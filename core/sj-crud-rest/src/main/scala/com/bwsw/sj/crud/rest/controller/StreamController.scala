@@ -23,7 +23,7 @@ import com.bwsw.sj.common.rest._
 import com.bwsw.sj.common.si.StreamSI
 import com.bwsw.sj.common.si.result.{Created, NotCreated}
 import com.bwsw.sj.common.utils.{MessageResourceUtils, StreamLiterals}
-import com.bwsw.sj.crud.rest.model.stream.{CreateStreamApi, StreamApi}
+import com.bwsw.sj.crud.rest.model.stream.{StreamApiCreator, StreamApi}
 import com.bwsw.sj.crud.rest.{RelatedToStreamResponseEntity, StreamResponseEntity, StreamsResponseEntity}
 import scaldi.Injectable.inject
 import scaldi.Injector
@@ -39,7 +39,7 @@ class StreamController(implicit protected val injector: Injector) extends Contro
 
   protected val entityNotFoundMessage: String = "rest.streams.stream.notfound"
   protected val entityDeletedMessage: String = "rest.streams.stream.deleted"
-  private val createStreamApi = inject[CreateStreamApi]
+  private val createStreamApi = inject[StreamApiCreator]
 
   override def create(serializedEntity: String): RestResponse = {
     Try(serializer.deserialize[StreamApi](serializedEntity)) match {

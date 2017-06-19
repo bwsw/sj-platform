@@ -24,7 +24,7 @@ import com.bwsw.sj.common.si.ProviderSI
 import com.bwsw.sj.common.si.result.{Created, NotCreated}
 import com.bwsw.sj.common.utils.{MessageResourceUtils, ProviderLiterals}
 import com.bwsw.sj.crud.rest._
-import com.bwsw.sj.crud.rest.model.provider.{CreateProviderApi, ProviderApi}
+import com.bwsw.sj.crud.rest.model.provider.{ProviderApiCreator, ProviderApi}
 import scaldi.Injectable.inject
 import scaldi.Injector
 
@@ -40,7 +40,7 @@ class ProviderController(implicit protected val injector: Injector) extends Cont
   override protected val entityDeletedMessage: String = "rest.providers.provider.deleted"
   override protected val entityNotFoundMessage: String = "rest.providers.provider.notfound"
 
-  private val createProviderApi = inject[CreateProviderApi]
+  private val createProviderApi = inject[ProviderApiCreator]
 
   def create(serializedEntity: String): RestResponse = {
     val triedProviderApi = Try(serializer.deserialize[ProviderApi](serializedEntity))

@@ -27,7 +27,7 @@ import com.bwsw.sj.common.si.result._
 import com.bwsw.sj.common.utils.MessageResourceUtils
 import com.bwsw.sj.common.utils.ServiceLiterals._
 import com.bwsw.sj.crud.rest._
-import com.bwsw.sj.crud.rest.model.service.{CreateServiceApi, ServiceApi}
+import com.bwsw.sj.crud.rest.model.service.{ServiceApiCreator, ServiceApi}
 import com.bwsw.sj.crud.rest.utils.JsonDeserializationErrorMessageCreator
 import org.mockito.ArgumentMatchers.{any, anyString}
 import org.mockito.Mockito._
@@ -49,7 +49,7 @@ class ServiceControllerTests extends FlatSpec with Matchers with MockitoSugar {
   val serializer = mock[JsonSerializer]
 
   val messageResourceUtils = mock[MessageResourceUtils]
-  val createServiceApi = mock[CreateServiceApi]
+  val createServiceApi = mock[ServiceApiCreator]
 
   val serviceInterface = mock[ServiceSI]
   when(serviceInterface.get(anyString())).thenReturn(None)
@@ -120,7 +120,7 @@ class ServiceControllerTests extends FlatSpec with Matchers with MockitoSugar {
     bind[MessageResourceUtils] to messageResourceUtils
     bind[JsonDeserializationErrorMessageCreator] to jsonDeserializationErrorMessageCreator
     bind[ServiceSI] to serviceInterface
-    bind[CreateServiceApi] to createServiceApi
+    bind[ServiceApiCreator] to createServiceApi
   }.injector
 
   val controller = new ServiceController()(injector)

@@ -125,7 +125,7 @@ class Service(val serviceType: String,
   }
 }
 
-class CreateService {
+class ServiceCreator {
 
   import scala.collection.JavaConverters._
 

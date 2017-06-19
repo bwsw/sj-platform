@@ -25,7 +25,7 @@ import com.bwsw.common.file.utils.MongoFileStorage
 import com.bwsw.sj.common.dal.model.module.{FileMetadataDomain, SpecificationDomain}
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
 import com.bwsw.sj.common.si.model.FileMetadataLiterals.customFileType
-import com.bwsw.sj.common.si.model.{FileMetadata, CreateFileMetadata}
+import com.bwsw.sj.common.si.model.{FileMetadata, FileMetadataCreator}
 import com.bwsw.sj.common.si.result._
 import com.bwsw.sj.common.utils.MessageResourceUtils
 import org.bson.types.ObjectId
@@ -62,7 +62,7 @@ class CustomFilesSiTests extends FlatSpec with Matchers with MockitoSugar {
     fileNotInStorage,
     fileNotInStorageDescription)
 
-  val fileMetadataCreator = mock[CreateFileMetadata]
+  val fileMetadataCreator = mock[FileMetadataCreator]
   filesInStorageMetadatas.zip(filesInStorageMetadataDomains).foreach {
     case (metadata, domain) =>
       when(fileMetadataCreator.from(mockitoEq(domain))(any[Injector]())).thenReturn(metadata)
@@ -168,7 +168,7 @@ class CustomFilesSiTests extends FlatSpec with Matchers with MockitoSugar {
     val module = new Module {
       bind[ConnectionRepository] to connectionRepository
       bind[FileBuffer] to fileBuffer
-      bind[CreateFileMetadata] to fileMetadataCreator
+      bind[FileMetadataCreator] to fileMetadataCreator
       bind[MessageResourceUtils] to mock[MessageResourceUtils]
     }
     implicit val injector = module.injector

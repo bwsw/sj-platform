@@ -44,7 +44,7 @@ class InstanceApiResponse(val moduleName: String,
                           val engine: String,
                           val restAddress: String)
 
-class CreateInstanceApiResponse(implicit injector: Injector) {
+class InstanceApiResponseCreator(implicit injector: Injector) {
   def from(instance: Instance): InstanceApiResponse = {
     val serializer = inject[JsonSerializer]
     instance.moduleType match {

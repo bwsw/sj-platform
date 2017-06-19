@@ -21,7 +21,7 @@ package com.bwsw.sj.common.si
 import com.bwsw.sj.common.dal.model.instance.{InputInstanceDomain, InstanceDomain}
 import com.bwsw.sj.common.dal.model.stream.StreamDomain
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
-import com.bwsw.sj.common.si.model.stream.{SjStream, CreateStream}
+import com.bwsw.sj.common.si.model.stream.{SjStream, StreamCreator}
 import com.bwsw.sj.common.si.result._
 import com.bwsw.sj.common.utils.MessageResourceUtils
 import scaldi.Injectable.inject
@@ -42,7 +42,7 @@ class StreamSI(implicit injector: Injector) extends ServiceInterface[SjStream, S
   override protected val entityRepository: GenericMongoRepository[StreamDomain] = connectionRepository.getStreamRepository
 
   private val instanceRepository = connectionRepository.getInstanceRepository
-  private val createStream = inject[CreateStream]
+  private val createStream = inject[StreamCreator]
 
   override def create(entity: SjStream): CreationResult = {
     val errors = entity.validate()

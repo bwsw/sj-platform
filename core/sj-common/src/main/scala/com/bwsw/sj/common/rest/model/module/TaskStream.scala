@@ -18,4 +18,14 @@
  */
 package com.bwsw.sj.common.rest.model.module
 
+/**
+  * Class contains the information about input stream
+  * that is needed to create [[com.bwsw.sj.common.dal.model.instance.ExecutionPlan]] for launching an instance
+  *
+  * @param name name of stream
+  * @param mode mode of stream, one of [[com.bwsw.sj.common.utils.EngineLiterals.streamModes]]
+  * @param availablePartitionsCount current number of partitions available for distributing between the execution plan tasks
+  * @param currentPartition number of current partition that the next [[com.bwsw.sj.common.dal.model.instance.Task]] will start
+  *                         to create an interval from which the data will be consumed
+  */
 case class TaskStream(name: String, mode: String, var availablePartitionsCount: Int, var currentPartition: Int = 0)

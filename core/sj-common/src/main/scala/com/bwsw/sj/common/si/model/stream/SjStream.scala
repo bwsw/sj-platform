@@ -98,7 +98,7 @@ class SjStream(val streamType: String,
   }
 }
 
-class CreateStream {
+class StreamCreator {
 
   def from(streamDomain: StreamDomain)(implicit injector: Injector): SjStream = streamDomain.streamType match {
     case StreamLiterals.tstreamType =>

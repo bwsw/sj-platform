@@ -39,7 +39,7 @@ class ConfigurationSettingApi(val name: String,
 
 }
 
-class CreateConfigurationSettingApi {
+class ConfigurationSettingApiCreator {
   def from(configSettings: ConfigurationSetting): ConfigurationSettingApi = {
     new ConfigurationSettingApi(
       configSettings.name,

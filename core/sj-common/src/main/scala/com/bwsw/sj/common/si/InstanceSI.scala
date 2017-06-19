@@ -21,7 +21,7 @@ package com.bwsw.sj.common.si
 import com.bwsw.sj.common.dal.model.instance.InstanceDomain
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
 import com.bwsw.sj.common.engine.{StreamingValidator, ValidationInfo}
-import com.bwsw.sj.common.si.model.instance.{Instance, CreateInstance}
+import com.bwsw.sj.common.si.model.instance.{Instance, InstanceCreator}
 import com.bwsw.sj.common.si.model.module.{ModuleMetadata, Specification}
 import com.bwsw.sj.common.si.result._
 import com.bwsw.sj.common.utils.EngineLiterals._
@@ -38,7 +38,7 @@ class InstanceSI(implicit injector: Injector) {
 
   private val connectionRepository = inject[ConnectionRepository]
   private val entityRepository: GenericMongoRepository[InstanceDomain] = connectionRepository.getInstanceRepository
-  private val createInstance = inject[CreateInstance]
+  private val createInstance = inject[InstanceCreator]
   private val tmpDirectory = "/tmp/"
 
   def create(instance: Instance, moduleMetadata: ModuleMetadata): CreationResult = {

@@ -21,7 +21,7 @@ package com.bwsw.sj.common.si
 import com.bwsw.sj.common.dal.model.instance.InstanceDomain
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
 import com.bwsw.sj.common.engine.{StreamingValidator, ValidationInfo}
-import com.bwsw.sj.common.si.model.instance.{Instance, CreateInstance}
+import com.bwsw.sj.common.si.model.instance.{Instance, InstanceCreator}
 import com.bwsw.sj.common.si.model.module.{ModuleMetadata, Specification}
 import com.bwsw.sj.common.si.result._
 import com.bwsw.sj.common.utils.EngineLiterals._
@@ -71,7 +71,7 @@ class InstanceSiTests extends FlatSpec with Matchers with BeforeAndAfterEach wit
   val injector = new Module {
     bind[ConnectionRepository] to connectionRepository
     bind[MessageResourceUtils] to MessageResourceUtilsMock.messageResourceUtils
-    bind[CreateInstance] to createInstance
+    bind[InstanceCreator] to createInstance
     bind[FileClassLoader] to fileClassLoader
   }.injector
 
@@ -229,7 +229,7 @@ class InstanceSiTests extends FlatSpec with Matchers with BeforeAndAfterEach wit
 
 object InstanceSiTests extends MockitoSugar {
 
-  val createInstance = mock[CreateInstance]
+  val createInstance = mock[InstanceCreator]
 
   val moduleFilename = "module.jar"
   val module1 = createModule(regularStreamingType, "module-1", "v1")

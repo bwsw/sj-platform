@@ -22,7 +22,7 @@ import com.bwsw.sj.common.dal.model.instance._
 import com.bwsw.sj.common.dal.model.service.ZKServiceDomain
 import com.bwsw.sj.common.dal.model.stream.{KafkaStreamDomain, StreamDomain, TStreamStreamDomain}
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
-import com.bwsw.sj.common.rest.model.module.{StreamWithMode, TaskStream}
+import com.bwsw.sj.common.rest.model.module.TaskStream
 import com.bwsw.sj.common.utils.StreamUtils.clearStreamFromMode
 import com.bwsw.sj.common.utils.{EngineLiterals, RestLiterals, StreamLiterals, StreamUtils}
 import scaldi.Injectable.inject
@@ -160,7 +160,7 @@ class Instance(val name: String,
 
 }
 
-class CreateInstance {
+class InstanceCreator {
   def from(instance: InstanceDomain)(implicit injector: Injector): Instance = {
     instance.moduleType match {
       case EngineLiterals.inputStreamingType =>
@@ -328,3 +328,11 @@ class CreateInstance {
     }
   }
 }
+
+/**
+  * An auxilary class that contains an instance input stream converted to name and stream mode
+  *
+  * @param streamName name of instance input stream
+  * @param mode       one of [[EngineLiterals.streamModes]]
+  */
+private case class StreamWithMode(streamName: String, mode: String)

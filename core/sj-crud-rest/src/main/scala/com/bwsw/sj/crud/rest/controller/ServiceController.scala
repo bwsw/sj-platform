@@ -23,7 +23,7 @@ import com.bwsw.sj.common.rest._
 import com.bwsw.sj.common.si.ServiceSI
 import com.bwsw.sj.common.si.result.{Created, NotCreated}
 import com.bwsw.sj.common.utils.{MessageResourceUtils, ServiceLiterals}
-import com.bwsw.sj.crud.rest.model.service.{CreateServiceApi, ServiceApi}
+import com.bwsw.sj.crud.rest.model.service.{ServiceApiCreator, ServiceApi}
 import com.bwsw.sj.crud.rest.{RelatedToServiceResponseEntity, ServiceResponseEntity, ServicesResponseEntity}
 import scaldi.Injectable.inject
 import scaldi.Injector
@@ -39,7 +39,7 @@ class ServiceController(implicit protected val injector: Injector) extends Contr
 
   protected val entityDeletedMessage: String = "rest.services.service.deleted"
   protected val entityNotFoundMessage: String = "rest.services.service.notfound"
-  private val createServiceApi = inject[CreateServiceApi]
+  private val createServiceApi = inject[ServiceApiCreator]
 
   override def create(serializedEntity: String): RestResponse = {
     val triedServiceApi = Try(serializer.deserialize[ServiceApi](serializedEntity))

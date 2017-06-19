@@ -24,7 +24,7 @@ import com.bwsw.sj.common.dal.model.instance.InstanceDomain
 import com.bwsw.sj.common.dal.model.service.{ServiceDomain, ZKServiceDomain}
 import com.bwsw.sj.common.dal.model.stream.StreamDomain
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
-import com.bwsw.sj.common.si.model.service.{Service, CreateService}
+import com.bwsw.sj.common.si.model.service.{Service, ServiceCreator}
 import com.bwsw.sj.common.si.result._
 import com.bwsw.sj.common.utils.{MessageResourceUtils, MessageResourceUtilsMock}
 import org.mockito.ArgumentMatchers.{any, anyString}
@@ -177,7 +177,7 @@ class ServiceSiTests extends FlatSpec with Matchers {
     val connectionRepository = mock[ConnectionRepository]
     when(connectionRepository.getServiceRepository).thenReturn(serviceRepository)
 
-    val createService = mock[CreateService]
+    val createService = mock[ServiceCreator]
     when(createService.from(any[ServiceDomain])(any[Injector]))
       .thenAnswer((invocationOnMock: InvocationOnMock) => {
         val serviceDomain = invocationOnMock.getArgument[ServiceDomain](0)
@@ -187,7 +187,7 @@ class ServiceSiTests extends FlatSpec with Matchers {
     val module = new Module {
       bind[ConnectionRepository] to connectionRepository
       bind[MessageResourceUtils] to MessageResourceUtilsMock.messageResourceUtils
-      bind[CreateService] to createService
+      bind[ServiceCreator] to createService
     }
     val injector = module.injector
     val serviceSI = new ServiceSI()(injector)

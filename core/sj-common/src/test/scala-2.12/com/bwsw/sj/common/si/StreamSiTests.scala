@@ -23,7 +23,7 @@ import java.util.UUID
 import com.bwsw.sj.common.dal.model.instance._
 import com.bwsw.sj.common.dal.model.stream.StreamDomain
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
-import com.bwsw.sj.common.si.model.stream.{SjStream, CreateStream}
+import com.bwsw.sj.common.si.model.stream.{SjStream, StreamCreator}
 import com.bwsw.sj.common.si.result._
 import com.bwsw.sj.common.utils.{MessageResourceUtils, MessageResourceUtilsMock}
 import org.mockito.ArgumentMatchers.{any, anyString}
@@ -148,7 +148,7 @@ class StreamSiTests extends FlatSpec with Matchers {
     val connectionRepository = mock[ConnectionRepository]
     when(connectionRepository.getStreamRepository).thenReturn(streamRepository)
 
-    val createStream = mock[CreateStream]
+    val createStream = mock[StreamCreator]
     when(createStream.from(any[StreamDomain])(any[Injector]))
       .thenAnswer((invocationOnMock: InvocationOnMock) => {
         val streamDomain = invocationOnMock.getArgument[StreamDomain](0)
@@ -158,7 +158,7 @@ class StreamSiTests extends FlatSpec with Matchers {
     val module = new Module {
       bind[ConnectionRepository] to connectionRepository
       bind[MessageResourceUtils] to MessageResourceUtilsMock.messageResourceUtils
-      bind[CreateStream] to createStream
+      bind[StreamCreator] to createStream
     }
     val injector = module.injector
     val streamSI = new StreamSI()(injector)

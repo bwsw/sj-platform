@@ -29,7 +29,7 @@ import com.bwsw.sj.common.si.model.module.{ModuleMetadata, Specification}
 import com.bwsw.sj.common.si.result.{Created, Deleted, DeletionError, NotCreated}
 import com.bwsw.sj.common.utils.EngineLiterals._
 import com.bwsw.sj.common.utils.MessageResourceUtils
-import com.bwsw.sj.crud.rest.model.module.{CreateSpecificationApi, ModuleMetadataApi, SpecificationApi}
+import com.bwsw.sj.crud.rest.model.module.{SpecificationApiCreator, ModuleMetadataApi, SpecificationApi}
 import com.bwsw.sj.crud.rest.utils.{FileMetadataUtils, JsonDeserializationErrorMessageCreator}
 import com.bwsw.sj.crud.rest._
 import org.mockito.Mockito.{reset, when}
@@ -42,7 +42,7 @@ import scala.collection.mutable.ArrayBuffer
 class ModuleControllerTests extends FlatSpec with Matchers with MockitoSugar with BeforeAndAfterEach {
   val messageResourceUtils = mock[MessageResourceUtils]
   val jsonDeserializationErrorMessageCreator = mock[JsonDeserializationErrorMessageCreator]
-  val createSpecificationApi = mock[CreateSpecificationApi]
+  val createSpecificationApi = mock[SpecificationApiCreator]
   val fileMetadataUtils = mock[FileMetadataUtils]
   val serviceInterface = mock[ModuleSI]
 
@@ -79,7 +79,7 @@ class ModuleControllerTests extends FlatSpec with Matchers with MockitoSugar wit
     bind[MessageResourceUtils] to messageResourceUtils
     bind[JsonDeserializationErrorMessageCreator] to jsonDeserializationErrorMessageCreator
     bind[ModuleSI] to serviceInterface
-    bind[CreateSpecificationApi] to createSpecificationApi
+    bind[SpecificationApiCreator] to createSpecificationApi
     bind[FileMetadataUtils] to fileMetadataUtils
   }
 

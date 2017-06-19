@@ -26,7 +26,7 @@ import com.bwsw.sj.common.si.model.config.ConfigurationSetting
 import com.bwsw.sj.common.si.result.{Created, NotCreated}
 import com.bwsw.sj.common.utils.MessageResourceUtils
 import com.bwsw.sj.crud.rest._
-import com.bwsw.sj.crud.rest.model.config.{ConfigurationSettingApi, CreateConfigurationSettingApi}
+import com.bwsw.sj.crud.rest.model.config.{ConfigurationSettingApi, ConfigurationSettingApiCreator}
 import scaldi.Injectable.inject
 import scaldi.Injector
 
@@ -38,7 +38,7 @@ class ConfigSettingsController(implicit protected val injector: Injector) extend
   import messageResourceUtils._
 
   val serviceInterface = inject[ConfigSettingsSI]
-  private val createConfigurationSettingApi = inject[CreateConfigurationSettingApi]
+  private val createConfigurationSettingApi = inject[ConfigurationSettingApiCreator]
 
   override protected val entityDeletedMessage: String = "rest.config.setting.deleted"
   override protected val entityNotFoundMessage: String = "rest.config.setting.notfound"

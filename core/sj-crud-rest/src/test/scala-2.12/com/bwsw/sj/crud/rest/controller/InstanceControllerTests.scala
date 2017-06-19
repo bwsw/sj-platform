@@ -30,7 +30,7 @@ import com.bwsw.sj.common.dal.model.module.FileMetadataDomain
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
 import com.bwsw.sj.common.rest._
 import com.bwsw.sj.common.si.model.instance._
-import com.bwsw.sj.common.si.model.module.{CreateModuleMetadata, ModuleMetadata, Specification}
+import com.bwsw.sj.common.si.model.module.{ModuleMetadataCreator, ModuleMetadata, Specification}
 import com.bwsw.sj.common.si.result._
 import com.bwsw.sj.common.si.{InstanceSI, ModuleSI}
 import com.bwsw.sj.common.utils.EngineLiterals._
@@ -38,7 +38,7 @@ import com.bwsw.sj.common.utils.MessageResourceUtils
 import com.bwsw.sj.crud.rest._
 import com.bwsw.sj.crud.rest.instance._
 import com.bwsw.sj.crud.rest.instance.validator.InstanceValidator
-import com.bwsw.sj.crud.rest.model.instance.response.{CreateInstanceApiResponse, InstanceApiResponse}
+import com.bwsw.sj.crud.rest.model.instance.response.{InstanceApiResponseCreator, InstanceApiResponse}
 import com.bwsw.sj.crud.rest.model.instance.{BatchInstanceApi, InputInstanceApi, OutputInstanceApi, RegularInstanceApi}
 import com.bwsw.sj.crud.rest.utils.JsonDeserializationErrorMessageCreator
 import org.apache.http._
@@ -69,8 +69,8 @@ class InstanceControllerTests extends FlatSpec with Matchers with MockitoSugar w
 
   val moduleSI = mock[ModuleSI]
   val instanceSI = mock[InstanceSI]
-  val createModuleMetadata = mock[CreateModuleMetadata]
-  val createInstanceApiResponse = mock[CreateInstanceApiResponse]
+  val createModuleMetadata = mock[ModuleMetadataCreator]
+  val createInstanceApiResponse = mock[InstanceApiResponseCreator]
   val instanceStarterBuilder = mock[InstanceStarterBuilder]
   val instanceStopperBuilder = mock[InstanceStopperBuilder]
   val instanceDestroyerBuilder = mock[InstanceDestroyerBuilder]
@@ -112,8 +112,8 @@ class InstanceControllerTests extends FlatSpec with Matchers with MockitoSugar w
     bind[InstanceSI] to instanceSI
     bind[ModuleSI] to moduleSI
     bind[ConnectionRepository] to connectionRepository
-    bind[CreateModuleMetadata] to createModuleMetadata
-    bind[CreateInstanceApiResponse] to createInstanceApiResponse
+    bind[ModuleMetadataCreator] to createModuleMetadata
+    bind[InstanceApiResponseCreator] to createInstanceApiResponse
     bind[InstanceStarterBuilder] to instanceStarterBuilder
     bind[InstanceStopperBuilder] to instanceStopperBuilder
     bind[InstanceDestroyerBuilder] to instanceDestroyerBuilder

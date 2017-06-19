@@ -26,7 +26,7 @@ import com.bwsw.sj.common.si.ConfigSettingsSI
 import com.bwsw.sj.common.si.model.config.ConfigurationSetting
 import com.bwsw.sj.common.si.result._
 import com.bwsw.sj.common.utils.MessageResourceUtils
-import com.bwsw.sj.crud.rest.model.config.{ConfigurationSettingApi, CreateConfigurationSettingApi}
+import com.bwsw.sj.crud.rest.model.config.{ConfigurationSettingApi, ConfigurationSettingApiCreator}
 import com.bwsw.sj.crud.rest.utils.JsonDeserializationErrorMessageCreator
 import com.bwsw.sj.crud.rest.{ConfigSettingResponseEntity, ConfigSettingsResponseEntity}
 import org.mockito.ArgumentMatchers.{any, anyString}
@@ -49,7 +49,7 @@ class ConfigSettingsControllerTests extends FlatSpec with Matchers with MockitoS
   val serializer = mock[JsonSerializer]
 
   val messageResourceUtils = mock[MessageResourceUtils]
-  val createConfigurationSettingApi = mock[CreateConfigurationSettingApi]
+  val createConfigurationSettingApi = mock[ConfigurationSettingApiCreator]
 
   val serviceInterface = mock[ConfigSettingsSI]
   when(serviceInterface.get(anyString())).thenReturn(None)
@@ -135,7 +135,7 @@ class ConfigSettingsControllerTests extends FlatSpec with Matchers with MockitoS
     bind[MessageResourceUtils] to messageResourceUtils
     bind[JsonDeserializationErrorMessageCreator] to jsonDeserializationErrorMessageCreator
     bind[ConfigSettingsSI] to serviceInterface
-    bind[CreateConfigurationSettingApi] to createConfigurationSettingApi
+    bind[ConfigurationSettingApiCreator] to createConfigurationSettingApi
   }.injector
 
   val controller = new ConfigSettingsController()(injector)

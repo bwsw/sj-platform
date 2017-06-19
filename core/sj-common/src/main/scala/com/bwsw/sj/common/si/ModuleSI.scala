@@ -23,7 +23,7 @@ import java.io.File
 import com.bwsw.sj.common.dal.model.module.FileMetadataDomain
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
 import com.bwsw.sj.common.si.model.FileMetadataLiterals
-import com.bwsw.sj.common.si.model.module.{ModuleMetadata, CreateModuleMetadata}
+import com.bwsw.sj.common.si.model.module.{ModuleMetadata, ModuleMetadataCreator}
 import com.bwsw.sj.common.si.result._
 import com.bwsw.sj.common.utils.{EngineLiterals, MessageResourceUtils}
 import org.apache.commons.io.FileUtils
@@ -41,7 +41,7 @@ class ModuleSI(implicit injector: Injector) extends JsonValidator {
   private val entityRepository: GenericMongoRepository[FileMetadataDomain] = connectionRepository.getFileMetadataRepository
   private val tmpDirectory = "/tmp/"
   private val fileBuffer = inject[FileBuffer]
-  private val createModuleMetadata = inject[CreateModuleMetadata]
+  private val createModuleMetadata = inject[ModuleMetadataCreator]
 
   def create(entity: ModuleMetadata): CreationResult = {
     val errors = entity.validate()

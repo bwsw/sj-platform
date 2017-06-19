@@ -26,7 +26,7 @@ import com.bwsw.sj.common.dal.model.instance.InstanceDomain
 import com.bwsw.sj.common.dal.model.module.{FileMetadataDomain, IOstream, SpecificationDomain}
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
 import com.bwsw.sj.common.si.model.FileMetadataLiterals
-import com.bwsw.sj.common.si.model.module.{ModuleMetadata, CreateModuleMetadata, Specification}
+import com.bwsw.sj.common.si.model.module.{ModuleMetadata, ModuleMetadataCreator, Specification}
 import com.bwsw.sj.common.si.result._
 import com.bwsw.sj.common.utils.EngineLiterals.{batchStreamingType, inputStreamingType, outputStreamingType, regularStreamingType}
 import com.bwsw.sj.common.utils.{MessageResourceUtils, MessageResourceUtilsMock}
@@ -42,7 +42,7 @@ import scala.collection.mutable.ArrayBuffer
 class ModuleSiTests extends FlatSpec with Matchers with MockitoSugar with BeforeAndAfterEach {
   val tmpDirectory = "/tmp/"
 
-  val createModuleMetadata = mock[CreateModuleMetadata]
+  val createModuleMetadata = mock[ModuleMetadataCreator]
 
   val notStoredModule = createModule("not-stored-module", "v1", regularStreamingType)
 
@@ -121,7 +121,7 @@ class ModuleSiTests extends FlatSpec with Matchers with MockitoSugar with Before
     bind[ConnectionRepository] to connectionRepository
     bind[MessageResourceUtils] to MessageResourceUtilsMock.messageResourceUtils
     bind[FileBuffer] to mock[FileBuffer]
-    bind[CreateModuleMetadata] to createModuleMetadata
+    bind[ModuleMetadataCreator] to createModuleMetadata
   }.injector
 
   val moduleSI = new ModuleSI()(injector)

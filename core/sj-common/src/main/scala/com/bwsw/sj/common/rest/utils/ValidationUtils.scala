@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory
 import scala.util.{Failure, Success, Try}
 
 /**
-  * Provides helping methods for validation some fields of entities
+  * Provides helping methods for validation some fields of entities that belong to SI layer
   */
 object ValidationUtils {
   private val logger = LoggerFactory.getLogger(this.getClass)

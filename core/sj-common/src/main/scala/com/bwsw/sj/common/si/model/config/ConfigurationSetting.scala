@@ -106,7 +106,7 @@ class ConfigurationSetting(val name: String,
   }
 }
 
-class CreateConfigurationSetting {
+class ConfigurationSettingCreator {
   def from(configSettingDomain: ConfigurationSettingDomain): ConfigurationSetting = {
     new ConfigurationSetting(
       ConfigurationSetting.clearConfigurationSettingName(configSettingDomain.domain, configSettingDomain.name),

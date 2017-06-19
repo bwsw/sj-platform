@@ -28,14 +28,14 @@ import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.rest._
 import com.bwsw.sj.common.si._
 import com.bwsw.sj.common.si.model.instance.Instance
-import com.bwsw.sj.common.si.model.module.{CreateModuleMetadata, ModuleMetadata, Specification}
+import com.bwsw.sj.common.si.model.module.{ModuleMetadataCreator, ModuleMetadata, Specification}
 import com.bwsw.sj.common.si.result._
 import com.bwsw.sj.common.utils.{CommonAppConfigNames, EngineLiterals, MessageResourceUtils}
 import com.bwsw.sj.crud.rest.exceptions.ConfigSettingNotFound
 import com.bwsw.sj.crud.rest.instance.validator.InstanceValidator
 import com.bwsw.sj.crud.rest.instance._
 import com.bwsw.sj.crud.rest.model.instance._
-import com.bwsw.sj.crud.rest.model.instance.response.CreateInstanceApiResponse
+import com.bwsw.sj.crud.rest.model.instance.response.InstanceApiResponseCreator
 import com.bwsw.sj.crud.rest.utils.JsonDeserializationErrorMessageCreator
 import com.bwsw.sj.crud.rest.{InstanceResponseEntity, InstancesResponseEntity, ShortInstance, ShortInstancesResponseEntity}
 import com.typesafe.config.ConfigFactory
@@ -62,8 +62,8 @@ class InstanceController(implicit injector: Injector) {
   private val serviceInterface = inject[InstanceSI]
   private val moduleSI = inject[ModuleSI]
   private val configService = inject[ConnectionRepository].getConfigRepository
-  private val createModuleMetadata = inject[CreateModuleMetadata]
-  private val createInstanceApiResponse = inject[CreateInstanceApiResponse]
+  private val createModuleMetadata = inject[ModuleMetadataCreator]
+  private val createInstanceApiResponse = inject[InstanceApiResponseCreator]
 
   def create(serializedEntity: String, moduleType: String, moduleName: String, moduleVersion: String): RestResponse = {
     ifModuleExists(moduleType, moduleName, moduleVersion) { module =>

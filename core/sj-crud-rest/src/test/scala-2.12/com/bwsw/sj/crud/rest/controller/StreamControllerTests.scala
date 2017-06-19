@@ -27,7 +27,7 @@ import com.bwsw.sj.common.si.result._
 import com.bwsw.sj.common.utils.MessageResourceUtils
 import com.bwsw.sj.common.utils.StreamLiterals._
 import com.bwsw.sj.crud.rest.{RelatedToStreamResponseEntity, _}
-import com.bwsw.sj.crud.rest.model.stream.{CreateStreamApi, StreamApi}
+import com.bwsw.sj.crud.rest.model.stream.{StreamApiCreator, StreamApi}
 import com.bwsw.sj.crud.rest.utils.JsonDeserializationErrorMessageCreator
 import org.mockito.ArgumentMatchers.{any, anyString}
 import org.mockito.Mockito._
@@ -49,7 +49,7 @@ class StreamControllerTests extends FlatSpec with Matchers with MockitoSugar {
   val serializer = mock[JsonSerializer]
 
   val messageResourceUtils = mock[MessageResourceUtils]
-  val createStreamApi = mock[CreateStreamApi]
+  val createStreamApi = mock[StreamApiCreator]
 
   val serviceInterface = mock[StreamSI]
   when(serviceInterface.get(anyString())).thenReturn(None)
@@ -118,7 +118,7 @@ class StreamControllerTests extends FlatSpec with Matchers with MockitoSugar {
     bind[MessageResourceUtils] to messageResourceUtils
     bind[JsonDeserializationErrorMessageCreator] to jsonDeserializationErrorMessageCreator
     bind[StreamSI] to serviceInterface
-    bind[CreateStreamApi] to createStreamApi
+    bind[StreamApiCreator] to createStreamApi
   }.injector
 
   val controller = new StreamController()(injector)

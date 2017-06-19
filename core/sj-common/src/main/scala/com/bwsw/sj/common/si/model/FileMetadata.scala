@@ -100,7 +100,7 @@ object FileMetadataLiterals {
   val moduleType: String = "module"
 }
 
-class CreateFileMetadata {
+class FileMetadataCreator {
   def from(fileMetadataDomain: FileMetadataDomain)(implicit injector: Injector): FileMetadata = {
     new FileMetadata(
       fileMetadataDomain.filename,

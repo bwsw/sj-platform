@@ -129,7 +129,7 @@ class ModuleMetadata(filename: String,
   }
 }
 
-class CreateModuleMetadata {
+class ModuleMetadataCreator {
   def from(fileMetadata: FileMetadataDomain, file: Option[File] = None)
           (implicit injector: Injector): ModuleMetadata = {
     val specification = Specification.from(fileMetadata.specification)

@@ -24,7 +24,7 @@ import com.bwsw.sj.common.si._
 import com.bwsw.sj.common.si.model.module.ModuleMetadata
 import com.bwsw.sj.common.si.result.{Created, Deleted, DeletionError, NotCreated}
 import com.bwsw.sj.common.utils.{EngineLiterals, MessageResourceUtils}
-import com.bwsw.sj.crud.rest.model.module.{CreateSpecificationApi, ModuleMetadataApi}
+import com.bwsw.sj.crud.rest.model.module.{SpecificationApiCreator, ModuleMetadataApi}
 import com.bwsw.sj.crud.rest.utils.{FileMetadataUtils, JsonDeserializationErrorMessageCreator}
 import com.bwsw.sj.crud.rest.{ModuleJar, ModulesResponseEntity, RelatedToModuleResponseEntity, SpecificationResponseEntity}
 import scaldi.Injectable.inject
@@ -108,7 +108,7 @@ class ModuleController(implicit injector: Injector) {
     processModuleWithoutFile(moduleType, moduleName, moduleVersion) { moduleMetadata =>
       OkRestResponse(
         SpecificationResponseEntity(
-          inject[CreateSpecificationApi].from(moduleMetadata.specification)))
+          inject[SpecificationApiCreator].from(moduleMetadata.specification)))
     }
   }
 

@@ -50,7 +50,7 @@ class ServiceApi(@JsonProperty("type") val serviceType: String,
     )
 }
 
-class CreateServiceApi {
+class ServiceApiCreator {
 
   def from(service: Service): ServiceApi = {
     service.serviceType match {

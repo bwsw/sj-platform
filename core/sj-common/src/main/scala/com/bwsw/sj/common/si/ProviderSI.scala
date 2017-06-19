@@ -22,7 +22,7 @@ import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.common.dal.model.provider.ProviderDomain
 import com.bwsw.sj.common.dal.model.service._
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
-import com.bwsw.sj.common.si.model.provider.{CreateProvider, Provider}
+import com.bwsw.sj.common.si.model.provider.{ProviderCreator, Provider}
 import com.bwsw.sj.common.si.result._
 import com.bwsw.sj.common.utils.MessageResourceUtils
 import scaldi.Injectable.inject
@@ -43,7 +43,7 @@ class ProviderSI(implicit injector: Injector) extends ServiceInterface[Provider,
   override protected val entityRepository: GenericMongoRepository[ProviderDomain] = connectionRepository.getProviderRepository
 
   private val serviceRepository = connectionRepository.getServiceRepository
-  private val createProvider = inject[CreateProvider]
+  private val createProvider = inject[ProviderCreator]
 
   override def create(entity: Provider): CreationResult = {
     val errors = entity.validate()

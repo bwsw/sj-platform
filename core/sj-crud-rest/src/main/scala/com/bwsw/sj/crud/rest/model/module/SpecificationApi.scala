@@ -65,7 +65,7 @@ class SpecificationApi(val name: String,
     executorClass)
 }
 
-class CreateSpecificationApi(implicit injector: Injector) {
+class SpecificationApiCreator(implicit injector: Injector) {
   private val serializer = inject[JsonSerializer]
 
   def from(specification: Specification): SpecificationApi = {

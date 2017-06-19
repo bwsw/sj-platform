@@ -140,7 +140,7 @@ object FrameworkUtil {
 
   def updateInstance(): Any = {
     val optionInstance = connectionRepository.getInstanceRepository.get(FrameworkUtil.params("instanceId"))
-      .map(inject[CreateInstance].from)
+      .map(inject[InstanceCreator].from)
 
     if (optionInstance.isEmpty) {
       logger.error(s"Not found instance")
