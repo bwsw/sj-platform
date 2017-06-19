@@ -41,12 +41,14 @@ import scala.collection.mutable
   *
   * @param executor             class under test [[OutputStreamingExecutor]]
   * @param outputRequestBuilder builder of requests for output service
-  * @tparam IT  type of incoming data
+  * @param wasFirstCheckpoint   indicates that first checkpoint was performed
+  * @tparam IT type of incoming data
   * @tparam OT type of requests for output service
   * @author Pavel Tomskikh
   */
 class OutputEngineSimulator[IT <: AnyRef, OT](executor: OutputStreamingExecutor[IT],
-                                             outputRequestBuilder: OutputRequestBuilder[OT]) {
+                                              outputRequestBuilder: OutputRequestBuilder[OT],
+                                              var wasFirstCheckpoint: Boolean = false) {
 
   import OutputEngineSimulator.defaultConsumerName
 
@@ -76,9 +78,14 @@ class OutputEngineSimulator[IT <: AnyRef, OT](executor: OutputStreamingExecutor[
     * @return collection of requests
     */
   def process(clearBuffer: Boolean = true): Seq[OT] = {
-    val requests = inputEnvelopes.flatMap { envelope =>
-      val outputEnvelopes = executor.onMessage(envelope)
-      outputEnvelopes.map(outputRequestBuilder.buildInsert(_, envelope))
+    val requests = inputEnvelopes.flatMap { inputEnvelope =>
+      val outputEnvelopes = executor.onMessage(inputEnvelope)
+      val deletionRequest = {
+        if (wasFirstCheckpoint) Seq.empty
+        else Seq(outputRequestBuilder.buildDelete(inputEnvelope))
+      }
+
+      deletionRequest ++ outputEnvelopes.map(outputRequestBuilder.buildInsert(_, inputEnvelope))
     }
 
     if (clearBuffer) clear()

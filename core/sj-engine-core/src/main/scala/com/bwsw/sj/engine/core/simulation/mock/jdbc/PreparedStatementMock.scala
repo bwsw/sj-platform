@@ -32,7 +32,7 @@ import com.bwsw.sj.engine.core.simulation.JdbcRequestBuilder
   * @author Pavel Tomskikh
   */
 class PreparedStatementMock(sql: String) extends PreparedStatement {
-  private val params = sql.split('?').map(SqlPart(_, ""))
+  private val params = (sql.split('?') :+ "").map(SqlPart(_, ""))
 
   override def setBigDecimal(parameterIndex: Int, x: java.math.BigDecimal): Unit = set(parameterIndex, x)
 
@@ -55,12 +55,8 @@ class PreparedStatementMock(sql: String) extends PreparedStatement {
 
   override def setShort(parameterIndex: Int, x: Short): Unit = set(parameterIndex, x)
 
-  override def setBoolean(parameterIndex: Int, x: Boolean): Unit = {
-    params(parameterIndex).param = {
-      if (x) "TRUE"
-      else "FALSE"
-    }
-  }
+  override def setBoolean(parameterIndex: Int, x: Boolean): Unit =
+    params(parameterIndex).param = x.toString.toUpperCase
 
   override def setDate(parameterIndex: Int, x: Date): Unit =
     params(parameterIndex).param = "'" + x.toString + "'"
