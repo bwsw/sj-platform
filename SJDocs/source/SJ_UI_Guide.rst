@@ -211,7 +211,7 @@ Please, enter a database name for the services here.
 
 .. note:: Required fields are marked with an asterisk (*)
 
-Click «Create» at the bottom and see the servces are in the list of providers now. Details of the node are displayed to the right when clicking the services in the list. 
+Click «Create» at the bottom and see the servces are in the list of services now. Details of the node are displayed to the right when clicking the services in the list. 
 
 .. figure:: _static/ServicesList.png
 
