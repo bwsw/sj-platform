@@ -41,7 +41,7 @@ Now you are ready to work with the system.
 
 Providers 
 ---------
-As the first step a provider should be created.  That is the provider of sevices for input data transformation into a stream (???)
+As the first step a provider should be created.  That is the provider of sevices for input data transformation into a stream.
 
 .. figure:: _static/CreateProvider.png
 
@@ -54,7 +54,7 @@ Please, press the «Create provider» button and fill in the form:
   Select from the drop down a type of the provider you are aimed to create. The following options are available:
 
   - cassandra (temporarily is inactive)
-
+  
   - aerospike  (temporarily is inactive)
 
   - zookeeper
@@ -67,31 +67,31 @@ Please, press the «Create provider» button and fill in the form:
 
   - REST
 
-  The type of the provider is determined with the type of the instance you want to create and work with at the end.
+The type of the provider is determined with the type of the instance you want to create and work with at the end.
 
 2. *Name* *
 
-  Enter  a name of the provider here. It should be unique, must contain digits, lowercase letters or hyphens and start with a letter. 
+Enter  a name of the provider here. It should be unique, must contain digits, lowercase letters or hyphens and start with a letter. 
 
 #. *Description* 
 
-  Enter a description for the provider here.
+Enter a description for the provider here.
 
 #. *Hosts* *
 
-  Enter a provider host that determines a file locaction.
+Enter a provider host that determines a file locaction.
 
-  Add more hosts clicking at the «Add Host» button and entering host names in the appeared lines.
+Add more hosts clicking at the «Add Host» button and entering host names in the appeared lines.
 
 #. *Login*
 
-  Enter a provider login here if necessary
+Enter a provider login here if necessary
 
 #. *Password*
 
-  Enter a password for the provider if necessary.
+Enter a password for the provider if necessary.
 
-  .. note:: Required fields are marked with an asterisk (*)
+.. note:: Required fields are marked with an asterisk (*)
 
 Click «Create» at the bottom and see the provider is in the list of providers now. Details of the node are displayed to the right when clicking the provider in the list. 
 
@@ -120,7 +120,7 @@ Please, press the «Create services» button and fill in the form:
 
 1.  *Choose* *type* *
 
-   Select from the dropdown a type of the services:
+Select from the dropdown a type of the services:
 
 - CassDB (temporarily is unavailable)
 - ESInd
@@ -131,77 +131,77 @@ Please, press the «Create services» button and fill in the form:
 - JDBC
 - REST
 
-  .. figure:: _static/CreateService_Type.png
+.. figure:: _static/CreateService_Type.png
 
 2. *Name* *
  
-  Enter a name of the services.  It must contain digits, lowercase letters or hyphens and start with a letter.
+Enter a name of the services.  It must contain digits, lowercase letters or hyphens and start with a letter.
 
 3.  *Description*
 
-  Provide a description for the services here if necessary.
+Provide a description for the services here if necessary.
 
 4. *Provider* *
 
-  This field appears once the service type is chosen.
+This field appears once the service type is chosen.
 
-  Select a provider for the services here. 
+Select a provider for the services here. 
 
-  The range of providers available in the dropdown is determined by the chosen services type.
+The range of providers available in the dropdown is determined by the chosen services type.
 
 5. *Namespace* *
 
-  It is a required field for the ZKCoord services type.
+It is a required field for the ZKCoord services type.
 
-  Please, specify a namespace here. It must contain digits, lowercase letters or underscore and start with a letter. 
+Please, specify a namespace here. It must contain digits, lowercase letters or underscore and start with a letter. 
 
 6.  *Index* *
 
-  This field appears when the ESInd services type is selected and is required for filling in.
+This field appears when the ESInd services type is selected and is required for filling in.
 
-  Please, specify an index of the services here. It must contain digits, lowercase letters or underscore and start with a letter. 
+Please, specify an index of the services here. It must contain digits, lowercase letters or underscore and start with a letter. 
 
 7. *Login*
 
-  This field appears when the ESInd services type is selected and is not required for filling in.
+This field appears when the ESInd services type is selected and is not required for filling in.
 
-  Please, specify a login of the services here. 
+Please, specify a login of the services here. 
 
 8. *Password*
 
-  This field appears when the ESInd services type is selected and is not required for filling in.
+This field appears when the ESInd services type is selected and is not required for filling in.
 
-  Please, specify a password of the services here. 
+Please, specify a password of the services here. 
 
 9. *ZK provider* *
 
-  This field appears when the KfkQ services type is selected and is required for filling in.
+This field appears when the KfkQ services type is selected and is required for filling in.
 
-  Please, select a zookeeper provider for the services here. 
+Please, select a zookeeper provider for the services here. 
 
 10. *ZK namespace* *
 
-  This field appears when the KfkQ services type is selected and is required for filling in.
+This field appears when the KfkQ services type is selected and is required for filling in.
 
-  Please, specify a zookeeper namespace for the services here. 
+Please, specify a zookeeper namespace for the services here. 
 
 11. *Prefix* *
 
-  This field appears when the TstrQ services type is selected and is required for filling in.
+This field appears when the TstrQ services type is selected and is required for filling in.
 
-  Please, enter a prefix for the services here. 
+Please, enter a prefix for the services here. 
 
 12. *Token* *
 
-  This field appears when the TstrQ services type is selected and is required for filling in.
+This field appears when the TstrQ services type is selected and is required for filling in.
 
-  Please, enter a token for the services here. It must contain no more than 32 symbols.
+Please, enter a token for the services here. It must contain no more than 32 symbols.
 
 13. *Database* *name* *
 
-  This field appears when the JDBC services type is selected and is required for filling in.
+This field appears when the JDBC services type is selected and is required for filling in.
 
-  Please, enter a database name for the services here. 
+Please, enter a database name for the services here. 
 
 .. note:: Required fields are marked with an asterisk (*)
 
@@ -215,7 +215,7 @@ In the list of services the following actions can be performed:
 
 2. **View** a provider for the services and get the provider`s information in a popup window by clicking at the active provider`s name in the «Providers» column.
 
-  .. figure:: _static/ServicesList_ProviderInfo.png
+.. figure:: _static/ServicesList_ProviderInfo.png
 
 3. **Delete** a service clicking at the corresponding icon in the Action block near the name of the services you want to delete
 
@@ -241,7 +241,7 @@ Please, press the «Create Stream» button and fill in the form:
 
 1.  *Choose* *type* *
 
-   Select from the dropdown a type of a stream:
+Select from the dropdown a type of a stream:
 
 - stream.t-stream — It is an input stream of the T-Stream type
 - stream.kafka - It is an input stream of the Kafka type
