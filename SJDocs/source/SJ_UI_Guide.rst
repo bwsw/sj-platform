@@ -341,14 +341,15 @@ An **engine** is a framework that performs processing of streams. It runs an app
 
 Currently the following **engine** **types** are supported in the platform:
 
-1. :TCP Imput Engine: It gets packages of data from TCP, handles them and produces series of events to T-stream streams. It can be used to program arbitrary TCP protocol recognition.
-2. :Regular Processing Engine: It gets events from Kafka or T-stream input streams and produces results to T-Stream output streams.
-3. :Windowed Processing Engine: It gets events from T-stream input streams, organizes them in batches and produces the results to T-stream output streams.
-4. :Output Engine:
-
-   - ElastiSearch Output Engine - allows creating output endpoint and place processing results 		to Elasticsearch index.
-	
-   - JDBC Output Engine  - allows creating output endpoint and place processing results to 			MySQL, PostgreSQL, Oracle tables.
+1. TCP Imput Engine
+        It gets packages of data from TCP, handles them and produces series of events to T-stream streams. It can be used to program arbitrary TCP protocol recognition.
+2. Regular Processing Engine 
+        It gets events from Kafka or T-stream input streams and produces results to T-Stream output streams.
+3. Windowed Processing Engine 
+        It gets events from T-stream input streams, organizes them in batches and produces the results to T-stream output streams.
+4. Output Engine   
+         - ElasticSearch Output Engine - allows creating output endpoint and place processing results 		to Elasticsearch index.   
+	 - JDBC Output Engine  - allows creating output endpoint and place processing results to 			MySQL, PostgreSQL, Oracle tables.
 
 After an engine is uploaded and a corresponding config settings file appears in the «Confg Settings» section, a module can be uploaded.
 
