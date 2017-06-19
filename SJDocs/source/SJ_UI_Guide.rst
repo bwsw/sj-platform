@@ -381,6 +381,17 @@ If the module is uploaded correctly a success message appears and the uploaded m
 
 .. figure:: _static/Module_Uploaded.png
 
+
+In the list of modules the following actions can be performed:
+
+1. **View** a module name, type, version and size
+
+2. **Download** a module to your computer by clicking at the download icon in the Action block near the name of the module you want to download. You need only to specify a folder where to store the module to and click the «Save» button.
+
+3. **Delete** a module clicking at the corresponding icon in the Action block near the name of the module you want to delete
+
+The list of modules can be filtered by its type and/or a name using the search tool above the list.
+
 Instances
 ---------
 
