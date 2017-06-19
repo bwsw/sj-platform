@@ -255,7 +255,7 @@ Select from the dropdown a type of a stream:
 - elasticsearch-output - It is an output stream of the Elasticsearch type
 - rest-output - It is an output stream of the REST type
 
-  .. figure:: _static/CreateStream_Type.png
+.. figure:: _static/CreateStream_Type.png
 
 2. *Name* *
 
@@ -317,7 +317,7 @@ In the list of streams the following actions can be performed:
 
 2. **View** a service for the stream and get the service`s information in a popup window by clicking at the active service`s name in the «Service» column.
 
-  .. figure:: _static/StreamsList_ServiceInfo.png
+.. figure:: _static/StreamsList_ServiceInfo.png
 
 3. **Delete** a stream clicking at the corresponding icon in the Action block near the name of the stream you want to delete
 
