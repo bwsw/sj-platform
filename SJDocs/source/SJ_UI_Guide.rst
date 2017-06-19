@@ -43,13 +43,13 @@ Providers
 ---------
 As the first step a provider should be created.  That is the provider of sevices for input data transformation into a stream (???)
 
-.. image:: CreateProvider.png
+.. figure:: _static/CreateProvider.png
 
 Please, press the «Create provider» button and fill in the form:
 
 #. *Choose* *type*  *
 
-  .. image:: CreateProvider_Type.png
+.. figure:: _static/CreateProvider_Type.png
 
   Select from the drop down a type of the provider you are aimed to create. The following options are available:
 
@@ -95,7 +95,7 @@ Please, press the «Create provider» button and fill in the form:
 
 Click «Create» at the bottom and see the provider is in the list of providers now. Details of the node are displayed to the right when clicking the provider in the list. 
 
-.. image:: Providers_list.png
+.. figure:: _static/Providers_list.png
 
 In the list of providers the following actions can be performed:
 
@@ -114,7 +114,7 @@ The next step is to create services. It is a service to perform an input data in
 
 Under the Services section of the main navigation bar you will find the list of services.
 
-.. image:: CreateService.png
+.. figure:: _static/CreateService.png
 
 Please, press the «Create services» button and fill in the form:
 
@@ -131,7 +131,7 @@ Please, press the «Create services» button and fill in the form:
 - JDBC
 - REST
 
-  .. image:: CreateService_Type.png
+  .. figure:: _static/CreateService_Type.png
 
 2. *Name* *
  
@@ -207,7 +207,7 @@ Please, press the «Create services» button and fill in the form:
 
 Click «Create» at the bottom and see the servces are in the list of providers now. Details of the node are displayed to the right when clicking the services in the list. 
 
-.. image:: ServicesList.png
+.. figure:: _static/ServicesList.png
 
 In the list of services the following actions can be performed:
 
@@ -227,9 +227,133 @@ Streams
 
 The next step is to create a data stream. A stream is a sequence of events happening randomly at irregular intervals.
 
+There are two kinds of streams in SJ-Platform
+An input stream It is a stream which provides new events. There are two different input stream types in the SJ platform: Kafka and T-Stream
+An output stream It is a stream which is a destination point for results. There is one output stream type supported in the SJ platform: T-Stream
+
+Under the Streams section of the main navigation bar you will find the list of streams.
+
+.. figure:: _static/CreateStreams.png
+
+Please, press the «Create Stream» button and fill in the form:
+
+1.  *Choose* *type* *
+
+   Select from the dropdown a type of a stream:
+
+- stream.t-stream — It is an input stream of the T-Stream type
+- stream.kafka - It is an input stream of the Kafka type
+- jdbc-output -It is an output stream of the JDBC type
+- elasticsearch-output - It is an output stream of the Elasticsearch type
+- rest-output - It is an output stream of the REST type
+
+  .. figure:: _static/CreateStream_Type.png
+
+2. *Name* *
+
+Enter a stream name here. It must contain lowercase letters, digits or hyphens only.
+
+3. *Description*
+
+Provide a description for the stream here if necessary.
+
+4. *Partitions* *
+
+Partitions is a part of data stream. Partitions are a special conception which handle regular queues in multi-queues, e.g. a stream with one partition is a queue, but a stream with two partitions is like a two different queues. Using streams with many partitions allows to handle parallelism properly as engine instances divide existing partitions fairly.
+
+Enter a number of partitions. It must be a positive integer.
+
+This field is a required one for such stream types as *stream.t-stream*, *stream.kafka*, *jdbc-output* and *rest-output*.
+
+5. *Service* *
+
+Select a service from the dropdown. 
+
+The range of available services is determined by a selected stream type.
+
+6. *Force*
+
+This field indicates if a stream should be removed and re-created by force (if it exists). Set it «True» or «False». It is set as «False» by default.
+
+This field is a available one for such stream types as *stream.t-stream*, *stream.kafka*, *jdbc-output*. The field is optional.
+
+7. *Tags*
+
+Enter a tag\tags for the stream here.
+
+This field is an available one for such stream types as *stream.t-stream*, *stream.kafka*, *jdbc-output*. The field is optional.
+
+8. *Replication* *Factor* *
+
+Replication factor is the number of zookeeper nodes to utilize.
+
+Enter a replication factor here. It must be an integer.
+
+This field is required for the *stream.kafka* stream type.
+
+9. *Primary*
+
+Enter a primary key here. It is a primary key field name used in sql database.
+
+This field is available for *jdbc-output* stream type. The field is optional.
+
+  .. note:: Required fields are marked with an asterisk (*)
 
 Modules
 -------
+
+In the next section  — Modules — you can upload and manage your own module(s). 
+
+ The platform suppports 4 types of modules:
+
+1. Regular-streaming (base type)
+2. Batch-streaming
+3. Input-streaming
+4. Output-streaming
+
+A module must be a jar file containing classes and specifications.
+
+In the table below the *specification* *fields* that should be specified in the module are described:
+
+.. csv-table:: Specification fields
+   :header: "Field", "Format", "Description"
+   :widths: 25, 20, 40
+
+   "name*", "String", "The unique name for a module"
+   "description", "String", "The description for a module"
+   "version*", "String", "The module version"
+   "author","String", "The module author"
+   "license","String", "The software license type for a module"
+   "inputs*","IOstream","The specification for the inputs of a module"
+   "outputs*","IOstream", "The specification for the outputs of a module"
+   "module-type*","String", "The type of a module. One of [input-streaming, output-streaming,         batch-streaming, regular-streaming]"
+   "Engine-name*", "String", "The name of the computing core of a module"
+   "engine-version*", "String", "The version of the computing core of a module"
+   "validator-class*", "String", "The absolute path to class that is responsible for a validation of launch options"
+   "executor-class*", "String", "The absolute path to class that is responsible for a running of module"
+   "batch-collector-class**", "String", "The absolute path to class that is responsible for a batch collecting of batch-streaming module"
+
+Before uploading a module make sure an engine of corresponding type is uploaded.
+
+ An **engine** is a framework that performs processing of streams. It runs an application code and handles data from an input stream providing results to an output stream.
+
+Currently the following **engine** **types** are supported in the platform:
+
+1. :TCP Imput Engine: It gets packages of data from TCP, handles them and produces series of events to T-stream streams. It can be used to program arbitrary TCP protocol recognition.
+2. :Regular Processing Engine: It gets events from Kafka or T-stream input streams and produces results to T-Stream output streams.
+3. :Windowed Processing Engine: It gets events from T-stream input streams, organizes them in batches and produces the results to T-stream output streams.
+4. :Output Engine:
+
+   - ElastiSearch Output Engine - allows creating output endpoint and place processing results 		to Elasticsearch index.
+	
+   - JDBC Output Engine  - allows creating output endpoint and place processing results to 			MySQL, PostgreSQL, Oracle tables.
+
+After an engine is uploaded and a corresponding config settings file appears in the «Confg Settings» section, a module can be uploaded.
+
+Click an «Upload Module» button and select a .jar file in the window to upload.  Press «Open» and wait for a few seconds till the mudule is uploaded.
+If the module is uploaded correctly a success message appears and the uploaded module is in the list of modules.
+
+.. figure:: _static/ModuleUploaded.png
 
 Instances
 ---------
