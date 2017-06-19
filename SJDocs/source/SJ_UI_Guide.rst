@@ -328,7 +328,7 @@ Modules
 
 In the next section  — Modules — you can upload and manage your own module(s). 
 
-The platform suppports 4 types of modules:
+The platform supports 4 types of modules:
 
 1. Regular-streaming (base type)
 2. Batch-streaming
