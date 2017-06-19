@@ -116,7 +116,7 @@ The list of providers can be filtered by its type and/or a name using the search
 Services
 --------
 
-The next step is to create services. It is a service to perform an input data into a stream of an exact type. (???)
+The next step is to create services. It is a service to perform an input data into a stream of an exact type. 
 
 Under the Services section of the main navigation bar you will find the list of services.
 
