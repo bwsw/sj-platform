@@ -30,19 +30,27 @@ import scala.collection.mutable
   *
   * Usage example:
   * {{{
-  * val executor: OutputStreamingExecutor[(Integer, String)]
+  * val manager: OutputEnvironmentManager
+  * val executor: OutputStreamingExecutor[(Integer, String)] = new MyOutputExecutor(manager)
   *
   * val requestBuilder = new RestRequestBuilder
-  * val simulator = new OutputEngineSimulator(executor, requestBuilder)
-  * simulator.send(Seq((11, "a"), (24, "b")))
-  * simulator.send(Seq((63, "c"), (31, "d")))
-  * val requests = simulator.process()
-  * println(requests)
+  * val simulator = new OutputEngineSimulator(executor, requestBuilder, manager)
+  * simulator.prepare(Seq((1, "a"), (2, "b")))
+  * simulator.prepare(Seq((3, "c")))
+  * val requestsBeforeFirstCheckpoint = simulator.process()
+  * println(requestsBeforeFirstCheckpoint)
+  *
+  * simulator.wasFirstCheckpoint = true // first checkpoint was performed
+  * simulator.prepare(Seq((4, "d"), (5, "e")))
+  * val requestsAfterFirstCheckpoint = simulator.process()
+  * println(requestsAfterFirstCheckpoint)
   * }}}
+  * The [[OutputEngineSimulator]] automatically updates a [[wasFirstCheckpoint]] if [[executor]] invokes a
+  * [[manager.initiateCheckpoint()]].
   *
   * @param executor             class under test [[OutputStreamingExecutor]]
   * @param outputRequestBuilder builder of requests for output service
-  * @param manager              environment manager for executor
+  * @param manager              environment manager that used by executor
   * @param wasFirstCheckpoint   indicates that first checkpoint was performed
   * @tparam IT type of incoming data
   * @tparam OT type of requests for output service
