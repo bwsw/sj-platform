@@ -313,7 +313,7 @@ The platform suppports 4 types of modules:
 3. Input-streaming
 4. Output-streaming
 
-A module must be a jar file containing classes and specifications.
+A module must be a `.jar` file containing classes and specifications.
 
 In the table below the *specification* *fields* that should be specified in the module are described:
 
@@ -329,7 +329,7 @@ In the table below the *specification* *fields* that should be specified in the 
    "inputs*","IOstream","The specification for the inputs of a module"
    "outputs*","IOstream", "The specification for the outputs of a module"
    "module-type*","String", "The type of a module. One of [input-streaming, output-streaming,         batch-streaming, regular-streaming]"
-   "Engine-name*", "String", "The name of the computing core of a module"
+   "engine-name*", "String", "The name of the computing core of a module"
    "engine-version*", "String", "The version of the computing core of a module"
    "validator-class*", "String", "The absolute path to class that is responsible for a validation of launch options"
    "executor-class*", "String", "The absolute path to class that is responsible for a running of module"
@@ -353,7 +353,7 @@ Currently the following **engine** **types** are supported in the platform:
 
 After an engine is uploaded and a corresponding config settings file appears in the «Confg Settings» section, a module can be uploaded.
 
-Click an «Upload Module» button and select a .jar file in the window to upload.  Press «Open» and wait for a few seconds till the mщdule is uploaded.
+Click an «Upload Module» button and select a `.jar` file in the window to upload.  Press «Open» and wait for a few seconds till the module is uploaded.
 
 If the module is uploaded correctly a success message appears and the uploaded module is in the list of modules.
 
