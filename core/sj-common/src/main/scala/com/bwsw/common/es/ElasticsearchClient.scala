@@ -69,7 +69,7 @@ class ElasticsearchClient(hosts: Set[(String, Int)]) {
                       documentType: String,
                       query: String = QueryBuilders.matchAllQuery().toString): BulkIndexByScrollResponse = {
     val queryWithType = new BoolQueryBuilder()
-      .must(QueryBuilders.queryStringQuery(query))
+      .must(QueryBuilders.wrapperQuery(query))
       .must(QueryBuilders.matchQuery(typeName, documentType))
 
     deleteByQueryAction
