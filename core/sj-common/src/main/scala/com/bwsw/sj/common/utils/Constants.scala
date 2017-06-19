@@ -28,6 +28,7 @@ object EngineLiterals {
   final val batchInstanceBarrierPrefix = "/instance/barriers/"
   final val batchInstanceLeaderPrefix = "/instance/leaders/"
   final val eventWaitTimeout = 1000
+  final val producerTransactionBatchSize = 20
 
   final val inputStreamingType = "input-streaming"
   final val outputStreamingType = "output-streaming"

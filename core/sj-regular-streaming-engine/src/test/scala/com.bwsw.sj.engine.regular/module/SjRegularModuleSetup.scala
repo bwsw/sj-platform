@@ -32,7 +32,7 @@ object SjRegularModuleSetup extends App {
   val providerService = connectionRepository.getProviderRepository
   val instanceService = connectionRepository.getInstanceRepository
   val fileStorage = connectionRepository.getFileStorage
-  val checkpointInterval = 2
+  val checkpointInterval = 4
   val stateManagement = "ram"
   val stateFullCheckpoint = 2
   val _type = commonMode
@@ -45,7 +45,7 @@ object SjRegularModuleSetup extends App {
   createStreams(streamService, serviceManager, partitions, _type, inputCount, outputCount)
   createInstance(serviceManager, instanceService, checkpointInterval, stateManagement, stateFullCheckpoint)
 
-  createData(4, 1, partitions, _type, inputCount)
+  createData(80, 1, partitions, _type, inputCount)
   connectionRepository.close()
 
   println("DONE")

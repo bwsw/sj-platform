@@ -30,7 +30,6 @@ import scala.collection.mutable
   * Class is able to do checkpoint of processing messages
   *
   * @param inputs set of streams and their set of partitions that this task input is responsible for
-  *
   * @author Kseniya Mikhaleva
   */
 abstract class CheckpointTaskInput[E <: Envelope](inputs: scala.collection.mutable.Map[StreamDomain, Array[Int]]) extends Closeable {

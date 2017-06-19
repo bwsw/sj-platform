@@ -43,13 +43,9 @@ class InputTaskManager(implicit injector: Injector) extends TaskManager {
       s"and it's impossible to retrieve inputs.")
   }
 
-  val inputInstance = instance.asInstanceOf[InputInstance]
+  val inputInstance: InputInstance = instance.asInstanceOf[InputInstance]
   val entryPort: Int = getEntryPort()
   val outputProducers: Map[String, Producer] = createOutputProducers()
-
-  require(numberOfAgentsPorts >=
-    (instance.outputs.length + 1),
-    "Not enough ports for t-stream consumers/producers")
 
   def getEntryPort(): Int = {
     val config = ConfigFactory.load()

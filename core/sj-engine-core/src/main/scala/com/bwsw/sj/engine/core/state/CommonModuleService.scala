@@ -33,7 +33,7 @@ import scala.collection.mutable
 
 /**
   * Class is in charge of creating a specific ModuleEnvironmentManager (and executor)
-  * depending on an instance parameter [[BatchInstanceDomain.stateManagement]] and performing the appropriate actions related with checkpoint
+  * depending on an instance parameter [[com.bwsw.sj.common.dal.model.instance.BatchInstanceDomain.stateManagement]] and performing the appropriate actions related with checkpoint
   *
   * @param manager            manager of environment of task of [[EngineLiterals.regularStreamingType]] or [[EngineLiterals.batchStreamingType]] module
   * @param performanceMetrics set of metrics that characterize performance of a regular or batch streaming module
@@ -55,7 +55,9 @@ abstract class CommonModuleService(manager: CommonTaskManager,
 
   private def addProducersToCheckpointGroup(): Unit = {
     logger.debug(s"Task: ${manager.taskName}. Start adding t-stream producers to checkpoint group.")
-    outputProducers.foreach(x => checkpointGroup.add(x._2))
+    outputProducers.foreach(x => {
+      checkpointGroup.add(x._2)
+    })
     logger.debug(s"Task: ${manager.taskName}. The t-stream producers are added to checkpoint group.")
   }
 
