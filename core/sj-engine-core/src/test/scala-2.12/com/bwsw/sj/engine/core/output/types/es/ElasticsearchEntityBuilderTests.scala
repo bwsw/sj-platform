@@ -18,8 +18,6 @@
  */
 package com.bwsw.sj.engine.core.output.types.es
 
-import com.bwsw.sj.engine.core.output.types.es.ElasticsearchEntityBuilder
-import com.bwsw.sj.engine.core.output.types.es._
 import org.scalatest.{FlatSpec, Matchers}
 
 

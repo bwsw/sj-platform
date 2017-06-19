@@ -30,7 +30,8 @@ import com.bwsw.sj.common.dal.model.stream.{StreamDomain, TStreamStreamDomain}
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
 import com.bwsw.sj.common.engine.{EnvelopeDataSerializer, ExtendedEnvelopeDataSerializer, StreamingExecutor}
 import com.bwsw.sj.common.si.model.config.ConfigurationSetting
-import com.bwsw.sj.common.si.model.instance.{Instance, CreateInstance}
+import com.bwsw.sj.common.si.model.instance.{CreateInstance, Instance}
+import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.common.utils.EngineLiterals._
 import com.bwsw.sj.common.utils.StreamLiterals._
 import com.bwsw.sj.engine.core.config.EngineConfigNames
@@ -49,6 +50,7 @@ import scaldi.Injector
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
+import scala.util.Try
 
 /**
   * Class allows to manage an environment of streaming task of specific type
@@ -59,7 +61,7 @@ import scala.collection.mutable
   * for this purposes firstly [[TStreamsFactory]] is configured using [[com.bwsw.sj.common.dal.model.instance.InstanceDomain]]
   */
 abstract class TaskManager(implicit injector: Injector) {
-  protected val connectionRepository = inject[ConnectionRepository]
+  protected val connectionRepository: ConnectionRepository = inject[ConnectionRepository]
   protected val logger: Logger = LoggerFactory.getLogger(this.getClass)
   val streamRepository: GenericMongoRepository[StreamDomain] = connectionRepository.getStreamRepository
 
@@ -67,7 +69,7 @@ abstract class TaskManager(implicit injector: Injector) {
 
   val instanceName: String = config.getString(EngineConfigNames.instanceName)
   val agentsHost: String = config.getString(EngineConfigNames.agentsHost)
-  private val agentsPorts = config.getString(EngineConfigNames.agentsPorts).split(",").map(_.toInt)
+  private val agentsPorts = Try(config.getString(EngineConfigNames.agentsPorts).split(",").map(_.toInt)).getOrElse(Array[Int]())
   protected val numberOfAgentsPorts: Int = agentsPorts.length
   val taskName: String = config.getString(EngineConfigNames.taskName)
   val instance: Instance = getInstance()
@@ -117,7 +119,7 @@ abstract class TaskManager(implicit injector: Injector) {
   private def setTStreamFactoryProperties(): Unit = {
     setAuthOptions(auxiliaryTStreamService)
     setCoordinationOptions(auxiliaryTStreamService)
-    setBindHostForAgents()
+    setBindHostForSubscribers()
     applyConfigurationSettings()
   }
 
@@ -130,8 +132,7 @@ abstract class TaskManager(implicit injector: Injector) {
     tstreamFactory.setProperty(ConfigurationOptions.Coordination.path, tStreamService.prefix)
   }
 
-  private def setBindHostForAgents(): TStreamsFactory = {
-    tstreamFactory.setProperty(ConfigurationOptions.Producer.bindPort, agentsHost)
+  private def setBindHostForSubscribers(): TStreamsFactory = {
     tstreamFactory.setProperty(ConfigurationOptions.Consumer.Subscriber.bindHost, agentsHost)
   }
 
@@ -177,7 +178,7 @@ abstract class TaskManager(implicit injector: Injector) {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
       s"Create the t-stream producers for each output stream.")
 
-    tstreamFactory.setProperty(ConfigurationOptions.Producer.Transaction.batchSize, 20)
+    tstreamFactory.setProperty(ConfigurationOptions.Producer.Transaction.batchSize, EngineLiterals.producerTransactionBatchSize)
 
     instance.outputs
       .map(x => (x, streamRepository.get(x).get))
@@ -188,17 +189,11 @@ abstract class TaskManager(implicit injector: Injector) {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
       s"Create producer for stream: ${stream.name}.")
 
-    setProducerBindPort()
     setStreamOptions(stream)
 
     tstreamFactory.getProducer(
       "producer_for_" + taskName + "_" + stream.name,
       (0 until stream.partitions).toSet)
-  }
-
-  private def setProducerBindPort(): Unit = {
-    tstreamFactory.setProperty(ConfigurationOptions.Producer.bindPort, agentsPorts(currentPortNumber))
-    currentPortNumber += 1
   }
 
   def createStorageStream(name: String, description: String, partitions: Int): Unit = {
@@ -251,6 +246,11 @@ abstract class TaskManager(implicit injector: Injector) {
       offset)
   }
 
+  private def setSubscribingConsumerBindPort(): Unit = {
+    tstreamFactory.setProperty(ConfigurationOptions.Consumer.Subscriber.bindPort, agentsPorts(currentPortNumber))
+    currentPortNumber += 1
+  }
+
   /**
     * Creates a t-stream consumer
     *
@@ -287,11 +287,6 @@ abstract class TaskManager(implicit injector: Injector) {
     tstreamFactory.setProperty(ConfigurationOptions.Stream.name, stream.name)
     tstreamFactory.setProperty(ConfigurationOptions.Stream.partitionsCount, stream.partitions)
     tstreamFactory.setProperty(ConfigurationOptions.Stream.description, stream.description)
-  }
-
-  private def setSubscribingConsumerBindPort(): Unit = {
-    tstreamFactory.setProperty(ConfigurationOptions.Consumer.Subscriber.bindPort, agentsPorts(currentPortNumber))
-    currentPortNumber += 1
   }
 
   /**

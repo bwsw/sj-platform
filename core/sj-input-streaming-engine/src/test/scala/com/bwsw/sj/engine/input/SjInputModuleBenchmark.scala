@@ -22,7 +22,7 @@ import java.io.{File, PrintStream}
 import java.net.Socket
 import java.util.logging.LogManager
 
-import com.bwsw.sj.common.config.TempHelperForConfigSetup
+import com.bwsw.sj.common.config.{TempHelperForConfigDestroy, TempHelperForConfigSetup}
 import com.bwsw.sj.engine.input.DataFactory._
 import com.bwsw.sj.engine.input.SjInputServices._
 
@@ -111,7 +111,7 @@ object SjInputModuleDestroy extends App {
   deleteInstance(SjInputServices.instanceService)
   deleteModule(SjInputServices.fileStorage, SjInputServices.inputModule.getName)
 
-  connectionRepository.getConfigRepository.deleteAll()
+  TempHelperForConfigDestroy.main(Array())
   connectionRepository.close()
 
   println("DONE")

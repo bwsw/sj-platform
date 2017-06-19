@@ -33,10 +33,10 @@ import scala.collection.mutable
   * @author Kseniya Tomskikh
   */
 class OutputTaskManager(implicit injector: Injector) extends TaskManager {
-  val outputInstance = instance.asInstanceOf[OutputInstance]
+  val outputInstance: OutputInstance = instance.asInstanceOf[OutputInstance]
   val inputs: mutable.Map[StreamDomain, Array[Int]] = getInputs(outputInstance.executionPlan)
 
-  require(numberOfAgentsPorts >= 2, "Not enough ports for t-stream consumers/producers ")
+  require(numberOfAgentsPorts >= 1, "Not enough ports for t-stream consumers. One or more ports are required")
 
   def getExecutor(environmentManager: EnvironmentManager): OutputStreamingExecutor[AnyRef] = {
     logger.debug(s"Task: $taskName. Start loading of executor class from module jar.")

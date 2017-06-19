@@ -88,7 +88,7 @@ object DataFactory {
   private def setTStreamFactoryProperties() = {
     setAuthOptions(tstrqService)
     setCoordinationOptions(tstrqService)
-    setBindHostForAgents()
+    setBindHostForSubscribers()
   }
 
   private def setAuthOptions(tStreamService: TStreamServiceDomain) = {
@@ -100,8 +100,7 @@ object DataFactory {
     tstreamFactory.setProperty(ConfigurationOptions.Coordination.path, tStreamService.prefix)
   }
 
-  private def setBindHostForAgents() = {
-    tstreamFactory.setProperty(ConfigurationOptions.Producer.bindHost, agentsHost)
+  private def setBindHostForSubscribers() = {
     tstreamFactory.setProperty(ConfigurationOptions.Consumer.Subscriber.bindHost, agentsHost)
   }
 
@@ -445,16 +444,11 @@ object DataFactory {
   }
 
   def createProducer(streamName: String, partitions: Int) = {
-    setProducerBindPort()
     setStreamOptions(streamName, partitions)
 
     tstreamFactory.getProducer(
       "producer for " + streamName,
       (0 until partitions).toSet)
-  }
-
-  private def setProducerBindPort() = {
-    tstreamFactory.setProperty(ConfigurationOptions.Producer.bindPort, 8030)
   }
 
   private def createConsumer(streamName: String, partitions: Int): Consumer = {

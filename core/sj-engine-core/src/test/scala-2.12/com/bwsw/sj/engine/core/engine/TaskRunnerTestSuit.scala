@@ -108,7 +108,9 @@ class TaskRunnerMock(_executorService: ExecutorCompletionService[Unit],
 }
 
 class TaskInputServiceMock extends Callable[Unit] with Closeable {
+
   override def call(): Unit = ???
 
   override def close(): Unit = ???
+
 }

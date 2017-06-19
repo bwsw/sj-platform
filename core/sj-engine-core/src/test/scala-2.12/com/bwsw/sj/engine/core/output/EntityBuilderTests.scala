@@ -19,7 +19,6 @@
 package com.bwsw.sj.engine.core.output
 
 import com.bwsw.sj.engine.core.output.types.es.{BooleanField, IntegerField, JavaStringField, LongField}
-import com.bwsw.sj.engine.core.output.EntityBuilder
 import org.scalatest.{FlatSpec, Matchers}
 
 /**

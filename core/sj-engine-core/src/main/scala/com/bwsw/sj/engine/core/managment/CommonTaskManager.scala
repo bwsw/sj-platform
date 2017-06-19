@@ -42,9 +42,9 @@ class CommonTaskManager(implicit injector: Injector) extends TaskManager {
   val outputProducers: Map[String, Producer] = createOutputProducers()
 
   require(numberOfAgentsPorts >=
-    (inputs.count(x => x._1.streamType == StreamLiterals.tstreamType) + instance.outputs.length + 3),
-    "Not enough ports for t-stream consumers/producers." +
-      s"${inputs.count(x => x._1.streamType == StreamLiterals.tstreamType) + instance.outputs.length + 3} ports are required")
+    inputs.count(x => x._1.streamType == StreamLiterals.tstreamType),
+    "Not enough ports for t-stream consumers." +
+      s"${inputs.count(x => x._1.streamType == StreamLiterals.tstreamType)} ports are required")
 
   def getExecutor(environmentManager: EnvironmentManager): StreamingExecutor = {
     logger.debug(s"Task: $taskName. Start loading an executor class from module jar.")

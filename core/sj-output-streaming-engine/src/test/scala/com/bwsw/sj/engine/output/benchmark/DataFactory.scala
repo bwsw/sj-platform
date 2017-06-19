@@ -25,7 +25,6 @@ import com.bwsw.common._
 import com.bwsw.common.es.ElasticsearchClient
 import com.bwsw.common.file.utils.MongoFileStorage
 import com.bwsw.common.jdbc.JdbcClientBuilder
-import com.bwsw.sj.common.SjModule
 import com.bwsw.sj.common.config.BenchmarkConfigNames
 import com.bwsw.sj.common.dal.model._
 import com.bwsw.sj.common.dal.model.instance.{ExecutionPlan, Task}
@@ -45,7 +44,6 @@ import org.eclipse.jetty.http.HttpVersion
 import org.elasticsearch.common.xcontent.XContentBuilder
 import org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder
 import scaldi.Injectable.inject
-import scaldi.{Injector, Module}
 
 import scala.collection.JavaConverters._
 import scala.util.{Failure, Success, Try}
@@ -136,7 +134,7 @@ object DataFactory {
   private def setTStreamFactoryProperties() = {
     setAuthOptions(tstrqService)
     setCoordinationOptions(tstrqService)
-    setBindHostForAgents()
+    setBindHostForSubscribers()
   }
 
   private def setAuthOptions(tStreamService: TStreamServiceDomain) = {
@@ -148,8 +146,7 @@ object DataFactory {
     tstreamFactory.setProperty(ConfigurationOptions.Coordination.path, tStreamService.prefix)
   }
 
-  private def setBindHostForAgents() = {
-    tstreamFactory.setProperty(ConfigurationOptions.Producer.bindHost, agentsHost)
+  private def setBindHostForSubscribers() = {
     tstreamFactory.setProperty(ConfigurationOptions.Consumer.Subscriber.bindHost, agentsHost)
   }
 
@@ -233,16 +230,11 @@ object DataFactory {
   }
 
   def createProducer(stream: TStreamStreamDomain) = {
-    setProducerBindPort()
     setStreamOptions(stream)
 
     tstreamFactory.getProducer(
       "producer for " + stream.name,
       (0 until stream.partitions).toSet)
-  }
-
-  private def setProducerBindPort() = {
-    tstreamFactory.setProperty(ConfigurationOptions.Producer.bindPort, producerPort)
   }
 
   def createConsumer(stream: TStreamStreamDomain): consumer.Consumer = {
