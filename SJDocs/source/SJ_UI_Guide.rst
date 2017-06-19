@@ -8,7 +8,9 @@ UI Guide
 
 .. |juggler-logo| image:: https://bitworks.software/sites/default/files/logo-juggler-prj.png
 
-Juggler is a real time stream processing platform designed for building both simple and complex event processing (CEP). Juggler uses Apache Messos, Kafka and T-streams to construct scalable and flexible processing algorithms. Juggler functions on the same principle as Apache Samza, but enables exactly-once processing and provides an integrated solution with a RESTful interface, JavaScript UI and an ad hoc repository for modules, services, streams and other data processing pipeline components.
+Juggler is a real time stream processing platform designed for building both simple and complex event processing (CEP). 
+
+Juggler uses Apache Messos, Kafka and T-streams to construct scalable and flexible processing algorithms. Juggler functions on the same principle as Apache Samza, but enables exactly-once processing and provides an integrated solution with a RESTful interface, JavaScript UI and an ad hoc repository for modules, services, streams and other data processing pipeline components.
 
 Overview
 --------
@@ -34,14 +36,18 @@ Get Started
 -----------
 Juggler has a user-friendly UI to create a processing sequence of arbitrary complexity, watch it in action and manage it using pre-created modules with flexible functionality. 
 For beginning go to the http://stream-juggler.z1.netpoint-dc.com:18080 and perform a registration process:
+
 #. 
+
 #. 
+
 #. 
+
 Now you are ready to work with the system. 
 
 Providers 
 ---------
-As the first step a provider should be created.  That is the provider of sevices for input data transformation into a stream.
+At the first step a provider should be created.  That is the provider of sevices for input data transformation into a stream.
 
 .. figure:: _static/CreateProvider.png
 
