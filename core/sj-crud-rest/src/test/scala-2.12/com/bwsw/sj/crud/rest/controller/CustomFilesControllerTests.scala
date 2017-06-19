@@ -182,7 +182,7 @@ class CustomFilesControllerTests extends FlatSpec with Matchers with MockitoSuga
     val api = mock[FileMetadataApi]
     when(api.filename).thenReturn(Some(filename))
     when(api.file).thenReturn(Some(file))
-    when(api.to()(any[Injector]())).thenReturn(metadata)
+    when(api.to()).thenReturn(metadata)
     when(api.customFileParts).thenReturn(Map[String, Any](
       "file" -> file,
       "description" -> description))

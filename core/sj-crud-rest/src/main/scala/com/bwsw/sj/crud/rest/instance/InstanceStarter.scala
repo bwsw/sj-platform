@@ -226,3 +226,20 @@ class InstanceStarter(instance: Instance,
 
   protected def hasFrameworkStarted(applicationEntity: MarathonApplication): Boolean = applicationEntity.app.tasksRunning == 1
 }
+
+class InstanceStarterBuilder(implicit val injector: Injector) {
+  def apply(instance: Instance,
+            marathonAddress: String,
+            zookeeperHost: Option[String] = None,
+            zookeeperPort: Option[Int] = None,
+            delay: Long = 1000,
+            marathonTimeout: Int = 60000): InstanceStarter = {
+    new InstanceStarter(
+      instance,
+      marathonAddress,
+      zookeeperHost,
+      zookeeperPort,
+      delay,
+      marathonTimeout)
+  }
+}

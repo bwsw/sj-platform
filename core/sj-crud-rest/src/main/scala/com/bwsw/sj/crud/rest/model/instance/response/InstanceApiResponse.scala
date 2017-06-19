@@ -22,6 +22,8 @@ import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.dal.model.instance.FrameworkStage
 import com.bwsw.sj.common.si.model.instance._
 import com.bwsw.sj.common.utils.EngineLiterals
+import scaldi.Injectable.inject
+import scaldi.Injector
 
 class InstanceApiResponse(val moduleName: String,
                           val moduleVersion: String,
@@ -42,9 +44,9 @@ class InstanceApiResponse(val moduleName: String,
                           val engine: String,
                           val restAddress: String)
 
-object InstanceApiResponse {
+class CreateInstanceApiResponse(implicit injector: Injector) {
   def from(instance: Instance): InstanceApiResponse = {
-    val serializer = new JsonSerializer()
+    val serializer = inject[JsonSerializer]
     instance.moduleType match {
       case EngineLiterals.inputStreamingType =>
         val inputInstance = instance.asInstanceOf[InputInstance]

@@ -65,8 +65,8 @@ class SpecificationApi(val name: String,
     executorClass)
 }
 
-object SpecificationApi {
-  private val serializer = new JsonSerializer(true)
+class CreateSpecificationApi(implicit injector: Injector) {
+  private val serializer = inject[JsonSerializer]
 
   def from(specification: Specification): SpecificationApi = {
     specification.moduleType match {
@@ -103,7 +103,7 @@ object SpecificationApi {
     }
   }
 
-  def from(file: File)(implicit injector: Injector): SpecificationApi = {
+  def from(file: File): SpecificationApi = {
     val messageResourceUtils = inject[MessageResourceUtils]
     import messageResourceUtils.getMessage
 

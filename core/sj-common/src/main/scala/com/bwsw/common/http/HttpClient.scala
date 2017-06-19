@@ -20,7 +20,7 @@ package com.bwsw.common.http
 
 import org.apache.http.client.config.RequestConfig
 import org.apache.http.client.methods.{CloseableHttpResponse, HttpUriRequest}
-import org.apache.http.impl.client.{CloseableHttpClient, HttpClientBuilder}
+import org.apache.http.impl.client.{CloseableHttpClient, HttpClientBuilder => ApacheHttpClientBuilder}
 import org.slf4j.LoggerFactory
 
 /**
@@ -32,14 +32,14 @@ import org.slf4j.LoggerFactory
 class HttpClient(timeout: Int) {
   private val logger = LoggerFactory.getLogger(getClass.getName)
   private val requestBuilder = RequestConfig
-      .custom()
-      .setConnectTimeout(timeout)
-      .setConnectionRequestTimeout(timeout)
-      .setSocketTimeout(timeout)
+    .custom()
+    .setConnectTimeout(timeout)
+    .setConnectionRequestTimeout(timeout)
+    .setSocketTimeout(timeout)
 
-  private val builder = HttpClientBuilder
-      .create()
-      .setDefaultRequestConfig(requestBuilder.build())
+  private val builder = ApacheHttpClientBuilder
+    .create()
+    .setDefaultRequestConfig(requestBuilder.build())
 
   private val client: CloseableHttpClient = {
     logger.debug("Create an http client.")
@@ -54,4 +54,8 @@ class HttpClient(timeout: Int) {
     logger.debug("Close an http client.")
     client.close()
   }
+}
+
+class HttpClientBuilder {
+  def apply(timeout: Int): HttpClient = new HttpClient(timeout)
 }

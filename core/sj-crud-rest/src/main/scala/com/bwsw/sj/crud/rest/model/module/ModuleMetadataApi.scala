@@ -23,7 +23,6 @@ import java.util.jar.JarFile
 
 import com.bwsw.sj.common.si.model.module.ModuleMetadata
 import com.bwsw.sj.common.utils.{MessageResourceUtils, RestLiterals}
-import com.bwsw.sj.crud.rest.ModuleInfo
 import com.bwsw.sj.crud.rest.model.FileMetadataApi
 import scaldi.Injectable.inject
 import scaldi.Injector
@@ -35,16 +34,17 @@ class ModuleMetadataApi(filename: String,
                         file: File,
                         description: String = RestLiterals.defaultDescription,
                         customFileParts: Map[String, Any] = Map())
+                       (implicit injector: Injector)
   extends FileMetadataApi(
     Option(filename),
     Option(file),
     description,
     customFileParts) {
 
-  override def to()(implicit injector: Injector): ModuleMetadata =
-    new ModuleMetadata(filename, SpecificationApi.from(file).to, Option(file))
+  override def to(): ModuleMetadata =
+    new ModuleMetadata(filename, inject[CreateSpecificationApi].from(file).to, Option(file))
 
-  def validate(implicit injector: Injector): ArrayBuffer[String] = {
+  def validate: ArrayBuffer[String] = {
     val messageResourceUtils = inject[MessageResourceUtils]
     import messageResourceUtils.createMessage
 
@@ -57,15 +57,5 @@ class ModuleMetadataApi(filename: String,
       errors += createMessage("rest.modules.module.jar.incorrect", filename)
 
     errors
-  }
-}
-
-object ModuleMetadataApi {
-  def toModuleInfo(moduleMetadata: ModuleMetadata): ModuleInfo = {
-    ModuleInfo(
-      moduleMetadata.specification.moduleType,
-      moduleMetadata.specification.name,
-      moduleMetadata.specification.version,
-      moduleMetadata.length.get)
   }
 }

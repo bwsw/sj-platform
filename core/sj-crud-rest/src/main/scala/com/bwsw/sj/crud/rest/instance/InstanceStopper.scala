@@ -36,7 +36,11 @@ import scala.util.{Failure, Success, Try}
   *
   * @author Kseniya Tomskikh
   */
-class InstanceStopper(instance: Instance, marathonAddress: String, delay: Long = 1000, marathonTimeout: Int = 60000)(implicit val injector: Injector) extends Runnable {
+class InstanceStopper(instance: Instance,
+                      marathonAddress: String,
+                      delay: Long = 1000,
+                      marathonTimeout: Int = 60000)
+                     (implicit val injector: Injector) extends Runnable {
 
   private val logger = LoggerFactory.getLogger(getClass.getName)
   protected val instanceManager = new InstanceDomainRenewer()
@@ -118,4 +122,12 @@ class InstanceStopper(instance: Instance, marathonAddress: String, delay: Long =
     logger.debug(s"Instance: '${instance.name}'. Clear the input instance tasks.")
     instance.asInstanceOf[InputInstance].tasks.foreach(_._2.clear())
   }
+}
+
+class InstanceStopperBuilder(implicit val injector: Injector) {
+  def apply(instance: Instance,
+            marathonAddress: String,
+            delay: Long = 1000,
+            marathonTimeout: Int = 60000): InstanceStopper =
+    new InstanceStopper(instance, marathonAddress, delay, marathonTimeout)
 }
