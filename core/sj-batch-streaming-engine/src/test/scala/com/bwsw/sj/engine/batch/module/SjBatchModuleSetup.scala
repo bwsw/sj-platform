@@ -22,6 +22,7 @@ import java.io.File
 import java.util.logging.LogManager
 
 import com.bwsw.sj.common.config.TempHelperForConfigSetup
+import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.batch.module.DataFactory._
 
 object SjBatchModuleSetup extends App {
@@ -32,7 +33,7 @@ object SjBatchModuleSetup extends App {
   val providerService = connectionRepository.getProviderRepository
   val instanceService = connectionRepository.getInstanceRepository
   val fileStorage = connectionRepository.getFileStorage
-  val stateManagement = "ram"
+  val stateManagement = EngineLiterals.ramStateMode
   val stateFullCheckpoint = 3
   val window = 2
   val slidingInterval = 1
