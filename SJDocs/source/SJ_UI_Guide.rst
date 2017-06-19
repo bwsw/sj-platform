@@ -355,7 +355,7 @@ After an engine is uploaded and a corresponding config settings file appears in 
 Click an «Upload Module» button and select a .jar file in the window to upload.  Press «Open» and wait for a few seconds till the mudule is uploaded.
 If the module is uploaded correctly a success message appears and the uploaded module is in the list of modules.
 
-.. figure:: _static/ModuleUploaded.png
+.. figure:: _static/Module_Uploaded.png
 
 Instances
 ---------
