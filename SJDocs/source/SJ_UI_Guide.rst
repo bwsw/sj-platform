@@ -203,7 +203,7 @@ Please, press the «Create services» button and fill in the form:
 
   Please, enter a database name for the services here. 
 
-  .. note:: Required fields are marked with an asterisk (*)
+.. note:: Required fields are marked with an asterisk (*)
 
 Click «Create» at the bottom and see the servces are in the list of providers now. Details of the node are displayed to the right when clicking the services in the list. 
 
@@ -215,7 +215,7 @@ In the list of services the following actions can be performed:
 
 2. **View** a provider for the services and get the provider`s information in a popup window by clicking at the active provider`s name in the «Providers» column.
 
-  .. image:: ServicesList_ProviderInfo.png
+  .. figure:: _static/ServicesList_ProviderInfo.png
 
 3. **Delete** a service clicking at the corresponding icon in the Action block near the name of the services you want to delete
 
@@ -228,8 +228,10 @@ Streams
 The next step is to create a data stream. A stream is a sequence of events happening randomly at irregular intervals.
 
 There are two kinds of streams in SJ-Platform
-An input stream It is a stream which provides new events. There are two different input stream types in the SJ platform: Kafka and T-Stream
-An output stream It is a stream which is a destination point for results. There is one output stream type supported in the SJ platform: T-Stream
+
+:An input stream: It is a stream which provides new events. There are two different input stream types in the SJ platform: Kafka and T-Stream
+
+:An output stream: It is a stream which is a destination point for results. There is one output stream type supported in the SJ platform: T-Stream
 
 Under the Streams section of the main navigation bar you will find the list of streams.
 
@@ -297,14 +299,14 @@ Enter a primary key here. It is a primary key field name used in sql database.
 
 This field is available for *jdbc-output* stream type. The field is optional.
 
-  .. note:: Required fields are marked with an asterisk (*)
+.. note:: Required fields are marked with an asterisk (*)
 
 Modules
 -------
 
 In the next section  — Modules — you can upload and manage your own module(s). 
 
- The platform suppports 4 types of modules:
+The platform suppports 4 types of modules:
 
 1. Regular-streaming (base type)
 2. Batch-streaming
@@ -335,7 +337,7 @@ In the table below the *specification* *fields* that should be specified in the 
 
 Before uploading a module make sure an engine of corresponding type is uploaded.
 
- An **engine** is a framework that performs processing of streams. It runs an application code and handles data from an input stream providing results to an output stream.
+An **engine** is a framework that performs processing of streams. It runs an application code and handles data from an input stream providing results to an output stream.
 
 Currently the following **engine** **types** are supported in the platform:
 
