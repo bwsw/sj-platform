@@ -19,6 +19,7 @@
 package com.bwsw.sj.engine.core.simulation
 
 import com.bwsw.sj.engine.core.entities.TStreamEnvelope
+import com.bwsw.sj.engine.core.environment.OutputEnvironmentManager
 import com.bwsw.sj.engine.core.output.OutputStreamingExecutor
 
 import scala.collection.mutable
@@ -41,6 +42,7 @@ import scala.collection.mutable
   *
   * @param executor             class under test [[OutputStreamingExecutor]]
   * @param outputRequestBuilder builder of requests for output service
+  * @param manager              environment manager for executor
   * @param wasFirstCheckpoint   indicates that first checkpoint was performed
   * @tparam IT type of incoming data
   * @tparam OT type of requests for output service
@@ -48,6 +50,7 @@ import scala.collection.mutable
   */
 class OutputEngineSimulator[IT <: AnyRef, OT](executor: OutputStreamingExecutor[IT],
                                               outputRequestBuilder: OutputRequestBuilder[OT],
+                                              manager: OutputEnvironmentManager,
                                               var wasFirstCheckpoint: Boolean = false) {
 
   import OutputEngineSimulator.defaultConsumerName
@@ -82,7 +85,13 @@ class OutputEngineSimulator[IT <: AnyRef, OT](executor: OutputStreamingExecutor[
       val outputEnvelopes = executor.onMessage(inputEnvelope)
       val deletionRequest = {
         if (wasFirstCheckpoint) Seq.empty
-        else Seq(outputRequestBuilder.buildDelete(inputEnvelope))
+        else {
+          if (manager.isCheckpointInitiated) {
+            wasFirstCheckpoint = true
+            manager.isCheckpointInitiated = false
+          }
+          Seq(outputRequestBuilder.buildDelete(inputEnvelope))
+        }
       }
 
       deletionRequest ++ outputEnvelopes.map(outputRequestBuilder.buildInsert(_, inputEnvelope))
