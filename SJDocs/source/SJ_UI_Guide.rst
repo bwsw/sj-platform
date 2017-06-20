@@ -195,13 +195,17 @@ Please, specify a zookeeper namespace for the services here.
 
 This field appears when the TstrQ services type is selected and is required for filling in.
 
+Here a ZooKeeper path where metadata of transactions, streams are located should be specified.
+
 Please, enter a prefix for the services here. 
 
 12. *Token* *
 
 This field appears when the TstrQ services type is selected and is required for filling in.
 
-Please, enter a token for the services here. It must contain no more than 32 symbols.
+A token is a unique key for getting access to the service. It must contain no more than 32 symbols.
+
+Please, enter a token for the services here. 
 
 13. *Database* *name* *
 
