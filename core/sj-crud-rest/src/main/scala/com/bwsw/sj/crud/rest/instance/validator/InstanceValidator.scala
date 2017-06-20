@@ -26,7 +26,7 @@ import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepo
 import com.bwsw.sj.common.rest.utils.ValidationUtils._
 import com.bwsw.sj.common.si.model.instance.Instance
 import com.bwsw.sj.common.si.model.module.Specification
-import com.bwsw.sj.common.utils.{EngineLiterals, MessageResourceUtils, StreamLiterals}
+import com.bwsw.sj.common.utils.{MessageResourceUtils, StreamLiterals}
 import com.bwsw.sj.crud.rest.utils.CompletionUtils
 import org.slf4j.{Logger, LoggerFactory}
 import scaldi.Injectable.inject
@@ -189,11 +189,5 @@ abstract class InstanceValidator(implicit val injector: Injector) extends Comple
     }
 
     errors
-  }
-
-  def getStreamMode(name: String): String = {
-    val nameWithMode = name.split(s"/")
-    if (nameWithMode.length == 1) EngineLiterals.splitStreamMode
-    else nameWithMode(0)
   }
 }
