@@ -78,8 +78,8 @@ class OutputEngineSimulator[IT <: AnyRef, OT](executor: OutputStreamingExecutor[
   def prepare(entities: Seq[IT], consumerName: String = defaultConsumerName): Long = {
     val queue = mutable.Queue(entities: _*)
     val envelope = new TStreamEnvelope[IT](queue, consumerName)
-    envelope.id = transactionId
     transactionId += 1
+    envelope.id = transactionId
 
     inputEnvelopes += envelope
     transactionId
