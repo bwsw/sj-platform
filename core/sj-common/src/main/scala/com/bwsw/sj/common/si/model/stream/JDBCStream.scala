@@ -20,6 +20,7 @@ package com.bwsw.sj.common.si.model.stream
 
 import com.bwsw.sj.common.dal.model.service.JDBCServiceDomain
 import com.bwsw.sj.common.dal.model.stream.JDBCStreamDomain
+import com.bwsw.sj.common.rest.utils.ValidationUtils.validateNamespace
 import com.bwsw.sj.common.utils.{ServiceLiterals, StreamLiterals}
 import scaldi.Injector
 
@@ -70,6 +71,17 @@ class JDBCStream(name: String,
                 someService.serviceType)
             }
         }
+    }
+
+    errors
+  }
+
+  //it is necessary to work with PostgreSQL that doesn't allow to use hyphens in the table name
+  override protected def validateStreamName(name: String): ArrayBuffer[String] = {
+    val errors = new ArrayBuffer[String]()
+
+    if (!validateNamespace(name)) {
+      errors += createMessage("entity.error.jdbc.incorrect.stream.name", name)
     }
 
     errors
