@@ -508,5 +508,52 @@ The list of instances can be filtered by its type and/or a name using the search
 Configuration Settings
 ----------------------
 
+ .. warning:: *The section is under development!*
+ 
+Here the basic settings necessary for the platform are described.
+ 
+These are configuration settings required for the modules start working.
+ 
+The config settings can be added under the "Config Settings" tab of the main navigation bar.
+
+When you open the Cofig Settings page via the navigation bar you can see the list of settings added to the platform.
+ 
+Please, find the required config settings in the table below and make sure they are added to your platform so that your modules could work.
+
+.. csv-table:: Required config settings
+  :header: "Config Domain","Name", "Description", "Example"
+  :widths: 15, 20, 50, 15
+
+  "system", "marathon-connect", "Use to launch transaction generators, framework responsible for running engine tasks and to manage or get information about applications that run on mesos. Must begin with 'http://'.", "http://stream-juggler.z1.netpoint-dc.com:8080"
+  "system", "marathon-connect-timeout", "Use when trying to connect by a marathon-connect (in milliseconds).", "60000"
+  "system", "current-transaction-generator", "Indicates what jar is used for running transaction generators. By this value you can get configuration setting that contains file name of transaction generator jar.", "com.bwsw.tg-0.1"
+  "system", "current-framework", "Indicates what jar is used for running framework. By this value you can get configuration setting that contains file name of framework jar.", "com.bwsw.fw-0.1"
+  "system", "transaction-generator-client-retry-period", "Time for connecting attempt to TG-server", "500"
+  "system", "transaction-generator-server-retry-period", "Time for attempt to lock a server as master on ZK", "500"
+  "system", "transaction-generator-retry-count", "Count of reconnections to TG-server", "10"
+  "system", "framework-principal", "Framework principal for mesos authentication", "principal"
+  "system", "framework-secret",  "Framework secret for mesos authentication", "secret"
+  "system", "framework-backoff-seconds", "Seconds for first delay after crash", "7"
+  "system", "framework-backoff-factor", "Factor for backoffSeconds parameter of following delays", "7.0"
+  "system", "framework-max-launch-delay-seconds", "Max seconds for delay", "600"
+  "kafka", "subscriber-timeout", "The time, in milliseconds, spent waiting in poll if data is not available. Must not be negative", "100"
+  "zk", "session.timeout", "Use when connecting to zookeeper in milliseconds (usually when we are dealing with t-streams consumers/producers)", "3000"
+  "jdbs", "timeout", "Timeout connection to sql database in milliseconds", "30000"
+
+The rest of the config settings are optional. 
+
+Сonfig domain which named 'kafka' contains properties used to creating kafka consumer. 
+
+.. note:: You must not define properties such as 'bootstrap.servers', 'enable.auto.commit', 'key.deserializer' and 'value.deserializer' to avoid a crashing of system
+
+Сonfig domain which named 't-streams' contains properties used for t-streams consumer/producer. 
+
+.. note:: You must not define properties such as 'producer.bind-host', 'producer.bind-port', 'consumer.subscriber.bind-host' and 'consumer.subscriber.bind-port' to avoid a crashing of system. 
+
+To see the properties list click this link for producer: http://t-streams.com/docs/a2-api/tstreams-factory-api/#TSF_DictionaryProducer_keyset, for consumer: http://t-streams.com/docs/a2-api/tstreams-factory-api/#TSF_DictionaryConsumer_keyset (you should use the textual constants to create a config setting)
+
+For each uploaded custom jar new config setting is added in the following format: 
+                                          key = {custom-jar-name}-{version}, value = {file-name}
+
 Custom Files
 ------------
