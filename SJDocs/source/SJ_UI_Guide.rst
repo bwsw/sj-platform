@@ -379,6 +379,8 @@ Currently the following **engine** **types** are supported in the platform:
 
 After an engine is uploaded and a corresponding config settings file appears in the «Config Settings» section, a module can be uploaded.
 
+.. note:: Read more about necessary configuration settings in the `Configuration Settings`_ section below.
+
 Click the «Upload Module» button and select a `.jar` file in the window to upload.  Press «Open» and wait for a few seconds till the module is uploaded.
 
 If the module is uploaded correctly a success message appears and the uploaded module is in the list of modules.
