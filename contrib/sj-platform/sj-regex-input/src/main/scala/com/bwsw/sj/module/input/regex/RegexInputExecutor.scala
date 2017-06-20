@@ -26,7 +26,7 @@ import com.bwsw.sj.common.utils.stream_distributor.{ByHash, StreamDistributor}
 import com.bwsw.sj.common.utils.{AvroRecordUtils, StreamLiterals}
 import com.bwsw.sj.engine.core.entities.InputEnvelope
 import com.bwsw.sj.engine.core.environment.InputEnvironmentManager
-import com.bwsw.sj.engine.core.input.utils.SeparateTokenizer
+import com.bwsw.sj.engine.core.input.utils.SplittingTokenizer
 import com.bwsw.sj.engine.core.input.{InputStreamingExecutor, Interval}
 import io.netty.buffer.ByteBuf
 import org.apache.avro.SchemaBuilder.FieldAssembler
@@ -58,7 +58,7 @@ class RegexInputExecutor(manager: InputEnvironmentManager) extends InputStreamin
   private val fallbackPartitionCount = getPartitionCount(manager.outputs.find(_.name == regexInputOptions.fallbackStream).get)
   private val fallbackDistributor = new StreamDistributor(fallbackPartitionCount)
 
-  private val tokenizer = new SeparateTokenizer(regexInputOptions.lineSeparator, regexInputOptions.encoding)
+  private val tokenizer = new SplittingTokenizer(regexInputOptions.lineSeparator, regexInputOptions.encoding)
 
   private val policyHandler: String => Option[InputEnvelope[Record]] = regexInputOptions.policy match {
     case RegexInputOptionsNames.checkEveryPolicy => handleDataWithCheckEveryPolicy

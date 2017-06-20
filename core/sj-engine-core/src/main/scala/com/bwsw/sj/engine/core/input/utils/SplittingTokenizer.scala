@@ -25,14 +25,14 @@ import io.netty.util.ByteProcessor
 import scala.io.Source
 
 /**
-  * Tokenize buffer by separator.
+  * Splits buffer by separator.
   * It collects bytes while the separator doesn't appear.
   *
   * @param separator a byte separator
   * @param encoding  encoding type of message data
   * @author Pavel Tomskikh
   */
-class SeparateTokenizer(separator: String, encoding: String) {
+class SplittingTokenizer(separator: String, encoding: String) {
 
   private val byteProcessor = new ByteProcessor {
     private var bytes: Array[Byte] = Array.empty
