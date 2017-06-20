@@ -45,24 +45,26 @@ import scala.collection.mutable
   * val requestsAfterFirstCheckpoint = simulator.process()
   * println(requestsAfterFirstCheckpoint)
   * }}}
-  * The [[OutputEngineSimulator]] automatically updates a [[wasFirstCheckpoint]] if [[executor]] invokes a
+  * The [[OutputEngineSimulator]] automatically updates a wasFirstCheckpoint if [[executor]] invokes a
   * [[manager.initiateCheckpoint()]].
   *
   * @param executor             class under test [[OutputStreamingExecutor]]
   * @param outputRequestBuilder builder of requests for output service
   * @param manager              environment manager that used by executor
-  * @param wasFirstCheckpoint   indicates that first checkpoint was performed
   * @tparam IT type of incoming data
   * @tparam OT type of requests for output service
   * @author Pavel Tomskikh
   */
 class OutputEngineSimulator[IT <: AnyRef, OT](executor: OutputStreamingExecutor[IT],
                                               outputRequestBuilder: OutputRequestBuilder[OT],
-                                              manager: OutputEnvironmentManager,
-                                              var wasFirstCheckpoint: Boolean = false) {
+                                              manager: OutputEnvironmentManager) {
 
   import OutputEngineSimulator.defaultConsumerName
 
+  /**
+    * Indicates that first checkpoint was performed
+    */
+  var wasFirstCheckpoint: Boolean = false
   private val inputEnvelopes: mutable.Buffer[TStreamEnvelope[IT]] = mutable.Buffer.empty
   private var transactionId: Long = 0
 
