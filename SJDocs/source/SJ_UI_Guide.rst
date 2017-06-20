@@ -283,7 +283,7 @@ The range of available services is determined by a selected stream type.
 
 This field indicates if a stream should be removed and re-created by force (if it exists). Set it «True» or «False». It is set as «False» by default.
 
-This field is a available one for such stream types as *stream.t-stream*, *stream.kafka*, *jdbc-output*. The field is optional.
+This field is available for such stream types as *stream.t-stream*, *stream.kafka*, *jdbc-output*. The field is optional.
 
 7. *Tags*
 
