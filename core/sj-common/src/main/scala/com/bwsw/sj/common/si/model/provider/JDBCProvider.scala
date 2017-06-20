@@ -87,7 +87,7 @@ class JDBCProvider(name: String,
           Try(settingsUtils.getJdbcDriverPrefix(x)) match {
             case Success(prefix) =>
               if (!JdbcLiterals.validPrefixes.contains(prefix))
-                errors += createMessage("entity.error.jdbc.prefix.incorrect", prefix, prefixSettingName)
+                errors += createMessage("entity.error.jdbc.incorrect.prefix", prefix, prefixSettingName)
             case Failure(_: NoSuchFieldException) =>
               errors += createMessage("entity.error.config.required", prefixSettingName)
             case Failure(e) => throw e

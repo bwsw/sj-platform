@@ -74,9 +74,7 @@ class SjStream(val streamType: String,
       case Some("") | None =>
         errors += createMessage("entity.error.attribute.required", "Name")
       case Some(x) =>
-        if (!validateName(x)) {
-          errors += createMessage("entity.error.incorrect.name", "Stream", x, "stream")
-        }
+        errors ++= validateStreamName(name)
 
         val streamObj = streamDAO.get(x)
         if (streamObj.isDefined) {
@@ -92,6 +90,16 @@ class SjStream(val streamType: String,
         if (!StreamLiterals.types.contains(t)) {
           errors += createMessage("entity.error.unknown.type.must.one.of", t, "stream", StreamLiterals.types.mkString("[", ", ", "]"))
         }
+    }
+
+    errors
+  }
+
+  protected def validateStreamName(name: String): ArrayBuffer[String] = {
+    val errors = new ArrayBuffer[String]()
+
+    if (!validateName(name)) {
+      errors += createMessage("entity.error.incorrect.name", "Stream", name, "stream")
     }
 
     errors

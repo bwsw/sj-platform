@@ -59,11 +59,6 @@ class JDBCService(name: String,
     // 'provider' field
     errors ++= validateProvider()
 
-    // 'name' field
-    val charSequence: CharSequence = "-"
-    if (Option(this.name).isDefined && this.name.contains(charSequence))
-      errors += createMessage("jdbc.error.service.name.contains", "-")
-
     // 'database' field
     Option(this.database) match {
       case None =>
@@ -90,7 +85,7 @@ class JDBCService(name: String,
           } match {
             case Success(_) =>
             case Failure(e: RuntimeException) =>
-              errors += createMessage("jdbc.error.cannot.create.client", e.getMessage)
+              errors += createMessage("error.cannot.create.client", e.getMessage)
             case Failure(e) =>
               e.printStackTrace()
           }
