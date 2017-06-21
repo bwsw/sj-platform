@@ -39,7 +39,6 @@ class InstanceSI(implicit injector: Injector) {
   private val connectionRepository = inject[ConnectionRepository]
   private val entityRepository: GenericMongoRepository[InstanceDomain] = connectionRepository.getInstanceRepository
   private val createInstance = inject[InstanceCreator]
-  private val tmpDirectory = "/tmp/"
 
   def create(instance: Instance, moduleMetadata: ModuleMetadata): CreationResult = {
     val instancePassedValidation = validateInstance(moduleMetadata.specification, moduleMetadata.filename, instance)
@@ -97,8 +96,8 @@ class InstanceSI(implicit injector: Injector) {
 
   private def validateInstance(specification: Specification, filename: String, instance: Instance): ValidationInfo = {
     val validatorClassName = specification.validatorClass
-    val clazz = inject[FileClassLoader].loadClass(validatorClassName, filename, tmpDirectory)
-    val validator = clazz.newInstance().asInstanceOf[StreamingValidator]
+    val classInstance = inject[FileClassLoader].getInstance(validatorClassName, filename)
+    val validator = classInstance.asInstanceOf[StreamingValidator]
     val optionsValidationInfo = validator.validate(instance)
     val instanceValidationInfo = validator.validate(instance.options)
 
