@@ -80,7 +80,10 @@ class TStreamStream(name: String,
       .setProperty(ConfigurationOptions.Coordination.endpoints, service.provider.getConcatenatedHosts())
       .setProperty(ConfigurationOptions.Coordination.path, service.prefix)
 
-    factory.getStorageClient()
+    val client = factory.getStorageClient()
+    factory.close()
+
+    client
   }
 
   override def validate(): ArrayBuffer[String] = {

@@ -34,12 +34,16 @@ class TStreamStreamDomain(override val name: String,
                           override val tags: Array[String] = Array())
   extends StreamDomain(name, description, service, force, tags, StreamLiterals.tstreamType) {
 
-  private val factory = new TStreamsFactory()
-  factory.setProperty(ConfigurationOptions.Coordination.path, this.service.prefix)
-    .setProperty(ConfigurationOptions.Coordination.endpoints, this.service.provider.getConcatenatedHosts())
-    .setProperty(ConfigurationOptions.Common.authenticationKey, this.service.token)
+  protected def createClient(): StorageClient = {
+    val factory = new TStreamsFactory()
+    factory.setProperty(ConfigurationOptions.Coordination.path, this.service.prefix)
+      .setProperty(ConfigurationOptions.Coordination.endpoints, this.service.provider.getConcatenatedHosts())
+      .setProperty(ConfigurationOptions.Common.authenticationKey, this.service.token)
+    val client = factory.getStorageClient()
+    factory.close()
 
-  protected def createClient(): StorageClient = factory.getStorageClient()
+    client
+  }
 
   override def create(): Unit = {
     val storageClient: StorageClient = createClient()

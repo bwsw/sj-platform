@@ -64,8 +64,8 @@ class InstanceSiTests extends FlatSpec with Matchers with BeforeAndAfterEach wit
     classOf[InstanceNotValid],
     classOf[OptionsNotValid],
     classOf[InstanceAndOptionsNotValid]).foreach { clazz =>
-    when(fileClassLoader.loadClass(argEq(clazz.getName), argEq(moduleFilename), anyString())(any[Injector]()))
-      .thenAnswer(_ => clazz)
+    when(fileClassLoader.getInstance(argEq(clazz.getName), argEq(moduleFilename))(any[Injector]()))
+      .thenAnswer(_ => clazz.newInstance())
   }
 
   val injector = new Module {
