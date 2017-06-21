@@ -77,8 +77,6 @@ class PreparedStatementMock(sql: String) extends PreparedStatement {
       super.equals(obj)
   }
 
-  case class SqlPart(part: String, var param: String)
-
 
   override def setObject(parameterIndex: Int, x: scala.Any, targetSqlType: Int): Unit = ???
 
@@ -256,3 +254,5 @@ class PreparedStatementMock(sql: String) extends PreparedStatement {
 
   override def isWrapperFor(iface: Class[_]): Boolean = ???
 }
+
+case class SqlPart(part: String, var param: String)
