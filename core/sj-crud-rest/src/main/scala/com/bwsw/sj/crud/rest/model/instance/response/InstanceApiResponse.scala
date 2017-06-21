@@ -21,7 +21,7 @@ package com.bwsw.sj.crud.rest.model.instance.response
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.dal.model.instance.FrameworkStage
 import com.bwsw.sj.common.si.model.instance._
-import com.bwsw.sj.common.utils.EngineLiterals
+import com.bwsw.sj.common.utils.{EngineLiterals, RestLiterals}
 import scaldi.Injectable.inject
 import scaldi.Injector
 
@@ -69,7 +69,7 @@ class InstanceApiResponseCreator(implicit injector: Injector) {
           inputInstance.environmentVariables,
           inputInstance.performanceReportingInterval,
           inputInstance.engine,
-          inputInstance.restAddress.getOrElse(""),
+          inputInstance.restAddress.getOrElse(RestLiterals.defaultRestAddress),
           inputInstance.outputs,
           inputInstance.checkpointMode,
           inputInstance.checkpointInterval,
@@ -103,7 +103,7 @@ class InstanceApiResponseCreator(implicit injector: Injector) {
           regularInstance.environmentVariables,
           regularInstance.performanceReportingInterval,
           regularInstance.engine,
-          regularInstance.restAddress.getOrElse(""),
+          regularInstance.restAddress.getOrElse(RestLiterals.defaultRestAddress),
           regularInstance.inputs,
           regularInstance.outputs,
           regularInstance.checkpointMode,
@@ -136,7 +136,7 @@ class InstanceApiResponseCreator(implicit injector: Injector) {
           batchInstance.environmentVariables,
           batchInstance.performanceReportingInterval,
           batchInstance.engine,
-          batchInstance.restAddress.getOrElse(""),
+          batchInstance.restAddress.getOrElse(RestLiterals.defaultRestAddress),
           batchInstance.inputs,
           batchInstance.window,
           batchInstance.slidingInterval,
@@ -169,7 +169,7 @@ class InstanceApiResponseCreator(implicit injector: Injector) {
           outputInstance.environmentVariables,
           outputInstance.performanceReportingInterval,
           outputInstance.engine,
-          outputInstance.restAddress.getOrElse(""),
+          outputInstance.restAddress.getOrElse(RestLiterals.defaultRestAddress),
           outputInstance.checkpointMode,
           outputInstance.checkpointInterval,
           outputInstance.executionPlan,

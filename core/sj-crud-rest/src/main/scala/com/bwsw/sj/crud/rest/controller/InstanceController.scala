@@ -28,9 +28,9 @@ import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.rest._
 import com.bwsw.sj.common.si._
 import com.bwsw.sj.common.si.model.instance.Instance
-import com.bwsw.sj.common.si.model.module.{ModuleMetadataCreator, ModuleMetadata, Specification}
+import com.bwsw.sj.common.si.model.module.{ModuleMetadata, ModuleMetadataCreator, Specification}
 import com.bwsw.sj.common.si.result._
-import com.bwsw.sj.common.utils.{CommonAppConfigNames, EngineLiterals, MessageResourceUtils}
+import com.bwsw.sj.common.utils.{CommonAppConfigNames, EngineLiterals, MessageResourceUtils, RestLiterals}
 import com.bwsw.sj.crud.rest.exceptions.ConfigSettingNotFound
 import com.bwsw.sj.crud.rest.instance.validator.InstanceValidator
 import com.bwsw.sj.crud.rest.instance._
@@ -118,7 +118,7 @@ class InstanceController(implicit injector: Injector) {
         instance.moduleVersion,
         instance.description,
         instance.status,
-        instance.restAddress.getOrElse(""))
+        instance.restAddress.getOrElse(RestLiterals.defaultRestAddress))
     }
 
     OkRestResponse(ShortInstancesResponseEntity(instances))
@@ -192,7 +192,7 @@ class InstanceController(implicit injector: Injector) {
       var response: RestResponse = UnprocessableEntityRestResponse(MessageResponseEntity(
         getMessage("rest.modules.instances.instance.cannot.get.tasks")))
 
-      if (instance.restAddress.isDefined) {
+      if (instance.restAddress.isDefined && instance.restAddress.get != RestLiterals.defaultRestAddress) {
         val client = inject[HttpClientBuilder].apply(3000)
         val url = new URI(instance.restAddress.get)
         val httpGet = new HttpGet(url.toString)

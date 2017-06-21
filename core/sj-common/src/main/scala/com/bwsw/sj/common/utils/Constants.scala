@@ -175,6 +175,7 @@ object RestLiterals {
   )
 
   final val defaultDescription = "No description"
+  final val defaultRestAddress = ""
 }
 
 object JdbcLiterals {
