@@ -377,6 +377,8 @@ Currently the following **engine** **types** are supported in the platform:
          - ElasticSearch Output Engine - allows creating output endpoint and place processing results 		to Elasticsearch index.   
 	 - JDBC Output Engine  - allows creating output endpoint and place processing results to 			MySQL, PostgreSQL, Oracle tables.
 
+Engines should be uploaded as a .jar file under the `Custom files`_ section in the "Custom Jars" tab.
+
 After an engine is uploaded and a corresponding config settings file appears in the «Config Settings» section, a module can be uploaded.
 
 .. note:: Read more about necessary configuration settings in the `Configuration Settings`_ section below.
@@ -558,3 +560,39 @@ For each uploaded custom jar new config setting is added in the following format
 
 Custom Files
 ------------
+A «Custom Files» section is a section where a user can upload custom .jar files and other files that can be necessary for correct module performance.
+
+Here you can find two tabs: **Custom** **Jars** and **Custom** **files**. Below you will find more information for each of these tabs.
+
+
+Custom Jars
+~~~~~~~~~~~
+
+Under the «Custom Jars» tab the engine .jar files can be uploaded that are necessary for module performance. Click the "Upload Jar" button and select the .jar file to upload from your computer. Click "Open" in the modal window and wait for a few seconds before the .jar is uploaded. If it is uploaded successfully a success message appears above the file list and the uploaded .jar is added to the list of jars.
+
+The following actions can be performed with the files in the list:
+
+1. **View** a jar name, version and size
+
+2. **Download** a jar file to your computer by clicking at the download icon in the Action block near the name of the jar you want to download. You need only to specify a folder where to store the jar to and click the «Save» button.
+
+3. **Delete** a jar clicking at the corresponding icon in the Action block near the name of the jar you want to delete
+
+The list of jars can be filtered by its name using the search tool above the list.
+
+
+
+Custom Files
+~~~~~~~~~~~
+
+Under the «Custom files» tab any other files that are necessary for module/engine performance can be uploaded. Click the "Upload file" button and select the file to upload from your computer. Click "Open" in the modal window and wait for a few seconds before the file is uploaded. If it is uploaded successfully a success message appears above the file list and the uploaded file is added to the list of files.
+
+The following actions can be performed with the files in the list:
+
+1. **View** a file name, description, upload date and size
+
+2. **Download** a file to your computer by clicking at the download icon in the Action block near the name of the file you want to download. You need only to specify a folder where to store the file to and click the «Save» button.
+
+3. **Delete** a file clicking at the corresponding icon in the Action block near the name of the file you want to delete
+
+The list of files can be filtered by its name using the search tool above the list.
