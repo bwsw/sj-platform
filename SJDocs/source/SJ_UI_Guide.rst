@@ -33,7 +33,7 @@ For beginning go to the http://stream-juggler.z1.netpoint-dc.com:18080 and enter
 
 Now you are ready to work with the system. 
 
-The platform allows to upload your custom module for data stream processing with preload engines and configuration settings. 
+The platform allows to upload your custom module for data stream processing with prerequisite engines and configuration settings. 
 
 For correct perofrmance a module requires creating a stream/streams with its service(-s) and service providers.
 
@@ -43,11 +43,9 @@ The diagram below may help you to understand the dependency of instances in the 
 
 For example, if you want to create a regular module that will process Kafka input data streams you have to create a Kafka service with a Kafka and a ZooKeeper providers for it.
 
-A module can not process data streams without uploading an engine (that is a .jar file) and required configuration settings. More information about these settings can be found in the `Configuration Settings`_ and the `Custom Files`_ sections of this document.
+A module can not process data streams without uploading an engine (that is a .jar file) that launches the module and required configuration settings. More information about these settings can be found in the `Configuration Settings`_ and the `Custom Files`_ sections of this document.
 
-Each module operates its instance(s). An instance is a full range of settings to perfom an exact executor type.
-
-
+An executor of the module utilises an instance, i.e. a full range of settings for an exect handler/executor.
 
 Providers 
 ---------
