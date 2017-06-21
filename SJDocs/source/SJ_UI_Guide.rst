@@ -448,7 +448,7 @@ Please, review the tables with general and specific fields description below.
   "Default Eviction Policy", "Can be 'LRU' (Least Recently Used) or 'LFU' (Least Frequently Used) or 'NONE' (NONE by default)",  "LRU"
   "Eviction Policy", "An eviction policy of input envelope duplicates. Can be 'fix-time' for storing an envelope key for the period specified in Lookup History, or 'expanded-time' meaning that if a duplicate envelope appears the time of the presence of the key will be updated ('fix-time' by default).", "fix-time" 
   "Backup Count", "The number of backup copies you want to have (0 by default, maximum 6). Sync backup operations have a blocking cost which may lead to latency issues. You can skip this field if you do not want your entries to be backed up, e.g. if performance is more important than backing up.", 2 
-  "Async-Backup-Count", "Flag points if an envelope (an envelope key) has to be checked for duplication or not (0 by default). The backup operations are performed at some point in time (non-blocking operation). You can skip this field if you do not want your entries to be backed up, e.g. if performance is more important than backing up.", 3 
+  "Async-Backup-Count", "The flag points if an envelope (an envelope key) has to be checked for duplication or not (0 by default). The backup operations are performed at some point in time (non-blocking operation). You can skip this field if you do not want your entries to be backed up, e.g. if performance is more important than backing up.", 3 
 
 .. csv-table:: **Regular-streaming instance fields**
   :header: "Field name","Description", "Example"
@@ -487,7 +487,7 @@ Please, review the tables with general and specific fields description below.
   "Start From", "Value must be 'newest' (the system reads nothing, waits for new events), 'oldest' (the system reads all input stream events) or datetime (that requires specifying a timestamp and means the system reads events from the stream starting from the specified moment). If an instance have kafka input streams, then 'Start from' must be 'oldest' or 'newest' ('newest' is default). If instance have kafka input streams, then the value here can be 'oldest' or 'newest' (newest is default)", "newest"
   "State Management", "Must be 'ram' or 'none' ('none' is default)","ram" 
   "State Full Checkpoint", "Interval for full checkpoint (100 is default)", 5 
-  "Event-Wait-Time", "Idle timeout, when not messages (1000 by default)", 10000 
+  "Event-Wait-Time", "Idle timeout, when there are no messages (1000 by default)", 10000 
 ..  "InputAvroSchema", "Avro schema for input objects. Requires if input object is instance of 'org.apache.avro.generic.GenericRecord':https://avro.apache.org/docs/1.8.1/api/java/org/apache/avro/generic/GenericRecord.html@.", "{'type':'record', 'name':'rec', 'fields':[{'name':'f1','type':string'}]}"
   .. note:: Required fields are marked with an asterisk (*)
 Click «Create» at the bottom and see the instance is in the list of instances now. Details of the node are displayed to the right when clicking the instance in the list. 
