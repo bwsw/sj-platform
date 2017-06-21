@@ -411,7 +411,7 @@ Before creating an instance make sure all necessary *configuration* *settings* a
 
 Under the «Instances» section of the main navigation menu there is a list of instances.  In the upper-right corner click the «Create Instance» button and choose the module from the dropdown. This is the module an instance will be created for. 
 
-.. figure:: _state/CreateInstance_Type.png
+.. figure:: _static/CreateInstance_Type.png
 
 The type of module will determine the type of instance that will be created: input-streaming, regular streaming, batch-streaming or output-streaming. 
 
