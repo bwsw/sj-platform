@@ -440,7 +440,7 @@ Please, review the tables with general and specific fields description below.
   :widths: 25, 60, 25
 
   "Checkpoint Mode*", "Value must be 'time-interval' for checkpointing after a set period of time, or 'every-nth' for performing a checkpoint after a set number of events", "every-nth"
-  "Checkpoint Interval*", "Interval for performing the checkpoint", "100"
+  "Checkpoint Interval*", "Interval for performing the checkpoint. If Checkpoint Mode is  'time-interval' the value is set in ms.  If Checkpoint Mode is 'every-nth' the value is the number of events after which the checkpoint is done.", "100"
   "Outputs*", "Names of output streams (must be stream.t-stream only)",  "'s3', 's4'" 
   "Duplicate Check", "Flag points if an envelope (an envelope key) has to be checked for duplication or not. (False by default)", "true"
   "Lookup History*", "How long a unique key of envelope can stay in a queue for checking envelopes for duplication (in seconds). If it does not equal to 0, entries that are older than this time and not updated for this time are evicted automatically accordingly to an eviction-policy. Valid values are integers between 0 and Integer.MAX VALUE. Default value is 0, which means infinite.", "1000"
@@ -455,10 +455,10 @@ Please, review the tables with general and specific fields description below.
   :widths: 25, 60, 25
 
   "Checkpoint Mode*", "Value must be 'time-interval' for checkpointing after a set period of time, or 'every-nth' for performing a checkpoint after a set number of events", "every-nth"
-  "Checkpoint Interval*", "Interval for performing the checkpoint", "100"
+  "Checkpoint Interval*", "Interval for performing the checkpoint. If Checkpoint Mode is  'time-interval' the value is set in ms.  If Checkpoint Mode is 'every-nth' the value is the number of events after which the checkpoint is done.", "100"
   "Inputs*", "Names of input streams. Requires input mode: 'full' or 'split' ('split' is default). The stream must exist in database (must be stream.t-stream or stream.kafka)",  "str1/full" 
   "Outputs*", "Names of output streams (must be stream.t-stream only)",  "s3" 
-  "Start From", "Value must be 'newest', 'oldest' or 'datetime'. If an instance have kafka input streams, then 'Start from' must be 'oldest' or 'newest' ('newest' is default)", "newest" 
+  "Start From", "Value must be 'newest' (the system reads nothing, waits for new events), 'oldest' (the system reads all input stream events) or datetime (that requires specifying a timestamp and means the system reads events from the stream starting from the specified moment). If an instance have kafka input streams, then 'Start from' must be 'oldest' or 'newest' ('newest' is default). If an instance have kafka input streams, then 'Start from' must be 'oldest' or 'newest' ('newest' is default)", "newest" 
   "State Management", "Must be 'ram' or 'none' ('none' is default)", "ram"
   "State Full Checkpoint", "Interval for full checkpoint (100 by default)", 5 
   "Event-Wait-Idle Time", "Idle timeout, when not messages (1000 is default)", 10000 
@@ -466,13 +466,14 @@ Please, review the tables with general and specific fields description below.
 
 
 .. csv-table:: **Output-streaming instance fields**
-
-  "Checkpoint Mode*", "Value must be 'time-interval' for checkpointing after a set period of time, or 'every-nth' for performing a checkpoint after a set number of events", "every-nth"
-  "Checkpoint Interval*", "Interval for performing the checkpoint", "100"
-  "Inputs*", "Names of input stream. Must be only 't-stream' type. Stream for this type of module is 'split' only. 
- Stream must exist in database.",  "str1" 
+  :header: "Field name","Description", "Example"
+  :widths: 25, 60, 25
+  
+  "Checkpoint Mode*", "Value must be 'time-interval' for checkpointing after a set period of time, or 'every-nth' for performing a checkpoint after a set number of events. For output streams 'every-nth' is only available.", "every-nth"
+  "Checkpoint Interval*", "Interval for performing the checkpoint. If Checkpoint Mode is  'time-interval' the value is set in ms.  If Checkpoint Mode is 'every-nth' the value is the number of events after which the checkpoint is done.", "100"
+  "Inputs*", "Names of input stream. Must be only 't-stream' type. Stream for this type of module is 'split' only. Stream must exist in database.",  "str1" 
   "Outputs*", "Names of output stream (must be elasticsearch-output, jdbc-ouptut or rest-output)",  "s3" 
-  "Start From", "Value must be 'newest', 'oldest' or 'datetime'.", "newest" 
+  "Start From", "Value must be 'newest' (the system reads nothing, waits for new events), 'oldest' (the system reads all input stream events) or datetime (that requires specifying a timestamp and means the system reads events from the stream starting from the specified moment).", "newest" 
 ..  "InputAvroSchema", "Avro schema for input objects. Requires if input object is instance of 'org.apache.avro.generic.GenericRecord':https://avro.apache.org/docs/1.8.1/api/java/org/apache/avro/generic/GenericRecord.html@.", "{'type':'record', 'name':'rec', 'fields':[{'name':'f1','type':string'}]}"
 
 .. csv-table:: **Batch-streaming instance fields**
@@ -483,7 +484,7 @@ Please, review the tables with general and specific fields description below.
   "Window", "Number of batches that will be contained in a window (1 by default). Must be greater than zero.", 3
   "Sliding Interval", The interval at which a window will be shifted (сount of batches that will be removed from the window after its processing). Must be greater than zero and less than or equal to the window (1 by default)", 3 
   "Inputs*", "Names of input streams.Requires input mode: 'full' or 'split' ('split' is default). The stream must exist in database (must be stream.t-stream or stream.kafka)",  "str1/full" 
-  "Start From", "Value must be 'newest', 'oldest' or datetime. If instance have kafka input streams, then the value here can be 'oldest' or 'newest' (newest is default)", "newest"
+  "Start From", "Value must be 'newest' (the system reads nothing, waits for new events), 'oldest' (the system reads all input stream events) or datetime (that requires specifying a timestamp and means the system reads events from the stream starting from the specified moment). If an instance have kafka input streams, then 'Start from' must be 'oldest' or 'newest' ('newest' is default). If instance have kafka input streams, then the value here can be 'oldest' or 'newest' (newest is default)", "newest"
   "State Management", "Must be 'ram' or 'none' ('none' is default)","ram" 
   "State Full Checkpoint", "Interval for full checkpoint (100 is default)", 5 
   "Event-Wait-Time", "Idle timeout, when not messages (1000 by default)", 10000 
@@ -495,7 +496,7 @@ Click «Create» at the bottom and see the instance is in the list of instances 
 
 In the list of instances the following actions can be performed:
 
-1. **View** an instance`s name and status — Starting, strated, failed, stopping, stopped, deleting, deleted.
+1. **View** an instance`s name and status — ready, starting, strated, failed, stopping, stopped, deleting, deleted.
 2. **Start** an instance by clicking the «Start» button in the Actions section. The instance status will first change to «Strating» and in a few seconds to «Started». That means the instance is launched and is working now.
 3. **Stop** the instance that has been started i.e. has the «Started» status. Clkick at the «Stop» button and wait for a while till the status changes to «Stopping» and then to «Stopped».
 4. **Delete** a stream clicking at the corresponding icon in the Action block near the name of the stream you want to delete.
