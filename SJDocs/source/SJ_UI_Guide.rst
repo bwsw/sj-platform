@@ -15,18 +15,9 @@ Juggler uses Apache Messos, Kafka and T-streams to construct scalable and flexib
 Overview
 --------
 
-Juggler's architecture is designed so that exactly-once processing is performed not only within a single processing block but throughout the entire sequence, starting from the moment stream events are fed the system and up to the moment when the output data is stored to conventional data storage.
+Juggler's architecture is designed so that exactly-once processing is performed not only within a single processing block but throughout the entire sequence, starting from the moment stream events are fed to the system and up to the moment when the output data is stored to conventional data storage.
 
 The approach based on loosely coupled blocks with exactly-once processing support throughout the entire sequence allows for decomposing data processing in order to provide better modularity, performance management and simplicity in development.
-Juggler supports four models of feeding events for processing:
-
-- no delay; this model dictates that the events be processed immediately after becoming available in the streams; 
-
-- in a time slot where events are grouped into blocks, each a certain amount of seconds long; processing is scheduled based on overlapping or non-overlapping sliding time slots; 
-
-- in a length-based slot where events are grouped into blocks, each a certain number of transactions long; processing is scheduled based on overlapping or non-overlapping sliding time slots;
- 
-- in a real-time slot where events are grouped into blocks, each including transactions in a certain time interval; processing is scheduled based on overlapping or non-overlapping sliding time slots; 
 
 Juggler easily integrates with in-memory grid systems, for example, Hazelcast, Apache Ignite.
 
@@ -34,16 +25,29 @@ The systems is available under Apache License v2.
 
 Get Started
 -----------
+ .. warning:: 
+        *The section is under development!*
+
 Juggler has a user-friendly UI to create a processing sequence of arbitrary complexity, watch it in action and manage it using pre-created modules with flexible functionality. 
-For beginning go to the http://stream-juggler.z1.netpoint-dc.com:18080 and perform a registration process:
-
-#. 
-
-#. 
-
-#. 
+For beginning go to the http://stream-juggler.z1.netpoint-dc.com:18080 and enter the platform using your login and password.
 
 Now you are ready to work with the system. 
+
+The platform allows to upload your custom module for data stream processing with preload engines and configuration settings. 
+
+For correct perofrmance a module requires creating a stream/streams with its service(-s) and service providers.
+
+The diagram below may help you to understand the dependency of instances in the platform.
+
+.. figure:: _static/СвязиCущностей.png
+
+For example, if you want to create a regular module that will process Kafka input data streams you have to create a Kafka service with a Kafka and a ZooKeeper providers for it.
+
+A module can not process data streams without uploading an engine (that is a .jar file) and required configuration settings. More information about these settings can be found in the `Configuration Settings`_ and the `Custom Files`_ sections of this document.
+
+Each module operates its instance(s). An instance is a full range of settings to perfom an exact executor type.
+
+
 
 Providers 
 ---------
@@ -510,8 +514,6 @@ The list of instances can be filtered by its type and/or a name using the search
 
 Configuration Settings
 ----------------------
-
- .. warning:: *The section is under development!*
  
 Here the basic settings necessary for the platform are described.
  
@@ -557,9 +559,11 @@ To see the properties list click this link for producer: http://t-streams.com/do
 
 For each uploaded custom jar new config setting is added in the following format: 
                                           key = {custom-jar-name}-{version}, value = {file-name}
+.. _Custom Files:
 
 Custom Files
-------------
+-------------
+
 A «Custom Files» section is a section where a user can upload custom .jar files and other files that can be necessary for correct module performance.
 
 Here you can find two tabs: **Custom** **Jars** and **Custom** **files**. Below you will find more information for each of these tabs.
@@ -583,7 +587,7 @@ The list of jars can be filtered by its name using the search tool above the lis
 
 
 Custom Files
-~~~~~~~~~~~
+~~~~~~~~~~~~
 
 Under the «Custom files» tab any other files that are necessary for module/engine performance can be uploaded. Click the "Upload file" button and select the file to upload from your computer. Click "Open" in the modal window and wait for a few seconds before the file is uploaded. If it is uploaded successfully a success message appears above the file list and the uploaded file is added to the list of files.
 
