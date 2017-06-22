@@ -40,7 +40,7 @@ import scala.collection.mutable
   * val requestsBeforeFirstCheckpoint = simulator.process()
   * println(requestsBeforeFirstCheckpoint)
   *
-  * simulator.wasFirstCheckpoint = true // first checkpoint was performed
+  * simulator.beforeFirstCheckpoint = false // first checkpoint was performed
   * simulator.prepare(Seq((4, "d"), (5, "e")))
   * val requestsAfterFirstCheckpoint = simulator.process()
   * println(requestsAfterFirstCheckpoint)
@@ -62,9 +62,9 @@ class OutputEngineSimulator[IT <: AnyRef, OT](executor: OutputStreamingExecutor[
   import OutputEngineSimulator.defaultConsumerName
 
   /**
-    * Indicates that first checkpoint was performed
+    * Indicates that first checkpoint was not performed
     */
-  var beforeFirstCheckpoint: Boolean = false
+  var beforeFirstCheckpoint: Boolean = true
   private val inputEnvelopes: mutable.Buffer[TStreamEnvelope[IT]] = mutable.Buffer.empty
   private var transactionId: Long = 0
 
@@ -96,14 +96,14 @@ class OutputEngineSimulator[IT <: AnyRef, OT](executor: OutputStreamingExecutor[
     val requests = inputEnvelopes.flatMap { inputEnvelope =>
       val outputEnvelopes = executor.onMessage(inputEnvelope)
       val deletionRequest = {
-        if (beforeFirstCheckpoint) Seq.empty
-        else {
+        if (beforeFirstCheckpoint) {
           if (manager.isCheckpointInitiated) {
-            beforeFirstCheckpoint = true
+            beforeFirstCheckpoint = false
             manager.isCheckpointInitiated = false
           }
           Seq(outputRequestBuilder.buildDelete(inputEnvelope))
         }
+        else Seq.empty
       }
 
       deletionRequest ++ outputEnvelopes.map(outputRequestBuilder.buildInsert(_, inputEnvelope))
