@@ -88,8 +88,8 @@ export class InstancesService extends BaseService<InstanceModel> {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
-    return this.http.delete(this.requestUrl + '/' + instance.module.moduleType + '/' + instance.module.moduleName + '/' +
-    instance.module.moduleVersion + '/instance' + '/' + instance.name, options)
+    return this.http.delete(this.requestUrl + '/' + instance.moduleType + '/' + instance.moduleName + '/' +
+    instance.moduleVersion + '/instance' + '/' + instance.name, options)
       .map(response => {
         const data = this.extractData(response);
         return data;
@@ -101,8 +101,8 @@ export class InstancesService extends BaseService<InstanceModel> {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
-    return this.http.get(this.requestUrl + '/' + instance.module.moduleType + '/' + instance.module.moduleName + '/' +
-      instance.module.moduleVersion + '/instance' + '/' + instance.name + '/start', options)
+    return this.http.get(this.requestUrl + '/' + instance.moduleType + '/' + instance.moduleName + '/' +
+      instance.moduleVersion + '/instance' + '/' + instance.name + '/start', options)
       .map(response => {
         const data = this.extractData(response);
         return data;
@@ -114,8 +114,8 @@ export class InstancesService extends BaseService<InstanceModel> {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
-    return this.http.get(this.requestUrl + '/' + instance.module.moduleType + '/' + instance.module.moduleName + '/' +
-      instance.module.moduleVersion + '/instance' + '/' + instance.name + '/stop', options)
+    return this.http.get(this.requestUrl + '/' + instance.moduleType + '/' + instance.moduleName + '/' +
+      instance.moduleVersion + '/instance' + '/' + instance.name + '/stop', options)
       .map(response => {
         const data = this.extractData(response);
         return data;
