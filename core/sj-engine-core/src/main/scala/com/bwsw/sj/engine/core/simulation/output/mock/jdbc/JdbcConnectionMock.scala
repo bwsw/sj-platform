@@ -1,11 +1,11 @@
-package com.bwsw.sj.engine.core.simulation.mock.jdbc
+package com.bwsw.sj.engine.core.simulation.output.mock.jdbc
 
 import java.sql.{Blob, CallableStatement, Clob, Connection, DatabaseMetaData, NClob, PreparedStatement, SQLWarning, SQLXML, Savepoint, Statement, Struct}
 import java.util.Properties
 import java.util.concurrent.Executor
 import java.{sql, util}
 
-import com.bwsw.sj.engine.core.simulation.JdbcRequestBuilder
+import com.bwsw.sj.engine.core.simulation.output.JdbcRequestBuilder
 
 /**
   * Mock of [[Connection]] for [[JdbcRequestBuilder]]

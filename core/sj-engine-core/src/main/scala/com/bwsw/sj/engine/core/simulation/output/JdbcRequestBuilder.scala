@@ -16,14 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.sj.engine.core.simulation
+package com.bwsw.sj.engine.core.simulation.output
 
 import java.sql.PreparedStatement
 
 import com.bwsw.sj.engine.core.entities.{OutputEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.output.Entity
 import com.bwsw.sj.engine.core.output.types.jdbc.JdbcCommandBuilder
-import com.bwsw.sj.engine.core.simulation.mock.jdbc.{JdbcClientMock, PreparedStatementMock}
+import com.bwsw.sj.engine.core.simulation.output.mock.jdbc.{JdbcClientMock, PreparedStatementMock}
 
 /**
   * Provides method for building SQL query from [[OutputEnvelope]].
