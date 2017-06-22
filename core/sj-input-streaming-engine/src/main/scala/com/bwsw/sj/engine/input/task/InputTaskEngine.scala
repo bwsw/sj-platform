@@ -29,6 +29,7 @@ import com.bwsw.sj.engine.core.entities.InputEnvelope
 import com.bwsw.sj.engine.core.environment.InputEnvironmentManager
 import com.bwsw.sj.engine.core.input.{InputStreamingExecutor, Interval}
 import com.bwsw.sj.engine.input.eviction_policy.InputInstanceEvictionPolicy
+import com.bwsw.sj.engine.input.eviction_policy.hazelcast.{Hazelcast, HazelcastParameters}
 import com.bwsw.sj.engine.input.task.reporting.InputStreamingPerformanceMetrics
 import com.bwsw.tstreams.agents.producer.{NewProducerTransactionPolicy, ProducerTransaction}
 import io.netty.buffer.ByteBuf
@@ -63,7 +64,9 @@ abstract class InputTaskEngine(manager: InputTaskManager,
   private val instance = manager.instance.asInstanceOf[InputInstance]
   private val environmentManager = createModuleEnvironmentManager()
   private val executor: InputStreamingExecutor[AnyRef] = manager.getExecutor(environmentManager)
-  private val evictionPolicy = InputInstanceEvictionPolicy(instance)
+  private val hazelcastMapName: String = instance.name + "-" + "inputEngine"
+  val hazelcast = new Hazelcast(hazelcastMapName, HazelcastParameters(instance))
+  private val evictionPolicy = InputInstanceEvictionPolicy(instance, hazelcast)
   protected val checkpointInterval: Long = instance.checkpointInterval
 
   /**
