@@ -28,8 +28,8 @@ import scala.io.Source
   * Splits buffer by separator.
   * It collects bytes while the separator doesn't appear.
   *
-  * @param separator a byte separator
-  * @param encoding  encoding type of message data
+  * @param separator the string used as a delimiter
+  * @param encoding  name of encoding
   * @author Pavel Tomskikh
   */
 class SplittingTokenizer(separator: String, encoding: String) {
@@ -44,6 +44,12 @@ class SplittingTokenizer(separator: String, encoding: String) {
     }
   }
 
+  /**
+    * Splits buffer by separator
+    *
+    * @param buffer buffer of bytes
+    * @return corresponding [[Interval]] if separator is found or None otherwise
+    */
   def tokenize(buffer: ByteBuf): Option[Interval] = {
     val startIndex = buffer.readerIndex()
     val endIndex = buffer.forEachByte(byteProcessor)
