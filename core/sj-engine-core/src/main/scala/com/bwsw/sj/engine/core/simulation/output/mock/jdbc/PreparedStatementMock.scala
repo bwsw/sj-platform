@@ -16,14 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.sj.engine.core.simulation.mock.jdbc
+package com.bwsw.sj.engine.core.simulation.output.mock.jdbc
 
 import java.io.{InputStream, Reader}
 import java.net.URL
 import java.sql.{Blob, Clob, Connection, Date, NClob, ParameterMetaData, PreparedStatement, Ref, ResultSet, ResultSetMetaData, RowId, SQLWarning, SQLXML, Time, Timestamp}
 import java.util.Calendar
 
-import com.bwsw.sj.engine.core.simulation.JdbcRequestBuilder
+import com.bwsw.sj.engine.core.simulation.output.JdbcRequestBuilder
 
 /**
   * Mock of [[PreparedStatement]] for [[JdbcRequestBuilder]]
