@@ -78,32 +78,28 @@ Please, press the «Create provider» button and fill in the form:
 The type of the provider is determined with the type of the instance you want to create and work with at the end.
 
 2. *Name* *
-
-Enter  a name of the provider here. It should be unique, must contain digits, lowercase letters or hyphens and start with a letter. 
+       Enter  a name of the provider here. It should be unique, must contain digits, lowercase letters or hyphens and start with a letter. 
 
 #. *Description* 
-
-Enter a description for the provider here.
+       Enter a description for the provider here.
 
 #. *Hosts* *
-
-Enter a provider host that determines a file locaction.
-
-Add more hosts clicking at the «Add Host» button and entering host names in the appeared lines.
+       Enter a provider host that determines a file locaction.
+       Add more hosts clicking at the «Add Host» button and entering host names in the appeared lines.
 
 #. *Login*
-
-Enter a provider login here if necessary
+       Enter a provider login here if necessary
 
 #. *Password*
-
-Enter a password for the provider if necessary.
+       Enter a password for the provider if necessary.
 
 .. note:: Required fields are marked with an asterisk (*)
 
 Click «Create» at the bottom and see the provider is in the list of providers now. Details of the node are displayed to the right when clicking the provider in the list. 
 
 .. figure:: _static/Providers_list.png
+
+Click "Cancel" to drop all the specified settings. The provider will not be created then.
 
 In the list of providers the following actions can be performed:
 
@@ -142,84 +138,74 @@ Select from the dropdown a type of the services:
 .. figure:: _static/CreateService_Type.png
 
 2. *Name* *
- 
-Enter a name of the services.  It must contain digits, lowercase letters or hyphens and start with a letter.
+       Enter a name of the services.  It must contain digits, lowercase letters or hyphens and start with a letter.
 
 3.  *Description*
-
-Provide a description for the services here if necessary.
+       Provide a description for the services here if necessary.
 
 4. *Provider* *
+       This field appears once the service type is chosen.
 
-This field appears once the service type is chosen.
-
-Select a provider for the services here. 
-
-The range of providers available in the dropdown is determined by the chosen services type.
+       Select a provider for the services here. 
+ 
+       The range of providers available in the dropdown is determined by the chosen services type.
 
 5. *Namespace* *
+        It is a required field for the ZKCoord services type.
 
-It is a required field for the ZKCoord services type.
-
-Please, specify a namespace here. It must contain digits, lowercase letters or underscore and start with a letter. 
+        Please, specify a namespace here. It must contain digits, lowercase letters or underscore and start with a letter. 
 
 6.  *Index* *
+        This field appears when the ESInd services type is selected and is required for filling in.
 
-This field appears when the ESInd services type is selected and is required for filling in.
-
-Please, specify an index of the services here. It must contain digits, lowercase letters or underscore and start with a letter. 
+        Please, specify an index of the services here. It must contain digits, lowercase letters or underscore and start with a letter. 
 
 7. *Login*
+        This field appears when the ESInd services type is selected and is not required for filling in.
 
-This field appears when the ESInd services type is selected and is not required for filling in.
-
-Please, specify a login of the services here. 
+        Please, specify a login of the services here. 
 
 8. *Password*
+       This field appears when the ESInd services type is selected and is not required for filling in.
 
-This field appears when the ESInd services type is selected and is not required for filling in.
-
-Please, specify a password of the services here. 
+       Please, specify a password of the services here. 
 
 9. *ZK provider* *
+       This field appears when the KfkQ services type is selected and is required for filling in.
 
-This field appears when the KfkQ services type is selected and is required for filling in.
-
-Please, select a zookeeper provider for the services here. 
+       Please, select a zookeeper provider for the services here. 
 
 10. *ZK namespace* *
+        This field appears when the KfkQ services type is selected and is required for filling in.
 
-This field appears when the KfkQ services type is selected and is required for filling in.
-
-Please, specify a zookeeper namespace for the services here. 
+        Please, specify a zookeeper namespace for the services here. 
 
 11. *Prefix* *
+        This field appears when the TstrQ services type is selected and is required for filling in.
 
-This field appears when the TstrQ services type is selected and is required for filling in.
+        Here a ZooKeeper path where metadata of transactions, streams are located should be specified.
 
-Here a ZooKeeper path where metadata of transactions, streams are located should be specified.
-
-Please, enter a prefix for the services here. 
+        Please, enter a prefix for the services here. 
 
 12. *Token* *
+        This field appears when the TstrQ services type is selected and is required for filling in.
 
-This field appears when the TstrQ services type is selected and is required for filling in.
+        A token is a unique key for getting access to the service. It must contain no more than 32 symbols.
 
-A token is a unique key for getting access to the service. It must contain no more than 32 symbols.
-
-Please, enter a token for the services here. 
+        Please, enter a token for the services here. 
 
 13. *Database* *name* *
+        This field appears when the JDBC services type is selected and is required for filling in.
 
-This field appears when the JDBC services type is selected and is required for filling in.
-
-Please, enter a database name for the services here. 
+        Please, enter a database name for the services here. 
 
 .. note:: Required fields are marked with an asterisk (*)
 
 Click «Create» at the bottom and see the servces are in the list of services now. Details of the node are displayed to the right when clicking the services in the list. 
 
 .. figure:: _static/ServicesList.png
+
+Click "Cancel" to drop all the specified settings. The service will not be created then.
 
 In the list of services the following actions can be performed:
 
@@ -264,58 +250,52 @@ Select from the dropdown a type of a stream:
 .. figure:: _static/CreateStream_Type.png
 
 2. *Name* *
-
-Enter a stream name here. It must contain lowercase letters, digits or hyphens only.
+        Enter a stream name here. It must contain lowercase letters, digits or hyphens only.
 
 3. *Description*
-
-Provide a description for the stream here if necessary.
+        Provide a description for the stream here if necessary.
 
 4. *Partitions* *
+        Partitions is a part of data stream. Partitions are a special conception which handle regular queues in multi-queues, e.g. a stream with one partition is a queue, but a stream with two partitions is like a two different queues. Using streams with many partitions allows to handle parallelism properly as engine instances divide existing partitions fairly.
 
-Partitions is a part of data stream. Partitions are a special conception which handle regular queues in multi-queues, e.g. a stream with one partition is a queue, but a stream with two partitions is like a two different queues. Using streams with many partitions allows to handle parallelism properly as engine instances divide existing partitions fairly.
+        Enter a number of partitions. It must be a positive integer.
 
-Enter a number of partitions. It must be a positive integer.
-
-This field is a required one for such stream types as *stream.t-stream*, *stream.kafka*, *jdbc-output* and *rest-output*.
+        This field is a required one for such stream types as *stream.t-stream*, *stream.kafka*, *jdbc-output* and *rest-output*.
 
 5. *Service* *
+        Select a service from the dropdown. 
 
-Select a service from the dropdown. 
-
-The range of available services is determined by a selected stream type.
+        The range of available services is determined by a selected stream type.
 
 6. *Force*
+        This field indicates if a stream should be removed and re-created by force (if it exists). Set it «True» or «False». It is set as «False» by default.
 
-This field indicates if a stream should be removed and re-created by force (if it exists). Set it «True» or «False». It is set as «False» by default.
-
-This field is available for such stream types as *stream.t-stream*, *stream.kafka*, *jdbc-output*. The field is optional.
+        This field is available for such stream types as *stream.t-stream*, *stream.kafka*, *jdbc-output*. The field is optional.
 
 7. *Tags*
+        Enter a tag\tags for the stream here.
 
-Enter a tag\tags for the stream here.
-
-This field is an available one for such stream types as *stream.t-stream*, *stream.kafka*, *jdbc-output*. The field is optional.
+        This field is an available one for such stream types as *stream.t-stream*, *stream.kafka*, *jdbc-output*. The field is optional.
 
 8. *Replication* *Factor* *
+       Replication factor is the number of zookeeper nodes to utilize.
 
-Replication factor is the number of zookeeper nodes to utilize.
+       Enter a replication factor here. It must be an integer.
 
-Enter a replication factor here. It must be an integer.
-
-This field is required for the *stream.kafka* stream type.
+       This field is required for the *stream.kafka* stream type.
 
 9. *Primary*
+       Enter a primary key here. It is a primary key field name used in sql database.
 
-Enter a primary key here. It is a primary key field name used in sql database.
-
-This field is available for *jdbc-output* stream type. The field is optional.
+       This field is available for *jdbc-output* stream type. The field is optional.
 
 .. note:: Required fields are marked with an asterisk (*)
 
 Click «Create» at the bottom and see the stream is in the list of streams now. Details of the node are displayed to the right when clicking the streams in the list. 
 
 .. figure:: _static/StreamsList.png
+
+Click "Cancel" to drop all the specified settings. The strem will not be created then.
 
 In the list of streams the following actions can be performed:
 
@@ -390,7 +370,6 @@ Click the «Upload Module» button and select a `.jar` file in the window to upl
 If the module is uploaded correctly a success message appears and the uploaded module is in the list of modules.
 
 .. figure:: _static/Module_Uploaded.png
-
 
 In the list of modules the following actions can be performed:
 
@@ -498,6 +477,16 @@ Click «Create» at the bottom and see the instance is in the list of instances 
 
 .. figure:: _static/InstancesList.png
 
+Click "Cancel" to drop all the specified settings. The instance will not be created then.
+
+An instance can be created by copying the settings of an existing instance. Just tick the "Clone from existing instance" option in the upper-left corner of the Create Instance form and select an instance you want to clone in the drop-down.
+
+.. figure:: _static:CreateInstance_Clone.png
+
+The form will show the settings of the selected instance. They can be edited and saved by clicking at the "Create" button. The new instance will appear in the list of instances.
+
+Click "Cancel" to drop all the specified settings. The strem will not be created then.
+
 In the list of instances the following actions can be performed:
 
 1. **View** an instance`s name and status — ready, starting, strated, failed, stopping, stopped, deleting, deleted.
@@ -513,15 +502,34 @@ The list of instances can be filtered by its type and/or a name using the search
 Configuration Settings
 ----------------------
  
-Here the basic settings necessary for the platform are described.
- 
-These are configuration settings required for the modules start working.
- 
-The config settings can be added under the "Config Settings" tab of the main navigation bar.
+Here the basic settings necessary for the platform are described. Besides, the flow of Config Settings addition to the system is clarified here.
 
-When you open the Cofig Settings page via the navigation bar you can see the list of settings added to the platform.
+Configuration settings are the setting required for the modules start working.
+ 
+The config settings can be added under the "Config Settings" tab of the main navigation bar. Please, click at "Add Settings" in the upper-right corner aboce the list and fill in the form (the information of the required settings can be found in the table_ below):
+
+1. *Name* *
+        Enter a setting name here. 
+
+
+2. *Value* *
+        Enter a setting value here. 
+	
+	
+3. *Domain* *
+        Select a domain from the drop-down. 
+	
+.. note:: Required fields are marked with an asterisk (*)
+
+Once the fileds are correctly filled in, click at the "Create" button and see the setting has appeared in the list of settings.
+
+Click "Cancel" to drop all the specified settings. The settnig will not be added then.
+
+The list of settings added to the platform can be viewed under the Cofig Settings section of the navigation bar. 
  
 Please, find the required config settings in the table below and make sure they are added to your platform so that your modules could work.
+
+.. _table:
 
 .. csv-table:: Required config settings
   :header: "Config Domain","Name", "Description", "Example"
