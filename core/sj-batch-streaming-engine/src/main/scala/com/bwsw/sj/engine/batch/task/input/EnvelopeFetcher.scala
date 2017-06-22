@@ -21,7 +21,7 @@ package com.bwsw.sj.engine.batch.task.input
 import java.util.concurrent.{Executors, ScheduledExecutorService}
 
 import com.bwsw.sj.common.utils.EngineLiterals
-import com.bwsw.sj.engine.core.entities.Envelope
+import com.bwsw.sj.common.engine.core.entities.Envelope
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import com.google.common.util.concurrent.ThreadFactoryBuilder
 import org.slf4j.{Logger, LoggerFactory}

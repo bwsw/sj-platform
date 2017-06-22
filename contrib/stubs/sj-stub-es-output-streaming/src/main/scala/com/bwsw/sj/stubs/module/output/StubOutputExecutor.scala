@@ -20,8 +20,8 @@ package com.bwsw.sj.stubs.module.output
 
 import java.util.Calendar
 
-import com.bwsw.sj.engine.core.entities.{OutputEnvelope, TStreamEnvelope}
-import com.bwsw.sj.engine.core.environment.OutputEnvironmentManager
+import com.bwsw.sj.common.engine.core.entities.{OutputEnvelope, TStreamEnvelope}
+import com.bwsw.sj.common.engine.core.environment.OutputEnvironmentManager
 import com.bwsw.sj.engine.core.output.OutputStreamingExecutor
 import com.bwsw.sj.engine.core.output.types.es._
 import com.bwsw.sj.stubs.module.output.data.StubEsData

@@ -21,7 +21,7 @@ package com.bwsw.sj.module.output.pm.data
 import java.util.Date
 
 import com.bwsw.common.JsonSerializer
-import com.bwsw.sj.engine.core.entities.OutputEnvelope
+import com.bwsw.sj.common.engine.core.entities.OutputEnvelope
 import com.fasterxml.jackson.annotation.JsonProperty
 
 /**

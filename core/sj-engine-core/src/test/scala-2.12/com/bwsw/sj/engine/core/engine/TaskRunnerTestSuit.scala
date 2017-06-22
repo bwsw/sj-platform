@@ -24,9 +24,9 @@ import java.util.concurrent.{Callable, ExecutorCompletionService}
 import com.bwsw.sj.common.engine.TaskEngine
 import com.bwsw.sj.common.si.model.instance.Instance
 import com.bwsw.sj.common.utils.EngineLiterals
-import com.bwsw.sj.engine.core.config.EngineConfigNames
-import com.bwsw.sj.engine.core.managment.TaskManager
-import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
+import com.bwsw.sj.common.engine.core.config.EngineConfigNames
+import com.bwsw.sj.common.engine.core.managment.TaskManager
+import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
 import com.typesafe.config.Config
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._

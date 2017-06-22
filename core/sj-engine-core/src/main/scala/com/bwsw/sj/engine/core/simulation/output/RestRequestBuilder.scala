@@ -20,7 +20,7 @@ package com.bwsw.sj.engine.core.simulation.output
 
 import java.net.URI
 
-import com.bwsw.sj.engine.core.entities.{OutputEnvelope, TStreamEnvelope}
+import com.bwsw.sj.common.engine.core.entities.{OutputEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.output.types.rest.RestCommandBuilder
 import org.eclipse.jetty.client.HttpClient
 import org.eclipse.jetty.client.api.Request

@@ -25,8 +25,8 @@ import com.bwsw.sj.common.dal.model.stream.TStreamStreamDomain
 import com.bwsw.sj.common.engine.EnvelopeDataSerializer
 import com.bwsw.sj.common.si.model.instance.{BatchInstance, OutputInstance, RegularInstance}
 import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
-import com.bwsw.sj.engine.core.entities.{Envelope, TStreamEnvelope}
-import com.bwsw.sj.engine.core.managment.TaskManager
+import com.bwsw.sj.common.engine.core.entities.{Envelope, TStreamEnvelope}
+import com.bwsw.sj.common.engine.core.managment.TaskManager
 import com.bwsw.tstreams.agents.consumer.Consumer
 import com.bwsw.tstreams.agents.consumer.Offset.{DateTime, IOffset, Newest, Oldest}
 import com.bwsw.tstreams.agents.consumer.subscriber.Subscriber

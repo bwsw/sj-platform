@@ -25,9 +25,9 @@ import com.bwsw.sj.common.engine.TaskEngine
 import com.bwsw.sj.common.si.model.instance.InputInstance
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.core.engine.{NumericalCheckpointTaskEngine, TimeCheckpointTaskEngine}
-import com.bwsw.sj.engine.core.entities.InputEnvelope
-import com.bwsw.sj.engine.core.environment.InputEnvironmentManager
-import com.bwsw.sj.engine.core.input.{InputStreamingExecutor, Interval}
+import com.bwsw.sj.common.engine.core.entities.InputEnvelope
+import com.bwsw.sj.common.engine.core.environment.InputEnvironmentManager
+import com.bwsw.sj.common.engine.core.input.{InputStreamingExecutor, Interval}
 import com.bwsw.sj.engine.input.eviction_policy.InputInstanceEvictionPolicy
 import com.bwsw.sj.engine.input.task.reporting.InputStreamingPerformanceMetrics
 import com.bwsw.tstreams.agents.producer.{NewProducerTransactionPolicy, ProducerTransaction}

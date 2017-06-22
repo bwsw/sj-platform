@@ -18,7 +18,7 @@
  */
 package com.bwsw.sj.stubs.module.output.data
 
-import com.bwsw.sj.engine.core.entities.OutputEnvelope
+import com.bwsw.sj.common.engine.core.entities.OutputEnvelope
 
 /**
   * @author Diryavkin Dmitry

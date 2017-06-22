@@ -23,8 +23,8 @@ import java.util.concurrent._
 
 import com.bwsw.sj.common.engine.TaskEngine
 import com.bwsw.sj.engine.core.engine.TaskRunner
-import com.bwsw.sj.engine.core.managment.TaskManager
-import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
+import com.bwsw.sj.common.engine.core.managment.TaskManager
+import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
 import com.bwsw.sj.engine.input.connection.tcp.server.InputStreamingServer
 import com.bwsw.sj.engine.input.task.{InputTaskEngine, InputTaskManager}
 import com.bwsw.sj.engine.input.task.reporting.InputStreamingPerformanceMetrics

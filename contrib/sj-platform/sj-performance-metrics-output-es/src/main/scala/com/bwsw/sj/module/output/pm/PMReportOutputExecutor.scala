@@ -19,8 +19,8 @@
 package com.bwsw.sj.module.output.pm
 
 import com.bwsw.common.{JsonSerializer, ObjectSerializer}
-import com.bwsw.sj.engine.core.entities.{OutputEnvelope, TStreamEnvelope}
-import com.bwsw.sj.engine.core.environment.OutputEnvironmentManager
+import com.bwsw.sj.common.engine.core.entities.{OutputEnvelope, TStreamEnvelope}
+import com.bwsw.sj.common.engine.core.environment.OutputEnvironmentManager
 import com.bwsw.sj.engine.core.output.OutputStreamingExecutor
 import com.bwsw.sj.engine.core.output.types.es._
 import com.bwsw.sj.module.output.pm.data.PerformanceMetrics
@@ -28,9 +28,7 @@ import com.bwsw.sj.module.output.pm.data.PerformanceMetrics
 /**
  * Handler for work with performance metrics t-stream envelopes
  *
- *
- *
- * @author Kseniya Mikhaleva
+  * @author Kseniya Mikhaleva
  */
 class PMReportOutputExecutor(manager: OutputEnvironmentManager) extends OutputStreamingExecutor[String](manager) {
   val jsonSerializer = new JsonSerializer()

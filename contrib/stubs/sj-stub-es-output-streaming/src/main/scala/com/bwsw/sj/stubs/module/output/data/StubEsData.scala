@@ -20,7 +20,7 @@ package com.bwsw.sj.stubs.module.output.data
 
 import java.util.Date
 
-import com.bwsw.sj.engine.core.entities.OutputEnvelope
+import com.bwsw.sj.common.engine.core.entities.OutputEnvelope
 import com.fasterxml.jackson.annotation.JsonProperty
 
 /**

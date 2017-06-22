@@ -19,8 +19,8 @@
 package com.bwsw.sj.engine.core.output
 
 import com.bwsw.sj.common.engine.StreamingExecutor
-import com.bwsw.sj.engine.core.entities.{OutputEnvelope, TStreamEnvelope}
-import com.bwsw.sj.engine.core.environment.OutputEnvironmentManager
+import com.bwsw.sj.common.engine.core.entities.{OutputEnvelope, TStreamEnvelope}
+import com.bwsw.sj.common.engine.core.environment.OutputEnvironmentManager
 
 /**
   *

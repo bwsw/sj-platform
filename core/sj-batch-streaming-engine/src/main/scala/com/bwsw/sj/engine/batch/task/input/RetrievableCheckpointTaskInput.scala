@@ -21,8 +21,8 @@ package com.bwsw.sj.engine.batch.task.input
 import com.bwsw.sj.common.dal.model.stream.StreamDomain
 import com.bwsw.sj.common.utils.StreamLiterals
 import com.bwsw.sj.engine.core.engine.input.CheckpointTaskInput
-import com.bwsw.sj.engine.core.entities.Envelope
-import com.bwsw.sj.engine.core.managment.CommonTaskManager
+import com.bwsw.sj.common.engine.core.entities.Envelope
+import com.bwsw.sj.common.engine.core.managment.CommonTaskManager
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import org.slf4j.LoggerFactory
 import scaldi.Injector

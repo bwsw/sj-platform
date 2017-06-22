@@ -23,10 +23,10 @@ import java.util.concurrent.ExecutorCompletionService
 
 import com.bwsw.sj.common.engine.TaskEngine
 import com.bwsw.sj.engine.batch.task.BatchTaskEngine
-import com.bwsw.sj.engine.core.batch.BatchStreamingPerformanceMetrics
+import com.bwsw.sj.common.engine.core.batch.BatchStreamingPerformanceMetrics
 import com.bwsw.sj.engine.core.engine.TaskRunner
-import com.bwsw.sj.engine.core.managment.{CommonTaskManager, TaskManager}
-import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
+import com.bwsw.sj.common.engine.core.managment.{CommonTaskManager, TaskManager}
+import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
 
 /**
   * Class is responsible for launching batch engine execution logic.

@@ -20,7 +20,7 @@ package com.bwsw.sj.engine.output.task.reporting
 
 import java.util.Calendar
 
-import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
+import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
 import com.bwsw.sj.engine.output.task.OutputTaskManager
 
 import scala.collection.mutable

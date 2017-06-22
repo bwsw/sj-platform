@@ -22,8 +22,8 @@ import com.bwsw.sj.common.engine.EnvelopeDataSerializer
 import com.bwsw.sj.common.si.model.instance.BatchInstance
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.core.engine.input.KafkaTaskInput
-import com.bwsw.sj.engine.core.entities.KafkaEnvelope
-import com.bwsw.sj.engine.core.managment.CommonTaskManager
+import com.bwsw.sj.common.engine.core.entities.KafkaEnvelope
+import com.bwsw.sj.common.engine.core.managment.CommonTaskManager
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import com.bwsw.tstreams.agents.producer.NewProducerTransactionPolicy
 import org.apache.kafka.clients.consumer.ConsumerRecord

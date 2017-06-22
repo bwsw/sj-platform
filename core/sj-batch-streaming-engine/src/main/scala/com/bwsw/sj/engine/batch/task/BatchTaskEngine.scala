@@ -26,10 +26,10 @@ import com.bwsw.sj.common.engine.TaskEngine
 import com.bwsw.sj.common.si.model.instance.BatchInstance
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.batch.task.input.{EnvelopeFetcher, RetrievableCheckpointTaskInput}
-import com.bwsw.sj.engine.core.batch.{BatchStreamingExecutor, BatchStreamingPerformanceMetrics, WindowRepository}
-import com.bwsw.sj.engine.core.entities._
-import com.bwsw.sj.engine.core.managment.CommonTaskManager
-import com.bwsw.sj.engine.core.state.CommonModuleService
+import com.bwsw.sj.common.engine.core.batch.{BatchStreamingExecutor, BatchStreamingPerformanceMetrics, WindowRepository}
+import com.bwsw.sj.common.engine.core.entities._
+import com.bwsw.sj.common.engine.core.managment.CommonTaskManager
+import com.bwsw.sj.common.engine.core.state.CommonModuleService
 import org.apache.curator.framework.recipes.barriers.DistributedDoubleBarrier
 import org.apache.curator.framework.{CuratorFramework, CuratorFrameworkFactory}
 import org.apache.curator.retry.ExponentialBackoffRetry

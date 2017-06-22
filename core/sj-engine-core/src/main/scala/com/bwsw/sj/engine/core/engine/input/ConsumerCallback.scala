@@ -22,7 +22,7 @@ import java.util.concurrent.ArrayBlockingQueue
 
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.engine.EnvelopeDataSerializer
-import com.bwsw.sj.engine.core.entities.{Envelope, TStreamEnvelope}
+import com.bwsw.sj.common.engine.core.entities.{Envelope, TStreamEnvelope}
 import com.bwsw.tstreams.agents.consumer.subscriber.Callback
 import com.bwsw.tstreams.agents.consumer.{Consumer, ConsumerTransaction, TransactionOperator}
 import org.slf4j.LoggerFactory

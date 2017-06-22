@@ -19,9 +19,9 @@
 package com.bwsw.sj.examples.sum
 
 import com.bwsw.common.ObjectSerializer
-import com.bwsw.sj.engine.core.entities.KafkaEnvelope
-import com.bwsw.sj.engine.core.environment.ModuleEnvironmentManager
-import com.bwsw.sj.engine.core.batch.{WindowRepository, BatchStreamingExecutor}
+import com.bwsw.sj.common.engine.core.entities.KafkaEnvelope
+import com.bwsw.sj.common.engine.core.environment.ModuleEnvironmentManager
+import com.bwsw.sj.common.engine.core.batch.{WindowRepository, BatchStreamingExecutor}
 
 
 class Executor(manager: ModuleEnvironmentManager) extends BatchStreamingExecutor[Array[Byte]](manager) {

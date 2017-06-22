@@ -20,8 +20,8 @@ package com.bwsw.sj.engine.regular.task.reporting
 
 import java.util.Calendar
 
-import com.bwsw.sj.engine.core.managment.CommonTaskManager
-import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
+import com.bwsw.sj.common.engine.core.managment.CommonTaskManager
+import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
 
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer

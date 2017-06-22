@@ -20,10 +20,10 @@ package com.bwsw.sj.stubs.module.regular_streaming
 
 import java.util.Random
 
-import com.bwsw.sj.engine.core.entities.{KafkaEnvelope, TStreamEnvelope}
-import com.bwsw.sj.engine.core.environment.ModuleEnvironmentManager
+import com.bwsw.sj.common.engine.core.entities.{KafkaEnvelope, TStreamEnvelope}
+import com.bwsw.sj.common.engine.core.environment.ModuleEnvironmentManager
 import com.bwsw.sj.engine.core.regular.RegularStreamingExecutor
-import com.bwsw.sj.engine.core.state.StateStorage
+import com.bwsw.sj.common.engine.core.state.StateStorage
 
 import scala.language.higherKinds
 

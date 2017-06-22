@@ -18,7 +18,7 @@
  */
 package com.bwsw.sj.engine.input.config
 
-import com.bwsw.sj.engine.core.config.EngineConfigNames.instance
+import com.bwsw.sj.common.engine.core.config.EngineConfigNames.instance
 
 /**
   * Names of configurations for application config

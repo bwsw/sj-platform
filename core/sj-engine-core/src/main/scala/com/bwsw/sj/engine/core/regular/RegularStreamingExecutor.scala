@@ -19,8 +19,8 @@
 package com.bwsw.sj.engine.core.regular
 
 import com.bwsw.sj.common.engine.{StateHandlers, StreamingExecutor}
-import com.bwsw.sj.engine.core.entities.{KafkaEnvelope, TStreamEnvelope}
-import com.bwsw.sj.engine.core.environment.ModuleEnvironmentManager
+import com.bwsw.sj.common.engine.core.entities.{KafkaEnvelope, TStreamEnvelope}
+import com.bwsw.sj.common.engine.core.environment.ModuleEnvironmentManager
 
 /**
  * Class is responsible for regular module execution logic.

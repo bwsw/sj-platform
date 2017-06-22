@@ -23,8 +23,8 @@ import java.util.concurrent.ExecutorCompletionService
 
 import com.bwsw.sj.common.engine.TaskEngine
 import com.bwsw.sj.engine.core.engine.TaskRunner
-import com.bwsw.sj.engine.core.managment.TaskManager
-import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
+import com.bwsw.sj.common.engine.core.managment.TaskManager
+import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
 import com.bwsw.sj.engine.output.task.reporting.OutputStreamingPerformanceMetrics
 import com.bwsw.sj.engine.output.task.{OutputTaskEngine, OutputTaskManager}
 

@@ -28,8 +28,8 @@ import com.bwsw.sj.common.dal.model.stream.{StreamDomain, TStreamStreamDomain}
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.si.model.config.ConfigurationSetting
 import com.bwsw.sj.common.utils.StreamLiterals
-import com.bwsw.sj.engine.core.entities.KafkaEnvelope
-import com.bwsw.sj.engine.core.managment.CommonTaskManager
+import com.bwsw.sj.common.engine.core.entities.KafkaEnvelope
+import com.bwsw.sj.common.engine.core.managment.CommonTaskManager
 import com.bwsw.tstreams.agents.consumer.Offset.Oldest
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import com.bwsw.tstreams.agents.producer.Producer

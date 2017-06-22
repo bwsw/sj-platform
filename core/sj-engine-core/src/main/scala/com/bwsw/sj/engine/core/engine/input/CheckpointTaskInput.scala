@@ -21,7 +21,7 @@ package com.bwsw.sj.engine.core.engine.input
 import java.io.Closeable
 
 import com.bwsw.sj.common.dal.model.stream.StreamDomain
-import com.bwsw.sj.engine.core.entities.Envelope
+import com.bwsw.sj.common.engine.core.entities.Envelope
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 
 import scala.collection.mutable

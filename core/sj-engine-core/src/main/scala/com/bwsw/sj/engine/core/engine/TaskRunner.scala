@@ -22,8 +22,8 @@ import java.io.Closeable
 import java.util.concurrent._
 
 import com.bwsw.sj.common.engine.TaskEngine
-import com.bwsw.sj.engine.core.managment.TaskManager
-import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
+import com.bwsw.sj.common.engine.core.managment.TaskManager
+import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
 import com.google.common.util.concurrent.ThreadFactoryBuilder
 import org.slf4j.{Logger, LoggerFactory}
 import scaldi.Injector

@@ -27,8 +27,8 @@ import com.bwsw.sj.common.si.model.instance.OutputInstance
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.core.engine.NumericalCheckpointTaskEngine
 import com.bwsw.sj.engine.core.engine.input.CallableTStreamCheckpointTaskInput
-import com.bwsw.sj.engine.core.entities._
-import com.bwsw.sj.engine.core.environment.OutputEnvironmentManager
+import com.bwsw.sj.common.engine.core.entities._
+import com.bwsw.sj.common.engine.core.environment.OutputEnvironmentManager
 import com.bwsw.sj.engine.core.output.{Entity, OutputStreamingExecutor}
 import com.bwsw.sj.engine.output.processing.OutputProcessor
 import com.bwsw.sj.engine.output.task.reporting.OutputStreamingPerformanceMetrics

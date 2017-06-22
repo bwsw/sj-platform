@@ -19,9 +19,9 @@
 package com.bwsw.sj.engine.input.task
 
 import com.bwsw.sj.common.si.model.instance.InputInstance
-import com.bwsw.sj.engine.core.environment.{EnvironmentManager, InputEnvironmentManager}
-import com.bwsw.sj.engine.core.input.InputStreamingExecutor
-import com.bwsw.sj.engine.core.managment.TaskManager
+import com.bwsw.sj.common.engine.core.environment.{EnvironmentManager, InputEnvironmentManager}
+import com.bwsw.sj.common.engine.core.input.InputStreamingExecutor
+import com.bwsw.sj.common.engine.core.managment.TaskManager
 import com.bwsw.sj.engine.input.config.InputEngineConfigNames
 import com.bwsw.tstreams.agents.producer.Producer
 import com.typesafe.config.ConfigFactory

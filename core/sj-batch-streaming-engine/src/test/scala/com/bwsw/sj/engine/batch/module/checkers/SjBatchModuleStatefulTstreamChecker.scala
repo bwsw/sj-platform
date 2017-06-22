@@ -19,7 +19,7 @@
 package com.bwsw.sj.engine.batch.module.checkers
 
 import com.bwsw.common.ObjectSerializer
-import com.bwsw.sj.engine.core.entities.{KafkaEnvelope, TStreamEnvelope, Batch}
+import com.bwsw.sj.common.engine.core.entities.{KafkaEnvelope, TStreamEnvelope, Batch}
 import com.bwsw.sj.engine.batch.module.DataFactory._
 import com.bwsw.sj.engine.batch.utils.StateHelper
 

@@ -21,8 +21,8 @@ package com.bwsw.sj.engine.input.task.reporting
 import java.util.Calendar
 
 import com.bwsw.common.ObjectSizeFetcher
-import com.bwsw.sj.engine.core.entities.{Envelope, InputEnvelope}
-import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
+import com.bwsw.sj.common.engine.core.entities.{Envelope, InputEnvelope}
+import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
 import com.bwsw.sj.engine.input.task.InputTaskManager
 
 import scala.collection.mutable

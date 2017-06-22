@@ -25,8 +25,8 @@ import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.engine.EnvelopeDataSerializer
 import com.bwsw.sj.common.si.model.instance.BatchInstance
 import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
-import com.bwsw.sj.engine.core.entities.TStreamEnvelope
-import com.bwsw.sj.engine.core.managment.CommonTaskManager
+import com.bwsw.sj.common.engine.core.entities.TStreamEnvelope
+import com.bwsw.sj.common.engine.core.managment.CommonTaskManager
 import com.bwsw.tstreams.agents.consumer.Offset.{DateTime, IOffset, Newest, Oldest}
 import com.bwsw.tstreams.agents.consumer.{Consumer, ConsumerTransaction}
 import com.bwsw.tstreams.agents.group.CheckpointGroup

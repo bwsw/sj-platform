@@ -20,10 +20,10 @@ package com.bwsw.sj.stubs.module.batch_streaming
 
 import java.util.Random
 
-import com.bwsw.sj.engine.core.entities.{KafkaEnvelope, TStreamEnvelope}
-import com.bwsw.sj.engine.core.environment.ModuleEnvironmentManager
-import com.bwsw.sj.engine.core.state.StateStorage
-import com.bwsw.sj.engine.core.batch.{WindowRepository, BatchStreamingExecutor}
+import com.bwsw.sj.common.engine.core.entities.{KafkaEnvelope, TStreamEnvelope}
+import com.bwsw.sj.common.engine.core.environment.ModuleEnvironmentManager
+import com.bwsw.sj.common.engine.core.state.StateStorage
+import com.bwsw.sj.common.engine.core.batch.{WindowRepository, BatchStreamingExecutor}
 
 
 class Executor(manager: ModuleEnvironmentManager) extends BatchStreamingExecutor[Integer](manager) {

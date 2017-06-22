@@ -24,10 +24,10 @@ import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.dal.model.stream.{KafkaStreamDomain, StreamDomain, TStreamStreamDomain}
 import com.bwsw.sj.common.utils.stream_distributor.{ByHash, StreamDistributor}
 import com.bwsw.sj.common.utils.{AvroRecordUtils, StreamLiterals}
-import com.bwsw.sj.engine.core.entities.InputEnvelope
-import com.bwsw.sj.engine.core.environment.InputEnvironmentManager
-import com.bwsw.sj.engine.core.input.utils.Tokenizer
-import com.bwsw.sj.engine.core.input.{InputStreamingExecutor, Interval}
+import com.bwsw.sj.common.engine.core.entities.InputEnvelope
+import com.bwsw.sj.common.engine.core.environment.InputEnvironmentManager
+import com.bwsw.sj.common.engine.core.input.utils.Tokenizer
+import com.bwsw.sj.common.engine.core.input.{InputStreamingExecutor, Interval}
 import io.netty.buffer.ByteBuf
 import org.apache.avro.SchemaBuilder.FieldAssembler
 import org.apache.avro.generic.GenericData.Record
