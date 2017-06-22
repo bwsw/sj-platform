@@ -18,7 +18,7 @@
  */
 package com.bwsw.sj.engine.core.output.types.rest
 
-import com.bwsw.sj.engine.core.output.NamedType
+import com.bwsw.sj.common.engine.core.output.NamedType
 
 /**
   * @author Pavel Tomskikh

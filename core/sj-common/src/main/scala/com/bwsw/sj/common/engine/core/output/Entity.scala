@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.sj.engine.core.output
+package com.bwsw.sj.common.engine.core.output
 
 import com.bwsw.sj.common.utils.EngineLiterals
 

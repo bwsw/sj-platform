@@ -18,7 +18,7 @@
  */
 package com.bwsw.sj.engine.core.output.types.es
 
-import com.bwsw.sj.engine.core.output.Entity
+import com.bwsw.sj.common.engine.core.output.Entity
 import com.bwsw.sj.engine.core.output.types.CommandBuilder
 import org.elasticsearch.index.query.QueryBuilders
 

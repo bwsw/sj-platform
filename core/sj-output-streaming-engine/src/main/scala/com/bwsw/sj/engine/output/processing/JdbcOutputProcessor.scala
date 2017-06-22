@@ -24,7 +24,7 @@ import com.bwsw.common.jdbc.JdbcClientBuilder
 import com.bwsw.sj.common.dal.model.service.JDBCServiceDomain
 import com.bwsw.sj.common.dal.model.stream.{JDBCStreamDomain, StreamDomain}
 import com.bwsw.sj.common.engine.core.entities._
-import com.bwsw.sj.engine.core.output.Entity
+import com.bwsw.sj.common.engine.core.output.Entity
 import com.bwsw.sj.engine.core.output.types.jdbc.JdbcCommandBuilder
 import com.bwsw.sj.engine.output.task.OutputTaskManager
 import com.bwsw.sj.engine.output.task.reporting.OutputStreamingPerformanceMetrics

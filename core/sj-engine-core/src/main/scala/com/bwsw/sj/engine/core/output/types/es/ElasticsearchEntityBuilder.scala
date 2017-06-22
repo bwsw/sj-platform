@@ -18,7 +18,8 @@
  */
 package com.bwsw.sj.engine.core.output.types.es
 
-import com.bwsw.sj.engine.core.output.{NamedType, EntityBuilder, IncompatibleTypeException}
+import com.bwsw.sj.common.engine.core.output.{EntityBuilder, NamedType}
+import com.bwsw.sj.engine.core.output.IncompatibleTypeException
 
 /**
   * Created by Ivan Kudryavtsev on 05.03.2017.

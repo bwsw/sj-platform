@@ -20,10 +20,11 @@ package com.bwsw.sj.engine.core.output.types.es
 
 import java.util.Base64
 
+import com.bwsw.sj.common.engine.core.output.BasicType
 import org.apache.commons.lang3.StringEscapeUtils
 
 import scala.util.parsing.json._
-import com.bwsw.sj.engine.core.output.{IncompatibleTypeException, BasicType}
+import com.bwsw.sj.engine.core.output.IncompatibleTypeException
 
 abstract class ElasticsearchField[T](name: String, default: T) extends BasicType[String, T](name, default)
 

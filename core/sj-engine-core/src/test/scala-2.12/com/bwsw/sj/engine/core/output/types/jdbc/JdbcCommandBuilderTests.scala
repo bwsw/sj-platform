@@ -20,7 +20,7 @@ package com.bwsw.sj.engine.core.output.types.jdbc
 
 import java.sql.PreparedStatement
 
-import com.bwsw.sj.engine.core.output.EntityBuilder
+import com.bwsw.sj.common.engine.core.output.EntityBuilder
 import com.bwsw.sj.engine.core.output.types.jdbc._
 import org.scalatest.{FlatSpec, Matchers}
 

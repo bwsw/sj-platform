@@ -21,7 +21,7 @@ package com.bwsw.sj.engine.core.output.types.jdbc
 import java.sql.PreparedStatement
 
 import com.bwsw.common.jdbc.IJdbcClient
-import com.bwsw.sj.engine.core.output.Entity
+import com.bwsw.sj.common.engine.core.output.Entity
 import com.bwsw.sj.engine.core.output.types.CommandBuilder
 
 /**

@@ -20,8 +20,9 @@ package com.bwsw.sj.engine.core.output.types.jdbc
 
 import java.sql.PreparedStatement
 
+import com.bwsw.sj.common.engine.core.output.BasicType
 import org.apache.commons.lang3.StringEscapeUtils
-import com.bwsw.sj.engine.core.output.{IncompatibleTypeException, BasicType}
+import com.bwsw.sj.engine.core.output.IncompatibleTypeException
 
 /**
   * Created by Ivan Kudryavtsev on 03.03.2017.

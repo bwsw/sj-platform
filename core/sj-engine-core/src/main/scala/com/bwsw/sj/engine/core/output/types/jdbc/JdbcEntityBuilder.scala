@@ -20,7 +20,8 @@ package com.bwsw.sj.engine.core.output.types.jdbc
 
 import java.sql.PreparedStatement
 
-import com.bwsw.sj.engine.core.output.{EntityBuilder, IncompatibleTypeException, NamedType}
+import com.bwsw.sj.common.engine.core.output.{EntityBuilder, NamedType}
+import com.bwsw.sj.engine.core.output.IncompatibleTypeException
 
 /**
   * Created by diryavkin_dn on 06.03.17.

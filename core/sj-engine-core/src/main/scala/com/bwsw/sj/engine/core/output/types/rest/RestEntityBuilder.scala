@@ -18,7 +18,7 @@
  */
 package com.bwsw.sj.engine.core.output.types.rest
 
-import com.bwsw.sj.engine.core.output.{EntityBuilder, NamedType}
+import com.bwsw.sj.common.engine.core.output.{EntityBuilder, NamedType}
 
 /**
   * ref. [[EntityBuilder]]

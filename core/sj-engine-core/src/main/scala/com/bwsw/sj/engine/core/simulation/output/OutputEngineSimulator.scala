@@ -20,7 +20,7 @@ package com.bwsw.sj.engine.core.simulation.output
 
 import com.bwsw.sj.common.engine.core.entities.TStreamEnvelope
 import com.bwsw.sj.common.engine.core.environment.OutputEnvironmentManager
-import com.bwsw.sj.engine.core.output.OutputStreamingExecutor
+import com.bwsw.sj.common.engine.core.output.OutputStreamingExecutor
 
 import scala.collection.mutable
 

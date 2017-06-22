@@ -19,6 +19,7 @@
 package com.bwsw.sj.engine.core.simulation.output
 
 import com.bwsw.sj.common.engine.core.entities.{OutputEnvelope, TStreamEnvelope}
+import com.bwsw.sj.common.engine.core.output.OutputStreamingExecutor
 import com.bwsw.sj.engine.core.output.types.CommandBuilder
 
 /**
@@ -36,9 +37,9 @@ trait OutputRequestBuilder[T] {
     * Builds insert request for output service
     *
     * @param outputEnvelope envelope that outgoing from
-    *                       [[com.bwsw.sj.engine.core.output.OutputStreamingExecutor OutputStreamingExecutor]]
+    *                       [[OutputStreamingExecutor OutputStreamingExecutor]]
     * @param inputEnvelope  envelope that incoming to
-    *                       [[com.bwsw.sj.engine.core.output.OutputStreamingExecutor OutputStreamingExecutor]]
+    *                       [[OutputStreamingExecutor OutputStreamingExecutor]]
     * @return constructed request
     */
   def buildInsert(outputEnvelope: OutputEnvelope, inputEnvelope: TStreamEnvelope[_]): T
@@ -47,7 +48,7 @@ trait OutputRequestBuilder[T] {
     * Builds delete request for output service
     *
     * @param inputEnvelope envelope that incoming to
-    *                      [[com.bwsw.sj.engine.core.output.OutputStreamingExecutor OutputStreamingExecutor]]
+    *                      [[OutputStreamingExecutor OutputStreamingExecutor]]
     * @return constructed request
     */
   def buildDelete(inputEnvelope: TStreamEnvelope[_]): T

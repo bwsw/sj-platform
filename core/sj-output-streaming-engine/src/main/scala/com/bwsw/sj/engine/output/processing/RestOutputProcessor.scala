@@ -21,7 +21,7 @@ package com.bwsw.sj.engine.output.processing
 import com.bwsw.common.rest.RestClient
 import com.bwsw.sj.common.dal.model.stream.RestStreamDomain
 import com.bwsw.sj.common.engine.core.entities.{OutputEnvelope, TStreamEnvelope}
-import com.bwsw.sj.engine.core.output.Entity
+import com.bwsw.sj.common.engine.core.output.Entity
 import com.bwsw.sj.engine.core.output.types.rest.RestCommandBuilder
 import com.bwsw.sj.engine.output.task.OutputTaskManager
 import com.bwsw.sj.engine.output.task.reporting.OutputStreamingPerformanceMetrics

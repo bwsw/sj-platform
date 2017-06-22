@@ -21,7 +21,7 @@ package com.bwsw.sj.module.output.pm
 import com.bwsw.common.{JsonSerializer, ObjectSerializer}
 import com.bwsw.sj.common.engine.core.entities.{OutputEnvelope, TStreamEnvelope}
 import com.bwsw.sj.common.engine.core.environment.OutputEnvironmentManager
-import com.bwsw.sj.engine.core.output.OutputStreamingExecutor
+import com.bwsw.sj.common.engine.core.output.OutputStreamingExecutor
 import com.bwsw.sj.engine.core.output.types.es._
 import com.bwsw.sj.module.output.pm.data.PerformanceMetrics
 

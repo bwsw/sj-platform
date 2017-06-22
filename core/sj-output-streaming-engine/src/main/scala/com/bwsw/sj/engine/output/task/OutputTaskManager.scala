@@ -22,7 +22,7 @@ import com.bwsw.sj.common.dal.model.stream.StreamDomain
 import com.bwsw.sj.common.si.model.instance.OutputInstance
 import com.bwsw.sj.common.engine.core.environment.{EnvironmentManager, OutputEnvironmentManager}
 import com.bwsw.sj.common.engine.core.managment.TaskManager
-import com.bwsw.sj.engine.core.output.OutputStreamingExecutor
+import com.bwsw.sj.common.engine.core.output.OutputStreamingExecutor
 import scaldi.Injector
 
 import scala.collection.mutable
