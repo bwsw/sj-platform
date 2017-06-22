@@ -32,7 +32,7 @@ import scala.io.Source
   * @param encoding  name of encoding
   * @author Pavel Tomskikh
   */
-class SplittingTokenizer(separator: String, encoding: String) {
+class Tokenizer(separator: String, encoding: String) {
 
   private val byteProcessor = new ByteProcessor {
     private var bytes: Array[Byte] = Array.empty

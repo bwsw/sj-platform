@@ -24,7 +24,7 @@ import com.bwsw.sj.common.utils.stream_distributor.{ByHash, StreamDistributor}
 import com.bwsw.sj.common.utils.{AvroRecordUtils, StreamLiterals}
 import com.bwsw.sj.engine.core.entities.InputEnvelope
 import com.bwsw.sj.engine.core.environment.InputEnvironmentManager
-import com.bwsw.sj.engine.core.input.utils.SplittingTokenizer
+import com.bwsw.sj.engine.core.input.utils.Tokenizer
 import com.bwsw.sj.engine.core.input.{InputStreamingExecutor, Interval}
 import com.opencsv.CSVParserBuilder
 import io.netty.buffer.ByteBuf
@@ -44,7 +44,7 @@ class CSVInputExecutor(manager: InputEnvironmentManager) extends InputStreamingE
   private val csvInputOptions = serializer.deserialize[CSVInputOptions](manager.options)
   if (csvInputOptions.uniqueKey.isEmpty) csvInputOptions.uniqueKey = csvInputOptions.fields
 
-  val tokenizer = new SplittingTokenizer(csvInputOptions.lineSeparator, csvInputOptions.encoding)
+  val tokenizer = new Tokenizer(csvInputOptions.lineSeparator, csvInputOptions.encoding)
 
   val fieldsNumber = csvInputOptions.fields.length
   val schema = {
