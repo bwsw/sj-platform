@@ -481,7 +481,7 @@ Click "Cancel" to drop all the specified settings. The instance will not be crea
 
 An instance can be created by copying the settings of an existing instance. Just tick the "Clone from existing instance" option in the upper-left corner of the Create Instance form and select an instance you want to clone in the drop-down.
 
-.. figure:: _static:CreateInstance_Clone.png
+.. figure:: _static/CreateInstance_Clone.png
 
 The form will show the settings of the selected instance. They can be edited and saved by clicking at the "Create" button. The new instance will appear in the list of instances.
 
