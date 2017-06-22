@@ -18,9 +18,9 @@
  */
 package com.bwsw.sj.engine.input.eviction_policy
 
+import com.bwsw.common.hazelcast.HazelcastInterface
 import com.bwsw.sj.common.si.model.instance.InputInstance
 import com.bwsw.sj.common.dal.model.instance.InputInstanceDomain
-import com.bwsw.sj.engine.input.eviction_policy.hazelcast.HazelcastInterface
 
 /**
   * Provides methods are responsible for an expanded time eviction policy of input envelope duplicates

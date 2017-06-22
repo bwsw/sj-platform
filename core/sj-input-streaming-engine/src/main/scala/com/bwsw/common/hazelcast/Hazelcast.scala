@@ -1,4 +1,4 @@
-package com.bwsw.sj.engine.input.eviction_policy.hazelcast
+package com.bwsw.common.hazelcast
 
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.input.config.InputEngineConfigNames
@@ -10,23 +10,26 @@ import org.slf4j.{Logger, LoggerFactory}
 import scala.collection.JavaConverters._
 
 /**
-  * Wrapper for hazelcast map
+  * Wrapper for hazelcast cluster
   *
-  * @param mapName name of hazelcast map
-  * @param params  parameters for hazelcast map
+  * @param mapName      name of hazelcast map
+  * @param configParams configuration parameters for hazelcast cluster
   * @author Pavel Tomskikh
   */
-class Hazelcast(mapName: String, params: HazelcastParameters) extends HazelcastInterface {
+class Hazelcast(mapName: String, configParams: HazelcastConfig) extends HazelcastInterface {
 
   private val logger: Logger = LoggerFactory.getLogger(getClass)
-  private val config = createHazelcastConfig(mapName)
+  private val config = createConfig(mapName)
   private val hazelcastInstance: HazelcastInstance = OriginalHazelcast.newHazelcastInstance(config)
 
+  /**
+    * @inheritdoc
+    */
   override def getMap: IMap[String, String] =
     hazelcastInstance.getMap(mapName)
 
-  private def createHazelcastConfig(mapName: String): Config = {
-    logger.debug(s"Create a hazelcast map configuration is named '$mapName'.")
+  private def createConfig(mapName: String): Config = {
+    logger.debug(s"Create a hazelcast cluster configuration with map '$mapName'.")
     val config = new XmlConfigBuilder().build()
     val networkConfig = createNetworkConfig()
     val evictionPolicy = createEvictionPolicy()
@@ -34,18 +37,18 @@ class Hazelcast(mapName: String, params: HazelcastParameters) extends HazelcastI
 
     config.setNetworkConfig(networkConfig)
       .getMapConfig(mapName)
-      .setTimeToLiveSeconds(params.lookupHistory)
+      .setTimeToLiveSeconds(configParams.ttlSeconds)
       .setEvictionPolicy(evictionPolicy)
       .setMaxSizeConfig(maxSizeConfig)
-      .setAsyncBackupCount(params.asyncBackupCount)
-      .setBackupCount(params.backupCount)
+      .setAsyncBackupCount(configParams.asyncBackupCount)
+      .setBackupCount(configParams.backupCount)
 
     config
   }
 
   private def createEvictionPolicy(): EvictionPolicy = {
     logger.debug("Create a hazelcast eviction policy.")
-    params.defaultEvictionPolicy match {
+    configParams.evictionPolicy match {
       case EngineLiterals.lruDefaultEvictionPolicy => EvictionPolicy.LRU
       case EngineLiterals.lfuDefaultEvictionPolicy => EvictionPolicy.LFU
       case _ => EvictionPolicy.NONE
@@ -81,12 +84,12 @@ class Hazelcast(mapName: String, params: HazelcastParameters) extends HazelcastI
   private def createMaxSizeConfig(): MaxSizeConfig = {
     logger.debug("Create a hazelcast max size config.")
     new MaxSizeConfig()
-      .setSize(params.queueMaxSize)
+      .setSize(configParams.maxSize)
   }
 }
 
 /**
-  * Wrapper for hazelcast map
+  * Wrapper for hazelcast cluster
   */
 trait HazelcastInterface {
 

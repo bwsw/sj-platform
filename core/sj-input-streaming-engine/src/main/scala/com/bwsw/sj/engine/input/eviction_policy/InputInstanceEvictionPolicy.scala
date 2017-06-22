@@ -18,9 +18,9 @@
  */
 package com.bwsw.sj.engine.input.eviction_policy
 
+import com.bwsw.common.hazelcast.HazelcastInterface
 import com.bwsw.sj.common.si.model.instance.InputInstance
 import com.bwsw.sj.common.utils.EngineLiterals
-import com.bwsw.sj.engine.input.eviction_policy.hazelcast.HazelcastInterface
 import com.hazelcast.core.IMap
 import org.slf4j.{Logger, LoggerFactory}
 
