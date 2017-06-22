@@ -43,9 +43,9 @@ The diagram below may help you to understand the dependency of instances in the 
 
 For example, if you want to create a regular module that will process Kafka input data streams you have to create a Kafka service with a Kafka and a ZooKeeper providers for it.
 
-A module can not process data streams without uploading an engine (that is a .jar file) that launches the module and required configuration settings. More information about these settings can be found in the `Configuration Settings`_ and the `Custom Files`_ sections of this document.
+A module can not process data streams without uploading an engine (that is a .jar file) that launches the module and contains required configuration settings. More information about these settings can be found in the `Configuration Settings`_ and the `Custom Files`_ sections of this document.
 
-An executor of the module utilises an instance, i.e. a full range of settings for an exect handler/executor.
+An executor of the module utilises an instance/instances, i.e. a full range of settings for an exect handler/executor.
 
 Providers 
 ---------
