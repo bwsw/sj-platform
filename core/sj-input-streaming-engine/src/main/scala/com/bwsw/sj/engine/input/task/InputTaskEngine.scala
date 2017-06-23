@@ -245,7 +245,7 @@ abstract class InputTaskEngine(manager: InputTaskManager,
     */
   private def sendClientResponse(envelope: Option[InputEnvelope[AnyRef]], isNotEmptyOrDuplicate: Boolean, ctx: ChannelHandlerContext): ChannelFuture = {
     val inputStreamingResponse = executor.createProcessedMessageResponse(envelope, isNotEmptyOrDuplicate)
-    if (inputStreamingResponse.isBuffered) ctx.write(inputStreamingResponse.message)
+    if (inputStreamingResponse.sendResponsesNow) ctx.write(inputStreamingResponse.message)
     else ctx.writeAndFlush(inputStreamingResponse.message)
   }
 
@@ -267,7 +267,7 @@ abstract class InputTaskEngine(manager: InputTaskManager,
     */
   private def checkpointInitiated(): Unit = {
     val inputStreamingResponse = executor.createCheckpointResponse()
-    if (inputStreamingResponse.isBuffered) contextsToSendCheckpointResponse.foreach(x => x.write(inputStreamingResponse.message))
+    if (inputStreamingResponse.sendResponsesNow) contextsToSendCheckpointResponse.foreach(x => x.write(inputStreamingResponse.message))
     else contextsToSendCheckpointResponse.foreach(x => x.writeAndFlush(inputStreamingResponse.message))
   }
 

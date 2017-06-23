@@ -96,6 +96,6 @@ class InputStreamingExecutor[T <: AnyRef](manager: InputEnvironmentManager) exte
     * @return A response containing a relevant information about a done checkpoint
     */
   def createCheckpointResponse(): InputStreamingResponse = {
-    InputStreamingResponse(s"Checkpoint has been done\n", isBuffered = false)
+    InputStreamingResponse(s"Checkpoint has been done\n", sendResponsesNow = false)
   }
 }

@@ -26,4 +26,4 @@ package com.bwsw.sj.common.engine.core.input
   *
   * @author Kseniya Mikhaleva
   */
-case class InputStreamingResponse(message: String, isBuffered: Boolean)
+case class InputStreamingResponse(message: String, sendResponsesNow: Boolean)
