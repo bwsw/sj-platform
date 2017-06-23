@@ -1,4 +1,4 @@
-package com.bwsw.sj.engine.input.simulation
+package com.bwsw.sj.engine.core.simulation.input.mocks
 
 import java.util
 import java.util.concurrent.TimeUnit

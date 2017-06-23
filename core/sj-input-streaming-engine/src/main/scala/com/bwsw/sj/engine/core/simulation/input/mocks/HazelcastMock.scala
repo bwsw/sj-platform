@@ -1,4 +1,4 @@
-package com.bwsw.sj.engine.input.simulation
+package com.bwsw.sj.engine.core.simulation.input.mocks
 
 import com.bwsw.common.hazelcast.{HazelcastConfig, HazelcastInterface}
 import com.hazelcast.core.IMap
