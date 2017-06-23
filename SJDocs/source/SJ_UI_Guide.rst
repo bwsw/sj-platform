@@ -385,7 +385,7 @@ The list of modules can be filtered by its type and/or a name using the search t
 
 
 Instances
-=========
+---------
 Module uses a specific instance to personalize its work.
 
 Instance is a full range of settings to perfom an exact executor type.
