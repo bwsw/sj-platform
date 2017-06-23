@@ -26,6 +26,24 @@ import com.bwsw.sj.engine.input.eviction_policy.InputInstanceEvictionPolicy
 import io.netty.buffer.{ByteBuf, Unpooled}
 
 /**
+  * Imitates behavior of [[com.bwsw.sj.engine.input.task.InputTaskEngine InputTaskEngine]] for testing an
+  * implementation of [[InputStreamingExecutor]].
+  *
+  * Usage example:
+  * {{{
+  * val manager: InputEnvironmentManager
+  * val executor = new SomeExecutor(manager)
+  *
+  * val hazelcastConfig = HazelcastConfig(600, 1, 1, EngineLiterals.lruDefaultEvictionPolicy, 100)
+  * val hazelcast = new HazelcastMock(hazelcastConfig)
+  * val evictionPolicy = InputInstanceEvictionPolicy(EngineLiterals.fixTimeEvictionPolicy, hazelcast)
+  *
+  * val simulator = new InputEngineSimulator(executor, evictionPolicy)
+  * simulator.prepare("1,2,x,2,4")
+  * val outputDatas = simulator.process(duplicateCheck = true)
+  * println(outputDatas)
+  * }}}
+  *
   * @param executor       implementation of [[InputStreamingExecutor]] under test
   * @param evictionPolicy eviction policy of duplicate envelopes
   * @param charset        encoding of incoming data
