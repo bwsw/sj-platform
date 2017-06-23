@@ -116,7 +116,7 @@ In the list of providers the following actions can be performed:
 
 .. note:: A provider that is connected with a service can not be deleted.
 
-#. **Test** **Connection**
+3. **Test** **Connection**
 
 The list of providers can be filtered by its type and/or a name using the search tool above the list.
 
@@ -131,9 +131,10 @@ Under the Services section of the main navigation bar you will find the list of 
 
 Please, press the «Create services» button and fill in the form where general and specific fields should be completed:
 
-- *Choose* *type* *
+**General fileds:**
 
-Select from the dropdown a type of the services:
+- *Choose* *type* *
+        Select from the dropdown a type of the services:
 
 - CassDB (temporarily is unavailable)
 - ESInd
@@ -256,7 +257,9 @@ Under the Streams section of the main navigation bar you will find the list of s
 
 .. figure:: _static/CreateStreams.png
 
-Please, press the «Create Stream» button and fill in the form:
+Please, press the «Create Stream» button and fill in the form where generals and specific fields should be completed:
+
+**General fileds:**
 
 - *Choose* *type* *
 
@@ -286,6 +289,8 @@ Select from the dropdown a type of a stream:
         Select a service from the dropdown. 
 
         The range of available services is determined by a selected stream type.
+
+**Specific fileds:**
 
 
 **stream.t-stream** **Stream** **Type**
