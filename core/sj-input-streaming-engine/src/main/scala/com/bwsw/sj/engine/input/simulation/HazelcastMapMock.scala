@@ -1,7 +1,6 @@
 package com.bwsw.sj.engine.input.simulation
 
 import java.util
-import java.util.Map
 import java.util.concurrent.TimeUnit
 
 import com.bwsw.common.hazelcast.HazelcastConfig
@@ -17,21 +16,27 @@ import com.hazelcast.query.Predicate
 import scala.collection.mutable
 
 /**
+  * Mock for [[IMap]]
+  *
+  * @param config configuration parameters for hazelcast cluster
   * @author Pavel Tomskikh
   */
-abstract class HazelcastMapMock(params: HazelcastConfig) extends IMap[String, String] {
+abstract class HazelcastMapMock(config: HazelcastConfig) extends IMap[String, String] {
 
-  val map: mutable.Map[String, HazelcastValue] = mutable.Map()
-  protected val evictionComparator: Option[(HazelcastValue, HazelcastValue) => Boolean]
-  private val lookupHistoryMillis: Long = params.ttlSeconds * 1000
+  val map: mutable.Map[String, HazelcastMapValue] = mutable.Map()
 
-  override def containsKey(key: Any): Boolean =
+  protected val evictionComparator: Option[(HazelcastMapValue, HazelcastMapValue) => Boolean]
+  private val ttlMillis: Long = config.ttlSeconds * 1000
+
+  override def containsKey(key: Any): Boolean = {
+    evictExpiredEntries()
     map.contains(key.asInstanceOf[String])
+  }
 
   override def put(key: String, value: String): String = {
     val oldValue = map.get(key)
     val hits = oldValue.map(_.hits).getOrElse(0)
-    map.put(key, HazelcastValue(value, hits + 1, System.currentTimeMillis))
+    map.put(key, HazelcastMapValue(value, hits + 1, System.currentTimeMillis))
     evict()
     oldValue.map(_.value).orNull
   }
@@ -39,23 +44,33 @@ abstract class HazelcastMapMock(params: HazelcastConfig) extends IMap[String, St
   override def set(key: String, value: String): Unit =
     put(key, value)
 
-  private def evict(): Unit = {
-    if (lookupHistoryMillis > 0) {
-      val currentTime = System.currentTimeMillis
-      val expiredEntries = map.filter {
-        case (_, value) =>
-          value.lastAccessTime + lookupHistoryMillis < currentTime
-      }.keysIterator
-      expiredEntries.foreach(map.remove)
-    }
+  /**
+    * Performs eviction
+    */
+  def evict(): Unit = {
+    evictExpiredEntries()
 
-    if (map.size > params.maxSize) {
+    if (map.size > config.maxSize) {
       evictionComparator.foreach { comparator =>
         val keysForEviction = map.toSeq
           .sortWith((v1, v2) => comparator(v1._2, v2._2))
-          .drop(params.maxSize).map(_._1)
+          .drop(config.maxSize).map(_._1)
         keysForEviction.foreach(map.remove)
       }
+    }
+  }
+
+  /**
+    * Evicts expired entries
+    */
+  def evictExpiredEntries(): Unit = {
+    if (ttlMillis > 0) {
+      val currentTime = System.currentTimeMillis
+      val expiredEntries = map.filter {
+        case (_, value) =>
+          value.lastAccessTime + ttlMillis < currentTime
+      }.keysIterator
+      expiredEntries.foreach(map.remove)
     }
   }
 
@@ -73,7 +88,7 @@ abstract class HazelcastMapMock(params: HazelcastConfig) extends IMap[String, St
 
   override def putTransient(key: String, value: String, ttl: Long, timeunit: TimeUnit): Unit = ???
 
-  override def containsValue(value: scala.Any): Boolean = ???
+  override def containsValue(value: Any): Boolean = ???
 
   override def put(key: String, value: String, ttl: Long, timeunit: TimeUnit): String = ???
 
@@ -107,9 +122,9 @@ abstract class HazelcastMapMock(params: HazelcastConfig) extends IMap[String, St
 
   override def addLocalEntryListener(listener: EntryListener[_, _], predicate: Predicate[String, String], key: String, includeValue: Boolean): String = ???
 
-  override def entrySet(): util.Set[Map.Entry[String, String]] = ???
+  override def entrySet(): util.Set[util.Map.Entry[String, String]] = ???
 
-  override def entrySet(predicate: Predicate[_, _]): util.Set[Map.Entry[String, String]] = ???
+  override def entrySet(predicate: Predicate[_, _]): util.Set[util.Map.Entry[String, String]] = ???
 
   override def forceUnlock(key: String): Unit = ???
 
@@ -219,27 +234,42 @@ abstract class HazelcastMapMock(params: HazelcastConfig) extends IMap[String, St
 }
 
 object HazelcastMapMock {
-  def apply(params: HazelcastConfig): HazelcastMapMock = {
-    params.evictionPolicy match {
-      case EngineLiterals.lruDefaultEvictionPolicy => new LruEvictionHazelcastMapMock(params)
-      case EngineLiterals.lfuDefaultEvictionPolicy => new LfuEvictionHazelcastMapMock(params)
-      case _ => new NoneEvictionHazelcastMapMock(params)
+  def apply(config: HazelcastConfig): HazelcastMapMock = {
+    config.evictionPolicy match {
+      case EngineLiterals.lruDefaultEvictionPolicy => new LruEvictionHazelcastMapMock(config)
+      case EngineLiterals.lfuDefaultEvictionPolicy => new LfuEvictionHazelcastMapMock(config)
+      case _ => new NoneEvictionHazelcastMapMock(config)
     }
   }
 }
 
-case class HazelcastValue(value: String, hits: Int, lastAccessTime: Long)
-
-class LruEvictionHazelcastMapMock(params: HazelcastConfig) extends HazelcastMapMock(params) {
-  override protected val evictionComparator: Option[(HazelcastValue, HazelcastValue) => Boolean] =
-    Some((v1: HazelcastValue, v2: HazelcastValue) => v1.lastAccessTime > v2.lastAccessTime)
+case class HazelcastMapValue(value: String, hits: Int, lastAccessTime: Long) {
+  override def equals(obj: scala.Any): Boolean = obj match {
+    case hazelcastMapValue: HazelcastMapValue =>
+      value == hazelcastMapValue.value && hits == hazelcastMapValue.hits
+    case _ => super.equals(obj)
+  }
 }
 
-class LfuEvictionHazelcastMapMock(params: HazelcastConfig) extends HazelcastMapMock(params) {
-  override protected val evictionComparator: Option[(HazelcastValue, HazelcastValue) => Boolean] =
-    Some((v1: HazelcastValue, v2: HazelcastValue) => v1.hits > v2.hits)
+/**
+  * Mock for [[IMap]] with "Least Recently Used" eviction policy
+  */
+class LruEvictionHazelcastMapMock(config: HazelcastConfig) extends HazelcastMapMock(config) {
+  override protected val evictionComparator: Option[(HazelcastMapValue, HazelcastMapValue) => Boolean] =
+    Some((v1: HazelcastMapValue, v2: HazelcastMapValue) => v1.lastAccessTime > v2.lastAccessTime)
 }
 
-class NoneEvictionHazelcastMapMock(params: HazelcastConfig) extends HazelcastMapMock(params) {
-  override protected val evictionComparator: Option[(HazelcastValue, HazelcastValue) => Boolean] = None
+/**
+  * Mock for [[IMap]] with "Least Frequently Used" eviction policy
+  */
+class LfuEvictionHazelcastMapMock(config: HazelcastConfig) extends HazelcastMapMock(config) {
+  override protected val evictionComparator: Option[(HazelcastMapValue, HazelcastMapValue) => Boolean] =
+    Some((v1: HazelcastMapValue, v2: HazelcastMapValue) => v1.hits > v2.hits)
+}
+
+/**
+  * Mock for [[IMap]] without eviction policy
+  */
+class NoneEvictionHazelcastMapMock(config: HazelcastConfig) extends HazelcastMapMock(config) {
+  override protected val evictionComparator: Option[(HazelcastMapValue, HazelcastMapValue) => Boolean] = None
 }
