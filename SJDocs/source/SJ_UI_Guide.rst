@@ -1,8 +1,5 @@
-Stream Juggler
-==============
-
-UI Guide
-========
+Stream Juggler UI Guide
+=======================
 
 |juggler-logo|
 
@@ -25,8 +22,6 @@ The systems is available under Apache License v2.
 
 Get Started
 -----------
- .. warning:: 
-        *The section is under development!*
 
 Juggler has a user-friendly UI to create a processing sequence of arbitrary complexity, watch it in action and manage it using pre-created modules with flexible functionality. 
 For beginning go to the http://stream-juggler.z1.netpoint-dc.com:18080 .
@@ -47,15 +42,21 @@ A module can not process data streams without uploading an engine (that is a .ja
 
 An executor of the module utilises an instance/instances, i.e. a full range of settings for an exect handler/executor.
 
+See more information on the platform struture and architecture at the `General Concepts`_ section.
+
+Below you will find the information on uploading your module via UI and starting data processing.
+
 Providers 
 ---------
 At the first step a provider should be created.  That is the provider of sevices for input data transformation into a stream.
 
 .. figure:: _static/CreateProvider.png
 
-Please, press the «Create provider» button and fill in the form:
+Please, press the «Create provider» button and fill in the form where general fields and specific fields should be completed:
 
-#. *Choose* *type*  *
+**General fileds:**
+
+- *Choose* *type*  *
 
 .. figure:: _static/CreateProvider_Type.png
 
@@ -77,21 +78,27 @@ Please, press the «Create provider» button and fill in the form:
 
 The type of the provider is determined with the type of the instance you want to create and work with at the end.
 
-2. *Name* *
+- *Name* *
        Enter  a name of the provider here. It should be unique, must contain digits, lowercase letters or hyphens and start with a letter. 
 
-#. *Description* 
+- *Description* 
        Enter a description for the provider here.
 
-#. *Hosts* *
+- *Hosts* *
        Enter a provider host that determines a file locaction.
        Add more hosts clicking at the «Add Host» button and entering host names in the appeared lines.
 
-#. *Login*
+- *Login*
        Enter a provider login here if necessary
 
-#. *Password*
+- *Password*
        Enter a password for the provider if necessary.
+
+**Specific fields:**
+
+**JDBC** **Provider** **Type**
+
+- *Driver* * - Enter a provider driver for JDBC provider type. 
 
 .. note:: Required fields are marked with an asterisk (*)
 
@@ -105,7 +112,9 @@ In the list of providers the following actions can be performed:
 
 #. **View** provider`s name and description
 
-#. **Delete** a provider clicking at the corresponding icon in the Action block near the name of the provider you want to delete
+#. **Delete** a provider clicking at the corresponding icon in the Action block near the name of the provider you want to delete. 
+
+.. note:: A provider that is connected with a service can not be deleted.
 
 #. **Test** **Connection**
 
@@ -120,9 +129,9 @@ Under the Services section of the main navigation bar you will find the list of 
 
 .. figure:: _static/CreateService.png
 
-Please, press the «Create services» button and fill in the form:
+Please, press the «Create services» button and fill in the form where general and specific fields should be completed:
 
-1.  *Choose* *type* *
+- *Choose* *type* *
 
 Select from the dropdown a type of the services:
 
@@ -137,65 +146,75 @@ Select from the dropdown a type of the services:
 
 .. figure:: _static/CreateService_Type.png
 
-2. *Name* *
+- *Name* *
        Enter a name of the services.  It must contain digits, lowercase letters or hyphens and start with a letter.
 
-3.  *Description*
+-  *Description*
        Provide a description for the services here if necessary.
 
-4. *Provider* *
+- *Provider* *
        This field appears once the service type is chosen.
 
        Select a provider for the services here. 
  
        The range of providers available in the dropdown is determined by the chosen services type.
 
-5. *Namespace* *
-        It is a required field for the ZKCoord services type.
+**Specific fields:**
 
-        Please, specify a namespace here. It must contain digits, lowercase letters or underscore and start with a letter. 
+**ZKCoord** **Service** **Type**
 
-6.  *Index* *
-        This field appears when the ESInd services type is selected and is required for filling in.
+- *Namespace* *
+             Please, specify a namespace here. It must contain digits, lowercase letters or underscore and start with a letter. 
+
+**ESInd** **Service** **Type**
+
+-  *Index* *
+        This field is required for filling in.
 
         Please, specify an index of the services here. It must contain digits, lowercase letters or underscore and start with a letter. 
 
-7. *Login*
-        This field appears when the ESInd services type is selected and is not required for filling in.
+- *Login*
+        This field is not required for filling in.
 
         Please, specify a login of the services here. 
 
-8. *Password*
-       This field appears when the ESInd services type is selected and is not required for filling in.
+- *Password*
+       The field is not required for filling in.
 
        Please, specify a password of the services here. 
 
-9. *ZK provider* *
-       This field appears when the KfkQ services type is selected and is required for filling in.
+**KfkQ** **Service** **Type**
+
+- *ZK provider* *
+       This field is required for filling in.
 
        Please, select a zookeeper provider for the services here. 
 
-10. *ZK namespace* *
-        This field appears when the KfkQ services type is selected and is required for filling in.
+- *ZK namespace* *
+        This field is required for filling in.
 
         Please, specify a zookeeper namespace for the services here. 
 
-11. *Prefix* *
-        This field appears when the TstrQ services type is selected and is required for filling in.
+**TstrQ** **Service** **Type**
+
+- *Prefix* *
+        This field is required for filling in.
 
         Here a ZooKeeper path where metadata of transactions, streams are located should be specified.
 
         Please, enter a prefix for the services here. 
 
-12. *Token* *
-        This field appears when the TstrQ services type is selected and is required for filling in.
+- *Token* *
+        This field is required for filling in.
 
         A token is a unique key for getting access to the service. It must contain no more than 32 symbols.
 
         Please, enter a token for the services here. 
 
-13. *Database* *name* *
-        This field appears when the JDBC services type is selected and is required for filling in.
+**JDBC** **Service** **Type**
+
+- *Database* *name* *
+        This field required for filling in.
 
         Please, enter a database name for the services here. 
 
@@ -215,7 +234,9 @@ In the list of services the following actions can be performed:
 
 .. figure:: _static/ServicesList_ProviderInfo.png
 
-3. **Delete** a service clicking at the corresponding icon in the Action block near the name of the services you want to delete
+3. **Delete** a service clicking at the corresponding icon in the Action block near the name of the services you want to delete.
+
+.. note:: A service used by one of the streams can not be deleted.
 
 The list of services can be filtered by its type and/or a name using the search tool above the list.
 
@@ -237,59 +258,103 @@ Under the Streams section of the main navigation bar you will find the list of s
 
 Please, press the «Create Stream» button and fill in the form:
 
-1.  *Choose* *type* *
+- *Choose* *type* *
 
 Select from the dropdown a type of a stream:
 
 - stream.t-stream — It is an input stream of the T-Stream type
+
 - stream.kafka - It is an input stream of the Kafka type
+
 - jdbc-output -It is an output stream of the JDBC type
+ 
 - elasticsearch-output - It is an output stream of the Elasticsearch type
+ 
 - rest-output - It is an output stream of the REST type
 
 .. figure:: _static/CreateStream_Type.png
 
-2. *Name* *
+- *Name* *
         Enter a stream name here. It must contain lowercase letters, digits or hyphens only.
 	
 	For 'jdbc-output' stream a name must contain lowercase letters, digits or underscores.
 
-3. *Description*
+- *Description*
         Provide a description for the stream here if necessary.
 
-4. *Partitions* *
-        Partitions is a part of data stream. Partitions are a special conception which handle regular queues in multi-queues, e.g. a stream with one partition is a queue, but a stream with two partitions is like a two different queues. Using streams with many partitions allows to handle parallelism properly as engine instances divide existing partitions fairly.
-
-        Enter a number of partitions. It must be a positive integer.
-
-        This field is a required one for such stream types as *stream.t-stream*, *stream.kafka*, *jdbc-output* and *rest-output*.
-
-5. *Service* *
+- *Service* *
         Select a service from the dropdown. 
 
         The range of available services is determined by a selected stream type.
 
-6. *Force*
+
+**stream.t-stream** **Stream** **Type**
+
+- *Partitions* *
+        Partitions is a part of data stream. Partitions are a special conception which handle regular queues in multi-queues, e.g. a stream with one partition is a queue, but a stream with two partitions is like a two different queues. Using streams with many partitions allows to handle parallelism properly as engine instances divide existing partitions fairly.
+
+        Enter a number of partitions. It must be a positive integer.
+
+- *Force*
         This field indicates if a stream should be removed and re-created by force (if it exists). Set it «True» or «False». It is set as «False» by default.
 
-        This field is available for such stream types as *stream.t-stream*, *stream.kafka*, *jdbc-output*. The field is optional.
-
-7. *Tags*
+- *Tags*
         Enter a tag\tags for the stream here.
 
-        This field is an available one for such stream types as *stream.t-stream*, *stream.kafka*, *jdbc-output*. The field is optional.
+**stream.kafka** **Stream** **Type**
 
-8. *Replication* *Factor* *
+- *Partitions* *
+        Partitions is a part of data stream. Partitions are a special conception which handle regular queues in multi-queues, e.g. a stream with one partition is a queue, but a stream with two partitions is like a two different queues. Using streams with many partitions allows to handle parallelism properly as engine instances divide existing partitions fairly.
+
+        Enter a number of partitions. It must be a positive integer.
+
+- *Force*
+        This field indicates if a stream should be removed and re-created by force (if it exists). Set it «True» or «False». It is set as «False» by default.
+
+- *Tags*
+        Enter a tag\tags for the stream here.
+	
+- *Replication* *Factor* *
        Replication factor is the number of zookeeper nodes to utilize.
 
        Enter a replication factor here. It must be an integer.
+       
+**jdbc-output** **Stream** **Type**
 
-       This field is required for the *stream.kafka* stream type.
+- *Partitions* *
+        Partitions is a part of data stream. Partitions are a special conception which handle regular queues in multi-queues, e.g. a stream with one partition is a queue, but a stream with two partitions is like a two different queues. Using streams with many partitions allows to handle parallelism properly as engine instances divide existing partitions fairly.
 
-9. *Primary*
+        Enter a number of partitions. It must be a positive integer.
+
+- *Force*
+        This field indicates if a stream should be removed and re-created by force (if it exists). Set it «True» or «False». It is set as «False» by default.
+
+- *Tags*
+        Enter a tag\tags for the stream here.
+	
+- *Primary*
        Enter a primary key here. It is a primary key field name used in sql database.
 
-       This field is available for *jdbc-output* stream type. The field is optional.
+**rest-output** **Stream** **Type**
+
+- *Partitions* *
+        Partitions is a part of data stream. Partitions are a special conception which handle regular queues in multi-queues, e.g. a stream with one partition is a queue, but a stream with two partitions is like a two different queues. Using streams with many partitions allows to handle parallelism properly as engine instances divide existing partitions fairly.
+
+        Enter a number of partitions. It must be a positive integer.
+
+- *Force*
+        This field indicates if a stream should be removed and re-created by force (if it exists). Set it «True» or «False». It is set as «False» by default.
+
+- *Tags*
+        Enter a tag\tags for the stream here.
+		
+**elasticsearch-output** **Stream** **Type**
+
+- *Force*
+        This field indicates if a stream should be removed and re-created by force (if it exists). Set it «True» or «False». It is set as «False» by default.
+
+- *Tags*
+        Enter a tag\tags for the stream here.
 
 .. note:: Required fields are marked with an asterisk (*)
 
@@ -307,7 +372,9 @@ In the list of streams the following actions can be performed:
 
 .. figure:: _static/StreamsList_ServiceInfo.png
 
-3. **Delete** a stream clicking at the corresponding icon in the Action block near the name of the stream you want to delete
+3. **Delete** a stream clicking at the corresponding icon in the Action block near the name of the stream you want to delete.
+
+.. note:: A stream used by any instance can not be deleted.
 
 The list of streams can be filtered by its type and/or a name using the search tool above the list.
 
@@ -379,7 +446,9 @@ In the list of modules the following actions can be performed:
 
 2. **Download** a module to your computer by clicking at the download icon in the Action block near the name of the module you want to download. You need only to specify a folder where to store the module to and click the «Save» button.
 
-3. **Delete** a module clicking at the corresponding icon in the Action block near the name of the module you want to delete
+3. **Delete** a module clicking at the corresponding icon in the Action block near the name of the module you want to delete.
+
+.. note:: A module used by any instance can not be deleted.
 
 The list of modules can be filtered by its type and/or a name using the search tool above the list.
 
