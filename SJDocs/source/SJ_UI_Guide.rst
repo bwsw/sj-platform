@@ -478,75 +478,147 @@ Each type of instance requires specific settings to be filled in alongside with 
 
 Please, review the tables with general and specific fields description below.
 
-.. csv-table:: **General instance fields**
-  :header: "Field name","Description", "Example"
-  :widths: 25, 60, 25
+**General fields**
+ 
+- Name *
+    A unique name of an instance. Must contain only letters, digits or hyphens, and starts with a letter.
+    
+- *Description*
+    Description of an instance
+    
+- Parallelism
+    Value may be integer or `max` string. If `max`, then parallelism equals minimum count of partitions of streams (1 by default). For an input streaming instance it can not exceed the total number of back-ups (Backup count + Async-backup-count)
+    
+- Options
+    Json with options for module
+    
+- Per-Task-Cores
+    Quantity of cores for task (1 by default)
+    
+- Per-Task-Ram
+    Amount of RAM for task (1024 by default)
+    
+- JVM Options
+    Json with jvm-options. It is important to emphasize that MESOS kills a task if it uses more memory than it is specified in the 'perTaskRam' parameter. There are no default options. The options defined in the example fit the Per-Task-Ram = 192 and it's recommended for launching modules. In general, the sum of the following parameters: `Xmx`, `XX:MaxDirectMemorySize` and `XX:MaxMetaspaceSize` should be less than `Per-Task-Ram`; `XX:MaxMetaspaceSize` must be grater or larger than `Xmx` by 32m.
 
-  "Name*", "A unique name of an instance. Must contain only letters, digits or hyphens, and starts with a letter.", "stub-reg-instance-1"
-  "Description", "Description of instance", "Test instance for regular module"
-  "Parallelism", "Value may be integer or `max` string. If `max`, then parallelism equals minimum count of partitions of streams (1 by default). For an input streaming instance it can not exceed the total number of back-ups (Backup count + Async-backup-count)","*max*" 
-  "Options", "Json with options for module", "{ 'opt1' : 10 }" 
-  "Per-Task-Cores", "Quantity of cores for task (1 by default)", "0.5"
-  "Per-Task-Ram", "Amount of RAM for task (1024 by default)", "256"
-  "JVM Options", "Json with jvm-options. It is important to emphasize that MESOS kills a task if it uses more memory than it is specified in the 'perTaskRam' parameter. There are no default options. The options defined in the example fit the Per-Task-Ram = 192 and it's recommended for launching modules. In general, the sum of the following parameters: `Xmx`, `XX:MaxDirectMemorySize` and `XX:MaxMetaspaceSize` should be less than `Per-Task-Ram`; `XX:MaxMetaspaceSize` must be grater or larger than `Xmx` by 32m .","{'-Xmx': '32m', '-XX:MaxDirectMemorySize=': '4m', '-XX:MaxMetaspaceSize=': '96m' }"
-  "Node Attributes", "Json with map attributes for framework", "{ '+tag1' : 'val1', '-tag2' : 'val2'}" 
-  "Coordination Service*", "Service name of zookeeper service", "zk_service"
-  "Environment Variables", "Used in framework", "{ 'LIBPROCESS_IP' : '176.1.0.17' }"
-  "Performance Reporting Interval", "Interval for creating a report of module performance metrics in ms (60000 by default)", 5000696 
+- Node Attributes
+    Json with map attributes for framework
+    
+- Coordination Service*
+    Service name of ZooKeeper service
+    
+-  Environment Variables
+    Variables used in the framework
+    
+- Performance Reporting Interval 
+      Interval for creating a report of module performance metrics in ms (60000 by default)
 
-.. csv-table:: **Input-streaming instance fields**
-  :header: "Field name","Description", "Example"
-  :widths: 25, 60, 25
-
-  "Checkpoint Mode*", "Value must be 'time-interval' for checkpointing after a set period of time, or 'every-nth' for performing a checkpoint after a set number of events", "every-nth"
-  "Checkpoint Interval*", "Interval for performing the checkpoint. If Checkpoint Mode is  'time-interval' the value is set in ms.  If Checkpoint Mode is 'every-nth' the value is the number of events after which the checkpoint is done.", "100"
-  "Outputs*", "Names of output streams (must be stream.t-stream only)",  "'s3', 's4'" 
-  "Duplicate Check", "Flag points if an envelope (an envelope key) has to be checked for duplication or not. (False by default)", "true"
-  "Lookup History*", "How long a unique key of envelope can stay in a queue for checking envelopes for duplication (in seconds). If it does not equal to 0, entries that are older than this time and not updated for this time are evicted automatically accordingly to an eviction-policy. Valid values are integers between 0 and Integer.MAX VALUE. Default value is 0, which means infinite.", "1000"
-  "Queue Max Size*", "Maximum size of the queue that contains the unique keys of envelopes. When maximum size is reached, the queue is evicted basing on the policy defined at default-eviction-policy (should be greater than 271)", 500
-  "Default Eviction Policy", "Can be 'LRU' (Least Recently Used) or 'LFU' (Least Frequently Used) or 'NONE' (NONE by default)",  "LRU"
-  "Eviction Policy", "An eviction policy of input envelope duplicates. Can be 'fix-time' for storing an envelope key for the period specified in Lookup History, or 'expanded-time' meaning that if a duplicate envelope appears the time of the presence of the key will be updated ('fix-time' by default).", "fix-time" 
-  "Backup Count", "The number of backup copies you want to have (0 by default, maximum 6). Sync backup operations have a blocking cost which may lead to latency issues. You can skip this field if you do not want your entries to be backed up, e.g. if performance is more important than backing up.", 2 
-  "Async-Backup-Count", "The flag points if an envelope (an envelope key) has to be checked for duplication or not (0 by default). The backup operations are performed at some point in time (non-blocking operation). You can skip this field if you do not want your entries to be backed up, e.g. if performance is more important than backing up.", 3 
-
-.. csv-table:: **Regular-streaming instance fields**
-  :header: "Field name","Description", "Example"
-  :widths: 25, 60, 25
-
-  "Checkpoint Mode*", "Value must be 'time-interval' for checkpointing after a set period of time, or 'every-nth' for performing a checkpoint after a set number of events", "every-nth"
-  "Checkpoint Interval*", "Interval for performing the checkpoint. If Checkpoint Mode is  'time-interval' the value is set in ms.  If Checkpoint Mode is 'every-nth' the value is the number of events after which the checkpoint is done.", "100"
-  "Inputs*", "Names of input streams. Requires input mode: 'full' or 'split' ('split' is default). The stream must exist in database (must be stream.t-stream or stream.kafka)",  "str1/full" 
-  "Outputs*", "Names of output streams (must be stream.t-stream only)",  "s3" 
-  "Start From", "Value must be 'newest' (the system reads nothing, waits for new events), 'oldest' (the system reads all input stream events) or datetime (that requires specifying a timestamp and means the system reads events from the stream starting from the specified moment). If an instance have kafka input streams, then 'Start from' must be 'oldest' or 'newest' ('newest' is default). If an instance have kafka input streams, then 'Start from' must be 'oldest' or 'newest' ('newest' is default)", "newest" 
-  "State Management", "Must be 'ram' or 'none' ('none' is default)", "ram"
-  "State Full Checkpoint", "Interval for full checkpoint (100 by default)", 5 
-  "Event-Wait-Idle Time", "Idle timeout, when not messages (1000 is default)", 10000 
-..  "InputAvroSchema", "Avro schema for input objects. Requires if input object is instance of 'org.apache.avro.generic.GenericRecord':https://avro.apache.org/docs/1.8.1/api/java/org/apache/avro/generic/GenericRecord.html@.", "{'type':'record', 'name':'rec', 'fields':[{'name':'f1','type':string'}]}"
-
-
-.. csv-table:: **Output-streaming instance fields**
-  :header: "Field name","Description", "Example"
-  :widths: 25, 60, 25
+**Input-streaming instance fields**
   
-  "Checkpoint Mode*", "Value must be 'time-interval' for checkpointing after a set period of time, or 'every-nth' for performing a checkpoint after a set number of events. For output streams 'every-nth' is only available.", "every-nth"
-  "Checkpoint Interval*", "Interval for performing the checkpoint. If Checkpoint Mode is  'time-interval' the value is set in ms.  If Checkpoint Mode is 'every-nth' the value is the number of events after which the checkpoint is done.", "100"
-  "Inputs*", "Names of input stream. Must be only 't-stream' type. Stream for this type of module is 'split' only. Stream must exist in database.",  "str1" 
-  "Outputs*", "Names of output stream (must be elasticsearch-output, jdbc-ouptut or rest-output)",  "s3" 
-  "Start From", "Value must be 'newest' (the system reads nothing, waits for new events), 'oldest' (the system reads all input stream events) or datetime (that requires specifying a timestamp and means the system reads events from the stream starting from the specified moment).", "newest" 
+- Checkpoint Mode*
+       Value must be 'time-interval' for checkpointing after a set period of time, or 'every-nth' for performing a checkpoint after a set number of events
+       
+- Checkpoint Interval* 
+       Interval for performing the checkpoint. If Checkpoint Mode is  'time-interval' the value is set in ms.  If Checkpoint Mode is 'every-nth' the value is the number of events after which the checkpoint is done.
+       
+- Outputs*
+       Names of output streams (must be stream.t-stream only).
+       
+- Duplicate Check
+       The flag points if an envelope (an envelope key) has to be checked for duplication or not. False by default.
+
+- Lookup History*
+       How long a unique key of envelope can stay in a queue for checking envelopes for duplication (in seconds). If it does not equal to 0, entries that are older than this time and not updated for this time are evicted automatically accordingly to an eviction-policy. Valid values are integers between 0 and Integer.MAX VALUE. Default value is 0, which means infinite.
+       
+- Queue Max Size*
+        Maximum size of the queue that contains the unique keys of envelopes. When maximum size is reached, the queue is evicted basing on the policy defined at default-eviction-policy (should be greater than 271).
+	
+- Default Eviction Policy
+        Can be 'LRU' (Least Recently Used) or 'LFU' (Least Frequently Used) or 'NONE' (NONE by default).
+  
+- Eviction Policy
+        An eviction policy of input envelope duplicates. Can be 'fix-time' for storing an envelope key for the period specified in Lookup History, or 'expanded-time' meaning that if a duplicate envelope appears the time of the presence of the key will be updated ('fix-time' by default).
+	
+- Backup Count 
+       The number of backup copies you want to have (0 by default, maximum 6). Sync backup operations have a blocking cost which may lead to latency issues. You can skip this field if you do not want your entries to be backed up, e.g. if performance is more important than backing up.
+
+- Async-Backup-Count
+       The flag points if an envelope (an envelope key) has to be checked for duplication or not (0 by default). The backup operations are performed at some point in time (non-blocking operation). You can skip this field if you do not want your entries to be backed up, e.g. if performance is more important than backing up.
+
+**Regular-streaming instance fields**
+
+- Checkpoint Mode*
+     Value must be 'time-interval' for checkpointing after a set period of time, or 'every-nth' for performing a checkpoint after a set number of events.
+ 
+- Checkpoint Interval* 
+     Interval for performing the checkpoint. If Checkpoint Mode is  'time-interval' the value is set in ms.  If Checkpoint Mode is 'every-nth' the value is the number of events after which the checkpoint is done.
+     
+- Inputs*
+     Names of input streams. Requires input mode: 'full' or 'split' ('split' is default). The stream must exist in database (must be stream.t-stream or stream.kafka).
+     
+- Outputs*
+     Names of output streams (must be stream.t-stream only).
+     
+- Start From
+     Value must be 'newest' (the system reads nothing, waits for new events), 'oldest' (the system reads all input stream events) or datetime (that requires specifying a timestamp and means the system reads events from the stream starting from the specified moment). If an instance have kafka input streams, then 'Start from' must be 'oldest' or 'newest' ('newest' is default). If an instance have kafka input streams, then 'Start from' must be 'oldest' or 'newest' ('newest' is default).
+
+- State Management
+     Must be 'ram' or 'none' ('none' is default).
+     
+- State Full Checkpoint
+     Interval for full checkpoint (100 by default)
+     
+- Event-Wait-Idle Time
+     Idle timeout, when not messages (1000 is default)
+     
 ..  "InputAvroSchema", "Avro schema for input objects. Requires if input object is instance of 'org.apache.avro.generic.GenericRecord':https://avro.apache.org/docs/1.8.1/api/java/org/apache/avro/generic/GenericRecord.html@.", "{'type':'record', 'name':'rec', 'fields':[{'name':'f1','type':string'}]}"
 
-.. csv-table:: **Batch-streaming instance fields**
-  :header: "Field name","Description", "Example"
-  :widths: 25, 60, 25
 
-  "Outputs*", "Names of output streams (must be stream.t-stream only)", 's3'
-  "Window", "Number of batches that will be contained in a window (1 by default). Must be greater than zero.", 3
-  "Sliding Interval", The interval at which a window will be shifted (сount of batches that will be removed from the window after its processing). Must be greater than zero and less than or equal to the window (1 by default)", 3 
-  "Inputs*", "Names of input streams.Requires input mode: 'full' or 'split' ('split' is default). The stream must exist in database (must be stream.t-stream or stream.kafka)",  "str1/full" 
-  "Start From", "Value must be 'newest' (the system reads nothing, waits for new events), 'oldest' (the system reads all input stream events) or datetime (that requires specifying a timestamp and means the system reads events from the stream starting from the specified moment). If an instance have kafka input streams, then 'Start from' must be 'oldest' or 'newest' ('newest' is default). If instance have kafka input streams, then the value here can be 'oldest' or 'newest' (newest is default)", "newest"
-  "State Management", "Must be 'ram' or 'none' ('none' is default)","ram" 
-  "State Full Checkpoint", "Interval for full checkpoint (100 is default)", 5 
-  "Event-Wait-Time", "Idle timeout, when there are no messages (1000 by default)", 10000 
+**Output-streaming instance fields**
+   
+- Checkpoint Mode*
+      Value must be 'time-interval' for checkpointing after a set period of time, or 'every-nth' for performing a checkpoint after a set number of events. For output streams 'every-nth' is only available.
+      
+- Checkpoint Interval*
+      Interval for performing the checkpoint. If Checkpoint Mode is 'time-interval' the value is set in ms.  If Checkpoint Mode is 'every-nth' the value is the number of events after which the checkpoint is done.
+      
+- Inputs* 
+      Names of input stream. Must be only 't-stream' type. Stream for this type of module is 'split' only. Stream must exist in database.
+      
+- Outputs* 
+     Names of output stream (must be elasticsearch-output, jdbc-ouptut or rest-output).
+     
+- Start From
+     Value must be 'newest' (the system reads nothing, waits for new events), 'oldest' (the system reads all input stream events) or datetime (that requires specifying a timestamp and means the system reads events from the stream starting from the specified moment).
+     
+..  "InputAvroSchema", "Avro schema for input objects. Requires if input object is instance of 'org.apache.avro.generic.GenericRecord':https://avro.apache.org/docs/1.8.1/api/java/org/apache/avro/generic/GenericRecord.html@.", "{'type':'record', 'name':'rec', 'fields':[{'name':'f1','type':string'}]}"
+
+**Batch-streaming instance fields**
+
+- Outputs* 
+     Names of output streams (must be stream.t-stream only).
+
+- Window 
+    Number of batches that will be contained in a window (1 by default). Must be greater than zero.
+    
+- Sliding Interva
+    The interval at which a window will be shifted (сount of batches that will be removed from the window after its processing). Must be greater than zero and less than or equal to the window (1 by default)
+   
+- Inputs*
+    Names of input streams. Requires input mode: 'full' or 'split' ('split' is default). The stream must exist in database (must be stream.t-stream or stream.kafka)
+    
+- Start From 
+    Value must be 'newest' (the system reads nothing, waits for new events), 'oldest' (the system reads all input stream events) or datetime (that requires specifying a timestamp and means the system reads events from the stream starting from the specified moment). If an instance have kafka input streams, then 'Start from' must be 'oldest' or 'newest' ('newest' is default). If instance have kafka input streams, then the value here can be 'oldest' or 'newest' (newest is default).
+    
+- State Management
+    Must be 'ram' or 'none' ('none' is default).
+
+- State Full Checkpoint
+    Interval for full checkpoint (100 is default).
+    
+- Event-Wait-Time
+    Idle timeout, when there are no messages (1000 by default).
+    
 ..  "InputAvroSchema", "Avro schema for input objects. Requires if input object is instance of 'org.apache.avro.generic.GenericRecord':https://avro.apache.org/docs/1.8.1/api/java/org/apache/avro/generic/GenericRecord.html@.", "{'type':'record', 'name':'rec', 'fields':[{'name':'f1','type':string'}]}"
   .. note:: Required fields are marked with an asterisk (*)
 Click «Create» at the bottom and see the instance is in the list of instances now. Details of the node are displayed to the right when clicking the instance in the list. 
