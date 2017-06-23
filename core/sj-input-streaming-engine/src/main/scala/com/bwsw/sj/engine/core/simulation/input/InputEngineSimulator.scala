@@ -20,16 +20,20 @@ package com.bwsw.sj.engine.core.simulation.input
 
 import java.nio.charset.Charset
 
-import com.bwsw.sj.common.engine.core.input.InputStreamingExecutor
+import com.bwsw.sj.common.engine.core.entities.InputEnvelope
+import com.bwsw.sj.common.engine.core.input.{InputStreamingExecutor, InputStreamingResponse}
+import com.bwsw.sj.engine.input.eviction_policy.InputInstanceEvictionPolicy
 import io.netty.buffer.{ByteBuf, Unpooled}
 
 /**
-  * @param executor implementation of [[InputStreamingExecutor]] under test
-  * @param charset  encoding of incoming data
+  * @param executor       implementation of [[InputStreamingExecutor]] under test
+  * @param evictionPolicy eviction policy of duplicate envelopes
+  * @param charset        encoding of incoming data
   * @tparam T type of outgoing data
   * @author Pavel Tomskikh
   */
 class InputEngineSimulator[T <: AnyRef](executor: InputStreamingExecutor[T],
+                                        evictionPolicy: InputInstanceEvictionPolicy,
                                         charset: Charset = Charset.forName("UTF-8")) {
 
   private val inputBuffer: ByteBuf = Unpooled.buffer()
@@ -48,4 +52,59 @@ class InputEngineSimulator[T <: AnyRef](executor: InputStreamingExecutor[T],
     */
   def prepare(data: String): Unit =
     inputBuffer.writeCharSequence(data, charset)
+
+  /**
+    * Sends byte buffer to [[executor]] while it can tokenize buffer and returns output data
+    *
+    * @param duplicateCheck indicates that every envelope has to be checked has to be checked on duplication
+    * @param clearBuffer    indicates that byte buffer must be cleared
+    * @return collection of output data
+    */
+  def process(duplicateCheck: Boolean, clearBuffer: Boolean = true): Seq[OutputData[T]] = {
+    def processOneInterval(outputDatas: Seq[OutputData[T]]): Seq[OutputData[T]] = {
+      val maybeOutputData = executor.tokenize(inputBuffer).map {
+        interval =>
+          val maybeInputEnvelope = executor.parse(inputBuffer, interval)
+          val isNotDuplicate = maybeInputEnvelope.map(checkDuplication(duplicateCheck))
+          val response = executor.createProcessedMessageResponse(maybeInputEnvelope, isNotDuplicate.getOrElse(false))
+          inputBuffer.readerIndex(interval.finalValue + 1)
+          inputBuffer.discardReadBytes()
+
+          OutputData(maybeInputEnvelope, isNotDuplicate, response)
+      }
+
+      maybeOutputData match {
+        case Some(outputData) => processOneInterval(outputDatas :+ outputData)
+        case None => outputDatas
+      }
+    }
+
+    val outputDatas = processOneInterval(Seq.empty)
+    if (clearBuffer) clear()
+    outputDatas
+  }
+
+  /**
+    * Removes all data from byte buffer
+    */
+  def clear(): Unit = inputBuffer.clear()
+
+  private def checkDuplication(duplicateCheck: Boolean)(inputEnvelope: InputEnvelope[T]): Boolean = {
+    if (duplicateCheck || inputEnvelope.duplicateCheck)
+      evictionPolicy.checkForDuplication(inputEnvelope.key)
+    else
+      true
+  }
 }
+
+/**
+  * Contains data from outputs of an [[InputStreamingExecutor]]
+  *
+  * @param inputEnvelope  result of [[InputStreamingExecutor.parse]]
+  * @param isNotDuplicate indicates that [[inputEnvelope]] is not duplicate
+  * @param response       response that will be sent to a client after an [[inputEnvelope]] has been processed
+  * @tparam T type of outgoing data
+  */
+case class OutputData[T <: AnyRef](inputEnvelope: Option[InputEnvelope[T]],
+                                   isNotDuplicate: Option[Boolean],
+                                   response: InputStreamingResponse)
