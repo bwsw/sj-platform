@@ -72,7 +72,7 @@ abstract class InputTaskEngine(manager: InputTaskManager,
     instance.defaultEvictionPolicy,
     instance.queueMaxSize)
   private val hazelcast = new Hazelcast(hazelcastMapName, hazelcastConfig)
-  private val evictionPolicy = InputInstanceEvictionPolicy(instance, hazelcast)
+  private val evictionPolicy = InputInstanceEvictionPolicy(instance.evictionPolicy, hazelcast)
   protected val checkpointInterval: Long = instance.checkpointInterval
 
   /**

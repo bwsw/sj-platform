@@ -19,22 +19,14 @@
 package com.bwsw.sj.engine.input.eviction_policy
 
 import com.bwsw.common.hazelcast.HazelcastInterface
-import com.bwsw.sj.common.si.model.instance.InputInstance
-import com.bwsw.sj.common.dal.model.instance.InputInstanceDomain
 
 /**
   * Provides methods are responsible for a fix time eviction policy of input envelope duplicates.
   * In this case a specific key will be kept within fix time
   *
-  * @param instance Input instance contains a settings of an eviction policy
-  *                 (message TTL [[InputInstanceDomain.lookupHistory]],
-  *                 a default eviction policy [[InputInstanceDomain.defaultEvictionPolicy]],
-  *                 a maximum size of message queue [[InputInstanceDomain.queueMaxSize]],
-  *                 async and sync backup count [[InputInstanceDomain.asyncBackupCount]] [[InputInstanceDomain.backupCount]])
+  * @param hazelcast wrapper for hazelcast map
   */
-
-class FixTimeEvictionPolicy(instance: InputInstance, hazelcast: HazelcastInterface)
-  extends InputInstanceEvictionPolicy(instance, hazelcast) {
+class FixTimeEvictionPolicy(hazelcast: HazelcastInterface) extends InputInstanceEvictionPolicy(hazelcast) {
 
   /**
     * Checks whether a specific key is duplicate or not

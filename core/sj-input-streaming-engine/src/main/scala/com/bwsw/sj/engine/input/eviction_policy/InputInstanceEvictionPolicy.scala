@@ -19,7 +19,6 @@
 package com.bwsw.sj.engine.input.eviction_policy
 
 import com.bwsw.common.hazelcast.HazelcastInterface
-import com.bwsw.sj.common.si.model.instance.InputInstance
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.hazelcast.core.IMap
 import org.slf4j.{Logger, LoggerFactory}
@@ -27,16 +26,11 @@ import org.slf4j.{Logger, LoggerFactory}
 /**
   * Provides methods are responsible for an eviction policy of input envelope duplicates
   *
-  * @param instance  Input instance contains a settings of an eviction policy
-  *                  (message TTL [[InputInstance.lookupHistory]],
-  *                  a default eviction policy [[InputInstance.defaultEvictionPolicy]],
-  *                  a maximum size of message queue [[InputInstance.queueMaxSize]],
-  *                  async and sync backup count [[InputInstance.asyncBackupCount]] [[InputInstance.backupCount]])
   * @param hazelcast wrapper for hazelcast map
   * @author Kseniya Mikhaleva
   */
 
-abstract class InputInstanceEvictionPolicy(instance: InputInstance, hazelcast: HazelcastInterface) {
+abstract class InputInstanceEvictionPolicy(hazelcast: HazelcastInterface) {
   protected val logger: Logger = LoggerFactory.getLogger(this.getClass)
   protected val stubValue: String = "stub"
   protected val uniqueEnvelopes: IMap[String, String] = getUniqueEnvelopes
@@ -66,11 +60,11 @@ object InputInstanceEvictionPolicy {
     *
     * @return Eviction policy of duplicate envelopes
     */
-  def apply(instance: InputInstance, hazelcast: HazelcastInterface): InputInstanceEvictionPolicy = {
-    instance.evictionPolicy match {
-      case EngineLiterals.fixTimeEvictionPolicy => new FixTimeEvictionPolicy(instance, hazelcast)
-      case EngineLiterals.expandedTimeEvictionPolicy => new ExpandedTimeEvictionPolicy(instance, hazelcast)
-      case _ => throw new RuntimeException(s"There is no eviction policy named: ${instance.evictionPolicy}")
+  def apply(evictionPolicy: String, hazelcast: HazelcastInterface): InputInstanceEvictionPolicy = {
+    evictionPolicy match {
+      case EngineLiterals.fixTimeEvictionPolicy => new FixTimeEvictionPolicy(hazelcast)
+      case EngineLiterals.expandedTimeEvictionPolicy => new ExpandedTimeEvictionPolicy(hazelcast)
+      case _ => throw new RuntimeException(s"There is no eviction policy named: $evictionPolicy")
     }
   }
 }
