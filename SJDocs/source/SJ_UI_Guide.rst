@@ -29,7 +29,7 @@ Get Started
         *The section is under development!*
 
 Juggler has a user-friendly UI to create a processing sequence of arbitrary complexity, watch it in action and manage it using pre-created modules with flexible functionality. 
-For beginning go to the http://stream-juggler.z1.netpoint-dc.com:18080 and enter the platform using your login and password.
+For beginning go to the http://stream-juggler.z1.netpoint-dc.com:18080 .
 
 Now you are ready to work with the system. 
 
@@ -251,6 +251,8 @@ Select from the dropdown a type of a stream:
 
 2. *Name* *
         Enter a stream name here. It must contain lowercase letters, digits or hyphens only.
+	
+	For 'jdbc-output' stream a name must contain lowercase letters, digits or underscores.
 
 3. *Description*
         Provide a description for the stream here if necessary.
@@ -383,7 +385,7 @@ The list of modules can be filtered by its type and/or a name using the search t
 
 
 Instances
-=========
+---------
 Module uses a specific instance to personalize its work.
 
 Instance is a full range of settings to perfom an exact executor type.
