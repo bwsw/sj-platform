@@ -20,6 +20,7 @@ package com.bwsw.sj.engine.input.task
 
 import java.util.concurrent.{ArrayBlockingQueue, TimeUnit}
 
+import com.bwsw.common.hazelcast.{Hazelcast, HazelcastConfig}
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.engine.TaskEngine
 import com.bwsw.sj.common.si.model.instance.InputInstance
@@ -63,7 +64,15 @@ abstract class InputTaskEngine(manager: InputTaskManager,
   private val instance = manager.instance.asInstanceOf[InputInstance]
   private val environmentManager = createModuleEnvironmentManager()
   private val executor: InputStreamingExecutor[AnyRef] = manager.getExecutor(environmentManager)
-  private val evictionPolicy = InputInstanceEvictionPolicy(instance)
+  private val hazelcastMapName: String = instance.name + "-" + "inputEngine"
+  private val hazelcastConfig: HazelcastConfig = HazelcastConfig(
+    instance.lookupHistory,
+    instance.asyncBackupCount,
+    instance.backupCount,
+    instance.defaultEvictionPolicy,
+    instance.queueMaxSize)
+  private val hazelcast = new Hazelcast(hazelcastMapName, hazelcastConfig)
+  private val evictionPolicy = InputInstanceEvictionPolicy(instance, hazelcast)
   protected val checkpointInterval: Long = instance.checkpointInterval
 
   /**

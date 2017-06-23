@@ -18,6 +18,7 @@
  */
 package com.bwsw.sj.engine.input.eviction_policy
 
+import com.bwsw.common.hazelcast.HazelcastInterface
 import com.bwsw.sj.common.si.model.instance.InputInstance
 import com.bwsw.sj.common.dal.model.instance.InputInstanceDomain
 
@@ -32,7 +33,8 @@ import com.bwsw.sj.common.dal.model.instance.InputInstanceDomain
   *                 async and sync backup count [[InputInstanceDomain.asyncBackupCount]] [[InputInstanceDomain.backupCount]])
   */
 
-class ExpandedTimeEvictionPolicy(instance: InputInstance) extends InputInstanceEvictionPolicy(instance) {
+class ExpandedTimeEvictionPolicy(instance: InputInstance, hazelcast: HazelcastInterface)
+  extends InputInstanceEvictionPolicy(instance, hazelcast) {
   /**
     * Checks whether a specific key is duplicate or not and if it is update a value by the key
     *
