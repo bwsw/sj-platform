@@ -23,10 +23,18 @@ The systems is available under Apache License v2.
 Get Started
 -----------
 
-Juggler has a user-friendly UI to create a processing sequence of arbitrary complexity, watch it in action and manage it using pre-created modules with flexible functionality. 
-For beginning go to the http://stream-juggler.z1.netpoint-dc.com:18080 .
+Stream Juggler has a user-friendly UI to create a processing sequence of arbitrary complexity, watch it in action and manage it using pre-created modules with flexible functionality. 
 
-Now you are ready to work with the system. 
+If you are a deveoper and are willing to use the platform you need to know of some prerequisites for the platform. These are required settings and engines for launching a module. Find more information about that in the `Configuration Settings`_ and the `Custom Files`_ sections of this document. And make sure the following services are deployed:
+
+- Mesos
+- Marathon 
+- ZooKeeper
+- MongoDB
+- an external storage (ElasticSearch, JDBC, etc.)
+- Kafka (if you are going to work with Kafka input data).
+
+Once everything is ready you can move to the Sream Juggler platform.
 
 The platform allows to upload your custom module for data stream processing with prerequisite engines and configuration settings. 
 
@@ -40,7 +48,7 @@ For example, if you want to create a regular module that will process Kafka inpu
 
 A module can not process data streams without uploading an engine (that is a .jar file) that launches the module and contains required configuration settings. More information about these settings can be found in the `Configuration Settings`_ and the `Custom Files`_ sections of this document.
 
-An executor of the module utilises an instance/instances, i.e. a full range of settings for an exect handler/executor.
+An executor of the module utilises an instance/instances, i.e. a full range of settings for an exact handler/executor.
 
 See more information on the platform struture and architecture at the `General Concepts`_ section.
 
@@ -423,7 +431,7 @@ An **engine** is a framework that performs processing of streams. It runs an app
 
 Currently the following **engine** **types** are supported in the platform:
 
-1. TCP Imput Engine
+1. TCP Input Engine
         It gets packages of data from TCP, handles them and produces series of events to T-stream streams. It can be used to program arbitrary TCP protocol recognition.
 2. Regular Processing Engine 
         It gets events from Kafka or T-stream input streams and produces results to T-Stream output streams.
