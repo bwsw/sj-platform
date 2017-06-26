@@ -153,8 +153,8 @@ class RegexInputExecutor(manager: InputEnvironmentManager) extends InputStreamin
     Some(new InputEnvelope(
       s"${rule.outputStream}$key",
       Array((rule.outputStream, outputDistributors(rule).getNextPartition(Some(record)))),
-      true,
-      record))
+      record,
+      Some(true)))
   }
 
   private def buildFallbackEnvelope(data: String): Option[InputEnvelope[Record]] = {
@@ -165,7 +165,6 @@ class RegexInputExecutor(manager: InputEnvironmentManager) extends InputStreamin
     Some(new InputEnvelope(
       s"${regexInputOptions.fallbackStream},$data",
       Array((regexInputOptions.fallbackStream, fallbackDistributor.getNextPartition())),
-      false,
       record))
   }
 

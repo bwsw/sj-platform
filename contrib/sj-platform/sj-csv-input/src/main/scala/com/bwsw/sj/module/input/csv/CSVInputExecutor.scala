@@ -96,8 +96,8 @@ class CSVInputExecutor(manager: InputEnvironmentManager) extends InputStreamingE
           Some(new InputEnvelope(
             s"${csvInputOptions.outputStream}$key",
             Array((csvInputOptions.outputStream, distributor.getNextPartition(Some(record)))),
-            true,
-            record))
+            record,
+            Some(true)))
         } else {
           buildFallbackEnvelope(line)
         }
@@ -111,7 +111,6 @@ class CSVInputExecutor(manager: InputEnvironmentManager) extends InputStreamingE
     Some(new InputEnvelope(
       s"${csvInputOptions.fallbackStream},$data",
       Array((csvInputOptions.fallbackStream, fallbackDistributor.getNextPartition())),
-      false,
       record))
   }
 

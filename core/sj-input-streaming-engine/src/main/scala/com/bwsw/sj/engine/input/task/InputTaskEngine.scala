@@ -222,15 +222,15 @@ abstract class InputTaskEngine(manager: InputTaskManager,
     * @param duplicateCheck flag points a key has to be checked or not.
     * @return True if a processed envelope is not duplicate and false in other case
     */
-  private def checkForDuplication(key: String, duplicateCheck: Boolean): Boolean = {
+  private def checkForDuplication(key: String, duplicateCheck: Option[Boolean]): Boolean = {
     logger.info(s"Task name: ${manager.taskName}. " +
       s"Try to check key: '$key' for duplication with a setting duplicateCheck = '$duplicateCheck' " +
       s"and an instance setting - 'duplicate-check' : '${instance.duplicateCheck}'.")
-    if (instance.duplicateCheck || duplicateCheck) {
-      logger.info(s"Task name: ${manager.taskName}. " +
-        s"Check key: '$key' for duplication.")
-      evictionPolicy.checkForDuplication(key)
-    } else true
+    if (duplicateCheck.isDefined) {
+      if (duplicateCheck.get) evictionPolicy.checkForDuplication(key) else true
+    } else {
+      if (instance.duplicateCheck) evictionPolicy.checkForDuplication(key) else true
+    }
   }
 
   protected def afterReceivingEnvelope(): Unit

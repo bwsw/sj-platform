@@ -59,7 +59,6 @@ class Executor(manager: InputEnvironmentManager) extends InputStreamingExecutor[
     val envelope = new InputEnvelope(
       new String(data),
       outputs.map(x => (x, 0)),
-      true,
       new String(data)
     )
 

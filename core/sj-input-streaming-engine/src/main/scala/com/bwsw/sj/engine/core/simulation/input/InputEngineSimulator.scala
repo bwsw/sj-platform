@@ -108,10 +108,11 @@ class InputEngineSimulator[T <: AnyRef](executor: InputStreamingExecutor[T],
   def clear(): Unit = inputBuffer.clear()
 
   private def checkDuplication(duplicateCheck: Boolean)(inputEnvelope: InputEnvelope[T]): Boolean = {
-    if (duplicateCheck || inputEnvelope.duplicateCheck)
-      evictionPolicy.checkForDuplication(inputEnvelope.key)
-    else
-      true
+    if (inputEnvelope.duplicateCheck.isDefined) {
+      if (inputEnvelope.duplicateCheck.get) evictionPolicy.checkForDuplication(inputEnvelope.key) else true
+    } else {
+      if (duplicateCheck) evictionPolicy.checkForDuplication(inputEnvelope.key) else true
+    }
   }
 }
 
