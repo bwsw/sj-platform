@@ -29,7 +29,7 @@ If you are a deveoper and are willing to use the platform you need to know of so
 
 - Mesos
 - Marathon 
-- ZooKeepe
+- ZooKeeper
 - MongoDB
 - an external storage (ElasticSearch, JDBC, etc.)
 - Kafka (if you are going to work with Kafka input data).
