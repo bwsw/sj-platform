@@ -86,14 +86,16 @@ lazy val common = Project(id = "sj-common",
   base = file("./core/sj-common"))
   .settings(commonSettings: _*)
   .settings(
-    libraryDependencies ++= Dependencies.sjCommonDependencies.value
+    libraryDependencies ++= Dependencies.sjCommonDependencies.value,
+    libraryDependencies ++= Dependencies.sjTestDependencies.value
   )
 
 lazy val engineCore = Project(id = "sj-engine-core",
   base = file("./core/sj-engine-core"))
   .settings(commonSettings: _*)
   .settings(
-    libraryDependencies ++= Dependencies.sjEngineCoreDependencies.value
+    libraryDependencies ++= Dependencies.sjEngineCoreDependencies.value,
+    libraryDependencies ++= Dependencies.sjTestDependencies.value
   )
   .dependsOn(common)
 
@@ -101,7 +103,8 @@ lazy val crudRest = Project(id = "sj-crud-rest",
   base = file("./core/sj-crud-rest"))
   .settings(commonSettings: _*)
   .settings(
-    libraryDependencies ++= Dependencies.sjRestDependencies.value
+    libraryDependencies ++= Dependencies.sjRestDependencies.value,
+    libraryDependencies ++= Dependencies.sjTestDependencies.value
   )
   .dependsOn(common)
 

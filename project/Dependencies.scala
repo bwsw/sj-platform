@@ -59,13 +59,11 @@ object Dependencies {
       .exclude("org.slf4j", "slf4j-api"),
     "com.aerospike" % "aerospike-client" % "3.3.4",
     "com.datastax.cassandra" % "cassandra-driver-core" % "3.2.0",
-    "org.scalatest" % "scalatest_2.12" % "3.0.1" % "test",
     "org.eclipse.jetty" % "jetty-client" % "9.4.3.v20170317",
     "com.fasterxml.jackson.module" % "jackson-module-scala_2.12" % "2.8.8",
     ("org.everit.json" % "org.everit.json.schema" % "1.4.1")
       .exclude("commons-logging", "commons-logging"),
-    "org.scaldi" %% "scaldi" % "0.5.8",
-    "org.mockito" % "mockito-core" % "2.8.9" % "test"
+    "org.scaldi" %% "scaldi" % "0.5.8"
   ))
 
   lazy val sjEngineCoreDependencies = Def.setting(Seq(
@@ -79,7 +77,6 @@ object Dependencies {
     ("com.mockrunner" % "mockrunner-jdbc" % "1.1.2" % "test")
       .exclude("jakarta-regexp", "jakarta-regexp")
       .exclude("xerces", "xerces"),
-    "org.scalatest" % "scalatest_2.12" % "3.0.1" % "provided",
     "org.mockito" % "mockito-core" % "2.8.9"
   ))
 
@@ -88,9 +85,7 @@ object Dependencies {
     "com.typesafe.akka" %% "akka-http" % "10.0.3",
     ("org.apache.httpcomponents" % "httpclient" % "4.5.2")
       .exclude("commons-logging", "commons-logging"),
-    "com.typesafe.akka" %% "akka-slf4j" % "2.4.16",
-    "org.scalatest" % "scalatest_2.12" % "3.0.1" % "provided",
-    "org.mockito" % "mockito-core" % "2.8.9" % "provided"
+    "com.typesafe.akka" %% "akka-slf4j" % "2.4.16"
   ))
 
   lazy val sjInputEngineDependencies = Def.setting(Seq(
@@ -134,5 +129,10 @@ object Dependencies {
     "org.eclipse.jetty" % "jetty-runner" % "9.4.3.v20170317",
     ("org.apache.httpcomponents" % "httpclient" % "4.5.2")
       .exclude("commons-logging", "commons-logging")
+  ))
+
+  lazy val sjTestDependencies = Def.setting(Seq(
+    "org.scalatest" % "scalatest_2.12" % "3.0.1" % "test",
+    "org.mockito" % "mockito-core" % "2.8.9" % "test"
   ))
 }
