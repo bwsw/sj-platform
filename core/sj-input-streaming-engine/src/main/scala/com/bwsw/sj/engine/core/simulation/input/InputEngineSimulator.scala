@@ -40,8 +40,8 @@ import io.netty.buffer.{ByteBuf, Unpooled}
   *
   * val simulator = new InputEngineSimulator(executor, evictionPolicy)
   * simulator.prepare("1,2,x,2,4")
-  * val outputDatas = simulator.process(duplicateCheck = true)
-  * println(outputDatas)
+  * val outputDataList = simulator.process(duplicateCheck = true)
+  * println(outputDataList)
   * }}}
   *
   * @param executor       implementation of [[InputStreamingExecutor]] under test
@@ -74,14 +74,14 @@ class InputEngineSimulator[T <: AnyRef](executor: InputStreamingExecutor[T],
     inputBuffer.writeCharSequence(record + separator, charset)
 
   /**
-    * Sends byte buffer to [[executor]] while it can tokenize buffer and returns output data
+    * Sends byte buffer to [[executor]]as long as it can tokenize the buffer. Method returns list of [[OutputData]].
     *
-    * @param duplicateCheck indicates that every envelope has to be checked has to be checked on duplication
+    * @param duplicateCheck indicates that every envelope has to be checked on duplication
     * @param clearBuffer    indicates that byte buffer must be cleared
-    * @return collection of output data
+    * @return list of [[OutputData]]
     */
   def process(duplicateCheck: Boolean, clearBuffer: Boolean = true): Seq[OutputData[T]] = {
-    def processOneInterval(outputDatas: Seq[OutputData[T]]): Seq[OutputData[T]] = {
+    def processOneInterval(outputDataList: Seq[OutputData[T]]): Seq[OutputData[T]] = {
       val maybeOutputData = executor.tokenize(inputBuffer).map {
         interval =>
           val maybeInputEnvelope = executor.parse(inputBuffer, interval)
@@ -94,14 +94,14 @@ class InputEngineSimulator[T <: AnyRef](executor: InputStreamingExecutor[T],
       }
 
       maybeOutputData match {
-        case Some(outputData) => processOneInterval(outputDatas :+ outputData)
-        case None => outputDatas
+        case Some(outputData) => processOneInterval(outputDataList :+ outputData)
+        case None => outputDataList
       }
     }
 
-    val outputDatas = processOneInterval(Seq.empty)
+    val outputDataList = processOneInterval(Seq.empty)
     if (clearBuffer) clear()
-    outputDatas
+    outputDataList
   }
 
   /**
