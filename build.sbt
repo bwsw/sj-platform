@@ -200,4 +200,8 @@ lazy val csvInput = Project(id = "sj-csv-input",
 lazy val regexInput = Project(id = "sj-regex-input",
   base = file("./contrib/sj-platform/sj-regex-input"))
   .settings(commonSettings: _*)
+  .settings(
+    libraryDependencies ++= Dependencies.sjTestDependencies.value
+  )
   .dependsOn(engineCore)
+  .dependsOn(inputStreamingEngine % "test")
