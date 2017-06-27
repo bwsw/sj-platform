@@ -27,12 +27,18 @@ import com.bwsw.sj.common.utils.ValidationUtils._
 import scala.collection.mutable.ArrayBuffer
 
 /**
-  * Validator for csv input module.
+  * Implementation of Streaming Validator for CSV input module
   *
   * @author Pavel Tomskikh
   */
 class CSVInputValidator extends StreamingValidator {
 
+  /**
+    * Validates options' fields of CSV Input module
+    *
+    * @param options option parameters
+    * @return result of the validation
+    */
   override def validate(options: String): ValidationInfo = {
     val errors = ArrayBuffer[String]()
     val serializer = new JsonSerializer
