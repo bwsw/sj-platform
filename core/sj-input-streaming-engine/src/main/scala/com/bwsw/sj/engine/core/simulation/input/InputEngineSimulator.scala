@@ -46,30 +46,32 @@ import io.netty.buffer.{ByteBuf, Unpooled}
   *
   * @param executor       implementation of [[InputStreamingExecutor]] under test
   * @param evictionPolicy eviction policy of duplicate envelopes
+  * @param separator      delimiter between data records
   * @param charset        encoding of incoming data
   * @tparam T type of outgoing data
   * @author Pavel Tomskikh
   */
 class InputEngineSimulator[T <: AnyRef](executor: InputStreamingExecutor[T],
                                         evictionPolicy: InputInstanceEvictionPolicy,
+                                        separator: String = "",
                                         charset: Charset = Charset.forName("UTF-8")) {
 
   private val inputBuffer: ByteBuf = Unpooled.buffer()
 
   /**
-    * Write data in byte buffer
+    * Write data records in byte buffer
     *
-    * @param data incoming data
+    * @param records incoming data records
     */
-  def prepare(data: Seq[String]): Unit = data.foreach(prepare)
+  def prepare(records: Seq[String]): Unit = records.foreach(prepare)
 
   /**
-    * Write data in byte buffer
+    * Write data record in byte buffer
     *
-    * @param data incoming data
+    * @param record incoming data record
     */
-  def prepare(data: String): Unit =
-    inputBuffer.writeCharSequence(data, charset)
+  def prepare(record: String): Unit =
+    inputBuffer.writeCharSequence(record + separator, charset)
 
   /**
     * Sends byte buffer to [[executor]] while it can tokenize buffer and returns output data
