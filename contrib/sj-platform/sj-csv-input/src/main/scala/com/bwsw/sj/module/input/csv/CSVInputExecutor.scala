@@ -93,9 +93,9 @@ class CSVInputExecutor(manager: InputEnvironmentManager) extends InputStreamingE
           csvInputOptions.fields.zip(values).foreach { case (field, value) => record.put(field, value) }
           val key = AvroRecordUtils.concatFields(csvInputOptions.uniqueKey, record)
 
-          Some(new InputEnvelope(
+          Some(InputEnvelope(
             s"${csvInputOptions.outputStream}$key",
-            Array((csvInputOptions.outputStream, distributor.getNextPartition(Some(record)))),
+            Seq((csvInputOptions.outputStream, distributor.getNextPartition(Some(record)))),
             record,
             Some(true)))
         } else {
@@ -108,9 +108,9 @@ class CSVInputExecutor(manager: InputEnvironmentManager) extends InputStreamingE
   private def buildFallbackEnvelope(data: String): Option[InputEnvelope[Record]] = {
     val record = new Record(fallbackSchema)
     record.put(fallbackFieldName, data)
-    Some(new InputEnvelope(
+    Some(InputEnvelope(
       s"${csvInputOptions.fallbackStream},$data",
-      Array((csvInputOptions.fallbackStream, fallbackDistributor.getNextPartition())),
+      Seq((csvInputOptions.fallbackStream, fallbackDistributor.getNextPartition())),
       record))
   }
 

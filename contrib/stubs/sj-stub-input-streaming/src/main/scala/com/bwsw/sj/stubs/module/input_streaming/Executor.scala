@@ -56,7 +56,7 @@ class Executor(manager: InputEnvironmentManager) extends InputStreamingExecutor[
 
     println("data into parse method " + new String(data) + ";")
 
-    val envelope = new InputEnvelope(
+    val envelope = InputEnvelope(
       new String(data),
       outputs.map(x => (x, 0)),
       new String(data)

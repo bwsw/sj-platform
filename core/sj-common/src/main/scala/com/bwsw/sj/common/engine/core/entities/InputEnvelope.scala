@@ -32,9 +32,9 @@ import com.bwsw.sj.common.si.model.instance.InputInstance
   * @tparam T type of data containing in a message
   */
 
-class InputEnvelope[T <: AnyRef](var key: String,
-                                 var outputMetadata: Array[(String, Int)],
-                                 var data: T,
-                                 var duplicateCheck: Option[Boolean] = None) extends Envelope {
+case class InputEnvelope[T <: AnyRef](key: String,
+                                      outputMetadata: Seq[(String, Int)],
+                                      data: T,
+                                      duplicateCheck: Option[Boolean] = None) extends Envelope {
   streamType = StreamLiterals.inputDummy
 }
