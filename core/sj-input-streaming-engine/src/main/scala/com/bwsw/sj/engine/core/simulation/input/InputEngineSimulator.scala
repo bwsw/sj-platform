@@ -74,11 +74,11 @@ class InputEngineSimulator[T <: AnyRef](executor: InputStreamingExecutor[T],
     inputBuffer.writeCharSequence(record + separator, charset)
 
   /**
-    * Sends byte buffer to [[executor]] while it can tokenize buffer and returns output data
+    * Sends byte buffer to [[executor]]as long as it can tokenize the buffer. Method returns list of [[OutputData]].
     *
-    * @param duplicateCheck indicates that every envelope has to be checked has to be checked on duplication
+    * @param duplicateCheck indicates that every envelope has to be checked on duplication
     * @param clearBuffer    indicates that byte buffer must be cleared
-    * @return collection of output data
+    * @return list of [[OutputData]]
     */
   def process(duplicateCheck: Boolean, clearBuffer: Boolean = true): Seq[OutputData[T]] = {
     def processOneInterval(outputDatas: Seq[OutputData[T]]): Seq[OutputData[T]] = {
