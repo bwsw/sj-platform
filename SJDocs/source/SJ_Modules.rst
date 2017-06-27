@@ -1,7 +1,8 @@
 Modules: types, structure, pipeline
 ===================================
-.. contents:: Contents
 
+.. contents:: Contents
+   
 Module is a processor that handles events in data streams.
 
 It includes an executor that processes data streams and a validator.
