@@ -191,7 +191,11 @@ lazy val sumBatch = Project(id = "sj-batch-sum",
 lazy val csvInput = Project(id = "sj-csv-input",
   base = file("./contrib/sj-platform/sj-csv-input"))
   .settings(commonSettings: _*)
+  .settings(
+    libraryDependencies ++= Dependencies.sjTestDependencies.value
+  )
   .dependsOn(engineCore)
+  .dependsOn(inputStreamingEngine % "test")
 
 lazy val regexInput = Project(id = "sj-regex-input",
   base = file("./contrib/sj-platform/sj-regex-input"))
