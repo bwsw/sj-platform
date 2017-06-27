@@ -52,8 +52,8 @@ case class RegexInputOptions(lineSeparator: String, policy: String, encoding: St
   * @param defaultValue Field's default value
   * @param _type        Field's type
   */
-case class Field(name: String,
-                 defaultValue: String,
+case class Field(@JsonProperty("name") name: String,
+                 @JsonProperty("defaultValue") defaultValue: String,
                  @JsonProperty(RegexInputOptionsNames.fieldType) _type: String)
 
 /**
