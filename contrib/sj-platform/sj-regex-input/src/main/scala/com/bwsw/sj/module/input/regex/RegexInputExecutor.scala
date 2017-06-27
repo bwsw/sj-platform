@@ -151,7 +151,7 @@ class RegexInputExecutor(manager: InputEnvironmentManager) extends InputStreamin
     val key = AvroRecordUtils.concatFields(uniqueKey, record)
 
     Some(InputEnvelope(
-      s"${rule.outputStream}$key",
+      s"${rule.outputStream},$key",
       Seq((rule.outputStream, outputDistributors(rule).getNextPartition(Some(record)))),
       record,
       Some(true)))

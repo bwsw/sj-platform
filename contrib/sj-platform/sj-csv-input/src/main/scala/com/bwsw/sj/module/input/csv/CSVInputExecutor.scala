@@ -94,7 +94,7 @@ class CSVInputExecutor(manager: InputEnvironmentManager) extends InputStreamingE
           val key = AvroRecordUtils.concatFields(csvInputOptions.uniqueKey, record)
 
           Some(InputEnvelope(
-            s"${csvInputOptions.outputStream}$key",
+            s"${csvInputOptions.outputStream},$key",
             Seq((csvInputOptions.outputStream, distributor.getNextPartition(Some(record)))),
             record,
             Some(true)))

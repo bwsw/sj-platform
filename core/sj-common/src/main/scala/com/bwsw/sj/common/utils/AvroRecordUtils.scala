@@ -39,7 +39,7 @@ object AvroRecordUtils {
     * @return
     */
   def concatFields(fieldNames: Seq[String], record: Record): String =
-    fieldNames.foldLeft("") { (acc, field) => acc + "," + record.get(field).toString }
+    fieldNames.map(field => record.get(field).toString).mkString(",")
 
   def jsonToSchema(json: String): Option[Schema] = {
     Option(json) match {
