@@ -46,8 +46,7 @@ class WindowRepository(instance: BatchInstance) {
     windowPerStream(stream)
   }
 
-  //TODO It was private[engine]
-  def put(stream: String, window: Window): Unit = {
+  private[sj] def put(stream: String, window: Window): Unit = {
     logger.debug(s"Put a window for stream: '$stream'.")
     windowPerStream(stream) = window
   }
