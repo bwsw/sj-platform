@@ -14,9 +14,9 @@ An engine is required to start the module. A module can not process data streams
 
 The engine is getting started via a framework. 
 
- A general structure of a module can be rendered as at the scheme below:
+A general structure of a module can be rendered as at the scheme below:
 
-.. figure: _static/ModuleStructure.png
+.. figure:: _static/ModuleGeneralStructure.png
 
 The platform supports 4 types of modules:
 
@@ -32,65 +32,73 @@ Input module
 ----------------
 An input type of modules handles external input streams, does data deduplication, transforms raw data to objects. In the SJ platform the TCP Input Stream processor is currently implemented in an Input module.
 
+.. figure:: _static/InputModuleStructure.png
 
-
-It performs the transformation of the streams incoming from TCP to T-streams. T-streams are persistent streams designed for exactly-once processing (so it includes transactional producer, consumer and subscriber). Find more information about T-streams at http://t-streams.com 
+It performs the transformation of the streams incoming from TCP to T-streams. T-streams are persistent streams designed for exactly-once processing (so it includes transactional producer, consumer and subscriber). Find more information about T-streams at `the site: <http://t-streams.com>`_ 
 
 An Input module executor provides the following methods with default implementations but they can be overridden.
 
 1) "tokenize": 
-        It is invoked every time when a new portion of data is received. It processes a flow of bytes to determine the beginning and the end of the Interval (significant set of bytes in incoming flow of bytes). By default it returns None value (means that it is impossible to determine an Interval). If Interval detected, method should return it (first and last indexes of Interval's elements in flow of bytes). Resulting interval can either contain message or not.
+      It is invoked every time when a new portion of data is received. It processes a flow of bytes to determine the beginning and the end of the Interval (significant set of bytes in incoming flow of bytes). By default it returns None value (means that it is impossible to determine an Interval). If Interval detected, method should return it (first and last indexes of Interval's elements in flow of bytes). Resulting interval can either contain message or not.
 
 2) "parse": 
       If "tokenize" method returns an Interval, this method is invoked. It processes both a buffer with incoming data (a flow of bytes) and an Interval (an output of "tokenize" method). Its purpose is to define whether the Interval contains a message or meaningless data. Default return value is None. The same value should be returned if Interval contains meaningless data. If Interval contains message, return value should be "InputEnvelope".
 
 3) "createProcessedMessageResponse": 
-     It is invoked after each call of parse method. Its purpose is to create response to the source of data - instance of InputStreamingResponse.
+      It is invoked after each call of parse method. Its purpose is to create response to the source of data - instance of InputStreamingResponse.
 
-    The parameters of the method are:
+The parameters of the method are:
 
-    - "InputEnvelope" (it can be defined or not)
+- "InputEnvelope" (it can be defined or not)
 
-    - "isNotEmptyOrDuplicate" - a boolean flag (denoting whether an "InputEnvelope" is defined and isn't a duplicate (true) or an "InputEnvelope" is a duplicate or empty (false))
+- "isNotEmptyOrDuplicate" - a boolean flag (denoting whether an "InputEnvelope" is defined and isn't a duplicate (true) or an "InputEnvelope" is a duplicate or empty (false))
 
 Default implementation of the method:
 
-`def createProcessedMessageResponse(envelope: Option[InputEnvelope], isNotEmptyOrDuplicate: Boolean): InputStreamingResponse = {`
+``def createProcessedMessageResponse(envelope: Option[InputEnvelope],`` 
 
- `var message = ""`
+``isNotEmptyOrDuplicate: Boolean): InputStreamingResponse = {``
 
- `var sendResponsesNow = true`
+``var message = ""``
 
- `if (isNotEmptyOrDuplicate) {`
-   `message = s"Input envelope with key: '${envelope.get.key}' has been sent\n"`
+``var sendResponsesNow = true``
+
+``if (isNotEmptyOrDuplicate) {``
+
+``message = s"Input envelope with key: '${envelope.get.key}' has been sent\n"``
  
-   `sendResponsesNow = false`
- `} else if (envelope.isDefined) {`
-   `message = s"Input envelope with key: '${envelope.get.key}' is duplicate\n"` 
- `} else {`
-   `message = s"Input envelope is empty\n"` 
+``sendResponsesNow = false``
 
- `}`
+``} else if (envelope.isDefined) {``
 
- `InputStreamingResponse(message, sendResponsesNow)`
+``message = s"Input envelope with key: '${envelope.get.key}' is duplicate\n"``
+   
+``} else {``
 
-`}`
+``message = s"Input envelope is empty\n"``
+
+``}``
+
+``InputStreamingResponse(message, sendResponsesNow)``
+
+``}``
 
 4) "createCheckpointResponse": 
       It is invoked on checkpoint's finish. It's purpose is to create response for data source to inform that checkpoint has been done. It returns an instance of "InputStreamingResponse".
 
 Default implementation of the method:
 
-`def createCheckpointResponse(): InputStreamingResponse = {`
-  `InputStreamingResponse(s"Checkpoint has been done\n", isBuffered = false)`
+``def createCheckpointResponse(): InputStreamingResponse = {``
+  
+``InputStreamingResponse(s"Checkpoint has been done\n", isBuffered = false)``
 
-`}`
+``}``
 
 There is a manager inside the module which allows to:
 
- - retrieve a list of output names by a set of tags (by calling "getStreamsByTags()")
+- retrieve a list of output names by a set of tags (by calling "getStreamsByTags()")
 
- - initiate checkpoint at any time (by calling `initiateCheckpoint()`) which would be performed only at the end of processing step (check diagram at the Input Streaming Engine page)
+- initiate checkpoint at any time (by calling `initiateCheckpoint()`) which would be performed only at the end of processing step (check diagram at the Input Streaming Engine page)
 
 **Entities description**
 
@@ -108,6 +116,7 @@ InputStreamingResponse:
 - sendResponsesNow - a boolean flag denoting whether response should be saved in temporary storage or all responses from this storage should be send to the source right now (including this one)
  
 To see a flow chart about how these methods intercommunicate, please, visit the `Input Streaming Engine`_ page.
+
 
 Output module
 ------------------
@@ -142,26 +151,26 @@ In the Regular module the executor provides the following methods that does not 
 
 Example of the checking a state variable:
 
-`if (!state.isExist(<variable_name>))`
+``if (!state.isExist(<variable_name>))``
 
-`state.set(<variable_name>, <variable_value>)`
+``state.set(<variable_name>, <variable_value>)``
 
-`<variable_name>` must have the String type
+``<variable_name>`` must have the String type
 
-`<variable_value>` can be any type (a user must be careful when casting a state variable value to a particular data type)
+``<variable_value>`` can be any type (a user must be careful when casting a state variable value to a particular data type)
 
 2) "onMessage": 
     It is invoked for every received message from one of the inputs that are defined within the instance. Inside the method there is an access to the message that can have the different data type depending on a data type of input. 
 
-  So there are two handlers with different parameters:
+So there are two handlers with different parameters:
 
-  `def onMessage(envelope: TStreamEnvelope[T]): Unit`
+``def onMessage(envelope: TStreamEnvelope[T]): Unit``
  
-  `def onMessage(envelope: KafkaEnvelope[T]): Unit`
+``def onMessage(envelope: KafkaEnvelope[T]): Unit``
  
-  Each envelope has a type parameter that defines the type of data contained in the envelope.
+Each envelope has a type parameter that defines the type of data contained in the envelope.
 
-  .. note:: The data type of the envelope can be only KafkaEnvelope data type or TStreamEnvelope data type. A user may specify one of them or both, depending on which type(s) is(are) used. 
+.. note:: The data type of the envelope can be only KafkaEnvelope data type or TStreamEnvelope data type. A user may specify one of them or both, depending on which type(s) is(are) used. 
 
 3) "onBeforeCheckpoint": 
     It is invoked before every checkpoint
@@ -199,7 +208,7 @@ A window is a period of time that is multiple of a batch and during which the ba
 
 The diagram below is a simple illustration of how a sliding widow operation looks like.
 
-.. figure:: _static/SlidingWindow.png
+.. figure:: _static/BatchModule.png
 
 
 As shown in the figure, every time the window slides over an input stream, the batches of events that fall within the window are combined and operated upon to produce the transformed data of the windowed stream. It is important that any window operation needs to specify the parameters:
@@ -219,38 +228,38 @@ The executor of the batch module provides the following methods that does not pe
 1) "onInit": 
     It is invoked only once, when a module is launched. This method can be used to initialize some auxiliary variables or check the state variables on existence and if it's necessary create them. Thus, you should do preparation of the executor before usage.
 
- Example of the checking a state variable:
+Example of the checking a state variable:
 
-  `if (!state.isExist(<variable_name>))`
+``if (!state.isExist(<variable_name>))``
  
-  `state.set(<variable_name>, <variable_value>)`
+``state.set(<variable_name>, <variable_value>)``
 
-  `<variable_name>` have to have the String type
+``<variable_name>`` have to have the String type
 
-  `<variable_value>` can be any type (be careful when you will cast a state variable value to a particular data type)
+``<variable_value>`` can be any type (be careful when you will cast a state variable value to a particular data type)
 
 2) "onWindow": 
     It is invoked for every collected window of the main stream that are defined within the instance. Inside the method there is an access to a window repository, containing a window for each input (few of them can be empty). A window consists of batches, a batch consists of envelopes (messages) that can have the different data type depending on a data type of input so a user should cast the message to get certain fields. Each envelope has a type parameter that defines the type of data containing in the envelope.
 
- Example of a message casting to a particular data type:
+Example of a message casting to a particular data type:
 
-  `val allWindows = windowRepository.getAll()`
+``val allWindows = windowRepository.getAll()``
 
-  `allWindows.flatMap(x => x._2.batches).flatMap(x =>` 
+``allWindows.flatMap(x => x._2.batches).flatMap(x =>`` 
 
-  `x.envelopes).foreach {`
+``x.envelopes).foreach {``
 
-  `case kafkaEnvelope: KafkaEnvelope[Integer @unchecked]` => //here there is an access to certain fields such as offset and data of integer type
+``case kafkaEnvelope: KafkaEnvelope[Integer @unchecked]`` => //here there is an access to certain fields such as offset and data of integer type
 
-  `case tstreamEnvelope: TStreamEnvelope[Integer @unchecked]` => //here there is an access to certain fields such as txnUUID, consumerName and data (array of integers)
+``case tstreamEnvelope: TStreamEnvelope[Integer @unchecked]`` => //here there is an access to certain fields such as txnUUID, consumerName and data (array of integers)
  
-  `}` 
+``}``
 
-  The data type of the envelope can be "KafkaEnvelope" data type or "TStreamEnvelope" data type. If a user specifies the inputs of only one of these data types in an instance ther is no need to match the envelope as shown in the example above and cast the envelope right to a particular data type:
+The data type of the envelope can be "KafkaEnvelope" data type or "TStreamEnvelope" data type. If a user specifies the inputs of only one of these data types in an instance ther is no need to match the envelope as shown in the example above and cast the envelope right to a particular data type:
 
-  `val tstreamEnvelope =` 
+``val tstreamEnvelope =``
 
-  `envelope.asInstanceOf[TStreamEnvelope[Integer]]`
+``envelope.asInstanceOf[TStreamEnvelope[Integer]]``
 
 3) "onBeforeCheckpoint": 
     It is invoked before every checkpoint
