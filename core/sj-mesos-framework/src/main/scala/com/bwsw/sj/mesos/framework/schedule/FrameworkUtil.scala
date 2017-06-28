@@ -154,7 +154,7 @@ object FrameworkUtil {
   }
 
   def getJvmOptions: String = {
-    instance.get.jvmOptions.asScala.foldLeft("")((acc, option) => s"$acc ${option._1}${option._2}")
+    instance.get.jvmOptions.foldLeft("")((acc, option) => s"$acc ${option._1}${option._2}")
   }
 
   def checkInstanceStarted(): Unit = {
