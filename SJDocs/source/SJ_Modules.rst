@@ -334,17 +334,15 @@ A detailed manual on how to write a module you may find at `page`_ .
 Modules` performance is determined with the work of engine. An engine structure, components and  the workflow are determined with the type of module. Please, find more information about engines at the `Engines`_  page.
 
 
-Streaming
-=========
+Prerequisites For Modules. Providers And Services In Streaming.
+================================================================
+.. Warning:: The section is under development!
+
 As stated above, modules process the data arranged in streams.
 
-Any kind of a module deals with two types of streams: input and output. 
+.. Any kind of a module deals with two types of streams: input and output. An input stream delivers events into the system. The Stream Juggler supports *Kafka* and *T-stream* type of incoming streams.An output streams put the processed data into an external storage. The Stream Juggler supports only *T-stream* type of output data streaming. Find more about T-streams at the `site <http://t-streams.com>`_ .
 
-An input stream delivers event into the  system. The Stream Juggler supports *Kafka* and *T-stream* type of incoming streams.
-
-An output streams put the processed data into an external storage. The Stream Juggler supports only *T-stream* type of output data streaming. Find more about T-streams at the `the site <http://t-streams.com>`_ .
-
-To transform an input data into a stream of exact type you need to create a service and a provider for this service. The type of a service and a provider is determined by the type of a stream you need for the module.
+To transform data into a stream of exact type you need to create a service and a provider for this service. The type of a service and a provider is determined by the type of a stream you need for the module.
 
 For example, a Batch module that receives data from Kafka or T-streams will require a Kafka service (KfkQ) and two provider types for it: Kafka and ZooKeeper. Or if you work with an Output module and you want to store the processed data to ElasticSearch index, you are going to work with  the ElasticSearch output type stream that in its turn requires a service and a provider of ElasticSearch type.
 
