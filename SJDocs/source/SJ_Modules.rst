@@ -348,7 +348,7 @@ Prerequisites For Modules. Providers And Services In Streaming.
 
 As stated above, modules process the data arranged in streams.
 
-The Stream Juggler supports *Kafka* and *T-stream* type of streams. And when the Kafka streams are a well-known type of streaming introduced by Apache Kafka, the T-streams are intentionally designed for the Stream Juggler platform. Find more about T-streams at the `site <http://t-streams.com>`_ .
+The Stream Juggler supports *Kafka* and *T-stream* type of streams. And when the Kafka streams are a well-known type of streaming introduced by Apache Kafka, the T-streams are intentionally designed for the Stream Juggler platform as a complement for Apache Kafka. The T-streams have more features than Kafka and make exactly-once processing possible. Find more about T-streams at the `site <http://t-streams.com>`_ .
 
 To transform data into a stream of exact type you need to create a service and a provider for this service. The type of a service and a provider is determined by the type of a stream you need for the module.
 
