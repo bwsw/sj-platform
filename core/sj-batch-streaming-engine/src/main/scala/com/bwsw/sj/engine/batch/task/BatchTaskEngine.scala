@@ -79,6 +79,7 @@ class BatchTaskEngine(manager: CommonTaskManager,
   private val collectedWindowPerStream = mutable.Map[String, Window]()
   private val windowRepository = new WindowRepository(instance)
   private val barrierMasterNode = EngineLiterals.batchInstanceBarrierPrefix + instance.name
+  private val barrierForLeaderMasterNode = EngineLiterals.batchInstanceBarrierPrefix + instance.name + "leader"
   private val leaderMasterNode = EngineLiterals.batchInstanceLeaderPrefix + instance.name
   private val zkHosts = inject[ConnectionRepository].getServiceRepository
     .get(instance.coordinationService)
@@ -86,7 +87,8 @@ class BatchTaskEngine(manager: CommonTaskManager,
     .asInstanceOf[ZKServiceDomain]
     .provider.hosts.toSet
   private val curatorClient = createCuratorClient()
-  private val barrier = new DistributedDoubleBarrier(curatorClient, barrierMasterNode, instance.executionPlan.tasks.size())
+  private val commonBarrier = new DistributedDoubleBarrier(curatorClient, barrierMasterNode, instance.executionPlan.tasks.size())
+  private val barrierForLeader = new DistributedDoubleBarrier(curatorClient, barrierForLeaderMasterNode, instance.executionPlan.tasks.size())
   private val leaderLatch = new LeaderLatch(zkHosts, leaderMasterNode)
   leaderLatch.start()
 
@@ -215,11 +217,13 @@ class BatchTaskEngine(manager: CommonTaskManager,
     logger.info(s"Windows have been collected (for streams: ${inputs.mkString(", ")}). Process them.")
     prepareCollectedWindows()
     executor.onWindow(windowRepository)
-    barrier.enter()
+    commonBarrier.enter()
     executor.onEnter()
+    barrierForLeader.enter()
     if (leaderLatch.hasLeadership()) executor.onLeaderEnter()
-    barrier.leave()
+    commonBarrier.leave()
     executor.onLeave()
+    barrierForLeader.leave()
     if (leaderLatch.hasLeadership()) executor.onLeaderLeave()
     retrievableStreams = inputs
     doCheckpoint()

@@ -86,14 +86,16 @@ lazy val common = Project(id = "sj-common",
   base = file("./core/sj-common"))
   .settings(commonSettings: _*)
   .settings(
-    libraryDependencies ++= Dependencies.sjCommonDependencies.value
+    libraryDependencies ++= Dependencies.sjCommonDependencies.value,
+    libraryDependencies ++= Dependencies.sjTestDependencies.value
   )
 
 lazy val engineCore = Project(id = "sj-engine-core",
   base = file("./core/sj-engine-core"))
   .settings(commonSettings: _*)
   .settings(
-    libraryDependencies ++= Dependencies.sjEngineCoreDependencies.value
+    libraryDependencies ++= Dependencies.sjEngineCoreDependencies.value,
+    libraryDependencies ++= Dependencies.sjTestDependencies.value
   )
   .dependsOn(common)
 
@@ -101,7 +103,8 @@ lazy val crudRest = Project(id = "sj-crud-rest",
   base = file("./core/sj-crud-rest"))
   .settings(commonSettings: _*)
   .settings(
-    libraryDependencies ++= Dependencies.sjRestDependencies.value
+    libraryDependencies ++= Dependencies.sjRestDependencies.value,
+    libraryDependencies ++= Dependencies.sjTestDependencies.value
   )
   .dependsOn(common)
 
@@ -188,7 +191,11 @@ lazy val sumBatch = Project(id = "sj-batch-sum",
 lazy val csvInput = Project(id = "sj-csv-input",
   base = file("./contrib/sj-platform/sj-csv-input"))
   .settings(commonSettings: _*)
+  .settings(
+    libraryDependencies ++= Dependencies.sjTestDependencies.value
+  )
   .dependsOn(engineCore)
+  .dependsOn(inputStreamingEngine % "test")
 
 lazy val regexInput = Project(id = "sj-regex-input",
   base = file("./contrib/sj-platform/sj-regex-input"))

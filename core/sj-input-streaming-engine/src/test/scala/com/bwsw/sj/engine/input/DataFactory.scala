@@ -23,7 +23,6 @@ import java.util.jar.JarFile
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.common.file.utils.FileStorage
-import com.bwsw.sj.common.SjModule
 import com.bwsw.sj.common.config.BenchmarkConfigNames
 import com.bwsw.sj.common.dal.model.instance.{InputTask, InstanceDomain}
 import com.bwsw.sj.common.dal.model.provider.ProviderDomain
@@ -38,7 +37,6 @@ import com.bwsw.tstreams.agents.consumer.Offset.Oldest
 import com.bwsw.tstreams.env.{ConfigurationOptions, TStreamsFactory}
 import com.typesafe.config.ConfigFactory
 import scaldi.Injectable.inject
-import scaldi.{Injector, Module}
 
 import scala.collection.mutable
 import scala.util.{Failure, Success, Try}
@@ -156,7 +154,7 @@ object DataFactory {
       description = "some description of test instance",
       outputs = instanceOutputs,
       checkpointInterval = checkpointInterval,
-      duplicateCheck = false,
+      duplicateCheck = true,
       lookupHistory = 100,
       queueMaxSize = 500,
       defaultEvictionPolicy = EngineLiterals.lruDefaultEvictionPolicy,

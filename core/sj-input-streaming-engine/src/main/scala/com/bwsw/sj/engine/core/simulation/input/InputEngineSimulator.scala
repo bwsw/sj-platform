@@ -40,46 +40,48 @@ import io.netty.buffer.{ByteBuf, Unpooled}
   *
   * val simulator = new InputEngineSimulator(executor, evictionPolicy)
   * simulator.prepare("1,2,x,2,4")
-  * val outputDatas = simulator.process(duplicateCheck = true)
-  * println(outputDatas)
+  * val outputDataList = simulator.process(duplicateCheck = true)
+  * println(outputDataList)
   * }}}
   *
   * @param executor       implementation of [[InputStreamingExecutor]] under test
   * @param evictionPolicy eviction policy of duplicate envelopes
+  * @param separator      delimiter between data records
   * @param charset        encoding of incoming data
   * @tparam T type of outgoing data
   * @author Pavel Tomskikh
   */
 class InputEngineSimulator[T <: AnyRef](executor: InputStreamingExecutor[T],
                                         evictionPolicy: InputInstanceEvictionPolicy,
+                                        separator: String = "",
                                         charset: Charset = Charset.forName("UTF-8")) {
 
   private val inputBuffer: ByteBuf = Unpooled.buffer()
 
   /**
-    * Write data in byte buffer
+    * Write data records in byte buffer
     *
-    * @param data incoming data
+    * @param records incoming data records
     */
-  def prepare(data: Seq[String]): Unit = data.foreach(prepare)
+  def prepare(records: Seq[String]): Unit = records.foreach(prepare)
 
   /**
-    * Write data in byte buffer
+    * Write data record in byte buffer
     *
-    * @param data incoming data
+    * @param record incoming data record
     */
-  def prepare(data: String): Unit =
-    inputBuffer.writeCharSequence(data, charset)
+  def prepare(record: String): Unit =
+    inputBuffer.writeCharSequence(record + separator, charset)
 
   /**
-    * Sends byte buffer to [[executor]] while it can tokenize buffer and returns output data
+    * Sends byte buffer to [[executor]]as long as it can tokenize the buffer. Method returns list of [[OutputData]].
     *
-    * @param duplicateCheck indicates that every envelope has to be checked has to be checked on duplication
+    * @param duplicateCheck indicates that every envelope has to be checked on duplication
     * @param clearBuffer    indicates that byte buffer must be cleared
-    * @return collection of output data
+    * @return list of [[OutputData]]
     */
   def process(duplicateCheck: Boolean, clearBuffer: Boolean = true): Seq[OutputData[T]] = {
-    def processOneInterval(outputDatas: Seq[OutputData[T]]): Seq[OutputData[T]] = {
+    def processOneInterval(outputDataList: Seq[OutputData[T]]): Seq[OutputData[T]] = {
       val maybeOutputData = executor.tokenize(inputBuffer).map {
         interval =>
           val maybeInputEnvelope = executor.parse(inputBuffer, interval)
@@ -92,14 +94,14 @@ class InputEngineSimulator[T <: AnyRef](executor: InputStreamingExecutor[T],
       }
 
       maybeOutputData match {
-        case Some(outputData) => processOneInterval(outputDatas :+ outputData)
-        case None => outputDatas
+        case Some(outputData) => processOneInterval(outputDataList :+ outputData)
+        case None => outputDataList
       }
     }
 
-    val outputDatas = processOneInterval(Seq.empty)
+    val outputDataList = processOneInterval(Seq.empty)
     if (clearBuffer) clear()
-    outputDatas
+    outputDataList
   }
 
   /**
@@ -108,10 +110,11 @@ class InputEngineSimulator[T <: AnyRef](executor: InputStreamingExecutor[T],
   def clear(): Unit = inputBuffer.clear()
 
   private def checkDuplication(duplicateCheck: Boolean)(inputEnvelope: InputEnvelope[T]): Boolean = {
-    if (duplicateCheck || inputEnvelope.duplicateCheck)
-      evictionPolicy.checkForDuplication(inputEnvelope.key)
-    else
-      true
+    if (inputEnvelope.duplicateCheck.isDefined) {
+      if (inputEnvelope.duplicateCheck.get) evictionPolicy.checkForDuplication(inputEnvelope.key) else true
+    } else {
+      if (duplicateCheck) evictionPolicy.checkForDuplication(inputEnvelope.key) else true
+    }
   }
 }
 

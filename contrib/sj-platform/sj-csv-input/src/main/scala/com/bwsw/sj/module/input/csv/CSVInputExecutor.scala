@@ -35,19 +35,25 @@ import scala.io.Source
 import scala.util.{Failure, Success, Try}
 
 /**
-  * Executor for work with csv.
+  * Implementation of Input Streaming Executor for CSV Input Module
   *
+  * @param manager instance of InputEnvironmentManager used for receiving module's options
   * @author Pavel Tomskikh
   */
 class CSVInputExecutor(manager: InputEnvironmentManager) extends InputStreamingExecutor[Record](manager) {
   private val serializer = new JsonSerializer
   private val csvInputOptions = serializer.deserialize[CSVInputOptions](manager.options)
-  if (csvInputOptions.uniqueKey.isEmpty) csvInputOptions.uniqueKey = csvInputOptions.fields
+  private val uniqueKey = {
+    if (csvInputOptions.uniqueKey.nonEmpty)
+      csvInputOptions.uniqueKey
+    else
+      csvInputOptions.fields
+  }
 
-  val tokenizer = new Tokenizer(csvInputOptions.lineSeparator, csvInputOptions.encoding)
+  private val tokenizer = new Tokenizer(csvInputOptions.lineSeparator, csvInputOptions.encoding)
 
-  val fieldsNumber = csvInputOptions.fields.length
-  val schema = {
+  private val fieldsNumber = csvInputOptions.fields.length
+  private val schema = {
     var scheme = SchemaBuilder.record("csv").fields()
     csvInputOptions.fields.foreach { field =>
       scheme = scheme.name(field).`type`().stringType().noDefault()
@@ -55,22 +61,24 @@ class CSVInputExecutor(manager: InputEnvironmentManager) extends InputStreamingE
     scheme.endRecord()
   }
 
-  val fallbackFieldName = "data"
-  val fallbackSchema = SchemaBuilder.record("fallback").fields()
+  private val fallbackFieldName = "data"
+  private val fallbackSchema = SchemaBuilder.record("fallback").fields()
     .name(fallbackFieldName).`type`().stringType().noDefault().endRecord()
 
 
-  val partitionCount = getPartitionCount(manager.outputs.find(_.name == csvInputOptions.outputStream).get)
+  private val partitionCount = getPartitionCount(manager.outputs.find(_.name == csvInputOptions.outputStream).get)
 
-  val distributor = {
-    if (csvInputOptions.distribution.isEmpty) new StreamDistributor(partitionCount)
-    else new StreamDistributor(partitionCount, ByHash, csvInputOptions.distribution)
+  private val distributor = {
+    if (csvInputOptions.distribution.isEmpty)
+      new StreamDistributor(partitionCount)
+    else
+      new StreamDistributor(partitionCount, ByHash, csvInputOptions.distribution)
   }
 
-  val fallbackPartitionCount = getPartitionCount(manager.outputs.find(_.name == csvInputOptions.fallbackStream).get)
-  val fallbackDistributor = new StreamDistributor(fallbackPartitionCount)
+  private val fallbackPartitionCount = getPartitionCount(manager.outputs.find(_.name == csvInputOptions.fallbackStream).get)
+  private val fallbackDistributor = new StreamDistributor(fallbackPartitionCount)
 
-  val csvParser = {
+  private val csvParser = {
     val csvParserBuilder = new CSVParserBuilder
     csvInputOptions.fieldSeparator.foreach(x => if (x.nonEmpty) csvParserBuilder.withSeparator(x.head))
     csvInputOptions.quoteSymbol.foreach(x => if (x.nonEmpty) csvParserBuilder.withQuoteChar(x.head))
@@ -91,16 +99,17 @@ class CSVInputExecutor(manager: InputEnvironmentManager) extends InputStreamingE
         if (values.length == fieldsNumber) {
           val record = new Record(schema)
           csvInputOptions.fields.zip(values).foreach { case (field, value) => record.put(field, value) }
-          val key = AvroRecordUtils.concatFields(csvInputOptions.uniqueKey, record)
+          val key = AvroRecordUtils.concatFields(uniqueKey, record)
 
-          Some(new InputEnvelope(
-            s"${csvInputOptions.outputStream}$key",
-            Array((csvInputOptions.outputStream, distributor.getNextPartition(Some(record)))),
-            true,
-            record))
+          Some(InputEnvelope(
+            s"${csvInputOptions.outputStream},$key",
+            Seq((csvInputOptions.outputStream, distributor.getNextPartition(Some(record)))),
+            record,
+            Some(true)))
         } else {
           buildFallbackEnvelope(line)
         }
+
       case Failure(_) => buildFallbackEnvelope(line)
     }
   }
@@ -108,10 +117,9 @@ class CSVInputExecutor(manager: InputEnvironmentManager) extends InputStreamingE
   private def buildFallbackEnvelope(data: String): Option[InputEnvelope[Record]] = {
     val record = new Record(fallbackSchema)
     record.put(fallbackFieldName, data)
-    Some(new InputEnvelope(
+    Some(InputEnvelope(
       s"${csvInputOptions.fallbackStream},$data",
-      Array((csvInputOptions.fallbackStream, fallbackDistributor.getNextPartition())),
-      false,
+      Seq((csvInputOptions.fallbackStream, fallbackDistributor.getNextPartition())),
       record))
   }
 

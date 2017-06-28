@@ -40,7 +40,7 @@ class NumericalBatchCollector(instance: BatchInstanceDomain,
     countOfEnvelopesPerStream.filter(x => x._2 == everyNthCount).keys.toSeq
   }
 
-  def afterReceivingEnvelope(envelope: Envelope): Unit = {
+  def afterEnvelopeReceive(envelope: Envelope): Unit = {
     increaseCounter(envelope)
   }
 

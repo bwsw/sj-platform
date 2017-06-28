@@ -19,20 +19,22 @@
 package com.bwsw.sj.common.engine.core.entities
 
 import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
+import com.bwsw.sj.common.si.model.instance.InputInstance
 
 /**
   * Provides a wrapper for t-stream transaction that is formed by [[EngineLiterals.inputStreamingType]] engine.
   *
   * @param key            a key for check on duplicate
   * @param outputMetadata information (stream -> partition) - where data should be placed
-  * @param duplicateCheck whether a message should be checked on duplicate or not
+  * @param duplicateCheck whether a message should be checked on duplicate or not.
+  *                       If it is None than a default value is used ([[InputInstance.duplicateCheck]])
   * @param data           message data
   * @tparam T type of data containing in a message
   */
 
-class InputEnvelope[T <: AnyRef](var key: String,
-                                 var outputMetadata: Array[(String, Int)],
-                                 var duplicateCheck: Boolean,
-                                 var data: T) extends Envelope {
+case class InputEnvelope[T <: AnyRef](key: String,
+                                      outputMetadata: Seq[(String, Int)],
+                                      data: T,
+                                      duplicateCheck: Option[Boolean] = None) extends Envelope {
   streamType = StreamLiterals.inputDummy
 }

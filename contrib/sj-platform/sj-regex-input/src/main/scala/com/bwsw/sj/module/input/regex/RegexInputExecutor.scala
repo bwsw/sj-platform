@@ -150,11 +150,11 @@ class RegexInputExecutor(manager: InputEnvironmentManager) extends InputStreamin
 
     val key = AvroRecordUtils.concatFields(uniqueKey, record)
 
-    Some(new InputEnvelope(
-      s"${rule.outputStream}$key",
-      Array((rule.outputStream, outputDistributors(rule).getNextPartition(Some(record)))),
-      true,
-      record))
+    Some(InputEnvelope(
+      s"${rule.outputStream},$key",
+      Seq((rule.outputStream, outputDistributors(rule).getNextPartition(Some(record)))),
+      record,
+      Some(true)))
   }
 
   private def buildFallbackEnvelope(data: String): Option[InputEnvelope[Record]] = {
@@ -162,10 +162,9 @@ class RegexInputExecutor(manager: InputEnvironmentManager) extends InputStreamin
     val record = new Record(fallbackSchema)
     record.put(RegexInputOptionsNames.fallbackFieldName, data)
 
-    Some(new InputEnvelope(
+    Some(InputEnvelope(
       s"${regexInputOptions.fallbackStream},$data",
-      Array((regexInputOptions.fallbackStream, fallbackDistributor.getNextPartition())),
-      false,
+      Seq((regexInputOptions.fallbackStream, fallbackDistributor.getNextPartition())),
       record))
   }
 

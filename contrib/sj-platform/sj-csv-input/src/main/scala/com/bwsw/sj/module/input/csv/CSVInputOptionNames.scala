@@ -19,11 +19,9 @@
 package com.bwsw.sj.module.input.csv
 
 /**
-  *
   * @author Pavel Tomskikh
   */
 object CSVInputOptionNames {
-
   val lineSeparator = "lineSeparator"
   val encoding = "encoding"
   val outputStream = "outputStream"
@@ -40,5 +38,5 @@ case class CSVInputOptions(lineSeparator: String,
                            fields: List[String],
                            fieldSeparator: Option[String],
                            quoteSymbol: Option[String],
-                           var uniqueKey: List[String],
+                           uniqueKey: List[String],
                            distribution: List[String])
