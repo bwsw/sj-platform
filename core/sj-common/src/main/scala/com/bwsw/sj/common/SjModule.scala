@@ -30,14 +30,13 @@ import com.bwsw.sj.common.si.model.module.ModuleMetadataCreator
 import com.bwsw.sj.common.si.model.provider.ProviderCreator
 import com.bwsw.sj.common.si.model.service.ServiceCreator
 import com.bwsw.sj.common.si.model.stream.StreamCreator
-import com.bwsw.sj.common.utils.{FileClassLoader, MessageResourceUtils, SpecificationUtils}
+import com.bwsw.sj.common.utils.{MessageResourceUtils, SpecificationUtils}
 import scaldi.Module
 
 class SjModule extends Module {
   bind[MessageResourceUtils] to new MessageResourceUtils
   bind[SpecificationUtils] to new SpecificationUtils
   bind[SettingsUtils] to new SettingsUtils
-  bind[FileClassLoader] to new FileClassLoader
 
   val mongoAuthChecker = new MongoAuthChecker(ConnectionConstants.mongoHosts, ConnectionConstants.databaseName)
   bind[ConnectionRepository] to new ConnectionRepository(mongoAuthChecker)

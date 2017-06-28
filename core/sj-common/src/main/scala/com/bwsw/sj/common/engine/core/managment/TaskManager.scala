@@ -19,9 +19,8 @@
 package com.bwsw.sj.common.engine.core.managment
 
 import java.io.File
-import java.net.URLClassLoader
 
-import com.bwsw.common.file.utils.MongoFileStorage
+import com.bwsw.common.file.utils.{ClosableClassLoader, MongoFileStorage}
 import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.common.dal.model.instance.ExecutionPlan
 import com.bwsw.sj.common.dal.model.module._
@@ -30,8 +29,8 @@ import com.bwsw.sj.common.dal.model.stream.{StreamDomain, TStreamStreamDomain}
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
 import com.bwsw.sj.common.engine.{EnvelopeDataSerializer, ExtendedEnvelopeDataSerializer, StreamingExecutor}
 import com.bwsw.sj.common.si.model.config.ConfigurationSetting
-import com.bwsw.sj.common.si.model.instance.{InstanceCreator, Instance}
-import com.bwsw.sj.common.utils.EngineLiterals
+import com.bwsw.sj.common.si.model.instance.{Instance, InstanceCreator}
+import com.bwsw.sj.common.utils.{EngineLiterals, FileClassLoader}
 import com.bwsw.sj.common.utils.EngineLiterals._
 import com.bwsw.sj.common.utils.StreamLiterals._
 import com.bwsw.sj.common.engine.core.config.EngineConfigNames
@@ -87,9 +86,13 @@ abstract class TaskManager(implicit injector: Injector) {
       "specification.version" -> instance.moduleVersion)
   ).head
   private val executorClassName: String = fileMetadata.specification.executorClass
-  val moduleClassLoader: URLClassLoader = createClassLoader()
+  val moduleClassLoader: ClosableClassLoader = createClassLoader()
 
-  protected val executorClass: Class[_] = moduleClassLoader.loadClass(executorClassName)
+  protected val executorClass: Class[_] = {
+    val _class = moduleClassLoader.loadClass(executorClassName)
+    moduleClassLoader.close()
+    _class
+  }
 
   val envelopeDataSerializer: EnvelopeDataSerializer[AnyRef] =
     new ExtendedEnvelopeDataSerializer(moduleClassLoader, instance)
@@ -143,14 +146,14 @@ abstract class TaskManager(implicit injector: Injector) {
     tstreamsSettings.foreach(x => tstreamFactory.setProperty(ConfigurationSetting.clearConfigurationSettingName(x.domain, x.name), x.value))
   }
 
-  protected def createClassLoader(): URLClassLoader = {
+  protected def createClassLoader(): ClosableClassLoader = {
     val file = getModuleJar
     logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
       s"Get class loader for jar file: ${file.getName}.")
 
-    val classLoaderUrls = Array(file.toURI.toURL)
+    val classLoader: ClosableClassLoader = new FileClassLoader(inject[ConnectionRepository].getFileStorage, file.getName)
 
-    new URLClassLoader(classLoaderUrls, ClassLoader.getSystemClassLoader)
+    classLoader
   }
 
   private def getModuleJar: File = {

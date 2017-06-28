@@ -18,12 +18,11 @@
  */
 package com.bwsw.common.jdbc
 
-import java.net.URLClassLoader
 import java.sql.{Connection, Driver, PreparedStatement, SQLException}
 import java.util.Properties
 
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
-import com.bwsw.sj.common.utils.JdbcLiterals
+import com.bwsw.sj.common.utils.{FileClassLoader, JdbcLiterals}
 import org.slf4j.LoggerFactory
 
 import scala.util.{Failure, Success, Try}
@@ -59,7 +58,7 @@ protected class JdbcClient(override val jdbcCCD: JdbcClientConnectionData)
 
     val driverFileName = jdbcCCD.driverFileName
     val jarFile = inject[ConnectionRepository].getFileStorage.get(driverFileName, s"tmp/$driverFileName")
-    val classLoader = new URLClassLoader(Array(jarFile.toURI.toURL), ClassLoader.getSystemClassLoader)
+    val classLoader = createClassLoader(jarFile.getName)
     val driver = classLoader.loadClass(jdbcCCD.driverClass).newInstance().asInstanceOf[Driver]
 
     driver
@@ -94,6 +93,8 @@ protected class JdbcClient(override val jdbcCCD: JdbcClientConnectionData)
 
     credential
   }
+
+  protected def createClassLoader(filename: String) = new FileClassLoader(inject[ConnectionRepository].getFileStorage, filename)
 }
 
 trait IJdbcClient {
