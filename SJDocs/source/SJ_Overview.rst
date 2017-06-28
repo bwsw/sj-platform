@@ -38,14 +38,15 @@ General Concepts
 
 The Stream Juggler provides a developer with three generic event processor types, which handle data streams:
 
-1. Input Stream Processor (ISP) – handles external inputs, does data deduplication, transforms raw data to objects, currently TCP Input Stream Processor; 
+1. *Input Stream Processor* (ISP) – handles external inputs, does data deduplication, transforms raw data to objects, currently TCP Input Stream Processor; 
 
-2. Output Stream Processor (OSP) – handles external output from event processing pipeline to external data destinations (Elasticsearch, JDBC, etc.);
+2. *Output Stream Processor* (OSP) – handles external output from event processing pipeline to external data destinations (Elasticsearch, JDBC, etc.);
 
-3. Pipeline Stream Processor (PSP) – handles data processing inside the pipeline, two types of PSP exist: 
+3. *Pipeline Stream Processor* (PSP) – handles data processing inside the pipeline, two types of PSP exist: 
 
-  1. Regular – the most generic processor which receives event, does some data transformation and (probably) sends transformation to the next processing step. 
-  2. Windowed (Batch)– the processor which organizes incoming data into batches and processing is done with sliding window. Windowed PSP may be used to implement streaming joins and processing where algorithm must observe range of input messages rather than current one. 
+- Regular – the most generic processor which receives event, does some data transformation and (probably) sends transformation to the next processing step. 
+
+- Windowed (Batch)– the processor which organizes incoming data into batches and processing is done with sliding window. Windowed PSP may be used to implement streaming joins and processing where algorithm must observe range of input messages rather than current one. 
 
 A module handles data flow making it into streams. The data elements in a stream are assembled in partitions. A **partition** is a part of a data stream allocated for convenience in operation.  Upon creation, every stream gets a name and a certain amount of partitions. The streams with many partitions allow to handle the idea of **parallelism** properly. In such case, an engine divides existing partitions fairly among executors and it enables to scale the data processing. Partitions are also helpful in distributing processing load between several workers.
 
