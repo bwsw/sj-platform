@@ -56,46 +56,33 @@ The parameters of the method are:
 
 - "isNotEmptyOrDuplicate" - a boolean flag (denoting whether an "InputEnvelope" is defined and isn't a duplicate (true) or an "InputEnvelope" is a duplicate or empty (false))
 
-Default implementation of the method:
+Default implementation of the method::
 
-``def createProcessedMessageResponse(envelope: Option[InputEnvelope],`` 
+  def createProcessedMessageResponse(envelope: Option[InputEnvelope],
+  isNotEmptyOrDuplicate: Boolean): InputStreamingResponse = {
+    var message = ""
+    var sendResponsesNow = true
+    if (isNotEmptyOrDuplicate) {
+      message = s"Input envelope with key: '${envelope.get.key}' has been sent\n"
+      sendResponsesNow = false
+    } else if (envelope.isDefined) {
+      message = s"Input envelope with key: '${envelope.get.key}' is duplicate\n"
+    } else {
+      message = s"Input envelope is empty\n"
+    }
+  InputStreamingResponse(message, sendResponsesNow)
+}
 
-``isNotEmptyOrDuplicate: Boolean): InputStreamingResponse = {``
-
-``var message = ""``
-
-``var sendResponsesNow = true``
-
-``if (isNotEmptyOrDuplicate) {``
-
-``message = s"Input envelope with key: '${envelope.get.key}' has been sent\n"``
- 
-``sendResponsesNow = false``
-
-``} else if (envelope.isDefined) {``
-
-``message = s"Input envelope with key: '${envelope.get.key}' is duplicate\n"``
-   
-``} else {``
-
-``message = s"Input envelope is empty\n"``
-
-``}``
-
-``InputStreamingResponse(message, sendResponsesNow)``
-
-``}``
 
 4) "createCheckpointResponse": 
       It is invoked on checkpoint's finish. It's purpose is to create response for data source to inform that checkpoint has been done. It returns an instance of "InputStreamingResponse".
 
-Default implementation of the method:
+Default implementation of the method::
 
-``def createCheckpointResponse(): InputStreamingResponse = {``
-  
-``InputStreamingResponse(s"Checkpoint has been done\n", isBuffered = false)``
+ def createCheckpointResponse(): InputStreamingResponse = {
+   InputStreamingResponse(s"Checkpoint has been done\n", isBuffered = false)
+ }
 
-``}``
 
 There is a manager inside the module which allows to:
 
@@ -152,11 +139,10 @@ In the Regular module the executor provides the following methods that does not 
 1) "onInit": 
         It is invoked only once, when a module is launched. This method can be used to initialize some auxiliary variables, or check the state variables on existence and if it's necessary create them. Thus, a user should do preparation of the executor before usage.
 
-Example of the checking a state variable:
+Example of the checking a state variable::
 
-``if (!state.isExist(<variable_name>))``
-
-``state.set(<variable_name>, <variable_value>)``
+ if (!state.isExist(<variable_name>))
+ state.set(<variable_name>, <variable_value>)
 
 ``<variable_name>`` must have the String type
 
@@ -165,11 +151,10 @@ Example of the checking a state variable:
 2) "onMessage": 
     It is invoked for every received message from one of the inputs that are defined within the instance. Inside the method there is an access to the message that can have the different data type depending on a data type of input. 
 
-So there are two handlers with different parameters:
+So there are two handlers with different parameters::
 
-``def onMessage(envelope: TStreamEnvelope[T]): Unit``
- 
-``def onMessage(envelope: KafkaEnvelope[T]): Unit``
+  def onMessage(envelope: TStreamEnvelope[T]): Unit
+  def onMessage(envelope: KafkaEnvelope[T]): Unit
  
 Each envelope has a type parameter that defines the type of data contained in the envelope.
 
@@ -231,12 +216,11 @@ The executor of the batch module provides the following methods that does not pe
 1) "onInit": 
     It is invoked only once, when a module is launched. This method can be used to initialize some auxiliary variables or check the state variables on existence and if it's necessary create them. Thus, you should do preparation of the executor before usage.
 
-Example of the checking a state variable:
-
-``if (!state.isExist(<variable_name>))``
+Example of the checking a state variable::
  
-``state.set(<variable_name>, <variable_value>)``
-
+  if (!state.isExist(<variable_name>))
+  state.set(<variable_name>, <variable_value>)
+  
 ``<variable_name>`` have to have the String type
 
 ``<variable_value>`` can be any type (be careful when you will cast a state variable value to a particular data type)
@@ -244,25 +228,19 @@ Example of the checking a state variable:
 2) "onWindow": 
     It is invoked for every collected window of the main stream that are defined within the instance. Inside the method there is an access to a window repository, containing a window for each input (few of them can be empty). A window consists of batches, a batch consists of envelopes (messages) that can have the different data type depending on a data type of input so a user should cast the message to get certain fields. Each envelope has a type parameter that defines the type of data containing in the envelope.
 
-Example of a message casting to a particular data type:
+Example of a message casting to a particular data type::
 
-``val allWindows = windowRepository.getAll()``
+  val allWindows = windowRepository.getAll()
+  allWindows.flatMap(x => x._2.batches).flatMap(x => 
+  x.envelopes).foreach {
+  case kafkaEnvelope: KafkaEnvelope[Integer @unchecked] => //here there is an access to certain fields such as offset and data of integer type
+  case tstreamEnvelope: TStreamEnvelope[Integer @unchecked] => //here there is an access to certain fields such as txnUUID, consumerName and data (array of integers)
+  }
 
-``allWindows.flatMap(x => x._2.batches).flatMap(x =>`` 
+The data type of the envelope can be "KafkaEnvelope" data type or "TStreamEnvelope" data type. If a user specifies the inputs of only one of these data types in an instance ther is no need to match the envelope as shown in the example above and cast the envelope right to a particular data type::
 
-``x.envelopes).foreach {``
-
-``case kafkaEnvelope: KafkaEnvelope[Integer @unchecked]`` => //here there is an access to certain fields such as offset and data of integer type
-
-``case tstreamEnvelope: TStreamEnvelope[Integer @unchecked]`` => //here there is an access to certain fields such as txnUUID, consumerName and data (array of integers)
- 
-``}``
-
-The data type of the envelope can be "KafkaEnvelope" data type or "TStreamEnvelope" data type. If a user specifies the inputs of only one of these data types in an instance ther is no need to match the envelope as shown in the example above and cast the envelope right to a particular data type:
-
-``val tstreamEnvelope =``
-
-``envelope.asInstanceOf[TStreamEnvelope[Integer]]``
+  val tstreamEnvelope =
+  envelope.asInstanceOf[TStreamEnvelope[Integer]]
 
 3) "onBeforeCheckpoint": 
     It is invoked before every checkpoint
