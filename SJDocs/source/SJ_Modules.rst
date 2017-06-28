@@ -348,11 +348,12 @@ Prerequisites For Modules. Providers And Services In Streaming.
 
 As stated above, modules process the data arranged in streams.
 
-.. Any kind of a module deals with two types of streams: input and output. An input stream delivers events into the system. The Stream Juggler supports *Kafka* and *T-stream* type of incoming streams.An output streams put the processed data into an external storage. The Stream Juggler supports only *T-stream* type of output data streaming. Find more about T-streams at the `site <http://t-streams.com>`_ .
+The Stream Juggler supports *Kafka* and *T-stream* type of streams. And when the Kafka streams are a well-known type of streaming introduced by Apache Kafka, the T-streams are intentionally designed for the Stream Juggler platform. Find more about T-streams at the `site <http://t-streams.com>`_ .
 
 To transform data into a stream of exact type you need to create a service and a provider for this service. The type of a service and a provider is determined by the type of a stream you need for the module.
 
-For example, a Batch module that receives data from Kafka or T-streams will require a Kafka service (KfkQ) and two provider types for it: Kafka and ZooKeeper. Or if you work with an Output module and you want to store the processed data to ElasticSearch index, you are going to work with  the ElasticSearch output type stream that in its turn requires a service and a provider of ElasticSearch type.
+For example, a Batch module that receives data from Kafka or T-streams will require a Kafka service (KfkQ) and two provider types for it: Kafka and ZooKeeper. 
+.. Or if you work with an Output module and you want to store the processed data to ElasticSearch index, you are going to work with  the ElasticSearch output type stream that in its turn requires a service and a provider of ElasticSearch type.
 
 The diagram below may help you to understand the dependency of instances in the platform.
 
