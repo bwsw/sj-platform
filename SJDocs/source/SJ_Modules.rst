@@ -21,6 +21,8 @@ A general structure of a module can be rendered as at the scheme below:
 
 .. figure:: _static/ModuleGeneralStructure.png
 
+A module handles data flow making it into streams. Raw data are transformed to objects referred to as an envelope. An envelope is a container for messages or events with data records.
+
 The platform supports 4 types of modules:
 
 1. *Input-streaming* - It handles external inputs, does data deduplication, transforms raw data to objects. 
@@ -30,6 +32,12 @@ The platform supports 4 types of modules:
 3. *Regular-streaming* (base type) - a generic processor which receives an event, does some data transformation and sends transformation to the next processing step. 
 
 4. *Batch-streaming* — It organizes incoming data into batches and processing is performed with sliding window. Batch module may be used to implement streaming joins and processing where algorithm must observe range of input messages rather than current one. 
+
+The modules can be strung in a pipeline as illustrated below:
+
+.. figure:: _static/ModulePipeline.png
+
+In this document each module is described in detail.
 
 Input module
 ----------------
