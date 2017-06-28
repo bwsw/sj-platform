@@ -342,17 +342,28 @@ A detailed manual on how to write a module you may find at `page`_ .
 Modules` performance is determined with the work of engine. An engine structure, components and  the workflow are determined with the type of module. Please, find more information about engines at the `Engines`_  page.
 
 
-Prerequisites For Modules. Providers And Services In Streaming.
-================================================================
+Prerequisites For Modules. Streaming Components.
+================================================
  .. Warning:: The section is under development!
 
-As stated above, modules process the data arranged in streams.
+A module requires the following elements to be created for its performance:
 
-The Stream Juggler supports *Kafka* and *T-stream* type of streams. And when the Kafka streams are a well-known type of streaming introduced by Apache Kafka, the T-streams are intentionally designed for the Stream Juggler platform as a complement for Apache Kafka. The T-streams have more features than Kafka and make exactly-once processing possible. Find more about T-streams at the `site <http://t-streams.com>`_ .
+- Provider
+
+- Service
+
+- Stream 
+
+- Instance
+
+The type of module requires a specific type of instance to create. An instance is a full range of settings to perform an exact executor type. These settings are specified via UI or REST API and determine the mode of the module operation: data stream type the module is going to work with, a checkpoint concept, the settings of state and parallelism, other options, etc.
+
+As stated above, modules process the data arranged in streams. The Stream Juggler supports *Kafka* and *T-stream* type of streams. And when the Kafka streams are a well-known type of streaming introduced by Apache Kafka, the T-streams are intentionally designed for the Stream Juggler platform as a complement for Apache Kafka. The T-streams have more features than Kafka and make exactly-once processing possible. Find more about T-streams at the `site <http://t-streams.com>`_ .
 
 To transform data into a stream of exact type you need to create a service and a provider for this service. The type of a service and a provider is determined by the type of a stream you need for the module.
 
 For example, a Batch module that receives data from Kafka or T-streams will require a Kafka service (KfkQ) and two provider types for it: Kafka and ZooKeeper. 
+
 .. Or if you work with an Output module and you want to store the processed data to ElasticSearch index, you are going to work with  the ElasticSearch output type stream that in its turn requires a service and a provider of ElasticSearch type.
 
 The diagram below may help you to understand the dependency of instances in the platform.
