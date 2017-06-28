@@ -102,12 +102,4 @@ class Executor(manager: ModuleEnvironmentManager) extends BatchStreamingExecutor
   override def onLeaderEnter() = {
     println("on leader enter")
   }
-
-  override def onLeave() = {
-    println("on leave")
-  }
-
-  override def onLeaderLeave() = {
-     println("on leader leave")
-  }
 }
