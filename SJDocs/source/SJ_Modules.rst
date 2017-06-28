@@ -190,6 +190,65 @@ Batch module
 -----------------
 A batch is a minimum data set for a handler to collect the events in the stream. The size of a batch is defined by a user. It can be a period of time or a quantity of events or a specific type of event after receiving which the batch is considered closed.  Then, the queue of batches is sent further in the flow for the next stage of processing. 
 
+In the module it is a Batch Collector that is responsible for the logic of collecting batches. It provides the following methods, implementation of which you should specify. 
+
+1) “getBatchesToCollect”:
+       It should return a list of stream names that are ready to collect.
+
+2) “afterEnvelopeReceive”:
+       It is invoked when a new envelope is received.
+
+3) “prepareForNextCollecting”:
+     It is invoked when a batch is collected. If several batches are collected at the same time then the method is invoked for each batch.
+
+Let us consider an example:
+
+This is a batch collector defining that a batch consists of a certain number of envelopes::
+
+  class NumericalBatchCollector(instance: BatchInstanceDomain,
+                              performanceMetrics: BatchStreamingPerformanceMetrics,
+                              streamRepository: Repository[StreamDomain])
+  extends BatchCollector(instance, performanceMetrics, streamRepository) {
+
+  private val logger = LoggerFactory.getLogger(this.getClass)
+  private val countOfEnvelopesPerStream = mutable.Map(instance.getInputsWithoutStreamMode.map(x => (x, 0)): _*)           (1)
+  private val everyNthCount = 2                                                                                           (2)
+
+  def getBatchesToCollect(): Seq[String] = {
+    countOfEnvelopesPerStream.filter(x => x._2 == everyNthCount).keys.toSeq                                               (3)
+  }
+
+  def afterEnvelopeReceive(envelope: Envelope): Unit = {
+    increaseCounter(envelope)                                                                                             (4)
+  }
+
+  private def increaseCounter(envelope: Envelope) = {
+    countOfEnvelopesPerStream(envelope.stream) += 1
+    logger.debug(s"Increase count of envelopes of stream: ${envelope.stream} to: ${countOfEnvelopesPerStream(envelope.stream)}.")
+  }
+
+  def prepareForNextCollecting(streamName: String): Unit = {
+    resetCounter(streamName)                                                                                              (5)
+  }
+
+  private def resetCounter(streamName: String) = {
+    logger.debug(s"Reset a counter of envelopes to 0.")
+    countOfEnvelopesPerStream(streamName) = 0
+  }
+ }
+
+Let's take a look at the main points:
+
+.(1) - create a storage of incoming envelopes for each input stream 
+
+.(2) - set a size of batch (in envelopes)
+
+.(3) - check that batches contain the necessary number of envelopes
+
+.(4) - when a new envelope is received then increase the number of envelopes for specific batch
+
+.(5) - when a batch has been collected then reset the number of envelopes for this batch 
+
 The module allows to transform the data aggregated from input streams applying the idea of a sliding window. 
 
 A window is a period of time that is multiple of a batch and during which the batches of input events are collected into a queue for further transformation.
