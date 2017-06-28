@@ -17,9 +17,10 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
-   Overview
-   Developers' Guide
-   REST API Documentation
+   SJ_Overview
+   Platform Architecture
+   SJ_Modules
+   SJ_REST API Documentation
    SJ_UI_Guide
    Glossary
    
