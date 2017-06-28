@@ -21,6 +21,7 @@ package com.bwsw.sj.mesos.framework.schedule
 import com.bwsw.sj.mesos.framework.task.TasksList
 import org.apache.log4j.Logger
 import org.apache.mesos.Protos._
+import scaldi.Injector
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
@@ -199,7 +200,7 @@ object OffersHandler {
       .build
   }
 
-  def distributeTasksOnSlaves(): Unit = {
+  def distributeTasksOnSlaves()(implicit injector: Injector): Unit = {
     logger.info(s"Distribute tasks to resource offers")
     OffersHandler.offerNumber = 0
     for (currTask <- TasksList.toLaunch) {
@@ -215,7 +216,7 @@ object OffersHandler {
     * @param tasksCountOnSlaves
     * @return
     */
-  private def createTaskToLaunch(taskName: String, tasksCountOnSlaves: mutable.ListBuffer[(Offer, Int)]): ListBuffer[String] = {
+  private def createTaskToLaunch(taskName: String, tasksCountOnSlaves: mutable.ListBuffer[(Offer, Int)])(implicit injector: Injector): ListBuffer[String] = {
     val currentOffer = OffersHandler.getNextOffer(tasksCountOnSlaves)
     val task = TasksList.createTaskToLaunch(taskName, currentOffer._1)
 

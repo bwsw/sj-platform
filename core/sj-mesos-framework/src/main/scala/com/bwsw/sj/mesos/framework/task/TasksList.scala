@@ -147,7 +147,7 @@ object TasksList {
     tasks.foreach(task => newTask(task))
   }
 
-  def createTaskToLaunch(task: String, offer: Offer): TaskInfo = {
+  def createTaskToLaunch(task: String, offer: Offer)(implicit injector: Injector): TaskInfo = {
     TaskInfo.newBuilder
       .setCommand(getCommand(task, offer))
       .setName(task)
@@ -159,7 +159,7 @@ object TasksList {
       .build()
   }
 
-  def getCommand(task: String, offer: Offer): CommandInfo = {
+  def getCommand(task: String, offer: Offer)(implicit injector: Injector): CommandInfo = {
     def getAgentPorts: String = {
       var agentPorts: String = ""
       var taskPort: String = ""
