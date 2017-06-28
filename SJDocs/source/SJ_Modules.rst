@@ -205,7 +205,7 @@ As shown in the figure, every time the window slides over an input stream, the b
 
 - *window size* - The duration of the window, i.e. how many batches should be collected before sliding. 
 
-- *sliding interval* - The interval at which the window operation is performed.
+- *sliding interval* - A step size at which the window slides forward.
 
 In the example, the operation is applied over the last 3 events, and slides by 2 events. Thus, the window size is 3 and the sliding interval is 2.
 
