@@ -221,9 +221,9 @@ Example of the checking a state variable::
   if (!state.isExist(<variable_name>))
   state.set(<variable_name>, <variable_value>)
   
-``<variable_name>`` have to have the String type
+``<variable_name>`` should be of the String type
 
-``<variable_value>`` can be any type (be careful when you will cast a state variable value to a particular data type)
+``<variable_value>`` can be of any type (be careful when you will cast a state variable value to a particular data type)
 
 2) "onWindow": 
     It is invoked for every collected window of the main stream that are defined within the instance. Inside the method there is an access to a window repository, containing a window for each input (few of them can be empty). A window consists of batches, a batch consists of envelopes (messages) that can have the different data type depending on a data type of input so a user should cast the message to get certain fields. Each envelope has a type parameter that defines the type of data containing in the envelope.
