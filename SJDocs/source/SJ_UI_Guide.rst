@@ -472,7 +472,7 @@ Instances
 ---------
 Module uses a specific instance to personalize its work.
 
-Instance is a full range of settings to perfom an exact executor type.
+Instance is a full range of settings to perform an exact executor type.
 
 Before creating an instance make sure all necessary *configuration* *settings* are added to the system.
 
