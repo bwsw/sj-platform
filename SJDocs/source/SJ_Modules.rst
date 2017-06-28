@@ -344,7 +344,7 @@ Modules` performance is determined with the work of engine. An engine structure,
 
 Prerequisites For Modules. Providers And Services In Streaming.
 ================================================================
-.. Warning:: The section is under development!
+ .. Warning:: The section is under development!
 
 As stated above, modules process the data arranged in streams.
 
