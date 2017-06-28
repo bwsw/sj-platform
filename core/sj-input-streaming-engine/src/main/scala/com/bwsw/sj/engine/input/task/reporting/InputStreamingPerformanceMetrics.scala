@@ -1,40 +1,61 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.bwsw.sj.engine.input.task.reporting
 
 import java.util.Calendar
 
-import com.bwsw.sj.engine.core.entities.{Envelope, InputEnvelope}
-import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
+import com.bwsw.common.ObjectSizeFetcher
+import com.bwsw.sj.common.engine.core.entities.{Envelope, InputEnvelope}
+import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
 import com.bwsw.sj.engine.input.task.InputTaskManager
+
 import scala.collection.mutable
+import scala.collection.mutable.ListBuffer
 
 /**
- * Class represents a set of metrics that characterize performance of a input streaming module
- *
- * @author Kseniya Mikhaleva
- */
+  * Class represents a set of metrics that characterize performance of an input streaming module
+  *
+  * @param manager allows to manage an environment of input streaming task
+  * @author Kseniya Mikhaleva
+  */
 
 class InputStreamingPerformanceMetrics(manager: InputTaskManager)
   extends PerformanceMetrics(manager) {
 
   currentThread.setName(s"input-task-${manager.taskName}-performance-metrics")
-  private val inputStreamName = manager.agentsHost + ":" + manager.entryPort
-  private val outputStreamNames = instance.outputs
+  private val inputStreamName: String = manager.agentsHost + ":" + manager.entryPort
+  private val outputStreamNames: Array[String] = instance.outputs
 
-  override protected var inputEnvelopesPerStream = createStorageForInputEnvelopes(Array(inputStreamName))
-  override protected var outputEnvelopesPerStream = createStorageForOutputEnvelopes(outputStreamNames)
+  override protected var inputEnvelopesPerStream: mutable.Map[String, ListBuffer[List[Int]]] = createStorageForInputEnvelopes(Array(inputStreamName))
+  override protected var outputEnvelopesPerStream: mutable.Map[String, mutable.Map[String, ListBuffer[Int]]] = createStorageForOutputEnvelopes(outputStreamNames)
 
   /**
-   * Invokes when a new envelope from the input stream is received
-   */
+    * Invokes when a new envelope from the input stream is received
+    */
   override def addEnvelopeToInputStream(envelope: Envelope): Unit = {
     val inputEnvelope = envelope.asInstanceOf[InputEnvelope[AnyRef]]
-    super.addEnvelopeToInputStream(inputStreamName, List(inputEnvelope.data.toString.length)) //todo придумать другой способ извлечения информации
+    super.addEnvelopeToInputStream(inputStreamName, List(ObjectSizeFetcher.getObjectSize(inputEnvelope.data)))
   }
 
   /**
-   * Constructs a report of performance metrics of task's work
-   * @return Constructed performance report
-   */
+    * Constructs a report of performance metrics of task work (one module could have multiple tasks)
+    */
   override def getReport(): String = {
     logger.info(s"Start preparing a report of performance for task: $taskName of an input module.")
     mutex.lock()

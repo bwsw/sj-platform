@@ -1,43 +1,64 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.bwsw.sj.engine.core.engine.input
 
 import java.util.Properties
 
 import com.bwsw.common.ObjectSerializer
+import com.bwsw.sj.common.SjInjector
+import com.bwsw.sj.common.config.{ConfigLiterals, SettingsUtils}
 import com.bwsw.sj.common.dal.model.service.KafkaServiceDomain
 import com.bwsw.sj.common.dal.model.stream.{StreamDomain, TStreamStreamDomain}
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
-import com.bwsw.sj.common.config.ConfigurationSettingsUtils._
-import com.bwsw.sj.common.config.{ConfigLiterals, ConfigurationSettingsUtils}
+import com.bwsw.sj.common.si.model.config.ConfigurationSetting
 import com.bwsw.sj.common.utils.StreamLiterals
-import com.bwsw.sj.engine.core.entities.KafkaEnvelope
-import com.bwsw.sj.engine.core.managment.CommonTaskManager
+import com.bwsw.sj.common.engine.core.entities.KafkaEnvelope
+import com.bwsw.sj.common.engine.core.managment.CommonTaskManager
 import com.bwsw.tstreams.agents.consumer.Offset.Oldest
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import com.bwsw.tstreams.agents.producer.Producer
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.common.TopicPartition
-import org.slf4j.LoggerFactory
+import org.slf4j.{Logger, LoggerFactory}
+import scaldi.Injectable.inject
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 
-trait KafkaTaskInput[T <: AnyRef] {
+trait KafkaTaskInput[T <: AnyRef] extends SjInjector {
   protected val manager: CommonTaskManager
   protected val checkpointGroup: CheckpointGroup
-  protected val currentThread = Thread.currentThread()
-  protected val logger = LoggerFactory.getLogger(this.getClass)
+  protected val currentThread: Thread = Thread.currentThread()
+  protected val logger: Logger = LoggerFactory.getLogger(this.getClass)
   protected val offsetSerializer = new ObjectSerializer()
-  protected val kafkaSubscriberTimeout = ConfigurationSettingsUtils.getKafkaSubscriberTimeout()
-  protected val kafkaInputs = getKafkaInputs()
-  protected val streamNamesToTags = kafkaInputs.map(x => (x._1.name, x._1.tags)).toMap
-  protected var kafkaOffsetsStorage = mutable.Map[(String, Int), Long]()
-  protected val kafkaOffsetsStream = manager.taskName + "_kafka_offsets"
-  protected val offsetStream = createOffsetStream()
+  protected val settingsUtils: SettingsUtils = inject[SettingsUtils]
+  protected val kafkaSubscriberTimeout: Int = settingsUtils.getKafkaSubscriberTimeout()
+  protected val kafkaInputs: mutable.Map[StreamDomain, Array[Int]] = getKafkaInputs()
+  protected val streamNamesToTags: Map[String, Array[String]] = kafkaInputs.map(x => (x._1.name, x._1.tags)).toMap
+  protected var kafkaOffsetsStorage: mutable.Map[(String, Int), Long] = mutable.Map[(String, Int), Long]()
+  protected val kafkaOffsetsStream: String = manager.taskName + "_kafka_offsets"
+  protected val offsetStream: TStreamStreamDomain = createOffsetStream()
 
-  protected val offsetProducer = createOffsetProducer()
+  protected val offsetProducer: Producer = createOffsetProducer()
   addOffsetProducerToCheckpointGroup()
 
-  protected val kafkaConsumer = createSubscribingKafkaConsumer(
+  protected val kafkaConsumer: KafkaConsumer[Array[Byte], Array[Byte]] = createSubscribingKafkaConsumer(
     kafkaInputs.map(x => (x._1.name, x._2.toList)).toList,
     kafkaInputs.flatMap(_._1.service.asInstanceOf[KafkaServiceDomain].provider.hosts).toList,
     chooseOffset()
@@ -48,11 +69,8 @@ trait KafkaTaskInput[T <: AnyRef] {
   }
 
   /**
-    * Creates SJStream is responsible for committing the offsets of last messages
+    * Creates [[com.bwsw.sj.common.dal.model.stream.KafkaStreamDomain]] is responsible for committing the offsets of last messages
     * that has successfully processed for each topic for each partition
-    *
-    * @return SJStream is responsible for committing the offsets of last messages
-    *         that has successfully processed for each topic for each partition
     */
   protected def createOffsetStream(): TStreamStreamDomain = {
     logger.debug(s"Task name: ${manager.taskName}. Get stream for keeping kafka offsets.")
@@ -60,9 +78,9 @@ trait KafkaTaskInput[T <: AnyRef] {
     val tags = Array("offsets")
     val partitions = 1
 
-    manager.createTStreamOnCluster(kafkaOffsetsStream, description, partitions)
+    manager.createStorageStream(kafkaOffsetsStream, description, partitions)
 
-    manager.getSjStream(kafkaOffsetsStream, description, tags, partitions)
+    manager.getStream(kafkaOffsetsStream, description, tags, partitions)
   }
 
 
@@ -86,12 +104,13 @@ trait KafkaTaskInput[T <: AnyRef] {
     * If there was a checkpoint with offsets of last consumed messages for each topic/partition
     * then consumer will fetch from this offsets otherwise in accordance with offset parameter
     *
-    * @param topics Set of kafka topic names and range of partitions relatively
-    * @param hosts  Addresses of kafka brokers in host:port format
-    * @param offset Default policy for kafka consumer (earliest/latest)
-    * @return Kafka consumer subscribed to topics
+    * @param topics set of kafka topic names and range of partitions relatively
+    * @param hosts  addresses of kafka brokers in host:port format
+    * @param offset default policy for kafka consumer (earliest/latest)
     */
-  protected def createSubscribingKafkaConsumer(topics: List[(String, List[Int])], hosts: List[String], offset: String): KafkaConsumer[Array[Byte], Array[Byte]] = {
+  protected def createSubscribingKafkaConsumer(topics: List[(String, List[Int])],
+                                               hosts: List[String],
+                                               offset: String): KafkaConsumer[Array[Byte], Array[Byte]] = {
     logger.debug(s"Task name: ${manager.taskName}. Create kafka consumer for topics (with their partitions): " +
       s"${topics.map(x => s"topic name: ${x._1}, " + s"partitions: ${x._2.mkString(",")}").mkString(",")}.")
     val consumer = createKafkaConsumer(hosts, offset)
@@ -105,7 +124,7 @@ trait KafkaTaskInput[T <: AnyRef] {
 
   protected def chooseOffset(): String
 
-  protected def createKafkaConsumer(hosts: List[String], offset: String) = {
+  protected def createKafkaConsumer(hosts: List[String], offset: String): KafkaConsumer[Array[Byte], Array[Byte]] = {
     logger.debug(s"Task: ${manager.taskName}. Create a kafka consumer.")
     val properties = new Properties()
     properties.put("bootstrap.servers", hosts.mkString(","))
@@ -120,7 +139,7 @@ trait KafkaTaskInput[T <: AnyRef] {
     consumer
   }
 
-  protected def assignKafkaConsumerOnTopics(consumer: KafkaConsumer[Array[Byte], Array[Byte]], topics: List[(String, List[Int])]) = {
+  protected def assignKafkaConsumerOnTopics(consumer: KafkaConsumer[Array[Byte], Array[Byte]], topics: List[(String, List[Int])]): Unit = {
     logger.debug(s"Task: ${manager.taskName}. Assign a kafka consumer to particular topics.")
     val topicPartitions = topics
       .flatMap(x => (x._2.head to x._2.tail.head)
@@ -129,7 +148,7 @@ trait KafkaTaskInput[T <: AnyRef] {
     consumer.assign(topicPartitions)
   }
 
-  protected def seekKafkaConsumerOffsets(consumer: KafkaConsumer[Array[Byte], Array[Byte]]) = {
+  protected def seekKafkaConsumerOffsets(consumer: KafkaConsumer[Array[Byte], Array[Byte]]): Unit = {
     logger.debug(s"Task: ${manager.taskName}. Seek a kafka consumer offset.")
     val partition = 0
     val partitionsRange = List(partition, partition)
@@ -147,26 +166,29 @@ trait KafkaTaskInput[T <: AnyRef] {
     if (maybeTxn.isDefined) {
       val tempTransaction = maybeTxn.get
       logger.debug(s"Task name: ${manager.taskName}. Get saved offsets for kafka consumer and apply them.")
-      val lastTxn = offsetConsumer.buildTransactionObject(tempTransaction.getPartition(), tempTransaction.getTransactionID(), tempTransaction.getCount()).get //todo fix it next milestone TR1216
+      val lastTxn = offsetConsumer.buildTransactionObject(tempTransaction.getPartition, tempTransaction.getTransactionID, tempTransaction.getState, tempTransaction.getCount).get //todo fix it next milestone TR1216
       kafkaOffsetsStorage = offsetSerializer.deserialize(lastTxn.next()).asInstanceOf[mutable.Map[(String, Int), Long]]
-//      kafkaOffsetsStorage = offsetSerializer.deserialize(lastTxn.getAll().dequeue()).asInstanceOf[mutable.Map[(String, Int), Long]]
       kafkaOffsetsStorage.foreach(x => consumer.seek(new TopicPartition(x._1._1, x._1._2), x._2 + 1))
     }
 
     offsetConsumer.stop()
   }
 
-  protected def applyConfigurationSettings(properties: Properties) = {
+  protected def applyConfigurationSettings(properties: Properties): Unit = {
     logger.debug(s"Task name: ${manager.taskName}. Get setting (using a config service) for kafka consumer and apply them.")
-    val configService = ConnectionRepository.getConfigRepository
+    val configService = inject[ConnectionRepository].getConfigRepository
 
     val kafkaSettings = configService.getByParameters(Map("domain" -> ConfigLiterals.kafkaDomain))
-    kafkaSettings.foreach(x => properties.put(clearConfigurationSettingName(x.domain, x.name), x.value))
+    kafkaSettings.foreach(x => properties.put(ConfigurationSetting.clearConfigurationSettingName(x.domain, x.name), x.value))
   }
 
-  def setConsumerOffset(envelope: KafkaEnvelope[T]) = {
+  def setConsumerOffset(envelope: KafkaEnvelope[T]): Unit = {
     logger.debug(s"Task: ${manager.taskName}. Change offset for stream: ${envelope.stream} " +
       s"for partition: ${envelope.partition} to ${envelope.id}.")
     kafkaOffsetsStorage((envelope.stream, envelope.partition)) = envelope.id
+  }
+
+  def close(): Unit = {
+    kafkaConsumer.close()
   }
 }

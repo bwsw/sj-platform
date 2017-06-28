@@ -1,14 +1,33 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.bwsw.sj.mesos.framework.task
 
-import com.bwsw.sj.common.dal.ConnectionConstants
-import com.bwsw.sj.common.dal.model.instance._
-import com.bwsw.sj.common.dal.model.module._
+import com.bwsw.sj.common.dal.model.instance.InputTask
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.rest.FrameworkRestEntity
+import com.bwsw.sj.common.si.model.instance._
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.mesos.framework.schedule.{FrameworkUtil, OffersHandler}
 import org.apache.log4j.Logger
 import org.apache.mesos.Protos.{TaskID, TaskInfo, _}
+import scaldi.Injectable.inject
+import scaldi.Injector
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
@@ -109,19 +128,19 @@ object TasksList {
     this.message = message
   }
 
-  def prepare(instance: InstanceDomain): Unit = {
+  def prepare(instance: Instance): Unit = {
     perTaskCores = FrameworkUtil.instance.get.perTaskCores
     perTaskMem = FrameworkUtil.instance.get.perTaskRam
     perTaskPortsCount = FrameworkUtil.getCountPorts(FrameworkUtil.instance.get)
 
     val tasks = FrameworkUtil.instance.get.moduleType match {
       case EngineLiterals.inputStreamingType =>
-        (0 until FrameworkUtil.instance.get.parallelism).map(tn => FrameworkUtil.instance.get.name + "-task" + tn)
+        (0 until FrameworkUtil.instance.get.countParallelism).map(tn => FrameworkUtil.instance.get.name + "-task" + tn)
       case _ =>
         val executionPlan = FrameworkUtil.instance.get match {
-          case regularInstance: RegularInstanceDomain => regularInstance.executionPlan
-          case outputInstance: OutputInstanceDomain => outputInstance.executionPlan
-          case batchInstance: BatchInstanceDomain => batchInstance.executionPlan
+          case regularInstance: RegularInstance => regularInstance.executionPlan
+          case outputInstance: OutputInstance => outputInstance.executionPlan
+          case batchInstance: BatchInstance => batchInstance.executionPlan
         }
         executionPlan.tasks.asScala.keys
     }
@@ -153,9 +172,9 @@ object TasksList {
     if (FrameworkUtil.instance.get.moduleType.equals(EngineLiterals.inputStreamingType)) {
       taskPort = availablePorts.head
       availablePorts = availablePorts.tail
-      val inputInstance = FrameworkUtil.instance.get.asInstanceOf[InputInstanceDomain]
+      val inputInstance = FrameworkUtil.instance.get.asInstanceOf[InputInstance]
       inputInstance.tasks.put(task, new InputTask(host, taskPort.toInt))
-      ConnectionRepository.getInstanceRepository.save(FrameworkUtil.instance.get)
+      inject[ConnectionRepository].getInstanceRepository.save(FrameworkUtil.instance.get.to)
     }
 
       agentPorts = availablePorts.mkString(",")

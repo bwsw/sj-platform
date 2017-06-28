@@ -1,52 +1,74 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.bwsw.sj.engine.output.task
 
-import java.util.concurrent.{ArrayBlockingQueue, Callable, TimeUnit}
+import java.util.concurrent.{ArrayBlockingQueue, TimeUnit}
 
-import com.bwsw.sj.common.dal.model.instance.OutputInstanceDomain
 import com.bwsw.sj.common.dal.model.stream.StreamDomain
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
+import com.bwsw.sj.common.engine.TaskEngine
+import com.bwsw.sj.common.si.model.instance.OutputInstance
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.core.engine.NumericalCheckpointTaskEngine
 import com.bwsw.sj.engine.core.engine.input.CallableTStreamCheckpointTaskInput
-import com.bwsw.sj.engine.core.entities._
-import com.bwsw.sj.engine.core.environment.OutputEnvironmentManager
-import com.bwsw.sj.engine.core.output.Entity
+import com.bwsw.sj.common.engine.core.entities._
+import com.bwsw.sj.common.engine.core.environment.OutputEnvironmentManager
+import com.bwsw.sj.common.engine.core.output.{Entity, OutputStreamingExecutor}
 import com.bwsw.sj.engine.output.processing.OutputProcessor
 import com.bwsw.sj.engine.output.task.reporting.OutputStreamingPerformanceMetrics
-import org.slf4j.LoggerFactory
+import org.slf4j.{Logger, LoggerFactory}
+import scaldi.Injectable.inject
+import scaldi.Injector
 
 
 /**
-  * Provided methods are responsible for a basic execution logic of task of output module
+  * Class contains methods for running output module
   *
-  * @param manager            Manager of environment of task of output module
-  * @param performanceMetrics Set of metrics that characterize performance of a output streaming module
+  * @param manager            allows to manage an environment of output streaming task
+  * @param performanceMetrics set of metrics that characterize performance of an output streaming module
   * @author Kseniya Mikhaleva
   */
-abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
-                                performanceMetrics: OutputStreamingPerformanceMetrics) extends Callable[Unit] {
+abstract class OutputTaskEngine(manager: OutputTaskManager,
+                                performanceMetrics: OutputStreamingPerformanceMetrics)
+                               (implicit injector: Injector) extends TaskEngine {
 
-  private val currentThread = Thread.currentThread()
+  import OutputTaskEngine.logger
+
+  private val currentThread: Thread = Thread.currentThread()
   currentThread.setName(s"output-task-${manager.taskName}-engine")
-  private val logger = LoggerFactory.getLogger(this.getClass)
-  private val blockingQueue = new ArrayBlockingQueue[Envelope](EngineLiterals.queueSize)
-  private val instance = manager.instance.asInstanceOf[OutputInstanceDomain]
-  private val outputStream = getOutputStream
-  private val environmentManager = createModuleEnvironmentManager()
-  private val executor = manager.getExecutor(environmentManager)
+  private val blockingQueue: ArrayBlockingQueue[Envelope] = new ArrayBlockingQueue[Envelope](EngineLiterals.queueSize)
+  private val instance: OutputInstance = manager.instance.asInstanceOf[OutputInstance]
+  private val outputStream: StreamDomain = getOutputStream
+  private val environmentManager: OutputEnvironmentManager = createModuleEnvironmentManager()
+  private val executor: OutputStreamingExecutor[AnyRef] = manager.getExecutor(environmentManager)
   private val entity: Entity[_] = executor.getOutputEntity
-  val taskInputService: CallableTStreamCheckpointTaskInput[AnyRef] = new CallableTStreamCheckpointTaskInput[AnyRef](manager, blockingQueue)
-  private val outputProcessor = OutputProcessor[AnyRef](outputStream, performanceMetrics, manager, entity)
-  private var wasFirstCheckpoint = false
-  protected val checkpointInterval = instance.checkpointInterval
+  val taskInputService: CallableTStreamCheckpointTaskInput[AnyRef] = new CallableTStreamCheckpointTaskInput[AnyRef](manager, blockingQueue, manager.createCheckpointGroup())
+  private val outputProcessor: OutputProcessor[AnyRef] = OutputProcessor[AnyRef](outputStream, performanceMetrics, manager, entity)
+  private var wasFirstCheckpoint: Boolean = false
+  protected val checkpointInterval: Long = instance.checkpointInterval
 
-  private def getOutputStream: StreamDomain = {
-    val streamService = ConnectionRepository.getStreamRepository
+  private val streamService = inject[ConnectionRepository].getStreamRepository
+
+  private def getOutputStream: StreamDomain =
     instance.outputs.flatMap(x => streamService.get(x)).head
-  }
 
   private def createModuleEnvironmentManager(): OutputEnvironmentManager = {
-    val streamService = ConnectionRepository.getStreamRepository
     val outputs = instance.outputs
       .flatMap(x => streamService.get(x))
     val options = instance.options
@@ -102,7 +124,7 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
   }
 
   /**
-    * Doing smth after catch envelope.
+    * Doing smth after process envelope.
     */
   protected def afterReceivingEnvelope(): Unit
 
@@ -119,21 +141,20 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
 
   protected def prepareForNextCheckpoint(): Unit
 
-  def close() = {
+  def close(): Unit = {
     outputProcessor.close()
   }
 }
 
 object OutputTaskEngine {
-  protected val logger = LoggerFactory.getLogger(this.getClass)
+  private val logger: Logger = LoggerFactory.getLogger(this.getClass)
 
   /**
     * Creates OutputTaskEngine is in charge of a basic execution logic of task of output module
-    *
-    * @return Engine of output task
     */
   def apply(manager: OutputTaskManager,
-            performanceMetrics: OutputStreamingPerformanceMetrics): OutputTaskEngine = {
+            performanceMetrics: OutputStreamingPerformanceMetrics)
+           (implicit injector: Injector): OutputTaskEngine = {
     manager.outputInstance.checkpointMode match {
       case EngineLiterals.`timeIntervalMode` =>
         logger.error(s"Task: ${manager.taskName}. Output module can't have a '${EngineLiterals.timeIntervalMode}' checkpoint mode.")

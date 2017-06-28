@@ -1,57 +1,75 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.bwsw.sj.engine.input
 
+import java.io.Closeable
 import java.util.concurrent._
 
-import com.bwsw.sj.engine.core.engine.{InstanceStatusObserver, TaskRunner}
+import com.bwsw.sj.common.engine.TaskEngine
+import com.bwsw.sj.engine.core.engine.TaskRunner
+import com.bwsw.sj.common.engine.core.managment.TaskManager
+import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
 import com.bwsw.sj.engine.input.connection.tcp.server.InputStreamingServer
 import com.bwsw.sj.engine.input.task.{InputTaskEngine, InputTaskManager}
 import com.bwsw.sj.engine.input.task.reporting.InputStreamingPerformanceMetrics
 import io.netty.buffer.ByteBuf
 import io.netty.channel.ChannelHandlerContext
-import org.slf4j.LoggerFactory
 
 import scala.collection.JavaConverters._
 
 /**
-  * Object is responsible for running a task of job that launches input module
+  * Class is responsible for launching input engine execution logic.
+  * First, there are created all services needed to start engine. All of those services implement Callable interface
+  * Next, each service are launched as a separate task using [[ExecutorCompletionService]]
+  * Finally, handle a case if some task will fail and stop the execution. In other case the execution will go on indefinitely
   *
   * @author Kseniya Mikhaleva
   */
-
 object InputTaskRunner extends {
   override val threadName = "InputTaskRunner-%d"
 } with TaskRunner {
 
-  private val logger = LoggerFactory.getLogger(this.getClass)
   private val queueSize = 1000
+  private val bufferForEachContext = new ConcurrentHashMap[ChannelHandlerContext, ByteBuf]().asScala
+  private val channelContextQueue = new ArrayBlockingQueue[ChannelHandlerContext](queueSize)
 
-  def main(args: Array[String]) {
-    val bufferForEachContext = new ConcurrentHashMap[ChannelHandlerContext, ByteBuf]().asScala
-    val channelContextQueue = new ArrayBlockingQueue[ChannelHandlerContext](queueSize)
+  override protected def createTaskManager(): TaskManager = new InputTaskManager()
 
-    val manager: InputTaskManager = new InputTaskManager()
-    logger.info(s"Task: ${manager.taskName}. Start preparing of task runner for an input module.")
+  override protected def createPerformanceMetrics(manager: TaskManager): PerformanceMetrics = {
+    new InputStreamingPerformanceMetrics(manager.asInstanceOf[InputTaskManager])
+  }
 
-    val performanceMetrics = new InputStreamingPerformanceMetrics(manager)
-
-    val inputTaskEngine = InputTaskEngine(manager, performanceMetrics, channelContextQueue, bufferForEachContext)
-
-    val inputStreamingServer = new InputStreamingServer(
-      manager.agentsHost,
-      manager.entryPort,
+  override protected def createTaskEngine(manager: TaskManager, performanceMetrics: PerformanceMetrics): TaskEngine = {
+    InputTaskEngine(
+      manager.asInstanceOf[InputTaskManager],
+      performanceMetrics.asInstanceOf[InputStreamingPerformanceMetrics],
       channelContextQueue,
       bufferForEachContext
     )
+  }
 
-    val instanceStatusObserver = new InstanceStatusObserver(manager.instanceName)
-
-    logger.info(s"Task: ${manager.taskName}. The preparation finished. Launch task.")
-
-    executorService.submit(inputTaskEngine)
-    executorService.submit(performanceMetrics)
-    executorService.submit(inputStreamingServer)
-    executorService.submit(instanceStatusObserver)
-
-    waitForCompletion()
+  override protected def createTaskInputService(manager: TaskManager, taskEngine: TaskEngine): Closeable = {
+    new InputStreamingServer(
+      manager.agentsHost,
+      manager.asInstanceOf[InputTaskManager].entryPort,
+      channelContextQueue,
+      bufferForEachContext
+    )
   }
 }

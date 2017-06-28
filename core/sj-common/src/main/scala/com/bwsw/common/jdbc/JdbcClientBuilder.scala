@@ -1,10 +1,30 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.bwsw.common.jdbc
 
+import com.bwsw.sj.common.SjModule
 import org.slf4j.LoggerFactory
 
 /**
-  * Builder class for JDBC client
+  * Build [[JdbcClient]]. You can not create [[JdbcClient]] directly
   */
+
 object JdbcClientBuilder {
   private val logger = LoggerFactory.getLogger(this.getClass)
 
@@ -50,8 +70,8 @@ object JdbcClientBuilder {
       username.get,
       password.get,
       database,
-      table)
-    new JdbcClient(jdbcClientConnectionData)
+      table)(SjModule.injector)
+    new JdbcClient(jdbcClientConnectionData)(SjModule.injector)
   }
 
   def setHosts(hosts: Array[String]): JdbcClientBuilder.type = {
@@ -84,12 +104,6 @@ object JdbcClientBuilder {
     this
   }
 
-  /**
-    * Use this method if you have JDBC connection data provider
-    *
-    * @param jdbcClientConnectionData : JdbcClientConnectionData
-    * @return this
-    */
   def setJdbcClientConnectionData(jdbcClientConnectionData: JdbcClientConnectionData): JdbcClientBuilder.type = {
     hosts = Option(jdbcClientConnectionData.hosts)
     driver = Option(jdbcClientConnectionData.driver)

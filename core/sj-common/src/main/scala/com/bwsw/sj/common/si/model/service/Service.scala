@@ -1,24 +1,63 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.bwsw.sj.common.si.model.service
 
 import com.bwsw.sj.common.dal.model.service._
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.rest.utils.ValidationUtils.validateName
-import com.bwsw.sj.common.utils.MessageResourceUtils.createMessage
-import com.bwsw.sj.common.utils.ServiceLiterals.types
-import com.bwsw.sj.common.utils.{RestLiterals, ServiceLiterals}
+import com.bwsw.sj.common.utils.ServiceLiterals.{typeToProviderType, types}
+import com.bwsw.sj.common.utils.{MessageResourceUtils, RestLiterals, ServiceLiterals}
+import scaldi.Injectable.inject
+import scaldi.Injector
 
 import scala.collection.mutable.ArrayBuffer
 
 class Service(val serviceType: String,
               val name: String,
-              val description: String) {
+              val provider: String,
+              val description: String)
+             (implicit injector: Injector) {
+
+  protected val messageResourceUtils = inject[MessageResourceUtils]
+
+  import messageResourceUtils.createMessage
+
+  protected val connectionRepository = inject[ConnectionRepository]
+  private val serviceRepository = connectionRepository.getServiceRepository
+  private val providerRepository = connectionRepository.getProviderRepository
 
   def to(): ServiceDomain = ???
 
+  /**
+    * Validates service
+    *
+    * @return empty array if service is correct, validation errors otherwise
+    */
   def validate(): ArrayBuffer[String] = validateGeneralFields()
 
+  /**
+    * Validates fields which common for all types of service
+    *
+    * @return empty array if fields is correct, validation errors otherwise
+    */
   protected def validateGeneralFields(): ArrayBuffer[String] = {
-    val serviceRepository = ConnectionRepository.getServiceRepository
+
     val errors = new ArrayBuffer[String]()
 
     // 'serviceType field
@@ -56,13 +95,41 @@ class Service(val serviceType: String,
 
     errors
   }
+
+  /**
+    * Checks that provider exists and type of service corresponds to provider
+    *
+    * @return empty array if validation passed, collection of errors otherwise
+    */
+  protected def validateProvider(): ArrayBuffer[String] = {
+    val errors = new ArrayBuffer[String]()
+
+    Option(this.provider) match {
+      case None =>
+        errors += createMessage("rest.validator.attribute.required", "Provider")
+      case Some(x) =>
+        if (x.isEmpty) {
+          errors += createMessage("rest.validator.attribute.required", "Provider")
+        }
+        else {
+          val providerObj = providerRepository.get(x)
+          if (providerObj.isEmpty) {
+            errors += createMessage("entity.error.doesnot.exist", "Provider", x)
+          } else if (providerObj.get.providerType != typeToProviderType(this.serviceType)) {
+            errors += createMessage("entity.error.must.one.type.other.given", "Provider", typeToProviderType(this.serviceType), providerObj.get.providerType)
+          }
+        }
+    }
+
+    errors
+  }
 }
 
-object Service {
+class ServiceCreator {
 
   import scala.collection.JavaConverters._
 
-  def from(serviceDomain: ServiceDomain): Service = {
+  def from(serviceDomain: ServiceDomain)(implicit injector: Injector): Service = {
     serviceDomain.serviceType match {
       case ServiceLiterals.aerospikeType =>
         val aerospikeService = serviceDomain.asInstanceOf[AerospikeServiceDomain]
@@ -158,18 +225,3 @@ object Service {
     }
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

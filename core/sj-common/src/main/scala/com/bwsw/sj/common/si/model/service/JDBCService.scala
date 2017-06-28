@@ -1,24 +1,43 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.bwsw.sj.common.si.model.service
 
 import com.bwsw.common.jdbc.JdbcClientBuilder
 import com.bwsw.sj.common.dal.model.provider.JDBCProviderDomain
 import com.bwsw.sj.common.dal.model.service.JDBCServiceDomain
-import com.bwsw.sj.common.dal.repository.ConnectionRepository
-import com.bwsw.sj.common.rest.utils.ValidationUtils.validateProvider
-import com.bwsw.sj.common.utils.MessageResourceUtils.createMessage
+import scaldi.Injector
 
 import scala.collection.mutable.ArrayBuffer
 import scala.util.{Failure, Success, Try}
 
 class JDBCService(name: String,
                   val database: String,
-                  val provider: String,
+                  provider: String,
                   description: String,
                   serviceType: String)
-  extends Service(serviceType, name, description) {
+                 (implicit injector: Injector)
+  extends Service(serviceType, name, provider, description) {
+
+  import messageResourceUtils.createMessage
 
   override def to(): JDBCServiceDomain = {
-    val providerRepository = ConnectionRepository.getProviderRepository
+    val providerRepository = connectionRepository.getProviderRepository
     val provider = providerRepository.get(this.provider).get.asInstanceOf[JDBCProviderDomain]
 
     val modelService =
@@ -38,12 +57,7 @@ class JDBCService(name: String,
     errors ++= super.validateGeneralFields()
 
     // 'provider' field
-    errors ++= validateProvider(this.provider, this.serviceType)
-
-    // 'name' field
-    val charSequence: CharSequence = "-"
-    if (Option(this.name).isDefined && this.name.contains(charSequence))
-      errors += createMessage("jdbc.error.service.name.contains", "-")
+    errors ++= validateProvider()
 
     // 'database' field
     Option(this.database) match {
@@ -53,7 +67,7 @@ class JDBCService(name: String,
         if (dbName.isEmpty) {
           errors += createMessage("entity.error.attribute.required", "Database")
         } else if (errors.isEmpty) { //provider should exist in the following test
-        val providerRepository = ConnectionRepository.getProviderRepository
+          val providerRepository = connectionRepository.getProviderRepository
           var database_exists: Boolean = false
           val provider = providerRepository.get(this.provider).get.asInstanceOf[JDBCProviderDomain]
           Try {
@@ -71,7 +85,7 @@ class JDBCService(name: String,
           } match {
             case Success(_) =>
             case Failure(e: RuntimeException) =>
-              errors += createMessage("jdbc.error.cannot.create.client", e.getMessage)
+              errors += createMessage("error.cannot.create.client", e.getMessage)
             case Failure(e) =>
               e.printStackTrace()
           }

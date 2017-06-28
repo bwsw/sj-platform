@@ -1,41 +1,56 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.bwsw.sj.engine.batch
 
-import com.bwsw.sj.common.dal.model.instance.BatchInstanceDomain
-import com.bwsw.sj.engine.core.engine.{InstanceStatusObserver, TaskRunner}
-import com.bwsw.sj.engine.core.managment.CommonTaskManager
-import com.bwsw.sj.engine.core.state.CommonModuleService
-import com.bwsw.sj.engine.core.batch.BatchStreamingPerformanceMetrics
-import com.bwsw.sj.engine.batch.task.BatchTaskEngine
-import com.bwsw.sj.engine.batch.task.input.EnvelopeFetcher
-import org.slf4j.LoggerFactory
+import java.io.Closeable
+import java.util.concurrent.ExecutorCompletionService
 
+import com.bwsw.sj.common.engine.TaskEngine
+import com.bwsw.sj.engine.batch.task.BatchTaskEngine
+import com.bwsw.sj.common.engine.core.batch.BatchStreamingPerformanceMetrics
+import com.bwsw.sj.engine.core.engine.TaskRunner
+import com.bwsw.sj.common.engine.core.managment.{CommonTaskManager, TaskManager}
+import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
+
+/**
+  * Class is responsible for launching batch engine execution logic.
+  * First, there are created all services needed to start engine. All of those services implement Callable interface
+  * Next, each service are launched as a separate task using [[ExecutorCompletionService]]
+  * Finally, handle a case if some task will fail and stop the execution. In other case the execution will go on indefinitely
+  *
+  * @author Kseniya Mikhaleva
+  */
 object BatchTaskRunner extends {
   override val threadName = "BatchTaskRunner-%d"
 } with TaskRunner {
 
-  private val logger = LoggerFactory.getLogger(this.getClass)
+  override protected def createTaskManager(): TaskManager = new CommonTaskManager()
 
-  def main(args: Array[String]) {
-    val manager = new CommonTaskManager()
-    val instance = manager.instance.asInstanceOf[BatchInstanceDomain]
+  override protected def createPerformanceMetrics(manager: TaskManager): PerformanceMetrics = {
+    new BatchStreamingPerformanceMetrics(manager.asInstanceOf[CommonTaskManager])
+  }
 
-    logger.info(s"Task: ${manager.taskName}. Start preparing of task runner for batch module\n")
+  override protected def createTaskEngine(manager: TaskManager, performanceMetrics: PerformanceMetrics): TaskEngine = {
+    new BatchTaskEngine(manager.asInstanceOf[CommonTaskManager], performanceMetrics.asInstanceOf[BatchStreamingPerformanceMetrics])
+  }
 
-    val envelopeFetcher = EnvelopeFetcher(manager)
-    val performanceMetrics = new BatchStreamingPerformanceMetrics(manager)
-    val moduleService = CommonModuleService(manager, envelopeFetcher.checkpointGroup, performanceMetrics)
-    val batchCollector = manager.getBatchCollector(instance, performanceMetrics)
-
-    val batchTaskEngine = new BatchTaskEngine(batchCollector, instance, moduleService, envelopeFetcher, performanceMetrics)
-
-    val instanceStatusObserver = new InstanceStatusObserver(manager.instanceName)
-
-    logger.info(s"Task: ${manager.taskName}. The preparation finished. Launch task\n")
-
-    executorService.submit(batchTaskEngine)
-    executorService.submit(performanceMetrics)
-    executorService.submit(instanceStatusObserver)
-
-    waitForCompletion()
+  override protected def createTaskInputService(manager: TaskManager, taskEngine: TaskEngine): Closeable = {
+    taskEngine.asInstanceOf[BatchTaskEngine].taskInputService
   }
 }

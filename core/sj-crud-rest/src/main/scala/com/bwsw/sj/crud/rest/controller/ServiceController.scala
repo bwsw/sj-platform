@@ -1,93 +1,94 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.bwsw.sj.crud.rest.controller
 
 import com.bwsw.common.exceptions.JsonDeserializationException
 import com.bwsw.sj.common.rest._
-import com.bwsw.sj.crud.rest.model.service.ServiceApi
 import com.bwsw.sj.common.si.ServiceSI
-import com.bwsw.sj.common.utils.MessageResourceUtils._
-import com.bwsw.sj.common.utils.ServiceLiterals
+import com.bwsw.sj.common.si.result.{Created, NotCreated}
+import com.bwsw.sj.common.utils.{MessageResourceUtils, ServiceLiterals}
+import com.bwsw.sj.crud.rest.model.service.{ServiceApiCreator, ServiceApi}
 import com.bwsw.sj.crud.rest.{RelatedToServiceResponseEntity, ServiceResponseEntity, ServicesResponseEntity}
-import com.bwsw.sj.crud.rest.utils.JsonDeserializationErrorMessageCreator
+import scaldi.Injectable.inject
+import scaldi.Injector
 
 import scala.util.{Failure, Success, Try}
 
-class ServiceController extends Controller {
-  override val serviceInterface = new ServiceSI()
+class ServiceController(implicit protected val injector: Injector) extends Controller {
+  private val messageResourceUtils = inject[MessageResourceUtils]
+
+  import messageResourceUtils._
+
+  override val serviceInterface = inject[ServiceSI]
+
+  protected val entityDeletedMessage: String = "rest.services.service.deleted"
+  protected val entityNotFoundMessage: String = "rest.services.service.notfound"
+  private val createServiceApi = inject[ServiceApiCreator]
 
   override def create(serializedEntity: String): RestResponse = {
-    var response: RestResponse = new RestResponse()
-
-    val triedServiceData = Try(serializer.deserialize[ServiceApi](serializedEntity))
-    triedServiceData match {
+    val triedServiceApi = Try(serializer.deserialize[ServiceApi](serializedEntity))
+    triedServiceApi match {
       case Success(serviceData) =>
         val created = serviceInterface.create(serviceData.to())
 
-        response = created match {
-          case Right(_) =>
-            CreatedRestResponse(MessageResponseEntity(createMessage("rest.services.service.created", serviceData.name)))
-          case Left(errors) => BadRequestRestResponse(MessageResponseEntity(
-            createMessage("rest.services.service.cannot.create", errors.mkString(";"))
-          ))
+        created match {
+          case Created =>
+            CreatedRestResponse(MessageResponseEntity(
+              createMessage("rest.services.service.created", serviceData.name)))
+          case NotCreated(errors) =>
+            BadRequestRestResponse(MessageResponseEntity(
+              createMessageWithErrors("rest.services.service.cannot.create", errors)))
         }
+
       case Failure(exception: JsonDeserializationException) =>
-        val error = JsonDeserializationErrorMessageCreator(exception)
-        response = BadRequestRestResponse(MessageResponseEntity(
+        val error = jsonDeserializationErrorMessageCreator(exception)
+        BadRequestRestResponse(MessageResponseEntity(
           createMessage("rest.services.service.cannot.create", error)))
 
       case Failure(exception) => throw exception
     }
-
-    response
   }
 
   override def getAll(): RestResponse = {
-    val response = OkRestResponse(ServicesResponseEntity())
-    val services = serviceInterface.getAll()
-    if (services.nonEmpty) {
-      response.entity = ServicesResponseEntity(services.map(p => ServiceApi.from(p)))
-    }
-
-    response
+    val services = serviceInterface.getAll().map(createServiceApi.from)
+    OkRestResponse(ServicesResponseEntity(services))
   }
 
   override def get(name: String): RestResponse = {
     val service = serviceInterface.get(name)
 
-    val response = service match {
+    service match {
       case Some(x) =>
-        OkRestResponse(ServiceResponseEntity(ServiceApi.from(x)))
+        OkRestResponse(ServiceResponseEntity(createServiceApi.from(x)))
       case None =>
-        NotFoundRestResponse(MessageResponseEntity(createMessage("rest.services.service.notfound", name)))
+        NotFoundRestResponse(MessageResponseEntity(createMessage(entityNotFoundMessage, name)))
     }
-
-    response
-  }
-
-  override def delete(name: String): RestResponse = {
-    val deleteResponse = serviceInterface.delete(name)
-    val response: RestResponse = deleteResponse match {
-      case Right(isDeleted) =>
-        if (isDeleted)
-          OkRestResponse(MessageResponseEntity(createMessage("rest.services.service.deleted", name)))
-        else
-          NotFoundRestResponse(MessageResponseEntity(createMessage("rest.services.service.notfound", name)))
-      case Left(message) =>
-        UnprocessableEntityRestResponse(MessageResponseEntity(message))
-    }
-
-    response
   }
 
   def getRelated(name: String): RestResponse = {
     val relatedStreamsAndInstances = serviceInterface.getRelated(name)
-    val response = relatedStreamsAndInstances match {
+    relatedStreamsAndInstances match {
       case Right(servicesAndInstances) =>
         OkRestResponse(RelatedToServiceResponseEntity(servicesAndInstances._1, servicesAndInstances._2))
       case Left(_) =>
-        NotFoundRestResponse(MessageResponseEntity(createMessage("rest.services.service.notfound", name)))
+        NotFoundRestResponse(MessageResponseEntity(createMessage(entityNotFoundMessage, name)))
     }
-
-    response
   }
 
   def getTypes(): RestResponse = {

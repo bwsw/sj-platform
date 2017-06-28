@@ -1,51 +1,81 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.bwsw.sj.mesos.framework.schedule
 
 import java.io.{PrintWriter, StringWriter}
 import java.net.URI
 
-import com.bwsw.sj.common.dal.model.module._
-import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
 import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.common.dal.model.ConfigurationSettingDomain
-import com.bwsw.sj.common.dal.model.instance._
+import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
+import com.bwsw.sj.common.si.model.instance._
+import com.bwsw.sj.common.utils.{CommonAppConfigNames, FrameworkLiterals}
 import com.bwsw.sj.mesos.framework.task.TasksList
+import com.typesafe.config.ConfigFactory
 import org.apache.log4j.Logger
 import org.apache.mesos.Protos.MasterInfo
 import org.apache.mesos.SchedulerDriver
+import scaldi.Injectable.inject
 
 import scala.collection.immutable
 import scala.util.Properties
 import scala.collection.JavaConverters._
+import scala.util.Try
 
 
 object FrameworkUtil {
+
+  import com.bwsw.sj.common.SjModule._
+
+  // Java threads created from JNI code in a non-java thread have null ContextClassloader unless the creator explicitly sets it.
+  // Also in such context Thread.currentThread().getContextClassLoader() returns null.
+  private val classLoader = ClassLoader.getSystemClassLoader
+  Thread.currentThread().setContextClassLoader(classLoader)
+
   var master: Option[MasterInfo] = None
   var frameworkId: Option[String] = None
   var driver: Option[SchedulerDriver] = None
   var jarName: Option[String] = None
-  var instance: Option[InstanceDomain] = None
-  val configRepository: GenericMongoRepository[ConfigurationSettingDomain] = ConnectionRepository.getConfigRepository
+  var instance: Option[Instance] = None
+  val connectionRepository: ConnectionRepository = inject[ConnectionRepository]
+  val configRepository: GenericMongoRepository[ConfigurationSettingDomain] = connectionRepository.getConfigRepository
   private val logger = Logger.getLogger(this.getClass)
   var params: Map[String, String] = immutable.Map[String, String]()
 
   /**
-   * Count how much ports must be for current task.
+    * Count how much ports must be for current task.
     *
     * @param instance current launched task
-   * @return ports count for current task
-   */
-  def getCountPorts(instance: InstanceDomain): Int = {
+    * @return ports count for current task
+    */
+  def getCountPorts(instance: Instance): Int = {
     instance match {
-      case _: OutputInstanceDomain => 2
-      case regularInstance: RegularInstanceDomain => regularInstance.inputs.length + regularInstance.outputs.length + 4
-      case _: InputInstanceDomain => instance.outputs.length + 2
-      case batchInstance: BatchInstanceDomain => batchInstance.inputs.length + batchInstance.outputs.length + 4
+      case _: OutputInstance => 2
+      case regularInstance: RegularInstance => regularInstance.inputs.length + regularInstance.outputs.length + 4
+      case inputInstance: InputInstance => inputInstance.outputs.length + 2
+      case batchInstance: BatchInstance => batchInstance.inputs.length + batchInstance.outputs.length + 4
     }
   }
 
   /**
-   * Handler for Scheduler Exception
-   */
+    * Handler for Scheduler Exception
+    */
   def handleSchedulerException(e: Exception, logger: Logger): Unit = {
     val sw = new StringWriter
     e.printStackTrace(new PrintWriter(sw))
@@ -56,19 +86,22 @@ object FrameworkUtil {
   }
 
   def getEnvParams: Map[String, String] = {
+    val config = ConfigFactory.load()
+
     Map(
-      "instanceId" -> Properties.envOrElse("INSTANCE_ID", "00000000-0000-0000-0000-000000000000"),
-      "mongodbHosts" -> Properties.envOrElse("MONGO_HOSTS", "127.0.0.1:27017")
+      "instanceId" ->
+        Try(config.getString(FrameworkLiterals.instanceId)).getOrElse("00000000-0000-0000-0000-000000000000"),
+      "mongodbHosts" -> Try(config.getString(CommonAppConfigNames.mongoHosts)).getOrElse("127.0.0.1:27017")
     )
   }
 
   /**
-   * Get jar URI for framework
+    * Get jar URI for framework
     *
-    * @param instance:Instance
-   * @return String
-   */
-  def getModuleUrl(instance: InstanceDomain): String = {
+    * @param instance :Instance
+    * @return String
+    */
+  def getModuleUrl(instance: Instance): String = {
     jarName = configRepository.get("system." + instance.engine).map(_.value)
     val restHost = configRepository.get(ConfigLiterals.hostOfCrudRestTag).get.value
     val restPort = configRepository.get(ConfigLiterals.portOfCrudRestTag).get.value.toInt
@@ -108,7 +141,8 @@ object FrameworkUtil {
 
 
   def updateInstance(): Any = {
-    val optionInstance = ConnectionRepository.getInstanceRepository.get(FrameworkUtil.params("instanceId"))
+    val optionInstance = connectionRepository.getInstanceRepository.get(FrameworkUtil.params("instanceId"))
+      .map(inject[InstanceCreator].from)
 
     if (optionInstance.isEmpty) {
       logger.error(s"Not found instance")

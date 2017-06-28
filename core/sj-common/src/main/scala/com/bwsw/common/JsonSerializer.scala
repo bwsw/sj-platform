@@ -1,9 +1,26 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.bwsw.common
 
 import java.lang.reflect.{ParameterizedType, Type}
 
 import com.bwsw.common.exceptions._
-import com.bwsw.common.traits.Serializer
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.core.JsonParseException
 import com.fasterxml.jackson.core.`type`.TypeReference
@@ -15,11 +32,16 @@ import org.slf4j.LoggerFactory
 import scala.collection.JavaConverters._
 import scala.util.{Failure, Success, Try}
 
-class JsonSerializer extends Serializer {
+/**
+  * Class based on jackson for json serialization.
+  * Most commonly used in REST to serialize/deserialize api entities
+  */
+class JsonSerializer {
 
-  def this(ignore: Boolean) = {
+  def this(ignore: Boolean, disableNullForPrimitives: Boolean = false) = {
     this()
     this.setIgnoreUnknown(ignore)
+    this.disableNullForPrimitives(disableNullForPrimitives)
   }
 
   private val logger = LoggerFactory.getLogger(this.getClass)
@@ -48,6 +70,8 @@ class JsonSerializer extends Serializer {
       case Failure(e: JsonMappingException) =>
         if (e.getMessage.startsWith("No content"))
           throw new JsonDeserializationException("Empty JSON")
+        else if (e.getMessage.startsWith("Missing required creator property"))
+          throw new JsonMissedPropertyException(getMissedProperty(e))
         else
           throw new JsonIncorrectValueException(getProblemProperty(e))
       case Failure(e: JsonParseException) =>
@@ -74,6 +98,9 @@ class JsonSerializer extends Serializer {
     }
   }
 
+  private def getMissedProperty(exception: JsonMappingException): String =
+    exception.getOriginalMessage.replaceFirst("Missing required creator property\\s*'(.*?)'.*", "$1")
+
   private def typeReference[T: Manifest]: TypeReference[T] = new TypeReference[T] {
     override def getType: Type = typeFromManifest(manifest[T])
   }
@@ -91,7 +118,7 @@ class JsonSerializer extends Serializer {
     }
   }
 
-  override def setIgnoreUnknown(ignore: Boolean): Unit = {
+  def setIgnoreUnknown(ignore: Boolean): Unit = {
     logger.debug(s"Set a value of flag: FAIL_ON_UNKNOWN_PROPERTIES to '$ignore'.")
     if (ignore) {
       mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
@@ -100,8 +127,18 @@ class JsonSerializer extends Serializer {
     }
   }
 
-  override def getIgnoreUnknown(): Boolean = {
+  def getIgnoreUnknown(): Boolean = {
     logger.debug(s"Retrieve a value of flag: FAIL_ON_UNKNOWN_PROPERTIES.")
     !((mapper.getDeserializationConfig.getDeserializationFeatures & DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES.getMask) == DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES.getMask)
+  }
+
+  def disableNullForPrimitives(disable: Boolean): Unit = {
+    logger.debug(s"Set a value of flag: FAIL_ON_NULL_FOR_PRIMITIVES to '$disable'.")
+    mapper.configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, disable)
+  }
+
+  def nullForPrimitivesIsDisabled(): Boolean = {
+    logger.debug(s"Retrieve a value of flag: FAIL_ON_NULL_FOR_PRIMITIVES.")
+    mapper.isEnabled(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES)
   }
 }

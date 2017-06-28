@@ -1,18 +1,34 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.bwsw.sj.common.utils
-
-import java.util.UUID
 
 import com.bwsw.tstreams.env.{ConfigurationOptions, TStreamsFactory}
 import org.eclipse.jetty.http.HttpVersion
 
 object EngineLiterals {
-  val persistentQueuePath = UUID.randomUUID().toString
 
+  final val httpPrefix = "http://"
   final val queueSize = 1000
-  final val persistentBlockingQueue = "persistentBlockingQueue"
   final val batchInstanceBarrierPrefix = "/instance/barriers/"
   final val batchInstanceLeaderPrefix = "/instance/leaders/"
   final val eventWaitTimeout = 1000
+  final val producerTransactionBatchSize = 20
 
   final val inputStreamingType = "input-streaming"
   final val outputStreamingType = "output-streaming"
@@ -79,6 +95,8 @@ object StreamLiterals {
   final val jdbcOutputType = "jdbc-output"
   final val restOutputType = "rest-output"
   val types: Seq[String] = Seq(tstreamType, kafkaStreamType, jdbcOutputType, esOutputType, restOutputType)
+  val outputTypes: Seq[String] = Seq(jdbcOutputType, esOutputType, restOutputType)
+  val internalTypes: Seq[String] = Seq(tstreamType, kafkaStreamType)
 
   private val tstreamFactory = new TStreamsFactory()
   final val ttl: Int = tstreamFactory.getProperty(ConfigurationOptions.Stream.ttlSec).asInstanceOf[Int]
@@ -157,6 +175,7 @@ object RestLiterals {
   )
 
   final val defaultDescription = "No description"
+  final val defaultRestAddress = ""
 }
 
 object JdbcLiterals {
@@ -170,4 +189,37 @@ object FrameworkLiterals {
   val instanceIdLabel = "INSTANCE_ID"
   val frameworkIdLabel = "FRAMEWORK_ID"
   val mesosMasterLabel = "MESOS_MASTER"
+
+  val framework = "mesos-framework"
+  val frameworkId = framework + ".id"
+  val instance = framework + ".instance"
+  val instanceId = instance + ".id"
+  val mesosMaster = framework + ".mesos.master"
+
+  val defaultBackoffSeconds = 7
+  val defaultBackoffFactor = 7.0
+  val defaultMaxLaunchDelaySeconds = 600
+
+  def createCommandToLaunch(frameworkJarName: String) = {
+    "java -jar " + frameworkJarName + " $PORT"
+  }
+
+  val initialStageDuration = 0
+}
+
+/**
+  * Names of configurations for application config
+  */
+object CommonAppConfigNames {
+  val sjCommon = "sj-common"
+
+  val mongo = sjCommon + ".mongo"
+  val mongoHosts = mongo + ".hosts"
+  val mongoUser = mongo + ".user"
+  val mongoPassword = mongo + ".password"
+  val mongoDbName = mongo + ".database-name"
+
+  val zookeeper = sjCommon + ".zookeeper"
+  val zooKeeperHost = zookeeper + ".host"
+  val zooKeeperPort = zookeeper + ".port"
 }

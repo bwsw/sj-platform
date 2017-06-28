@@ -1,19 +1,38 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.bwsw.sj.engine.core.engine.input
 
 import java.util.Date
 import java.util.concurrent.ArrayBlockingQueue
 
-import com.bwsw.sj.common.dal.model.instance.{BatchInstanceDomain, OutputInstanceDomain, RegularInstanceDomain}
 import com.bwsw.sj.common.dal.model.stream.TStreamStreamDomain
 import com.bwsw.sj.common.engine.EnvelopeDataSerializer
+import com.bwsw.sj.common.si.model.instance.{BatchInstance, OutputInstance, RegularInstance}
 import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
-import com.bwsw.sj.engine.core.entities.{Envelope, TStreamEnvelope}
-import com.bwsw.sj.engine.core.managment.TaskManager
+import com.bwsw.sj.common.engine.core.entities.{Envelope, TStreamEnvelope}
+import com.bwsw.sj.common.engine.core.managment.TaskManager
 import com.bwsw.tstreams.agents.consumer.Consumer
 import com.bwsw.tstreams.agents.consumer.Offset.{DateTime, IOffset, Newest, Oldest}
 import com.bwsw.tstreams.agents.consumer.subscriber.Subscriber
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import org.slf4j.LoggerFactory
+import scaldi.Injector
 
 import scala.collection.mutable
 
@@ -30,8 +49,10 @@ import scala.collection.mutable
   */
 class CallableTStreamCheckpointTaskInput[T <: AnyRef](manager: TaskManager,
                                                       blockingQueue: ArrayBlockingQueue[Envelope],
-                                                      override val checkpointGroup: CheckpointGroup = new CheckpointGroup())
+                                                      override val checkpointGroup: CheckpointGroup)
+                                                     (implicit injector: Injector)
   extends CallableCheckpointTaskInput[TStreamEnvelope[T]](manager.inputs) {
+
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val (subscribingConsumers, consumerClones) = createConsumers()
 
@@ -60,9 +81,9 @@ class CallableTStreamCheckpointTaskInput[T <: AnyRef](manager: TaskManager,
     logger.debug(s"Task: ${manager.taskName}. Get an offset parameter from instance.")
     val instance = manager.instance
     val offset = instance match {
-      case instance: RegularInstanceDomain => instance.startFrom
-      case instance: BatchInstanceDomain => instance.startFrom
-      case instance: OutputInstanceDomain => instance.startFrom
+      case instance: RegularInstance => instance.startFrom
+      case instance: BatchInstance => instance.startFrom
+      case instance: OutputInstance => instance.startFrom
       case badInstance =>
         logger.error(s"Task: ${manager.taskName}. Instance type isn't supported.")
         throw new TypeNotPresentException(badInstance.getClass.getName,

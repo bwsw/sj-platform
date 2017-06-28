@@ -1,73 +1,59 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.bwsw.sj.crud.rest.routes
 
-import akka.http.scaladsl.server.{Directives, RequestContext}
-import com.bwsw.common.exceptions.JsonDeserializationException
-import com.bwsw.sj.common.config.ConfigLiterals
-import com.bwsw.sj.common.config.ConfigurationSettingsUtils._
+import akka.http.scaladsl.server.{Directives, RequestContext, Route}
+import com.bwsw.sj.common.SjInjector
 import com.bwsw.sj.common.rest._
-import com.bwsw.sj.common.rest.model.config.ConfigurationSettingApi
-import com.bwsw.sj.common.utils.MessageResourceUtils._
-import com.bwsw.sj.crud.rest.exceptions.UnknownConfigSettingDomain
-import com.bwsw.sj.crud.rest.utils.JsonDeserializationErrorMessageCreator
-import com.bwsw.sj.crud.rest.validator.SjCrudValidator
+import com.bwsw.sj.crud.rest.SjCrudRestServer
+import com.bwsw.sj.crud.rest.controller.ConfigSettingsController
+import com.bwsw.sj.crud.rest.utils.CompletionUtils
 
-import scala.collection.mutable.ArrayBuffer
-import scala.util.{Failure, Success, Try}
+trait SjConfigurationSettingsRoute extends Directives with SjCrudRestServer with CompletionUtils with SjInjector {
+  val configSettingsController = new ConfigSettingsController
 
-trait SjConfigurationSettingsRoute extends Directives with SjCrudValidator {
-
-  val configSettingsRoute = {
+  val configSettingsRoute: Route = {
     pathPrefix("config") {
       pathPrefix("settings") {
         pathPrefix("domains") {
           pathEndOrSingleSlash {
             get {
               val response = OkRestResponse(DomainsResponseEntity())
-
               complete(restResponseToHttpResponse(response))
             }
           }
         } ~
           pathPrefix(Segment) { (domain: String) =>
-            if (!ConfigLiterals.domains.contains(domain))
-              throw UnknownConfigSettingDomain(createMessage("rest.config.setting.domain.unknown", ConfigLiterals.domains.mkString(", ")), domain)
             pathEndOrSingleSlash {
               get {
-                val configElements = configService.getByParameters(Map("domain" -> domain))
-                val response = OkRestResponse(ConfigSettingsResponseEntity())
-                if (configElements.nonEmpty) {
-                  response.entity = ConfigSettingsResponseEntity(configElements.map(x => x.asProtocolConfigurationSetting()))
-                }
-
+                val response = configSettingsController.getByDomain(domain)
                 complete(restResponseToHttpResponse(response))
-
               }
             } ~
               pathPrefix(Segment) { (name: String) =>
                 pathEndOrSingleSlash {
                   get {
-                    var response: RestResponse = NotFoundRestResponse(MessageResponseEntity(
-                      createMessage("rest.config.setting.notfound", domain, name)))
-                    configService.get(createConfigurationSettingName(domain, name)) match {
-                      case Some(configElement) =>
-                        val entity = ConfigSettingResponseEntity(configElement.asProtocolConfigurationSetting())
-                        response = OkRestResponse(entity)
-                      case None =>
-                    }
-
+                    val response = configSettingsController.get(domain, name)
                     complete(restResponseToHttpResponse(response))
                   } ~
                     delete {
-                      var response: RestResponse = NotFoundRestResponse(MessageResponseEntity(
-                        createMessage("rest.config.setting.notfound", domain, name)))
-                      configService.get(createConfigurationSettingName(domain, name)) match {
-                        case Some(_) =>
-                          configService.delete(createConfigurationSettingName(domain, name))
-                          val entity = MessageResponseEntity(createMessage("rest.config.setting.deleted", domain, name))
-                          response = OkRestResponse(entity)
-                        case None =>
-                      }
-
+                      val response = configSettingsController.delete(domain, name)
                       complete(restResponseToHttpResponse(response))
                     }
                 }
@@ -75,41 +61,12 @@ trait SjConfigurationSettingsRoute extends Directives with SjCrudValidator {
           } ~
           pathEndOrSingleSlash {
             post { (ctx: RequestContext) =>
-              var response: Option[RestResponse] = None
-              val errors = new ArrayBuffer[String]
-
-              Try(serializer.deserialize[ConfigurationSettingApi](getEntityFromContext(ctx))) match {
-                case Success(data) =>
-                  errors ++= data.validate()
-
-                  if (errors.isEmpty) {
-                    configService.save(data.asModelConfigurationSetting)
-                    response = Option(
-                      CreatedRestResponse(
-                        MessageResponseEntity(
-                          createMessage("rest.config.setting.created", data.domain, data.name))))
-                  }
-                case Failure(e: JsonDeserializationException) =>
-                  errors += JsonDeserializationErrorMessageCreator(e)
-                case Failure(e) => throw e
-              }
-
-              if (errors.nonEmpty) {
-                response = Option(
-                  BadRequestRestResponse(
-                    MessageResponseEntity(
-                      createMessage("rest.config.setting.cannot.create", errors.mkString("\n")))))
-              }
-
-              ctx.complete(restResponseToHttpResponse(response.get))
+              val entity = getEntityFromContext(ctx)
+              val response = configSettingsController.create(entity)
+              ctx.complete(restResponseToHttpResponse(response))
             } ~
               get {
-                val configElements = configService.getAll
-                val response = OkRestResponse(ConfigSettingsResponseEntity())
-                if (configElements.nonEmpty) {
-                  response.entity = ConfigSettingsResponseEntity(configElements.map(_.asProtocolConfigurationSetting()))
-                }
-
+                val response = configSettingsController.getAll()
                 complete(restResponseToHttpResponse(response))
               }
           }
@@ -117,4 +74,3 @@ trait SjConfigurationSettingsRoute extends Directives with SjCrudValidator {
     }
   }
 }
-

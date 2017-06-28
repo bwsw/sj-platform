@@ -1,10 +1,28 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.bwsw.sj.crud.rest.model.service
 
 import com.bwsw.sj.common.si.model.service._
 import com.bwsw.sj.common.utils.{RestLiterals, ServiceLiterals}
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type
 import com.fasterxml.jackson.annotation.{JsonIgnore, JsonProperty, JsonSubTypes, JsonTypeInfo}
-
+import scaldi.Injector
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type", defaultImpl = classOf[ServiceApi], visible = true)
 @JsonSubTypes(Array(
@@ -19,18 +37,20 @@ import com.fasterxml.jackson.annotation.{JsonIgnore, JsonProperty, JsonSubTypes,
 ))
 class ServiceApi(@JsonProperty("type") val serviceType: String,
                  val name: String,
-                 val description: String = RestLiterals.defaultDescription) {
+                 val provider: String,
+                 val description: Option[String] = Some(RestLiterals.defaultDescription)) {
 
   @JsonIgnore
-  def to(): Service =
+  def to()(implicit injector: Injector): Service =
     new Service(
       serviceType = this.serviceType,
       name = this.name,
-      description = this.description
+      provider = this.provider,
+      description = this.description.getOrElse(RestLiterals.defaultDescription)
     )
 }
 
-object ServiceApi {
+class ServiceApiCreator {
 
   def from(service: Service): ServiceApi = {
     service.serviceType match {
@@ -41,7 +61,7 @@ object ServiceApi {
           name = aerospikeService.name,
           namespace = aerospikeService.namespace,
           provider = aerospikeService.provider,
-          description = aerospikeService.description
+          description = Option(aerospikeService.description)
         )
 
       case ServiceLiterals.cassandraType =>
@@ -51,7 +71,7 @@ object ServiceApi {
           name = cassandraService.name,
           keyspace = cassandraService.keyspace,
           provider = cassandraService.provider,
-          description = cassandraService.description
+          description = Option(cassandraService.description)
         )
 
       case ServiceLiterals.elasticsearchType =>
@@ -61,7 +81,7 @@ object ServiceApi {
           name = esService.name,
           index = esService.index,
           provider = esService.provider,
-          description = esService.description
+          description = Option(esService.description)
         )
 
       case ServiceLiterals.jdbcType =>
@@ -71,7 +91,7 @@ object ServiceApi {
           name = jdbcService.name,
           database = jdbcService.database,
           provider = jdbcService.provider,
-          description = jdbcService.description
+          description = Option(jdbcService.description)
         )
 
       case ServiceLiterals.kafkaType =>
@@ -82,7 +102,7 @@ object ServiceApi {
           zkProvider = kafkaService.zkProvider,
           zkNamespace = kafkaService.zkNamespace,
           provider = kafkaService.provider,
-          description = kafkaService.description
+          description = Option(kafkaService.description)
         )
 
       case ServiceLiterals.restType =>
@@ -90,11 +110,11 @@ object ServiceApi {
 
         new RestServiceApi(
           name = restService.name,
-          basePath = restService.basePath,
-          httpVersion = restService.httpVersion,
-          headers = restService.headers,
+          basePath = Option(restService.basePath),
+          httpVersion = Option(restService.httpVersion),
+          headers = Option(restService.headers),
           provider = restService.provider,
-          description = restService.description
+          description = Option(restService.description)
         )
 
       case ServiceLiterals.tstreamsType =>
@@ -105,7 +125,7 @@ object ServiceApi {
           prefix = tStreamService.prefix,
           token = tStreamService.token,
           provider = tStreamService.provider,
-          description = tStreamService.description
+          description = Option(tStreamService.description)
         )
 
       case ServiceLiterals.zookeeperType =>
@@ -115,10 +135,8 @@ object ServiceApi {
           name = zkService.name,
           namespace = zkService.namespace,
           provider = zkService.provider,
-          description = zkService.description
+          description = Option(zkService.description)
         )
     }
   }
 }
-
-

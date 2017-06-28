@@ -1,20 +1,42 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.bwsw.sj.mesos.framework.schedule
 
 import java.util
 
+import com.bwsw.sj.mesos.framework.config.FrameworkConfigNames
 import com.bwsw.sj.mesos.framework.task.{StatusHandler, TasksList}
+import com.typesafe.config.ConfigFactory
 import org.apache.log4j.Logger
 import org.apache.mesos.Protos._
 import org.apache.mesos.{Scheduler, SchedulerDriver}
+import scaldi.Injector
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
+import scala.util.Try
 
 /**
- * Mesos scheduler implementation
- */
-class FrameworkScheduler extends Scheduler {
+  * Mesos scheduler implementation
+  */
+class FrameworkScheduler(implicit injector: Injector) extends Scheduler {
 
   private val logger = Logger.getLogger(this.getClass)
   var uniqueHosts = false
@@ -47,11 +69,11 @@ class FrameworkScheduler extends Scheduler {
 
 
   /**
-   * Execute when task change status.
+    * Execute when task change status.
     *
     * @param driver scheduler driver
-   * @param status received status from master
-   */
+    * @param status received status from master
+    */
   def statusUpdate(driver: SchedulerDriver, status: TaskStatus): Unit = {
     logger.info(s"GOT STATUS UPDATE")
     StatusHandler.handle(status)
@@ -64,11 +86,11 @@ class FrameworkScheduler extends Scheduler {
 
 
   /**
-   * Obtain resources and launch tasks.
-   *
-   * @param driver scheduler driver
-   * @param offers resources, that master offered to framework
-   */
+    * Obtain resources and launch tasks.
+    *
+    * @param driver scheduler driver
+    * @param offers resources, that master offered to framework
+    */
   override def resourceOffers(driver: SchedulerDriver, offers: util.List[Offer]): Unit = {
     logger.info(s"GOT RESOURCE OFFERS")
 
@@ -129,16 +151,16 @@ class FrameworkScheduler extends Scheduler {
   }
 
   /**
-   * Perform a reregistration of framework after master disconnected.
-   */
+    * Perform a reregistration of framework after master disconnected.
+    */
   def reregistered(driver: SchedulerDriver, masterInfo: MasterInfo): Unit = {
     logger.debug(s"New master $masterInfo.")
     TasksList.setMessage(s"New master $masterInfo")
   }
 
   /**
-   * Registering framework.
-   */
+    * Registering framework.
+    */
   def registered(driver: SchedulerDriver, frameworkId: FrameworkID, masterInfo: MasterInfo): Unit = {
     logger.info(s"Registered framework as: ${frameworkId.getValue}.")
 
@@ -155,7 +177,8 @@ class FrameworkScheduler extends Scheduler {
     TasksList.prepare(FrameworkUtil.instance.get)
     logger.debug(s"Got tasks: $TasksList.")
 
-    uniqueHosts = scala.util.Try(System.getenv("UNIQUE_HOSTS").toBoolean).getOrElse(false)
+    val config = ConfigFactory.load()
+    uniqueHosts = Try(config.getBoolean(FrameworkConfigNames.uniqueHosts)).getOrElse(false)
 
     TasksList.setMessage(s"Registered framework as: ${frameworkId.getValue}")
   }

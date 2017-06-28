@@ -1,15 +1,34 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.bwsw.common.jdbc
 
-import java.net.URLClassLoader
 import java.sql.{Connection, Driver, PreparedStatement, SQLException}
 import java.util.Properties
 
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
-import com.bwsw.sj.common.utils.JdbcLiterals
+import com.bwsw.sj.common.utils.{FileClassLoader, JdbcLiterals}
 import org.slf4j.LoggerFactory
 
 import scala.util.{Failure, Success, Try}
-
+import com.bwsw.sj.common.dal.model.provider.JDBCProviderDomain
+import scaldi.Injectable.inject
+import scaldi.Injector
 
 // todo: Add multiple connection to databases.
 /**
@@ -19,13 +38,15 @@ import scala.util.{Failure, Success, Try}
   * 2) driver.<driver_name>.class - name of class of the driver (e.g. "com.mysql.jdbc.Driver")
   * 3) driver.<driver_name>.prefix - prefix of server url: (prefix)://(host:port)/(database), one of [jdbc:mysql, jdbc:postgresql, jdbc:oracle:thin]
   *
-  * driver_name is used in JDBC provider ('driver' field)
+  * driver_name is used in [[JDBCProviderDomain.driver]]
   *
   * Also allows manipulating with elements of the specific table (only one table)
   *
-  * @param jdbcCCD : connection data provider
+  * @param jdbcCCD connection data
   */
-protected class JdbcClient(override val jdbcCCD: JdbcClientConnectionData) extends IJdbcClient {
+
+protected class JdbcClient(override val jdbcCCD: JdbcClientConnectionData)
+                          (implicit injector: Injector) extends IJdbcClient {
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val driver = createDriver()
   private val credential = createCredential()
@@ -36,8 +57,8 @@ protected class JdbcClient(override val jdbcCCD: JdbcClientConnectionData) exten
     java.util.Locale.setDefault(java.util.Locale.ENGLISH)
 
     val driverFileName = jdbcCCD.driverFileName
-    val jarFile = ConnectionRepository.getFileStorage.get(driverFileName, s"tmp/$driverFileName")
-    val classLoader = new URLClassLoader(Array(jarFile.toURI.toURL), ClassLoader.getSystemClassLoader)
+    val jarFile = inject[ConnectionRepository].getFileStorage.get(driverFileName, s"tmp/$driverFileName")
+    val classLoader = createClassLoader(jarFile.getName)
     val driver = classLoader.loadClass(jdbcCCD.driverClass).newInstance().asInstanceOf[Driver]
 
     driver
@@ -72,6 +93,8 @@ protected class JdbcClient(override val jdbcCCD: JdbcClientConnectionData) exten
 
     credential
   }
+
+  protected def createClassLoader(filename: String) = new FileClassLoader(inject[ConnectionRepository].getFileStorage, filename)
 }
 
 trait IJdbcClient {

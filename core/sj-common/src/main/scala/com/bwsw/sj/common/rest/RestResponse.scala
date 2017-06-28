@@ -1,14 +1,30 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.bwsw.sj.common.rest
 
 import com.bwsw.sj.common.config.ConfigLiterals
-import com.bwsw.sj.common.rest.model.config.ConfigurationSettingApi
-import com.bwsw.sj.common.rest.model.module.{InstanceApi, SpecificationApi}
-import com.bwsw.sj.common.rest.model.stream.StreamApi
 import com.fasterxml.jackson.annotation.JsonProperty
 
+import scala.annotation.meta.field
 import scala.collection.mutable
 
-class RestResponse(@JsonProperty("status-code") var statusCode: Int = 0, entity: ResponseEntity = new ResponseEntity {})
+class RestResponse(@(JsonProperty @field)("status-code") val statusCode: Int = 0, entity: ResponseEntity = new ResponseEntity {})
 
 case class OkRestResponse(var entity: ResponseEntity) extends RestResponse(200, entity)
 
@@ -44,43 +60,6 @@ case class KeyedMessageResponseEntity(message: String, key: String) extends Resp
 
 case class TypesResponseEntity(types: Seq[String]) extends ResponseEntity
 
-
-case class StreamResponseEntity(stream: StreamApi) extends ResponseEntity
-
-case class StreamsResponseEntity(streams: mutable.Buffer[StreamApi] = mutable.Buffer()) extends ResponseEntity
-
 case class RelatedToStreamResponseEntity(instances: mutable.Buffer[String] = mutable.Buffer()) extends ResponseEntity
 
-
-case class ConfigSettingsResponseEntity(configSettings: mutable.Buffer[ConfigurationSettingApi] = mutable.Buffer()) extends ResponseEntity
-
-case class ConfigSettingResponseEntity(configSetting: ConfigurationSettingApi) extends ResponseEntity
-
 case class DomainsResponseEntity(domains: Seq[String] = ConfigLiterals.domains) extends ResponseEntity
-
-
-case class ModuleInfo(moduleType: String, moduleName: String, moduleVersion: String, size: Long)
-
-case class ModulesResponseEntity(modules: mutable.Buffer[ModuleInfo] = mutable.Buffer()) extends ResponseEntity
-
-case class RelatedToModuleResponseEntity(instances: mutable.Buffer[String] = mutable.Buffer()) extends ResponseEntity
-
-case class SpecificationResponseEntity(specification: SpecificationApi) extends ResponseEntity
-
-case class ShortInstancesResponseEntity(instances: mutable.Buffer[ShortInstance] = mutable.Buffer()) extends ResponseEntity
-
-case class InstanceResponseEntity(instance: InstanceApi) extends ResponseEntity
-
-case class InstancesResponseEntity(instances: mutable.Buffer[InstanceApi] = mutable.Buffer()) extends ResponseEntity
-
-case class ShortInstance(name: String, moduleType: String, moduleName: String, moduleVersion: String,
-                         description: String, status: String, restAddress: String)
-
-
-case class CustomJarInfo(name: String, version: String, size: Long)
-
-case class CustomJarsResponseEntity(customJars: mutable.Buffer[CustomJarInfo] = mutable.Buffer()) extends ResponseEntity
-
-case class CustomFileInfo(name: String, description: String, uploadDate: String, size: Long) extends ResponseEntity
-
-case class CustomFilesResponseEntity(customFiles: mutable.Buffer[CustomFileInfo] = mutable.Buffer()) extends ResponseEntity

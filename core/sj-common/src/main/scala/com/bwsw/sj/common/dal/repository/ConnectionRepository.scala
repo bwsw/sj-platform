@@ -1,44 +1,60 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.bwsw.sj.common.dal.repository
 
 import com.bwsw.common.file.utils.MongoFileStorage
-import com.bwsw.sj.common.dal.ConnectionConstants
+import com.bwsw.sj.common.{ConnectionConstants, MongoAuthChecker}
 import com.bwsw.sj.common.dal.model._
 import com.bwsw.sj.common.dal.model.instance.InstanceDomain
-import com.bwsw.sj.common.dal.model.module.FileMetadata
+import com.bwsw.sj.common.dal.model.module.FileMetadataDomain
 import com.bwsw.sj.common.dal.model.provider.ProviderDomain
 import com.bwsw.sj.common.dal.model.service.ServiceDomain
 import com.bwsw.sj.common.dal.model.stream.StreamDomain
 import com.bwsw.sj.common.dal.morphia.CustomMorphiaObjectFactory
-import com.mongodb.MongoClient
 import org.mongodb.morphia.Morphia
 import org.mongodb.morphia.dao.BasicDAO
 import org.slf4j.LoggerFactory
+import scaldi.Injector
 
-import scala.collection.JavaConverters._
 import scala.reflect.ClassTag
 
 /**
-  * Repository for connection to MongoDB and file storage (GridFS)
+  * Repository for connection to MongoDB and file storage [[com.mongodb.casbah.gridfs.GridFS]]
   */
-
-object ConnectionRepository {
+class ConnectionRepository(mongoAuthChecker: MongoAuthChecker)(implicit injector: Injector) {
 
   import ConnectionConstants._
 
   private val logger = LoggerFactory.getLogger(this.getClass)
+  private val authEnable: Boolean = mongoAuthChecker.isAuthRequired()
 
-  private lazy val Left(mongoClient) = createClient("mongodb-driver") // new MongoClient(mongoHosts.asJava, mongoCredential.asJava)
+  private lazy val (mongoClient, mongoConnection) = mongoAuthChecker.createClient("mongodb-driver", authEnable, mongoUser, mongoPassword) // new MongoClient(mongoHosts.asJava, mongoCredential.asJava)
+  // com.mongodb.casbah.MongoClient(replicaSetSeeds = mongoHosts, credentials = mongoCredential)
 
   private lazy val morphia = new Morphia()
   setMapperOptions(morphia)
 
   private lazy val datastore = morphia.createDatastore(mongoClient, databaseName)
 
-  private lazy val Right(mongoConnection) = createClient("casbah") // com.mongodb.casbah.MongoClient(replicaSetSeeds = mongoHosts, credentials = mongoCredential)
-
   private lazy val fileStorage: MongoFileStorage = new MongoFileStorage(mongoConnection(databaseName))
 
-  private lazy val fileMetadataRepository = new GenericMongoRepository[FileMetadata]()
+  private lazy val fileMetadataRepository = new GenericMongoRepository[FileMetadataDomain]()
 
   private lazy val instanceRepository = new GenericMongoRepository[InstanceDomain]()
 
@@ -50,7 +66,16 @@ object ConnectionRepository {
 
   private lazy val configRepository = new GenericMongoRepository[ConfigurationSettingDomain]()
 
-  def getFileMetadataRepository: GenericMongoRepository[FileMetadata] = {
+  var mongoEnvironment: Map[String, String] = Map[String, String]("MONGO_HOSTS" -> mongoHosts)
+  if (authEnable) {
+    if ((mongoUser.nonEmpty && mongoPassword.nonEmpty) && mongoAuthChecker.isCorrectCredentials(mongoUser, mongoPassword))
+      mongoEnvironment = mongoEnvironment ++ Map[String, String](
+        "MONGO_USER" -> mongoUser.get,
+        "MONGO_PASSWORD" -> mongoPassword.get
+      )
+  }
+
+  def getFileMetadataRepository: GenericMongoRepository[FileMetadataDomain] = {
     fileMetadataRepository
   }
 
@@ -82,22 +107,6 @@ object ConnectionRepository {
     logger.debug("Close a repository of connection.")
     mongoConnection.close()
     mongoClient.close()
-  }
-
-  def createClient(clientType: String): Either[MongoClient, com.mongodb.casbah.MongoClient] = {
-    logger.debug("Create a new mongo client.")
-    if (authEnable) {
-      clientType match {
-        case "mongodb-driver" => Left(new MongoClient(mongoHosts.asJava, mongoCredential.asJava))
-        case "casbah" => Right(com.mongodb.casbah.MongoClient(replicaSetSeeds = mongoHosts, credentials = mongoCredential))
-      }
-    }
-    else {
-      clientType match {
-        case "mongodb-driver" => Left(new MongoClient(mongoHosts.asJava))
-        case "casbah" => Right(com.mongodb.casbah.MongoClient(replicaSetSeeds = mongoHosts))
-      }
-    }
   }
 
   private def setMapperOptions(morphia: Morphia): Unit = {

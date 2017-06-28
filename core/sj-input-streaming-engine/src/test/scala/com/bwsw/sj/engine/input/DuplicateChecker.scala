@@ -1,11 +1,28 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.bwsw.sj.engine.input
 
-import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.engine.input.DataFactory._
 
 object DuplicateChecker extends App {
 
-  val streamService = ConnectionRepository.getStreamRepository
+  val streamService = connectionRepository.getStreamRepository
 
   val outputConsumers = (1 to outputCount).map(x => createOutputConsumer(streamService, x.toString))
   outputConsumers.foreach(x => x.start())
@@ -15,15 +32,15 @@ object DuplicateChecker extends App {
   var totalOutputElements = 0
 
   outputConsumers.foreach(outputConsumer => {
-    val partitions = outputConsumer.getPartitions().toIterator
+    val partitions = outputConsumer.getPartitions.toIterator
 
     while (partitions.hasNext) {
-      val currentPartition = partitions.next()
+      val currentPartition = partitions.next
       var maybeTxn = outputConsumer.getTransaction(currentPartition)
 
       while (maybeTxn.isDefined) {
         val transaction = maybeTxn.get
-        while (transaction.hasNext()) {
+        while (transaction.hasNext) {
           transaction.next()
           totalOutputElements += 1
         }
@@ -36,7 +53,7 @@ object DuplicateChecker extends App {
     s"Count of all txns elements that are consumed from output stream($totalOutputElements) should equals count of the elements that are consumed from input socket excluding the duplicates(${totalInputElements - totalDuplicates})")
 
   outputConsumers.foreach(x => x.stop())
-  ConnectionRepository.close()
+  connectionRepository.close()
 
   println("DONE")
 }

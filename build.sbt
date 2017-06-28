@@ -39,6 +39,7 @@ val commonSettings = Seq(
     case PathList("javax", "servlet", xs@_*) => MergeStrategy.first
     case x if x.endsWith("io.netty.versions.properties") => MergeStrategy.concat
     case "log4j.properties" => MergeStrategy.concat
+    case "application.conf" => MergeStrategy.concat
     case x =>
       val oldStrategy = (assemblyMergeStrategy in assembly).value
       oldStrategy(x)

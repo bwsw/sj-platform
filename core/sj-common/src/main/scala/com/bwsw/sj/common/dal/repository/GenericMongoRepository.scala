@@ -1,23 +1,44 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.bwsw.sj.common.dal.repository
 
 import com.mongodb.BasicDBObject
+import scaldi.Injectable.inject
+import scaldi.Injector
 
 import scala.collection.mutable
 import scala.reflect.ClassTag
 
 /**
- * Provides a service for access to elements of mongo database collection
- * @tparam T Type of collection elements
- */
+  * Provides a service for access to elements of mongo database collection
+  *
+  * @tparam T type of collection elements
+  */
 
-class GenericMongoRepository[T: ClassTag] extends Repository[T] {
+class GenericMongoRepository[T: ClassTag](implicit injector: Injector) extends Repository[T] {
 
   import scala.collection.JavaConverters._
 
   /**
-   * Allows manipulating with elements of mongo database collection
-   */
-  private val genericDAO = ConnectionRepository.getGenericDAO[T]
+    * Allows manipulating with elements of mongo database collection
+    */
+  private val genericDAO = inject[ConnectionRepository].getGenericDAO[T]
   private val emptyQuery = new BasicDBObject()
 
   def save(entity: T): Unit = {
@@ -30,11 +51,11 @@ class GenericMongoRepository[T: ClassTag] extends Repository[T] {
     Option(genericDAO.get(name))
   }
 
-  def getByParameters(parameters: Map[String, Any]): mutable.Buffer[T] = {
+  def getByParameters(parameters: Map[String, Any]): Seq[T] = {
     logger.debug(s"Retrieve an entity from a mongo database by parameters: ${parameters.mkString(", ")}.")
-    val query = genericDAO.createQuery()
+    val query = genericDAO.createQuery().disableValidation()
     query.and(parameters.map(x => query.criteria(x._1).equal(x._2)).toSeq: _*)
-    query.asList().asScala
+    genericDAO.find(query).iterator().asScala.toSeq
   }
 
   def getAll: mutable.Buffer[T] = {

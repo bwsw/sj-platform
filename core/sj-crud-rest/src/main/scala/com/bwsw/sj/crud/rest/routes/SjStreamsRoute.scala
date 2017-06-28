@@ -1,142 +1,68 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.bwsw.sj.crud.rest.routes
 
-import akka.http.scaladsl.server.{Directives, RequestContext}
-import com.bwsw.common.exceptions.JsonDeserializationException
-import com.bwsw.sj.common.dal.model.instance.InstanceDomain
-import com.bwsw.sj.common.rest.model._
-import com.bwsw.sj.common.rest.model.stream.StreamApi
-import com.bwsw.sj.common.rest._
-import com.bwsw.sj.common.utils.EngineLiterals._
-import com.bwsw.sj.common.utils.MessageResourceUtils._
-import com.bwsw.sj.common.utils.StreamLiterals
-import com.bwsw.sj.crud.rest.utils.JsonDeserializationErrorMessageCreator
-import com.bwsw.sj.crud.rest.validator.SjCrudValidator
+import akka.http.scaladsl.server.{Directives, RequestContext, Route}
+import com.bwsw.sj.common.SjInjector
+import com.bwsw.sj.crud.rest.SjCrudRestServer
+import com.bwsw.sj.crud.rest.controller.StreamController
+import com.bwsw.sj.crud.rest.utils.CompletionUtils
 
-import scala.collection.mutable.ArrayBuffer
-import scala.util.{Failure, Success, Try}
+trait SjStreamsRoute extends Directives with SjCrudRestServer with CompletionUtils with SjInjector {
 
-trait SjStreamsRoute extends Directives with SjCrudValidator {
+  private val streamController = new StreamController
 
-  val streamsRoute = {
+  val streamsRoute: Route = {
     pathPrefix("streams") {
       pathEndOrSingleSlash {
         post { (ctx: RequestContext) =>
-          var response: Option[RestResponse] = None
-          val errors = new ArrayBuffer[String]
-          Try (serializer.deserialize[StreamApi](getEntityFromContext(ctx))) match {
-            case Success(streamData) =>
-              errors ++= streamData.validate()
-
-              if (errors.isEmpty) {
-                streamData.create()
-                streamDAO.save(streamData.asModelStream())
-                response = Option(
-                  CreatedRestResponse(
-                    MessageResponseEntity(
-                      createMessage("rest.streams.stream.created", streamData.name))))
-              }
-              case Failure(e: JsonDeserializationException) =>
-                errors += JsonDeserializationErrorMessageCreator(e)
-              case Failure(e) => throw e
-            }
-
-          if (errors.nonEmpty) {
-            response = Option(
-              BadRequestRestResponse(
-                MessageResponseEntity(
-                  createMessage("rest.streams.stream.cannot.create", errors.mkString(";")))))
-          }
-
-          ctx.complete(restResponseToHttpResponse(response.get))
+          val entity = getEntityFromContext(ctx)
+          ctx.complete(restResponseToHttpResponse(streamController.create(entity)))
         } ~
           get {
-            val streams = streamDAO.getAll
-            val response = OkRestResponse(StreamsResponseEntity())
-            if (streams.nonEmpty) {
-              response.entity = StreamsResponseEntity(streams.map(s => s.asProtocolStream()))
-            }
-
-            complete(restResponseToHttpResponse(response))
+            complete(restResponseToHttpResponse(streamController.getAll()))
           }
       } ~
         pathPrefix("_types") {
           pathEndOrSingleSlash {
             get {
-              val response = OkRestResponse(TypesResponseEntity(StreamLiterals.types))
-
-              complete(restResponseToHttpResponse(response))
+              complete(restResponseToHttpResponse(streamController.getTypes))
             }
           }
         } ~
         pathPrefix(Segment) { (streamName: String) =>
           pathEndOrSingleSlash {
             get {
-              val stream = streamDAO.get(streamName)
-              var response: RestResponse = NotFoundRestResponse(MessageResponseEntity(
-                createMessage("rest.streams.stream.notfound", streamName))
-              )
-              stream match {
-                case Some(x) =>
-                  response = OkRestResponse(StreamResponseEntity(x.asProtocolStream()))
-                case None =>
-              }
-
-              complete(restResponseToHttpResponse(response))
+              complete(restResponseToHttpResponse(streamController.get(streamName)))
             } ~
               delete {
-                var response: RestResponse = UnprocessableEntityRestResponse(MessageResponseEntity(
-                  createMessage("rest.streams.stream.cannot.delete", streamName)))
-
-                val instances = getRelatedInstances(streamName)
-
-                if (instances.isEmpty) {
-                  val stream = streamDAO.get(streamName)
-                  stream match {
-                    case Some(x) =>
-                      x.delete()
-                      streamDAO.delete(streamName)
-                      response = OkRestResponse(MessageResponseEntity(
-                        createMessage("rest.streams.stream.deleted", streamName))
-                      )
-                    case None =>
-                      response = NotFoundRestResponse(MessageResponseEntity(
-                        createMessage("rest.streams.stream.notfound", streamName))
-                      )
-                  }
-                }
-
-                complete(restResponseToHttpResponse(response))
+                complete(restResponseToHttpResponse(streamController.delete(streamName)))
               }
           } ~
             pathPrefix("related") {
               pathEndOrSingleSlash {
                 get {
-                  val stream = streamDAO.get(streamName)
-                  var response: RestResponse = NotFoundRestResponse(
-                    MessageResponseEntity(createMessage("rest.streams.stream.notfound", streamName)))
-
-                  stream match {
-                    case Some(x) =>
-                      response = OkRestResponse(RelatedToStreamResponseEntity(getRelatedInstances(streamName)))
-                    case None =>
-                  }
-
-                  complete(restResponseToHttpResponse(response))
+                  complete(restResponseToHttpResponse(streamController.getRelated(streamName)))
                 }
               }
             }
         }
     }
-  }
-
-  private def getRelatedInstances(streamName: String) = {
-    instanceDAO.getAll.filter {
-      (instance: InstanceDomain) =>
-        if (!instance.moduleType.equals(inputStreamingType)) {
-          instance.getInputsWithoutStreamMode().contains(streamName) || instance.outputs.contains(streamName)
-        } else {
-          instance.outputs.contains(streamName)
-        }
-    }.map(_.name)
   }
 }

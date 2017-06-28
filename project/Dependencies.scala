@@ -1,14 +1,33 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import sbt._
 
 object Dependencies {
 
   object Versions {
-    val scala = "2.12.1"
+    val scala = "2.12.2"
   }
 
   lazy val sjCommonDependencies = Def.setting(Seq(
     "org.slf4j" % "slf4j-log4j12" % "1.7.22",
-    ("com.bwsw" % "t-streams_2.12" % "2.2.2-SNAPSHOT")
+    ("com.bwsw" % "t-streams_2.12" % "3.0.5-SNAPSHOT")
       .exclude("org.slf4j", "slf4j-simple")
       .exclude("org.slf4j", "slf4j-api")
       .exclude("log4j", "log4j")
@@ -42,7 +61,11 @@ object Dependencies {
     "com.datastax.cassandra" % "cassandra-driver-core" % "3.2.0",
     "org.scalatest" % "scalatest_2.12" % "3.0.1" % "test",
     "org.eclipse.jetty" % "jetty-client" % "9.4.3.v20170317",
-    "com.fasterxml.jackson.module" % "jackson-module-scala_2.12" % "2.8.8"
+    "com.fasterxml.jackson.module" % "jackson-module-scala_2.12" % "2.8.8",
+    ("org.everit.json" % "org.everit.json.schema" % "1.4.1")
+      .exclude("commons-logging", "commons-logging"),
+    "org.scaldi" %% "scaldi" % "0.5.8",
+    "org.mockito" % "mockito-core" % "2.8.9" % "test"
   ))
 
   lazy val sjEngineCoreDependencies = Def.setting(Seq(
@@ -56,17 +79,18 @@ object Dependencies {
     ("com.mockrunner" % "mockrunner-jdbc" % "1.1.2" % "test")
       .exclude("jakarta-regexp", "jakarta-regexp")
       .exclude("xerces", "xerces"),
-    "org.scalatest" % "scalatest_2.12" % "3.0.1" % "provided"
+    "org.scalatest" % "scalatest_2.12" % "3.0.1" % "provided",
+    "org.mockito" % "mockito-core" % "2.8.9"
   ))
 
   lazy val sjRestDependencies = Def.setting(Seq(
     "org.slf4j" % "slf4j-log4j12" % "1.7.22" % "provided",
     "com.typesafe.akka" %% "akka-http" % "10.0.3",
-    ("org.everit.json" % "org.everit.json.schema" % "1.4.1")
-      .exclude("commons-logging", "commons-logging"),
     ("org.apache.httpcomponents" % "httpclient" % "4.5.2")
       .exclude("commons-logging", "commons-logging"),
-    "com.typesafe.akka" %% "akka-slf4j" % "2.4.16"
+    "com.typesafe.akka" %% "akka-slf4j" % "2.4.16",
+    "org.scalatest" % "scalatest_2.12" % "3.0.1" % "provided",
+    "org.mockito" % "mockito-core" % "2.8.9" % "provided"
   ))
 
   lazy val sjInputEngineDependencies = Def.setting(Seq(

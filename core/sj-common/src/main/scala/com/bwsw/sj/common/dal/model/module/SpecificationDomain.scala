@@ -1,11 +1,27 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.bwsw.sj.common.dal.model.module
 
-import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.dal.morphia.MorphiaAnnotations.PropertyField
-import com.bwsw.sj.common.rest.model.module.SpecificationApi
 
 /**
-  * Entity for specification-json of module
+  * Domain entity for specification of module
   *
   * @author Kseniya Tomskikh
   */
@@ -20,27 +36,4 @@ class SpecificationDomain(val name: String,
                           @PropertyField("engine-name") var engineName: String,
                           @PropertyField("engine-version") var engineVersion: String,
                           @PropertyField("validator-class") val validateClass: String,
-                          @PropertyField("executor-class") val executorClass: String,
-                          @PropertyField("batch-collector-class") val batchCollectorClass: String,
-                          val options: String = "{}"
-                   ) {
-
-  def asSpecification(): SpecificationApi = {
-    val serializer = new JsonSerializer
-    SpecificationApi(this.name,
-      this.description,
-      this.version,
-      this.author,
-      this.license,
-      Map("cardinality" -> this.inputs.cardinality,
-        "types" -> this.inputs.types),
-      Map("cardinality" -> this.outputs.cardinality,
-        "types" -> this.outputs.types),
-      this.moduleType,
-      this.engineName,
-      this.engineVersion,
-      serializer.deserialize[Map[String, Any]](this.options),
-      this.validateClass,
-      this.executorClass)
-  }
-}
+                          @PropertyField("executor-class") val executorClass: String)

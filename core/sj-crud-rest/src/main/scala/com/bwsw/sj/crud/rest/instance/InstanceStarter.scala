@@ -1,69 +1,101 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.bwsw.sj.crud.rest.instance
 
 import java.net.URI
 
 import com.bwsw.common.LeaderLatch
-import com.bwsw.sj.common.dal.ConnectionConstants
-import com.bwsw.sj.common.config.ConfigurationSettingsUtils
-import com.bwsw.sj.common.dal.model.instance.InstanceDomain
+import com.bwsw.common.http.HttpClient
+import com.bwsw.common.http.HttpStatusChecker._
+import com.bwsw.common.marathon.{MarathonApi, MarathonApplication, MarathonRequest}
+import com.bwsw.sj.common.config.SettingsUtils
+import com.bwsw.sj.common.dal.repository.ConnectionRepository
+import com.bwsw.sj.common.si.model.instance.Instance
 import com.bwsw.sj.common.utils.FrameworkLiterals._
 import com.bwsw.sj.common.utils._
-import com.bwsw.sj.crud.rest.RestLiterals
-import com.bwsw.sj.crud.rest.marathon.{MarathonApplicationById, MarathonRequest}
+import com.bwsw.sj.crud.rest.utils.RestLiterals
 import org.slf4j.LoggerFactory
+import scaldi.Injectable.inject
+import scaldi.Injector
 
-import scala.collection.JavaConverters._
 import scala.util.{Failure, Success, Try}
 
 /**
   * One-thread starting object for instance
   * using synchronous apache http client
   *
+  * protected methods and variables need for testing purposes
+  *
   * @author Kseniya Tomskikh
   */
-class InstanceStarter(instance: InstanceDomain, delay: Long = 1000) extends Runnable with InstanceManager {
+class InstanceStarter(instance: Instance,
+                      marathonAddress: String,
+                      zookeeperHost: Option[String] = None,
+                      zookeeperPort: Option[Int] = None,
+                      delay: Long = 1000,
+                      marathonTimeout: Int = 60000)(implicit val injector: Injector) extends Runnable {
 
   import EngineLiterals._
 
   private val logger = LoggerFactory.getLogger(getClass.getName)
-  private lazy val restHost = ConfigurationSettingsUtils.getCrudRestHost()
-  private lazy val restPort = ConfigurationSettingsUtils.getCrudRestPort()
-  private lazy val restAddress = new URI(s"http://$restHost:$restPort").toString
-  private val frameworkName = getFrameworkName(instance)
+  private val settingsUtils = inject[SettingsUtils]
+  private lazy val restHost = settingsUtils.getCrudRestHost()
+  private lazy val restPort = settingsUtils.getCrudRestPort()
+  private lazy val restAddress = RestLiterals.createUri(restHost, restPort)
+  protected val instanceManager = new InstanceDomainRenewer()
+  protected val client = new HttpClient(marathonTimeout)
+  protected val marathonManager = new MarathonApi(client, marathonAddress)
+  private val frameworkName = InstanceAdditionalFieldCreator.getFrameworkName(instance)
 
   private var leaderLatch: Option[LeaderLatch] = None
 
-  def run() = {
+  def run(): Unit = {
     Try {
       logger.info(s"Instance: '${instance.name}'. Launch an instance.")
-      updateInstanceStatus(instance, starting)
+      instanceManager.updateInstanceStatus(instance, starting)
       startInstance()
-      close()
+      client.close()
     } match {
       case Success(_) =>
         logger.info(s"Instance: '${instance.name}' has been launched.")
       case Failure(e) =>
         logger.error(s"Instance: '${instance.name}'. Instance is failed during the start process.", e)
-        updateInstanceStatus(instance, failed)
+        instanceManager.updateInstanceStatus(instance, failed)
         leaderLatch.foreach(_.close())
-        close()
+        client.close()
     }
   }
 
-  private def startInstance() = {
-    val marathonInfo = getMarathonInfo()
+  protected def startInstance(): Unit = {
+    val marathonInfo = marathonManager.getMarathonInfo()
     if (isStatusOK(marathonInfo)) {
-      val marathonMaster = getMarathonMaster(marathonInfo)
+      val marathonMaster = marathonManager.getMarathonMaster(marathonInfo)
       leaderLatch = Option(createLeaderLatch(marathonMaster))
-      updateFrameworkStage(instance, starting)
+      instanceManager.updateFrameworkStage(instance, starting)
       startFramework(marathonMaster)
       leaderLatch.foreach(_.close())
     } else {
-      updateInstanceStatus(instance, failed)
+      instanceManager.updateInstanceStatus(instance, failed)
     }
   }
 
-  private def createLeaderLatch(marathonMaster: String) = {
+  protected def createLeaderLatch(marathonMaster: String): LeaderLatch = {
     logger.debug(s"Instance: '${instance.name}'. Creating a leader latch to start the instance.")
     val zkServers = getZooKeeperServers(marathonMaster)
     val leader = new LeaderLatch(Set(zkServers), RestLiterals.masterNode)
@@ -73,26 +105,25 @@ class InstanceStarter(instance: InstanceDomain, delay: Long = 1000) extends Runn
     leader
   }
 
-  private def getZooKeeperServers(marathonMaster: String) = {
+  protected def getZooKeeperServers(marathonMaster: String): String = {
     logger.debug(s"Instance: '${instance.name}'. Getting a zookeeper address.")
-    var zooKeeperServers = ""
-    val zkHost = Option(System.getenv("ZOOKEEPER_HOST"))
-    val zkPort = Option(System.getenv("ZOOKEEPER_PORT"))
-    if (zkHost.isDefined && zkPort.isDefined) {
-      zooKeeperServers = zkHost.get + ":" + zkPort.get
-      logger.debug(s"Instance: '${instance.name}'. Get a zookeeper address: '$zooKeeperServers' from environment variables.")
-    } else {
-      val marathonMasterUrl = new URI(marathonMaster)
-      zooKeeperServers = marathonMasterUrl.getHost + ":" + marathonMasterUrl.getPort
-      logger.debug(s"Instance: '${instance.name}'. Get a zookeeper address: '$zooKeeperServers' from marathon.")
-    }
+    (zookeeperHost, zookeeperPort) match {
+      case (Some(zkHost), Some(zkPort)) =>
+        val zooKeeperServers = s"$zkHost:$zkPort"
+        logger.debug(s"Instance: '${instance.name}'. Get a zookeeper address: '$zooKeeperServers'.")
+        zooKeeperServers
 
-    zooKeeperServers
+      case _ =>
+        val marathonMasterUrl = new URI(marathonMaster)
+        val zooKeeperServers = marathonMasterUrl.getHost + ":" + marathonMasterUrl.getPort
+        logger.debug(s"Instance: '${instance.name}'. Get a zookeeper address: '$zooKeeperServers' from marathon.")
+        zooKeeperServers
+    }
   }
 
-  private def startFramework(marathonMaster: String) = {
+  protected def startFramework(marathonMaster: String): Unit = {
     logger.debug(s"Instance: '${instance.name}'. Try to launch or create a framework: '$frameworkName'.")
-    val frameworkApplicationInfo = getApplicationInfo(frameworkName)
+    val frameworkApplicationInfo = marathonManager.getApplicationInfo(frameworkName)
     if (isStatusOK(frameworkApplicationInfo)) {
       launchFramework()
     } else {
@@ -100,37 +131,37 @@ class InstanceStarter(instance: InstanceDomain, delay: Long = 1000) extends Runn
     }
   }
 
-  private def launchFramework() = {
+  protected def launchFramework(): Unit = {
     logger.debug(s"Instance: '${instance.name}'. Launch a framework: '$frameworkName'.")
-    val startFrameworkResult = scaleMarathonApplication(frameworkName, 1)
+    val startFrameworkResult = marathonManager.scaleMarathonApplication(frameworkName, 1)
     if (isStatusOK(startFrameworkResult)) {
       waitForFrameworkToStart()
     } else {
-      updateFrameworkStage(instance, failed)
-      updateInstanceStatus(instance, failed)
-      updateInstanceRestAddress(instance, "")
+      instanceManager.updateFrameworkStage(instance, failed)
+      instanceManager.updateInstanceStatus(instance, failed)
+      instanceManager.updateInstanceRestAddress(instance, None)
     }
   }
 
-  private def createFramework(marathonMaster: String) = {
+  protected def createFramework(marathonMaster: String): Unit = {
     logger.debug(s"Instance: '${instance.name}'. Create a framework: '$frameworkName'.")
     val request = createRequestForFrameworkCreation(marathonMaster)
-    val startFrameworkResult = startMarathonApplication(request)
+    val startFrameworkResult = marathonManager.startMarathonApplication(request)
     if (isStatusCreated(startFrameworkResult)) {
       waitForFrameworkToStart()
     } else {
-      updateFrameworkStage(instance, failed)
-      updateInstanceStatus(instance, failed)
-      updateInstanceRestAddress(instance, "")
+      instanceManager.updateFrameworkStage(instance, failed)
+      instanceManager.updateInstanceStatus(instance, failed)
+      instanceManager.updateInstanceRestAddress(instance, None)
     }
   }
 
-  private def createRequestForFrameworkCreation(marathonMaster: String) = {
-    val frameworkJarName = ConfigurationSettingsUtils.getFrameworkJarName()
-    val command = "java -jar " + frameworkJarName + " $PORT"
+  protected def createRequestForFrameworkCreation(marathonMaster: String): MarathonRequest = {
+    val frameworkJarName = settingsUtils.getFrameworkJarName()
+    val command = FrameworkLiterals.createCommandToLaunch(frameworkJarName)
     val restUrl = new URI(s"$restAddress/v1/custom/jars/$frameworkJarName")
     val environmentVariables = getFrameworkEnvironmentVariables(marathonMaster)
-    val backoffSettings = getBackoffSettings()
+    val backoffSettings = settingsUtils.getBackoffSettings()
     val request = MarathonRequest(
       frameworkName,
       command,
@@ -144,71 +175,71 @@ class InstanceStarter(instance: InstanceDomain, delay: Long = 1000) extends Runn
     request
   }
 
-  private def getFrameworkEnvironmentVariables(marathonMaster: String) = {
+  protected def getFrameworkEnvironmentVariables(marathonMaster: String): Map[String, String] = {
     var environmentVariables = Map(
       instanceIdLabel -> instance.name,
       mesosMasterLabel -> marathonMaster,
       frameworkIdLabel -> frameworkName
     )
-    environmentVariables = environmentVariables ++ ConnectionConstants.mongoEnvironment
-    environmentVariables = environmentVariables ++ instance.environmentVariables.asScala
+    environmentVariables = environmentVariables ++ inject[ConnectionRepository].mongoEnvironment
+    environmentVariables = environmentVariables ++ instance.environmentVariables
 
     environmentVariables
   }
 
-  private def getBackoffSettings(): (Int, Double, Int) = {
-    val backoffSeconds = Try(ConfigurationSettingsUtils.getFrameworkBackoffSeconds()) match {
-      case Success(x) => x
-      case Failure(_: NoSuchFieldException) => 7
-      case Failure(e) => throw e
-    }
-    val backoffFactor = Try(ConfigurationSettingsUtils.getFrameworkBackoffFactor()) match {
-      case Success(x) => x
-      case Failure(_: NoSuchFieldException) => 7.0
-      case Failure(e) => throw e
-    }
-    val maxLaunchDelaySeconds = Try(ConfigurationSettingsUtils.getFrameworkMaxLaunchDelaySeconds()) match {
-      case Success(x) => x
-      case Failure(_: NoSuchFieldException) => 600
-      case Failure(e) => throw e
-    }
-    (backoffSeconds, backoffFactor, maxLaunchDelaySeconds)
-  }
-
-  private def waitForFrameworkToStart() = {
+  protected def waitForFrameworkToStart(): Unit = {
     var isStarted = false
     while (!isStarted) {
       logger.debug(s"Instance: '${instance.name}'. Waiting until a framework: '$frameworkName' is launched.")
-      val frameworkApplicationInfo = getApplicationInfo(frameworkName)
+      val frameworkApplicationInfo = marathonManager.getApplicationInfo(frameworkName)
       if (isStatusOK(frameworkApplicationInfo)) {
-        val applicationParsedEntity = getApplicationEntity(frameworkApplicationInfo)
+        val applicationParsedEntity = marathonManager.getApplicationEntity(frameworkApplicationInfo)
 
         if (hasFrameworkStarted(applicationParsedEntity)) {
-          updateFrameworkStage(instance, started)
-          updateInstanceStatus(instance, started)
-          var fwRest = getRestAddress(getLeaderTask(getApplicationInfo(frameworkName)))
-          while (fwRest.isEmpty) fwRest = getRestAddress(getLeaderTask(getApplicationInfo(frameworkName)))
-          updateInstanceRestAddress(instance, fwRest.get)
+          instanceManager.updateFrameworkStage(instance, started)
+          instanceManager.updateInstanceStatus(instance, started)
+          var fwRest = InstanceAdditionalFieldCreator.getRestAddress(marathonManager.getLeaderTask(marathonManager.getApplicationInfo(frameworkName)))
+          while (fwRest.isEmpty) fwRest = InstanceAdditionalFieldCreator.getRestAddress(marathonManager.getLeaderTask(marathonManager.getApplicationInfo(frameworkName)))
+          instanceManager.updateInstanceRestAddress(instance, fwRest)
           isStarted = true
         } else {
           Option(applicationParsedEntity.app.lastTaskFailure) match {
             case Some(x) =>
-              destroyMarathonApplication(frameworkName)
-              updateFrameworkStage(instance, failed)
-              throw new Exception(s"Framework has not started due to: ${x.message}; " +
+              marathonManager.destroyMarathonApplication(frameworkName)
+              instanceManager.updateFrameworkStage(instance, failed)
+              instanceManager.updateInstanceRestAddress(instance, None)
+              throw new InterruptedException(s"Framework has not started due to: ${x.message}; " +
                 s"Framework '$frameworkName' is marked as failed.")
             case _ =>
           }
-          updateFrameworkStage(instance, starting)
+          instanceManager.updateFrameworkStage(instance, starting)
           Thread.sleep(delay)
         }
       } else {
-        updateFrameworkStage(instance, failed)
+        instanceManager.updateFrameworkStage(instance, failed)
+        instanceManager.updateInstanceRestAddress(instance, None)
         throw new Exception(s"Marathon returns status code: ${getStatusCode(frameworkApplicationInfo)} " +
           s"during the start process of framework. Framework '$frameworkName' is marked as failed.")
       }
     }
   }
 
-  private def hasFrameworkStarted(applicationEntity: MarathonApplicationById) = applicationEntity.app.tasksRunning == 1
+  protected def hasFrameworkStarted(applicationEntity: MarathonApplication): Boolean = applicationEntity.app.tasksRunning == 1
+}
+
+class InstanceStarterBuilder(implicit val injector: Injector) {
+  def apply(instance: Instance,
+            marathonAddress: String,
+            zookeeperHost: Option[String] = None,
+            zookeeperPort: Option[Int] = None,
+            delay: Long = 1000,
+            marathonTimeout: Int = 60000): InstanceStarter = {
+    new InstanceStarter(
+      instance,
+      marathonAddress,
+      zookeeperHost,
+      zookeeperPort,
+      delay,
+      marathonTimeout)
+  }
 }

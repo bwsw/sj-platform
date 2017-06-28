@@ -1,112 +1,110 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.bwsw.sj.crud.rest.controller
 
 import com.bwsw.common.exceptions.JsonDeserializationException
 import com.bwsw.sj.common.rest._
 import com.bwsw.sj.common.si.ProviderSI
-import com.bwsw.sj.common.utils.MessageResourceUtils._
-import com.bwsw.sj.common.utils.ProviderLiterals
+import com.bwsw.sj.common.si.result.{Created, NotCreated}
+import com.bwsw.sj.common.utils.{MessageResourceUtils, ProviderLiterals}
 import com.bwsw.sj.crud.rest._
-import com.bwsw.sj.crud.rest.model.provider.ProviderApi
-import com.bwsw.sj.crud.rest.utils.JsonDeserializationErrorMessageCreator
+import com.bwsw.sj.crud.rest.model.provider.{ProviderApiCreator, ProviderApi}
+import scaldi.Injectable.inject
+import scaldi.Injector
 
 import scala.util.{Failure, Success, Try}
 
-class ProviderController extends Controller {
-  override val serviceInterface = new ProviderSI()
+class ProviderController(implicit protected val injector: Injector) extends Controller {
+  private val messageResourceUtils = inject[MessageResourceUtils]
+
+  import messageResourceUtils._
+
+  override val serviceInterface = inject[ProviderSI]
+
+  override protected val entityDeletedMessage: String = "rest.providers.provider.deleted"
+  override protected val entityNotFoundMessage: String = "rest.providers.provider.notfound"
+
+  private val createProviderApi = inject[ProviderApiCreator]
 
   def create(serializedEntity: String): RestResponse = {
-    var response: RestResponse = new RestResponse()
-
-    val triedProviderData = Try(serializer.deserialize[ProviderApi](serializedEntity))
-    triedProviderData match {
+    val triedProviderApi = Try(serializer.deserialize[ProviderApi](serializedEntity))
+    triedProviderApi match {
       case Success(providerData) =>
         val created = serviceInterface.create(providerData.to())
 
-        response = created match {
-          case Right(_) =>
+        created match {
+          case Created =>
             CreatedRestResponse(MessageResponseEntity(createMessage("rest.providers.provider.created", providerData.name)))
-          case Left(errors) => BadRequestRestResponse(MessageResponseEntity(
-            createMessage("rest.providers.provider.cannot.create", errors.mkString(";"))
-          ))
+          case NotCreated(errors) =>
+            BadRequestRestResponse(MessageResponseEntity(
+              createMessageWithErrors("rest.providers.provider.cannot.create", errors)))
         }
       case Failure(exception: JsonDeserializationException) =>
-        val error = JsonDeserializationErrorMessageCreator(exception)
-        response = BadRequestRestResponse(MessageResponseEntity(
+        val error = jsonDeserializationErrorMessageCreator(exception)
+        BadRequestRestResponse(MessageResponseEntity(
           createMessage("rest.providers.provider.cannot.create", error)))
 
       case Failure(exception) => throw exception
     }
-
-    response
   }
 
   def getAll(): RestResponse = {
-    val response = OkRestResponse(ProvidersResponseEntity())
-    val providers = serviceInterface.getAll()
-    if (providers.nonEmpty) {
-      response.entity = ProvidersResponseEntity(providers.map(p => ProviderApi.from(p)))
-    }
-
-    response
+    val providers = serviceInterface.getAll().map(createProviderApi.from)
+    OkRestResponse(ProvidersResponseEntity(providers))
   }
 
   def get(name: String): RestResponse = {
     val provider = serviceInterface.get(name)
 
-    val response = provider match {
+    provider match {
       case Some(x) =>
-        OkRestResponse(ProviderResponseEntity(ProviderApi.from(x)))
+        OkRestResponse(ProviderResponseEntity(createProviderApi.from(x)))
       case None =>
-        NotFoundRestResponse(MessageResponseEntity(createMessage("rest.providers.provider.notfound", name)))
+        NotFoundRestResponse(MessageResponseEntity(createMessage(entityNotFoundMessage, name)))
     }
-
-    response
-  }
-
-  def delete(name: String): RestResponse = {
-    val deleteResponse = serviceInterface.delete(name)
-    val response: RestResponse = deleteResponse match {
-      case Right(isDeleted) =>
-        if (isDeleted)
-          OkRestResponse(MessageResponseEntity(createMessage("rest.providers.provider.deleted", name)))
-        else
-          NotFoundRestResponse(MessageResponseEntity(createMessage("rest.providers.provider.notfound", name)))
-      case Left(message) =>
-        UnprocessableEntityRestResponse(MessageResponseEntity(message))
-    }
-
-    response
   }
 
   def checkConnection(name: String): RestResponse = {
     val connectionResponse = serviceInterface.checkConnection(name)
 
-    val response = connectionResponse match {
+    connectionResponse match {
       case Right(isFound) =>
         if (isFound) {
-          OkRestResponse(ConnectionResponseEntity())
+          OkRestResponse(ConnectionSuccessResponseEntity)
         }
         else {
           NotFoundRestResponse(
-            MessageResponseEntity(createMessage("rest.providers.provider.notfound", name)))
+            MessageResponseEntity(createMessage(entityNotFoundMessage, name)))
         }
       case Left(message) =>
-        ConflictRestResponse(TestConnectionResponseEntity(connection = false, message.mkString(";")))
+        ConflictRestResponse(ConnectionFailedResponseEntity(message.mkString(";")))
     }
-
-    response
   }
 
   def getRelated(name: String): RestResponse = {
     val relatedServices = serviceInterface.getRelated(name)
-    val response = relatedServices match {
+    relatedServices match {
       case Right(services) =>
         OkRestResponse(RelatedToProviderResponseEntity(services))
       case Left(_) =>
-        NotFoundRestResponse(MessageResponseEntity(createMessage("rest.providers.provider.notfound", name)))
+        NotFoundRestResponse(MessageResponseEntity(createMessage(entityNotFoundMessage, name)))
     }
-
-    response
   }
 
   def getTypes(): RestResponse = {

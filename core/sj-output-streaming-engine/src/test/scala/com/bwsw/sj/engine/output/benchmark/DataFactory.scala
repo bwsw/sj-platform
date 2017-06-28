@@ -1,3 +1,21 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.bwsw.sj.engine.output.benchmark
 
 import java.io.{BufferedReader, File, InputStreamReader}
@@ -7,22 +25,25 @@ import com.bwsw.common._
 import com.bwsw.common.es.ElasticsearchClient
 import com.bwsw.common.file.utils.MongoFileStorage
 import com.bwsw.common.jdbc.JdbcClientBuilder
-import com.bwsw.common.traits.Serializer
+import com.bwsw.sj.common.config.BenchmarkConfigNames
 import com.bwsw.sj.common.dal.model._
-import com.bwsw.sj.common.dal.model.instance.{ExecutionPlan, OutputInstanceDomain, Task}
+import com.bwsw.sj.common.dal.model.instance.{ExecutionPlan, Task}
 import com.bwsw.sj.common.dal.model.provider.{JDBCProviderDomain, ProviderDomain}
 import com.bwsw.sj.common.dal.model.service._
 import com.bwsw.sj.common.dal.model.stream._
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
+import com.bwsw.sj.common.si.model.instance.OutputInstance
 import com.bwsw.sj.common.utils.{ProviderLiterals, _}
 import com.bwsw.sj.engine.core.testutils.TestStorageServer
 import com.bwsw.tstreams.agents.consumer
 import com.bwsw.tstreams.agents.consumer.Offset.Oldest
-import com.bwsw.tstreams.agents.producer.{NewTransactionProducerPolicy, Producer}
+import com.bwsw.tstreams.agents.producer.{NewProducerTransactionPolicy, Producer}
 import com.bwsw.tstreams.env.{ConfigurationOptions, TStreamsFactory}
+import com.typesafe.config.ConfigFactory
 import org.eclipse.jetty.http.HttpVersion
 import org.elasticsearch.common.xcontent.XContentBuilder
 import org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder
+import scaldi.Injectable.inject
 
 import scala.collection.JavaConverters._
 import scala.util.{Failure, Success, Try}
@@ -33,6 +54,11 @@ import scala.util.{Failure, Success, Try}
   * @author Kseniya Tomskikh
   */
 object DataFactory {
+
+  import com.bwsw.sj.common.SjModule._
+
+  val connectionRepository: ConnectionRepository = inject[ConnectionRepository]
+  private val config = ConfigFactory.load()
   private val agentsHost = "localhost"
   val zookeeperProviderName: String = "output-zookeeper-test-provider"
   val tstreamServiceName = "output-tstream-test-service"
@@ -65,24 +91,37 @@ object DataFactory {
   val databaseName: String = "test_database_for_output_engine"
   val restBasePath = "/test/base_path/for/output_engine"
 
-  val streamService = ConnectionRepository.getStreamRepository
-  val serviceManager = ConnectionRepository.getServiceRepository
-  val providerService = ConnectionRepository.getProviderRepository
-  val instanceService = ConnectionRepository.getInstanceRepository
-  val fileStorage: MongoFileStorage = ConnectionRepository.getFileStorage
-  val configService: GenericMongoRepository[ConfigurationSettingDomain] = ConnectionRepository.getConfigRepository
+  val streamService = connectionRepository.getStreamRepository
+  val serviceManager = connectionRepository.getServiceRepository
+  val providerService = connectionRepository.getProviderRepository
+  val instanceService = connectionRepository.getInstanceRepository
+  val fileStorage: MongoFileStorage = connectionRepository.getFileStorage
+  val configService: GenericMongoRepository[ConfigurationSettingDomain] = connectionRepository.getConfigRepository
 
   val esInstanceName: String = "test-es-instance-for-output-engine"
   val jdbcInstanceName: String = "test-jdbc-instance-for-output-engine"
   val restInstanceName: String = "test-rest-instance-for-output-engine"
 
-  val objectSerializer = new ObjectSerializer()
-  private val serializer: Serializer = new JsonSerializer
+  val tstreamPartitions: Int = 4
+  val tstreamTtl: Long = 60000l
+  val producerPort: Int = 8030
 
-  private val esProviderHosts = System.getenv("ES_HOSTS").split(",").map(host => host.trim)
-  private val jdbcHosts = System.getenv("JDBC_HOSTS").split(",").map(host => host.trim)
-  private val restHosts = System.getenv("RESTFUL_HOSTS").split(",").map(host => host.trim)
-  private val zookeeperHosts = System.getenv("ZOOKEEPER_HOSTS").split(",").map(host => host.trim)
+  val inputData = Array(
+    "abc",
+    "a'b",
+    """a"b""",
+    """a\b""",
+    """a
+      |b
+    """.stripMargin)
+
+  val objectSerializer = new ObjectSerializer()
+  private val serializer = new JsonSerializer
+
+  private val esProviderHosts = config.getString(OutputBenchmarkConfigNames.esHosts).split(",").map(host => host.trim)
+  private val jdbcHosts = config.getString(OutputBenchmarkConfigNames.jdbcHosts).split(",").map(host => host.trim)
+  private val restHosts = config.getString(OutputBenchmarkConfigNames.restHosts).split(",").map(host => host.trim)
+  private val zookeeperHosts = config.getString(BenchmarkConfigNames.zkHosts).split(",").map(host => host.trim)
   private val zookeeperProvider = new ProviderDomain(zookeeperProviderName, zookeeperProviderName,
     zookeeperHosts, "", "", ProviderLiterals.zookeeperType)
   private val tstrqService = new TStreamServiceDomain(tstreamServiceName, tstreamServiceName, zookeeperProvider, TestStorageServer.prefix, TestStorageServer.token)
@@ -94,26 +133,20 @@ object DataFactory {
 
   private def setTStreamFactoryProperties() = {
     setAuthOptions(tstrqService)
-    setStorageOptions(tstrqService)
     setCoordinationOptions(tstrqService)
-    setBindHostForAgents()
+    setBindHostForSubscribers()
   }
 
   private def setAuthOptions(tStreamService: TStreamServiceDomain) = {
-    tstreamFactory.setProperty(ConfigurationOptions.StorageClient.Auth.key, tStreamService.token)
-  }
-
-  private def setStorageOptions(tStreamService: TStreamServiceDomain) = {
-    tstreamFactory.setProperty(ConfigurationOptions.StorageClient.Zookeeper.endpoints, tStreamService.provider.hosts.mkString(","))
-      .setProperty(ConfigurationOptions.StorageClient.Zookeeper.prefix, tStreamService.prefix)
+    tstreamFactory.setProperty(ConfigurationOptions.Common.authenticationKey, tStreamService.token)
   }
 
   private def setCoordinationOptions(tStreamService: TStreamServiceDomain) = {
-    tstreamFactory.setProperty(ConfigurationOptions.Coordination.endpoints, tStreamService.provider.hosts.mkString(","))
+    tstreamFactory.setProperty(ConfigurationOptions.Coordination.endpoints, tStreamService.provider.getConcatenatedHosts())
+    tstreamFactory.setProperty(ConfigurationOptions.Coordination.path, tStreamService.prefix)
   }
 
-  private def setBindHostForAgents() = {
-    tstreamFactory.setProperty(ConfigurationOptions.Producer.bindHost, agentsHost)
+  private def setBindHostForSubscribers() = {
     tstreamFactory.setProperty(ConfigurationOptions.Consumer.Subscriber.bindHost, agentsHost)
   }
 
@@ -121,8 +154,7 @@ object DataFactory {
     val tStream: TStreamStreamDomain = new TStreamStreamDomain(
       tstreamInputName,
       tstrqService,
-      4
-    ) //todo get rid of number
+      tstreamPartitions)
 
     val producer = createProducer(tStream)
     val s = System.currentTimeMillis()
@@ -137,24 +169,11 @@ object DataFactory {
                         countElements: Int,
                         producer: Producer) = {
     var number = 0
-    var string = "abc"
     (0 until countTxns) foreach { (x: Int) =>
-      val transaction = producer.newTransaction(NewTransactionProducerPolicy.ErrorIfOpened)
+      val transaction = producer.newTransaction(NewProducerTransactionPolicy.ErrorIfOpened)
       (0 until countElements) foreach { (y: Int) =>
         number += 1
-        number % 8 match {
-          case 0 => string = "abc"
-          case 1 => string = "a'b"
-          case 2 => string = "a\\"
-          case 3 => string = "a\nc"
-          case 4 => string = "a\""
-          case 5 => string = """r"t"""
-          case 6 => string = """r\t"""
-          case 7 => string =
-            """r
-              |t
-            """.stripMargin
-        }
+        val string = inputData(number % inputData.length)
         println(s"write data $number, |$string|")
         val msg = objectSerializer.serialize((number, string).asInstanceOf[Object])
         transaction.send(msg)
@@ -211,16 +230,11 @@ object DataFactory {
   }
 
   def createProducer(stream: TStreamStreamDomain) = {
-    setProducerBindPort()
     setStreamOptions(stream)
 
     tstreamFactory.getProducer(
       "producer for " + stream.name,
       (0 until stream.partitions).toSet)
-  }
-
-  private def setProducerBindPort() = {
-    tstreamFactory.setProperty(ConfigurationOptions.Producer.bindPort, 8030)
   }
 
   def createConsumer(stream: TStreamStreamDomain): consumer.Consumer = {
@@ -334,7 +348,7 @@ object DataFactory {
     storageClient.createStream(
       tstreamInputName,
       partitions,
-      60000,
+      tstreamTtl,
       tstreamInputName)
   }
 
@@ -342,23 +356,28 @@ object DataFactory {
                      streamName: String, moduleName: String) = {
 
     val task1 = new Task()
-    task1.inputs = Map(tstreamInputName -> Array(0, 3)).asJava
+    task1.inputs = Map(tstreamInputName -> Array(0, tstreamPartitions - 1)).asJava
     val executionPlan = new ExecutionPlan(Map(instanceName + "-task0" -> task1).asJava)
 
-    val instance = new OutputInstanceDomain(instanceName, EngineLiterals.outputStreamingType,
-      moduleName, "1.0", "com.bwsw.output.streaming.engine-1.0",
-      serviceManager.get(zookeeperServiceName).get.asInstanceOf[ZKServiceDomain], checkpointMode
-    )
-    instance.status = EngineLiterals.started
-    instance.description = "some description of test instance"
-    instance.inputs = Array(tstreamInputName)
-    instance.outputs = Array(streamName)
-    instance.checkpointInterval = checkpointInterval
-    instance.options = """{"hey": "hey"}"""
-    instance.startFrom = EngineLiterals.oldestStartMode
-    instance.executionPlan = executionPlan
+    val instance = new OutputInstance(
+      name = instanceName,
+      moduleType = EngineLiterals.outputStreamingType,
+      moduleName = moduleName,
+      moduleVersion = "1.0",
+      engine = "com.bwsw.output.streaming.engine-1.0",
+      coordinationService = zookeeperServiceName,
+      _status = EngineLiterals.started,
+      description = "some description of test instance",
+      input = tstreamInputName,
+      output = streamName,
+      checkpointInterval = checkpointInterval,
+      options = """{"hey": "hey"}""",
+      startFrom = EngineLiterals.oldestStartMode,
+      executionPlan = executionPlan,
+      checkpointMode = checkpointMode)
 
-    instanceService.save(instance)
+
+    instanceService.save(instance.to)
   }
 
   def deleteInstance(instanceName: String) = {

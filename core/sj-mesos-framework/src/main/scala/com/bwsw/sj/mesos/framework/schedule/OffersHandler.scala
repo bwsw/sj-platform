@@ -1,6 +1,22 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.bwsw.sj.mesos.framework.schedule
-
-import java.util
 
 import com.bwsw.sj.mesos.framework.task.TasksList
 import org.apache.log4j.Logger
@@ -29,11 +45,11 @@ object OffersHandler {
    * @param filters:util.Map[String, String]
    * @return util.List[Offer]
    */
-  def filter(filters: util.Map[String, String]): Unit = {
+  def filter(filters: Map[String, String]): Unit = {
     logger.info(s"Filtering resource offers")
     var result: mutable.Buffer[Offer] = mutable.Buffer()
-    if (!filters.isEmpty) {
-      for (filter <- filters.asScala) {
+    if (filters.nonEmpty) {
+      for (filter <- filters) {
         for (offer <- offers) {
           if (filter._1.matches( """\+.+""")) {
             for (attribute <- offer.getAttributesList.asScala) {

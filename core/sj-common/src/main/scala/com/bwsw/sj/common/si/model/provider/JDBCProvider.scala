@@ -1,10 +1,28 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.bwsw.sj.common.si.model.provider
 
-import com.bwsw.sj.common.config.{ConfigLiterals, ConfigurationSettingsUtils}
+import com.bwsw.sj.common.config.{ConfigLiterals, SettingsUtils}
 import com.bwsw.sj.common.dal.model.provider.JDBCProviderDomain
-import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.JdbcLiterals
-import com.bwsw.sj.common.utils.MessageResourceUtils.createMessage
+import scaldi.Injectable.inject
+import scaldi.Injector
 
 import scala.collection.mutable.ArrayBuffer
 import scala.util.{Failure, Success, Try}
@@ -16,7 +34,12 @@ class JDBCProvider(name: String,
                    val driver: String,
                    description: String,
                    providerType: String)
+                  (implicit injector: Injector)
   extends Provider(name, login, password, providerType, hosts, description) {
+
+  import messageResourceUtils.createMessage
+
+  private val settingsUtils = inject[SettingsUtils]
 
   override def to(): JDBCProviderDomain = {
     val provider =
@@ -44,16 +67,16 @@ class JDBCProvider(name: String,
           errors += createMessage("entity.error.attribute.required", "Driver")
         }
         else {
-          Try(ConfigurationSettingsUtils.getJdbcDriverFileName(x)) match {
+          Try(settingsUtils.getJdbcDriverFileName(x)) match {
             case Success(driverFileName) =>
-              if (!ConnectionRepository.getFileStorage.exists(driverFileName))
+              if (!connectionRepository.getFileStorage.exists(driverFileName))
                 errors += createMessage("entity.error.file.required", driverFileName)
             case Failure(_: NoSuchFieldException) =>
               errors += createMessage("entity.error.config.required", s"${ConfigLiterals.jdbcDriver}.$x")
             case Failure(e) => throw e
           }
 
-          Try(ConfigurationSettingsUtils.getJdbcDriverClass(x)) match {
+          Try(settingsUtils.getJdbcDriverClass(x)) match {
             case Success(_) =>
             case Failure(_: NoSuchFieldException) =>
               errors += createMessage("entity.error.config.required", s"${ConfigLiterals.jdbcDriver}.$x.class")
@@ -61,10 +84,10 @@ class JDBCProvider(name: String,
           }
 
           val prefixSettingName = s"${ConfigLiterals.jdbcDriver}.$x.prefix"
-          Try(ConfigurationSettingsUtils.getJdbcDriverPrefix(x)) match {
+          Try(settingsUtils.getJdbcDriverPrefix(x)) match {
             case Success(prefix) =>
               if (!JdbcLiterals.validPrefixes.contains(prefix))
-                errors += createMessage("entity.error.jdbc.prefix.incorrect", prefix, prefixSettingName)
+                errors += createMessage("entity.error.jdbc.incorrect.prefix", prefix, prefixSettingName)
             case Failure(_: NoSuchFieldException) =>
               errors += createMessage("entity.error.config.required", prefixSettingName)
             case Failure(e) => throw e

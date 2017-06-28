@@ -1,3 +1,21 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.bwsw.sj.common.dal.model.provider
 
 import java.net.{InetSocketAddress, URI}
@@ -7,9 +25,7 @@ import java.util.concurrent.TimeUnit
 
 import com.aerospike.client.{AerospikeClient, AerospikeException}
 import com.bwsw.common.es.ElasticsearchClient
-import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.common.dal.morphia.MorphiaAnnotations.{IdField, PropertyField}
-import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.ProviderLiterals
 import com.datastax.driver.core.Cluster
 import com.datastax.driver.core.exceptions.NoHostAvailableException
@@ -18,12 +34,15 @@ import kafka.javaapi.consumer.SimpleConsumer
 import org.apache.zookeeper.ZooKeeper
 import org.eclipse.jetty.client.HttpClient
 import org.mongodb.morphia.annotations.Entity
-import com.bwsw.sj.common.utils.MessageResourceUtils._
+
 import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.duration._
-
 import scala.util.{Failure, Success, Try}
 
+
+/**
+  * protected methods and variables need for testing purposes
+  */
 @Entity("providers")
 class ProviderDomain(@IdField val name: String,
                      val description: String,
@@ -32,28 +51,27 @@ class ProviderDomain(@IdField val name: String,
                      val password: String,
                      @PropertyField("provider-type") val providerType: String) {
 
-  override def equals(obj: scala.Any): Boolean = obj match {
-    case that: ProviderDomain => that.name.equals(this.name) && that.providerType.equals(this.providerType)
-    case _ => false
+  def getConcatenatedHosts(separator: String = ","): String = {
+    hosts.mkString(separator)
   }
 
-  def checkConnection(): ArrayBuffer[String] = {
+  def checkConnection(zkSessionTimeout: Int): ArrayBuffer[String] = {
     val errors = ArrayBuffer[String]()
     for (host <- this.hosts) {
-      errors ++= checkProviderConnectionByType(host, this.providerType)
+      errors ++= checkProviderConnectionByType(host, this.providerType, zkSessionTimeout)
     }
 
     errors
   }
 
-  private def checkProviderConnectionByType(host: String, providerType: String): ArrayBuffer[String] = {
+  protected def checkProviderConnectionByType(host: String, providerType: String, zkSessionTimeout: Int): ArrayBuffer[String] = {
     providerType match {
       case ProviderLiterals.cassandraType =>
         checkCassandraConnection(host)
       case ProviderLiterals.aerospikeType =>
         checkAerospikeConnection(host)
       case ProviderLiterals.zookeeperType =>
-        checkZookeeperConnection(host)
+        checkZookeeperConnection(host, zkSessionTimeout)
       case ProviderLiterals.kafkaType =>
         checkKafkaConnection(host)
       case ProviderLiterals.elasticsearchType =>
@@ -67,7 +85,7 @@ class ProviderDomain(@IdField val name: String,
     }
   }
 
-  private def checkCassandraConnection(address: String): ArrayBuffer[String] = {
+  protected def checkCassandraConnection(address: String): ArrayBuffer[String] = {
     val errors = ArrayBuffer[String]()
     Try {
       val (host, port) = getHostAndPort(address)
@@ -88,7 +106,7 @@ class ProviderDomain(@IdField val name: String,
     errors
   }
 
-  private def checkAerospikeConnection(address: String): ArrayBuffer[String] = {
+  protected def checkAerospikeConnection(address: String): ArrayBuffer[String] = {
     val errors = ArrayBuffer[String]()
     val (host, port) = getHostAndPort(address)
 
@@ -106,32 +124,28 @@ class ProviderDomain(@IdField val name: String,
     errors
   }
 
-  private def checkZookeeperConnection(address: String): ArrayBuffer[String] = {
+  protected def checkZookeeperConnection(address: String, zkSessionTimeout: Int): ArrayBuffer[String] = {
     val errors = ArrayBuffer[String]()
-    ConnectionRepository.getConfigRepository.get(ConfigLiterals.zkSessionTimeoutTag) match {
-      case Some(config) =>
-        val zkTimeout = config.value.toInt
-        Try(new ZooKeeper(address, zkTimeout, null)) match {
-          case Success(client) =>
-            val deadline = 1.seconds.fromNow
-            var connected: Boolean = false
-            while (!connected && deadline.hasTimeLeft) {
-              connected = client.getState.isConnected
-            }
-            if (!connected) {
-              errors += s"Can gain an access to Zookeeper on '$address'"
-            }
-            client.close()
-          case Failure(_) =>
-            errors += s"Wrong host '$address'"
+
+    Try(new ZooKeeper(address, zkSessionTimeout, null)) match {
+      case Success(client) =>
+        val deadline = 1.seconds.fromNow
+        var connected: Boolean = false
+        while (!connected && deadline.hasTimeLeft) {
+          connected = client.getState.isConnected
         }
-      case None => errors += createMessage("entity.error.config.required", ConfigLiterals.zkSessionTimeoutTag)
+        if (!connected) {
+          errors += s"Can gain an access to Zookeeper on '$address'"
+        }
+        client.close()
+      case Failure(_) =>
+        errors += s"Wrong host '$address'"
     }
 
     errors
   }
 
-  private def checkKafkaConnection(address: String): ArrayBuffer[String] = {
+  protected def checkKafkaConnection(address: String): ArrayBuffer[String] = {
     val errors = ArrayBuffer[String]()
     val (host, port) = getHostAndPort(address)
     val consumer = new SimpleConsumer(host, port, 500, 64 * 1024, "connectionTest")
@@ -148,7 +162,7 @@ class ProviderDomain(@IdField val name: String,
     errors
   }
 
-  private def checkESConnection(address: String): ArrayBuffer[String] = {
+  protected def checkESConnection(address: String): ArrayBuffer[String] = {
     val errors = ArrayBuffer[String]()
     val client = new ElasticsearchClient(Set(getHostAndPort(address)))
     if (!client.isConnected()) {
@@ -161,7 +175,7 @@ class ProviderDomain(@IdField val name: String,
 
   protected def checkJdbcConnection(address: String): ArrayBuffer[String] = ArrayBuffer()
 
-  private def checkHttpConnection(address: String): ArrayBuffer[String] = {
+  protected def checkHttpConnection(address: String): ArrayBuffer[String] = {
     val errors = ArrayBuffer[String]()
     val uri = new URI("http://" + address)
     val client = new HttpClient()

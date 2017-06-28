@@ -1,27 +1,51 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.bwsw.sj.engine.output.task.reporting
 
 import java.util.Calendar
 
-import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
+import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
 import com.bwsw.sj.engine.output.task.OutputTaskManager
+
 import scala.collection.mutable
+import scala.collection.mutable.ListBuffer
 
 /**
- * Class represents a set of metrics that characterize performance of an output streaming module
- *
- * @author Kseniya Mikhaleva
- */
+  * Class represents a set of metrics that characterize performance of an output streaming module
+  *
+  * @param manager allows to manage an environment of output streaming task
+  * @author Kseniya Mikhaleva
+  */
 
 class OutputStreamingPerformanceMetrics(manager: OutputTaskManager)
   extends PerformanceMetrics(manager) {
 
   currentThread.setName(s"output-task-${manager.taskName}-performance-metrics")
-  private val inputStreamNames = instance.getInputsWithoutStreamMode()
-  private val outputStreamNames = instance.outputs
+  private val inputStreamNames: Array[String] = instance.getInputsWithoutStreamMode
+  private val outputStreamNames: Array[String] = instance.outputs
 
-  override protected var inputEnvelopesPerStream = createStorageForInputEnvelopes(inputStreamNames)
-  override protected var outputEnvelopesPerStream = createStorageForOutputEnvelopes(outputStreamNames)
+  override protected var inputEnvelopesPerStream: mutable.Map[String, ListBuffer[List[Int]]] = createStorageForInputEnvelopes(inputStreamNames)
+  override protected var outputEnvelopesPerStream: mutable.Map[String, mutable.Map[String, ListBuffer[Int]]] = createStorageForOutputEnvelopes(outputStreamNames)
 
+  /**
+    * Constructs a report of performance metrics of task work (one module could have multiple tasks)
+    */
   override def getReport(): String = {
     logger.info(s"Start preparing a report of performance for task: $taskName of output module.")
     mutex.lock()

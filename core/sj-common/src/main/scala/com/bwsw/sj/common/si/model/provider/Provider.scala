@@ -1,3 +1,21 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.bwsw.sj.common.si.model.provider
 
 import java.net.{URI, URISyntaxException}
@@ -5,9 +23,10 @@ import java.net.{URI, URISyntaxException}
 import com.bwsw.sj.common.dal.model.provider.{JDBCProviderDomain, ProviderDomain}
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.rest.utils.ValidationUtils.{normalizeName, validateName}
-import com.bwsw.sj.common.utils.MessageResourceUtils.createMessage
-import com.bwsw.sj.common.utils.ProviderLiterals
+import com.bwsw.sj.common.utils.{MessageResourceUtils, ProviderLiterals}
 import com.bwsw.sj.common.utils.ProviderLiterals.types
+import scaldi.Injectable.inject
+import scaldi.Injector
 
 import scala.collection.mutable.ArrayBuffer
 import scala.util.{Failure, Success, Try}
@@ -17,25 +36,34 @@ class Provider(val name: String,
                val password: String,
                val providerType: String,
                val hosts: Array[String],
-               val description: String) {
+               val description: String)
+              (implicit injector: Injector) {
+
+  protected val messageResourceUtils = inject[MessageResourceUtils]
+
+  import messageResourceUtils.createMessage
+
+  protected val connectionRepository: ConnectionRepository = inject[ConnectionRepository]
+  private val providerRepository = connectionRepository.getProviderRepository
 
   def to(): ProviderDomain = {
-    val provider =
-      new ProviderDomain(
-        name = this.name,
-        description = this.description,
-        hosts = this.hosts,
-        login = this.login,
-        password = this.password,
-        providerType = this.providerType
-      )
-
-    provider
+    new ProviderDomain(
+      name = this.name,
+      description = this.description,
+      hosts = this.hosts,
+      login = this.login,
+      password = this.password,
+      providerType = this.providerType
+    )
   }
 
+  /**
+    * Validates provider
+    *
+    * @return empty array if provider is correct, validation errors otherwise
+    */
   def validate(): ArrayBuffer[String] = {
     val errors = new ArrayBuffer[String]()
-    val providerRepository = ConnectionRepository.getProviderRepository
 
     // 'name' field
     Option(this.name) match {
@@ -120,8 +148,8 @@ class Provider(val name: String,
   }
 }
 
-object Provider {
-  def from(providerDomain: ProviderDomain): Provider = {
+class ProviderCreator {
+  def from(providerDomain: ProviderDomain)(implicit injector: Injector): Provider = {
     providerDomain.providerType match {
       case ProviderLiterals.jdbcType =>
         val jdbcProvider = providerDomain.asInstanceOf[JDBCProviderDomain]

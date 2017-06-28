@@ -1,15 +1,33 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.bwsw.sj.module.input.regex
 
 import java.util.regex.Pattern
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.dal.model.stream.{KafkaStreamDomain, StreamDomain, TStreamStreamDomain}
-import com.bwsw.sj.common.utils.stream_distributor.{ByHash, SjStreamDistributor}
-import com.bwsw.sj.common.utils.{AvroUtils, StreamLiterals}
-import com.bwsw.sj.engine.core.entities.InputEnvelope
-import com.bwsw.sj.engine.core.environment.InputEnvironmentManager
-import com.bwsw.sj.engine.core.input.utils.SeparateTokenizer
-import com.bwsw.sj.engine.core.input.{InputStreamingExecutor, Interval}
+import com.bwsw.sj.common.utils.stream_distributor.{ByHash, StreamDistributor}
+import com.bwsw.sj.common.utils.{AvroRecordUtils, StreamLiterals}
+import com.bwsw.sj.common.engine.core.entities.InputEnvelope
+import com.bwsw.sj.common.engine.core.environment.InputEnvironmentManager
+import com.bwsw.sj.common.engine.core.input.utils.Tokenizer
+import com.bwsw.sj.common.engine.core.input.{InputStreamingExecutor, Interval}
 import io.netty.buffer.ByteBuf
 import org.apache.avro.SchemaBuilder.FieldAssembler
 import org.apache.avro.generic.GenericData.Record
@@ -38,9 +56,9 @@ class RegexInputExecutor(manager: InputEnvironmentManager) extends InputStreamin
     .name(RegexInputOptionsNames.fallbackFieldName).`type`().stringType().noDefault().endRecord()
 
   private val fallbackPartitionCount = getPartitionCount(manager.outputs.find(_.name == regexInputOptions.fallbackStream).get)
-  private val fallbackDistributor = new SjStreamDistributor(fallbackPartitionCount)
+  private val fallbackDistributor = new StreamDistributor(fallbackPartitionCount)
 
-  private val tokenizer = new SeparateTokenizer(regexInputOptions.lineSeparator, regexInputOptions.encoding)
+  private val tokenizer = new Tokenizer(regexInputOptions.lineSeparator, regexInputOptions.encoding)
 
   private val policyHandler: String => Option[InputEnvelope[Record]] = regexInputOptions.policy match {
     case RegexInputOptionsNames.checkEveryPolicy => handleDataWithCheckEveryPolicy
@@ -130,7 +148,7 @@ class RegexInputExecutor(manager: InputEnvironmentManager) extends InputStreamin
 
     logger.debug(s"Created Avro record from data: $record")
 
-    val key = AvroUtils.concatFields(uniqueKey, record)
+    val key = AvroRecordUtils.concatFields(uniqueKey, record)
 
     Some(new InputEnvelope(
       s"${rule.outputStream}$key",
@@ -151,8 +169,8 @@ class RegexInputExecutor(manager: InputEnvironmentManager) extends InputStreamin
       record))
   }
 
-  private def getPartitionCount(sjStream: StreamDomain) = {
-    sjStream match {
+  private def getPartitionCount(streamDomain: StreamDomain) = {
+    streamDomain match {
       case s: TStreamStreamDomain => s.partitions
       case s: KafkaStreamDomain => s.partitions
       case _ => throw new IllegalArgumentException(s"stream type must be ${StreamLiterals.tstreamType} or " +
@@ -175,7 +193,7 @@ class RegexInputExecutor(manager: InputEnvironmentManager) extends InputStreamin
   private def createOutputDistributor(rule: Rule) = {
     val outputPartitionCount = getPartitionCount(manager.outputs.find(_.name == rule.outputStream).get)
 
-    if (rule.distribution.isEmpty) new SjStreamDistributor(outputPartitionCount)
-    else new SjStreamDistributor(outputPartitionCount, ByHash, rule.distribution)
+    if (rule.distribution.isEmpty) new StreamDistributor(outputPartitionCount)
+    else new StreamDistributor(outputPartitionCount, ByHash, rule.distribution)
   }
 }

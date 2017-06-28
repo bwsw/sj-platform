@@ -1,26 +1,55 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.bwsw.sj.engine.input
 
 import java.io.{BufferedReader, File, InputStreamReader}
-import java.util
 import java.util.jar.JarFile
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.common.file.utils.FileStorage
-import com.bwsw.sj.common.dal.model.instance.{InputInstanceDomain, InputTask, InstanceDomain}
+import com.bwsw.sj.common.SjModule
+import com.bwsw.sj.common.config.BenchmarkConfigNames
+import com.bwsw.sj.common.dal.model.instance.{InputTask, InstanceDomain}
 import com.bwsw.sj.common.dal.model.provider.ProviderDomain
 import com.bwsw.sj.common.dal.model.service.{ServiceDomain, TStreamServiceDomain, ZKServiceDomain}
 import com.bwsw.sj.common.dal.model.stream.{StreamDomain, TStreamStreamDomain}
-import com.bwsw.sj.common.dal.repository.GenericMongoRepository
+import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
+import com.bwsw.sj.common.si.model.instance.InputInstance
 import com.bwsw.sj.common.utils.{ProviderLiterals, _}
 import com.bwsw.sj.engine.core.testutils.TestStorageServer
 import com.bwsw.tstreams.agents.consumer.Consumer
 import com.bwsw.tstreams.agents.consumer.Offset.Oldest
 import com.bwsw.tstreams.env.{ConfigurationOptions, TStreamsFactory}
+import com.typesafe.config.ConfigFactory
+import scaldi.Injectable.inject
+import scaldi.{Injector, Module}
 
+import scala.collection.mutable
 import scala.util.{Failure, Success, Try}
 
 object DataFactory {
-  private val zookeeperHosts = System.getenv("ZOOKEEPER_HOSTS")
+
+  import com.bwsw.sj.common.SjModule._
+
+  val connectionRepository: ConnectionRepository = inject[ConnectionRepository]
+  private val config = ConfigFactory.load()
+  private val zookeeperHosts = config.getString(BenchmarkConfigNames.zkHosts)
   private val testNamespace = "test_namespace_for_input_engine"
   private val instanceName = "test-instance-for-input-engine"
   private val zookeeperProviderName = "zookeeper-test-provider"
@@ -28,7 +57,7 @@ object DataFactory {
   private val zookeeperServiceName = "zookeeper-test-service"
   private val tstreamOutputNamePrefix = "tstream-output"
   private var instanceOutputs: Array[String] = Array()
-  private val tasks = new util.HashMap[String, InputTask]()
+  private val tasks = mutable.Map[String, InputTask]()
   tasks.put(s"$instanceName-task0", new InputTask(SjInputServices.host, SjInputServices.port))
   private val partitions = 1
   private val serializer = new JsonSerializer()
@@ -42,21 +71,16 @@ object DataFactory {
 
   private def setTStreamFactoryProperties() = {
     setAuthOptions(tstrqService)
-    setStorageOptions(tstrqService)
     setCoordinationOptions(tstrqService)
   }
 
   private def setAuthOptions(tStreamService: TStreamServiceDomain) = {
-    tstreamFactory.setProperty(ConfigurationOptions.StorageClient.Auth.key, tStreamService.token)
-  }
-
-  private def setStorageOptions(tStreamService: TStreamServiceDomain) = {
-    tstreamFactory.setProperty(ConfigurationOptions.StorageClient.Zookeeper.endpoints, tStreamService.provider.hosts.mkString(","))
-      .setProperty(ConfigurationOptions.StorageClient.Zookeeper.prefix, tStreamService.prefix)
+    tstreamFactory.setProperty(ConfigurationOptions.Common.authenticationKey, tStreamService.token)
   }
 
   private def setCoordinationOptions(tStreamService: TStreamServiceDomain) = {
-    tstreamFactory.setProperty(ConfigurationOptions.Coordination.endpoints, tStreamService.provider.hosts.mkString(","))
+    tstreamFactory.setProperty(ConfigurationOptions.Coordination.endpoints, tStreamService.provider.getConcatenatedHosts())
+    tstreamFactory.setProperty(ConfigurationOptions.Coordination.path, tStreamService.prefix)
   }
 
   def createProviders(providerService: GenericMongoRepository[ProviderDomain]) = {
@@ -120,22 +144,26 @@ object DataFactory {
                      checkpointInterval: Int
                     ) = {
 
-    val instance = new InputInstanceDomain(instanceName, EngineLiterals.inputStreamingType,
-      "input-streaming-stub", "1.0", "com.bwsw.input.streaming.engine-1.0",
-      serviceManager.get(zookeeperServiceName).get.asInstanceOf[ZKServiceDomain], EngineLiterals.everyNthMode
-    )
-    instance.status = EngineLiterals.started
-    instance.description = "some description of test instance"
-    instance.outputs = instanceOutputs
-    instance.checkpointInterval = checkpointInterval
-    instance.duplicateCheck = false
-    instance.lookupHistory = 100
-    instance.queueMaxSize = 500
-    instance.defaultEvictionPolicy = EngineLiterals.lruDefaultEvictionPolicy
-    instance.evictionPolicy = "expanded-time"
-    instance.tasks = tasks
+    val instance = new InputInstance(
+      name = instanceName,
+      moduleType = EngineLiterals.inputStreamingType,
+      moduleName = "input-streaming-stub",
+      moduleVersion = "1.0",
+      engine = "com.bwsw.input.streaming.engine-1.0",
+      coordinationService = zookeeperServiceName,
+      checkpointMode = EngineLiterals.everyNthMode,
+      _status = EngineLiterals.started,
+      description = "some description of test instance",
+      outputs = instanceOutputs,
+      checkpointInterval = checkpointInterval,
+      duplicateCheck = false,
+      lookupHistory = 100,
+      queueMaxSize = 500,
+      defaultEvictionPolicy = EngineLiterals.lruDefaultEvictionPolicy,
+      evictionPolicy = "expanded-time",
+      tasks = tasks)
 
-    instanceService.save(instance)
+    instanceService.save(instance.to)
   }
 
   def deleteInstance(instanceService: GenericMongoRepository[InstanceDomain]) = {

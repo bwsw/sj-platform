@@ -1,76 +1,116 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.bwsw.sj.common.si
 
+import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.common.dal.model.provider.ProviderDomain
 import com.bwsw.sj.common.dal.model.service._
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
-import com.bwsw.sj.common.si.model.provider.Provider
-import com.bwsw.sj.common.utils.MessageResourceUtils._
+import com.bwsw.sj.common.si.model.provider.{ProviderCreator, Provider}
+import com.bwsw.sj.common.si.result._
+import com.bwsw.sj.common.utils.MessageResourceUtils
+import scaldi.Injectable.inject
+import scaldi.Injector
 
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
-class ProviderSI extends ServiceInterface[Provider, ProviderDomain] {
-  override protected val entityRepository: GenericMongoRepository[ProviderDomain] = ConnectionRepository.getProviderRepository
+/**
+  * Provides methods to access [[Provider]]s in [[GenericMongoRepository]]
+  */
+class ProviderSI(implicit injector: Injector) extends ServiceInterface[Provider, ProviderDomain] {
+  private val messageResourceUtils = inject[MessageResourceUtils]
 
-  private val serviceRepository = ConnectionRepository.getServiceRepository
+  import messageResourceUtils.createMessage
 
-  override def create(entity: Provider): Either[ArrayBuffer[String], Boolean] = {
-    val errors = new ArrayBuffer[String]
+  private val connectionRepository: ConnectionRepository = inject[ConnectionRepository]
+  override protected val entityRepository: GenericMongoRepository[ProviderDomain] = connectionRepository.getProviderRepository
 
-    errors ++= entity.validate()
+  private val serviceRepository = connectionRepository.getServiceRepository
+  private val createProvider = inject[ProviderCreator]
+
+  override def create(entity: Provider): CreationResult = {
+    val errors = entity.validate()
 
     if (errors.isEmpty) {
       entityRepository.save(entity.to())
 
-      Right(true)
+      Created
     } else {
-      Left(errors)
+      NotCreated(errors)
     }
   }
 
   def getAll(): mutable.Buffer[Provider] = {
-    entityRepository.getAll.map(x => Provider.from(x))
+    entityRepository.getAll.map(x => createProvider.from(x))
   }
 
   def get(name: String): Option[Provider] = {
-    entityRepository.get(name).map(Provider.from)
+    entityRepository.get(name).map(createProvider.from)
   }
 
-  override def delete(name: String): Either[String, Boolean] = {
-    var response: Either[String, Boolean] = Left(createMessage("rest.providers.provider.cannot.delete", name))
-    val services = getRelatedServices(name)
-
-    if (services.isEmpty) {
-      val provider = entityRepository.get(name)
-
-      provider match {
+  override def delete(name: String): DeletionResult = {
+    if (getRelatedServices(name).nonEmpty)
+      DeletionError(createMessage("rest.providers.provider.cannot.delete", name))
+    else {
+      entityRepository.get(name) match {
         case Some(_) =>
           entityRepository.delete(name)
-          response = Right(true)
+
+          Deleted
         case None =>
-          response = Right(false)
+          EntityNotFound
       }
     }
-
-    response
   }
 
+  /**
+    * Establishes connection to [[Provider.hosts]]
+    *
+    * @param name name of provider
+    * @return Right(true) if connection established, Right(false) if provider not found in [[entityRepository]],
+    *         Left(errors) if some errors happened
+    */
   def checkConnection(name: String): Either[ArrayBuffer[String], Boolean] = {
     val provider = entityRepository.get(name)
+    val zkSessionTimeout = connectionRepository.getConfigRepository
+      .get(ConfigLiterals.zkSessionTimeoutTag)
+      .map(_.value.toInt)
+      .getOrElse(ConfigLiterals.zkSessionTimeoutDefault)
 
     provider match {
       case Some(x) =>
-        val errors = x.checkConnection()
-        if (errors.isEmpty) {
+        val errors = x.checkConnection(zkSessionTimeout)
+        if (errors.isEmpty)
           Right(true)
-        }
-        else {
+        else
           Left(errors)
-        }
       case None => Right(false)
     }
   }
 
+  /**
+    * Returns [[com.bwsw.sj.common.si.model.service.Service Service]]s related with [[Provider]]
+    *
+    * @param name name of provider
+    * @return Right(services) if provider exists, Left(false) otherwise
+    */
   def getRelated(name: String): Either[Boolean, mutable.Buffer[String]] = {
     val provider = entityRepository.get(name)
 
@@ -82,22 +122,10 @@ class ProviderSI extends ServiceInterface[Provider, ProviderDomain] {
 
   private def getRelatedServices(providerName: String): mutable.Buffer[String] = {
     serviceRepository.getAll.filter {
-      case esService: ESServiceDomain =>
-        esService.provider.name.equals(providerName)
-      case zkService: ZKServiceDomain =>
-        zkService.provider.name.equals(providerName)
-      case aeroService: AerospikeServiceDomain =>
-        aeroService.provider.name.equals(providerName)
-      case cassService: CassandraServiceDomain =>
-        cassService.provider.name.equals(providerName)
       case kfkService: KafkaServiceDomain =>
         kfkService.provider.name.equals(providerName) || kfkService.zkProvider.name.equals(providerName)
-      case tService: TStreamServiceDomain =>
-        tService.provider.name.equals(providerName)
-      case jdbcService: JDBCServiceDomain =>
-        jdbcService.provider.name.equals(providerName)
-      case restService: RestServiceDomain =>
-        restService.provider.name.equals(providerName)
+      case serviceDomain: ServiceDomain =>
+        serviceDomain.provider.name.equals(providerName)
     }.map(_.name)
   }
 }

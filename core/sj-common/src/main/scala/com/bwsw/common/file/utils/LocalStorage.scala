@@ -1,12 +1,34 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.bwsw.common.file.utils
 
-import java.io.{FileInputStream, File, FileNotFoundException, InputStream}
+import java.io.{File, FileInputStream, FileNotFoundException, InputStream}
 import java.nio.file.FileAlreadyExistsException
 
+import com.bwsw.sj.common.dal.model.module.SpecificationDomain
 import org.apache.commons.io.FileUtils
 
-import scala.reflect.io.{Directory, Path}
-
+/**
+  * Provides methods to CRUD files using a specific local path
+  *
+  * @param pathToLocalStorage a specific local path where files will be stored
+  */
 class LocalStorage(pathToLocalStorage: String) extends FileStorage {
   override def put(file: File, fileName: String): Unit = {
     logger.debug(s"Try to put a file: '$fileName' in a local storage (path to local storage: $pathToLocalStorage).")
@@ -37,6 +59,9 @@ class LocalStorage(pathToLocalStorage: String) extends FileStorage {
     }
   }
 
+  /**
+    * Retrieve file as [[InputStream]]
+    */
   override def getStream(fileName: String): InputStream = {
     logger.debug(s"Try to get a file: '$fileName' from a local storage (path to local storage: $pathToLocalStorage).")
     val storageFile = new File(pathToLocalStorage + fileName)
@@ -62,12 +87,11 @@ class LocalStorage(pathToLocalStorage: String) extends FileStorage {
     }
   }
 
-  override def getContent(): Seq[String] = {
-    logger.debug(s"Get a list of contents of a local storage directory.")
-    Directory.apply(Path(pathToLocalStorage).toAbsolute).files.map(_.name).toSeq
+  override def put(file: File, fileName: String, specification: Map[String, Any], filetype: String): Unit = {
+    throw new NotImplementedError("Local storage hasn't an opportunity to save file with specification yet.")
   }
 
-  override def put(file: File, fileName: String, specification: Map[String, Any], filetype: String): Unit = {
+  override def put(file: File, fileName: String, specification: SpecificationDomain, filetype: String): Unit = {
     throw new NotImplementedError("Local storage hasn't an opportunity to save file with specification yet.")
   }
 

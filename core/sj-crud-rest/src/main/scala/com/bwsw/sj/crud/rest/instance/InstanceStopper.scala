@@ -1,94 +1,133 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.bwsw.sj.crud.rest.instance
 
-import com.bwsw.sj.common.dal.model.instance.{InputInstanceDomain, InstanceDomain}
+import com.bwsw.common.http.HttpClient
+import com.bwsw.common.http.HttpStatusChecker._
+import com.bwsw.common.marathon.{MarathonApi, MarathonApplication}
+import com.bwsw.sj.common.si.model.instance.{InputInstance, Instance}
 import com.bwsw.sj.common.utils.EngineLiterals
-import com.bwsw.sj.crud.rest.marathon.MarathonApplicationById
 import org.slf4j.LoggerFactory
+import scaldi.Injector
 
-import scala.collection.JavaConverters._
 import scala.util.{Failure, Success, Try}
 
 /**
   * One-thread stopper object for instance
   * using synchronous apache http client
   *
+  * protected methods and variables need for testing purposes
+  *
   * @author Kseniya Tomskikh
   */
-class InstanceStopper(instance: InstanceDomain, delay: Long = 1000) extends Runnable with InstanceManager {
+class InstanceStopper(instance: Instance,
+                      marathonAddress: String,
+                      delay: Long = 1000,
+                      marathonTimeout: Int = 60000)
+                     (implicit val injector: Injector) extends Runnable {
+
   private val logger = LoggerFactory.getLogger(getClass.getName)
-  private val frameworkName = getFrameworkName(instance)
+  protected val instanceManager = new InstanceDomainRenewer()
+  protected val client = new HttpClient(marathonTimeout)
+  protected val marathonManager = new MarathonApi(client, marathonAddress)
+  private val frameworkName = InstanceAdditionalFieldCreator.getFrameworkName(instance)
 
   import EngineLiterals._
 
-  def run() = {
+  def run(): Unit = {
     Try {
       logger.info(s"Instance: '${instance.name}'. Stop an instance.")
-      updateInstanceStatus(instance, stopping)
+      instanceManager.updateInstanceStatus(instance, stopping)
       stopFramework()
       markInstanceAsStopped()
-      close()
+      client.close()
     } match {
       case Success(_) => logger.info(s"Instance: '${instance.name}' has been stopped.")
       case Failure(e) =>
         logger.error(s"Instance: '${instance.name}'. Instance is failed during the stopping process.", e)
-        updateInstanceStatus(instance, error)
-        close()
+        instanceManager.updateInstanceStatus(instance, error)
+        instanceManager.updateInstanceRestAddress(instance, None)
+        client.close()
     }
   }
 
-  private def stopFramework() = {
+  protected def stopFramework(): Unit = {
     logger.debug(s"Instance: '${instance.name}'. Stopping a framework.")
-    val response = stopMarathonApplication(frameworkName)
+    val response = marathonManager.stopMarathonApplication(frameworkName)
     if (isStatusOK(response)) {
-      updateFrameworkStage(instance, stopping)
+      instanceManager.updateFrameworkStage(instance, stopping)
       waitForFrameworkToStop()
     } else {
-      updateFrameworkStage(instance, error)
+      instanceManager.updateFrameworkStage(instance, error)
       throw new Exception(s"Marathon returns status code: $response " +
         s"during the stopping process of framework. Framework '$frameworkName' is marked as error.")
     }
   }
 
-  private def waitForFrameworkToStop() = {
+  protected def waitForFrameworkToStop(): Unit = {
     var hasStopped = false
     while (!hasStopped) {
       logger.debug(s"Instance: '${instance.name}'. Waiting until a framework is stopped.")
-      val frameworkApplicationInfo = getApplicationInfo(frameworkName)
+      val frameworkApplicationInfo = marathonManager.getApplicationInfo(frameworkName)
       if (isStatusOK(frameworkApplicationInfo)) {
-        val applicationParsedEntity = getApplicationEntity(frameworkApplicationInfo)
+        val applicationParsedEntity = marathonManager.getApplicationEntity(frameworkApplicationInfo)
 
         if (hasFrameworkStopped(applicationParsedEntity)) {
-          updateFrameworkStage(instance, stopped)
+          instanceManager.updateFrameworkStage(instance, stopped)
           hasStopped = true
         } else {
-          updateFrameworkStage(instance, stopping)
+          instanceManager.updateFrameworkStage(instance, stopping)
           Thread.sleep(delay)
         }
       } else {
-        updateFrameworkStage(instance, error)
+        instanceManager.updateFrameworkStage(instance, error)
         throw new Exception(s"Marathon returns status code: ${getStatusCode(frameworkApplicationInfo)} " +
           s"during the stopping process of framework. Framework '$frameworkName' is marked as error.")
       }
     }
   }
 
-  private def hasFrameworkStopped(applicationEntity: MarathonApplicationById) = applicationEntity.app.tasksRunning == 0
+  private def hasFrameworkStopped(applicationEntity: MarathonApplication): Boolean = applicationEntity.app.tasksRunning == 0
 
-  private def markInstanceAsStopped() = {
+  protected def markInstanceAsStopped(): Unit = {
     logger.debug(s"Instance: '${instance.name}'. Mark an instance as stopped.")
-    if (isInputInstance()) {
+    if (isInputInstance) {
       clearTasks()
     }
-    updateInstanceStatus(instance, stopped)
-    updateInstanceRestAddress(instance, "")
+    instanceManager.updateInstanceStatus(instance, stopped)
+    instanceManager.updateInstanceRestAddress(instance, None)
   }
 
-  private def isInputInstance() = {
+  private def isInputInstance: Boolean = {
     instance.moduleType.equals(inputStreamingType)
   }
 
-  private def clearTasks() = {
+  private def clearTasks(): Unit = {
     logger.debug(s"Instance: '${instance.name}'. Clear the input instance tasks.")
-    instance.asInstanceOf[InputInstanceDomain].tasks.asScala.foreach(x => x._2.clear())
+    instance.asInstanceOf[InputInstance].tasks.foreach(_._2.clear())
   }
+}
+
+class InstanceStopperBuilder(implicit val injector: Injector) {
+  def apply(instance: Instance,
+            marathonAddress: String,
+            delay: Long = 1000,
+            marathonTimeout: Int = 60000): InstanceStopper =
+    new InstanceStopper(instance, marathonAddress, delay, marathonTimeout)
 }

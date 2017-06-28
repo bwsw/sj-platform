@@ -1,42 +1,90 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.bwsw.sj.engine.batch.task
 
-import java.util.concurrent.Callable
-
 import com.bwsw.common.LeaderLatch
-import com.bwsw.sj.common.dal.model.instance.BatchInstanceDomain
+import com.bwsw.sj.common.config.SettingsUtils
+import com.bwsw.sj.common.dal.model.service.ZKServiceDomain
+import com.bwsw.sj.common.dal.repository.ConnectionRepository
+import com.bwsw.sj.common.engine.TaskEngine
+import com.bwsw.sj.common.si.model.instance.BatchInstance
 import com.bwsw.sj.common.utils.EngineLiterals
-import com.bwsw.sj.engine.core.entities._
-import com.bwsw.sj.engine.core.state.CommonModuleService
-import com.bwsw.sj.engine.core.batch.{BatchCollector, BatchStreamingExecutor, BatchStreamingPerformanceMetrics, WindowRepository}
-import com.bwsw.sj.engine.batch.task.input.EnvelopeFetcher
-import org.apache.curator.framework.{CuratorFramework, CuratorFrameworkFactory}
+import com.bwsw.sj.engine.batch.task.input.{EnvelopeFetcher, RetrievableCheckpointTaskInput}
+import com.bwsw.sj.common.engine.core.batch.{BatchStreamingExecutor, BatchStreamingPerformanceMetrics, WindowRepository}
+import com.bwsw.sj.common.engine.core.entities._
+import com.bwsw.sj.common.engine.core.managment.CommonTaskManager
+import com.bwsw.sj.common.engine.core.state.CommonModuleService
 import org.apache.curator.framework.recipes.barriers.DistributedDoubleBarrier
+import org.apache.curator.framework.{CuratorFramework, CuratorFrameworkFactory}
 import org.apache.curator.retry.ExponentialBackoffRetry
 import org.slf4j.LoggerFactory
+import scaldi.Injectable.inject
+import scaldi.Injector
 
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
-class BatchTaskEngine(batchCollector: BatchCollector,
-                      instance: BatchInstanceDomain,
-                      moduleService: CommonModuleService,
-                      inputService: EnvelopeFetcher,
-                      performanceMetrics: BatchStreamingPerformanceMetrics) extends Callable[Unit] {
+/**
+  * Class contains methods for running batch module
+  *
+  * moduleService   provides an executor of batch streaming module and a method to perform checkpoint
+  * inputService    accesses to incoming envelopes
+  * batchCollector     gathering batches that consist of envelopes
+  * instance           set of settings of a batch streaming module
+  *
+  * @param manager            allows to manage an environment of regular streaming task
+  * @param performanceMetrics set of metrics that characterize performance of a batch streaming module
+  */
+class BatchTaskEngine(manager: CommonTaskManager,
+                      performanceMetrics: BatchStreamingPerformanceMetrics)
+                     (implicit injector: Injector)
+  extends TaskEngine {
 
   private val currentThread = Thread.currentThread()
   currentThread.setName(s"batch-task-engine")
   private val logger = LoggerFactory.getLogger(this.getClass)
-  private val inputs = instance.getInputsWithoutStreamMode()
+  private val settingsUtils = inject[SettingsUtils]
+  private val streamRepository = inject[ConnectionRepository].getStreamRepository
+  private val instance = manager.instance.asInstanceOf[BatchInstance]
+  private val batchCollector = manager.getBatchCollector(instance.to, performanceMetrics, streamRepository)
+  private val inputs = instance.getInputsWithoutStreamMode
+  val taskInputService: RetrievableCheckpointTaskInput[Envelope] =
+    RetrievableCheckpointTaskInput[AnyRef](
+      manager.asInstanceOf[CommonTaskManager],
+      manager.createCheckpointGroup()
+    ).asInstanceOf[RetrievableCheckpointTaskInput[Envelope]]
+  private val envelopeFetcher = new EnvelopeFetcher(taskInputService, settingsUtils.getLowWatermark())
+  private val moduleService = CommonModuleService(manager, envelopeFetcher.checkpointGroup, performanceMetrics)
   private val executor = moduleService.executor.asInstanceOf[BatchStreamingExecutor[AnyRef]]
   private val moduleTimer = moduleService.moduleTimer
-  private var retrievableStreams = instance.getInputsWithoutStreamMode()
+  private var retrievableStreams = instance.getInputsWithoutStreamMode
   private var counterOfBatchesPerStream = createCountersOfBatches()
   private val currentWindowPerStream = createStorageOfWindows()
   private val collectedWindowPerStream = mutable.Map[String, Window]()
   private val windowRepository = new WindowRepository(instance)
   private val barrierMasterNode = EngineLiterals.batchInstanceBarrierPrefix + instance.name
   private val leaderMasterNode = EngineLiterals.batchInstanceLeaderPrefix + instance.name
-  private val zkHosts = instance.coordinationService.provider.hosts.toSet
+  private val zkHosts = inject[ConnectionRepository].getServiceRepository
+    .get(instance.coordinationService)
+    .get
+    .asInstanceOf[ZKServiceDomain]
+    .provider.hosts.toSet
   private val curatorClient = createCuratorClient()
   private val barrier = new DistributedDoubleBarrier(curatorClient, barrierMasterNode, instance.executionPlan.tasks.size())
   private val leaderLatch = new LeaderLatch(zkHosts, leaderMasterNode)
@@ -80,7 +128,7 @@ class BatchTaskEngine(batchCollector: BatchCollector,
   private def retrieveAndProcessEnvelopes(): Unit = {
     retrievableStreams.foreach(stream => {
       logger.debug(s"Retrieve an available envelope from '$stream' stream.")
-      inputService.get(stream) match {
+      envelopeFetcher.get(stream) match {
         case Some(envelope) =>
           batchCollector.onReceive(envelope)
           processBatches()
@@ -96,7 +144,7 @@ class BatchTaskEngine(batchCollector: BatchCollector,
 
   private def processBatches(): Unit = {
     logger.debug(s"Check whether there are batches to collect or not.")
-    val batches = batchCollector.getBatchesToCollect.map(batchCollector.collectBatch)
+    val batches = batchCollector.getBatchesToCollect().map(batchCollector.collectBatch)
     if (batches.isEmpty) {
       onIdle()
     } else {
@@ -189,7 +237,7 @@ class BatchTaskEngine(batchCollector: BatchCollector,
 
   private def registerBatches(window: Window): Unit = {
     window.batches.slice(0, instance.slidingInterval)
-      .foreach(x => x.envelopes.foreach(x => inputService.registerEnvelope(x)))
+      .foreach(x => x.envelopes.foreach(x => envelopeFetcher.registerEnvelope(x)))
   }
 
   /**
@@ -201,7 +249,7 @@ class BatchTaskEngine(batchCollector: BatchCollector,
     executor.onBeforeCheckpoint()
     logger.debug(s"Do group checkpoint.")
     moduleService.doCheckpoint()
-    inputService.doCheckpoint()
+    envelopeFetcher.doCheckpoint()
     logger.debug(s"Invoke onAfterCheckpoint() handler.")
     executor.onAfterCheckpoint()
   }
