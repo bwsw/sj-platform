@@ -113,7 +113,7 @@ InputStreamingResponse:
  
 - sendResponsesNow - a boolean flag denoting whether response should be saved in temporary storage or all responses from this storage should be send to the source right now (including this one)
  
-To see a flow chart about how these methods intercommunicate, please, visit the `Input Streaming Engine`_ page.
+.. To see a flow chart about how these methods intercommunicate, please, visit the `Input Streaming Engine`_ page.
 
 
 Output module
@@ -121,7 +121,7 @@ Output module
 
 An Output module handles external output from event processing pipeline to external data destinations (Elasticsearch, JDBC, etc.)
 
-.. figure:: _static/OutputModuleStructure.png
+.. figure:: _static/OutputModule.png
 
 It transforms the processing data results into T-streams and put them into an external data storage. It allows to transform one data item from incoming streaming into one and more data output items.
 
@@ -139,45 +139,42 @@ Regular module
 -------------------
 A simplified definition of a Regular module is a handler that performs data transformation and put the processed data into a T-stream.
 
-.. figure:: _static/RegularModule.png
+.. figure:: _static/RegularModule2.png
 
 
 In the Regular module the executor provides the following methods that does not perform any work by default so you should define their implementation by yourself.
 
 1) "onInit": 
-        It is invoked only once, when a module is launched. This method can be used to initialize some auxiliary variables, or check the state variables on existence and if it's necessary create them. Thus, a user should do preparation of the executor before usage.
+        It is invoked only once, when a module is launched. This method can be used to initialize some auxiliary variables, or check the state variables on existence and create them if necessary . Thus, you should do preparation of the executor before usage.
 
 Example of the checking a state variable::
 
- if (!state.isExist(<variable_name>))
- state.set(<variable_name>, <variable_value>)
+ if (!state.isExist(<variable_name>)) state.set(<variable_name>, <variable_value>)
 
 ``<variable_name>`` must have the String type
 
 ``<variable_value>`` can be any type (a user must be careful when casting a state variable value to a particular data type)
 
 2) "onMessage": 
-    It is invoked for every received message from one of the inputs that are defined within the instance. Inside the method there is an access to the message that can have the different data type depending on a data type of input. 
-
-So there are two handlers with different parameters::
+    It is invoked for every received message from one of the inputs that are defined within the instance. There are two possible data types of input sources - that's why there are two methods with appropriate signatures:
 
   def onMessage(envelope: TStreamEnvelope[T]): Unit
   def onMessage(envelope: KafkaEnvelope[T]): Unit
  
-Each envelope has a type parameter that defines the type of data contained in the envelope.
+Each envelope has a type parameter that defines the type of data in the envelope.
 
 .. note:: The data type of the envelope can be only KafkaEnvelope data type or TStreamEnvelope data type. A user may specify one of them or both, depending on which type(s) is(are) used. 
 
 3) "onBeforeCheckpoint": 
-    It is invoked before every checkpoint
+    It is invoked before every checkpoint.
 4) "onAfterCheckpoint": 
-    It is invoked after every checkpoint
+    It is invoked after every checkpoint.
 5) "onTimer": 
-    It is invoked every time when a set timer goes out. Inside the method there is an access to a parameter that defines a delay between a real response time and an invocation of this handler
+    It is invoked every time when a set timer goes out. Inside the method there is an access to a parameter that defines a delay between a real response time and an invocation of this handler.
 6) "onIdle": 
-    It is invoked every time when idle timeout goes out but a new message hadn't appeared. It is a moment when there is nothing to process
+    It is invoked every time when idle timeout goes out but a new message hadn't appeared. It is a moment when there is nothing to process.
 7) "onBeforeStateSave": 
-    It is invoked prior to every saving of the state. Inside the method there is a flag denoting the full state (true) or partial changes of state (false) will be saved
+    It is invoked prior to every saving of the state. Inside the method there is a flag denoting the full state (true) or partial changes of state (false) will be saved.
 8) "onAfterStateSave": 
     It is invoked after every saving of the state. Inside the method there is a flag denoting the full state (true) or partial changes of state (false) have(s) been saved
 
@@ -188,10 +185,10 @@ Inside of the module there is a manager allowing to get an access to:
 - an output that is defined within the instance (by calling "getPartitionedOutput()" or "getRoundRobinOutput()"),
 - timer (by calling "setTimer()")
 - state (by calling "getState()") if it is a stateful module
-- list of output names by a set of tags contained in every output (by calling "getStreamsByTags()")
--  initiate additional checkpoint at any time (by calling "initiateCheckpoint()").
+- list of output names (by calling "getStreamsByTags()"). Every output contains its own set of tags which are used to retrieve it. 
+-  initiation of checkpoint (by calling "initiateCheckpoint()").
 
-To see a flow chart on how these methods intercommunicate see the page `Regular Streaming Engine`_ .
+.. To see a flow chart on how these methods intercommunicate see the page `Regular Streaming Engine`_ .
 
 
 Batch module
@@ -285,15 +282,14 @@ The executor of the batch module provides the following methods that does not pe
 
 Example of the checking a state variable::
  
-  if (!state.isExist(<variable_name>))
-  state.set(<variable_name>, <variable_value>)
+  if (!state.isExist(<variable_name>)) state.set(<variable_name>, <variable_value>)
   
 ``<variable_name>`` should be of the String type
 
 ``<variable_value>`` can be of any type (be careful when you will cast a state variable value to a particular data type)
 
 2) "onWindow": 
-    It is invoked for every collected window of the main stream that are defined within the instance. Inside the method there is an access to a window repository, containing a window for each input (few of them can be empty). A window consists of batches, a batch consists of envelopes (messages) that can have the different data type depending on a data type of input so a user should cast the message to get certain fields. Each envelope has a type parameter that defines the type of data containing in the envelope.
+    It is invoked when a window for each input stream is collected (a list of input streams are defined within the instance). These collected windows are accessible via a window repository within the method. A window consists of batches, a batch consists of envelopes (messages). There are two possible data types of envelopes - that's why you should cast the envelope inside the method. Each envelope has a type parameter that defines the type of message data.
 
 Example of a message casting to a particular data type::
 
@@ -304,7 +300,7 @@ Example of a message casting to a particular data type::
   case tstreamEnvelope: TStreamEnvelope[Integer @unchecked] => //here there is an access to certain fields such as txnUUID, consumerName and data (array of integers)
   }
 
-The data type of the envelope can be "KafkaEnvelope" data type or "TStreamEnvelope" data type. If a user specifies the inputs of only one of these data types in an instance ther is no need to match the envelope as shown in the example above and cast the envelope right to a particular data type::
+The data type of the envelope can be "KafkaEnvelope" data type or "TStreamEnvelope" data type. If you specify in an instance the inputs of the only one of this data types you shouldn't match the envelope like in the  example above and cast right the envelope to a particular data type::
 
   val tstreamEnvelope =
   envelope.asInstanceOf[TStreamEnvelope[Integer]]
@@ -322,40 +318,64 @@ The data type of the envelope can be "KafkaEnvelope" data type or "TStreamEnvelo
 8) "onAfterStateSave": 
     It is invoked after every saving of the state. Inside the method there is a flag denoting the full state (true) or partial changes of state (false) have(s) been saved
 
-The following handlers are used for synchronizing the tasks operation. It can be useful when at information aggregation using Hazelcast or something else.
+The following handlers are used for synchronizing the tasks' work. It can be useful when at information aggregation using shared memory, e.g. Hazelcast or any other.
+ 
+1) "onEnter": The system awaits for every task to finish the "onWindow" method and then the "onEnter" method of all tasks is invoked.
 
-1) "onEnter": It is invoked by every task after "onWindow" handler and waits for others stop processing
+2) "onLeaderEnter": The system awaits for every task to finishe the "onEnter" method and then the "onLeaderEnter" method of a leader task is invoked.
 
-2) "onLeaderEnter": It is invoked by a leader-task after passing an entry barrier
+.. 3) "onLeave": It is invoked by every task and waits for a leader-task stop processing
 
-3) "onLeave": It is invoked by every task and waits for a leader-task stop processing
+.. 4) "onLeaderLeave": It is invoked by a leader-task after passing an output barrier
 
-4) "onLeaderLeave": It is invoked by a leader-task after passing an output barrier
+.. To see a flow chart about how these methods intercommunicate see the page `Batch Streaming Engine`_ .
 
-To see a flow chart about how these methods intercommunicate see the page `Batch Streaming Engine`_ .
+The Batch module can either have a state or not. A state is a sort of a key-value storage and can be used to keep some global module variables related to processing. These variables are persisted and are recovered after a fail. A fail means that something is going wrong in one of the methods described above. In this case a whole module will be restarted. And the work will start on onInit method invocation.
+There is a manager inside module which grants access to:
+
+- output that was defined within the instance (by calling getPartitionedOutput() or getRoundRobinOutput()),
+- timer (by calling setTimer())
+- state (by calling getState()) (only if it is a stateful module)
+- list of output's names (by calling getStreamsByTags()). Every output contains it's own set of tags which are used to retrieve it.
+- initiation of checkpoint (by calling initiateCheckpoint())
+
 
 A Batch and a Regular modules may have a state. A state is a sort of a key-value storage that can be used to keep some global module variables related to processing. These variables are persisted and are recovered after a fail. A fail means that something is going wrong in one of the methods used in an executor. In this case a whole module will be restarted. 
 The state is performed alongside with the checkpoint. At a checkpoint the data received after processing is checked for completeness. The checkpoint is an event that provides an exactly-once processing. 
 
-A detailed manual on how to write a module you may find at `page`_ .
+.. A detailed manual on how to write a module you may find at `page`_ .
 
-Modules` performance is determined with the work of engine. An engine structure, components and  the workflow are determined with the type of module. Please, find more information about engines at the `Engines`_  page.
+Modules` performance is determined with the work of engine. An engine structure, components and  the workflow are determined with the type of module. 
+
+.. Please, find more information about engines at the `Engines`_  page.
 
 
-Prerequisites For Modules. Providers And Services In Streaming.
-================================================================
+Prerequisites For Modules. Streaming Components.
+================================================
  .. Warning:: The section is under development!
 
-As stated above, modules process the data arranged in streams.
+A module requires the following elements to be created for its performance:
 
-.. Any kind of a module deals with two types of streams: input and output. An input stream delivers events into the system. The Stream Juggler supports *Kafka* and *T-stream* type of incoming streams.An output streams put the processed data into an external storage. The Stream Juggler supports only *T-stream* type of output data streaming. Find more about T-streams at the `site <http://t-streams.com>`_ .
+- Provider
+
+- Service
+
+- Stream 
+
+- Instance
+
+The type of module requires a specific type of instance to create. An instance is a full range of settings to perform an exact executor type. These settings are specified via UI or REST API and determine the mode of the module operation: data stream type the module is going to work with, a checkpoint concept, the settings of state and parallelism, other options, etc.
+
+As stated above, modules process the data arranged in streams. The Stream Juggler supports *Kafka* and *T-stream* type of streams. And when the Kafka streams are a well-known type of streaming introduced by Apache Kafka, the T-streams are intentionally designed for the Stream Juggler platform as a complement for Apache Kafka. The T-streams have more features than Kafka and make exactly-once processing possible. Find more about T-streams at the `site <http://t-streams.com>`_ .
 
 To transform data into a stream of exact type you need to create a service and a provider for this service. The type of a service and a provider is determined by the type of a stream you need for the module.
 
-For example, a Batch module that receives data from Kafka or T-streams will require a Kafka service (KfkQ) and two provider types for it: Kafka and ZooKeeper. Or if you work with an Output module and you want to store the processed data to ElasticSearch index, you are going to work with  the ElasticSearch output type stream that in its turn requires a service and a provider of ElasticSearch type.
+For example, a Batch module that receives data from Kafka will require a Kafka service (KfkQ) and two provider types for it: Kafka and ZooKeeper. 
+
+.. Or if you work with an Output module and you want to store the processed data to ElasticSearch index, you are going to work with  the ElasticSearch output type stream that in its turn requires a service and a provider of ElasticSearch type.
 
 The diagram below may help you to understand the dependency of instances in the platform.
 
-.. figure:: _static/СвязиCущностей.png
+.. figure:: _static/СвязиСущностей.png
 
 The data elements in a stream are assembled in partitions. A partition is a part of a data stream allocated for convenience in operation. The streams with many partitions allow to handle the idea of parallelism properly. In such case, an engine divides existing partitions fairly among executors and it enables to scale the data processing.  

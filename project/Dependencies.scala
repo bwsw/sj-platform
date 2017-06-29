@@ -57,8 +57,6 @@ object Dependencies {
     "com.opencsv" % "opencsv" % "3.9",
     ("org.apache.avro" % "avro" % "1.8.1")
       .exclude("org.slf4j", "slf4j-api"),
-    "com.aerospike" % "aerospike-client" % "3.3.4",
-    "com.datastax.cassandra" % "cassandra-driver-core" % "3.2.0",
     "org.eclipse.jetty" % "jetty-client" % "9.4.3.v20170317",
     "com.fasterxml.jackson.module" % "jackson-module-scala_2.12" % "2.8.8",
     ("org.everit.json" % "org.everit.json.schema" % "1.4.1")
@@ -77,7 +75,8 @@ object Dependencies {
     ("com.mockrunner" % "mockrunner-jdbc" % "1.1.2" % "test")
       .exclude("jakarta-regexp", "jakarta-regexp")
       .exclude("xerces", "xerces"),
-    "org.mockito" % "mockito-core" % "2.8.9"
+    "org.mockito" % "mockito-core" % "2.8.9",
+    "com.hazelcast" % "hazelcast" % "3.7.3"
   ))
 
   lazy val sjRestDependencies = Def.setting(Seq(
@@ -89,8 +88,7 @@ object Dependencies {
   ))
 
   lazy val sjInputEngineDependencies = Def.setting(Seq(
-    "org.slf4j" % "slf4j-log4j12" % "1.7.22" % "provided",
-    "com.hazelcast" % "hazelcast" % "3.7.3"
+    "org.slf4j" % "slf4j-log4j12" % "1.7.22" % "provided"
   ))
 
   lazy val sjRegularEngineDependencies = Def.setting(Seq(

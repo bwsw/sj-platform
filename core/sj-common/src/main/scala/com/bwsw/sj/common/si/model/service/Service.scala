@@ -131,28 +131,6 @@ class ServiceCreator {
 
   def from(serviceDomain: ServiceDomain)(implicit injector: Injector): Service = {
     serviceDomain.serviceType match {
-      case ServiceLiterals.aerospikeType =>
-        val aerospikeService = serviceDomain.asInstanceOf[AerospikeServiceDomain]
-
-        new AerospikeService(
-          name = aerospikeService.name,
-          namespace = aerospikeService.namespace,
-          provider = aerospikeService.provider.name,
-          description = aerospikeService.description,
-          serviceType = aerospikeService.serviceType
-        )
-
-      case ServiceLiterals.cassandraType =>
-        val cassandraService = serviceDomain.asInstanceOf[CassandraServiceDomain]
-
-        new CassandraService(
-          name = cassandraService.name,
-          keyspace = cassandraService.keyspace,
-          provider = cassandraService.provider.name,
-          description = cassandraService.description,
-          serviceType = cassandraService.serviceType
-        )
-
       case ServiceLiterals.elasticsearchType =>
         val esService = serviceDomain.asInstanceOf[ESServiceDomain]
 

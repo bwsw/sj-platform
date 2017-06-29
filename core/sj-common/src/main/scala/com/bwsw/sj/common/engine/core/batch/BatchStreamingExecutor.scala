@@ -75,14 +75,4 @@ class BatchStreamingExecutor[T <: AnyRef](manager: ModuleEnvironmentManager) ext
     * system awaits when every task finishes onEnter method and then onLeaderEnter method of leader task is invoked
     */
   def onLeaderEnter(): Unit = {}
-
-  /**
-    * system awaits when a leader task finishes onLeaderEnter method and then onLeave method of all tasks is invoked
-    */
-  def onLeave(): Unit = {}
-
-  /**
-    * system awaits when every task finishes onLeave method and then onLeaderLeave method of leader task is invoked
-    */
-  def onLeaderLeave(): Unit = {}
 }

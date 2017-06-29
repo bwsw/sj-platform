@@ -32,7 +32,6 @@ import com.bwsw.sj.engine.output.OutputTaskRunner
 
   *         AGENTS_HOST=localhost
   *         AGENTS_PORTS=31000,31001
-  *         CASSANDRA_HOSTS=176.120.25.19:9042
   *         ZOOKEEPER_HOSTS=176.120.25.19:2181
   *         ES_HOSTS=176.120.25.19:9300
   *         JDBC_HOSTS=0.0.0.0:5432

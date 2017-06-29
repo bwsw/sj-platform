@@ -105,14 +105,3 @@ class Hazelcast(mapName: String, configParams: HazelcastConfig) extends Hazelcas
       .setSize(configParams.maxSize)
   }
 }
-
-/**
-  * Wrapper for hazelcast cluster
-  */
-trait HazelcastInterface {
-
-  /**
-    * Returns the hazelcast map
-    */
-  def getMap: IMap[String, String]
-}

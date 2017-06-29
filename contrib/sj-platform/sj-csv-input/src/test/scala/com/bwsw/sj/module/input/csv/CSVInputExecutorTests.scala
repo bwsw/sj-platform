@@ -85,38 +85,33 @@ class CSVInputExecutorTests extends FlatSpec with Matchers with MockitoSugar {
     .name(fallbackFieldName).`type`().stringType().noDefault()
     .endRecord()
 
-  val duplicatedKey1 = "duplicated-key-1"
-  val duplicatedKey2 = "duplicated-key-2"
-  val duplicatedIncorrectLine = "duplicated incorrect line"
-
-  val correctInputDataList = Seq(
-    CorrectInputData(s"$key1Field-value1", s"$key2Field-value1", s"$otherField1Name-value1", s"$otherField2Name-value1"),
-    CorrectInputData(s"$duplicatedKey1", s"$duplicatedKey2", s"$otherField1Name-original", s"$otherField2Name-original"),
-    CorrectInputData(s"$duplicatedKey1", s"$duplicatedKey2", s"$otherField1Name-duplicate1", s"$otherField2Name-duplicate1", isNotDuplicate = false),
-    CorrectInputData(s"$key1Field-value2", s"$key2Field-value2", s"$otherField1Name-value2", s"$otherField2Name-value2"),
-    CorrectInputData(s"$duplicatedKey1", s"$duplicatedKey2", s"$otherField1Name-duplicate2", s"$otherField2Name-duplicate2", isNotDuplicate = false),
-    CorrectInputData(s"$key1Field-value3", s"$key2Field-value3", s"$otherField1Name-value3", s"$otherField2Name-value3"),
-    CorrectInputData(s"$duplicatedKey1", s"$duplicatedKey2", s"$otherField1Name-duplicate3", s"$otherField2Name-duplicate3", isNotDuplicate = false),
-    CorrectInputData(s"$key1Field-value4", s"$key2Field-value4", s"$otherField1Name-value4", s"$otherField2Name-value4"))
-
 
   "CSVInputExecutor" should "handle correct input data properly (default duplication checking disabled)" in new TestPreparation {
+    val duplicatedKey1 = "duplicated-key-1"
+    val duplicatedKey2 = "duplicated-key-2"
+
+    val correctInputDataList = Seq(
+      CorrectInputData(s"$key1Field-value1", s"$key2Field-value1", s"$otherField1Name-value1", s"$otherField2Name-value1"),
+      CorrectInputData(s"$duplicatedKey1", s"$duplicatedKey2", s"$otherField1Name-original", s"$otherField2Name-original"),
+      CorrectInputData(s"$duplicatedKey1", s"$duplicatedKey2", s"$otherField1Name-duplicate1", s"$otherField2Name-duplicate1", isNotDuplicate = false),
+      CorrectInputData(s"$key1Field-value2", s"$key2Field-value2", s"$otherField1Name-value2", s"$otherField2Name-value2"),
+      CorrectInputData(s"$duplicatedKey1", s"$duplicatedKey2", s"$otherField1Name-duplicate2", s"$otherField2Name-duplicate2", isNotDuplicate = false),
+      CorrectInputData(s"$key1Field-value3", s"$key2Field-value3", s"$otherField1Name-value3", s"$otherField2Name-value3"),
+      CorrectInputData(s"$duplicatedKey1", s"$duplicatedKey2", s"$otherField1Name-duplicate3", s"$otherField2Name-duplicate3", isNotDuplicate = false),
+      CorrectInputData(s"$key1Field-value4", s"$key2Field-value4", s"$otherField1Name-value4", s"$otherField2Name-value4"))
+
     val expectedOutputDataList = correctInputDataList.map(_.createOutputData)
 
     simulator.prepare(correctInputDataList.map(_.toString))
     val outputDataList = simulator.process(duplicateCheck = false)
+    // In this case value of duplicateCheck does not have any effect because
+    // the CSVInputExecutor forces envelopes to be checked on duplicate
 
     outputDataList shouldBe expectedOutputDataList
   }
 
-  it should "handle correct input data properly (default duplication checking enabled)" in new TestPreparation {
-    val expectedOutputDataList = correctInputDataList.map(_.createOutputData)
 
-    simulator.prepare(correctInputDataList.map(_.toString))
-    val outputDataList = simulator.process(duplicateCheck = true)
-
-    outputDataList shouldBe expectedOutputDataList
-  }
+  val duplicatedIncorrectLine = "duplicated incorrect line"
 
   it should "handle incorrect input lines properly (default duplication checking disabled)" in new TestPreparation {
     val incorrectInputLines = Seq(

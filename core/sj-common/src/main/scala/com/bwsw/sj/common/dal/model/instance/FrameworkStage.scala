@@ -28,7 +28,7 @@ import com.bwsw.sj.common.utils.EngineLiterals
   *
   * @param state    state of instance one of the following [[EngineLiterals.instanceStatusModes]]
   * @param datetime last time when a state has been changed
-  * @param duration how long an instance has got current state
+  * @param duration how long a stage has got a current state
   * @author Kseniya Tomskikh
   */
 case class FrameworkStage(var state: String = toHandle, var datetime: Date = new Date(), var duration: Long = 0)

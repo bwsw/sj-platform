@@ -44,7 +44,7 @@ For correct perofrmance a module requires creating a stream/streams with its ser
 
 The diagram below may help you to understand the dependency of instances in the platform.
 
-.. figure:: _static/СвязиCущностей.png
+.. figure:: _static/СвязиСущностей.png
 
 For example, if you want to create a regular module that will process Kafka input data streams you have to create a Kafka service with a Kafka and a ZooKeeper providers for it.
 
@@ -472,7 +472,7 @@ Instances
 ---------
 Module uses a specific instance to personalize its work.
 
-Instance is a full range of settings to perfom an exact executor type.
+Instance is a full range of settings to perform an exact executor type.
 
 Before creating an instance make sure all necessary *configuration* *settings* are added to the system.
 

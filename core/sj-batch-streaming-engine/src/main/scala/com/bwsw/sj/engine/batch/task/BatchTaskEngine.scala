@@ -23,13 +23,13 @@ import com.bwsw.sj.common.config.SettingsUtils
 import com.bwsw.sj.common.dal.model.service.ZKServiceDomain
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.engine.TaskEngine
-import com.bwsw.sj.common.si.model.instance.BatchInstance
-import com.bwsw.sj.common.utils.EngineLiterals
-import com.bwsw.sj.engine.batch.task.input.{EnvelopeFetcher, RetrievableCheckpointTaskInput}
 import com.bwsw.sj.common.engine.core.batch.{BatchStreamingExecutor, BatchStreamingPerformanceMetrics, WindowRepository}
 import com.bwsw.sj.common.engine.core.entities._
 import com.bwsw.sj.common.engine.core.managment.CommonTaskManager
 import com.bwsw.sj.common.engine.core.state.CommonModuleService
+import com.bwsw.sj.common.si.model.instance.BatchInstance
+import com.bwsw.sj.common.utils.EngineLiterals
+import com.bwsw.sj.engine.batch.task.input.{EnvelopeFetcher, RetrievableCheckpointTaskInput}
 import org.apache.curator.framework.recipes.barriers.DistributedDoubleBarrier
 import org.apache.curator.framework.{CuratorFramework, CuratorFrameworkFactory}
 import org.apache.curator.retry.ExponentialBackoffRetry
@@ -79,7 +79,6 @@ class BatchTaskEngine(manager: CommonTaskManager,
   private val collectedWindowPerStream = mutable.Map[String, Window]()
   private val windowRepository = new WindowRepository(instance)
   private val barrierMasterNode = EngineLiterals.batchInstanceBarrierPrefix + instance.name
-  private val barrierForLeaderMasterNode = EngineLiterals.batchInstanceBarrierPrefix + instance.name + "leader"
   private val leaderMasterNode = EngineLiterals.batchInstanceLeaderPrefix + instance.name
   private val zkHosts = inject[ConnectionRepository].getServiceRepository
     .get(instance.coordinationService)
@@ -88,7 +87,6 @@ class BatchTaskEngine(manager: CommonTaskManager,
     .provider.hosts.toSet
   private val curatorClient = createCuratorClient()
   private val commonBarrier = new DistributedDoubleBarrier(curatorClient, barrierMasterNode, instance.executionPlan.tasks.size())
-  private val barrierForLeader = new DistributedDoubleBarrier(curatorClient, barrierForLeaderMasterNode, instance.executionPlan.tasks.size())
   private val leaderLatch = new LeaderLatch(zkHosts, leaderMasterNode)
   leaderLatch.start()
 
@@ -219,12 +217,8 @@ class BatchTaskEngine(manager: CommonTaskManager,
     executor.onWindow(windowRepository)
     commonBarrier.enter()
     executor.onEnter()
-    barrierForLeader.enter()
-    if (leaderLatch.hasLeadership()) executor.onLeaderEnter()
     commonBarrier.leave()
-    executor.onLeave()
-    barrierForLeader.leave()
-    if (leaderLatch.hasLeadership()) executor.onLeaderLeave()
+    if (leaderLatch.hasLeadership()) executor.onLeaderEnter()
     retrievableStreams = inputs
     doCheckpoint()
   }

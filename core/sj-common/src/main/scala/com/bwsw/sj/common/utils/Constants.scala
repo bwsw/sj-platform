@@ -103,32 +103,26 @@ object StreamLiterals {
 }
 
 object ServiceLiterals {
-  final val cassandraType = "CassDB"
   final val elasticsearchType = "ESInd"
   final val kafkaType = "KfkQ"
   final val tstreamsType = "TstrQ"
   final val zookeeperType = "ZKCoord"
-  final val aerospikeType = "ArspkDB"
   final val jdbcType = "JDBC"
   final val restType = "REST"
 
   val types: Seq[String] = Seq(
-    cassandraType,
     elasticsearchType,
     kafkaType,
     tstreamsType,
     zookeeperType,
-    aerospikeType,
     jdbcType,
     restType
   )
 
   val typeToProviderType: Map[String, String] = Map(
-    cassandraType -> ProviderLiterals.cassandraType,
     elasticsearchType -> ProviderLiterals.elasticsearchType,
     kafkaType -> ProviderLiterals.kafkaType,
     zookeeperType -> ProviderLiterals.zookeeperType,
-    aerospikeType -> ProviderLiterals.aerospikeType,
     jdbcType -> ProviderLiterals.jdbcType,
     restType -> ProviderLiterals.restType,
     tstreamsType -> ProviderLiterals.zookeeperType
@@ -136,8 +130,6 @@ object ServiceLiterals {
 }
 
 object ProviderLiterals {
-  final val cassandraType = "cassandra"
-  final val aerospikeType = "aerospike"
   final val zookeeperType = "zookeeper"
   final val kafkaType = "kafka"
   final val elasticsearchType = "ES"
@@ -145,8 +137,6 @@ object ProviderLiterals {
   final val restType = "REST"
 
   val types: Seq[String] = Seq(
-    cassandraType,
-    aerospikeType,
     zookeeperType,
     kafkaType,
     elasticsearchType,
