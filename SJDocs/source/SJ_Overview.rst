@@ -55,7 +55,7 @@ The PSP modules perform **checkpoint** and, if the module has a state, stores th
 The modules also fulfill a **group** **checkpoint** conception. It means that all producers and consumers are bunched into a group and do a checkpoint automatically fixing the current state. This is the key idea of exactly-once processing.
 
 
-Find more about:
+Read more about:
  
 `Platform Architecture`_
 
