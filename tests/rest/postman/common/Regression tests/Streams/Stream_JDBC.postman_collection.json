@@ -58,8 +58,7 @@
 			"responses": [],
 			"tests": "tests[\"Status code is 200\"] = responseCode.code === 404;\n\ntests[\"Body matches string\"] = responseBody.has(\"Stream 'restjdbc' has not been found.\");",
 			"currentHelper": "normal",
-			"helperAttributes": {},
-			"rawModeData": "{\r\n      \"stream-type\": \"stream.kafka\",\r\n      \"name\": \"rest-kafka\",\r\n      \"description\": \"Tstream example\",\r\n      \"partitions\": 1,\r\n      \"service\": \"kafka-ps-service\",\r\n      \"force\": false,\r\n      \"replication-factor\": 1\r\n}\r\n\r\n"
+			"helperAttributes": {}
 		},
 		{
 			"id": "1697bc8b-626c-40cc-2d89-62d1783c4a84",
@@ -555,8 +554,7 @@
 			"responses": [],
 			"tests": "tests[\"Status code is 404\"] = responseCode.code === 404;\n\n\n\ntests[\"Body matches string\"] = responseBody.has(\"Stream 'restjdbc111' has not been found.\");",
 			"currentHelper": "normal",
-			"helperAttributes": {},
-			"rawModeData": "{\r\n      \"stream-type\": \"stream.kafka\",\r\n      \"name\": \"rest-kafka\",\r\n      \"description\": \"Tstream example\",\r\n      \"partitions\": 1,\r\n      \"service\": \"kafka-ps-service\",\r\n      \"force\": false,\r\n      \"replication-factor\": 1\r\n}\r\n\r\n"
+			"helperAttributes": {}
 		},
 		{
 			"id": "c1f7fbb1-2b34-a9c7-829a-f83ef857efa8",
@@ -595,8 +593,7 @@
 			"name": "Stream_5.2.1.Get_by_name",
 			"description": "",
 			"collectionId": "c82770b9-1b6e-c79d-b38a-d8b72c3fea86",
-			"responses": [],
-			"rawModeData": "{\r\n      \"stream-type\": \"stream.kafka\",\r\n      \"name\": \"rest-kafka\",\r\n      \"description\": \"Tstream example\",\r\n      \"partitions\": 1,\r\n      \"service\": \"kafka-ps-service\",\r\n      \"force\": false,\r\n      \"replication-factor\": 1\r\n}\r\n\r\n"
+			"responses": []
 		},
 		{
 			"id": "d17eed7f-083b-1a79-bf5b-e59dc846c5a4",
@@ -656,8 +653,7 @@
 			"name": "Service_5.2.7.Related",
 			"description": "",
 			"collectionId": "c82770b9-1b6e-c79d-b38a-d8b72c3fea86",
-			"responses": [],
-			"rawModeData": "{\r\n      \"stream-type\": \"stream.kafka\",\r\n      \"name\": \"rest-kafka\",\r\n      \"description\": \"Tstream example\",\r\n      \"partitions\": 1,\r\n      \"service\": \"kafka-ps-service\",\r\n      \"force\": false,\r\n      \"replication-factor\": 1\r\n}\r\n\r\n"
+			"responses": []
 		}
 	]
 }

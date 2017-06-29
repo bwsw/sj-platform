@@ -45,7 +45,7 @@
 			"data": [],
 			"dataMode": "raw",
 			"version": 2,
-			"tests": "tests[\"Status code is 400\"] = responseCode.code === 400;\n\ntests[\"Body matches string\"] = responseBody.has(\" Unknown type '1kafka' of provider provided. Must be one of: [cassandra, aerospike, zookeeper, kafka, ES, JDBC, REST].\");",
+			"tests": "tests[\"Status code is 400\"] = responseCode.code === 400;\n\ntests[\"Body matches string\"] = responseBody.has(\" Unknown type '1kafka' of provider provided. Must be one of: [zookeeper, kafka, ES, JDBC, REST].\");",
 			"currentHelper": "normal",
 			"helperAttributes": {},
 			"time": 1493803395432,

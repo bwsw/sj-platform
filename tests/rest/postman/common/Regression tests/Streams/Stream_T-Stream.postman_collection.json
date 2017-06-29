@@ -61,8 +61,7 @@
 			"name": "Service_6.2.7.Related",
 			"description": "",
 			"collectionId": "cb619691-957b-ceda-708b-83593ca5044c",
-			"responses": [],
-			"rawModeData": "{\r\n      \"type\": \"stream.kafka\",\r\n      \"name\": \"rest-kafka\",\r\n      \"description\": \"Tstream example\",\r\n      \"partitions\": 1,\r\n      \"service\": \"kafka-ps-service\",\r\n      \"force\": false,\r\n      \"replication-factor\": 1\r\n}\r\n\r\n"
+			"responses": []
 		},
 		{
 			"id": "3039778b-c81e-100f-7ed8-4bfa7957d139",
@@ -122,8 +121,7 @@
 			"name": "Stream_2.2.1.Get_by_name",
 			"description": "",
 			"collectionId": "cb619691-957b-ceda-708b-83593ca5044c",
-			"responses": [],
-			"rawModeData": "{\r\n      \"type\": \"stream.t-stream\",\r\n      \"name\": \"rest-tstream1\",\r\n      \"description\": \"Tstream example\",\r\n\r\n      \"service\": \"rest-tstream\",\r\n\r\n      \"force\": false,\r\n      \"generator\": {\r\n        \"generator-type\": \"global\",\r\n        \"service\": \"zookeeper-ps-service\",\r\n        \"instance-count\": 1\r\n      }\r\n}"
+			"responses": []
 		},
 		{
 			"id": "436dbe1d-a6be-d936-d5fe-545740e1c30c",
@@ -143,8 +141,7 @@
 			"responses": [],
 			"tests": "tests[\"Status code is 404\"] = responseCode.code === 404;\n\n\n\ntests[\"Body matches string\"] = responseBody.has(\"Stream 'rest-tstream11' has not been found.\");",
 			"currentHelper": "normal",
-			"helperAttributes": "{}",
-			"rawModeData": "{\r\n      \"type\": \"stream.t-stream\",\r\n      \"name\": \"rest-tstream1\",\r\n      \"description\": \"Tstream example\",\r\n\r\n      \"service\": \"rest-tstream\",\r\n\r\n      \"force\": false,\r\n      \"generator\": {\r\n        \"generator-type\": \"global\",\r\n        \"service\": \"zookeeper-ps-service\",\r\n        \"instance-count\": 1\r\n      }\r\n}"
+			"helperAttributes": "{}"
 		},
 		{
 			"id": "48f2823f-967c-5d38-fec6-23b1be5553e9",
@@ -632,8 +629,7 @@
 			"name": "Stream_2.2.6.Get_deleted_stream",
 			"description": "",
 			"collectionId": "cb619691-957b-ceda-708b-83593ca5044c",
-			"responses": [],
-			"rawModeData": "{\r\n      \"type\": \"stream.t-stream\",\r\n      \"name\": \"rest-tstream1\",\r\n      \"description\": \"Tstream example\",\r\n\r\n      \"service\": \"rest-tstream\",\r\n\r\n      \"force\": false,\r\n      \"generator\": {\r\n        \"generator-type\": \"global\",\r\n        \"service\": \"zookeeper-ps-service\",\r\n        \"instance-count\": 1\r\n      }\r\n}"
+			"responses": []
 		},
 		{
 			"id": "d71f2170-4132-7831-1afd-7c469e1e7fde",

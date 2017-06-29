@@ -73,7 +73,7 @@
 			"description": "",
 			"collectionId": "05603d2d-495d-11dd-989d-0b504227c9d9",
 			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"rest-cassandra\",\r\n     \"description\": \"example cassandra provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"cassandra\",\r\n     \"hosts\": [\r\n        \"176.120.25.19:9042\"\r\n      ]\r\n}"
+			"rawModeData": "{\r\n     \"name\": \"1rest\",\r\n     \"description\": \"example cassandra provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"cassandra\",\r\n     \"hosts\": [\r\n        \"176.120.25.19:9042\"\r\n      ]\r\n}"
 		},
 		{
 			"id": "0ed06ceb-9c9c-2299-6ea7-c59c18f6ca25",
@@ -153,8 +153,7 @@
 			"name": "Provider_3.3.3.Test_connection_unknown",
 			"description": "",
 			"collectionId": "05603d2d-495d-11dd-989d-0b504227c9d9",
-			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"rest-cassandra\",\r\n     \"description\": \"example cassandra provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"cassandra\",\r\n     \"hosts\": [\r\n        \"176.120.25.19:9042\"\r\n      ]\r\n}"
+			"responses": []
 		},
 		{
 			"id": "326532aa-690c-8c1b-8f95-c53279105738",
@@ -253,8 +252,7 @@
 			"name": "Provider_3.2.4.Get_delited_provider",
 			"description": "",
 			"collectionId": "05603d2d-495d-11dd-989d-0b504227c9d9",
-			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"rest-cassandra\",\r\n     \"description\": \"example cassandra provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"cassandra\",\r\n     \"hosts\": [\r\n        \"176.120.25.19:9042\"\r\n      ]\r\n}"
+			"responses": []
 		},
 		{
 			"id": "8ff9f0ad-f288-2605-380e-0dbffe96ede8",
@@ -335,8 +333,7 @@
 			"responses": [],
 			"tests": "tests[\"Status code is 200\"] = responseCode.code === 200;\n\n\n\n",
 			"currentHelper": "normal",
-			"helperAttributes": {},
-			"rawModeData": "{\r\n     \"name\": \"rest-cassandra\",\r\n     \"description\": \"example cassandra provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"cassandra\",\r\n     \"hosts\": [\r\n        \"176.120.25.19:9042\"\r\n      ]\r\n}"
+			"helperAttributes": {}
 		},
 		{
 			"id": "c0175757-f560-8b0e-8e69-a2af7a340753",
@@ -396,8 +393,7 @@
 			"name": "Provider_3.3.2.Test_connection_not_available",
 			"description": "",
 			"collectionId": "05603d2d-495d-11dd-989d-0b504227c9d9",
-			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"rest-cassandra\",\r\n     \"description\": \"example cassandra provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"cassandra\",\r\n     \"hosts\": [\r\n        \"176.120.25.19:9042\"\r\n      ]\r\n}"
+			"responses": []
 		},
 		{
 			"id": "cb9fefaa-725a-0f76-1316-ff6173d034a1",
@@ -516,8 +512,7 @@
 			"name": "Provider_3.2.1.Get_provider_by_name",
 			"description": "",
 			"collectionId": "05603d2d-495d-11dd-989d-0b504227c9d9",
-			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"rest-cassandra\",\r\n     \"description\": \"example cassandra provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"cassandra\",\r\n     \"hosts\": [\r\n        \"176.120.25.19:9042\"\r\n      ]\r\n}"
+			"responses": []
 		},
 		{
 			"id": "fc1d6b73-98c1-adba-2466-fd64120fe1e0",

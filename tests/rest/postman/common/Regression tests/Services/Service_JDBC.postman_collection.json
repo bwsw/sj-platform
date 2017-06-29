@@ -168,7 +168,7 @@
 			"data": [],
 			"dataMode": "raw",
 			"version": 2,
-			"tests": "tests[\"Status code is 400\"] = responseCode.code === 400;\n\ntests[\"Body matches string\"] = responseBody.has(\"Unknown type 'JDBC12' of service provided. Must be one of: [CassDB, ESInd, KfkQ, TstrQ, ZKCoord, ArspkDB, JDBC, REST]\");",
+			"tests": "tests[\"Status code is 400\"] = responseCode.code === 400;\n\ntests[\"Body matches string\"] = responseBody.has(\"Unknown type 'JDBC12' of service provided. Must be one of: [ESInd, KfkQ, TstrQ, ZKCoord, JDBC, REST]\");",
 			"currentHelper": "normal",
 			"helperAttributes": {},
 			"time": 1493865388863,
@@ -276,8 +276,7 @@
 			"responses": [],
 			"tests": "tests[\"Status code is 200\"] = responseCode.code === 404;\n\ntests[\"Body matches string\"] = responseBody.has(\"Service 'restjdbc' has not been found.\");",
 			"currentHelper": "normal",
-			"helperAttributes": {},
-			"rawModeData": "{\r\n     \"name\": \"rest-kafka1\",\r\n     \"description\": \"example kafka provider\",\r\n     \"provider\": \"aerospike_test_provider\",\r\n     \"zk-provider\": \"zookeeper_test_provider\",\r\n     \"type\": \"KfkQ\",\r\n     \"zk-namespace\": \"a1\"\r\n}"
+			"helperAttributes": {}
 		},
 		{
 			"id": "7298c212-8440-6bc8-5d3c-18ae7afe71b0",
@@ -458,8 +457,7 @@
 			"name": "Provider_8.2.7.Related",
 			"description": "",
 			"collectionId": "2c6f32d2-ffd0-1c45-33e8-b71a60bef6af",
-			"responses": [],
-			"rawModeData": "{\r\n      \"stream-type\": \"stream.kafka\",\r\n      \"name\": \"rest-kafka\",\r\n      \"description\": \"Tstream example\",\r\n      \"partitions\": 1,\r\n      \"service\": \"kafka-ps-service\",\r\n      \"force\": false,\r\n      \"replication-factor\": 1\r\n}\r\n\r\n"
+			"responses": []
 		},
 		{
 			"id": "b232b32b-1b36-a9f1-0dca-20ad2cf8166a",
@@ -519,8 +517,7 @@
 			"responses": [],
 			"tests": "tests[\"Status code is 404\"] = responseCode.code === 404;\n\ntests[\"Body matches string\"] = responseBody.has(\"Service 'restjdbc111' has not been found.\");",
 			"currentHelper": "normal",
-			"helperAttributes": {},
-			"rawModeData": "{\r\n     \"name\": \"rest-kafka\",\r\n     \"description\": \"example kafka provider\",\r\n     \"provider\": \"kafka-good\",\r\n     \"zk-provider\": \"zookeeper_test_provider\",\r\n     \"type\": \"KfkQ\",\r\n     \"zk-namespace\": \"a1\"\r\n}"
+			"helperAttributes": {}
 		},
 		{
 			"id": "cc514fdf-a1fb-4a54-b369-25e12f729218",
@@ -540,8 +537,7 @@
 			"responses": [],
 			"tests": "tests[\"Status code is 200\"] = responseCode.code === 200;\n\ntests[\"Body matches string\"] = responseBody.has(\"restjdbc\");\n\ntests[\"Body matches string\"] = responseBody.has(\"JDBC\");",
 			"currentHelper": "normal",
-			"helperAttributes": {},
-			"rawModeData": "{\r\n     \"name\": \"rest-kafka1\",\r\n     \"description\": \"example kafka provider\",\r\n     \"provider\": \"aerospike_test_provider\",\r\n     \"zk-provider\": \"zookeeper_test_provider\",\r\n     \"type\": \"KfkQ\",\r\n     \"zk-namespace\": \"a1\"\r\n}"
+			"helperAttributes": {}
 		},
 		{
 			"id": "e06bcfcd-029a-5178-4b11-ff9bd8f76f4b",

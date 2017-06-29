@@ -115,8 +115,7 @@
 			"name": "Service_4.2.6.Get_deleted_service",
 			"description": "",
 			"collectionId": "e885e2d9-389b-dc42-e716-ebfc0404838b",
-			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"rest-kafka1\",\r\n     \"description\": \"example kafka provider\",\r\n     \"provider\": \"aerospike_test_provider\",\r\n     \"zk-provider\": \"zookeeper_test_provider\",\r\n     \"type\": \"KfkQ\",\r\n     \"zk-namespace\": \"a1\"\r\n}"
+			"responses": []
 		},
 		{
 			"id": "180b8ca3-5aa1-7d63-58dd-15a5fb42e244",
@@ -128,7 +127,7 @@
 			"data": [],
 			"dataMode": "raw",
 			"version": 2,
-			"tests": "tests[\"Status code is 400\"] = responseCode.code === 400;\n\ntests[\"Body matches string\"] = responseBody.has(\"Unknown type 'ESInd111' of service provided. Must be one of: [CassDB, ESInd, KfkQ, TstrQ, ZKCoord, ArspkDB, JDB, REST].\");",
+			"tests": "tests[\"Status code is 400\"] = responseCode.code === 400;\n\ntests[\"Body matches string\"] = responseBody.has(\"Unknown type 'ESInd111' of service provided. Must be one of: [ESInd, KfkQ, TstrQ, ZKCoord, JDBC, REST].\");",
 			"currentHelper": "normal",
 			"helperAttributes": {},
 			"time": 1494908788591,
@@ -195,8 +194,7 @@
 			"name": "Service_4.2.1.Get_by_name",
 			"description": "",
 			"collectionId": "e885e2d9-389b-dc42-e716-ebfc0404838b",
-			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"rest-kafka1\",\r\n     \"description\": \"example kafka provider\",\r\n     \"provider\": \"aerospike_test_provider\",\r\n     \"zk-provider\": \"zookeeper_test_provider\",\r\n     \"type\": \"KfkQ\",\r\n     \"zk-namespace\": \"a1\"\r\n}"
+			"responses": []
 		},
 		{
 			"id": "53d2ee91-dc11-3807-ba96-be9c3e2e46e9",
@@ -479,8 +477,7 @@
 			"responses": [],
 			"tests": "tests[\"Status code is 404\"] = responseCode.code === 404;\n\ntests[\"Body matches string\"] = responseBody.has(\"Service 'rest-elasticsearch111' has not been found.\");",
 			"currentHelper": "normal",
-			"helperAttributes": {},
-			"rawModeData": "{\r\n     \"name\": \"rest-kafka\",\r\n     \"description\": \"example kafka provider\",\r\n     \"provider\": \"kafka-good\",\r\n     \"zk-provider\": \"zookeeper_test_provider\",\r\n     \"type\": \"KfkQ\",\r\n     \"zk-namespace\": \"a1\"\r\n}"
+			"helperAttributes": {}
 		},
 		{
 			"id": "e8e2e561-b2a1-7503-1ee0-331dd0688b69",

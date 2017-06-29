@@ -155,8 +155,7 @@
 			"name": "Provider_7.2.7.Related",
 			"description": "",
 			"collectionId": "dfef66d0-dbcb-7bb2-4b95-b09a4048aa2d",
-			"responses": [],
-			"rawModeData": "{\r\n      \"stream-type\": \"stream.kafka\",\r\n      \"name\": \"rest-kafka\",\r\n      \"description\": \"Tstream example\",\r\n      \"partitions\": 1,\r\n      \"service\": \"kafka-ps-service\",\r\n      \"force\": false,\r\n      \"replication-factor\": 1\r\n}\r\n\r\n"
+			"responses": []
 		},
 		{
 			"id": "36789e30-2117-32a8-ed62-bffd139c9190",
@@ -168,7 +167,7 @@
 			"data": [],
 			"dataMode": "raw",
 			"version": 2,
-			"tests": "tests[\"Status code is 400\"] = responseCode.code === 400;\n\ntests[\"Body matches string\"] = responseBody.has(\"Unknown type 'ZKCoord111' of service provided. Must be one of: [CassDB, ESInd, KfkQ, TstrQ, ZKCoord, ArspkDB, JDBC, REST].\");",
+			"tests": "tests[\"Status code is 400\"] = responseCode.code === 400;\n\ntests[\"Body matches string\"] = responseBody.has(\"Unknown type 'ZKCoord111' of service provided. Must be one of: [ESInd, KfkQ, TstrQ, ZKCoord, JDBC, REST].\");",
 			"currentHelper": "normal",
 			"helperAttributes": {},
 			"time": 1493866629299,
@@ -216,8 +215,7 @@
 			"name": "Service_7.1.6.Get_deleted_service",
 			"description": "",
 			"collectionId": "dfef66d0-dbcb-7bb2-4b95-b09a4048aa2d",
-			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"rest-kafka1\",\r\n     \"description\": \"example kafka provider\",\r\n     \"provider\": \"aerospike_test_provider\",\r\n     \"zk-provider\": \"zookeeper_test_provider\",\r\n     \"type\": \"KfkQ\",\r\n     \"zk-namespace\": \"a1\"\r\n}"
+			"responses": []
 		},
 		{
 			"id": "625cdbb2-6019-a588-55f5-435b51496f7f",
@@ -257,8 +255,7 @@
 			"responses": [],
 			"tests": "tests[\"Status code is 404\"] = responseCode.code === 404;\n\ntests[\"Body matches string\"] = responseBody.has(\"Service 'rest-zookeper111' has not been found.\");",
 			"currentHelper": "normal",
-			"helperAttributes": {},
-			"rawModeData": "{\r\n     \"name\": \"rest-kafka\",\r\n     \"description\": \"example kafka provider\",\r\n     \"provider\": \"kafka-good\",\r\n     \"zk-provider\": \"zookeeper_test_provider\",\r\n     \"type\": \"KfkQ\",\r\n     \"zk-namespace\": \"a1\"\r\n}"
+			"helperAttributes": {}
 		},
 		{
 			"id": "77462fc8-a92f-1fa4-b250-c43386455608",
@@ -462,8 +459,7 @@
 			"name": "Service_7.2.1.Get_by_name",
 			"description": "",
 			"collectionId": "dfef66d0-dbcb-7bb2-4b95-b09a4048aa2d",
-			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"rest-kafka1\",\r\n     \"description\": \"example kafka provider\",\r\n     \"provider\": \"aerospike_test_provider\",\r\n     \"zk-provider\": \"zookeeper_test_provider\",\r\n     \"type\": \"KfkQ\",\r\n     \"zk-namespace\": \"a1\"\r\n}"
+			"responses": []
 		},
 		{
 			"id": "bb56fc87-2a56-7644-0515-44701e9d2c60",

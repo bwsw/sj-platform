@@ -78,8 +78,7 @@
 			"name": "Provider_5.2.5.Related",
 			"description": "",
 			"collectionId": "67472d1a-5ec1-d4d7-7f7f-7ce68db25514",
-			"responses": [],
-			"rawModeData": "{\r\n      \"stream-type\": \"stream.kafka\",\r\n      \"name\": \"rest-kafka\",\r\n      \"description\": \"Tstream example\",\r\n      \"partitions\": 1,\r\n      \"service\": \"kafka-ps-service\",\r\n      \"force\": false,\r\n      \"replication-factor\": 1\r\n}\r\n\r\n"
+			"responses": []
 		},
 		{
 			"id": "1ce9399e-1b58-c8a6-3bcb-cca83f79475f",
@@ -256,7 +255,7 @@
 			"data": [],
 			"dataMode": "raw",
 			"version": 2,
-			"tests": "tests[\"Status code is 400\"] = responseCode.code === 400;\n\ntests[\"Body matches string\"] = responseBody.has(\"Unknown type 'TstrQ11' of service provided. Must be one of: [CassDB, ESInd, KfkQ, TstrQ, ZKCoord, ArspkDB, JDBC, REST].\");",
+			"tests": "tests[\"Status code is 400\"] = responseCode.code === 400;\n\ntests[\"Body matches string\"] = responseBody.has(\"Unknown type 'TstrQ11' of service provided. Must be one of: [ESInd, KfkQ, TstrQ, ZKCoord, JDBC, REST].\");",
 			"currentHelper": "normal",
 			"helperAttributes": {},
 			"time": 1494909144539,
@@ -364,8 +363,7 @@
 			"responses": [],
 			"tests": "tests[\"Status code is 404\"] = responseCode.code === 404;\n\ntests[\"Body matches string\"] = responseBody.has(\"Service 'rest-tstream111' has not been found.\");",
 			"currentHelper": "normal",
-			"helperAttributes": "{}",
-			"rawModeData": "{\r\n     \"name\": \"rest-kafka\",\r\n     \"description\": \"example kafka provider\",\r\n     \"provider\": \"kafka-good\",\r\n     \"zk-provider\": \"zookeeper_test_provider\",\r\n     \"type\": \"KfkQ\",\r\n     \"zk-namespace\": \"a1\"\r\n}"
+			"helperAttributes": "{}"
 		},
 		{
 			"id": "77330dc2-e7eb-32d1-23c9-0e2b7e2af9a1",
@@ -384,8 +382,7 @@
 			"name": "Service_6.2.6.Get_deleted_string",
 			"description": "",
 			"collectionId": "67472d1a-5ec1-d4d7-7f7f-7ce68db25514",
-			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"rest-kafka1\",\r\n     \"description\": \"example kafka provider\",\r\n     \"provider\": \"aerospike_test_provider\",\r\n     \"zk-provider\": \"zookeeper_test_provider\",\r\n     \"type\": \"KfkQ\",\r\n     \"zk-namespace\": \"a1\"\r\n}"
+			"responses": []
 		},
 		{
 			"id": "7beac24f-28bb-4e05-780d-40993fed586e",
@@ -486,7 +483,7 @@
 			"tests": "tests[\"Status code is 404\"] = responseCode.code === 404;\n\ntests[\"Body matches string\"] = responseBody.has(\"Service 'rest-tstream' has not been found.\");",
 			"currentHelper": "normal",
 			"helperAttributes": "{}",
-			"rawModeData": "{\r\n     \"type\": \"TstrQ\",\r\n     \"name\": \"rest-tstream\",\r\n     \"description\": \"tstream\",\r\n     \"metadata-provider\": \"cassandra_test_provider\",\r\n     \"metadata-namespace\": \"a1\",\r\n     \"data-provider\": \"aerospike\",\r\n     \"data-namespace\":\"a1\",\r\n     \"lock-provider\":\"rest-zookeeper\",\r\n     \"lock-namespace\":\"a1\"\r\n}\r\n"
+			"rawModeData": "{\r\n     \"type\": \"TstrQ\",\r\n     \"name\": \"rest-tstream\",\r\n     \"description\": \"tstream\",\r\n     \"provider\": \"rest-zookeeper\",\r\n     \"prefix\": \"/path\",\r\n     \"token\": \"12345678910111213141516171819202\"\r\n}"
 		},
 		{
 			"id": "ac7be072-503d-ea42-4edb-6aaa0578abd2",
@@ -629,8 +626,7 @@
 			"name": "Service_6.2.1.Get_by_name",
 			"description": "",
 			"collectionId": "67472d1a-5ec1-d4d7-7f7f-7ce68db25514",
-			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"rest-kafka1\",\r\n     \"description\": \"example kafka provider\",\r\n     \"provider\": \"aerospike_test_provider\",\r\n     \"zk-provider\": \"zookeeper_test_provider\",\r\n     \"type\": \"KfkQ\",\r\n     \"zk-namespace\": \"a1\"\r\n}"
+			"responses": []
 		},
 		{
 			"id": "eb9f3ed3-c012-1c68-67e4-a190468b1a54",

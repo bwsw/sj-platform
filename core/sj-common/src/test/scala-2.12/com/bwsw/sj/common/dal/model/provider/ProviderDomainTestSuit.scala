@@ -56,42 +56,6 @@ class ProviderDomainTestSuit extends FlatSpec with Matchers with PrivateMethodTe
     port shouldBe expectedPort
   }
 
-  it should s"checkConnection() method checks aerospike connection for each host " +
-    s"if provider has got '${ProviderLiterals.aerospikeType}' type" in {
-    //arrange
-    val numberOfChecks = 4
-    val provider = mock[ProviderDomainMock]
-    when(provider.providerType).thenReturn(ProviderLiterals.aerospikeType)
-    when(provider.hosts).thenReturn(Array.fill(numberOfChecks)("example"))
-    when(provider.checkConnection(any())).thenCallRealMethod()
-    when(provider.checkProviderConnectionByType(any(), any(), any())).thenCallRealMethod()
-    when(provider.checkAerospikeConnection(any())).thenCallRealMethod()
-
-    //act
-    provider.checkConnection(ConfigLiterals.zkSessionTimeoutDefault)
-
-    //assert
-    verify(provider, times(numberOfChecks)).checkAerospikeConnection(any())
-  }
-
-  it should s"checkConnection() method checks cassandra connection for each host " +
-    s"if provider has got '${ProviderLiterals.cassandraType}' type" in {
-    //arrange
-    val numberOfChecks = 4
-    val provider = mock[ProviderDomainMock]
-    when(provider.providerType).thenReturn(ProviderLiterals.cassandraType)
-    when(provider.hosts).thenReturn(Array.fill(numberOfChecks)("example"))
-    when(provider.checkConnection(any())).thenCallRealMethod()
-    when(provider.checkProviderConnectionByType(any(), any(), any())).thenCallRealMethod()
-    when(provider.checkCassandraConnection(any())).thenCallRealMethod()
-
-    //act
-    provider.checkConnection(ConfigLiterals.zkSessionTimeoutDefault)
-
-    //assert
-    verify(provider, times(numberOfChecks)).checkCassandraConnection(any())
-  }
-
   it should s"checkConnection() method checks jdbc connection for each host " +
     s"if provider has got '${ProviderLiterals.jdbcType}' type" in {
     //arrange
@@ -185,17 +149,11 @@ class ProviderDomainTestSuit extends FlatSpec with Matchers with PrivateMethodTe
 }
 
 trait ProviderDomainMocks extends MockitoSugar {
-  private val name = "provider"
-
   def providerDomain(setOfHosts: Array[String] = Array()) =
     new ProviderDomain(null, null, setOfHosts, null, null, null)
 }
 
 class ProviderDomainMock extends ProviderDomain(null, null, Array("host"), null, null, null) {
-  override def checkAerospikeConnection(address: String): ArrayBuffer[String] = ArrayBuffer()
-
-  override def checkCassandraConnection(address: String): ArrayBuffer[String] = ArrayBuffer()
-
   override def checkESConnection(address: String): ArrayBuffer[String] = ArrayBuffer()
 
   override def checkHttpConnection(address: String): ArrayBuffer[String] = ArrayBuffer()

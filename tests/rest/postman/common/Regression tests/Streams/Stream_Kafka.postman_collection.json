@@ -175,8 +175,7 @@
 			"name": "Stream_3.2.1.Get_by_name",
 			"description": "",
 			"collectionId": "bf0d2deb-f963-06d5-e6b5-0fb2d8667930",
-			"responses": [],
-			"rawModeData": "{\r\n      \"type\": \"stream.kafka\",\r\n      \"name\": \"rest-kafka\",\r\n      \"description\": \"Tstream example\",\r\n      \"partitions\": 1,\r\n      \"service\": \"rest-kafka\",\r\n      \"force\": false,\r\n      \"replicationFactor\": 1\r\n}\r\n\r\n"
+			"responses": []
 		},
 		{
 			"id": "24cc53e5-2044-e730-8e4b-84daef07a1cf",
@@ -564,8 +563,7 @@
 			"name": "Stream_3.2.5.Get_not_found",
 			"description": "",
 			"collectionId": "bf0d2deb-f963-06d5-e6b5-0fb2d8667930",
-			"responses": [],
-			"rawModeData": "{\r\n      \"type\": \"stream.kafka\",\r\n      \"name\": \"rest-kafka\",\r\n      \"description\": \"Tstream example\",\r\n      \"partitions\": 1,\r\n      \"service\": \"rest-kafka\",\r\n      \"force\": false,\r\n      \"replicationFactor\": 1\r\n}\r\n\r\n"
+			"responses": []
 		},
 		{
 			"id": "9f5d323b-9846-8be8-723d-41eeb3d45c65",
@@ -648,8 +646,7 @@
 			"name": "Service_5.2.6.Related",
 			"description": "",
 			"collectionId": "bf0d2deb-f963-06d5-e6b5-0fb2d8667930",
-			"responses": [],
-			"rawModeData": "{\r\n      \"type\": \"stream.kafka\",\r\n      \"name\": \"rest-kafka\",\r\n      \"description\": \"Tstream example\",\r\n      \"partitions\": 1,\r\n      \"service\": \"rest-kafka\",\r\n      \"force\": false,\r\n      \"replicationFactor\": 1\r\n}\r\n\r\n"
+			"responses": []
 		},
 		{
 			"id": "b27bd40b-455d-299e-5492-2e2ef4e5dd3f",
@@ -752,8 +749,7 @@
 			"name": "Stream_3.2.6.Get_deleted",
 			"description": "",
 			"collectionId": "bf0d2deb-f963-06d5-e6b5-0fb2d8667930",
-			"responses": [],
-			"rawModeData": "{\r\n      \"type\": \"stream.kafka\",\r\n      \"name\": \"rest-kafka\",\r\n      \"description\": \"Tstream example\",\r\n      \"partitions\": 1,\r\n      \"service\": \"rest-kafka\",\r\n      \"force\": false,\r\n      \"replicationFactor\": 1\r\n}\r\n\r\n"
+			"responses": []
 		},
 		{
 			"id": "c6188030-a8a1-b0a3-5536-4de5d5918e9d",
