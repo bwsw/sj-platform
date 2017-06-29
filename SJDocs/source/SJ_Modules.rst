@@ -139,7 +139,7 @@ Regular module
 -------------------
 A simplified definition of a Regular module is a handler that performs data transformation and put the processed data into a T-stream.
 
-.. figure:: _static/RegularModule.png
+.. figure:: _static/RegularModule2.png
 
 
 In the Regular module the executor provides the following methods that does not perform any work by default so you should define their implementation by yourself.
