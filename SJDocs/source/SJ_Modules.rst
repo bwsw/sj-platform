@@ -121,7 +121,7 @@ Output module
 
 An Output module handles external output from event processing pipeline to external data destinations (Elasticsearch, JDBC, etc.)
 
-.. figure:: _static/OutputModuleStructure.png
+.. figure:: _static/OutputModule.png
 
 It transforms the processing data results into T-streams and put them into an external data storage. It allows to transform one data item from incoming streaming into one and more data output items.
 
