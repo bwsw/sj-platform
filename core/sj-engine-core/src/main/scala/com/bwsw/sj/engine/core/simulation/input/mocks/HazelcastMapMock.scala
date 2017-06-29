@@ -97,7 +97,6 @@ abstract class HazelcastMapMock(config: HazelcastConfig) extends IMap[String, St
     case _ => super.equals(obj)
   }
 
-
   override def removeAsync(key: String): ICompletableFuture[String] = ???
 
   override def setAsync(key: String, value: String): ICompletableFuture[Void] = ???
@@ -262,7 +261,7 @@ object HazelcastMapMock {
 }
 
 case class HazelcastMapValue(value: String, hits: Int, lastAccessTime: Long) {
-  override def equals(obj: scala.Any): Boolean = obj match {
+  override def equals(obj: Any): Boolean = obj match {
     case hazelcastMapValue: HazelcastMapValue =>
       value == hazelcastMapValue.value && hits == hazelcastMapValue.hits
     case _ => super.equals(obj)

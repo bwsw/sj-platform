@@ -26,7 +26,7 @@ import com.bwsw.sj.engine.input.eviction_policy.InputInstanceEvictionPolicy
 import io.netty.buffer.{ByteBuf, Unpooled}
 
 /**
-  * Imitates behavior of [[com.bwsw.sj.engine.input.task.InputTaskEngine InputTaskEngine]] for testing an
+  * Imitates behavior of InputTaskEngine for testing an
   * implementation of [[InputStreamingExecutor]].
   *
   * Usage example:

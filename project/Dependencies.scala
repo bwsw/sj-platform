@@ -77,7 +77,8 @@ object Dependencies {
     ("com.mockrunner" % "mockrunner-jdbc" % "1.1.2" % "test")
       .exclude("jakarta-regexp", "jakarta-regexp")
       .exclude("xerces", "xerces"),
-    "org.mockito" % "mockito-core" % "2.8.9"
+    "org.mockito" % "mockito-core" % "2.8.9",
+    "com.hazelcast" % "hazelcast" % "3.7.3"
   ))
 
   lazy val sjRestDependencies = Def.setting(Seq(
@@ -89,8 +90,7 @@ object Dependencies {
   ))
 
   lazy val sjInputEngineDependencies = Def.setting(Seq(
-    "org.slf4j" % "slf4j-log4j12" % "1.7.22" % "provided",
-    "com.hazelcast" % "hazelcast" % "3.7.3"
+    "org.slf4j" % "slf4j-log4j12" % "1.7.22" % "provided"
   ))
 
   lazy val sjRegularEngineDependencies = Def.setting(Seq(
