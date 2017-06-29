@@ -39,7 +39,7 @@ import io.netty.buffer.{ByteBuf, Unpooled}
   * val evictionPolicy = InputInstanceEvictionPolicy(EngineLiterals.fixTimeEvictionPolicy, hazelcast)
   *
   * val simulator = new InputEngineSimulator(executor, evictionPolicy)
-  * simulator.prepare("1,2,x,2,4")
+  * simulator.prepare(Seq("1", "2", "a", "3", "b")) // byte buffer in simulator will be contatins "1,2,a,3,b,"
   * val outputDataList = simulator.process(duplicateCheck = true)
   * println(outputDataList)
   * }}}
@@ -74,7 +74,7 @@ class InputEngineSimulator[T <: AnyRef](executor: InputStreamingExecutor[T],
     inputBuffer.writeCharSequence(record + separator, charset)
 
   /**
-    * Sends byte buffer to [[executor]]as long as it can tokenize the buffer. Method returns list of [[OutputData]].
+    * Sends byte buffer to [[executor]] as long as it can tokenize the buffer. Method returns list of [[OutputData]].
     *
     * @param duplicateCheck indicates that every envelope has to be checked on duplication
     * @param clearBuffer    indicates that byte buffer must be cleared
@@ -122,7 +122,8 @@ class InputEngineSimulator[T <: AnyRef](executor: InputStreamingExecutor[T],
   * Contains data from outputs of an [[InputStreamingExecutor]]
   *
   * @param inputEnvelope  result of [[InputStreamingExecutor.parse]]
-  * @param isNotDuplicate indicates that [[inputEnvelope]] is not duplicate
+  * @param isNotDuplicate indicates that [[inputEnvelope]] is not duplicate if [[inputEnvelope.isDefined]] or None 
+  *                       otherwise
   * @param response       response that will be sent to a client after an [[inputEnvelope]] has been processed
   * @tparam T type of outgoing data
   */
