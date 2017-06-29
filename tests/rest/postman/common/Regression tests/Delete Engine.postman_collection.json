@@ -1,0 +1,181 @@
+{
+	"id": "023c5d7b-88e7-cf78-5fce-a3dbd1b28138",
+	"name": "Delete Engine",
+	"description": "",
+	"order": [
+		"997f32b3-6cee-14a6-e8f6-05756ef5dfdd",
+		"77dd0124-87a2-d8ae-378f-0df6a11c2c6d",
+		"cf749090-9e4a-80b3-85aa-21c284a18fe1",
+		"8cddc760-8f10-d7f5-719e-fe31021d6905",
+		"5f8ee0cc-8429-0203-cde6-93f85415ce79",
+		"eb9211e9-167e-c2c3-a051-ea2806e4ef3c"
+	],
+	"folders": [],
+	"timestamp": 1491878413604,
+	"owner": "",
+	"public": false,
+	"requests": [
+		{
+			"id": "5f8ee0cc-8429-0203-cde6-93f85415ce79",
+			"headers": "",
+			"url": "{{address}}/v1/custom/jars",
+			"pathVariables": {},
+			"preRequestScript": null,
+			"method": "DELETE",
+			"collectionId": "023c5d7b-88e7-cf78-5fce-a3dbd1b28138",
+			"data": [
+				{
+					"key": "",
+					"value": "sj-regular-streaming-engine-1.0-SNAPSHOT.jar",
+					"type": "file",
+					"enabled": true
+				}
+			],
+			"dataMode": "params",
+			"name": "sj-regular-streaming-engine-1.0-SNAPSHOT",
+			"description": "",
+			"descriptionFormat": "html",
+			"time": 1491878442550,
+			"version": 2,
+			"responses": [],
+			"tests": "tests[\"Status code is 200\"] = responseCode.code === 200;",
+			"currentHelper": "normal",
+			"helperAttributes": {}
+		},
+		{
+			"id": "77dd0124-87a2-d8ae-378f-0df6a11c2c6d",
+			"headers": "",
+			"url": "{{address}}/v1/custom/jars",
+			"pathVariables": {},
+			"preRequestScript": null,
+			"method": "DELETE",
+			"collectionId": "023c5d7b-88e7-cf78-5fce-a3dbd1b28138",
+			"data": [
+				{
+					"key": "",
+					"value": "sj-input-streaming-engine-1.0-SNAPSHOT.jar",
+					"type": "file",
+					"enabled": true
+				}
+			],
+			"dataMode": "params",
+			"name": "sj-input-streaming-engine-1.0-SNAPSHOT",
+			"description": "",
+			"descriptionFormat": "html",
+			"time": 1491878422149,
+			"version": 2,
+			"responses": [],
+			"tests": "tests[\"Status code is 200\"] = responseCode.code === 200;",
+			"currentHelper": "normal",
+			"helperAttributes": {}
+		},
+		{
+			"id": "8cddc760-8f10-d7f5-719e-fe31021d6905",
+			"headers": "",
+			"url": "{{address}}/v1/custom/jars",
+			"pathVariables": {},
+			"preRequestScript": null,
+			"method": "DELETE",
+			"collectionId": "023c5d7b-88e7-cf78-5fce-a3dbd1b28138",
+			"data": [
+				{
+					"key": "",
+					"value": "sj-mesos-framework-1.0-SNAPSHOT.jar",
+					"type": "file",
+					"enabled": true
+				}
+			],
+			"dataMode": "params",
+			"name": "sj-output-streaming-engine-1.0-SNAPSHOT",
+			"description": "",
+			"descriptionFormat": "html",
+			"time": 1491878436486,
+			"version": 2,
+			"responses": [],
+			"tests": "tests[\"Status code is 200\"] = responseCode.code === 200;",
+			"currentHelper": "normal",
+			"helperAttributes": {}
+		},
+		{
+			"id": "997f32b3-6cee-14a6-e8f6-05756ef5dfdd",
+			"headers": "",
+			"url": "{{address}}/v1/custom/jars",
+			"pathVariables": {},
+			"preRequestScript": null,
+			"method": "DELETE",
+			"collectionId": "023c5d7b-88e7-cf78-5fce-a3dbd1b28138",
+			"data": [
+				{
+					"key": "",
+					"value": "",
+					"type": "file",
+					"enabled": true
+				}
+			],
+			"dataMode": "params",
+			"name": "sj-batch-streaming-engine-1.0-SNAPSHOT",
+			"description": "",
+			"descriptionFormat": "html",
+			"time": 1491878413604,
+			"version": 2,
+			"responses": [],
+			"tests": "tests[\"Status code is 200\"] = responseCode.code === 200;",
+			"currentHelper": "normal",
+			"helperAttributes": {}
+		},
+		{
+			"id": "cf749090-9e4a-80b3-85aa-21c284a18fe1",
+			"headers": "",
+			"url": "{{address}}/v1/custom/jars",
+			"pathVariables": {},
+			"preRequestScript": null,
+			"method": "DELETE",
+			"collectionId": "023c5d7b-88e7-cf78-5fce-a3dbd1b28138",
+			"data": [
+				{
+					"key": "",
+					"value": "sj-mesos-framework-1.0-SNAPSHOT.jar",
+					"type": "file",
+					"enabled": true
+				}
+			],
+			"dataMode": "params",
+			"name": "sj-mesos-framework-1.0-SNAPSHOT",
+			"description": "",
+			"descriptionFormat": "html",
+			"time": 1491878430421,
+			"version": 2,
+			"responses": [],
+			"tests": "tests[\"Status code is 200\"] = responseCode.code === 200;",
+			"currentHelper": "normal",
+			"helperAttributes": {}
+		},
+		{
+			"id": "eb9211e9-167e-c2c3-a051-ea2806e4ef3c",
+			"headers": "",
+			"url": "{{address}}/v1/custom/jars",
+			"pathVariables": {},
+			"preRequestScript": null,
+			"method": "DELETE",
+			"collectionId": "023c5d7b-88e7-cf78-5fce-a3dbd1b28138",
+			"data": [
+				{
+					"key": "",
+					"value": "sj-transaction-generator-1.0-SNAPSHOT.jar",
+					"type": "file",
+					"enabled": true
+				}
+			],
+			"dataMode": "params",
+			"name": "sj-transaction-generator-1.0-SNAPSHOT",
+			"description": "",
+			"descriptionFormat": "html",
+			"time": 1491878447629,
+			"version": 2,
+			"responses": [],
+			"tests": "tests[\"Status code is 200\"] = responseCode.code === 200;",
+			"currentHelper": "normal",
+			"helperAttributes": {}
+		}
+	]
+}
