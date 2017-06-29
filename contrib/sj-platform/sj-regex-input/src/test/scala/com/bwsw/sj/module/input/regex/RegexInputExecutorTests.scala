@@ -55,7 +55,7 @@ class RegexInputExecutorTests extends FlatSpec with Matchers with MockitoSugar {
   val defaultValue = "0"
 
   val rule1 = Rule(
-    regex = s"""^(?<$field1Name>\w+),(?<$field2Name>\d+),(?<$field3Name>\w+)""",
+    regex = s"^(?<$field1Name>\\w+),(?<$field2Name>\\d+),(?<$field3Name>\\w+)",
     fields = List(
       Field(field1Name, defaultValue, "string"),
       Field(field2Name, defaultValue, "int"),
@@ -65,12 +65,12 @@ class RegexInputExecutorTests extends FlatSpec with Matchers with MockitoSugar {
     distribution = List(field2Name))
 
   val rule2 = Rule(
-    regex = s"""^(?<$field1Name>\d+),(?<$field2Name>\w+),(?<$field3Name>\d+)""",
+    regex = s"^(?<$field1Name>\\d+),(?<$field2Name>\\w+),(?<$field3Name>\\d+)",
     fields = List(
       Field(field1Name, defaultValue, "int"),
       Field(field2Name, defaultValue, "string"),
       Field(field3Name, defaultValue, "int")),
-    outputStream = outputStream1.name,
+    outputStream = outputStream2.name,
     uniqueKey = List(field2Name),
     distribution = List(field3Name))
 
@@ -95,6 +95,73 @@ class RegexInputExecutorTests extends FlatSpec with Matchers with MockitoSugar {
   val serializedOptions = serializer.serialize(options)
   val manager = new InputEnvironmentManager(serializedOptions, Array(outputStream1, outputStream2, fallbackStream))
   val hazelcastConfig = HazelcastConfig(600, 1, 1, EngineLiterals.lruDefaultEvictionPolicy, 100)
+
+
+  "RegexInputExecutor" should "handle correct input data properly" in new TestPreparation {
+    val duplicatedField1Value = "duplicatedField1"
+    val duplicatedField2Value = "duplicatedField2"
+    val duplicatedField3Value = "duplicatedField3"
+
+    val correctInputDataList = Seq(
+      CorrectInputData1("value11", 1, "value13"),
+      CorrectInputData2(1, "value12", 10),
+      CorrectInputData1(duplicatedField1Value, 101, duplicatedField3Value),
+      CorrectInputData1("value21", 2, "value23"),
+      CorrectInputData2(201, duplicatedField2Value, 301),
+      CorrectInputData2(2, "value22", 20),
+      CorrectInputData1("value31", 3, "value33"),
+      CorrectInputData2(202, duplicatedField2Value, 302, isNotDuplicate = false),
+      CorrectInputData1(duplicatedField1Value, 102, duplicatedField3Value, isNotDuplicate = false),
+      CorrectInputData2(203, duplicatedField2Value, 303, isNotDuplicate = false),
+      CorrectInputData1(duplicatedField1Value, 103, duplicatedField3Value, isNotDuplicate = false),
+      CorrectInputData2(3, "value32", 30))
+
+    simulator.prepare(correctInputDataList.map(_.toString))
+
+    val expectedOutputDataList = correctInputDataList.map(_.createOutputData)
+    val outputDataList = simulator.process(duplicateCheck = false)
+    // In this case value of duplicateCheck does not have any effect because
+    // the RegexInputExecutor forces envelopes to be checked on duplicate
+
+    outputDataList shouldBe expectedOutputDataList
+  }
+
+
+  val duplicatedIncorrectLine = "duplicated line that does not matches"
+
+  it should "handle incorrect input data properly (default duplication checking is disabled)" in new TestPreparation {
+    val incorrectInputDataList = Seq(
+      IncorrectInputData("line that does not matches 1"),
+      IncorrectInputData(duplicatedIncorrectLine),
+      IncorrectInputData("line that does not matches 2"),
+      IncorrectInputData(duplicatedIncorrectLine),
+      IncorrectInputData("line that does not matches 3"),
+      IncorrectInputData(duplicatedIncorrectLine))
+
+    simulator.prepare(incorrectInputDataList.map(_.toString))
+
+    val expectedOutputDataList = incorrectInputDataList.map(_.createOutputData(fallbackDistributor.getNextPartition()))
+    val outputDataList = simulator.process(duplicateCheck = false)
+
+    outputDataList shouldBe expectedOutputDataList
+  }
+
+  it should "handle incorrect input data properly (default duplication checking is enabled)" in new TestPreparation {
+    val incorrectInputDataList = Seq(
+      IncorrectInputData("line that does not matches 1"),
+      IncorrectInputData(duplicatedIncorrectLine),
+      IncorrectInputData("line that does not matches 2"),
+      IncorrectInputData(duplicatedIncorrectLine, isNotDuplicate = false),
+      IncorrectInputData("line that does not matches 3"),
+      IncorrectInputData(duplicatedIncorrectLine, isNotDuplicate = false))
+
+    simulator.prepare(incorrectInputDataList.map(_.toString))
+
+    val expectedOutputDataList = incorrectInputDataList.map(_.createOutputData(fallbackDistributor.getNextPartition()))
+    val outputDataList = simulator.process(duplicateCheck = true)
+
+    outputDataList shouldBe expectedOutputDataList
+  }
 
 
   trait TestPreparation {
@@ -125,7 +192,7 @@ class RegexInputExecutorTests extends FlatSpec with Matchers with MockitoSugar {
     override def createInputEnvelope: InputEnvelope[Record] = {
       InputEnvelope(
         key,
-        Seq((outputStream2.name, getPartitionByHash)),
+        Seq((outputStream1.name, getPartitionByHash)),
         createAvroRecord,
         Some(true))
     }
@@ -146,7 +213,7 @@ class RegexInputExecutorTests extends FlatSpec with Matchers with MockitoSugar {
     override def createInputEnvelope: InputEnvelope[Record] = {
       InputEnvelope(
         key,
-        Seq((outputStream1.name, getPartitionByHash)),
+        Seq((outputStream2.name, getPartitionByHash)),
         createAvroRecord,
         Some(true))
     }
