@@ -113,7 +113,7 @@ InputStreamingResponse:
  
 - sendResponsesNow - a boolean flag denoting whether response should be saved in temporary storage or all responses from this storage should be send to the source right now (including this one)
  
-To see a flow chart about how these methods intercommunicate, please, visit the `Input Streaming Engine`_ page.
+.. To see a flow chart about how these methods intercommunicate, please, visit the `Input Streaming Engine`_ page.
 
 
 Output module
@@ -188,7 +188,7 @@ Inside of the module there is a manager allowing to get an access to:
 - list of output names (by calling "getStreamsByTags()"). Every output contains its own set of tags which are used to retrieve it. 
 -  initiation of checkpoint (by calling "initiateCheckpoint()").
 
-To see a flow chart on how these methods intercommunicate see the page `Regular Streaming Engine`_ .
+.. To see a flow chart on how these methods intercommunicate see the page `Regular Streaming Engine`_ .
 
 
 Batch module
@@ -328,7 +328,7 @@ The following handlers are used for synchronizing the tasks' work. It can be use
 
 .. 4) "onLeaderLeave": It is invoked by a leader-task after passing an output barrier
 
-To see a flow chart about how these methods intercommunicate see the page `Batch Streaming Engine`_ .
+.. To see a flow chart about how these methods intercommunicate see the page `Batch Streaming Engine`_ .
 
 The Batch module can either have a state or not. A state is a sort of a key-value storage and can be used to keep some global module variables related to processing. These variables are persisted and are recovered after a fail. A fail means that something is going wrong in one of the methods described above. In this case a whole module will be restarted. And the work will start on onInit method invocation.
 There is a manager inside module which grants access to:
@@ -343,9 +343,10 @@ There is a manager inside module which grants access to:
 A Batch and a Regular modules may have a state. A state is a sort of a key-value storage that can be used to keep some global module variables related to processing. These variables are persisted and are recovered after a fail. A fail means that something is going wrong in one of the methods used in an executor. In this case a whole module will be restarted. 
 The state is performed alongside with the checkpoint. At a checkpoint the data received after processing is checked for completeness. The checkpoint is an event that provides an exactly-once processing. 
 
-A detailed manual on how to write a module you may find at `page`_ .
+.. A detailed manual on how to write a module you may find at `page`_ .
 
-Modules` performance is determined with the work of engine. An engine structure, components and  the workflow are determined with the type of module. Please, find more information about engines at the `Engines`_  page.
+Modules` performance is determined with the work of engine. An engine structure, components and  the workflow are determined with the type of module. 
+.. Please, find more information about engines at the `Engines`_  page.
 
 
 Prerequisites For Modules. Streaming Components.
