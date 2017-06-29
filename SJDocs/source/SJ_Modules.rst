@@ -370,7 +370,7 @@ As stated above, modules process the data arranged in streams. The Stream Juggle
 
 To transform data into a stream of exact type you need to create a service and a provider for this service. The type of a service and a provider is determined by the type of a stream you need for the module.
 
-For example, a Batch module that receives data from Kafka or T-streams will require a Kafka service (KfkQ) and two provider types for it: Kafka and ZooKeeper. 
+For example, a Batch module that receives data from Kafka will require a Kafka service (KfkQ) and two provider types for it: Kafka and ZooKeeper. 
 
 .. Or if you work with an Output module and you want to store the processed data to ElasticSearch index, you are going to work with  the ElasticSearch output type stream that in its turn requires a service and a provider of ElasticSearch type.
 
