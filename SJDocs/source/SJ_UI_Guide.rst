@@ -9,6 +9,8 @@ Juggler is a real time stream processing platform designed for building both sim
 
 Juggler uses Apache Messos, Kafka and T-streams to construct scalable and flexible processing algorithms. Juggler functions on the same principle as Apache Samza, but enables exactly-once processing and provides an integrated solution with a RESTful interface, JavaScript UI and an ad hoc repository for modules, services, streams and other data processing pipeline components.
 
+.. contents:: Contents
+
 Overview
 --------
 
@@ -470,7 +472,7 @@ Instances
 ---------
 Module uses a specific instance to personalize its work.
 
-Instance is a full range of settings to perfom an exact executor type.
+Instance is a full range of settings to perform an exact executor type.
 
 Before creating an instance make sure all necessary *configuration* *settings* are added to the system.
 

@@ -48,7 +48,7 @@ abstract class BatchCollector(protected val instance: BatchInstanceDomain,
   def onReceive(envelope: Envelope): Unit = {
     logger.debug(s"Invoke onReceive() handler.")
     registerEnvelope(envelope)
-    afterReceivingEnvelope(envelope)
+    afterEnvelopeReceive(envelope)
   }
 
   private def registerEnvelope(envelope: Envelope): Unit = {
@@ -66,7 +66,7 @@ abstract class BatchCollector(protected val instance: BatchInstanceDomain,
     batch
   }
 
-  protected def afterReceivingEnvelope(envelope: Envelope): Unit
+  protected def afterEnvelopeReceive(envelope: Envelope): Unit
 
   def getBatchesToCollect(): Seq[String]
 

@@ -28,6 +28,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore
   * Entity for execution plan of [[InstanceDomain]] and auxilary methods to fill it
   * [[ExecutionPlan]] doesn't exist in [[InputInstanceDomain]]. It contains [[InputInstanceDomain.tasks]] instead
   *
+  * Execution plan consists of tasks. Count of tasks equals to a parallelism parameter [[InstanceDomain.parallelism]].
+  * Each task has a unique name within execution plan. Also the task has a set of input stream names and their intervals of partitions.
+  * Altogether it provides the information of the sources from which the data will be consumed.
+  *
   * @author Kseniya Tomskikh
   */
 class ExecutionPlan(var tasks: java.util.Map[String, Task] = new util.HashMap()) {
