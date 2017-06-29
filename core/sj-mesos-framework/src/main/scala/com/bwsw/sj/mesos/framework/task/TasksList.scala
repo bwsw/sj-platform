@@ -167,15 +167,15 @@ object TasksList {
 
       var availablePorts = ports.getRanges.getRangeList.asScala.map(_.getBegin.toString)
 
-    val host = OffersHandler.getOfferIp(offer)
-    TasksList(task).foreach(task => task.update(host=host))
-    if (FrameworkUtil.instance.get.moduleType.equals(EngineLiterals.inputStreamingType)) {
-      taskPort = availablePorts.head
-      availablePorts = availablePorts.tail
-      val inputInstance = FrameworkUtil.instance.get.asInstanceOf[InputInstance]
-      inputInstance.tasks.put(task, new InputTask(host, taskPort.toInt))
-      inject[ConnectionRepository].getInstanceRepository.save(FrameworkUtil.instance.get.to)
-    }
+      val host = OffersHandler.getOfferIp(offer)
+      TasksList(task).foreach(task => task.update(host=host))
+      if (FrameworkUtil.instance.get.moduleType.equals(EngineLiterals.inputStreamingType)) {
+        taskPort = availablePorts.head
+        availablePorts = availablePorts.tail
+        val inputInstance = FrameworkUtil.instance.get.asInstanceOf[InputInstance]
+        inputInstance.tasks.put(task, new InputTask(host, taskPort.toInt))
+        inject[ConnectionRepository].getInstanceRepository.save(FrameworkUtil.instance.get.to)
+      }
 
       agentPorts = availablePorts.mkString(",")
       agentPorts.dropRight(1)
@@ -231,13 +231,22 @@ object TasksList {
         .addVariables(Environment.Variable.newBuilder.setName("AGENTS_HOST").setValue(OffersHandler.getOfferIp(offer)))
         .addVariables(Environment.Variable.newBuilder.setName("AGENTS_PORTS").setValue(getAgentPorts))
         .addVariables(Environment.Variable.newBuilder.setName("INSTANCE_HOSTS").setValue(getInstanceHosts))
+        .addVariables(Environment.Variable.newBuilder.setName("MONGO_HOSTS").setValue(FrameworkUtil.params {"mongodbHosts"}))
+        //TODO add env, set right value.
+//        .addVariables(Environment.Variable.newBuilder.setName("ENTRY_PORT").setValue("8888"))
         .build()
     }
 
+    FrameworkUtil.getModuleUrl(FrameworkUtil.instance.get)
+    println("java " + FrameworkUtil.getJvmOptions + " -jar " + FrameworkUtil.jarName.get)
+
+    val env = getEnvironments
+    println(env)
     CommandInfo.newBuilder
       .addUris(CommandInfo.URI.newBuilder.setValue(FrameworkUtil.getModuleUrl(FrameworkUtil.instance.get)))
-      .setValue("java " + FrameworkUtil.getJvmOptions + " -jar " + FrameworkUtil.jarName)
+      .setValue("java " + FrameworkUtil.getJvmOptions + " -jar " + FrameworkUtil.jarName.get)
       .setEnvironment(getEnvironments).build()
+
   }
 
 

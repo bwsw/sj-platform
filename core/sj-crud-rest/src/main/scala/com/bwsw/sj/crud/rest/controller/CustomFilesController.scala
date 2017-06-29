@@ -63,9 +63,7 @@ class CustomFilesController(implicit protected val injector: Injector) extends C
           ConflictRestResponse(MessageResponseEntity(
             createMessage("rest.custom.files.file.exists", entity.filename.get)))
       }
-      file.delete()
     }
-    entity.file.foreach(_.delete())
 
     response
   }

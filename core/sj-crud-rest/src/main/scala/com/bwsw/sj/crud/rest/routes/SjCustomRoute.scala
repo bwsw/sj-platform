@@ -72,7 +72,9 @@ trait SjCustomRoute extends Directives with SjCrudRestServer with CompletionUtil
               uploadedFile("jar") {
                 case (metadata: FileInfo, file: File) =>
                   val fileMetadataApi = new FileMetadataApi(filename = Some(metadata.fileName), file = Some(file))
-                  complete(restResponseToHttpResponse(customJarsController.create(fileMetadataApi)))
+                  val response = customJarsController.create(fileMetadataApi)
+                  file.delete()
+                  complete(restResponseToHttpResponse(response))
               }
             } ~
               get {
@@ -101,7 +103,9 @@ trait SjCustomRoute extends Directives with SjCrudRestServer with CompletionUtil
                   case Success(allParts) =>
                     val fileMetadataApi = new FileMetadataApi(filename = filename, customFileParts = allParts, file = Some(file))
 
-                    complete(restResponseToHttpResponse(customFilesController.create(fileMetadataApi)))
+                    val response = customFilesController.create(fileMetadataApi)
+                    file.delete()
+                    complete(restResponseToHttpResponse(response))
                   case Failure(throwable) =>
                     file.delete()
                     throw throwable

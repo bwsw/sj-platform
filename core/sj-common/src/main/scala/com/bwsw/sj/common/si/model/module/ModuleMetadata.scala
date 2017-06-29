@@ -19,6 +19,7 @@
 package com.bwsw.sj.common.si.model.module
 
 import java.io.File
+import java.net.URLClassLoader
 
 import com.bwsw.sj.common.dal.model.module.FileMetadataDomain
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
@@ -87,7 +88,7 @@ class ModuleMetadata(filename: String,
     val errors = new ArrayBuffer[String]
     if (file.isDefined) {
       Try {
-        createClassLoader(file.get.getName)
+        createClassLoader(filename)
       } match {
         case Success(classLoader) =>
           implementations.foreach {
@@ -130,7 +131,11 @@ class ModuleMetadata(filename: String,
       .nonEmpty
   }
 
-  protected def createClassLoader(filename: String) = new FileClassLoader(inject[ConnectionRepository].getFileStorage, filename)
+  protected def createClassLoader(filename: String): ClassLoader = {
+//    new FileClassLoader(inject[ConnectionRepository].getFileStorage, filename)
+    println(file.get.getName)
+    new URLClassLoader(Array(file.get.toURI.toURL), ClassLoader.getSystemClassLoader)
+  }
 }
 
 class ModuleMetadataCreator {

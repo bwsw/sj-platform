@@ -57,8 +57,6 @@ class CustomJarsController(implicit protected val injector: Injector) extends Co
       response
     }
 
-    entity.file.get.delete()
-
     triedCustomJar.get
   }
 

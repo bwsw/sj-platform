@@ -78,7 +78,6 @@ abstract class TaskManager(implicit injector: Injector) {
   setTStreamFactoryProperties()
 
   protected var currentPortNumber: Int = 0
-  private val storage: MongoFileStorage = connectionRepository.getFileStorage
 
   protected val fileMetadata: FileMetadataDomain = connectionRepository.getFileMetadataRepository.getByParameters(
     Map("specification.name" -> instance.moduleName,
@@ -90,7 +89,7 @@ abstract class TaskManager(implicit injector: Injector) {
 
   protected val executorClass: Class[_] = {
     val _class = moduleClassLoader.loadClass(executorClassName)
-    moduleClassLoader.close()
+//    moduleClassLoader.close()
     _class
   }
 
@@ -147,18 +146,12 @@ abstract class TaskManager(implicit injector: Injector) {
   }
 
   protected def createClassLoader(): ClosableClassLoader = {
-    val file = getModuleJar
     logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
-      s"Get class loader for jar file: ${file.getName}.")
+      s"Get file contains uploaded '${instance.moduleName}' module jar.")
 
-    val classLoader: ClosableClassLoader = new FileClassLoader(inject[ConnectionRepository].getFileStorage, file.getName)
+    val classLoader: ClosableClassLoader = new FileClassLoader(inject[ConnectionRepository].getFileStorage, fileMetadata.filename)
 
     classLoader
-  }
-
-  private def getModuleJar: File = {
-    logger.debug(s"Instance name: $instanceName, task name: $taskName. Get file contains uploaded '${instance.moduleName}' module jar.")
-    storage.get(fileMetadata.filename, s"tmp/${instance.moduleName}")
   }
 
   @throws(classOf[Exception])
