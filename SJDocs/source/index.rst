@@ -18,11 +18,9 @@ Contents:
    :maxdepth: 2
 
    SJ_Overview
-   Platform Architecture
    SJ_Modules
-   SJ_REST API Documentation
    SJ_UI_Guide
-   Glossary
+
    
  
 
