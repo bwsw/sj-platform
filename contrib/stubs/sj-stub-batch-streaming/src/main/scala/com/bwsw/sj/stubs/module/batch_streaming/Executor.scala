@@ -40,7 +40,7 @@ class Executor(manager: ModuleEnvironmentManager) extends BatchStreamingExecutor
 
   override def onWindow(windowRepository: WindowRepository): Unit = {
     val outputs = manager.getStreamsByTags(Array("output"))
-    val output = manager.getRoundRobinOutput(outputs(new Random().nextInt(outputs.length)))
+    val output = manager.getRoundRobinOutput(outputs(new Random().nextInt(outputs.length)), this)
     var sum = state.get("sum").asInstanceOf[Int]
     val allWindows = windowRepository.getAll()
 
@@ -57,10 +57,10 @@ class Executor(manager: ModuleEnvironmentManager) extends BatchStreamingExecutor
     })
 
     allWindows.flatMap(x => x._2.batches.slice(begin, end)).flatMap(x => x.envelopes).foreach {
-      case kafkaEnvelope: KafkaEnvelope[Integer @unchecked] =>
+      case kafkaEnvelope: KafkaEnvelope[Integer@unchecked] =>
         sum += kafkaEnvelope.data
         state.set("sum", sum)
-      case tstreamEnvelope: TStreamEnvelope[Integer @unchecked] =>
+      case tstreamEnvelope: TStreamEnvelope[Integer@unchecked] =>
         tstreamEnvelope.data.foreach(x => {
           sum += x
         })
@@ -87,10 +87,10 @@ class Executor(manager: ModuleEnvironmentManager) extends BatchStreamingExecutor
   }
 
   /**
-   * Handler triggered before save state
-   *
-   * @param isFullState Flag denotes that full state (true) or partial changes of state (false) will be saved
-   */
+    * Handler triggered before save state
+    *
+    * @param isFullState Flag denotes that full state (true) or partial changes of state (false) will be saved
+    */
   override def onBeforeStateSave(isFullState: Boolean): Unit = {
     println("on before state saving")
   }

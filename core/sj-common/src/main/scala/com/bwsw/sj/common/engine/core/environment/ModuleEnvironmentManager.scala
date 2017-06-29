@@ -18,6 +18,7 @@
  */
 package com.bwsw.sj.common.engine.core.environment
 
+import com.bwsw.common.SerializerInterface
 import com.bwsw.sj.common.dal.model.instance.InstanceDomain
 import com.bwsw.sj.common.dal.model.stream.StreamDomain
 import com.bwsw.sj.common.utils.SjTimer
@@ -28,6 +29,7 @@ import com.bwsw.tstreams.agents.producer.Producer
 
 import scala.collection._
 import com.bwsw.sj.common.utils.EngineLiterals
+
 /**
   * Provides for user methods that can be used in [[EngineLiterals.regularStreamingType]] or [[EngineLiterals.batchStreamingType]] module
   *
@@ -55,7 +57,7 @@ class ModuleEnvironmentManager(options: String,
     * @param streamName Name of output stream
     * @return Partitioned output that wrapping output stream
     */
-  def getPartitionedOutput(streamName: String): PartitionedOutput = {
+  def getPartitionedOutput(streamName: String, serializer: SerializerInterface): PartitionedOutput = {
     logger.info(s"Get partitioned output for stream: $streamName\n")
     if (producers.contains(streamName)) {
       if (producerPolicyByOutput.contains(streamName)) {
@@ -67,7 +69,8 @@ class ModuleEnvironmentManager(options: String,
           throw new Exception(s"For output stream: $streamName partitioned output is set")
         }
       } else {
-        producerPolicyByOutput(streamName) = ("partitioned", new PartitionedOutput(producers(streamName), performanceMetrics, classLoader))
+        producerPolicyByOutput(streamName) = ("partitioned",
+          new PartitionedOutput(producers(streamName), performanceMetrics, classLoader, serializer))
 
         producerPolicyByOutput(streamName)._2.asInstanceOf[PartitionedOutput]
       }
@@ -83,7 +86,7 @@ class ModuleEnvironmentManager(options: String,
     * @param streamName Name of output stream
     * @return Round-robin output that wrapping output stream
     */
-  def getRoundRobinOutput(streamName: String): RoundRobinOutput = {
+  def getRoundRobinOutput(streamName: String, serializer: SerializerInterface): RoundRobinOutput = {
     logger.info(s"Get round-robin output for stream: $streamName\n")
     if (producers.contains(streamName)) {
       if (producerPolicyByOutput.contains(streamName)) {
@@ -95,7 +98,8 @@ class ModuleEnvironmentManager(options: String,
           throw new Exception(s"For output stream: $streamName partitioned output is set")
         }
       } else {
-        producerPolicyByOutput(streamName) = ("round-robin", new RoundRobinOutput(producers(streamName), performanceMetrics, classLoader))
+        producerPolicyByOutput(streamName) = ("round-robin",
+          new RoundRobinOutput(producers(streamName), performanceMetrics, classLoader, serializer))
 
         producerPolicyByOutput(streamName)._2.asInstanceOf[RoundRobinOutput]
       }

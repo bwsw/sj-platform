@@ -18,6 +18,7 @@
  */
 package com.bwsw.sj.common.engine.core.environment
 
+import com.bwsw.common.SerializerInterface
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.common.engine.core.entities.{KafkaEnvelope, TStreamEnvelope}
 import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
@@ -37,8 +38,9 @@ import scala.collection._
 
 class PartitionedOutput(producer: Producer,
                         performanceMetrics: PerformanceMetrics,
-                        classLoader: ClassLoader)
-  extends ModuleOutput(performanceMetrics, classLoader) {
+                        classLoader: ClassLoader,
+                        serializer: SerializerInterface)
+  extends ModuleOutput(performanceMetrics, classLoader, serializer) {
 
   private val transactions = mutable.Map[Int, ProducerTransaction]()
   private val streamName = producer.stream.name

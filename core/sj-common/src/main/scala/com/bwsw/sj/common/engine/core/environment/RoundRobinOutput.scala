@@ -18,6 +18,7 @@
  */
 package com.bwsw.sj.common.engine.core.environment
 
+import com.bwsw.common.SerializerInterface
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.common.engine.core.entities.{KafkaEnvelope, TStreamEnvelope}
 import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
@@ -36,7 +37,9 @@ import com.bwsw.tstreams.agents.producer.{NewProducerTransactionPolicy, Producer
 
 class RoundRobinOutput(producer: Producer,
                        performanceMetrics: PerformanceMetrics,
-                       classLoader: ClassLoader) extends ModuleOutput(performanceMetrics, classLoader) {
+                       classLoader: ClassLoader,
+                       serializer: SerializerInterface)
+  extends ModuleOutput(performanceMetrics, classLoader, serializer) {
 
   private var maybeTransaction: Option[ProducerTransaction] = None
   private val streamName = producer.stream.name

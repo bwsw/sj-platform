@@ -102,7 +102,7 @@ abstract class InputTaskEngine(manager: InputTaskManager,
   private def sendData(stream: String, partition: Int, data: AnyRef): Unit = {
     logger.info(s"Task name: ${manager.taskName}. Send envelope to each output stream..")
     val maybeTransaction = getTransaction(stream, partition)
-    val bytes = manager.envelopeDataSerializer.serialize(data)
+    val bytes = executor.serialize(data)
     val producerTransaction = maybeTransaction match {
       case Some(transaction) =>
         logger.debug(s"Task name: ${manager.taskName}. Txn for stream/partition: '$stream/$partition' is defined.")

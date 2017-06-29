@@ -18,11 +18,11 @@
  */
 package com.bwsw.sj.common.engine.core.environment
 
-import com.bwsw.sj.common.engine.DefaultEnvelopeDataSerializer
-import com.bwsw.sj.common.utils.EngineLiterals
-import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
-import org.slf4j.{Logger, LoggerFactory}
+import com.bwsw.common.SerializerInterface
 import com.bwsw.sj.common.engine.core.entities._
+import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
+import com.bwsw.sj.common.utils.EngineLiterals
+import org.slf4j.{Logger, LoggerFactory}
 
 /**
   * Common class that is a wrapper for output stream
@@ -31,7 +31,8 @@ import com.bwsw.sj.common.engine.core.entities._
   * @param classLoader        it is needed for loading some custom classes from module jar to serialize/deserialize envelope data
   *                           (ref. [[TStreamEnvelope.data]] or [[KafkaEnvelope.data]])
   */
-class ModuleOutput(performanceMetrics: PerformanceMetrics, classLoader: ClassLoader) {
+class ModuleOutput(performanceMetrics: PerformanceMetrics,
+                   classLoader: ClassLoader,
+                   protected val objectSerializer: SerializerInterface) {
   protected val logger: Logger = LoggerFactory.getLogger(this.getClass)
-  protected val objectSerializer: DefaultEnvelopeDataSerializer = new DefaultEnvelopeDataSerializer(classLoader)
 }
