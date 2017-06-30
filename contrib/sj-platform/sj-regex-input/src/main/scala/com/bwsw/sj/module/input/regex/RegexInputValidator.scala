@@ -25,6 +25,7 @@ import com.bwsw.sj.common.engine.{StreamingValidator, ValidationInfo}
 import com.bwsw.sj.common.utils.ValidationUtils._
 
 import scala.collection.mutable.ArrayBuffer
+import scala.util.Try
 
 /**
   * Implementation of Streaming Validator for Regex Input module
@@ -40,8 +41,7 @@ class RegexInputValidator extends StreamingValidator {
     */
   override def validate(options: String): ValidationInfo = {
     def validateField(field: Field) =
-      isRequiredStringField(Option(field._type)) &&
-        isRequiredStringField(Option(field.defaultValue)) &&
+      Try(Field.convertType(field._type)(field.defaultValue)).isSuccess &&
         isRequiredStringField(Option(field.name))
 
     def validateRule(rule: Rule) =

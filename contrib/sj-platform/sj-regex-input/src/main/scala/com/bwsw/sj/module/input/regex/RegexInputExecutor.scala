@@ -119,7 +119,10 @@ class RegexInputExecutor(manager: InputEnvironmentManager) extends InputStreamin
 
         case r :: rs if data.matches(r.regex) =>
           logger.debug(s"Data $data matched with regex ${r.regex}")
-          buildOutputEnvelope(data, r)
+          Try(buildOutputEnvelope(data, r)) match {
+            case Success(inputEnvelope) => inputEnvelope
+            case Failure(_) => handleByRules(rs)
+          }
 
         case r :: rs =>
           logger.debug(s"Data $data was not match with regex ${r.regex}")
@@ -143,10 +146,12 @@ class RegexInputExecutor(manager: InputEnvironmentManager) extends InputStreamin
     // Used to find the match in the data using the regex pattern
     if (ruleMatcher.find()) {
       rule.fields.foreach { field =>
-        val fieldValue = Try[String](ruleMatcher.group(field.name)) match {
+        val fieldStringValue = Try(ruleMatcher.group(field.name)) match {
           case Success(value) => value
           case Failure(_) => field.defaultValue
         }
+
+        val fieldValue = Field.convertType(field._type)(fieldStringValue)
         record.put(field.name, fieldValue)
       }
     }
@@ -187,7 +192,11 @@ class RegexInputExecutor(manager: InputEnvironmentManager) extends InputStreamin
     def createSchemaInner(fieldList: List[Field], scheme: FieldAssembler[Schema]): Schema = {
       fieldList match {
         case Nil => scheme.endRecord()
-        case f :: fs => createSchemaInner(fs, scheme.name(f.name).`type`().stringType().stringDefault(f.defaultValue))
+        case f :: fs =>
+          createSchemaInner(
+            fs,
+            scheme.name(f.name).`type`(f._type)
+              .withDefault(Field.convertType(f._type)(f.defaultValue)))
       }
     }
 
