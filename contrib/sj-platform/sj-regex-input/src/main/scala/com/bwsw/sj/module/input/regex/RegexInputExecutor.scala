@@ -20,14 +20,14 @@ package com.bwsw.sj.module.input.regex
 
 import java.util.regex.Pattern
 
-import com.bwsw.common.JsonSerializer
+import com.bwsw.common.{AvroSerializer, JsonSerializer}
 import com.bwsw.sj.common.dal.model.stream.{KafkaStreamDomain, StreamDomain, TStreamStreamDomain}
-import com.bwsw.sj.common.utils.stream_distributor.{ByHash, StreamDistributor}
-import com.bwsw.sj.common.utils.{AvroRecordUtils, StreamLiterals}
 import com.bwsw.sj.common.engine.core.entities.InputEnvelope
 import com.bwsw.sj.common.engine.core.environment.InputEnvironmentManager
 import com.bwsw.sj.common.engine.core.input.utils.Tokenizer
 import com.bwsw.sj.common.engine.core.input.{InputStreamingExecutor, Interval}
+import com.bwsw.sj.common.utils.stream_distributor.{ByHash, StreamDistributor}
+import com.bwsw.sj.common.utils.{AvroRecordUtils, StreamLiterals}
 import io.netty.buffer.ByteBuf
 import org.apache.avro.SchemaBuilder.FieldAssembler
 import org.apache.avro.generic.GenericData.Record
@@ -46,8 +46,9 @@ import scala.util.{Failure, Success, Try}
   */
 class RegexInputExecutor(manager: InputEnvironmentManager) extends InputStreamingExecutor[Record](manager) {
   private val logger = LoggerFactory.getLogger(this.getClass)
-  private val serializer = new JsonSerializer
-  private val regexInputOptions = serializer.deserialize[RegexInputOptions](manager.options)
+  private val jsonSerializer = new JsonSerializer
+  private val avroSerializer = new AvroSerializer
+  private val regexInputOptions = jsonSerializer.deserialize[RegexInputOptions](manager.options)
 
   private val outputSchemas = regexInputOptions.rules.map(r => r -> createOutputSchema(r.fields)).toMap
   private val outputDistributors = regexInputOptions.rules.map(r => r -> createOutputDistributor(r)).toMap
@@ -97,6 +98,8 @@ class RegexInputExecutor(manager: InputEnvironmentManager) extends InputStreamin
 
     policyHandler(line)
   }
+
+  override def serialize(obj: AnyRef): Array[Byte] = avroSerializer.serialize(obj)
 
   private def handleDataWithCheckEveryPolicy(data: String): Option[InputEnvelope[Record]] = {
     // TODO: Change behavior for check-every policy

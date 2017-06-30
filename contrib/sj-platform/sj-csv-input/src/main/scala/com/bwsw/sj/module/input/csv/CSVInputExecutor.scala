@@ -18,14 +18,14 @@
  */
 package com.bwsw.sj.module.input.csv
 
-import com.bwsw.common.JsonSerializer
+import com.bwsw.common.{AvroSerializer, JsonSerializer}
 import com.bwsw.sj.common.dal.model.stream.{KafkaStreamDomain, StreamDomain, TStreamStreamDomain}
-import com.bwsw.sj.common.utils.stream_distributor.{ByHash, StreamDistributor}
-import com.bwsw.sj.common.utils.{AvroRecordUtils, StreamLiterals}
 import com.bwsw.sj.common.engine.core.entities.InputEnvelope
 import com.bwsw.sj.common.engine.core.environment.InputEnvironmentManager
 import com.bwsw.sj.common.engine.core.input.utils.Tokenizer
 import com.bwsw.sj.common.engine.core.input.{InputStreamingExecutor, Interval}
+import com.bwsw.sj.common.utils.stream_distributor.{ByHash, StreamDistributor}
+import com.bwsw.sj.common.utils.{AvroRecordUtils, StreamLiterals}
 import com.opencsv.CSVParserBuilder
 import io.netty.buffer.ByteBuf
 import org.apache.avro.SchemaBuilder
@@ -41,8 +41,9 @@ import scala.util.{Failure, Success, Try}
   * @author Pavel Tomskikh
   */
 class CSVInputExecutor(manager: InputEnvironmentManager) extends InputStreamingExecutor[Record](manager) {
-  private val serializer = new JsonSerializer
-  private val csvInputOptions = serializer.deserialize[CSVInputOptions](manager.options)
+  private val jsonSerializer = new JsonSerializer
+  private val avroSerializer = new AvroSerializer
+  private val csvInputOptions = jsonSerializer.deserialize[CSVInputOptions](manager.options)
   private val uniqueKey = {
     if (csvInputOptions.uniqueKey.nonEmpty)
       csvInputOptions.uniqueKey
@@ -113,6 +114,8 @@ class CSVInputExecutor(manager: InputEnvironmentManager) extends InputStreamingE
       case Failure(_) => buildFallbackEnvelope(line)
     }
   }
+
+  override def serialize(obj: AnyRef): Array[Byte] = avroSerializer.serialize(obj)
 
   private def buildFallbackEnvelope(data: String): Option[InputEnvelope[Record]] = {
     val record = new Record(fallbackSchema)
