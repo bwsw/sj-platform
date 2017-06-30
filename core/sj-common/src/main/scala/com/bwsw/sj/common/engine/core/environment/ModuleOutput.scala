@@ -18,7 +18,6 @@
  */
 package com.bwsw.sj.common.engine.core.environment
 
-import com.bwsw.common.SerializerInterface
 import com.bwsw.sj.common.engine.core.entities._
 import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
 import com.bwsw.sj.common.utils.EngineLiterals
@@ -32,7 +31,6 @@ import org.slf4j.{Logger, LoggerFactory}
   *                           (ref. [[TStreamEnvelope.data]] or [[KafkaEnvelope.data]])
   */
 class ModuleOutput(performanceMetrics: PerformanceMetrics,
-                   classLoader: ClassLoader,
-                   protected val objectSerializer: SerializerInterface) {
+                   classLoader: ClassLoader) {
   protected val logger: Logger = LoggerFactory.getLogger(this.getClass)
 }

@@ -40,7 +40,7 @@ class Executor(manager: ModuleEnvironmentManager) extends BatchStreamingExecutor
 
   override def onWindow(windowRepository: WindowRepository): Unit = {
     val outputs = manager.getStreamsByTags(Array("output"))
-    val output = manager.getRoundRobinOutput(outputs(new Random().nextInt(outputs.length)), this)
+    val output = manager.getRoundRobinOutput(outputs(new Random().nextInt(outputs.length)))
     var sum = state.get("sum").asInstanceOf[Int]
     val allWindows = windowRepository.getAll()
 

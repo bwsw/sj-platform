@@ -42,7 +42,7 @@ class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecut
   }
 
   override def onMessage(envelope: TStreamEnvelope[Integer]): Unit = {
-    val output = manager.getRoundRobinOutput(outputs(new Random().nextInt(outputs.length)), this)
+    val output = manager.getRoundRobinOutput(outputs(new Random().nextInt(outputs.length)))
     var sum = state.get("sum").asInstanceOf[Int]
 
     if (new Random().nextInt(100) < 5) throw new Exception("it happened")
@@ -56,7 +56,7 @@ class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecut
   }
 
   override def onMessage(envelope: KafkaEnvelope[Integer]): Unit = {
-    val output = manager.getRoundRobinOutput(outputs(new Random().nextInt(outputs.length)), this)
+    val output = manager.getRoundRobinOutput(outputs(new Random().nextInt(outputs.length)))
     var sum = state.get("sum").asInstanceOf[Int]
 
     if (new Random().nextInt(100) < 5) throw new Exception("it happened")
