@@ -83,11 +83,11 @@ abstract class TaskManager(implicit injector: Injector) {
       "specification.version" -> instance.moduleVersion)
   ).head
   private val executorClassName: String = fileMetadata.specification.executorClass
-  val moduleClassLoader: ClosableClassLoader = createClassLoader()
+  protected val moduleClassLoader: ClosableClassLoader = createClassLoader()
 
   protected val executorClass: Class[_] = {
     val _class = moduleClassLoader.loadClass(executorClassName)
-//    moduleClassLoader.close()
+
     _class
   }
 
