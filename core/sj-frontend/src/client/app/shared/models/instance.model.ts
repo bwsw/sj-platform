@@ -39,7 +39,7 @@ export class InstanceModel extends BaseModel {
   performanceReportingInterval: number = 60000;
   queueMaxSize: number;
   slidingInterval: number;
-  stages: Object;
+  stage: Object;
   startFrom: string = 'newest';
   stateFullCheckpoint: number = 100;
   stateManagement: string = 'none';
@@ -64,7 +64,7 @@ export class SubtypedInstance {
   perTaskCores: number;
   perTaskRam: number;
   performanceReportingInterval: number;
-  stages: Object;
+  stage: Object;
   checkpointInterval: number;
   checkpointMode: string;
   eventWaitIdleTime: number;

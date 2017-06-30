@@ -18,10 +18,8 @@
  */
 package com.bwsw.sj.common.engine.core.environment
 
-import com.bwsw.common.SerializerInterface
-import com.bwsw.sj.common.utils.EngineLiterals
-import com.bwsw.sj.common.engine.core.entities.{KafkaEnvelope, TStreamEnvelope}
 import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
+import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.tstreams.agents.producer.{NewProducerTransactionPolicy, Producer, ProducerTransaction}
 
 import scala.collection._
@@ -30,23 +28,21 @@ import scala.collection._
   * Provides an output stream that defined for each partition
   *
   * @param producer           producer of specific output
-  * @param performanceMetrics set of metrics that characterize performance of [[EngineLiterals.regularStreamingType]] or [[EngineLiterals.batchStreamingType]] module
-  * @param classLoader        it is needed for loading some custom classes from module jar to serialize/deserialize envelope data
-  *                           (ref. [[TStreamEnvelope.data]] or [[KafkaEnvelope.data]])
+  * @param performanceMetrics set of metrics that characterize performance of [[EngineLiterals.regularStreamingType]]
+  *                           or [[EngineLiterals.batchStreamingType]] module
   * @author Kseniya Mikhaleva
   */
 
 class PartitionedOutput(producer: Producer,
-                        performanceMetrics: PerformanceMetrics,
-                        classLoader: ClassLoader,
-                        serializer: SerializerInterface)
-  extends ModuleOutput(performanceMetrics, classLoader, serializer) {
+                        performanceMetrics: PerformanceMetrics)
+                       (implicit serialize: AnyRef => Array[Byte])
+  extends ModuleOutput(performanceMetrics) {
 
   private val transactions = mutable.Map[Int, ProducerTransaction]()
   private val streamName = producer.stream.name
 
   def put(data: AnyRef, partition: Int): Unit = {
-    val bytes = objectSerializer.serialize(data)
+    val bytes = serialize(data)
     logger.debug(s"Send a portion of data to stream: '$streamName' partition with number: '$partition'.")
     if (transactions.contains(partition)) {
       transactions(partition).send(bytes)

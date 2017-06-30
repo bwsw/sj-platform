@@ -18,29 +18,27 @@
  */
 package com.bwsw.sj.common.engine.core.environment
 
-import com.bwsw.common.SerializerInterface
 import com.bwsw.sj.common.dal.model.instance.InstanceDomain
 import com.bwsw.sj.common.dal.model.stream.StreamDomain
-import com.bwsw.sj.common.utils.SjTimer
-import com.bwsw.sj.common.engine.core.entities.{KafkaEnvelope, TStreamEnvelope}
 import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
 import com.bwsw.sj.common.engine.core.state.StateStorage
+import com.bwsw.sj.common.utils.{EngineLiterals, SjTimer}
 import com.bwsw.tstreams.agents.producer.Producer
 
 import scala.collection._
-import com.bwsw.sj.common.utils.EngineLiterals
 
 /**
-  * Provides for user methods that can be used in [[EngineLiterals.regularStreamingType]] or [[EngineLiterals.batchStreamingType]] module
+  * Provides for user methods that can be used in [[EngineLiterals.regularStreamingType]]
+  * or [[EngineLiterals.batchStreamingType]] module
   *
   * @param producers              t-streams producers for each output stream from instance [[InstanceDomain.outputs]]
   * @param options                user defined options from instance [[InstanceDomain.options]]
   * @param outputs                set of output streams [[StreamDomain]] from instance [[InstanceDomain.outputs]]
-  * @param producerPolicyByOutput keeps a tag (partitioned or round-robin output) corresponding to the output for each output stream
+  * @param producerPolicyByOutput keeps a tag (partitioned or round-robin output) corresponding to the output for each
+  *                               output stream
   * @param moduleTimer            provides a possibility to set a timer inside a module
-  * @param performanceMetrics     set of metrics that characterize performance of [[EngineLiterals.regularStreamingType]] or [[EngineLiterals.batchStreamingType]] module
-  * @param classLoader            it is needed for loading some custom classes from module jar to serialize/deserialize envelope data
-  *                               (ref. [[TStreamEnvelope.data]] or [[KafkaEnvelope.data]])
+  * @param performanceMetrics     set of metrics that characterize performance of [[EngineLiterals.regularStreamingType]]
+  *                               or [[EngineLiterals.batchStreamingType]] module
   * @author Kseniya Mikhaleva
   */
 
@@ -49,15 +47,16 @@ class ModuleEnvironmentManager(options: String,
                                outputs: Array[StreamDomain],
                                producerPolicyByOutput: mutable.Map[String, (String, ModuleOutput)],
                                moduleTimer: SjTimer,
-                               performanceMetrics: PerformanceMetrics,
-                               classLoader: ClassLoader) extends EnvironmentManager(options, outputs) {
+                               performanceMetrics: PerformanceMetrics)
+  extends EnvironmentManager(options, outputs) {
+
   /**
     * Allows getting partitioned output for specific output stream
     *
     * @param streamName Name of output stream
     * @return Partitioned output that wrapping output stream
     */
-  def getPartitionedOutput(streamName: String, serializer: SerializerInterface): PartitionedOutput = {
+  def getPartitionedOutput(streamName: String)(implicit serialize: AnyRef => Array[Byte]): PartitionedOutput = {
     logger.info(s"Get partitioned output for stream: $streamName\n")
     if (producers.contains(streamName)) {
       if (producerPolicyByOutput.contains(streamName)) {
@@ -70,7 +69,7 @@ class ModuleEnvironmentManager(options: String,
         }
       } else {
         producerPolicyByOutput(streamName) = ("partitioned",
-          new PartitionedOutput(producers(streamName), performanceMetrics, classLoader, serializer))
+          new PartitionedOutput(producers(streamName), performanceMetrics))
 
         producerPolicyByOutput(streamName)._2.asInstanceOf[PartitionedOutput]
       }
@@ -86,7 +85,7 @@ class ModuleEnvironmentManager(options: String,
     * @param streamName Name of output stream
     * @return Round-robin output that wrapping output stream
     */
-  def getRoundRobinOutput(streamName: String, serializer: SerializerInterface): RoundRobinOutput = {
+  def getRoundRobinOutput(streamName: String)(implicit serialize: AnyRef => Array[Byte]): RoundRobinOutput = {
     logger.info(s"Get round-robin output for stream: $streamName\n")
     if (producers.contains(streamName)) {
       if (producerPolicyByOutput.contains(streamName)) {
@@ -99,7 +98,7 @@ class ModuleEnvironmentManager(options: String,
         }
       } else {
         producerPolicyByOutput(streamName) = ("round-robin",
-          new RoundRobinOutput(producers(streamName), performanceMetrics, classLoader, serializer))
+          new RoundRobinOutput(producers(streamName), performanceMetrics))
 
         producerPolicyByOutput(streamName)._2.asInstanceOf[RoundRobinOutput]
       }

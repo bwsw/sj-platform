@@ -1,6 +1,7 @@
 package com.bwsw.common
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, ObjectInputStream, ObjectOutputStream}
+import scala.language.implicitConversions
 
 /**
   * Provides methods for serialization/deserialization objects
@@ -9,7 +10,7 @@ import java.io.{ByteArrayInputStream, ByteArrayOutputStream, ObjectInputStream, 
   */
 trait SerializerInterface {
 
-  def serialize(obj: AnyRef): Array[Byte] = {
+  implicit def serialize(obj: AnyRef): Array[Byte] = {
     val byteArrayOutputStream = new ByteArrayOutputStream()
     val objectOutputStream = new ObjectOutputStream(byteArrayOutputStream)
     objectOutputStream.writeObject(obj)
