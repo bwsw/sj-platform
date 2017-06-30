@@ -28,18 +28,15 @@ import org.slf4j.LoggerFactory
 /**
   * Serializer from [[org.apache.avro.generic.GenericRecord GenericRecord]] and vice versa.
   *
-  * @param schema avro schema for serialization/deserialization
   * @author Pavel Tomskikh
   */
-class AvroSerializer(schema: Option[Schema] = None) extends SerializerInterface {
-
+class AvroSerializer {
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val writerOutput = new ByteArrayOutputStream()
   private val encoder = EncoderFactory.get().binaryEncoder(writerOutput, null)
 
-  override def serialize(obj: AnyRef): Array[Byte] = {
+  def serialize(record: GenericRecord): Array[Byte] = {
     logger.debug(s"Serialize an avro record to a byte array.")
-    val record = obj.asInstanceOf[GenericRecord]
 
     val writer = new GenericDatumWriter[GenericRecord](record.getSchema)
     writer.write(record, encoder)
@@ -49,12 +46,11 @@ class AvroSerializer(schema: Option[Schema] = None) extends SerializerInterface 
     serialized
   }
 
-  override def deserialize(bytes: Array[Byte]): GenericRecord = {
-    require(schema.nonEmpty, "avro schema must be defined")
+  def deserialize(bytes: Array[Byte], schema: Schema): GenericRecord = {
     logger.debug("Deserialize a byte array to an avro record.")
 
     val decoder = DecoderFactory.get().binaryDecoder(bytes, null)
-    val reader = new GenericDatumReader[GenericRecord](schema.get)
+    val reader = new GenericDatumReader[GenericRecord](schema)
     reader.read(null, decoder)
   }
 }
