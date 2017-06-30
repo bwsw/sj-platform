@@ -18,6 +18,8 @@
  */
 package com.bwsw.sj.common.engine.core.input.utils
 
+import java.nio.charset.Charset
+
 import com.bwsw.sj.common.engine.core.input.Interval
 import io.netty.buffer.ByteBuf
 import io.netty.util.ByteProcessor
@@ -33,6 +35,8 @@ import scala.io.Source
   * @author Pavel Tomskikh
   */
 class Tokenizer(separator: String, encoding: String) {
+  require(separator.length > 0, "separator must be nonempty")
+  require(Charset.isSupported(encoding), s"encoding '$encoding' does not supported")
 
   private val byteProcessor = new ByteProcessor {
     private var bytes: Array[Byte] = Array.empty
