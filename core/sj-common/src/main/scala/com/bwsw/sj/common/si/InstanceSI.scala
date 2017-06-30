@@ -18,7 +18,6 @@
  */
 package com.bwsw.sj.common.si
 
-import com.bwsw.common.file.utils.ClosableClassLoader
 import com.bwsw.sj.common.dal.model.instance.InstanceDomain
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
 import com.bwsw.sj.common.engine.{StreamingValidator, ValidationInfo}
@@ -47,7 +46,7 @@ class InstanceSI(implicit injector: Injector) {
     if (instancePassedValidation.result) {
       instance.prepareInstance()
       instance.createStreams()
-      entityRepository.save(instance.to())
+      entityRepository.save(instance.to)
 
       Created
     } else {

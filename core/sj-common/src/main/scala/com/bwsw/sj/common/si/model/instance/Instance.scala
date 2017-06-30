@@ -55,7 +55,7 @@ class Instance(val name: String,
   protected val connectionRepository: ConnectionRepository = inject[ConnectionRepository]
   protected val streamRepository: GenericMongoRepository[StreamDomain] = connectionRepository.getStreamRepository
 
-  def to(): InstanceDomain = {
+  def to: InstanceDomain = {
     val serviceRepository = connectionRepository.getServiceRepository
 
     new InstanceDomain(
@@ -228,7 +228,6 @@ class InstanceCreator {
           batchInstance.stateManagement,
           batchInstance.stateFullCheckpoint,
           batchInstance.eventWaitIdleTime,
-          batchInstance.inputAvroSchema,
           batchInstance.executionPlan,
 
           Option(batchInstance.restAddress),
@@ -264,7 +263,6 @@ class InstanceCreator {
           regularInstance.stateManagement,
           regularInstance.stateFullCheckpoint,
           regularInstance.eventWaitIdleTime,
-          regularInstance.inputAvroSchema,
           regularInstance.executionPlan,
 
           Option(regularInstance.restAddress),
@@ -297,7 +295,6 @@ class InstanceCreator {
           outputInstance.inputs.head,
           outputInstance.outputs.head,
           outputInstance.startFrom,
-          outputInstance.inputAvroSchema,
           outputInstance.executionPlan,
 
           Option(outputInstance.restAddress),

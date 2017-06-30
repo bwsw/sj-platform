@@ -58,8 +58,7 @@ class RegularInstanceDomain(override val name: String,
                             @Property("start-from") var startFrom: String = EngineLiterals.newestStartMode,
                             @Property("state-management") var stateManagement: String = EngineLiterals.noneStateMode,
                             @Property("state-full-checkpoint") var stateFullCheckpoint: Int = 100,
-                            @Property("event-wait-idle-time") var eventWaitIdleTime: Long = 1000,
-                            @Property("input-avro-schema") var inputAvroSchema: String = "{}")
+                            @Property("event-wait-idle-time") var eventWaitIdleTime: Long = 1000)
   extends InstanceDomain(
     name,
     moduleType,

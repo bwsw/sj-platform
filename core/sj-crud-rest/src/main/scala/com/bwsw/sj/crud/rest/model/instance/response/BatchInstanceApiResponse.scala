@@ -46,8 +46,7 @@ class BatchInstanceApiResponse(moduleName: String,
                                val startFrom: String,
                                val stateManagement: String,
                                val stateFullCheckpoint: Int,
-                               val eventWaitIdleTime: Long,
-                               val inputAvroSchema: Map[String, Any])
+                               val eventWaitIdleTime: Long)
   extends InstanceApiResponse(
     moduleName,
     moduleVersion,

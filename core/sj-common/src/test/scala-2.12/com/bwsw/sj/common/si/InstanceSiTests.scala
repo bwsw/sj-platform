@@ -279,7 +279,7 @@ object InstanceSiTests extends MockitoSugar {
     when(instance.name).thenReturn(name)
     when(instance.status).thenReturn(status)
     when(instance.options).thenReturn(s"""{"name": $name}""")
-    when(instance.to()).thenReturn(instanceDomain)
+    when(instance.to).thenReturn(instanceDomain)
 
     when(createInstance.from(argEq(instanceDomain))(any[Injector]())).thenReturn(instance)
 

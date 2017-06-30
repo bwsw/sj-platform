@@ -112,8 +112,7 @@ class InstanceApiResponseCreator(implicit injector: Injector) {
           regularInstance.startFrom,
           regularInstance.stateManagement,
           regularInstance.stateFullCheckpoint,
-          regularInstance.eventWaitIdleTime,
-          serializer.deserialize[Map[String, Any]](regularInstance.inputAvroSchema))
+          regularInstance.eventWaitIdleTime)
 
       case EngineLiterals.batchStreamingType =>
         val batchInstance = instance.asInstanceOf[BatchInstance]
@@ -145,8 +144,7 @@ class InstanceApiResponseCreator(implicit injector: Injector) {
           batchInstance.startFrom,
           batchInstance.stateManagement,
           batchInstance.stateFullCheckpoint,
-          batchInstance.eventWaitIdleTime,
-          serializer.deserialize[Map[String, Any]](batchInstance.inputAvroSchema))
+          batchInstance.eventWaitIdleTime)
 
       case EngineLiterals.outputStreamingType =>
         val outputInstance = instance.asInstanceOf[OutputInstance]
@@ -175,8 +173,7 @@ class InstanceApiResponseCreator(implicit injector: Injector) {
           outputInstance.executionPlan,
           outputInstance.startFrom,
           outputInstance.input,
-          outputInstance.output,
-          serializer.deserialize[Map[String, Any]](outputInstance.inputAvroSchema))
+          outputInstance.output)
     }
   }
 }

@@ -55,8 +55,7 @@ class OutputInstanceDomain(override val name: String,
                            @PropertyField("checkpoint-mode") val checkpointMode: String,
                            @Property("checkpoint-interval") var checkpointInterval: Long = 0,
                            @Embedded("execution-plan") var executionPlan: ExecutionPlan = new ExecutionPlan(),
-                           @Property("start-from") var startFrom: String = "newest",
-                           @Property("input-avro-schema") var inputAvroSchema: String = "{}")
+                           @Property("start-from") var startFrom: String = "newest")
   extends InstanceDomain(
     name,
     moduleType,

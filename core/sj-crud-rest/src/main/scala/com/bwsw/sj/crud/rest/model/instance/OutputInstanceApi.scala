@@ -43,8 +43,7 @@ class OutputInstanceApi(name: String,
                         nodeAttributes: Map[String, String] = Map(),
                         environmentVariables: Map[String, String] = Map(),
                         @JsonDeserialize(contentAs = classOf[Long]) performanceReportingInterval: Option[Long] = Some(60000),
-                        val startFrom: String = EngineLiterals.newestStartMode,
-                        val inputAvroSchema: Map[String, Any] = Map())
+                        val startFrom: String = EngineLiterals.newestStartMode)
   extends InstanceApi(
     name,
     coordinationService,
@@ -82,7 +81,6 @@ class OutputInstanceApi(name: String,
       checkpointInterval,
       input,
       output,
-      Option(startFrom).getOrElse(EngineLiterals.newestStartMode),
-      serializer.serialize(Option(inputAvroSchema).getOrElse(Map())))
+      Option(startFrom).getOrElse(EngineLiterals.newestStartMode))
   }
 }

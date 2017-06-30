@@ -43,8 +43,7 @@ class OutputInstanceApiResponse(moduleName: String,
                                 val executionPlan: ExecutionPlan,
                                 val startFrom: String,
                                 val input: String,
-                                val output: String,
-                                val inputAvroSchema: Map[String, Any])
+                                val output: String)
   extends InstanceApiResponse(
     moduleName,
     moduleVersion,

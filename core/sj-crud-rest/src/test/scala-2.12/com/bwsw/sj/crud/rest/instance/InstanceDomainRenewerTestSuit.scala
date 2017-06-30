@@ -38,7 +38,7 @@ class InstanceDomainRenewerTestSuit extends FlatSpec with Matchers with Instance
     //arrange
     val instanceDomain: InstanceDomain = mock[InstanceDomain]
     val instance: Instance = mock[Instance]
-    when(instance.to()).thenReturn(instanceDomain)
+    when(instance.to).thenReturn(instanceDomain)
 
     //act
     instanceManager.updateInstanceStatus(instance, statusStub)
@@ -54,7 +54,7 @@ class InstanceDomainRenewerTestSuit extends FlatSpec with Matchers with Instance
     val restAddress = None
     val instanceDomain: InstanceDomain = mock[InstanceDomain]
     val instance: Instance = mock[Instance]
-    when(instance.to()).thenReturn(instanceDomain)
+    when(instance.to).thenReturn(instanceDomain)
 
     //act
     instanceManager.updateInstanceRestAddress(instance, restAddress)
@@ -70,7 +70,7 @@ class InstanceDomainRenewerTestSuit extends FlatSpec with Matchers with Instance
     val restAddress = Some("host")
     val instanceDomain: InstanceDomain = mock[InstanceDomain]
     val instance: Instance = mock[Instance]
-    when(instance.to()).thenReturn(instanceDomain)
+    when(instance.to).thenReturn(instanceDomain)
 
     //act
     instanceManager.updateInstanceRestAddress(instance, restAddress)
@@ -90,7 +90,7 @@ class InstanceDomainRenewerTestSuit extends FlatSpec with Matchers with Instance
     when(frameworkStage.datetime).thenReturn(new Date())
     val instance: Instance = mock[Instance]
     when(instance.stage).thenReturn(frameworkStage)
-    when(instance.to()).thenReturn(instanceDomain)
+    when(instance.to).thenReturn(instanceDomain)
 
     //act
     instanceManager.updateFrameworkStage(instance, statusStub)
@@ -110,7 +110,7 @@ class InstanceDomainRenewerTestSuit extends FlatSpec with Matchers with Instance
     when(frameworkStage.state).thenReturn(statusStub)
     val instance: Instance = mock[Instance]
     when(instance.stage).thenReturn(frameworkStage)
-    when(instance.to()).thenReturn(instanceDomain)
+    when(instance.to).thenReturn(instanceDomain)
 
     //act
     instanceManager.updateFrameworkStage(instance, differentStatus)

@@ -49,7 +49,6 @@ class RegularInstance(name: String,
                       val stateManagement: String = EngineLiterals.noneStateMode,
                       val stateFullCheckpoint: Int = 100,
                       val eventWaitIdleTime: Long = 1000,
-                      val inputAvroSchema: String = "{}",
                       val executionPlan: ExecutionPlan = new ExecutionPlan(),
                       restAddress: Option[String] = None,
                       stage: FrameworkStage = FrameworkStage(),
@@ -109,8 +108,7 @@ class RegularInstance(name: String,
       startFrom,
       stateManagement,
       stateFullCheckpoint,
-      eventWaitIdleTime,
-      inputAvroSchema)
+      eventWaitIdleTime)
   }
 
   override def inputsOrEmptyList: Array[String] = inputs

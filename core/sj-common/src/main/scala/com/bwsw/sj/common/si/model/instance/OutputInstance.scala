@@ -46,7 +46,6 @@ class OutputInstance(name: String,
                      val input: String,
                      val output: String,
                      val startFrom: String = EngineLiterals.newestStartMode,
-                     val inputAvroSchema: String = "{}",
                      val executionPlan: ExecutionPlan = new ExecutionPlan(),
                      restAddress: Option[String] = None,
                      stage: FrameworkStage = FrameworkStage(),
@@ -103,8 +102,7 @@ class OutputInstance(name: String,
       checkpointMode,
       checkpointInterval,
       executionPlan,
-      startFrom,
-      inputAvroSchema)
+      startFrom)
   }
 
   override def inputsOrEmptyList: Array[String] = Array(input)

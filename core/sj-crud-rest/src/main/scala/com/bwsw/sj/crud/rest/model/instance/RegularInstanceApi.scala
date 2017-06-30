@@ -42,12 +42,11 @@ class RegularInstanceApi(name: String,
                          jvmOptions: Map[String, String] = Map(),
                          nodeAttributes: Map[String, String] = Map(),
                          environmentVariables: Map[String, String] = Map(),
-                         @JsonDeserialize(contentAs = classOf[Long]) performanceReportingInterval: Option[Long] = Some(60000),
+                         @JsonDeserialize(contentAs = classOf[Long]) performanceReportingInterval: Option[Long] = Some(60000l),
                          val startFrom: String = EngineLiterals.newestStartMode,
                          val stateManagement: String = EngineLiterals.noneStateMode,
                          @JsonDeserialize(contentAs = classOf[Int]) val stateFullCheckpoint: Option[Int] = Some(100),
-                         @JsonDeserialize(contentAs = classOf[Long]) val eventWaitIdleTime: Option[Long] = Some(1000),
-                         val inputAvroSchema: Map[String, Any] = Map())
+                         @JsonDeserialize(contentAs = classOf[Long]) val eventWaitIdleTime: Option[Long] = Some(1000l))
   extends InstanceApi(
     name,
     coordinationService,
@@ -88,7 +87,6 @@ class RegularInstanceApi(name: String,
       Option(startFrom).getOrElse(EngineLiterals.newestStartMode),
       Option(stateManagement).getOrElse(EngineLiterals.noneStateMode),
       stateFullCheckpoint.getOrElse(100),
-      eventWaitIdleTime.getOrElse(1000l),
-      serializer.serialize(Option(inputAvroSchema).getOrElse(Map())))
+      eventWaitIdleTime.getOrElse(1000l))
   }
 }

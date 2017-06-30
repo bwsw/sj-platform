@@ -32,12 +32,12 @@ private[instance] class InstanceDomainRenewer(implicit val injector: Injector) {
 
   def updateInstanceStatus(instance: Instance, status: String): Unit = {
     instance.status = status
-    instanceRepository.save(instance.to())
+    instanceRepository.save(instance.to)
   }
 
   def updateInstanceRestAddress(instance: Instance, restAddress: Option[String]): Unit = {
     instance.restAddress = restAddress
-    instanceRepository.save(instance.to())
+    instanceRepository.save(instance.to)
   }
 
   def updateFrameworkStage(instance: Instance, status: String): Unit = {
@@ -49,7 +49,7 @@ private[instance] class InstanceDomainRenewer(implicit val injector: Injector) {
       instance.stage.duration = FrameworkLiterals.initialStageDuration
     }
 
-    instanceRepository.save(instance.to())
+    instanceRepository.save(instance.to)
   }
 
   def deleteInstance(name: String): Unit = instanceRepository.delete(name)

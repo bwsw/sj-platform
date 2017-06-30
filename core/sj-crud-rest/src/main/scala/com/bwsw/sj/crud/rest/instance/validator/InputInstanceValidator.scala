@@ -29,7 +29,7 @@ import scaldi.Injector
 import scala.collection.mutable.ArrayBuffer
 
 /**
-  * Validator for input-streaming instance
+  * Validator for [[InputInstance]]
   *
   * @author Kseniya Tomskikh
   */

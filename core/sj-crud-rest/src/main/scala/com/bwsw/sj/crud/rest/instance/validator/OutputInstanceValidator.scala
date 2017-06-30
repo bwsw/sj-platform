@@ -24,7 +24,6 @@ import com.bwsw.sj.common.si.model.instance.OutputInstance
 import com.bwsw.sj.common.si.model.module.Specification
 import com.bwsw.sj.common.utils.EngineLiterals._
 import com.bwsw.sj.common.utils.StreamUtils._
-import com.bwsw.sj.common.utils.{AvroRecordUtils, EngineLiterals}
 import org.slf4j.{Logger, LoggerFactory}
 import scaldi.Injector
 
@@ -32,7 +31,7 @@ import scala.collection.mutable.ArrayBuffer
 import scala.util.{Failure, Success, Try}
 
 /**
-  *
+  * Validator for [[OutputInstance]]
   *
   * @author Kseniya Tomskikh
   */
@@ -69,9 +68,9 @@ class OutputInstanceValidator(implicit injector: Injector) extends InstanceValid
           errors += createMessage("rest.validator.attribute.required", "checkpointMode")
         }
         else {
-          if (!x.equals(EngineLiterals.everyNthMode)) {
+          if (!x.equals(everyNthMode)) {
             errors += createMessage("rest.validator.attribute.unknown.value", "checkpointMode", s"$x") + ". " +
-              createMessage("rest.validator.attribute.not", "checkpointMode", EngineLiterals.everyNthMode)
+              createMessage("rest.validator.attribute.not", "checkpointMode", everyNthMode)
           }
         }
     }
@@ -81,9 +80,6 @@ class OutputInstanceValidator(implicit injector: Injector) extends InstanceValid
       errors += createMessage("rest.validator.attribute.required", "checkpointInterval") + ". " +
         createMessage("rest.validator.attribute.must.greater.than.zero", "checkpointInterval")
     }
-
-    if (Try(AvroRecordUtils.jsonToSchema(outputInstanceMetadata.inputAvroSchema)).isFailure)
-      errors += createMessage("rest.validator.attribute.not", "inputAvroSchema", "Avro Schema")
 
     errors
   }
@@ -103,8 +99,11 @@ class OutputInstanceValidator(implicit injector: Injector) extends InstanceValid
         }
         else {
           val inputMode: String = getStreamMode(x)
-          if (!inputMode.equals(EngineLiterals.splitStreamMode)) {
-            errors += createMessage("rest.validator.attribute.unknown.value", "stream-mode", EngineLiterals.splitStreamMode)
+          if (!inputMode.equals(splitStreamMode)) {
+            errors += createMessage(
+              "rest.validator.attribute.unknown.value",
+              "stream-mode",
+              splitStreamMode)
           }
 
           val inputStreamName = clearStreamFromMode(x)
@@ -115,7 +114,10 @@ class OutputInstanceValidator(implicit injector: Injector) extends InstanceValid
             case Some(stream) =>
               val inputTypes = specification.inputs.types
               if (!inputTypes.contains(stream.streamType)) {
-                errors += createMessage("rest.validator.attribute.must.one_of", "Input stream", inputTypes.mkString("[", ", ", "]"))
+                errors += createMessage(
+                  "rest.validator.attribute.must.one_of",
+                  "Input stream",
+                  inputTypes.mkString("[", ", ", "]"))
               } else {
                 val input = stream.asInstanceOf[TStreamStreamDomain]
                 val service = input.service
@@ -145,7 +147,10 @@ class OutputInstanceValidator(implicit injector: Injector) extends InstanceValid
             case Some(stream) =>
               val outputTypes = specification.outputs.types
               if (!outputTypes.contains(stream.streamType)) {
-                errors += createMessage("rest.validator.attribute.must.one_of", "Output stream", outputTypes.mkString("[", ", ", "]"))
+                errors += createMessage(
+                  "rest.validator.attribute.must.one_of",
+                  "Output stream",
+                  outputTypes.mkString("[", ", ", "]"))
               }
           }
         }
@@ -157,7 +162,10 @@ class OutputInstanceValidator(implicit injector: Injector) extends InstanceValid
       Try(startFrom.toLong) match {
         case Success(_) =>
         case Failure(_: NumberFormatException) =>
-          errors += createMessage("rest.validator.attribute.must.one_of", "startFrom", s"${startFromModes.mkString("[", ", ", "]")} or timestamp")
+          errors += createMessage(
+            "rest.validator.attribute.must.one_of",
+            "startFrom",
+            s"${startFromModes.mkString("[", ", ", "]")} or timestamp")
         case Failure(e) => throw e
       }
     }
