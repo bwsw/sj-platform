@@ -18,7 +18,6 @@
  */
 package com.bwsw.sj.common.engine.core.environment
 
-import com.bwsw.sj.common.engine.core.entities._
 import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
 import com.bwsw.sj.common.utils.EngineLiterals
 import org.slf4j.{Logger, LoggerFactory}
@@ -26,11 +25,9 @@ import org.slf4j.{Logger, LoggerFactory}
 /**
   * Common class that is a wrapper for output stream
   *
-  * @param performanceMetrics set of metrics that characterize performance of [[EngineLiterals.regularStreamingType]] or [[EngineLiterals.batchStreamingType]] module
-  * @param classLoader        it is needed for loading some custom classes from module jar to serialize/deserialize envelope data
-  *                           (ref. [[TStreamEnvelope.data]] or [[KafkaEnvelope.data]])
+  * @param performanceMetrics set of metrics that characterize performance of [[EngineLiterals.regularStreamingType]]
+  *                           or [[EngineLiterals.batchStreamingType]] module
   */
-class ModuleOutput(performanceMetrics: PerformanceMetrics,
-                   classLoader: ClassLoader) {
+class ModuleOutput(performanceMetrics: PerformanceMetrics) {
   protected val logger: Logger = LoggerFactory.getLogger(this.getClass)
 }
