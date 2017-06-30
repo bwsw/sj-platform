@@ -30,6 +30,7 @@ import com.opencsv.CSVParserBuilder
 import io.netty.buffer.ByteBuf
 import org.apache.avro.SchemaBuilder
 import org.apache.avro.generic.GenericData.Record
+import org.apache.avro.generic.GenericRecord
 
 import scala.io.Source
 import scala.util.{Failure, Success, Try}
@@ -115,7 +116,8 @@ class CSVInputExecutor(manager: InputEnvironmentManager) extends InputStreamingE
     }
   }
 
-  override def serialize(obj: AnyRef): Array[Byte] = avroSerializer.serialize(obj)
+  override def serialize(obj: AnyRef): Array[Byte] =
+    avroSerializer.serialize(obj.asInstanceOf[GenericRecord])
 
   private def buildFallbackEnvelope(data: String): Option[InputEnvelope[Record]] = {
     val record = new Record(fallbackSchema)

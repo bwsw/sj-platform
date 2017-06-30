@@ -31,6 +31,7 @@ import com.bwsw.sj.common.utils.{AvroRecordUtils, StreamLiterals}
 import io.netty.buffer.ByteBuf
 import org.apache.avro.SchemaBuilder.FieldAssembler
 import org.apache.avro.generic.GenericData.Record
+import org.apache.avro.generic.GenericRecord
 import org.apache.avro.{Schema, SchemaBuilder}
 import org.slf4j.LoggerFactory
 
@@ -99,7 +100,8 @@ class RegexInputExecutor(manager: InputEnvironmentManager) extends InputStreamin
     policyHandler(line)
   }
 
-  override def serialize(obj: AnyRef): Array[Byte] = avroSerializer.serialize(obj)
+  override def serialize(obj: AnyRef): Array[Byte] =
+    avroSerializer.serialize(obj.asInstanceOf[GenericRecord])
 
   private def handleDataWithCheckEveryPolicy(data: String): Option[InputEnvelope[Record]] = {
     // TODO: Change behavior for check-every policy
