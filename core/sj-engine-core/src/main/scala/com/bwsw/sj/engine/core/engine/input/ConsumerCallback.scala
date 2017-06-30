@@ -20,8 +20,8 @@ package com.bwsw.sj.engine.core.engine.input
 
 import java.util.concurrent.ArrayBlockingQueue
 
+import com.bwsw.common.SerializerInterface
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
-import com.bwsw.sj.common.engine.EnvelopeDataSerializer
 import com.bwsw.sj.common.engine.core.entities.{Envelope, TStreamEnvelope}
 import com.bwsw.tstreams.agents.consumer.subscriber.Callback
 import com.bwsw.tstreams.agents.consumer.{Consumer, ConsumerTransaction, TransactionOperator}
@@ -36,7 +36,7 @@ import scaldi.Injector
   * @param blockingQueue Persistent blocking queue for storing transactions
   */
 
-class ConsumerCallback[T <: AnyRef](envelopeDataSerializer: EnvelopeDataSerializer[T],
+class ConsumerCallback[T <: AnyRef](envelopeDataSerializer: SerializerInterface,
                                     blockingQueue: ArrayBlockingQueue[Envelope])
                                    (implicit injector: Injector) extends Callback {
   private val logger = LoggerFactory.getLogger(this.getClass)
@@ -46,7 +46,7 @@ class ConsumerCallback[T <: AnyRef](envelopeDataSerializer: EnvelopeDataSerializ
     logger.debug(s"onTransaction handler was invoked by subscriber: ${consumer.name}.")
     val stream = inject[ConnectionRepository].getStreamRepository.get(consumer.stream.name).get
 
-    val data = transaction.getAll.map(envelopeDataSerializer.deserialize)
+    val data = transaction.getAll.map(envelopeDataSerializer.deserialize(_).asInstanceOf[T])
     val envelope = new TStreamEnvelope(data, consumer.name)
     envelope.stream = stream.name
     envelope.partition = transaction.getPartition

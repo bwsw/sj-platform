@@ -54,7 +54,12 @@ abstract class RegularTaskEngine(manager: CommonTaskManager,
   private val checkpointGroup: CheckpointGroup = manager.createCheckpointGroup()
   private val moduleService: CommonModuleService = createRegularModuleService()
   private val executor: RegularStreamingExecutor[AnyRef] = moduleService.executor.asInstanceOf[RegularStreamingExecutor[AnyRef]]
-  val taskInputService: CallableCheckpointTaskInput[Envelope] = CallableCheckpointTaskInput[AnyRef](manager, blockingQueue, checkpointGroup).asInstanceOf[CallableCheckpointTaskInput[Envelope]]
+  val taskInputService: CallableCheckpointTaskInput[Envelope] = CallableCheckpointTaskInput[AnyRef](
+    manager,
+    blockingQueue,
+    checkpointGroup,
+    executor)
+    .asInstanceOf[CallableCheckpointTaskInput[Envelope]]
   private val moduleTimer: SjTimer = moduleService.moduleTimer
   protected val checkpointInterval: Long = instance.checkpointInterval
 
@@ -90,8 +95,10 @@ abstract class RegularTaskEngine(manager: CommonTaskManager,
             case tstreamEnvelope: TStreamEnvelope[AnyRef@unchecked] =>
               executor.onMessage(tstreamEnvelope)
             case wrongEnvelope =>
-              logger.error(s"Incoming envelope with type: ${wrongEnvelope.getClass} is not defined for regular/batch streaming engine")
-              throw new Exception(s"Incoming envelope with type: ${wrongEnvelope.getClass} is not defined for regular/batch streaming engine")
+              logger.error(s"Incoming envelope with type: ${wrongEnvelope.getClass} is not defined for regular/batch" +
+                s" streaming engine")
+              throw new Exception(s"Incoming envelope with type: ${wrongEnvelope.getClass} is not defined for " +
+                s"regular/batch streaming engine")
           }
 
         case None =>
@@ -120,7 +127,8 @@ abstract class RegularTaskEngine(manager: CommonTaskManager,
   /**
     * Check whether a group checkpoint of t-streams consumers/producers have to be done or not
     *
-    * @param isCheckpointInitiated Flag points whether checkpoint was initiated inside regular module (not on the schedule) or not.
+    * @param isCheckpointInitiated Flag points whether checkpoint was initiated inside regular module
+    *                              (not on the schedule) or not.
     */
   protected def isItTimeToCheckpoint(isCheckpointInitiated: Boolean): Boolean
 
@@ -157,10 +165,12 @@ object RegularTaskEngine {
 
     regularInstance.checkpointMode match {
       case EngineLiterals.`timeIntervalMode` =>
-        logger.info(s"Task: ${manager.taskName}. Regular module has a '${EngineLiterals.timeIntervalMode}' checkpoint mode, create an appropriate task engine.")
+        logger.info(s"Task: ${manager.taskName}. Regular module has a '${EngineLiterals.timeIntervalMode}' " +
+          s"checkpoint mode, create an appropriate task engine.")
         new RegularTaskEngine(manager, performanceMetrics) with TimeCheckpointTaskEngine
       case EngineLiterals.`everyNthMode` =>
-        logger.info(s"Task: ${manager.taskName}. Regular module has an '${EngineLiterals.everyNthMode}' checkpoint mode, create an appropriate task engine.")
+        logger.info(s"Task: ${manager.taskName}. Regular module has an '${EngineLiterals.everyNthMode}' " +
+          s"checkpoint mode, create an appropriate task engine.")
         new RegularTaskEngine(manager, performanceMetrics) with NumericalCheckpointTaskEngine
 
     }

@@ -23,13 +23,13 @@ import java.util.concurrent.{ArrayBlockingQueue, TimeUnit}
 import com.bwsw.sj.common.dal.model.stream.StreamDomain
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.engine.TaskEngine
+import com.bwsw.sj.common.engine.core.entities._
+import com.bwsw.sj.common.engine.core.environment.OutputEnvironmentManager
+import com.bwsw.sj.common.engine.core.output.{Entity, OutputStreamingExecutor}
 import com.bwsw.sj.common.si.model.instance.OutputInstance
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.core.engine.NumericalCheckpointTaskEngine
 import com.bwsw.sj.engine.core.engine.input.CallableTStreamCheckpointTaskInput
-import com.bwsw.sj.common.engine.core.entities._
-import com.bwsw.sj.common.engine.core.environment.OutputEnvironmentManager
-import com.bwsw.sj.common.engine.core.output.{Entity, OutputStreamingExecutor}
 import com.bwsw.sj.engine.output.processing.OutputProcessor
 import com.bwsw.sj.engine.output.task.reporting.OutputStreamingPerformanceMetrics
 import org.slf4j.{Logger, LoggerFactory}
@@ -58,8 +58,16 @@ abstract class OutputTaskEngine(manager: OutputTaskManager,
   private val environmentManager: OutputEnvironmentManager = createModuleEnvironmentManager()
   private val executor: OutputStreamingExecutor[AnyRef] = manager.getExecutor(environmentManager)
   private val entity: Entity[_] = executor.getOutputEntity
-  val taskInputService: CallableTStreamCheckpointTaskInput[AnyRef] = new CallableTStreamCheckpointTaskInput[AnyRef](manager, blockingQueue, manager.createCheckpointGroup())
-  private val outputProcessor: OutputProcessor[AnyRef] = OutputProcessor[AnyRef](outputStream, performanceMetrics, manager, entity)
+  val taskInputService: CallableTStreamCheckpointTaskInput[AnyRef] = new CallableTStreamCheckpointTaskInput[AnyRef](
+    manager,
+    blockingQueue,
+    manager.createCheckpointGroup(),
+    executor)
+  private val outputProcessor: OutputProcessor[AnyRef] = OutputProcessor[AnyRef](
+    outputStream,
+    performanceMetrics,
+    manager,
+    entity)
   private var wasFirstCheckpoint: Boolean = false
   protected val checkpointInterval: Long = instance.checkpointInterval
 
@@ -78,7 +86,8 @@ abstract class OutputTaskEngine(manager: OutputTaskManager,
   /**
     * Check whether a group checkpoint of t-streams consumers/producers have to be done or not
     *
-    * @param isCheckpointInitiated Flag points whether checkpoint was initiated inside output module (not on the schedule) or not.
+    * @param isCheckpointInitiated Flag points whether checkpoint was initiated inside output module
+    *                              (not on the schedule) or not.
     */
   protected def isItTimeToCheckpoint(isCheckpointInitiated: Boolean): Boolean
 
@@ -157,10 +166,14 @@ object OutputTaskEngine {
            (implicit injector: Injector): OutputTaskEngine = {
     manager.outputInstance.checkpointMode match {
       case EngineLiterals.`timeIntervalMode` =>
-        logger.error(s"Task: ${manager.taskName}. Output module can't have a '${EngineLiterals.timeIntervalMode}' checkpoint mode.")
-        throw new Exception(s"Task: ${manager.taskName}. Output module can't have a '${EngineLiterals.timeIntervalMode}' checkpoint mode.")
+        logger.error(s"Task: ${manager.taskName}. Output module can't have a '${EngineLiterals.timeIntervalMode}'" +
+          s" checkpoint mode.")
+        throw new Exception(s"Task: ${manager.taskName}. Output module can't have a " +
+          s"'${EngineLiterals.timeIntervalMode}' checkpoint mode.")
+
       case EngineLiterals.`everyNthMode` =>
-        logger.info(s"Task: ${manager.taskName}. Output module has an '${EngineLiterals.everyNthMode}' checkpoint mode, create an appropriate task engine.")
+        logger.info(s"Task: ${manager.taskName}. Output module has an '${EngineLiterals.everyNthMode}'" +
+          s" checkpoint mode, create an appropriate task engine.")
         new OutputTaskEngine(manager, performanceMetrics) with NumericalCheckpointTaskEngine
     }
   }

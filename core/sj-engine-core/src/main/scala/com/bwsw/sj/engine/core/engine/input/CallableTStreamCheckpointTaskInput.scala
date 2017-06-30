@@ -21,12 +21,12 @@ package com.bwsw.sj.engine.core.engine.input
 import java.util.Date
 import java.util.concurrent.ArrayBlockingQueue
 
+import com.bwsw.common.SerializerInterface
 import com.bwsw.sj.common.dal.model.stream.TStreamStreamDomain
-import com.bwsw.sj.common.engine.EnvelopeDataSerializer
-import com.bwsw.sj.common.si.model.instance.{BatchInstance, OutputInstance, RegularInstance}
-import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
 import com.bwsw.sj.common.engine.core.entities.{Envelope, TStreamEnvelope}
 import com.bwsw.sj.common.engine.core.managment.TaskManager
+import com.bwsw.sj.common.si.model.instance.{BatchInstance, OutputInstance, RegularInstance}
+import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
 import com.bwsw.tstreams.agents.consumer.Consumer
 import com.bwsw.tstreams.agents.consumer.Offset.{DateTime, IOffset, Newest, Oldest}
 import com.bwsw.tstreams.agents.consumer.subscriber.Subscriber
@@ -49,7 +49,8 @@ import scala.collection.mutable
   */
 class CallableTStreamCheckpointTaskInput[T <: AnyRef](manager: TaskManager,
                                                       blockingQueue: ArrayBlockingQueue[Envelope],
-                                                      override val checkpointGroup: CheckpointGroup)
+                                                      override val checkpointGroup: CheckpointGroup,
+                                                      envelopeDataSerializer: SerializerInterface)
                                                      (implicit injector: Injector)
   extends CallableCheckpointTaskInput[TStreamEnvelope[T]](manager.inputs) {
 
@@ -61,7 +62,7 @@ class CallableTStreamCheckpointTaskInput[T <: AnyRef](manager: TaskManager,
     val consumerClones = mutable.Map[String, Consumer]()
     val inputs = manager.inputs
     val offset = getOffset()
-    val callback = new ConsumerCallback[T](manager.envelopeDataSerializer.asInstanceOf[EnvelopeDataSerializer[T]], blockingQueue)
+    val callback = new ConsumerCallback[T](envelopeDataSerializer, blockingQueue)
 
     val consumers = inputs.filter(x => x._1.streamType == StreamLiterals.tstreamType)
       .map(x => (x._1.asInstanceOf[TStreamStreamDomain], x._2.toList))
@@ -137,4 +138,3 @@ class CallableTStreamCheckpointTaskInput[T <: AnyRef](manager: TaskManager,
     consumerClones.foreach(_._2.stop())
   }
 }
-

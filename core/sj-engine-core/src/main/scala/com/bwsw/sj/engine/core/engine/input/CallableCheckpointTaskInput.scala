@@ -20,6 +20,7 @@ package com.bwsw.sj.engine.core.engine.input
 
 import java.util.concurrent.{ArrayBlockingQueue, Callable}
 
+import com.bwsw.common.SerializerInterface
 import com.bwsw.sj.common.dal.model.stream.StreamDomain
 import com.bwsw.sj.common.utils.StreamLiterals
 import com.bwsw.sj.common.engine.core.entities.Envelope
@@ -36,15 +37,31 @@ object CallableCheckpointTaskInput {
 
   def apply[T <: AnyRef](manager: CommonTaskManager,
                          blockingQueue: ArrayBlockingQueue[Envelope],
-                         checkpointGroup: CheckpointGroup)
+                         checkpointGroup: CheckpointGroup,
+                         envelopeDataSerializer: SerializerInterface)
                         (implicit injector: Injector): CallableCheckpointTaskInput[_ <: Envelope] = {
     val isKafkaInputExist = manager.inputs.exists(x => x._1.streamType == StreamLiterals.kafkaStreamType)
     val isTstreamInputExist = manager.inputs.exists(x => x._1.streamType == StreamLiterals.tstreamType)
 
     (isKafkaInputExist, isTstreamInputExist) match {
-      case (true, true) => new CallableCompleteCheckpointTaskInput[T](manager, blockingQueue, checkpointGroup)
-      case (false, true) => new CallableTStreamCheckpointTaskInput[T](manager, blockingQueue, checkpointGroup)
-      case (true, false) => new CallableKafkaCheckpointTaskInput[T](manager, blockingQueue, checkpointGroup)
+      case (true, true) => new CallableCompleteCheckpointTaskInput[T](
+        manager,
+        blockingQueue,
+        checkpointGroup,
+        envelopeDataSerializer)
+
+      case (false, true) => new CallableTStreamCheckpointTaskInput[T](
+        manager,
+        blockingQueue,
+        checkpointGroup,
+        envelopeDataSerializer)
+
+      case (true, false) => new CallableKafkaCheckpointTaskInput[T](
+        manager,
+        blockingQueue,
+        checkpointGroup,
+        envelopeDataSerializer)
+
       case _ =>
         logger.error("Type of input stream is not 'kafka' or 't-stream'")
         throw new Exception("Type of input stream is not 'kafka' or 't-stream'")

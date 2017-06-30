@@ -20,6 +20,7 @@ package com.bwsw.sj.engine.core.engine.input
 
 import java.util.concurrent.ArrayBlockingQueue
 
+import com.bwsw.common.SerializerInterface
 import com.bwsw.sj.common.engine.core.entities.{Envelope, KafkaEnvelope, TStreamEnvelope}
 import com.bwsw.sj.common.engine.core.managment.CommonTaskManager
 import com.bwsw.tstreams.agents.group.CheckpointGroup
@@ -36,13 +37,22 @@ import scaldi.Injector
   */
 class CallableCompleteCheckpointTaskInput[T <: AnyRef](manager: CommonTaskManager,
                                                        blockingQueue: ArrayBlockingQueue[Envelope],
-                                                       override val checkpointGroup: CheckpointGroup)
+                                                       override val checkpointGroup: CheckpointGroup,
+                                                       envelopeDataSerializer: SerializerInterface)
                                                       (implicit injector: Injector)
   extends CallableCheckpointTaskInput[Envelope](manager.inputs) {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
-  private val kafkaCheckpointTaskInput = new CallableKafkaCheckpointTaskInput[T](manager, blockingQueue, checkpointGroup)
-  private val tStreamCheckpointTaskInput = new CallableTStreamCheckpointTaskInput[T](manager, blockingQueue, checkpointGroup)
+  private val kafkaCheckpointTaskInput = new CallableKafkaCheckpointTaskInput[T](
+    manager,
+    blockingQueue,
+    checkpointGroup,
+    envelopeDataSerializer)
+  private val tStreamCheckpointTaskInput = new CallableTStreamCheckpointTaskInput[T](
+    manager,
+    blockingQueue,
+    checkpointGroup,
+    envelopeDataSerializer)
 
   override def registerEnvelope(envelope: Envelope): Unit = {
     logger.debug(s"Register an envelope: ${envelope.toString}")
@@ -52,8 +62,10 @@ class CallableCompleteCheckpointTaskInput[T <: AnyRef](manager: CommonTaskManage
       case kafkaEnvelope: KafkaEnvelope[T] =>
         kafkaCheckpointTaskInput.registerEnvelope(kafkaEnvelope)
       case wrongEnvelope =>
-        logger.error(s"Incoming envelope with type: ${wrongEnvelope.getClass} is not defined for regular/windowed streaming engine")
-        throw new Exception(s"Incoming envelope with type: ${wrongEnvelope.getClass} is not defined for regular/windowed streaming engine")
+        logger.error(s"Incoming envelope with type: ${wrongEnvelope.getClass} is not defined " +
+          s"for regular/windowed streaming engine")
+        throw new Exception(s"Incoming envelope with type: ${wrongEnvelope.getClass} is not defined " +
+          s"for regular/windowed streaming engine")
     }
   }
 
@@ -74,8 +86,10 @@ class CallableCompleteCheckpointTaskInput[T <: AnyRef](manager: CommonTaskManage
       case kafkaEnvelope: KafkaEnvelope[T] =>
         kafkaCheckpointTaskInput.setConsumerOffset(kafkaEnvelope)
       case wrongEnvelope =>
-        logger.error(s"Incoming envelope with type: ${wrongEnvelope.getClass} is not defined for regular/windowed streaming engine")
-        throw new Exception(s"Incoming envelope with type: ${wrongEnvelope.getClass} is not defined for regular/windowed streaming engine")
+        logger.error(s"Incoming envelope with type: ${wrongEnvelope.getClass} is not defined " +
+          s"for regular/windowed streaming engine")
+        throw new Exception(s"Incoming envelope with type: ${wrongEnvelope.getClass} is not defined " +
+          s"for regular/windowed streaming engine")
     }
   }
 
