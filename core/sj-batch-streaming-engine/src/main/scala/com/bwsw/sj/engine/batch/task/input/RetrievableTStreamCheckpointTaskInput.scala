@@ -20,13 +20,13 @@ package com.bwsw.sj.engine.batch.task.input
 
 import java.util.Date
 
+import com.bwsw.common.SerializerInterface
 import com.bwsw.sj.common.dal.model.stream.{StreamDomain, TStreamStreamDomain}
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
-import com.bwsw.sj.common.engine.EnvelopeDataSerializer
-import com.bwsw.sj.common.si.model.instance.BatchInstance
-import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
 import com.bwsw.sj.common.engine.core.entities.TStreamEnvelope
 import com.bwsw.sj.common.engine.core.managment.CommonTaskManager
+import com.bwsw.sj.common.si.model.instance.BatchInstance
+import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
 import com.bwsw.tstreams.agents.consumer.Offset.{DateTime, IOffset, Newest, Oldest}
 import com.bwsw.tstreams.agents.consumer.{Consumer, ConsumerTransaction}
 import com.bwsw.tstreams.agents.group.CheckpointGroup
@@ -50,14 +50,14 @@ import scala.collection.mutable
   * @author Kseniya Mikhaleva
   */
 class RetrievableTStreamCheckpointTaskInput[T <: AnyRef](manager: CommonTaskManager,
-                                                         override val checkpointGroup: CheckpointGroup)
+                                                         override val checkpointGroup: CheckpointGroup,
+                                                         envelopeDataSerializer: SerializerInterface)
                                                         (implicit injector: Injector)
   extends RetrievableCheckpointTaskInput[TStreamEnvelope[T]](manager.inputs) {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val instance = manager.instance.asInstanceOf[BatchInstance]
   private val tstreamOffsetsStorage = mutable.Map[(String, Int), Long]()
-  private val envelopeDataSerializer = manager.envelopeDataSerializer.asInstanceOf[EnvelopeDataSerializer[T]]
   private val consumers = createConsumers()
   addConsumersToCheckpointGroup()
   launchConsumers()
@@ -107,7 +107,8 @@ class RetrievableTStreamCheckpointTaskInput[T <: AnyRef](manager: CommonTaskMana
     })
   }
 
-  private def transactionsToEnvelopes(transactions: Seq[ConsumerTransaction], consumer: Consumer): Seq[TStreamEnvelope[T]] = {
+  private def transactionsToEnvelopes(transactions: Seq[ConsumerTransaction],
+                                      consumer: Consumer): Seq[TStreamEnvelope[T]] = {
     val stream: StreamDomain = inject[ConnectionRepository].getStreamRepository.get(consumer.stream.name).get
     transactions.map(transaction => buildTransactionObject(transaction, consumer))
       .filter(_.getState != TransactionStates.Invalid)
@@ -115,14 +116,18 @@ class RetrievableTStreamCheckpointTaskInput[T <: AnyRef](manager: CommonTaskMana
   }
 
   private def buildTransactionObject(transaction: ConsumerTransaction, consumer: Consumer): ConsumerTransaction = {
-    val tempTransaction = consumer.buildTransactionObject(transaction.getPartition, transaction.getTransactionID, transaction.getState, transaction.getCount).get //todo fix it next milestone TR1216
+    val tempTransaction = consumer.buildTransactionObject(
+      transaction.getPartition,
+      transaction.getTransactionID,
+      transaction.getState,
+      transaction.getCount).get //todo fix it next milestone TR1216
     tstreamOffsetsStorage((consumer.name, tempTransaction.getPartition)) = tempTransaction.getTransactionID
 
     tempTransaction
   }
 
   private def createEnvelope(transaction: ConsumerTransaction, consumerName: String, stream: StreamDomain) = {
-    val data = transaction.getAll.map(envelopeDataSerializer.deserialize)
+    val data = transaction.getAll.map(envelopeDataSerializer.deserialize(_).asInstanceOf[T])
     val envelope = new TStreamEnvelope(data, consumerName)
     envelope.stream = stream.name
     envelope.partition = transaction.getPartition

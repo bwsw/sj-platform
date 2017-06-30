@@ -18,6 +18,7 @@
  */
 package com.bwsw.sj.engine.batch.task.input
 
+import com.bwsw.common.SerializerInterface
 import com.bwsw.sj.common.engine.core.entities.{Envelope, KafkaEnvelope, TStreamEnvelope}
 import com.bwsw.sj.common.engine.core.managment.CommonTaskManager
 import com.bwsw.tstreams.agents.group.CheckpointGroup
@@ -33,13 +34,20 @@ import scaldi.Injector
   * @author Kseniya Mikhaleva
   */
 class RetrievableCompleteCheckpointTaskInput[T <: AnyRef](manager: CommonTaskManager,
-                                                          override val checkpointGroup: CheckpointGroup)
+                                                          override val checkpointGroup: CheckpointGroup,
+                                                          envelopeDataSerializer: SerializerInterface)
                                                          (implicit injector: Injector)
   extends RetrievableCheckpointTaskInput[Envelope](manager.inputs) {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
-  private val retrievableKafkaTaskInput = new RetrievableKafkaCheckpointTaskInput[T](manager, checkpointGroup)
-  private val retrievableTStreamTaskInput = new RetrievableTStreamCheckpointTaskInput[T](manager, checkpointGroup)
+  private val retrievableKafkaTaskInput = new RetrievableKafkaCheckpointTaskInput[T](
+    manager,
+    checkpointGroup,
+    envelopeDataSerializer)
+  private val retrievableTStreamTaskInput = new RetrievableTStreamCheckpointTaskInput[T](
+    manager,
+    checkpointGroup,
+    envelopeDataSerializer)
 
   override def registerEnvelope(envelope: Envelope): Unit = {
     envelope match {

@@ -64,14 +64,16 @@ class BatchTaskEngine(manager: CommonTaskManager,
   private val instance = manager.instance.asInstanceOf[BatchInstance]
   private val batchCollector = manager.getBatchCollector(instance.to, performanceMetrics, streamRepository)
   private val inputs = instance.getInputsWithoutStreamMode
+  private val checkpointGroup = manager.createCheckpointGroup()
+  private val moduleService = CommonModuleService(manager, checkpointGroup, performanceMetrics)
+  private val executor = moduleService.executor.asInstanceOf[BatchStreamingExecutor[AnyRef]]
   val taskInputService: RetrievableCheckpointTaskInput[Envelope] =
     RetrievableCheckpointTaskInput[AnyRef](
       manager.asInstanceOf[CommonTaskManager],
-      manager.createCheckpointGroup()
+      checkpointGroup,
+      executor
     ).asInstanceOf[RetrievableCheckpointTaskInput[Envelope]]
   private val envelopeFetcher = new EnvelopeFetcher(taskInputService, settingsUtils.getLowWatermark())
-  private val moduleService = CommonModuleService(manager, envelopeFetcher.checkpointGroup, performanceMetrics)
-  private val executor = moduleService.executor.asInstanceOf[BatchStreamingExecutor[AnyRef]]
   private val moduleTimer = moduleService.moduleTimer
   private var retrievableStreams = instance.getInputsWithoutStreamMode
   private var counterOfBatchesPerStream = createCountersOfBatches()
@@ -86,7 +88,10 @@ class BatchTaskEngine(manager: CommonTaskManager,
     .asInstanceOf[ZKServiceDomain]
     .provider.hosts.toSet
   private val curatorClient = createCuratorClient()
-  private val commonBarrier = new DistributedDoubleBarrier(curatorClient, barrierMasterNode, instance.executionPlan.tasks.size())
+  private val commonBarrier = new DistributedDoubleBarrier(
+    curatorClient,
+    barrierMasterNode,
+    instance.executionPlan.tasks.size())
   private val leaderLatch = new LeaderLatch(zkHosts, leaderMasterNode)
   leaderLatch.start()
 
@@ -202,7 +207,8 @@ class BatchTaskEngine(manager: CommonTaskManager,
   }
 
   private def deleteBatches(stream: String): Unit = {
-    logger.debug(s"Delete batches from windows (for each stream) than shouldn't be repeated (from 0 to ${instance.slidingInterval}).")
+    logger.debug(s"Delete batches from windows (for each stream) than shouldn't be repeated (from 0 to" +
+      s" ${instance.slidingInterval}).")
     currentWindowPerStream(stream).batches.remove(0, instance.slidingInterval)
   }
 

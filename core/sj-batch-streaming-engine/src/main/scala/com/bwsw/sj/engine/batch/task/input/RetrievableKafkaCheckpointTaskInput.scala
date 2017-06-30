@@ -18,12 +18,12 @@
  */
 package com.bwsw.sj.engine.batch.task.input
 
-import com.bwsw.sj.common.engine.EnvelopeDataSerializer
+import com.bwsw.common.SerializerInterface
+import com.bwsw.sj.common.engine.core.entities.KafkaEnvelope
+import com.bwsw.sj.common.engine.core.managment.CommonTaskManager
 import com.bwsw.sj.common.si.model.instance.BatchInstance
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.core.engine.input.KafkaTaskInput
-import com.bwsw.sj.common.engine.core.entities.KafkaEnvelope
-import com.bwsw.sj.common.engine.core.managment.CommonTaskManager
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import com.bwsw.tstreams.agents.producer.NewProducerTransactionPolicy
 import org.apache.kafka.clients.consumer.ConsumerRecord
@@ -41,12 +41,11 @@ import scala.collection.JavaConverters._
   * @author Kseniya Mikhaleva
   */
 class RetrievableKafkaCheckpointTaskInput[T <: AnyRef](override val manager: CommonTaskManager,
-                                                       override val checkpointGroup: CheckpointGroup)
+                                                       override val checkpointGroup: CheckpointGroup,
+                                                       envelopeDataSerializer: SerializerInterface)
                                                       (override implicit val injector: Injector)
   extends RetrievableCheckpointTaskInput[KafkaEnvelope[T]](manager.inputs) with KafkaTaskInput[T] {
   currentThread.setName(s"batch-task-${manager.taskName}-kafka-consumer")
-
-  private val envelopeDataSerializer = manager.envelopeDataSerializer.asInstanceOf[EnvelopeDataSerializer[T]]
 
   override def chooseOffset(): String = {
     val instance = manager.instance.asInstanceOf[BatchInstance]
@@ -57,14 +56,15 @@ class RetrievableKafkaCheckpointTaskInput[T <: AnyRef](override val manager: Com
   }
 
   override def get(): Iterable[KafkaEnvelope[T]] = {
-    logger.debug(s"Task: ${manager.taskName}. Waiting for records that consumed from kafka for $kafkaSubscriberTimeout milliseconds.")
+    logger.debug(s"Task: ${manager.taskName}. Waiting for records that consumed from kafka for" +
+      s" $kafkaSubscriberTimeout milliseconds.")
     val records = kafkaConsumer.poll(kafkaSubscriberTimeout)
     records.asScala.map(consumerRecordToEnvelope)
   }
 
   private def consumerRecordToEnvelope(consumerRecord: ConsumerRecord[Array[Byte], Array[Byte]]): KafkaEnvelope[T] = {
     logger.debug(s"Task name: ${manager.taskName}. Convert a consumed kafka record to kafka envelope.")
-    val data = envelopeDataSerializer.deserialize(consumerRecord.value())
+    val data = envelopeDataSerializer.deserialize(consumerRecord.value()).asInstanceOf[T]
     val envelope = new KafkaEnvelope(data)
     envelope.stream = consumerRecord.topic()
     envelope.partition = consumerRecord.partition()
