@@ -808,26 +808,6 @@
 			"rawModeData": " {\r\n      \"name\": \"regular1\",\r\n      \"checkpointMode\": \"every-nth\",\r\n      \"inputs\":[\"input-stream-tstream\"],\r\n      \"outputs\": [\"qqq\"],\r\n      \"options\":{\"d\":1},\r\n      \"coordinationService\": \"zookeper-coord-serv\",\r\n      \"checkpointInterval\":1,\r\n      \"performanceReportingInterval\":1,\r\n      \"eventWaitTime\":1\r\n}"
 		},
 		{
-			"id": "588b3376-94a0-47f8-c545-8b95bb941f6f",
-			"headers": "",
-			"url": "{{address}}/v1/modules/regular-streaming/Integration-Regular/1.0/instance",
-			"preRequestScript": null,
-			"pathVariables": {},
-			"method": "POST",
-			"data": [],
-			"dataMode": "raw",
-			"version": 2,
-			"tests": "tests[\"Body matches string\"] = responseBody.has(\"Json contains incorrect value in property 'inputAvroSchema'\");\n\ntests[\"Status code is 400\"] = responseCode.code === 400;",
-			"currentHelper": "normal",
-			"helperAttributes": {},
-			"time": 1494903495498,
-			"name": "Instance_4.1.71.InputAvroSchema_is_not_Avro Schema",
-			"description": "",
-			"collectionId": "4d7f7559-f8ac-6e89-96e6-56170a2d54a6",
-			"responses": [],
-			"rawModeData": " {\r\n      \"name\": \"regular\",\r\n      \"checkpointMode\": \"every-nth\",\r\n      \"inputs\":[\"input-stream-tstream\"],\r\n      \"outputs\": [\"output-stream-tstream\"],\r\n      \"options\":{\"d\":1},\r\n      \"coordinationService\": \"zookeper-coord-serv\",\r\n      \"checkpointInterval\":1,\r\n      \"checkpointInterval\":1,\r\n      \"inputAvroSchema\":{\"3\"}\r\n}"
-		},
-		{
 			"id": "5b8b991a-08ea-5c13-05f3-98c4d2481ead",
 			"headers": "",
 			"url": "{{address}}/v1/modules/regular-streaming/Integration-Regular/1.0/instance",
@@ -1032,7 +1012,7 @@
 			"description": "",
 			"collectionId": "4d7f7559-f8ac-6e89-96e6-56170a2d54a6",
 			"responses": [],
-			"rawModeData": " {\r\n      \"name\": \"regular\",\r\n      \"checkpointMode\": \"every-nth\",\r\n      \"inputs\":[\"input-stream-tstream\"],\r\n      \"outputs\": [\"output-stream-tstream\"],\r\n      \"options\":{\"d\":1},\r\n      \"coordinationService\": \"zookeper-coord-serv\",\r\n      \"checkpointInterval\":1,\r\n      \"inputAvroSchema\":{\"type\":\"record\", \"name\":\"rec\", \r\n\"fields\":[{\"name\":\"f1\",\"type\":\"string\"}]}\r\n}"
+			"rawModeData": " {\r\n      \"name\": \"regular\",\r\n      \"checkpointMode\": \"every-nth\",\r\n      \"inputs\":[\"input-stream-tstream\"],\r\n      \"outputs\": [\"output-stream-tstream\"],\r\n      \"options\":{\"d\":1},\r\n      \"coordinationService\": \"zookeper-coord-serv\",\r\n      \"checkpointInterval\":1,\r\n}"
 		},
 		{
 			"id": "71056d32-96ef-a56a-395d-104e3859a4df",
@@ -1071,7 +1051,7 @@
 			"description": "",
 			"collectionId": "4d7f7559-f8ac-6e89-96e6-56170a2d54a6",
 			"responses": [],
-			"rawModeData": " {\r\n      \"name\": \"regular\"\r\n      \"checkpointMode\": \"every-nth\",\r\n      \"inputs\":[\"input-stream-tstream\"],\r\n      \"outputs\": [\"output-stream-tstream\"],\r\n      \"options\":{\"d\":1},\r\n      \"coordinationService\": \"zookeper-coord-serv\",\r\n      \"checkpointInterval\":1,\r\n      \"checkpointInterval\":1,\r\n      \"inputAvroSchema\":{\"type\":\"record\", \"name\":\"rec\", \r\n\"fields\":[{\"name\":\"f1\",\"type\":\"string\"}]}\r\n}"
+			"rawModeData": " {\r\n      \"name\": \"regular\"\r\n      \"checkpointMode\": \"every-nth\",\r\n      \"inputs\":[\"input-stream-tstream\"],\r\n      \"outputs\": [\"output-stream-tstream\"],\r\n      \"options\":{\"d\":1},\r\n      \"coordinationService\": \"zookeper-coord-serv\",\r\n      \"checkpointInterval\":1,\r\n      \"checkpointInterval\":1,\r\n }"
 		},
 		{
 			"id": "7654232f-05fd-394c-41ae-81e8a111fa40",

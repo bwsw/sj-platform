@@ -39,6 +39,8 @@ The modules can be strung in a pipeline as illustrated below:
 
 In this document each module is described in detail.
 
+.. _input-module:
+
 Input module
 ----------------
 An input type of modules handles external input streams, does data deduplication, transforms raw data to objects. In the SJ platform the TCP Input Stream processor is currently implemented in an Input module.
@@ -104,7 +106,7 @@ InputEnvelope:
 
 - key of an envelope 
 - information about the destination 
-- "check on duplication" boolean flag 
+- "check on duplication" boolean flag (it has higher priority than 'duplicateCheck' in InputInstance)
 - message data 
 
 InputStreamingResponse: 
