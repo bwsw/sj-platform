@@ -56,6 +56,16 @@ case class Field(@JsonProperty("name") name: String,
                  @JsonProperty("defaultValue") defaultValue: String,
                  @JsonProperty(RegexInputOptionsNames.fieldType) _type: String)
 
+object Field {
+  val convertType = Map(
+    "boolean" -> ((s: String) => s.toBoolean),
+    "int" -> ((s: String) => s.toInt),
+    "long" -> ((s: String) => s.toLong),
+    "float" -> ((s: String) => s.toFloat),
+    "double" -> ((s: String) => s.toDouble),
+    "string" -> ((s: String) => s))
+}
+
 /**
   * Model class for list of rules in options
   *

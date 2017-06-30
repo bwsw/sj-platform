@@ -33,7 +33,7 @@ import com.bwsw.sj.engine.core.simulation.input.mocks.HazelcastMock
 import com.bwsw.sj.engine.core.simulation.input.{InputEngineSimulator, OutputData}
 import com.bwsw.sj.engine.input.eviction_policy.FixTimeEvictionPolicy
 import com.bwsw.sj.module.input.regex.RegexInputOptionsNames.{fallbackFieldName, fallbackRecordName, firstMatchWinPolicy, outputRecordName}
-import org.apache.avro.SchemaBuilder
+import org.apache.avro.{Schema, SchemaBuilder}
 import org.apache.avro.generic.GenericData.Record
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FlatSpec, Matchers}
@@ -52,14 +52,15 @@ class RegexInputExecutorTests extends FlatSpec with Matchers with MockitoSugar {
   val field1Name = "field1"
   val field2Name = "field2"
   val field3Name = "field3"
-  val defaultValue = "0"
+  val defaultStringValue = "default"
+  val defaultIntValue = 0
 
   val rule1 = Rule(
     regex = s"^(?<$field1Name>\\w+),(?<$field2Name>\\d+),(?<$field3Name>\\w+)",
     fields = List(
-      Field(field1Name, defaultValue, "string"),
-      Field(field2Name, defaultValue, "int"),
-      Field(field3Name, defaultValue, "string")),
+      Field(field1Name, defaultStringValue, "string"),
+      Field(field2Name, defaultIntValue.toString, "int"),
+      Field(field3Name, defaultStringValue, "string")),
     outputStream = outputStream1.name,
     uniqueKey = List(field1Name, field3Name),
     distribution = List(field2Name))
@@ -67,17 +68,23 @@ class RegexInputExecutorTests extends FlatSpec with Matchers with MockitoSugar {
   val rule2 = Rule(
     regex = s"^(?<$field1Name>\\d+),(?<$field2Name>\\w+),(?<$field3Name>\\d+)",
     fields = List(
-      Field(field1Name, defaultValue, "int"),
-      Field(field2Name, defaultValue, "string"),
-      Field(field3Name, defaultValue, "int")),
+      Field(field1Name, defaultIntValue.toString, "int"),
+      Field(field2Name, defaultStringValue, "string"),
+      Field(field3Name, defaultIntValue.toString, "int")),
     outputStream = outputStream2.name,
     uniqueKey = List(field2Name),
     distribution = List(field3Name))
 
-  val schema = SchemaBuilder.record(outputRecordName).fields()
-    .name(field1Name).`type`().stringType().stringDefault(defaultValue)
-    .name(field2Name).`type`().stringType().stringDefault(defaultValue)
-    .name(field3Name).`type`().stringType().stringDefault(defaultValue)
+  val schema1 = SchemaBuilder.record(outputRecordName).fields()
+    .name(field1Name).`type`().stringType().stringDefault(defaultStringValue)
+    .name(field2Name).`type`().intType().intDefault(defaultIntValue)
+    .name(field3Name).`type`().stringType().stringDefault(defaultStringValue)
+    .endRecord()
+
+  val schema2 = SchemaBuilder.record(outputRecordName).fields()
+    .name(field1Name).`type`().intType().intDefault(defaultIntValue)
+    .name(field2Name).`type`().stringType().stringDefault(defaultStringValue)
+    .name(field3Name).`type`().intType().intDefault(defaultIntValue)
     .endRecord()
 
   val fallbackAvroSchema = SchemaBuilder.record(fallbackRecordName).fields()
@@ -179,7 +186,7 @@ class RegexInputExecutorTests extends FlatSpec with Matchers with MockitoSugar {
 
 
   case class CorrectInputData1(field1: String, field2: Int, field3: String, isNotDuplicate: Boolean = true)
-    extends CorrectInputData(field1, field2, field3, isNotDuplicate) {
+    extends CorrectInputData(field1, field2, field3, schema1, isNotDuplicate) {
 
     override def key: String =
       s"${outputStream1.name},$field1,$field3"
@@ -200,7 +207,7 @@ class RegexInputExecutorTests extends FlatSpec with Matchers with MockitoSugar {
 
 
   case class CorrectInputData2(field1: Int, field2: String, field3: Int, isNotDuplicate: Boolean = true)
-    extends CorrectInputData(field1, field2, field3, isNotDuplicate) {
+    extends CorrectInputData(field1, field2, field3, schema2, isNotDuplicate) {
 
     override def key: String =
       s"${outputStream2.name},$field2"
@@ -220,7 +227,11 @@ class RegexInputExecutorTests extends FlatSpec with Matchers with MockitoSugar {
   }
 
 
-  abstract class CorrectInputData(field1: Any, field2: Any, field3: Any, isNotDuplicate: Boolean = true) {
+  abstract class CorrectInputData(field1: Any,
+                                  field2: Any,
+                                  field3: Any,
+                                  schema: Schema,
+                                  isNotDuplicate: Boolean) {
     def key: String
 
     def getPartitionByHash: Int
