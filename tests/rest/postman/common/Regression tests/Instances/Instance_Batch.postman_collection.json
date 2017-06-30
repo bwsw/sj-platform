@@ -283,7 +283,7 @@
 			"tests": "tests[\"Status code is 400\"] = responseCode.code === 400;\n\ntests[\"Body matches string\"] = responseBody.has(\"Cannot parse json:\");",
 			"currentHelper": "normal",
 			"helperAttributes": {},
-			"rawModeData": "{\n       \"name\": \"batch\" \n       \"coordinationService\": \"zookeper-coord-serv\", \n       \"inputs\": [\"input-kafka\"], \n       \"options\":{\"d\":1},\n       \"outputs\": [\"output-tstream\"],\n       \"checkpointInterval\":1,\n      \"inputAvroSchema\":{\"type\":\"record\", \"name\":\"rec\", \n\"fields\":[{\"name\":\"f1\",\"type\":\"string\"}]}\n     }"
+			"rawModeData": "{\n       \"name\": \"batch\" \n       \"coordinationService\": \"zookeper-coord-serv\", \n       \"inputs\": [\"input-kafka\"], \n       \"options\":{\"d\":1},\n       \"outputs\": [\"output-tstream\"],\n       \"checkpointInterval\":1,\n }"
 		},
 		{
 			"id": "1acc1444-5a3f-31c8-ad35-189de66e7696",
@@ -1185,7 +1185,7 @@
 			"description": "",
 			"collectionId": "dfb56a63-0810-6ade-eff3-bb451b3e80e1",
 			"responses": [],
-			"rawModeData": "{\n       \"name\": \"batch\", \n       \"coordinationService\": \"zookeper-coord-serv\", \n       \"inputs\": [\"input-kafka\"], \n       \"options\":{\"d\":1},\n       \"outputs\": [\"output-tstream\"],\n       \"checkpointInterval\":1,\n      \"inputAvroSchema\":{\"type\":\"record\", \"name\":\"rec\", \n\"fields\":[{\"name\":\"f1\",\"type\":\"string\"}]}\n     }"
+			"rawModeData": "{\n       \"name\": \"batch\", \n       \"coordinationService\": \"zookeper-coord-serv\", \n       \"inputs\": [\"input-kafka\"], \n       \"options\":{\"d\":1},\n       \"outputs\": [\"output-tstream\"],\n       \"checkpointInterval\":1,\n      }"
 		},
 		{
 			"id": "93e7f2d8-63d4-f82d-51d4-de5323652b3a",
@@ -1435,26 +1435,6 @@
 			"collectionId": "dfb56a63-0810-6ade-eff3-bb451b3e80e1",
 			"responses": [],
 			"rawModeData": "{\n       \"name\":\"batch\",\n       \"coordinationService\": \"rest-restful\", \n       \"inputs\": [\"input-kafka\"], \n       \"options\":{\"d\":1},\n       \"outputs\": [\"output-tstream\"]\n     }"
-		},
-		{
-			"id": "bf427836-79b7-c3f9-448e-76996320c60b",
-			"headers": "",
-			"url": "{{address}}/v1/modules/batch-streaming/Integration-Batch/1.0/instance",
-			"preRequestScript": null,
-			"pathVariables": {},
-			"method": "POST",
-			"data": [],
-			"dataMode": "raw",
-			"version": 2,
-			"tests": "tests[\"Status code is 400\"] = responseCode.code === 400;\n\ntests[\"Body matches string\"] = responseBody.has(\"inputAvroSchema' attribute is not 'Avro Schema\");",
-			"currentHelper": "normal",
-			"helperAttributes": {},
-			"time": 1493780740123,
-			"name": "Instance_5.1.53.InputAvroSchema_is_not_Avro Schema",
-			"description": "",
-			"collectionId": "dfb56a63-0810-6ade-eff3-bb451b3e80e1",
-			"responses": [],
-			"rawModeData": "{\n       \"name\": \"batch\", \n       \"coordinationService\": \"zookeper-coord-serv\", \n       \"inputs\": [\"input-kafka\"], \n       \"options\":{\"d\":1},\n       \"outputs\": [\"output-tstream\"],\n       \"checkpointInterval\":1,\n      \"inputAvroSchema\":{\"3\":\"\"}\n     }"
 		},
 		{
 			"id": "c3438fae-e2cc-86bc-93ae-d23902726224",
