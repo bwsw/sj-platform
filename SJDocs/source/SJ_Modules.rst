@@ -104,7 +104,7 @@ InputEnvelope:
 
 - key of an envelope 
 - information about the destination 
-- "check on duplication" boolean flag 
+- "check on duplication" boolean flag (it has higher priority than 'duplicateCheck' in InputInstance)
 - message data 
 
 InputStreamingResponse: 
