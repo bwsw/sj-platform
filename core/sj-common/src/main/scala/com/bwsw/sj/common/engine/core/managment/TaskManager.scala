@@ -28,21 +28,21 @@ import com.bwsw.sj.common.dal.model.module._
 import com.bwsw.sj.common.dal.model.service.TStreamServiceDomain
 import com.bwsw.sj.common.dal.model.stream.{StreamDomain, TStreamStreamDomain}
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
-import com.bwsw.sj.common.engine.{EnvelopeDataSerializer, ExtendedEnvelopeDataSerializer, StreamingExecutor}
+import com.bwsw.sj.common.engine.StreamingExecutor
+import com.bwsw.sj.common.engine.core.config.EngineConfigNames
+import com.bwsw.sj.common.engine.core.environment.EnvironmentManager
 import com.bwsw.sj.common.si.model.config.ConfigurationSetting
-import com.bwsw.sj.common.si.model.instance.{InstanceCreator, Instance}
+import com.bwsw.sj.common.si.model.instance.{Instance, InstanceCreator}
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.common.utils.EngineLiterals._
 import com.bwsw.sj.common.utils.StreamLiterals._
-import com.bwsw.sj.common.engine.core.config.EngineConfigNames
-import com.bwsw.sj.common.engine.core.environment.EnvironmentManager
 import com.bwsw.tstreams.agents.consumer.Consumer
 import com.bwsw.tstreams.agents.consumer.Offset.IOffset
 import com.bwsw.tstreams.agents.consumer.subscriber.{Callback, Subscriber}
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import com.bwsw.tstreams.agents.producer.Producer
-import com.bwsw.tstreams.storage.StorageClient
 import com.bwsw.tstreams.env.{ConfigurationOptions, TStreamsFactory}
+import com.bwsw.tstreams.storage.StorageClient
 import com.typesafe.config.ConfigFactory
 import org.slf4j.{Logger, LoggerFactory}
 import scaldi.Injectable.inject
@@ -91,8 +91,6 @@ abstract class TaskManager(implicit injector: Injector) {
 
   protected val executorClass: Class[_] = moduleClassLoader.loadClass(executorClassName)
 
-  val envelopeDataSerializer: EnvelopeDataSerializer[AnyRef] =
-    new ExtendedEnvelopeDataSerializer(moduleClassLoader, instance)
   val inputs: mutable.Map[StreamDomain, Array[Int]]
 
 
