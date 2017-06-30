@@ -10,7 +10,12 @@ Welcome to Stream Juggler!
 
 .. |juggler-logo| image:: https://bitworks.software/sites/default/files/logo-juggler-prj.png
 
-Juggler is a real time stream processing platform designed for building both simple and complex event processing (CEP). Juggler uses Apache Mesos, Kafka and T-streams to construct scalable and flexible processing algorithms. Juggler functions on the same principle as Apache Samza, but enables exactly-once processing and provides an integrated solution with a RESTful interface, JavaScript UI and an ad hoc repository for modules, services, streams and other data processing pipeline components.
+Stream Juggler (SJ) is an open source, scalable solution for real-time and batched stream processing. The system fits for building both simple and complex event processing systems (CEP) and allows a developer to construct pipelines for analyzing data streams.
+
+Juggler uses Apache Mesos, Kafka and T-streams to construct scalable and flexible processing algorithms. It enables exactly-once processing and provides an integrated solution with a RESTful interface, JavaScript UI and an ad hoc repository for modules, services, streams and other data processing pipeline components.
+
+Thus, Stream Juggler is a platform that allows high-throughput, fault-tolerant stream processing of live data streams. Data can be ingested from different sources like Kafka, or TCP sockets, and can be processed using complex algorithms. Finally, processed data can be pushed out to filesystems, external databases.
+
 
 Contents:
 
@@ -18,11 +23,9 @@ Contents:
    :maxdepth: 2
 
    SJ_Overview
-   Platform Architecture
    SJ_Modules
-   SJ_REST API Documentation
    SJ_UI_Guide
-   Glossary
+
    
  
 

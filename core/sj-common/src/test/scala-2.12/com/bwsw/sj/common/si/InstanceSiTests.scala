@@ -18,6 +18,7 @@
  */
 package com.bwsw.sj.common.si
 
+import com.bwsw.common.file.utils.{ClosableClassLoader, MongoFileStorage}
 import com.bwsw.sj.common.dal.model.instance.InstanceDomain
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
 import com.bwsw.sj.common.engine.{StreamingValidator, ValidationInfo}
@@ -25,9 +26,9 @@ import com.bwsw.sj.common.si.model.instance.{Instance, InstanceCreator}
 import com.bwsw.sj.common.si.model.module.{ModuleMetadata, Specification}
 import com.bwsw.sj.common.si.result._
 import com.bwsw.sj.common.utils.EngineLiterals._
-import com.bwsw.sj.common.utils.{FileClassLoader, MessageResourceUtils, MessageResourceUtilsMock}
+import com.bwsw.sj.common.utils._
 import org.mockito.ArgumentMatchers.{any, anyString, eq => argEq}
-import org.mockito.Mockito.{never, reset, verify, when}
+import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{BeforeAndAfterEach, FlatSpec, Matchers}
 import scaldi.{Injector, Module}
@@ -58,24 +59,29 @@ class InstanceSiTests extends FlatSpec with Matchers with BeforeAndAfterEach wit
   val connectionRepository = mock[ConnectionRepository]
   when(connectionRepository.getInstanceRepository).thenReturn(instanceRepository)
 
-  val fileClassLoader = mock[FileClassLoader]
-  Seq[Class[_]](
-    classOf[AllValid],
-    classOf[InstanceNotValid],
-    classOf[OptionsNotValid],
-    classOf[InstanceAndOptionsNotValid]).foreach { clazz =>
-    when(fileClassLoader.getInstance(argEq(clazz.getName), argEq(moduleFilename))(any[Injector]()))
-      .thenAnswer(_ => clazz.newInstance())
-  }
+
 
   val injector = new Module {
     bind[ConnectionRepository] to connectionRepository
     bind[MessageResourceUtils] to MessageResourceUtilsMock.messageResourceUtils
     bind[InstanceCreator] to createInstance
-    bind[FileClassLoader] to fileClassLoader
   }.injector
 
-  val instanceSI = new InstanceSI()(injector)
+
+  class InstanceSIMock(implicit injector: Injector) extends InstanceSI()(injector) {
+    private val fileClassLoader = mock[FileClassLoader]
+    Seq[Class[_]](
+      classOf[AllValid],
+      classOf[InstanceNotValid],
+      classOf[OptionsNotValid],
+      classOf[InstanceAndOptionsNotValid]).foreach { clazz =>
+      when(fileClassLoader.loadClass(argEq(clazz.getName)))
+        .thenAnswer(_ => clazz)
+    }
+    override protected def createClassLoader(filename: String) = fileClassLoader
+  }
+
+  val instanceSI = new InstanceSIMock()(injector)
 
   override def beforeEach(): Unit = {
     reset(instanceRepository)

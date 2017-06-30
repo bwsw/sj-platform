@@ -34,6 +34,8 @@ import org.apache.mesos.SchedulerDriver
 import scaldi.Injectable.inject
 
 import scala.collection.immutable
+import scala.util.Properties
+import scala.collection.JavaConverters._
 import scala.util.Try
 
 
@@ -149,5 +151,15 @@ object FrameworkUtil {
     } else {
       FrameworkUtil.instance = optionInstance
     }
+  }
+
+  def getJvmOptions: String = {
+    instance.get.jvmOptions.foldLeft("")((acc, option) => s"$acc ${option._1}${option._2}")
+  }
+
+  def checkInstanceStarted(): Unit = {
+    logger.info(s"Check is instance status 'started': $isInstanceStarted")
+    if (isInstanceStarted) prepareTasksToLaunch()
+    else teardown()
   }
 }

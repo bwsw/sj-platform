@@ -18,17 +18,14 @@
  */
 package com.bwsw.sj.common.dal.model.provider
 
-import java.net.{InetSocketAddress, URI}
+import java.net.URI
 import java.nio.channels.ClosedChannelException
 import java.util.Collections
 import java.util.concurrent.TimeUnit
 
-import com.aerospike.client.{AerospikeClient, AerospikeException}
 import com.bwsw.common.es.ElasticsearchClient
 import com.bwsw.sj.common.dal.morphia.MorphiaAnnotations.{IdField, PropertyField}
 import com.bwsw.sj.common.utils.ProviderLiterals
-import com.datastax.driver.core.Cluster
-import com.datastax.driver.core.exceptions.NoHostAvailableException
 import kafka.javaapi.TopicMetadataRequest
 import kafka.javaapi.consumer.SimpleConsumer
 import org.apache.zookeeper.ZooKeeper
@@ -66,10 +63,6 @@ class ProviderDomain(@IdField val name: String,
 
   protected def checkProviderConnectionByType(host: String, providerType: String, zkSessionTimeout: Int): ArrayBuffer[String] = {
     providerType match {
-      case ProviderLiterals.cassandraType =>
-        checkCassandraConnection(host)
-      case ProviderLiterals.aerospikeType =>
-        checkAerospikeConnection(host)
       case ProviderLiterals.zookeeperType =>
         checkZookeeperConnection(host, zkSessionTimeout)
       case ProviderLiterals.kafkaType =>
@@ -83,45 +76,6 @@ class ProviderDomain(@IdField val name: String,
       case _ =>
         throw new Exception(s"Host checking for provider type '$providerType' is not implemented")
     }
-  }
-
-  protected def checkCassandraConnection(address: String): ArrayBuffer[String] = {
-    val errors = ArrayBuffer[String]()
-    Try {
-      val (host, port) = getHostAndPort(address)
-
-      val builder = Cluster.builder().addContactPointsWithPorts(new InetSocketAddress(host, port))
-
-      val client = builder.build()
-      client.getMetadata
-      client.close()
-    } match {
-      case Success(_) =>
-      case Failure(_: NoHostAvailableException) =>
-        errors += s"Cannot gain an access to Cassandra on '$address'"
-      case Failure(_) =>
-        errors += s"Wrong host '$address'"
-    }
-
-    errors
-  }
-
-  protected def checkAerospikeConnection(address: String): ArrayBuffer[String] = {
-    val errors = ArrayBuffer[String]()
-    val (host, port) = getHostAndPort(address)
-
-    Try(new AerospikeClient(host, port)) match {
-      case Success(client) =>
-        if (!client.isConnected) {
-          errors += s"Cannot gain an access to Aerospike on '$address'"
-        }
-        client.close()
-      case Failure(_: AerospikeException) =>
-        errors += s"Cannot gain an access to Aerospike on '$address'"
-      case Failure(e) => throw e
-    }
-
-    errors
   }
 
   protected def checkZookeeperConnection(address: String, zkSessionTimeout: Int): ArrayBuffer[String] = {

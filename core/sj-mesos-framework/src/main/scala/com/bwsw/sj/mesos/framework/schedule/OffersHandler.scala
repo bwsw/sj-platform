@@ -21,9 +21,11 @@ package com.bwsw.sj.mesos.framework.schedule
 import com.bwsw.sj.mesos.framework.task.TasksList
 import org.apache.log4j.Logger
 import org.apache.mesos.Protos._
+import scaldi.Injector
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
+import scala.collection.mutable.ListBuffer
 
 /**
  * Object for filter offers.
@@ -33,6 +35,7 @@ object OffersHandler {
   var filteredOffers = mutable.Buffer[Offer]()
   var offerNumber: Int = 0
   private var offers = mutable.Buffer[Offer]()
+  var tasksCountOnSlaves: mutable.ListBuffer[(Offer, Int)] = mutable.ListBuffer[(Offer, Int)]()
 
 
   def getOffers = offers
@@ -69,6 +72,7 @@ object OffersHandler {
       }
     } else result = offers
     filteredOffers = result
+    tasksCountOnSlaves = getTasksForOffer
   }
 
   /**
@@ -87,7 +91,7 @@ object OffersHandler {
    *
    * @return mutable.ListBuffer[(Offer, Int)]
    */
-  def getOffersForSlave: mutable.ListBuffer[(Offer, Int)] = {
+  def getTasksForOffer: mutable.ListBuffer[(Offer, Int)] = {
     logger.info("Calculating how much tasks can be launched on selected offers for this instance")
     var overCpus = 0.0
     var overMem = 0.0
@@ -153,13 +157,13 @@ object OffersHandler {
   }
 
   /**
-    * Get random unused ports
+    * Get random free ports
  *
     * @param offer:Offer
     * @param task:String
     * @return Resource
     */
-  def getPorts(offer: Offer, task: String): Resource = {
+  def getPortsResource(offer: Offer, task: String): Resource = {
     val portsResource = OffersHandler.getResource(offer, "ports")
     for (range <- portsResource.getRanges.getRangeList.asScala) {
       TasksList.getAvailablePorts ++= (range.getBegin to range.getEnd).to[mutable.ListBuffer]
@@ -178,5 +182,48 @@ object OffersHandler {
       .setType(Value.Type.RANGES)
       .setRanges(ranges)
       .build()
+  }
+
+  def getCpusResource: Resource = {
+    Resource.newBuilder
+      .setType(Value.Type.SCALAR)
+      .setName("cpus")
+      .setScalar(Value.Scalar.newBuilder.setValue(TasksList.perTaskCores))
+      .build
+  }
+
+  def getMemResource: Resource = {
+    Resource.newBuilder
+      .setType(org.apache.mesos.Protos.Value.Type.SCALAR)
+      .setName("mem")
+      .setScalar(org.apache.mesos.Protos.Value.Scalar.newBuilder.setValue(TasksList.perTaskMem))
+      .build
+  }
+
+  def distributeTasksOnSlaves()(implicit injector: Injector): Unit = {
+    logger.info(s"Distribute tasks to resource offers")
+    OffersHandler.offerNumber = 0
+    for (currTask <- TasksList.toLaunch) {
+      createTaskToLaunch(currTask, OffersHandler.tasksCountOnSlaves)
+      OffersHandler.tasksCountOnSlaves = OffersHandler.updateOfferNumber(OffersHandler.tasksCountOnSlaves)
+    }
+  }
+
+  /**
+    * Create task to launch.
+    *
+    * @param taskName
+    * @param tasksCountOnSlaves
+    * @return
+    */
+  private def createTaskToLaunch(taskName: String, tasksCountOnSlaves: mutable.ListBuffer[(Offer, Int)])(implicit injector: Injector): ListBuffer[String] = {
+    val currentOffer = OffersHandler.getNextOffer(tasksCountOnSlaves)
+    val task = TasksList.createTaskToLaunch(taskName, currentOffer._1)
+
+    TasksList.addTaskToSlave(task, currentOffer)
+
+    // update how much tasks we can run on slave when launch current task
+    tasksCountOnSlaves.update(tasksCountOnSlaves.indexOf(currentOffer), Tuple2(currentOffer._1, currentOffer._2 - 1))
+    TasksList.launched(taskName)
   }
 }

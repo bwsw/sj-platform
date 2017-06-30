@@ -18,10 +18,7 @@
  */
 package com.bwsw.sj.common.engine.core.managment
 
-import java.io.File
-import java.net.URLClassLoader
-
-import com.bwsw.common.file.utils.MongoFileStorage
+import com.bwsw.common.file.utils.ClosableClassLoader
 import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.common.dal.model.instance.ExecutionPlan
 import com.bwsw.sj.common.dal.model.module._
@@ -33,8 +30,8 @@ import com.bwsw.sj.common.engine.core.config.EngineConfigNames
 import com.bwsw.sj.common.engine.core.environment.EnvironmentManager
 import com.bwsw.sj.common.si.model.config.ConfigurationSetting
 import com.bwsw.sj.common.si.model.instance.{Instance, InstanceCreator}
-import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.common.utils.EngineLiterals._
+import com.bwsw.sj.common.utils.{EngineLiterals, FileClassLoader}
 import com.bwsw.sj.common.utils.StreamLiterals._
 import com.bwsw.tstreams.agents.consumer.Consumer
 import com.bwsw.tstreams.agents.consumer.Offset.IOffset
@@ -79,7 +76,6 @@ abstract class TaskManager(implicit injector: Injector) {
   setTStreamFactoryProperties()
 
   protected var currentPortNumber: Int = 0
-  private val storage: MongoFileStorage = connectionRepository.getFileStorage
 
   protected val fileMetadata: FileMetadataDomain = connectionRepository.getFileMetadataRepository.getByParameters(
     Map("specification.name" -> instance.moduleName,
@@ -87,9 +83,13 @@ abstract class TaskManager(implicit injector: Injector) {
       "specification.version" -> instance.moduleVersion)
   ).head
   private val executorClassName: String = fileMetadata.specification.executorClass
-  val moduleClassLoader: URLClassLoader = createClassLoader()
+  val moduleClassLoader: ClosableClassLoader = createClassLoader()
 
-  protected val executorClass: Class[_] = moduleClassLoader.loadClass(executorClassName)
+  protected val executorClass: Class[_] = {
+    val _class = moduleClassLoader.loadClass(executorClassName)
+//    moduleClassLoader.close()
+    _class
+  }
 
   val inputs: mutable.Map[StreamDomain, Array[Int]]
 
@@ -141,19 +141,13 @@ abstract class TaskManager(implicit injector: Injector) {
     tstreamsSettings.foreach(x => tstreamFactory.setProperty(ConfigurationSetting.clearConfigurationSettingName(x.domain, x.name), x.value))
   }
 
-  protected def createClassLoader(): URLClassLoader = {
-    val file = getModuleJar
+  protected def createClassLoader(): ClosableClassLoader = {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
-      s"Get class loader for jar file: ${file.getName}.")
+      s"Get file contains uploaded '${instance.moduleName}' module jar.")
 
-    val classLoaderUrls = Array(file.toURI.toURL)
+    val classLoader: ClosableClassLoader = new FileClassLoader(inject[ConnectionRepository].getFileStorage, fileMetadata.filename)
 
-    new URLClassLoader(classLoaderUrls, ClassLoader.getSystemClassLoader)
-  }
-
-  private def getModuleJar: File = {
-    logger.debug(s"Instance name: $instanceName, task name: $taskName. Get file contains uploaded '${instance.moduleName}' module jar.")
-    storage.get(fileMetadata.filename, s"tmp/${instance.moduleName}")
+    classLoader
   }
 
   @throws(classOf[Exception])

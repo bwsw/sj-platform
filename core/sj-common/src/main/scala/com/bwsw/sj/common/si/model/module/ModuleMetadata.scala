@@ -19,14 +19,17 @@
 package com.bwsw.sj.common.si.model.module
 
 import java.io.File
+import java.net.URLClassLoader
 
 import com.bwsw.sj.common.dal.model.module.FileMetadataDomain
+import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.engine.StreamingValidator
 import com.bwsw.sj.common.si.model.FileMetadata
+import com.bwsw.sj.common.utils.FileClassLoader
+import scaldi.Injectable._
 import scaldi.Injector
 
 import scala.collection.mutable.ArrayBuffer
-import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
 import scala.util.{Failure, Success, Try}
 
 class ModuleMetadata(filename: String,
@@ -85,7 +88,7 @@ class ModuleMetadata(filename: String,
     val errors = new ArrayBuffer[String]
     if (file.isDefined) {
       Try {
-        new URLClassLoader(Array(file.get.toURI.toURL), ClassLoader.getSystemClassLoader)
+        createClassLoader(filename)
       } match {
         case Success(classLoader) =>
           implementations.foreach {
@@ -126,6 +129,12 @@ class ModuleMetadata(filename: String,
       "specification.module-type" -> specification.moduleType,
       "specification.version" -> specification.version))
       .nonEmpty
+  }
+
+  protected def createClassLoader(filename: String): ClassLoader = {
+//    new FileClassLoader(inject[ConnectionRepository].getFileStorage, filename)
+    println(file.get.getName)
+    new URLClassLoader(Array(file.get.toURI.toURL), ClassLoader.getSystemClassLoader)
   }
 }
 

@@ -39,7 +39,9 @@ trait SjModulesRoute extends Directives with CompletionUtils with SjInjector {
           uploadedFile("jar") {
             case (metadata: FileInfo, file: File) =>
               val moduleMetadataApi = new ModuleMetadataApi(metadata.fileName, file)
-              complete(restResponseToHttpResponse(moduleController.create(moduleMetadataApi)))
+              val response = moduleController.create(moduleMetadataApi)
+              file.delete()
+              complete(restResponseToHttpResponse(response))
           }
         } ~
           get {

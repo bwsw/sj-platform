@@ -49,7 +49,7 @@ object SuccessHandler {
     val slaveStateUrl = s"http://$slaveHost/state.json"
     val slaveResponse = scala.io.Source.fromURL(slaveStateUrl).mkString
     val obj = StatusHandler.serializer.deserialize[SlaveState](slaveResponse)
-    val framework = obj.frameworks.filter(framework => FrameworkUtil.frameworkId.contains(framework.id)).head
+    val framework = obj.frameworks.filter(framework => FrameworkUtil.frameworkId.get.contains(framework.id)).head
     framework.executors.filter(executor => executor.id == taskId.getValue).head.directory
   }
 }

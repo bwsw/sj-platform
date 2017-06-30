@@ -57,8 +57,6 @@ object Dependencies {
     "com.opencsv" % "opencsv" % "3.9",
     ("org.apache.avro" % "avro" % "1.8.1")
       .exclude("org.slf4j", "slf4j-api"),
-    "com.aerospike" % "aerospike-client" % "3.3.4",
-    "com.datastax.cassandra" % "cassandra-driver-core" % "3.2.0",
     "org.eclipse.jetty" % "jetty-client" % "9.4.3.v20170317",
     "com.fasterxml.jackson.module" % "jackson-module-scala_2.12" % "2.8.8",
     ("org.everit.json" % "org.everit.json.schema" % "1.4.1")

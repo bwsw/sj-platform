@@ -53,7 +53,7 @@
 			"description": "",
 			"collectionId": "336e97db-aa5c-c137-f636-13a666192aea",
 			"responses": [],
-			"rawModeData": "{\r\n     \"type\": \"REST\",\r\n     \"name\": \"rest-ful\",\r\n     \"description\": \"aero\",\r\n     \"namespace\": \"a1\",\r\n     \"provider\": \"rest-ful\"\r\n}"
+			"rawModeData": "{\r\n     \"type\": \"REST\",\r\n     \"name\": \"rest-ful\",\r\n     \"namespace\": \"a1\",\r\n     \"provider\": \"rest-ful\"\r\n}"
 		},
 		{
 			"id": "1a1c3d1e-ee15-1ddd-c70b-191b5a732ca4",
@@ -73,7 +73,7 @@
 			"description": "",
 			"collectionId": "336e97db-aa5c-c137-f636-13a666192aea",
 			"responses": [],
-			"rawModeData": "{\r\n     \"type\": \"REST\",\r\n     \"name\": \"rest-ful1\",\r\n     \"description\": \"aero\",\r\n     \"provider\": \"rest111\"\r\n}"
+			"rawModeData": "{\r\n     \"type\": \"REST\",\r\n     \"name\": \"rest-ful1\",\r\n     \"provider\": \"rest111\"\r\n}"
 		},
 		{
 			"id": "1bd8aafb-fc8e-87bf-396f-5846cf216323",
@@ -93,8 +93,7 @@
 			"responses": [],
 			"tests": "tests[\"Status code is 200\"] = responseCode.code === 200;\n\ntests[\"Body matches string\"] = responseBody.has(\"rest-ful\");\n\ntests[\"Body matches string\"] = responseBody.has(\"services\");",
 			"currentHelper": "normal",
-			"helperAttributes": {},
-			"rawModeData": "{\r\n     \"name\": \"rest-kafka1\",\r\n     \"description\": \"example kafka provider\",\r\n     \"provider\": \"aerospike_test_provider\",\r\n     \"zk-provider\": \"zookeeper_test_provider\",\r\n     \"type\": \"KfkQ\",\r\n     \"zk-namespace\": \"a1\"\r\n}"
+			"helperAttributes": {}
 		},
 		{
 			"id": "21348d89-136c-10d0-7c46-58f897365e2d",
@@ -113,8 +112,7 @@
 			"name": "Service_3.2.1.Get_by_name",
 			"description": "",
 			"collectionId": "336e97db-aa5c-c137-f636-13a666192aea",
-			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"rest-kafka1\",\r\n     \"description\": \"example kafka provider\",\r\n     \"provider\": \"aerospike_test_provider\",\r\n     \"zk-provider\": \"zookeeper_test_provider\",\r\n     \"type\": \"KfkQ\",\r\n     \"zk-namespace\": \"a1\"\r\n}"
+			"responses": []
 		},
 		{
 			"id": "23002e33-eab3-db96-a9d9-823980e1e106",
@@ -134,7 +132,7 @@
 			"description": "",
 			"collectionId": "336e97db-aa5c-c137-f636-13a666192aea",
 			"responses": [],
-			"rawModeData": "{\r\n     \"type\": \"REST\",\r\n\r\n     \"description\": \"aero\",\r\n     \"provider\": \"rest-ful\"\r\n}"
+			"rawModeData": "{\r\n     \"type\": \"REST\",\r\n\r\n    ,\r\n     \"provider\": \"rest-ful\"\r\n}"
 		},
 		{
 			"id": "293f4de2-abf3-dcea-9b63-a91970d27767",
@@ -154,7 +152,7 @@
 			"description": "",
 			"collectionId": "336e97db-aa5c-c137-f636-13a666192aea",
 			"responses": [],
-			"rawModeData": "{\r\n     \"type\": \"\",\r\n     \"name\": \"rest-ful1\",\r\n     \"description\": \"aero\",\r\n     \"provider\": \"rest-ful\"\r\n}"
+			"rawModeData": "{\r\n     \"type\": \"\",\r\n     \"name\": \"rest-ful1\",\r\n     \"provider\": \"rest-ful\"\r\n}"
 		},
 		{
 			"id": "3f5f07d3-2c16-6b1c-23b9-c3f3514cf6c2",
@@ -187,7 +185,7 @@
 			"data": [],
 			"dataMode": "raw",
 			"version": 2,
-			"tests": "tests[\"Status code is 400\"] = responseCode.code === 400;\n\ntests[\"Body matches string\"] = responseBody.has(\"Unknown type 'REST11' of service provided. Must be one of: [CassDB, ESInd, KfkQ, TstrQ, ZKCoord, ArspkDB, JDBC, REST].\");",
+			"tests": "tests[\"Status code is 400\"] = responseCode.code === 400;\n\ntests[\"Body matches string\"] = responseBody.has(\"Unknown type 'REST11' of service provided. Must be one of: [ESInd, KfkQ, TstrQ, ZKCoord, JDBC, REST].\");",
 			"currentHelper": "normal",
 			"helperAttributes": {},
 			"time": 1495528649946,
@@ -195,7 +193,7 @@
 			"description": "",
 			"collectionId": "336e97db-aa5c-c137-f636-13a666192aea",
 			"responses": [],
-			"rawModeData": "{\r\n     \"type\": \"REST11\",\r\n     \"name\": \"rest-ful1\",\r\n     \"description\": \"aero\",\r\n     \"provider\": \"rest-ful\"\r\n}"
+			"rawModeData": "{\r\n     \"type\": \"REST11\",\r\n     \"name\": \"rest-ful1\",\r\n     \"provider\": \"rest-ful\"\r\n}"
 		},
 		{
 			"id": "698c920d-8f64-9358-d278-fb85decdc0a3",
@@ -216,7 +214,7 @@
 			"tests": "tests[\"Status code is 201\"] = responseCode.code === 201;\n\ntests[\"Body matches string\"] = responseBody.has(\"Service 'rest-ful' has been created.\");",
 			"currentHelper": "normal",
 			"helperAttributes": {},
-			"rawModeData": "{\r\n     \"type\": \"REST\",\r\n     \"name\": \"rest-ful\",\r\n     \"description\": \"aero\",\r\n     \"namespace\": \"a1\",\r\n     \"provider\": \"rest-ful\"\r\n}"
+			"rawModeData": "{\r\n     \"type\": \"REST\",\r\n     \"name\": \"rest-ful\",\r\n     \"namespace\": \"a1\",\r\n     \"provider\": \"rest-ful\"\r\n}"
 		},
 		{
 			"id": "74ca46c2-563f-fbaf-cef6-60a2baf99cf8",
@@ -236,8 +234,7 @@
 			"responses": [],
 			"tests": "tests[\"Status code is 404\"] = responseCode.code === 404;\n\ntests[\"Body matches string\"] = responseBody.has(\"Service 'rest-ful' has not been found.\");",
 			"currentHelper": "normal",
-			"helperAttributes": {},
-			"rawModeData": "{\r\n     \"type\": \"REST\",\r\n     \"name\": \"rest-ful\",\r\n     \"description\": \"aero\",\r\n     \"namespace\": \"a1\",\r\n     \"provider\": \"aerospike\"\r\n}"
+			"helperAttributes": {}
 		},
 		{
 			"id": "74f139d7-a6d6-8551-7dd4-7843a52ccfba",
@@ -278,7 +275,7 @@
 			"description": "",
 			"collectionId": "336e97db-aa5c-c137-f636-13a666192aea",
 			"responses": [],
-			"rawModeData": "{\r\n\r\n     \"name\": \"rest-ful1\",\r\n     \"description\": \"aero\",\r\n     \"provider\": \"rest-ful\"\r\n}"
+			"rawModeData": "{\r\n\r\n     \"name\": \"rest-ful1\",\r\n     \"provider\": \"rest-ful\"\r\n}"
 		},
 		{
 			"id": "884a0f9e-1b3f-a344-d4e2-feeea156eb63",
@@ -298,7 +295,7 @@
 			"description": "",
 			"collectionId": "336e97db-aa5c-c137-f636-13a666192aea",
 			"responses": [],
-			"rawModeData": "{\r\n     \"type\": \"REST\",\r\n     \"name\": \"rest-ful\",\r\n     \"description\": \"aero\",\r\n     \"namespace\": \"a1\",\r\n     \"provider\": \"rest-ful\",\r\n     \"basePath\": \"a\"\r\n}"
+			"rawModeData": "{\r\n     \"type\": \"REST\",\r\n     \"name\": \"rest-ful\",\r\n     \"namespace\": \"a1\",\r\n     \"provider\": \"rest-ful\",\r\n     \"basePath\": \"a\"\r\n}"
 		},
 		{
 			"id": "8f7a296c-432e-1910-25a0-da07ed8c8cda",
@@ -339,7 +336,7 @@
 			"tests": "tests[\"Status code is 400\"] = responseCode.code === 400;\n\ntests[\"Body matches string\"] = responseBody.has(\"Cannot parse json:\");",
 			"currentHelper": "normal",
 			"helperAttributes": {},
-			"rawModeData": "{\r\n     \"type\": \"REST\",\r\n     \"name\": \"rest-ful\",\r\n     \"description\": \"aero\",\r\n     \"namespace\": \"a1\",\r\n     \"provider\": \"rest-ful\",\r\n     \"Headers\": 4,\r\n}"
+			"rawModeData": "{\r\n     \"type\": \"REST\",\r\n     \"name\": \"rest-ful\",\r\n     \"namespace\": \"a1\",\r\n     \"provider\": \"rest-ful\",\r\n     \"Headers\": 4,\r\n}"
 		},
 		{
 			"id": "a03a1fc4-5645-2cfd-e058-d756eb1dd99d",
@@ -359,7 +356,7 @@
 			"description": "",
 			"collectionId": "336e97db-aa5c-c137-f636-13a666192aea",
 			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"rest-ful\",\r\n     \"description\": \"example aerospike provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"REST\",\r\n     \"hosts\": [\r\n        \"176.120.25.19:3000\"\r\n      ]\r\n}"
+			"rawModeData": "{\r\n     \"name\": \"rest-ful\",\r\n     \"description\": \"example rest provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"REST\",\r\n     \"hosts\": [\r\n        \"176.120.25.19:3000\"\r\n      ]\r\n}"
 		},
 		{
 			"id": "a2ef14ce-f63c-c10f-b5d1-cabbbcce0475",
@@ -379,8 +376,7 @@
 			"responses": [],
 			"tests": "tests[\"Status code is 200\"] = responseCode.code === 404;\n\ntests[\"Body matches string\"] = responseBody.has(\"Service 'rest-ful' has not been found.\");",
 			"currentHelper": "normal",
-			"helperAttributes": {},
-			"rawModeData": "{\r\n     \"name\": \"rest-kafka1\",\r\n     \"description\": \"example kafka provider\",\r\n     \"provider\": \"aerospike_test_provider\",\r\n     \"zk-provider\": \"zookeeper_test_provider\",\r\n     \"type\": \"KfkQ\",\r\n     \"zk-namespace\": \"a1\"\r\n}"
+			"helperAttributes": {}
 		},
 		{
 			"id": "a921dc1c-979a-4b9e-d43f-571557ab9c01",
@@ -400,7 +396,7 @@
 			"description": "",
 			"collectionId": "336e97db-aa5c-c137-f636-13a666192aea",
 			"responses": [],
-			"rawModeData": "{\r\n     \"type\": \"REST\",\r\n     \"name\": \"1rest-ful\",\r\n     \"description\": \"aero\",\r\n     \"namespace\": \"a1\",\r\n     \"provider\": \"rest-ful\"\r\n}"
+			"rawModeData": "{\r\n     \"type\": \"REST\",\r\n     \"name\": \"1rest-ful\",\r\n     \"namespace\": \"a1\",\r\n     \"provider\": \"rest-ful\"\r\n}"
 		},
 		{
 			"id": "cb8b3441-838a-45f6-8117-a9a5564d0279",
@@ -420,8 +416,7 @@
 			"responses": [],
 			"tests": "tests[\"Status code is 404\"] = responseCode.code === 404;\n\ntests[\"Body matches string\"] = responseBody.has(\"Service 'rest-ful111' has not been found.\");",
 			"currentHelper": "normal",
-			"helperAttributes": {},
-			"rawModeData": "{\r\n     \"name\": \"rest-kafka\",\r\n     \"description\": \"example kafka provider\",\r\n     \"provider\": \"kafka-good\",\r\n     \"zk-provider\": \"zookeeper_test_provider\",\r\n     \"type\": \"KfkQ\",\r\n     \"zk-namespace\": \"a1\"\r\n}"
+			"helperAttributes": {}
 		},
 		{
 			"id": "d2e3dfce-e441-7870-fb7c-85743ba9f3f2",
@@ -462,7 +457,7 @@
 			"description": "",
 			"collectionId": "336e97db-aa5c-c137-f636-13a666192aea",
 			"responses": [],
-			"rawModeData": "{\r\n     \"type\": \"REST\",\r\n     \"name\": \"rest-ful\",\r\n     \"description\": \"aero\",\r\n     \"namespace\": \"a1\",\r\n     \"provider\": \"rest-ful\",\r\n     \"httpVersion\": 4\r\n}"
+			"rawModeData": "{\r\n     \"type\": \"REST\",\r\n     \"name\": \"rest-ful\",\r\n     \"namespace\": \"a1\",\r\n     \"provider\": \"rest-ful\",\r\n     \"httpVersion\": 4\r\n}"
 		},
 		{
 			"id": "d6fa1d1c-d6fc-6d84-f558-9c68b15a7360",
@@ -502,7 +497,7 @@
 			"description": "",
 			"collectionId": "336e97db-aa5c-c137-f636-13a666192aea",
 			"responses": [],
-			"rawModeData": "{\r\n     \"type\": \"REST\",\r\n     \"name\":\"\",\r\n     \"description\": \"aero\",\r\n     \"provider\": \"rest-ful\"\r\n}"
+			"rawModeData": "{\r\n     \"type\": \"REST\",\r\n     \"name\":\"\",\r\n     \"provider\": \"rest-ful\"\r\n}"
 		},
 		{
 			"id": "e1149d6b-acaa-bf65-5b90-0365016279df",
@@ -522,7 +517,7 @@
 			"description": "",
 			"collectionId": "336e97db-aa5c-c137-f636-13a666192aea",
 			"responses": [],
-			"rawModeData": "{\r\n     \"type\": \"REST\",\r\n     \"name\": \"rest-ful1\",\r\n     \"description\": \"aero\"\r\n\r\n}"
+			"rawModeData": "{\r\n     \"type\": \"REST\",\r\n     \"name\": \"rest-ful1\",\r\n\r\n}"
 		},
 		{
 			"id": "e19e83d2-4931-daab-cec5-28578e877d5a",
@@ -542,7 +537,7 @@
 			"description": "",
 			"collectionId": "336e97db-aa5c-c137-f636-13a666192aea",
 			"responses": [],
-			"rawModeData": "{\r\n     \"type\": \"REST\",\r\n     \"name\": \"rest-ful1\",\r\n     \"description\": \"aero\",\r\n     \"provider\": \"\"\r\n}"
+			"rawModeData": "{\r\n     \"type\": \"REST\",\r\n     \"name\": \"rest-ful1\",\r\n     \"provider\": \"\"\r\n}"
 		}
 	]
 }

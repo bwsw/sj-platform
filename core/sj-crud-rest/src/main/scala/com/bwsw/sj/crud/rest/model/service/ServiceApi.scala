@@ -26,12 +26,10 @@ import scaldi.Injector
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type", defaultImpl = classOf[ServiceApi], visible = true)
 @JsonSubTypes(Array(
-  new Type(value = classOf[CassDBServiceApi], name = ServiceLiterals.cassandraType),
   new Type(value = classOf[EsServiceApi], name = ServiceLiterals.elasticsearchType),
   new Type(value = classOf[KfkQServiceApi], name = ServiceLiterals.kafkaType),
   new Type(value = classOf[TstrQServiceApi], name = ServiceLiterals.tstreamsType),
   new Type(value = classOf[ZKCoordServiceApi], name = ServiceLiterals.zookeeperType),
-  new Type(value = classOf[ArspkDBServiceApi], name = ServiceLiterals.aerospikeType),
   new Type(value = classOf[JDBCServiceApi], name = ServiceLiterals.jdbcType),
   new Type(value = classOf[RestServiceApi], name = ServiceLiterals.restType)
 ))
@@ -54,26 +52,6 @@ class ServiceApiCreator {
 
   def from(service: Service): ServiceApi = {
     service.serviceType match {
-      case ServiceLiterals.aerospikeType =>
-        val aerospikeService = service.asInstanceOf[AerospikeService]
-
-        new ArspkDBServiceApi(
-          name = aerospikeService.name,
-          namespace = aerospikeService.namespace,
-          provider = aerospikeService.provider,
-          description = Option(aerospikeService.description)
-        )
-
-      case ServiceLiterals.cassandraType =>
-        val cassandraService = service.asInstanceOf[CassandraService]
-
-        new CassDBServiceApi(
-          name = cassandraService.name,
-          keyspace = cassandraService.keyspace,
-          provider = cassandraService.provider,
-          description = Option(cassandraService.description)
-        )
-
       case ServiceLiterals.elasticsearchType =>
         val esService = service.asInstanceOf[ESService]
 

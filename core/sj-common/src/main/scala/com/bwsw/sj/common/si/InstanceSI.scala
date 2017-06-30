@@ -18,6 +18,7 @@
  */
 package com.bwsw.sj.common.si
 
+import com.bwsw.common.file.utils.ClosableClassLoader
 import com.bwsw.sj.common.dal.model.instance.InstanceDomain
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
 import com.bwsw.sj.common.engine.{StreamingValidator, ValidationInfo}
@@ -96,13 +97,17 @@ class InstanceSI(implicit injector: Injector) {
 
   private def validateInstance(specification: Specification, filename: String, instance: Instance): ValidationInfo = {
     val validatorClassName = specification.validatorClass
-    val classInstance = inject[FileClassLoader].getInstance(validatorClassName, filename)
+    val classLoader = createClassLoader(filename)
+    val classInstance = classLoader.loadClass(validatorClassName).newInstance()
     val validator = classInstance.asInstanceOf[StreamingValidator]
     val optionsValidationInfo = validator.validate(instance)
     val instanceValidationInfo = validator.validate(instance.options)
+    classLoader.close()
 
     ValidationInfo(
       optionsValidationInfo.result && instanceValidationInfo.result,
       optionsValidationInfo.errors ++= instanceValidationInfo.errors)
   }
+
+  protected def createClassLoader(filename: String) = new FileClassLoader(inject[ConnectionRepository].getFileStorage, filename)
 }

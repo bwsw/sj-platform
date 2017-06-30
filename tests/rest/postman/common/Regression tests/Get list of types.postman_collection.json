@@ -29,7 +29,7 @@
 			"time": 1495514171619,
 			"version": 2,
 			"responses": [],
-			"tests": "tests[\"Body matches string\"] = responseBody.has(\"cassandra\");\n\ntests[\"Body matches string\"] = responseBody.has(\"aerospike\");\n\ntests[\"Body matches string\"] = responseBody.has(\"zookeeper\");\n\ntests[\"Body matches string\"] = responseBody.has(\"kafka\");\n\ntests[\"Body matches string\"] = responseBody.has(\"ES\");\n\ntests[\"Body matches string\"] = responseBody.has(\"JDBC\");\n\ntests[\"Body matches string\"] = responseBody.has(\"REST\");\n\ntests[\"Status code is 200\"] = responseCode.code === 200;",
+			"tests": "tests[\"Body matches string\"] = responseBody.has(\"zookeeper\");\n\ntests[\"Body matches string\"] = responseBody.has(\"kafka\");\n\ntests[\"Body matches string\"] = responseBody.has(\"ES\");\n\ntests[\"Body matches string\"] = responseBody.has(\"JDBC\");\n\ntests[\"Body matches string\"] = responseBody.has(\"REST\");\n\ntests[\"Status code is 200\"] = responseCode.code === 200;",
 			"currentHelper": "normal",
 			"helperAttributes": {}
 		},
@@ -89,7 +89,7 @@
 			"time": 1495514218411,
 			"version": 2,
 			"responses": [],
-			"tests": "tests[\"Body matches string\"] = responseBody.has(\"CassDB\");\n\ntests[\"Body matches string\"] = responseBody.has(\"ESInd\");\n\ntests[\"Body matches string\"] = responseBody.has(\"KfkQ\");\n\ntests[\"Body matches string\"] = responseBody.has(\"TstrQ\");\n\ntests[\"Body matches string\"] = responseBody.has(\"ZKCoord\");\n\ntests[\"Body matches string\"] = responseBody.has(\"JDBC\");\n\ntests[\"Body matches string\"] = responseBody.has(\"REST\");\n\ntests[\"Status code is 200\"] = responseCode.code === 200;\n\ntests[\"Body matches string\"] = responseBody.has(\"ArspkDB\");",
+			"tests": "tests[\"Body matches string\"] = responseBody.has(\"ESInd\");\n\ntests[\"Body matches string\"] = responseBody.has(\"KfkQ\");\n\ntests[\"Body matches string\"] = responseBody.has(\"TstrQ\");\n\ntests[\"Body matches string\"] = responseBody.has(\"ZKCoord\");\n\ntests[\"Body matches string\"] = responseBody.has(\"JDBC\");\n\ntests[\"Body matches string\"] = responseBody.has(\"REST\");\n\ntests[\"Status code is 200\"] = responseCode.code === 200;",
 			"currentHelper": "normal",
 			"helperAttributes": {}
 		}

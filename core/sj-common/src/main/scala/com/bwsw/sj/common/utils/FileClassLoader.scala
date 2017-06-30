@@ -18,36 +18,35 @@
  */
 package com.bwsw.sj.common.utils
 
-import com.bwsw.sj.common.dal.repository.ConnectionRepository
-import scaldi.Injectable.inject
-import scaldi.Injector
+import com.bwsw.common.file.utils.{ClosableClassLoader, FileStorage}
 
 import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
 
 /**
   * Provides method for loading class from file in [[com.bwsw.common.file.utils.FileStorage FileStorage]]
   */
-class FileClassLoader {
+class FileClassLoader(storage: FileStorage, filename: String) extends ClosableClassLoader{
   /**
     * directory for temporary file saving
     */
   private val tmpDirectory = "/tmp/"
+
+  private val file = storage.get(filename, tmpDirectory + filename)
 
   /**
     * Loads the class from file that is in [[com.bwsw.common.file.utils.FileStorage FileStorage]]
     * and returns an instance of this class
     *
     * @param className    name of class
-    * @param filename     name of file
     */
-  def getInstance(className: String, filename: String)
-                 (implicit injector: Injector): Any = {
-    val storage = inject[ConnectionRepository].getFileStorage
-    val file = storage.get(filename, tmpDirectory + filename)
+  override def loadClass(className: String): Class[_] = {
     val loader = new URLClassLoader(Seq(file.toURI.toURL), ClassLoader.getSystemClassLoader)
-    val instance = loader.loadClass(className).newInstance()
-    file.delete()
+    val _class = loader.loadClass(className)
 
-    instance
+    _class
+  }
+
+  def close() = {
+    file.delete()
   }
 }

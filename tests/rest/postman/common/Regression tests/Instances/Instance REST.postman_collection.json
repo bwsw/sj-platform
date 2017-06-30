@@ -451,7 +451,7 @@
 			"description": "",
 			"collectionId": "e2806752-f0bd-ecbe-cb33-bfe953151f21",
 			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"rest-ful\",\r\n     \"description\": \"example aerospike provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"REST\",\r\n     \"hosts\": [\r\n        \"176.120.25.19:3000\"\r\n      ]\r\n}"
+			"rawModeData": "{\r\n     \"name\": \"rest-ful\",\r\n     \"description\": \"example rest-ful provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"REST\",\r\n     \"hosts\": [\r\n        \"176.120.25.19:3000\"\r\n      ]\r\n}"
 		},
 		{
 			"id": "b0f050a9-36aa-3e84-f5bd-a908d6f597ea",
