@@ -21,6 +21,7 @@ package com.bwsw.sj.engine.core.simulation.output
 import com.bwsw.sj.common.engine.core.entities.TStreamEnvelope
 import com.bwsw.sj.common.engine.core.environment.OutputEnvironmentManager
 import com.bwsw.sj.common.engine.core.output.OutputStreamingExecutor
+import com.bwsw.sj.engine.core.simulation.SimulatorConstants.defaultConsumerName
 
 import scala.collection.mutable
 
@@ -58,8 +59,6 @@ import scala.collection.mutable
 class OutputEngineSimulator[IT <: AnyRef, OT](executor: OutputStreamingExecutor[IT],
                                               outputRequestBuilder: OutputRequestBuilder[OT],
                                               manager: OutputEnvironmentManager) {
-
-  import OutputEngineSimulator.defaultConsumerName
 
   /**
     * Indicates that first checkpoint was not performed
@@ -118,8 +117,4 @@ class OutputEngineSimulator[IT <: AnyRef, OT](executor: OutputStreamingExecutor[
     * Removes all envelopes from local buffer
     */
   def clear(): Unit = inputEnvelopes.clear()
-}
-
-object OutputEngineSimulator {
-  val defaultConsumerName = "default-consumer-name"
 }
