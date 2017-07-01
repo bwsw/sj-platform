@@ -30,7 +30,16 @@ import scala.collection.mutable
   * @author Pavel Tomskikh
   */
 trait ModuleOutputMockHelper {
-  val transactions: mutable.Buffer[Transaction] = mutable.Buffer.empty
+  protected var transactions: mutable.Buffer[Transaction] = mutable.Buffer.empty
+
+  /**
+    * Returns [[transactions]] and clears it
+    */
+  def readTransactions() = {
+    val buffer = transactions
+    transactions = mutable.Buffer.empty
+    buffer
+  }
 }
 
 /**
