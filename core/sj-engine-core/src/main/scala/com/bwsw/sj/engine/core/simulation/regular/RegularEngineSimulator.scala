@@ -18,10 +18,10 @@
  */
 package com.bwsw.sj.engine.core.simulation.regular
 
-import com.bwsw.sj.common.engine.core.entities.{KafkaEnvelope, TStreamEnvelope}
-import com.bwsw.sj.common.engine.core.environment.ModuleEnvironmentManager
+import com.bwsw.sj.common.engine.core.entities.{Envelope, KafkaEnvelope, TStreamEnvelope}
 import com.bwsw.sj.common.engine.core.regular.RegularStreamingExecutor
 import com.bwsw.sj.engine.core.simulation.SimulatorConstants.defaultConsumerName
+import com.bwsw.sj.engine.core.simulation.regular.mocks.{ModuleEnvironmentManagerMock, ModuleOutputMockHelper, Transaction}
 
 import scala.collection.mutable
 
@@ -35,11 +35,11 @@ import scala.collection.mutable
   * @author Pavel Tomskikh
   */
 class RegularEngineSimulator[T <: AnyRef](executor: RegularStreamingExecutor[T],
-                                          manager: ModuleEnvironmentManager) {
+                                          manager: ModuleEnvironmentManagerMock,
+                                          checkpointInterval: Long) {
 
   private var transactionID: Long = 0
-  private val tStreamEnvelopes: mutable.Buffer[TStreamEnvelope[T]] = mutable.Buffer.empty
-  private val kafkaEnvelopes: mutable.Buffer[KafkaEnvelope[T]] = mutable.Buffer.empty
+  private val inputEnvelopes: mutable.Buffer[Envelope] = mutable.Buffer.empty
 
   executor.onInit()
 
@@ -58,7 +58,7 @@ class RegularEngineSimulator[T <: AnyRef](executor: RegularStreamingExecutor[T],
     envelope.id = transactionID
     envelope.stream = stream
 
-    tStreamEnvelopes += envelope
+    inputEnvelopes += envelope
     transactionID
   }
 
@@ -75,7 +75,7 @@ class RegularEngineSimulator[T <: AnyRef](executor: RegularStreamingExecutor[T],
     envelope.id = transactionID
     envelope.stream = stream
 
-    kafkaEnvelopes += envelope
+    inputEnvelopes += envelope
     transactionID
   }
 
@@ -89,4 +89,32 @@ class RegularEngineSimulator[T <: AnyRef](executor: RegularStreamingExecutor[T],
     */
   def prepareKafka(entities: Seq[T], stream: String): Seq[Long] =
     entities.map(prepareKafka(_, stream))
+
+  def process(clearBuffer: Boolean = true) = {
+    def callOnMessage(envelope: Envelope) = envelope match {
+      case tStreamEnvelope: TStreamEnvelope[T] =>
+        executor.onMessage(tStreamEnvelope)
+      case kafkaEnvelope: KafkaEnvelope[T] =>
+        executor.onMessage(kafkaEnvelope)
+    }
+
+    inputEnvelopes.map { envelope =>
+      callOnMessage(envelope)
+
+      val transactions = manager.producerPolicyByOutput.mapValues {
+        case (_, moduleOutput: ModuleOutputMockHelper) =>
+          moduleOutput.readTransactions()
+      }.filter(_._2.nonEmpty)
+
+      ProcessResult(envelope.id, transactions)
+    }
+  }
+
+  /**
+    * Removes all envelopes from local buffer
+    */
+  def clear(): Unit =
+    inputEnvelopes.clear()
 }
+
+case class ProcessResult(transactionId: Long, transactions: collection.Map[String, mutable.Buffer[Transaction]])
