@@ -21,6 +21,7 @@ package com.bwsw.sj.common.engine.core.state
 import com.bwsw.common.ObjectSerializer
 import com.bwsw.sj.common.dal.model.stream.TStreamStreamDomain
 import com.bwsw.sj.common.engine.core.managment.CommonTaskManager
+import com.bwsw.sj.common.engine.core.state.StateLiterals.{deleteLiteral, setLiteral}
 import com.bwsw.tstreams.agents.consumer.ConsumerTransaction
 import com.bwsw.tstreams.agents.consumer.Offset.Oldest
 import com.bwsw.tstreams.agents.group.CheckpointGroup
@@ -133,8 +134,8 @@ class StateLoader(manager: CommonTaskManager, checkpointGroup: CheckpointGroup, 
                                   partialState: mutable.Map[String, (String, Any)]): Unit = {
     logger.debug(s"Apply partial changes to state sequentially.")
     partialState.foreach {
-      case (key, ("set", value)) => fullState(key) = value
-      case (key, ("delete", _)) => fullState.remove(key)
+      case (key, (`setLiteral`, value)) => fullState(key) = value
+      case (key, (`deleteLiteral`, _)) => fullState.remove(key)
     }
   }
 

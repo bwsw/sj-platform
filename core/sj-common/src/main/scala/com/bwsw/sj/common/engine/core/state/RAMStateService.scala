@@ -18,6 +18,7 @@
  */
 package com.bwsw.sj.common.engine.core.state
 
+import com.bwsw.sj.common.engine.core.state.StateLiterals.{deleteLiteral, setLiteral}
 import org.slf4j.LoggerFactory
 
 import scala.collection.mutable
@@ -32,8 +33,6 @@ import scala.collection.mutable
 class RAMStateService(stateSaver: StateSaverInterface,
                       stateLoader: StateLoaderInterface)
   extends IStateService {
-
-  import RAMStateService.{deleteLiteral, setLiteral}
 
   private val logger = LoggerFactory.getLogger(this.getClass)
 
@@ -122,9 +121,4 @@ class RAMStateService(stateSaver: StateSaverInterface,
     stateSaver.saveFullState(stateChanges, stateVariables)
     stateChanges.clear()
   }
-}
-
-object RAMStateService {
-  val setLiteral = "set"
-  val deleteLiteral = "delete"
 }
