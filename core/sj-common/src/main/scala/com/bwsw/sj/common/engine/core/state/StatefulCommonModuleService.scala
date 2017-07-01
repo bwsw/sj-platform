@@ -18,7 +18,7 @@
  */
 package com.bwsw.sj.common.engine.core.state
 
-import com.bwsw.sj.common.dal.model.stream.StreamDomain
+import com.bwsw.sj.common.dal.model.stream.{StreamDomain, TStreamStreamDomain}
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
 import com.bwsw.sj.common.engine.core.environment.StatefulModuleEnvironmentManager
 import com.bwsw.sj.common.engine.core.managment.CommonTaskManager
@@ -48,7 +48,11 @@ class StatefulCommonModuleService(manager: CommonTaskManager,
 
   private val streamService: GenericMongoRepository[StreamDomain] = inject[ConnectionRepository].getStreamRepository
   private var countOfCheckpoints: Int = 1
-  private val stateService: RAMStateService = new RAMStateService(manager, checkpointGroup)
+
+  private val stateStream = createStateStream()
+  private val stateLoader: StateLoader = new StateLoader(manager, checkpointGroup, stateStream)
+  private val stateSaver: StateSaver = new StateSaver(manager, checkpointGroup, stateStream)
+  private val stateService: RAMStateService = new RAMStateService(stateSaver, stateLoader)
 
   val environmentManager = new StatefulModuleEnvironmentManager(
     new StateStorage(stateService),
@@ -106,5 +110,21 @@ class StatefulCommonModuleService(manager: CommonTaskManager,
       case regularInstance: RegularInstance => regularInstance.stateFullCheckpoint
       case batchInstance: BatchInstance => batchInstance.stateFullCheckpoint
     }
+  }
+
+  /**
+    * Creates [[TStreamStreamDomain]] to keep a module state
+    */
+  private def createStateStream(): TStreamStreamDomain = {
+    logger.debug(s"Task name: ${manager.taskName} " +
+      s"Get stream for keeping state of module.")
+
+    val description = "store state of module"
+    val tags = Array("state")
+    val partitions = 1
+    val stateStreamName = manager.taskName + "_state"
+
+    manager.createStorageStream(stateStreamName, description, partitions)
+    manager.getStream(stateStreamName, description, tags, partitions)
   }
 }
