@@ -647,9 +647,39 @@ Click "Cancel" to drop all the specified settings. The strem will not be created
 
 In the list of instances the following actions can be performed:
 
-1. **View** an instance`s name and status — ready, starting, strated, failed, stopping, stopped, deleting, deleted.
-2. **Start** an instance by clicking the «Start» button in the Actions section. The instance status will first change to «Strating» and in a few seconds to «Started». That means the instance is launched and is working now.
-3. **Stop** the instance that has been started i.e. has the «Started» status. Clkick at the «Stop» button and wait for a while till the status changes to «Stopping» and then to «Stopped».
+1. **View** an instance`s name and status. An instance nay have the following statuses:
+     
+- ready - a newly created instance and not started yet;
+
+- starting - a recently launched instance but not started yet (right after the "Start" button is pushed);
+
+- started - the launched instance started to work;
+
+- stopped - an instance that has been stopped;
+
+- deleting - an instance in the process of deleting (right after the "Delete" button is pressed);
+
+- failed - an instance that has been launched but in view of some errors is not started;
+
+- error - an error is detected when stopping the instance.
+
+If an instance stucks in 'failed' or 'error' status, you should use the following instruction:
+
+1) Check that all of the following settings exist (see the table_ for more information on Config Settings):
+
+- crud-rest-host (domain: system)
+- crud-rest-port (domain: system)
+- marathon-connect (domain: system)
+- current-framework (domain: system)
+
+2) Check that the rest address specified in the 'crud-rest-host' and 'crud-rest-port' is available
+3) Check that the marathon address specified in the 'marathon-connect' is available
+4) Check that there is a setting with name specified in the 'current-framework' and also a file with name and version (divide 'current-framework' by '-') is uploaded
+
+If all described above is correct, but the "failed" or the "error" status still takes place, please contact the support team.
+
+2. **Start** an instance by clicking the «Start» button in the Actions section. The instance status will first change to «Starting» and in a few seconds to «Started». That means the instance is launched and is working now.
+3. **Stop** the instance that has been started i.e. has the «Started» status. Click at the «Stop» button and wait for a while till the status changes to «Stopping» and then to «Stopped».
 4. **Delete** a stream clicking at the corresponding icon in the Action block near the name of the stream you want to delete.
 
 .. note:: An instance with statuses «Starting», «Started», «Stopping», «Deleting» can not be deleted.
