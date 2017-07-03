@@ -21,14 +21,14 @@ package com.bwsw.sj.engine.regular.task
 import java.util.concurrent.{ArrayBlockingQueue, TimeUnit}
 
 import com.bwsw.sj.common.engine.TaskEngine
+import com.bwsw.sj.common.engine.core.entities.{Envelope, KafkaEnvelope, TStreamEnvelope}
+import com.bwsw.sj.common.engine.core.managment.CommonTaskManager
+import com.bwsw.sj.common.engine.core.regular.RegularStreamingExecutor
+import com.bwsw.sj.common.engine.core.state.CommonModuleService
 import com.bwsw.sj.common.si.model.instance.RegularInstance
 import com.bwsw.sj.common.utils.{EngineLiterals, SjTimer}
 import com.bwsw.sj.engine.core.engine.input.CallableCheckpointTaskInput
 import com.bwsw.sj.engine.core.engine.{NumericalCheckpointTaskEngine, TimeCheckpointTaskEngine}
-import com.bwsw.sj.common.engine.core.entities.{Envelope, KafkaEnvelope, TStreamEnvelope}
-import com.bwsw.sj.common.engine.core.managment.CommonTaskManager
-import com.bwsw.sj.common.engine.core.regular.RegularStreamingExecutor
-import com.bwsw.sj.common.engine.core.state.{CommonModuleService, StatefulCommonModuleService, StatelessCommonModuleService}
 import com.bwsw.sj.engine.regular.task.reporting.RegularStreamingPerformanceMetrics
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import org.slf4j.{Logger, LoggerFactory}
@@ -52,26 +52,12 @@ abstract class RegularTaskEngine(manager: CommonTaskManager,
   private val blockingQueue: ArrayBlockingQueue[Envelope] = new ArrayBlockingQueue[Envelope](EngineLiterals.queueSize)
   private val instance: RegularInstance = manager.instance.asInstanceOf[RegularInstance]
   private val checkpointGroup: CheckpointGroup = manager.createCheckpointGroup()
-  private val moduleService: CommonModuleService = createRegularModuleService()
+  private val moduleService: CommonModuleService = CommonModuleService(manager, checkpointGroup, performanceMetrics)
   private val executor: RegularStreamingExecutor[AnyRef] = moduleService.executor.asInstanceOf[RegularStreamingExecutor[AnyRef]]
-  val taskInputService: CallableCheckpointTaskInput[Envelope] = CallableCheckpointTaskInput[AnyRef](
-    manager,
-    blockingQueue,
-    checkpointGroup,
-    executor)
-    .asInstanceOf[CallableCheckpointTaskInput[Envelope]]
+  val taskInputService: CallableCheckpointTaskInput[Envelope] =
+    CallableCheckpointTaskInput[AnyRef](manager, blockingQueue, checkpointGroup, executor)
+      .asInstanceOf[CallableCheckpointTaskInput[Envelope]]
   private val moduleTimer: SjTimer = moduleService.moduleTimer
-  protected val checkpointInterval: Long = instance.checkpointInterval
-
-  private def createRegularModuleService(): CommonModuleService = {
-    instance.stateManagement match {
-      case EngineLiterals.noneStateMode =>
-        logger.debug(s"Task: ${manager.taskName}. Start preparing of regular module without state.")
-        new StatelessCommonModuleService(manager, checkpointGroup, performanceMetrics)
-      case EngineLiterals.ramStateMode =>
-        new StatefulCommonModuleService(manager, checkpointGroup, performanceMetrics)
-    }
-  }
 
   /**
     * It is in charge of running a basic execution logic of regular task engine

@@ -26,8 +26,10 @@ import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
 import com.bwsw.sj.common.engine.{StateHandlers, StreamingExecutor}
 import com.bwsw.sj.common.si.model.instance.{BatchInstance, RegularInstance}
 import com.bwsw.sj.common.utils.EngineLiterals
+import com.bwsw.tstreams.agents.consumer.Consumer
 import com.bwsw.tstreams.agents.consumer.Offset.Oldest
 import com.bwsw.tstreams.agents.group.CheckpointGroup
+import com.bwsw.tstreams.agents.producer.Producer
 import scaldi.Injectable.inject
 import scaldi.Injector
 
@@ -49,17 +51,23 @@ class StatefulCommonModuleService(manager: CommonTaskManager,
 
   private val streamService: GenericMongoRepository[StreamDomain] = inject[ConnectionRepository].getStreamRepository
   private var countOfCheckpoints: Int = 1
+  private val stateService: RAMStateService = createStateService()
+  private val stateFullCheckpoint: Int = {
+    instance match {
+      case regularInstance: RegularInstance => regularInstance.stateFullCheckpoint
+      case batchInstance: BatchInstance => batchInstance.stateFullCheckpoint
+    }
+  }
 
-  private val stateStream = createStateStream()
-  private val stateProducer = manager.createProducer(stateStream)
-  private val partition = 0
-  private val stateConsumer = manager.createConsumer(stateStream, List(partition, partition), Oldest)
-  stateConsumer.start()
-  addAgentsToCheckpointGroup()
+  private def createStateService() = {
+    val stateStream = createStateStream()
+    val stateProducer = createStateProducer(stateStream)
+    val stateConsumer = createStateConsumer(stateStream)
+    val stateLoader = new StateLoader(stateConsumer)
+    val stateSaver = new StateSaver(stateProducer)
 
-  private val stateLoader: StateLoader = new StateLoader(stateConsumer)
-  private val stateSaver: StateSaver = new StateSaver(stateProducer)
-  private val stateService: RAMStateService = new RAMStateService(stateSaver, stateLoader)
+    new RAMStateService(stateSaver, stateLoader)
+  }
 
   val environmentManager = new StatefulModuleEnvironmentManager(
     new StateStorage(stateService),
@@ -78,7 +86,7 @@ class StatefulCommonModuleService(manager: CommonTaskManager,
     * Does group checkpoint of t-streams state consumers/producers
     */
   override def doCheckpoint(): Unit = {
-    if (countOfCheckpoints != getStateFullCheckpoint()) {
+    if (countOfCheckpoints != stateFullCheckpoint) {
       doCheckpointOfPartOfState()
     } else {
       doCheckpointOfFullState()
@@ -112,13 +120,6 @@ class StatefulCommonModuleService(manager: CommonTaskManager,
     countOfCheckpoints = 1
   }
 
-  private def getStateFullCheckpoint(): Int = {
-    instance match {
-      case regularInstance: RegularInstance => regularInstance.stateFullCheckpoint
-      case batchInstance: BatchInstance => batchInstance.stateFullCheckpoint
-    }
-  }
-
   /**
     * Creates [[TStreamStreamDomain]] to keep a module state
     */
@@ -136,12 +137,25 @@ class StatefulCommonModuleService(manager: CommonTaskManager,
   }
 
   /**
-    * Adds a state producer and a state consumer to checkpoint group
+    * Create a state producer and adds it to checkpoint group
     */
-  private def addAgentsToCheckpointGroup(): Unit = {
-    logger.debug(s"Task: ${manager.taskName}. Start adding state consumer and producer to checkpoint group.")
-    checkpointGroup.add(stateConsumer)
+  private def createStateProducer(stateStream: TStreamStreamDomain): Producer = {
+    val stateProducer = manager.createProducer(stateStream)
     checkpointGroup.add(stateProducer)
-    logger.debug(s"Task: ${manager.taskName}. Adding state consumer and producer to checkpoint group is finished.")
+
+    stateProducer
+  }
+
+  /**
+    * Create a state consumer and adds it to checkpoint group
+    */
+  private def createStateConsumer(stateStream: TStreamStreamDomain): Consumer = {
+    val partition = 0
+    val stateConsumer = manager.createConsumer(stateStream, List(partition, partition), Oldest)
+    stateConsumer.start()
+
+    checkpointGroup.add(stateConsumer)
+
+    stateConsumer
   }
 }

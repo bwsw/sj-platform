@@ -40,7 +40,7 @@ class StateSaver(stateProducer: Producer) extends StateSaverInterface {
   private val logger = LoggerFactory.getLogger(this.getClass)
 
   /**
-    * Provides a serialization from a transaction data to a state variable or state change
+    * Provides a serialization from a transaction data to state variables or state changes
     */
   private val serializer: ObjectSerializer = new ObjectSerializer()
 
@@ -71,13 +71,13 @@ class StateSaver(stateProducer: Producer) extends StateSaverInterface {
   }
 
   /**
-    * Does checkpoint of changes of state
+    * Saves the changes of state
     *
-    * @param id      ID of transaction for which a changes was applied
+    * @param id      ID of transaction for which the changes has been applied
     * @param changes state changes
     */
   private def sendChanges(id: Long, changes: mutable.Map[String, (String, Any)]): Unit = {
-    logger.debug(s"Save a partial state in t-stream intended for storing/restoring a state.")
+    logger.debug(s"Save a partial state in t-stream for storing/restoring a state.")
     val transaction = stateProducer.newTransaction(NewProducerTransactionPolicy.ErrorIfOpened)
     transaction.send(serializer.serialize(Long.box(id)))
     changes.foreach((x: (String, (String, Any))) => transaction.send(serializer.serialize(x)))
@@ -85,7 +85,7 @@ class StateSaver(stateProducer: Producer) extends StateSaverInterface {
 }
 
 /**
-  * Provides methods for storing states
+  * Provides methods to save a state
   */
 trait StateSaverInterface {
 
@@ -95,7 +95,7 @@ trait StateSaverInterface {
   var lastFullStateID: Option[Long]
 
   /**
-    * Stores changes of state
+    * Saves the changes of state
     *
     * @param stateChanges   key/value storage that keeps changes of state
     * @param stateVariables key/value storage that keeps state
@@ -103,7 +103,7 @@ trait StateSaverInterface {
   def savePartialState(stateChanges: mutable.Map[String, (String, Any)], stateVariables: mutable.Map[String, Any]): Unit
 
   /**
-    * Stores a full state
+    * Saves a full state
     *
     * @param stateChanges   key/value storage that keeps changes of state
     * @param stateVariables key/value storage that keeps state
