@@ -34,7 +34,7 @@ class JsonSerializerTests extends FlatSpec with Matchers {
       val serializer = new JsonSerializer
 
       serializer.setIgnoreUnknown(flag)
-      serializer.getIgnoreUnknown() shouldBe flag
+      serializer.getIgnoreUnknown shouldBe flag
     }
   }
 
@@ -43,7 +43,7 @@ class JsonSerializerTests extends FlatSpec with Matchers {
       val serializer = new JsonSerializer
 
       serializer.disableNullForPrimitives(flag)
-      serializer.nullForPrimitivesIsDisabled() shouldBe flag
+      serializer.nullForPrimitivesIsDisabled shouldBe flag
     }
   }
 }
