@@ -26,8 +26,30 @@ import com.bwsw.sj.engine.core.simulation.state.{ModuleEnvironmentManagerMock, M
 import scala.collection.mutable
 
 /**
-  * Simulates behavior of [[com.bwsw.sj.common.engine.TaskEngine TaskEngine]] for testing of
+  * Simulates behavior of [[com.bwsw.sj.common.engine.TaskEngine TaskEngine]] for testing an implementation of
   * [[RegularStreamingExecutor]]
+  *
+  * Usage example:
+  * {{{
+  * val stateSaver = mock(classOf[StateSaverInterface])
+  * val stateLoader = new StateLoaderMock
+  * val stateService = new RAMStateService(stateSaver, stateLoader)
+  * val stateStorage = new StateStorage(stateService)
+  * val options = ""
+  * val output = new TStreamStreamDomain("out", mock(classOf[TStreamServiceDomain]), 1, tags = Array("output"))
+  * val manager = new ModuleEnvironmentManagerMock(stateStorage, options, Array(output))
+  * val executor: RegularStreamingExecutor[String] = new MyExecutor(manager)
+  * val checkpointInterval = 3
+  * val tstreamInput = "t-stream-input"
+  * val kafkaInput = "kafka-input"
+  *
+  * val simulator = new RegularEngineSimulator(executor, manager, checkpointInterval)
+  * simulator.prepareState(Map("var1" -> 1, "var2" -> 2))
+  * simulator.prepareTstream(Seq("a", "b", "c"), tstreamInput)
+  * simulator.prepareKafka(Seq("d", "e"), kafkaInput)
+  * val results = simulator.process()
+  * println(results)
+  * }}}
   *
   * @param executor           implementation of [[RegularStreamingExecutor]] under test
   * @param manager            environment manager that used by executor
