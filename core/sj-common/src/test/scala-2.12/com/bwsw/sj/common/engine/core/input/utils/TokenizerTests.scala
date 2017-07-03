@@ -57,7 +57,7 @@ class TokenizerTests extends FlatSpec with Matchers with TableDrivenPropertyChec
       ("test,test,test,test", 0),
       ("test,test,test,test", 3),
       ("test,test,test,test", 4),
-      ("test,test,test,test", 15),
+      ("test,test,test,test", 5),
       ("test,test,test,test", 15))
 
     forAll(table) { (inputString, readerIndex) =>
