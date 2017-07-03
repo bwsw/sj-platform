@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.sj.engine.core.simulation.regular.mocks
+package com.bwsw.sj.engine.core.simulation.state
 
 import com.bwsw.sj.common.engine.core.state.StateLoaderInterface
 
@@ -25,15 +25,14 @@ import scala.collection.mutable
 /**
   * Mock for [[StateLoaderInterface]]
   *
+  * @param lastState last state
   * @author Pavel Tomskikh
   */
-class StateLoaderMock(lastStateId: Option[Long] = None, lastState: mutable.Map[String, Any] = mutable.Map.empty)
+class StateLoaderMock(lastState: mutable.Map[String, Any] = mutable.Map.empty)
   extends StateLoaderInterface {
 
   /**
-    * Allows getting last state. Needed for restoring after crashing
-    *
-    * @return (ID of the last state, state variables)
+    * @inheritdoc
     */
-  override def loadLastState(): (Option[Long], mutable.Map[String, Any]) = (lastStateId, lastState)
+  override def loadLastState(): (Option[Long], mutable.Map[String, Any]) = (None, lastState)
 }

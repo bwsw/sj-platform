@@ -16,45 +16,79 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.sj.engine.core.simulation.regular.mocks
+package com.bwsw.sj.engine.core.simulation.state
 
-import com.bwsw.sj.common.dal.model.stream.StreamDomain
-import com.bwsw.sj.common.engine.core.environment.{ModuleEnvironmentManager, ModuleOutput}
+import com.bwsw.sj.common.dal.model.stream.{StreamDomain, TStreamStreamDomain}
+import com.bwsw.sj.common.engine.core.environment.{ModuleOutput, StatefulModuleEnvironmentManager}
 import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
+import com.bwsw.sj.common.engine.core.state.StateStorage
 import com.bwsw.sj.common.utils.SjTimer
 import com.bwsw.tstreams.agents.producer.Producer
+import com.bwsw.tstreams.streams
+import org.mockito.Mockito.{mock, when}
 
 import scala.collection.{Map, mutable}
 
 /**
-  * Mock for [[com.bwsw.sj.common.engine.core.environment.ModuleEnvironmentManager]]. Creates [[PartitionedOutputMock]]
-  * instead [[com.bwsw.sj.common.engine.core.environment.PartitionedOutput]] and [[RoundRobinOutputMock]] instead
+  * Mock for [[StatefulModuleEnvironmentManager]]. Creates [[PartitionedOutputMock]] instead
+  * [[com.bwsw.sj.common.engine.core.environment.PartitionedOutput]] and [[RoundRobinOutputMock]] instead
   * [[com.bwsw.sj.common.engine.core.environment.RoundRobinOutput]].
   *
-  * @inheritdoc
+  * @param stateStorage storage of state
+  * @param options      user defined options from instance
+  * @param outputs      set of output streams from instance
   * @author Pavel Tomskikh
   */
-class ModuleEnvironmentManagerMock(options: String,
-                                   producers: Map[String, Producer],
-                                   outputs: Array[StreamDomain],
-                                   val producerPolicyByOutput: mutable.Map[String, (String, ModuleOutput)],
-                                   moduleTimer: SjTimer,
-                                   performanceMetrics: PerformanceMetrics)
-  extends ModuleEnvironmentManager(
-    options, producers, outputs, producerPolicyByOutput, moduleTimer, performanceMetrics) {
+class ModuleEnvironmentManagerMock(stateStorage: StateStorage,
+                                   options: String,
+                                   outputs: Array[TStreamStreamDomain]) extends {
+  val producers: Map[String, Producer] = outputs.map { s =>
+    val stream = mock(classOf[streams.Stream])
+    when(stream.partitionsCount).thenReturn(s.partitions)
+    when(stream.name).thenReturn(s.name)
 
+    val producer = mock(classOf[Producer])
+    when(producer.stream).thenReturn(stream)
+
+    s.name -> producer
+  }.toMap
+
+  val producerPolicyByOutput = mutable.Map.empty[String, (String, ModuleOutput)]
+  val moduleTimer = mock(classOf[SjTimer])
+  val performanceMetrics = mock(classOf[PerformanceMetrics])
+} with StatefulModuleEnvironmentManager(
+  stateStorage,
+  options,
+  producers,
+  outputs.asInstanceOf[Array[StreamDomain]],
+  producerPolicyByOutput,
+  moduleTimer,
+  performanceMetrics) {
+
+  /**
+    * @inheritdoc
+    */
   override def getPartitionedOutput(streamName: String)
                                    (implicit serialize: (AnyRef) => Array[Byte]): PartitionedOutputMock =
     super.getPartitionedOutput(streamName).asInstanceOf[PartitionedOutputMock]
 
+  /**
+    * @inheritdoc
+    */
   override def getRoundRobinOutput(streamName: String)
                                   (implicit serialize: (AnyRef) => Array[Byte]): RoundRobinOutputMock =
     super.getRoundRobinOutput(streamName).asInstanceOf[RoundRobinOutputMock]
 
+  /**
+    * @inheritdoc
+    */
   override protected def createPartitionedOutput(producer: Producer)
                                                 (implicit serialize: AnyRef => Array[Byte]): PartitionedOutputMock =
     new PartitionedOutputMock(producer, performanceMetrics)
 
+  /**
+    * @inheritdoc
+    */
   override protected def createRoundRobinOutput(producer: Producer)
                                                (implicit serialize: AnyRef => Array[Byte]): RoundRobinOutputMock =
     new RoundRobinOutputMock(producer, performanceMetrics)

@@ -16,8 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.sj.engine.core.simulation.regular.mocks
+package com.bwsw.sj.engine.core.simulation.state
 
+import com.bwsw.sj.common.engine.core.environment.EnvironmentLiterals.{partitionedOutput, roundRobinOutput}
 import com.bwsw.sj.common.engine.core.environment.{PartitionedOutput, RoundRobinOutput}
 import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
 import com.bwsw.tstreams.agents.producer.Producer
@@ -59,7 +60,7 @@ class PartitionedOutputMock(producer: Producer,
     * Stores data in [[transactions]]
     */
   override def put(data: AnyRef, partition: Int): Unit =
-    transactions += Transaction(data, partition)
+    transactions += Transaction(data, partition, partitionedOutput)
 }
 
 /**
@@ -81,7 +82,7 @@ class RoundRobinOutputMock(producer: Producer,
     * Stores data in [[transactions]]
     */
   override def put(data: AnyRef): Unit = {
-    transactions += Transaction(data, currentPartition)
+    transactions += Transaction(data, currentPartition, roundRobinOutput)
     if (currentPartition < producer.stream.partitionsCount)
       currentPartition += 1
     else
@@ -92,4 +93,4 @@ class RoundRobinOutputMock(producer: Producer,
 /**
   * Contains transaction info
   */
-case class Transaction(data: AnyRef, partition: Int)
+case class Transaction(data: AnyRef, partition: Int, `type`: String)

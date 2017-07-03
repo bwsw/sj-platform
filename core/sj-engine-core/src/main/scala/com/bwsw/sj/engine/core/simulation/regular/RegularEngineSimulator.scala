@@ -21,16 +21,17 @@ package com.bwsw.sj.engine.core.simulation.regular
 import com.bwsw.sj.common.engine.core.entities.{Envelope, KafkaEnvelope, TStreamEnvelope}
 import com.bwsw.sj.common.engine.core.regular.RegularStreamingExecutor
 import com.bwsw.sj.engine.core.simulation.SimulatorConstants.defaultConsumerName
-import com.bwsw.sj.engine.core.simulation.regular.mocks.{ModuleEnvironmentManagerMock, ModuleOutputMockHelper, Transaction}
+import com.bwsw.sj.engine.core.simulation.state.{ModuleEnvironmentManagerMock, ModuleOutputMockHelper, Transaction}
 
 import scala.collection.mutable
 
 /**
-  * SImulates behavior of [[com.bwsw.sj.common.engine.TaskEngine TaskEngine]] for testing of
+  * Simulates behavior of [[com.bwsw.sj.common.engine.TaskEngine TaskEngine]] for testing of
   * [[RegularStreamingExecutor]]
   *
-  * @param executor implementation of [[RegularStreamingExecutor]] under test
-  * @param manager  environment manager that used by executor
+  * @param executor           implementation of [[RegularStreamingExecutor]] under test
+  * @param manager            environment manager that used by executor
+  * @param checkpointInterval number of envelopes before between checkpoints
   * @tparam T type of incoming data
   * @author Pavel Tomskikh
   */
@@ -40,8 +41,17 @@ class RegularEngineSimulator[T <: AnyRef](executor: RegularStreamingExecutor[T],
 
   private var transactionID: Long = 0
   private val inputEnvelopes: mutable.Buffer[Envelope] = mutable.Buffer.empty
+  private var envelopesWithoutCheckpoint: Long = 0
 
-  executor.onInit()
+  /**
+    * Load state in state storage
+    *
+    * @param state key/value map
+    */
+  def prepareState(state: Map[String, Any]): Unit = state.foreach {
+    case (key, value) =>
+      manager.getState.set(key, value)
+  }
 
   /**
     * Creates [[TStreamEnvelope]] and saves it in a local buffer.
@@ -90,24 +100,42 @@ class RegularEngineSimulator[T <: AnyRef](executor: RegularStreamingExecutor[T],
   def prepareKafka(entities: Seq[T], stream: String): Seq[Long] =
     entities.map(prepareKafka(_, stream))
 
-  def process(clearBuffer: Boolean = true) = {
-    def callOnMessage(envelope: Envelope) = envelope match {
-      case tStreamEnvelope: TStreamEnvelope[T] =>
-        executor.onMessage(tStreamEnvelope)
-      case kafkaEnvelope: KafkaEnvelope[T] =>
-        executor.onMessage(kafkaEnvelope)
-    }
+  /**
+    * Sends all incoming envelopes from local buffer to [[executor]] and builds simulation results
+    *
+    * @param clearBuffer indicates that local buffer must be cleared
+    * @return collection of simulation results
+    */
+  def process(clearBuffer: Boolean = true): mutable.Buffer[SimulationResult] = {
+    val results = inputEnvelopes.map { envelope =>
+      envelope match {
+        case tStreamEnvelope: TStreamEnvelope[T] =>
+          executor.onMessage(tStreamEnvelope)
+        case kafkaEnvelope: KafkaEnvelope[T] =>
+          executor.onMessage(kafkaEnvelope)
+      }
+      val state = manager.getState.getAll
 
-    inputEnvelopes.map { envelope =>
-      callOnMessage(envelope)
+      if (envelopesWithoutCheckpoint == checkpointInterval || manager.isCheckpointInitiated) {
+        executor.onBeforeCheckpoint()
+        executor.onAfterCheckpoint()
+        envelopesWithoutCheckpoint = 0
+      } else
+        envelopesWithoutCheckpoint += 1
 
       val transactions = manager.producerPolicyByOutput.mapValues {
         case (_, moduleOutput: ModuleOutputMockHelper) =>
           moduleOutput.readTransactions()
+        case _ =>
+          throw new IllegalStateException("Incorrect outputs")
       }.filter(_._2.nonEmpty)
 
-      ProcessResult(envelope.id, transactions)
+      SimulationResult(envelope.id, transactions, state)
     }
+
+    if (clearBuffer) clear()
+
+    results
   }
 
   /**
@@ -117,4 +145,12 @@ class RegularEngineSimulator[T <: AnyRef](executor: RegularStreamingExecutor[T],
     inputEnvelopes.clear()
 }
 
-case class ProcessResult(transactionId: Long, transactions: collection.Map[String, mutable.Buffer[Transaction]])
+/**
+  * Contains results of simulation
+  *
+  * @param transactionId ID of incoming transaction
+  * @param transactions  outgoing transactions
+  */
+case class SimulationResult(transactionId: Long,
+                            transactions: collection.Map[String, mutable.Buffer[Transaction]],
+                            state: Map[String, Any])
