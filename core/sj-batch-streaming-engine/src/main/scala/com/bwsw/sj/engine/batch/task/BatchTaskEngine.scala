@@ -19,7 +19,6 @@
 package com.bwsw.sj.engine.batch.task
 
 import com.bwsw.common.LeaderLatch
-import com.bwsw.sj.common.config.SettingsUtils
 import com.bwsw.sj.common.dal.model.service.ZKServiceDomain
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.engine.TaskEngine
@@ -52,18 +51,17 @@ import scala.collection.mutable.ListBuffer
   * @param performanceMetrics set of metrics that characterize performance of a batch streaming module
   */
 class BatchTaskEngine(manager: CommonTaskManager,
-                      performanceMetrics: BatchStreamingPerformanceMetrics)
+                      performanceMetrics: BatchStreamingPerformanceMetrics,
+                      lowWatermark: Int)
                      (implicit injector: Injector)
   extends TaskEngine {
 
   private val currentThread = Thread.currentThread()
   currentThread.setName(s"batch-task-engine")
   private val logger = LoggerFactory.getLogger(this.getClass)
-  private val settingsUtils = inject[SettingsUtils]
-  private val streamRepository = inject[ConnectionRepository].getStreamRepository
   private val instance = manager.instance.asInstanceOf[BatchInstance]
-  private val batchCollector = manager.getBatchCollector(instance.to, performanceMetrics, streamRepository)
   private val inputs = instance.getInputsWithoutStreamMode
+  private val batchCollector = manager.getBatchCollector(instance.to, performanceMetrics, inputs)
   private val checkpointGroup = manager.createCheckpointGroup()
   private val moduleService = CommonModuleService(manager, checkpointGroup, performanceMetrics)
   private val executor = moduleService.executor.asInstanceOf[BatchStreamingExecutor[AnyRef]]
@@ -73,7 +71,7 @@ class BatchTaskEngine(manager: CommonTaskManager,
       checkpointGroup,
       executor
     ).asInstanceOf[RetrievableCheckpointTaskInput[Envelope]]
-  private val envelopeFetcher = new EnvelopeFetcher(taskInputService, settingsUtils.getLowWatermark())
+  private val envelopeFetcher = new EnvelopeFetcher(taskInputService, lowWatermark)
   private val moduleTimer = moduleService.moduleTimer
   private var retrievableStreams = instance.getInputsWithoutStreamMode
   private var counterOfBatchesPerStream = createCountersOfBatches()

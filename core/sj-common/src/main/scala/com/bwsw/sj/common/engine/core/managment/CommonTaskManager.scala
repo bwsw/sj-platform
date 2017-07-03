@@ -21,12 +21,11 @@ package com.bwsw.sj.common.engine.core.managment
 import com.bwsw.sj.common.dal.model.instance.{BatchInstanceDomain, ExecutionPlan}
 import com.bwsw.sj.common.dal.model.module.BatchSpecificationDomain
 import com.bwsw.sj.common.dal.model.stream.StreamDomain
-import com.bwsw.sj.common.dal.repository.Repository
 import com.bwsw.sj.common.engine.StreamingExecutor
-import com.bwsw.sj.common.si.model.instance.{BatchInstance, RegularInstance}
-import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
 import com.bwsw.sj.common.engine.core.batch.{BatchCollector, BatchStreamingPerformanceMetrics}
 import com.bwsw.sj.common.engine.core.environment.{EnvironmentManager, ModuleEnvironmentManager}
+import com.bwsw.sj.common.si.model.instance.{BatchInstance, RegularInstance}
+import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
 import com.bwsw.tstreams.agents.producer.Producer
 import scaldi.Injector
 
@@ -59,19 +58,20 @@ class CommonTaskManager(implicit injector: Injector) extends TaskManager {
 
   def getBatchCollector(instance: BatchInstanceDomain,
                         performanceMetrics: BatchStreamingPerformanceMetrics,
-                        streamRepository: Repository[StreamDomain]): BatchCollector = {
+                        inputStreams: Array[String]): BatchCollector = {
     instance match {
       case _: BatchInstanceDomain =>
         logger.info(s"Task: $taskName. Getting a batch collector class from jar of file: " +
           instance.moduleType + "-" + instance.moduleName + "-" + instance.moduleVersion + ".")
+        val inputs = inputStreams.map(x => streamRepository.get(x).get)
         val batchCollectorClassName = fileMetadata.specification.asInstanceOf[BatchSpecificationDomain].batchCollectorClass
         val batchCollector = moduleClassLoader
           .loadClass(batchCollectorClassName)
           .getConstructor(
             classOf[BatchInstanceDomain],
             classOf[BatchStreamingPerformanceMetrics],
-            classOf[Repository[StreamDomain]])
-          .newInstance(instance, performanceMetrics, streamRepository)
+            classOf[Array[StreamDomain]])
+          .newInstance(instance, performanceMetrics, inputs)
           .asInstanceOf[BatchCollector]
 
         batchCollector

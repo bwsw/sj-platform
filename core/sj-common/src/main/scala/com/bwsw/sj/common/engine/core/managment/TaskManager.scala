@@ -60,7 +60,7 @@ import scala.util.Try
 abstract class TaskManager(implicit injector: Injector) {
   protected val connectionRepository: ConnectionRepository = inject[ConnectionRepository]
   protected val logger: Logger = LoggerFactory.getLogger(this.getClass)
-  val streamRepository: GenericMongoRepository[StreamDomain] = connectionRepository.getStreamRepository
+  protected val streamRepository: GenericMongoRepository[StreamDomain] = connectionRepository.getStreamRepository
 
   private val config = ConfigFactory.load()
 
