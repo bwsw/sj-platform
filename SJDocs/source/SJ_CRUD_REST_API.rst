@@ -5,8 +5,8 @@ CRUD REST API Documentation
 
 Introduction
 ---------------
-The Stream Juggler platform provides third party developers with the opportunity of retrieving data by programming means. The range of REST API functions described on this page is intended for this purposes. 
-Each method request will return specific data, choose the method you need from the list, and generate a request according to the method description below. 
+The Stream Juggler platform provides developers with the opportunity of retrieving data by programming means. The range of REST API functions described on this page is intended for this purposes. 
+Each method request will return specific data. Choose the method you need from the list, and generate a request according to the method description below. 
 
 HTTP Methods
 ~~~~~~~~~~~~
@@ -25,6 +25,7 @@ HTTP Status codes
 ~~~~~~~~~~~~~~~~~
 	
 Stream Jugler REST API uses HTTP status codes to indicate success or failure of an API call. In general, status codes in the 2xx range mean success, 4xx range mean there was an error in the provided information, and those in the 5xx range indicate server side errors. 
+
 Commonly used HTTP status codes are listed below.
 				
 .. csv-table:: 
@@ -42,7 +43,8 @@ Requirements for requests and responses
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Expected URI scheme for requests should include the version number of the REST API, for example: 
-                 http://{domain}/{version}/. 
+                 
+		 http://{domain}/{version}/. 
 
 All text data must be encoded in UTF-8.
 
@@ -71,7 +73,7 @@ CRUD Rest-API for Providers
 
 Provider type must be one of the following values: "cassandra", "aerospike", "zookeeper", "kafka", "ES", "JDBC", "REST"
 
-Config settings must contain (<driver> is a value of field "driver"):
+Config settings must contain (<driver> is a value of the "driver" field):
 
 - driver.<driver> - name of file with JDBC driver (must exists in files) (e.g. "mysql-connector-java-5.1.6.jar")
 - driver.<driver>.class - name of class of this driver (e.g. "com.mysql.jdbc.Driver")
@@ -223,6 +225,7 @@ Get list of provider types
 ------------------------------
 
 Request method: GET
+
 Request format: http://{domain}/v1/providers/_types
 
 .. csv-table::  Response
@@ -421,7 +424,7 @@ T-streams queue (TstrQ)
   "description", "String", "Service description"
   "provider*", "String", "provider name"
   "prefix*", "String", "Must be a valid znode path"
-  "token*", "String", " (no more than 32 symbols)"
+  "token*", "String", "(no more than 32 symbols)"
 
 .. note:: provider type can be 'zookeeper' only
 
@@ -712,15 +715,12 @@ Stream fields
    "all", "force", "Boolean", "Indicates if a stream should be removed and re-created by force (if it exists). False by default."
 
 
-.. important:: Service type for 'stream.t-stream' stream can be 'TstrQ' only. 
-                      
-               Service type for 'stream.kafka' stream can be 'KfkQ' only. 
-                      
-               Service type for 'jdbc-output' stream can be 'JDBC' only. 
-                     
-               Service type for 'elasticsearch-output' stream can be 'ESInd' only.
-                      
-               Service type for 'rest-output' stream can be 'REST' only.
+.. important:: 
+           - Service type for 'stream.t-stream' stream can be 'TstrQ' only. 
+           - Service type for 'stream.kafka' stream can be 'KfkQ' only. 
+           - Service type for 'jdbc-output' stream can be 'JDBC' only. 
+           - Service type for 'elasticsearch-output' stream can be 'ESInd' only.
+           - Service type for 'rest-output' stream can be 'REST' only.
 
 .. note:: `*` - required field.
 
@@ -1191,7 +1191,7 @@ Example of source message::
 
   "200", "Custom jar '<file_name>' has been uploaded."
   "400", "Cannot upload custom jar. Errors: {list-of-errors}. ('Specification.json is not found or invalid.'; 'Custom jar '<file_name>' already exists.'; 'Cannot upload custom jar '<file_name>'. Custom jar with name <name_from_specification> and version <version_from_specification> already exists.')"
-  "500|Internal server error"
+  "500", "Internal server error"
 
 Response example::
 
@@ -1564,9 +1564,8 @@ Response headers example::
   :widths: 10, 60
 
   "200", "Jar-file for download"
-  "404", "
-          1. Module '<module_type>-<module_name>-<module_version>' has not been found.
-          2. Jar of module '<module_type>-<module_name>-<module_version>' has not been found in the storage."
+  "404", "1. Module '<module_type>-<module_name>-<module_version>' has not been found.
+  2. Jar of module '<module_type>-<module_name>-<module_version>' has not been found in the storage."
   "500", "Internal server error"
 
 Delete uploaded module
@@ -1581,12 +1580,10 @@ Request format: http://{domain}/v1/modules/{module-type}/{module-name}/{module-v
   :widths: 10, 60
 
   "200", "Module {module-name} for type {module-type} has been deleted"
-  "404", " 
-           1. Module '<module_type>-<module_name>-<module_version>' has not been found.
-           2. Jar of module '<module_type>-<module_name>-<module_version>' has not been found in the storage."
-  "422", "
-               1. It's impossible to delete module '<module_type>-<module_name>-<module_version>'. Module has instances.
-               2. Cannot delete file '<module-filename>'"
+  "404", "1. Module '<module_type>-<module_name>-<module_version>' has not been found.
+  2. Jar of module '<module_type>-<module_name>-<module_version>' has not been found in the storage."
+  "422", "1. It's impossible to delete module '<module_type>-<module_name>-<module_version>'. Module has instances.
+  2. Cannot delete file '<module-filename>'"
   "500", "Internal server error"
 
 Response example::
@@ -1709,10 +1706,9 @@ Request format: http://{domain}/v1/modules/{module-type}/{module-name}/{module-v
   :widths: 15, 60
 
   "200", "specification json (see [[Json_schema_for_specification_of_module]])"
-  "404", "
-          1. Module '<module_type>-<module_name>-<module_version>' has not been found.
-          2. Jar of module '<module_type>-<module_name>-<module_version>' has not been found in the storage."
-   "500", "Internal server error (including erorrs related to incorrect module type or nonexistent module)"
+  "404", "1. Module '<module_type>-<module_name>-<module_version>' has not been found.
+  2. Jar of module '<module_type>-<module_name>-<module_version>' has not been found in the storage."
+  "500", "Internal server error (including erorrs related to incorrect module type or nonexistent module)"
 
 Response example::
 
@@ -1802,14 +1798,14 @@ Response entity: json example::
 
 .. note:: Instance may have one of the following statuses:
 
- * ready
- * starting
- * started
- * stopping
- * stopped
- * deleting
- * failed
- * error
+ * ready - a newly created instance and not started yet;
+ * starting - a recently launched instance but not started yet (right after the "Start" button is pushed);
+ * started - the launched instance started to work;
+ * stopping - a started instance in the process of stopping (right after the "Stop" button is pushed)
+ * stopped - an instance that has been stopped
+ * deleting - an instance in the process of deleting (right after the "Delete" button is pressed)
+ * failed - an instance that has been launched but in view of some errors is not started
+ * error - an error is detected when stopping the instance
 
 .. figure:: _static/Возможные_состояния_инстанса.png
 
