@@ -26,16 +26,16 @@ import org.slf4j.LoggerFactory
 import scala.collection.mutable
 
 /**
-  * Provides method for loading a last state
+  * Provides method for loading last state
   *
-  * @param stateConsumer t-stream consumer for loading states
+  * @param stateConsumer t-stream consumer for loading state
   * @author Pavel Tomskikh
   */
 class StateLoader(stateConsumer: Consumer) extends StateLoaderInterface {
   private val logger = LoggerFactory.getLogger(this.getClass)
 
   /**
-    * Provides a serialization from a transaction data to a state variable or state change
+    * Provides a serialization from a transaction data to state variables or state changes
     */
   private val serializer: ObjectSerializer = new ObjectSerializer()
 
@@ -125,12 +125,8 @@ class StateLoader(stateConsumer: Consumer) extends StateLoaderInterface {
   }
 }
 
-object StateLoader {
-
-}
-
 /**
-  * Provides method for loading a last state
+  * Provides method for loading last state
   */
 trait StateLoaderInterface {
 
