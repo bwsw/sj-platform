@@ -29,7 +29,6 @@ import org.slf4j.LoggerFactory
 trait TimeCheckpointTaskEngine {
   private val logger = LoggerFactory.getLogger(this.getClass)
   protected val checkpointInterval: Long
-
   private val checkpointTimer: Option[SjTimer] = createTimer()
   private val isNotOnlyCustomCheckpoint = checkpointTimer.isDefined
 
