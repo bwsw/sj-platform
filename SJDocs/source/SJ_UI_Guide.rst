@@ -693,23 +693,33 @@ Please, find the required config settings in the table below and make sure they 
   :header: "Config Domain","Name", "Description", "Example"
   :widths: 15, 20, 50, 15
 
-  "system", "marathon-connect", "Use to launch transaction generators, framework responsible for running engine tasks and to manage or get information about applications that run on mesos. Must begin with 'http://'.", "http://stream-juggler.z1.netpoint-dc.com:8080"
-  "system", "marathon-connect-timeout", "Use when trying to connect by a marathon-connect (in milliseconds).", "60000"
-  "system", "current-transaction-generator", "Indicates what jar is used for running transaction generators. By this value you can get configuration setting that contains file name of transaction generator jar.", "com.bwsw.tg-0.1"
-  "system", "current-framework", "Indicates what jar is used for running framework. By this value you can get configuration setting that contains file name of framework jar.", "com.bwsw.fw-0.1"
+  "system", "crud-rest-host", "A host on which the rest has launched", "localhost"
+  "system", "crud-rest-port", "A port on which the rest has launched", "8080"
+  "system", "marathon-connect", "Use to launch a framework responsible for running engine tasks and provides the information about applications that run on Mesos. Must begin with 'http://'.", "http://stream-juggler.z1.netpoint-dc.com:8080"
+  "system", "marathon-connect-timeout", "Use when trying to connect by marathon-connect (in milliseconds).", "60000"
+  "system", "current-framework", "Indicates what file is used to run a framework. By this value you can get a setting that contains a file name of framework jar.", "com.bwsw.fw-0.1"
+  "system", "low-watermark", "A number of preloaded messages for batch engine processing.", "1000"
+  "kafka", "subscriber-timeout", "The time, in milliseconds, spent waiting in poll if data is not available. Must not be negative", "100"
+  "zk", "session.timeout", "Use when connecting to zookeeper in milliseconds (usually when we are dealing with t-streams consumers/producers)", "3000"
+.. "system", "current-transaction-generator", "Indicates what jar is used for running transaction generators. By this value you can get configuration setting that contains file name of transaction generator jar.", "com.bwsw.tg-0.1"
   "system", "transaction-generator-client-retry-period", "Time for connecting attempt to TG-server", "500"
   "system", "transaction-generator-server-retry-period", "Time for attempt to lock a server as master on ZK", "500"
   "system", "transaction-generator-retry-count", "Count of reconnections to TG-server", "10"
-  "system", "framework-principal", "Framework principal for mesos authentication", "principal"
-  "system", "framework-secret",  "Framework secret for mesos authentication", "secret"
+   "jdbs", "timeout", "Timeout connection to sql database in milliseconds", "30000"
+
+The range of optional settings is presented below. They have default values in the system but can be overriden by a user.
+
+.. csv-table:: Optional config settings
+  :header: "Config Domain","Name", "Description", "Default value"
+  :widths: 15, 20, 50, 15
+  
+  "system", "framework-principal", "Framework principal for mesos authentication", "---"
+  "system", "framework-secret",  "Framework secret for mesos authentication", "---"
   "system", "framework-backoff-seconds", "Seconds for first delay after crash", "7"
   "system", "framework-backoff-factor", "Factor for backoffSeconds parameter of following delays", "7.0"
   "system", "framework-max-launch-delay-seconds", "Max seconds for delay", "600"
-  "kafka", "subscriber-timeout", "The time, in milliseconds, spent waiting in poll if data is not available. Must not be negative", "100"
-  "zk", "session.timeout", "Use when connecting to zookeeper in milliseconds (usually when we are dealing with t-streams consumers/producers)", "3000"
-  "jdbs", "timeout", "Timeout connection to sql database in milliseconds", "30000"
 
-The rest of the config settings are optional. 
+.. note::  In general 'framework-backoff-seconds', 'framework-backoff-factor' and 'framework-max-launch-delay-seconds' configure exponential backoff behavior when launching potentially sick apps. This prevents sandboxes associated with consecutively failing tasks from filling up the hard disk on Mesos slaves. The backoff period is multiplied by the factor for each consecutive failure until it reaches maxLaunchDelaySeconds. This applies also to tasks that are killed due to failing too many health checks.
 
 Сonfig domain which named 'kafka' contains properties used to creating kafka consumer. 
 
@@ -722,7 +732,9 @@ The rest of the config settings are optional.
 To see the properties list click this link for producer: http://t-streams.com/docs/a2-api/tstreams-factory-api/#TSF_DictionaryProducer_keyset, for consumer: http://t-streams.com/docs/a2-api/tstreams-factory-api/#TSF_DictionaryConsumer_keyset (you should use the textual constants to create a config setting)
 
 For each uploaded custom jar new config setting is added in the following format: 
-                                          key = {custom-jar-name}-{version}, value = {file-name}
+
+key = {custom-jar-name}-{version}, value = {file-name}
+
 .. _Custom Files:
 
 Custom Files
