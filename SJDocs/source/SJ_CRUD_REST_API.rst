@@ -5,8 +5,8 @@ CRUD REST API Documentation
 
 Introduction
 ---------------
-The Stream Juggler platform provides third party developers with the opportunity of retrieving data by programming means. The range of REST API functions described on this page is intended for this purposes. 
-Each method request will return specific data, choose the method you need from the list, and generate a request according to the method description below. 
+The Stream Juggler platform provides developers with the opportunity of retrieving data by programming means. The range of REST API functions described on this page is intended for this purposes. 
+Each method request will return specific data. Choose the method you need from the list, and generate a request according to the method description below. 
 
 HTTP Methods
 ~~~~~~~~~~~~
@@ -25,6 +25,7 @@ HTTP Status codes
 ~~~~~~~~~~~~~~~~~
 	
 Stream Jugler REST API uses HTTP status codes to indicate success or failure of an API call. In general, status codes in the 2xx range mean success, 4xx range mean there was an error in the provided information, and those in the 5xx range indicate server side errors. 
+
 Commonly used HTTP status codes are listed below.
 				
 .. csv-table:: 
@@ -41,8 +42,9 @@ Commonly used HTTP status codes are listed below.
 Requirements for requests and responses
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Expected URI scheme for requests should include the version number of the REST API, for example: 
-                 http://{domain}/{version}/. 
+Expected URI scheme for requests should include the version number of the REST API, for example:: 
+                 
+ http://{domain}/{version}/ 
 
 All text data must be encoded in UTF-8.
 
@@ -71,7 +73,7 @@ CRUD Rest-API for Providers
 
 Provider type must be one of the following values: "cassandra", "aerospike", "zookeeper", "kafka", "ES", "JDBC", "REST"
 
-Config settings must contain (<driver> is a value of field "driver"):
+Config settings must contain (<driver> is a value of the "driver" field):
 
 - driver.<driver> - name of file with JDBC driver (must exists in files) (e.g. "mysql-connector-java-5.1.6.jar")
 - driver.<driver>.class - name of class of this driver (e.g. "com.mysql.jdbc.Driver")
@@ -82,7 +84,9 @@ Create a new provider
 
 Request method: POST
 
-Request format: http://{domain}/v1/providers
+Request format::
+ 
+ http://{domain}/v1/providers
 
 .. csv-table::  Response
   :header: "Status code","Description"
@@ -133,7 +137,9 @@ Get provider by name
 
 Request method: GET
 
-Request format: http://{domain}/v1/providers/{name}
+Request format:: 
+
+ http://{domain}/v1/providers/{name}
 
 .. csv-table::  Response
   :header: "Status code","Description"
@@ -178,7 +184,9 @@ Get list of all providers
 
 Request method: GET
 
-Request format: http://{domain}/v1/providers
+Request format:: 
+
+ http://{domain}/v1/providers
 
 .. csv-table::  Response
   :header: "Status code","Description"
@@ -223,7 +231,10 @@ Get list of provider types
 ------------------------------
 
 Request method: GET
-Request format: http://{domain}/v1/providers/_types
+
+Request format:: 
+ 
+ http://{domain}/v1/providers/_types
 
 .. csv-table::  Response
   :header: "Status code","Description"
@@ -255,7 +266,9 @@ Delete provider by name
 
 Request method: DELETE
 
-Request format: http://{domain}/v1/providers/{name}
+Request format:: 
+
+ http://{domain}/v1/providers/{name}
 
 .. csv-table::  Response
   :header: "Status code","Description"
@@ -282,7 +295,9 @@ Test connection to provider
 
 Method: GET
 
-Request format: http://{domain}/v1/providers/{name}/connection
+Request format:: 
+
+ http://{domain}/v1/providers/{name}/connection
 
 .. csv-table::  Response
   :header: "Status code","Description"
@@ -329,7 +344,9 @@ Get services related to a provider (by provider name)
 
 Request method: GET
 
-Request format: http://{domain}/v1/providers/{name}/related
+Request format:: 
+
+ http://{domain}/v1/providers/{name}/related
 
 .. csv-table::  Response
   :header: "Status code","Description"
@@ -421,7 +438,7 @@ T-streams queue (TstrQ)
   "description", "String", "Service description"
   "provider*", "String", "provider name"
   "prefix*", "String", "Must be a valid znode path"
-  "token*", "String", " (no more than 32 symbols)"
+  "token*", "String", "(no more than 32 symbols)"
 
 .. note:: provider type can be 'zookeeper' only
 
@@ -479,7 +496,9 @@ Create a new service
 
 Request method: POST
 
-Request format: http://{domain}/v1/services
+Request format:: 
+ 
+ http://{domain}/v1/services
 
 .. csv-table::  Response
   :header: "Status code",  "Description"
@@ -525,7 +544,9 @@ Get service by name
 
 Request method: GET
 
-Request format: http://{domain}/v1/services/{name}
+Request format:: 
+
+ http://{domain}/v1/services/{name}
 
 .. csv-table::  Response
   :header: "Status code",  "Description"
@@ -556,7 +577,9 @@ Get list of all services
 
 Request method: GET
 
-Request format: http://{domain}/v1/services
+Request format:: 
+
+ http://{domain}/v1/services
 
 .. csv-table::  Response
   :header: "Status code",  "Description"
@@ -596,7 +619,9 @@ Get list of service types
 
 Request method: GET
 
-Request format: http://{domain}/v1/services/_types
+Request format:: 
+
+ http://{domain}/v1/services/_types
 
 .. csv-table::  Response
   :header: "Status code",  "Description"
@@ -627,7 +652,9 @@ Delete service by name
 
 Request method: DELETE
 
-Request format: http://{domain}/v1/services/{name}
+Request format:: 
+
+ http://{domain}/v1/services/{name}
 
 .. csv-table::  Response
   :header: "Status code",  "Description"
@@ -655,7 +682,9 @@ Get streams and instances related to a service (by service name)
 
 Request method: GET
 
-Request format: http://{domain}/v1/services/{name}/related
+Request format:: 
+
+ http://{domain}/v1/services/{name}/related
 
 .. csv-table::  Response
   :header: "Status code",  "Description"
@@ -712,15 +741,12 @@ Stream fields
    "all", "force", "Boolean", "Indicates if a stream should be removed and re-created by force (if it exists). False by default."
 
 
-.. important:: Service type for 'stream.t-stream' stream can be 'TstrQ' only. 
-                      
-               Service type for 'stream.kafka' stream can be 'KfkQ' only. 
-                      
-               Service type for 'jdbc-output' stream can be 'JDBC' only. 
-                     
-               Service type for 'elasticsearch-output' stream can be 'ESInd' only.
-                      
-               Service type for 'rest-output' stream can be 'REST' only.
+.. important:: 
+           - Service type for 'stream.t-stream' stream can be 'TstrQ' only. 
+           - Service type for 'stream.kafka' stream can be 'KfkQ' only. 
+           - Service type for 'jdbc-output' stream can be 'JDBC' only. 
+           - Service type for 'elasticsearch-output' stream can be 'ESInd' only.
+           - Service type for 'rest-output' stream can be 'REST' only.
 
 .. note:: `*` - required field.
 
@@ -729,7 +755,9 @@ Create a new stream
 
 Request method: POST
 
-Request format: http://{domain}/v1/streams
+Request format:: 
+
+ http://{domain}/v1/streams
 
 .. csv-table::  Response
   :header: "Status code",  "Description"
@@ -774,7 +802,9 @@ Get list of all streams
 
 Request method: GET
 
-Request format: http://{domain}/v1/streams
+Request format:: 
+
+ http://{domain}/v1/streams
 
 .. csv-table::  Response
   :header: "Status code",  "Description"
@@ -816,7 +846,9 @@ Get list of streams types
 
 Request method: GET
 
-Request format: http://{domain}/v1/streams/_types
+Request format:: 
+
+ http://{domain}/v1/streams/_types
 
 .. csv-table::  Response
   :header: "Status code",  "Description"
@@ -845,7 +877,9 @@ Get stream by name
 
 Request method: GET
 
-Request format: http://{domain}/v1/streams/{name}
+Request format:: 
+
+ http://{domain}/v1/streams/{name}
 
 .. csv-table::  Response
   :header: "Status code",  "Description"
@@ -889,7 +923,9 @@ Delete stream by name
 
 Request method: DELETE
 
-Request format: http://{domain}/v1/streams/{name}
+Request format:: 
+
+ http://{domain}/v1/streams/{name}
 
 .. csv-table::  Response
   :header: "Status code",  "Description"
@@ -915,7 +951,9 @@ Get instances related to a stream (by stream name)
 
 Request method: GET
 
-Request format: http://{domain}/v1/streams/{name}/related
+Request format:: 
+
+ http://{domain}/v1/streams/{name}/related
 
 .. csv-table::  Response
   :header: "Status code",  "Description"
@@ -963,7 +1001,9 @@ Create a new config setting
 
 Request method: POST
 
-Request format: http://{domain}/v1/config/settings
+Request format:: 
+ 
+ http://{domain}/v1/config/settings
 
 .. csv-table::  Response
   :header: "Status code",  "Description"
@@ -999,7 +1039,9 @@ Get a config setting by name
 
 Request method: GET
 
-Request format: http://{domain}/v1/config/settings/{config-domain}/{name}
+Request format:: 
+
+ http://{domain}/v1/config/settings/{config-domain}/{name}
 
 .. csv-table::  Response
   :header: "Status code",  "Description"
@@ -1028,7 +1070,9 @@ Get all config settings for specific config domain
 
 Request method: GET
 
-Request format: http://{domain}/v1/config/settings/{config-domain}
+Request format:: 
+
+ http://{domain}/v1/config/settings/{config-domain}
 
 .. csv-table::  Response
   :header: "Status code",  "Description"
@@ -1063,7 +1107,9 @@ Delete a config setting by name
 
 Request method: DELETE
 
-Request format: http://{domain}/v1/config/settings/{config-domain}/{name}
+Request format:: 
+
+ http://{domain}/v1/config/settings/{config-domain}/{name}
 
 .. csv-table::  Response
   :header: "Status code",  "Description"
@@ -1089,7 +1135,9 @@ Get all config settings
 
 Request method: GET
 
-Request format: http://{domain}/v1/config/settings
+Request format:: 
+
+ http://{domain}/v1/config/settings
 
 .. csv-table::  Response
   :header: "Status code",  "Description"
@@ -1129,7 +1177,9 @@ Get list of domains
 
 Request method: GET
 
-Request format: http://{domain}/v1/config/settings/domains
+Request format:: 
+
+ http://{domain}/v1/config/settings/domains
 
 .. csv-table::  Response
   :header: "Status code",  "Description"
@@ -1165,7 +1215,9 @@ Upload custom jar
 
 Request method: POST
 
-Request format: http://{domain}/v1/custom/jars
+Request format::
+
+ http://{domain}/v1/custom/jars
 
 Content-type: `multipart/form-data`
 
@@ -1191,7 +1243,7 @@ Example of source message::
 
   "200", "Custom jar '<file_name>' has been uploaded."
   "400", "Cannot upload custom jar. Errors: {list-of-errors}. ('Specification.json is not found or invalid.'; 'Custom jar '<file_name>' already exists.'; 'Cannot upload custom jar '<file_name>'. Custom jar with name <name_from_specification> and version <version_from_specification> already exists.')"
-  "500|Internal server error"
+  "500", "Internal server error"
 
 Response example::
 
@@ -1208,7 +1260,9 @@ Download a custom jar by file name
 
 Request method: GET
 
-Request format: http://{domain}/v1/custom/jars/{custom-jar-file-name}
+Request format:: 
+
+ http://{domain}/v1/custom/jars/{custom-jar-file-name}
 
 Response headers example::
 
@@ -1235,7 +1289,9 @@ Download a custom jar by name and version
 
 Request method: GET
 
-Request format: http://{domain}/v1/custom/jars/{custom-jar-name}/{custom-jar-version}/
+Request format:: 
+
+ http://{domain}/v1/custom/jars/{custom-jar-name}/{custom-jar-version}/
 
 .. csv-table::  Response
   :header: "Status code",  "Description"
@@ -1250,7 +1306,9 @@ Delete a custom jar by file name
 
 Request method: DELETE
 
-Request format: http://{domain}/v1/custom/jars/{custom-jar-file-name}/
+Request format:: 
+
+ http://{domain}/v1/custom/jars/{custom-jar-file-name}/
 
 .. csv-table::  Response
   :header: "Status code",  "Description"
@@ -1274,7 +1332,9 @@ Delete a custom jar by name and version (from specification)
 
 Request method: DELETE
 
-Request format: http://{domain}/v1/custom/jars/{custom-jar-name}/{custom-jar-version}/
+Request format:: 
+
+ http://{domain}/v1/custom/jars/{custom-jar-name}/{custom-jar-version}/
 
 .. csv-table::  Response
   :header: "Status code",  "Description"
@@ -1299,7 +1359,9 @@ Get list of all uploaded custom jars
 
 Request method: GET
 
-Request format: http://{domain}/v1/custom/jars
+Request format:: 
+
+ http://{domain}/v1/custom/jars
 
 .. csv-table::  Response
   :header: "Status code",  "Description"
@@ -1337,7 +1399,9 @@ Upload a custom file
 
 Request method: POST
 
-Request format: http://{domain}/v1/custom/files
+Request format:: 
+  
+ http://{domain}/v1/custom/files
 
 Content-type: `multipart/form-data`
 
@@ -1367,7 +1431,9 @@ Download a custom file by file name
 
 Request method: GET
 
-Request format: http://{domain}/v1/custom/files/{custom-jar-file-name}
+Request format:: 
+
+ http://{domain}/v1/custom/files/{custom-jar-file-name}
 
 Response format for file download::
 
@@ -1394,7 +1460,9 @@ Delete a custom file
 
 Request method: DELETE
 
-Request format: http://{domain}/v1/custom/files/{custom-jar-file-name}
+Request format:: 
+
+ http://{domain}/v1/custom/files/{custom-jar-file-name}
 
 .. csv-table::  Response
   :header: "Status code",  "Description"
@@ -1419,7 +1487,9 @@ Get list of all uploaded custom files
 
 Request method: GET
 
-Request format: http://{domain}/v1/custom/files
+Request format:: 
+
+ http://{domain}/v1/custom/files
 
 .. csv-table::  Response
   :header: "Status code",  "Description"
@@ -1499,7 +1569,9 @@ Upload module
 
 Request method: POST
 
-Request format: http://{domain}/v1/modules
+Request format:: 
+
+ http://{domain}/v1/modules
 
 Content-type: `multipart/form-data`
 
@@ -1523,11 +1595,10 @@ Example of source message::
   :widths: 10, 60
 
   "200", "Jar file '<file_name>' of module has been uploaded."
-  "400", "
-         1. Cannot upload jar file '<file_name>' of module. Errors: file '<file_name>' does not have the .jar extension. 
-         2. Cannot upload jar file '<file_name>' of module. Errors: module '<module-type>-<module-name>-<module-version>' already exists.
-         3. Cannot upload jar file '<file_name>' of module. Errors: file '<file_name>' already exists.
-         4. Other errors"
+  "400", "1. Cannot upload jar file '<file_name>' of module. Errors: file '<file_name>' does not have the .jar extension. 
+  2. Cannot upload jar file '<file_name>' of module. Errors: module '<module-type>-<module-name>-<module-version>' already exists.
+  3. Cannot upload jar file '<file_name>' of module. Errors: file '<file_name>' already exists.
+  4. Other errors"
   "500", "Internal server error"
 
 Response example::
@@ -1545,7 +1616,9 @@ Download jar of uploaded module
 
 Request method: GET
 
-Request format: http://{domain}/v1/modules/{module-type}/{module-name}/{module-version}/
+Request format:: 
+
+ http://{domain}/v1/modules/{module-type}/{module-name}/{module-version}/
 
 Response headers example::
 
@@ -1564,9 +1637,8 @@ Response headers example::
   :widths: 10, 60
 
   "200", "Jar-file for download"
-  "404", "
-          1. Module '<module_type>-<module_name>-<module_version>' has not been found.
-          2. Jar of module '<module_type>-<module_name>-<module_version>' has not been found in the storage."
+  "404", "1. Module '<module_type>-<module_name>-<module_version>' has not been found.
+  2. Jar of module '<module_type>-<module_name>-<module_version>' has not been found in the storage."
   "500", "Internal server error"
 
 Delete uploaded module
@@ -1574,19 +1646,19 @@ Delete uploaded module
 
 Request method: DELETE
 
-Request format: http://{domain}/v1/modules/{module-type}/{module-name}/{module-version}/
+Request format:: 
+
+ http://{domain}/v1/modules/{module-type}/{module-name}/{module-version}/
 
 .. csv-table::  **Response**
   :header: "Status code",  "Description"
   :widths: 10, 60
 
   "200", "Module {module-name} for type {module-type} has been deleted"
-  "404", " 
-           1. Module '<module_type>-<module_name>-<module_version>' has not been found.
-           2. Jar of module '<module_type>-<module_name>-<module_version>' has not been found in the storage."
-  "422", "
-               1. It's impossible to delete module '<module_type>-<module_name>-<module_version>'. Module has instances.
-               2. Cannot delete file '<module-filename>'"
+  "404", "1. Module '<module_type>-<module_name>-<module_version>' has not been found.
+  2. Jar of module '<module_type>-<module_name>-<module_version>' has not been found in the storage."
+  "422", "1. It's impossible to delete module '<module_type>-<module_name>-<module_version>'. Module has instances.
+  2. Cannot delete file '<module-filename>'"
   "500", "Internal server error"
 
 Response example::
@@ -1604,7 +1676,9 @@ Get list of all uploaded modules
 
 Request method: GET
 
-Request format: http://{domain}/v1/modules
+Request format:: 
+
+ http://{domain}/v1/modules
 
 .. csv-table::  **Response**
   :header: "Status code",  "Description"
@@ -1641,7 +1715,9 @@ Get list of types of modules
 
 Request method: GET
 
-Request format: http://{domain}/v1/modules/_types
+Request format:: 
+
+ http://{domain}/v1/modules/_types
 
 .. csv-table::  **Response**
   :header: "Status code",  "Description"
@@ -1670,7 +1746,9 @@ Get list of all uploaded module for such type
 
 Request method: GET
 
-Request format: http://{domain}/v1/modules/{module-type}
+Request format:: 
+
+ http://{domain}/v1/modules/{module-type}
 
 .. csv-table:: **Response**
   :header: "Status code",  "Description"
@@ -1702,17 +1780,18 @@ Get specification for uploaded module
 
 Request method: GET
 
-Request format: http://{domain}/v1/modules/{module-type}/{module-name}/{module-version}/specification
+Request format:: 
+
+ http://{domain}/v1/modules/{module-type}/{module-name}/{module-version}/specification
 
 .. csv-table::  **Response**
   :header: "Status code",  "Description"
   :widths: 15, 60
 
   "200", "specification json (see [[Json_schema_for_specification_of_module]])"
-  "404", "
-          1. Module '<module_type>-<module_name>-<module_version>' has not been found.
-          2. Jar of module '<module_type>-<module_name>-<module_version>' has not been found in the storage."
-   "500", "Internal server error (including erorrs related to incorrect module type or nonexistent module)"
+  "404", "1. Module '<module_type>-<module_name>-<module_version>' has not been found.
+  2. Jar of module '<module_type>-<module_name>-<module_version>' has not been found in the storage."
+  "500", "Internal server error (including erorrs related to incorrect module type or nonexistent module)"
 
 Response example::
 
@@ -1765,7 +1844,9 @@ Get all instances
 
 Request method: GET
 
-Request format: http://{domain}/v1/modules/instances
+Request format:: 
+ 
+ http://{domain}/v1/modules/instances
 
 .. csv-table:: **Response**
   :header: "Status code",  "Description"
@@ -1802,14 +1883,14 @@ Response entity: json example::
 
 .. note:: Instance may have one of the following statuses:
 
- * ready
- * starting
- * started
- * stopping
- * stopped
- * deleting
- * failed
- * error
+ * ready - a newly created instance and not started yet;
+ * starting - a recently launched instance but not started yet (right after the "Start" button is pushed);
+ * started - the launched instance started to work;
+ * stopping - a started instance in the process of stopping (right after the "Stop" button is pushed);
+ * stopped - an instance that has been stopped;
+ * deleting - an instance in the process of deleting (right after the "Delete" button is pressed);
+ * failed - an instance that has been launched but in view of some errors is not started;
+ * error - an error is detected at stopping or deleting an instance.
 
 .. figure:: _static/Возможные_состояния_инстанса.png
 
@@ -1819,7 +1900,9 @@ Stream Juggler Mesos Framework Rest
 
 Request method: GET
 
-Request format: http://{rest-address}
+Request format:: 
+
+ http://{rest-address}
 
 .. csv-table:: **Response**
   :header: "Status code",  "Description"
@@ -1854,7 +1937,9 @@ Create an instance of a module
 
 Request method: POST
 
-Request format: http://{domain}/v1/modules/{module-type}/{module-name}/{module-version}/instance/
+Request format:: 
+
+ http://{domain}/v1/modules/{module-type}/{module-name}/{module-version}/instance/
 
 .. note:: The name of an input stream should contain the  "/split" suffix (if stream's partitions should be distributed between the tasks) or "/full" (if each task should process all partitions of the stream). The stream has a 'split' mode as default. (see `CRUD Rest-API for Modules/Execution plan <Execution plan>`_)
 
@@ -2060,12 +2145,10 @@ Request json example for creating batch-streaming instance::
   :widths: 10, 60
   
   "201", "Instance '<instance_name>' for module '<module_type>-<module_name>-<module_version>' has been created."
-  "400", "
-               1. Cannot create instance of module. The instance parameter 'options' haven't passed validation, which is declared in a method, called 'validate'. This method is owned by a validator class that implements StreamingValidator interface. Errors: {list-of-errors}.
-               2. Cannot create instance of module. Errors: {list-of-errors}."
-  "404", "
-                1. Module '<module_type>-<module_name>-<module_version>' has not been found.
-                2. Jar of module '<module_type>-<module_name>-<module_version>' has not been found in the storage."
+  "400", "1. Cannot create instance of module. The instance parameter 'options' haven't passed validation, which is declared in a method, called 'validate'. This method is owned by a validator class that implements StreamingValidator interface. Errors: {list-of-errors}.
+  2. Cannot create instance of module. Errors: {list-of-errors}."
+  "404", "1. Module '<module_type>-<module_name>-<module_version>' has not been found.
+  2. Jar of module '<module_type>-<module_name>-<module_version>' has not been found in the storage."
   "500", "Internal server error (including erorrs related to incorrect module type or nonexistent module)"
 
 
@@ -2192,14 +2275,14 @@ The stage consists of state, datetime and duration. Let's look at every paramete
 
 1. *State* can have one of the following values. The value corresponds to an instance status:
 
-* to-handle
-* starting
-* started
-* stopping
-* stopped
-* deleting
-* failed
-* error
+* to-handle - a newly created instance and not started yet;
+* starting -  a recently launched instance but not started yet (right after the "Start" button is pushed);
+* started - the launched instance started to work;
+* stopping - a started instance that has been stopped (right after the "Stop" button is pushed);
+* stopped - an instance that has been stopped;
+* deleting - an instance in the process of deleting (right after the "Delete" button is pressed);
+* failed - an instance that has been launched but in view of some errors is not started;
+* error - an error is detected when stopping the instance.
 
 2. *Datetime* defines the time when a state has been changed
 
@@ -2220,16 +2303,17 @@ Get instances related to a specific module
 
 Request method: GET
 
-Request format: http://{domain}/v1/modules/{module-type}/{module-name}/{module-version}/related
+Request format:: 
+
+ http://{domain}/v1/modules/{module-type}/{module-name}/{module-version}/related
 
 .. csv-table:: **Response**
   :header: "Status code",  "Description"
   :widths: 10, 60
 
   "200", "List of instances"
-  "404", "
-               1. Module '<module_type>-<module_name>-<module_version>' has not been found.
-               2. Jar of module '<module_type>-<module_name>-<module_version>' has not been found in the storage."
+  "404", "1. Module '<module_type>-<module_name>-<module_version>' has not been found.
+  2. Jar of module '<module_type>-<module_name>-<module_version>' has not been found in the storage."
   "500", "Internal server error (including erorrs related to incorrect module type or nonexistent module)"
 
 Response entity json example::
@@ -2250,16 +2334,17 @@ Get all instances of a specific module
 
 Request method: GET
 
-Request format: http://{domain}/v1/modules/{module-type}/{module-name}/{module-version}/instance/
+Request format:: 
+ 
+ http://{domain}/v1/modules/{module-type}/{module-name}/{module-version}/instance/
 
 .. csv-table:: **Response**
   :header: "Status code",  "Description"
   :widths: 15, 60
 
   "200", "List of instances of module"
-  "404", "
-               1. Module '<module_type>-<module_name>-<module_version>' has not been found.
-               2. Jar of module '<module_type>-<module_name>-<module_version>' has not been found in the storage."
+  "404", "1. Module '<module_type>-<module_name>-<module_version>' has not been found.
+  2. Jar of module '<module_type>-<module_name>-<module_version>' has not been found in the storage."
   "500", "Internal server error (including erorrs related to incorrect module type or nonexistent module)"
 
 Response entity: json example::
@@ -2288,7 +2373,9 @@ Get an instance of a specific module
 
 Request method: GET
 
-Request format: http://{domain}/v1/modules/{module-type}/{module-name}/{module-version}/instance/{instance-name}/
+Request format:: 
+
+ http://{domain}/v1/modules/{module-type}/{module-name}/{module-version}/instance/{instance-name}/
 
 .. csv-table:: **Response**
   :header: "Status code",  "Description"
@@ -2303,15 +2390,16 @@ Delete an instance of a specific module
 
 Request method: DELETE
 
-Request format: http://{domain}/v1/modules/{module-type}/{module-name}/{module-version}/instance/{instance-name}/
+Request format:: 
+
+ http://{domain}/v1/modules/{module-type}/{module-name}/{module-version}/instance/{instance-name}/
 
 .. csv-table:: **Response**
   :header: "Status code",  "Description"
   :widths: 10, 60
 
-  "200", "
-                1. Instance '<instance_name>' is being deleted.
-                2. Instance '<instance_name>' has been deleted."
+  "200", "1. Instance '<instance_name>' is being deleted.
+  2. Instance '<instance_name>' has been deleted."
   "404", "Instance '<instance_name>' has not been found."
   "422", "Cannot delete of instance '<instance_name>'. Instance is not been stopped, failed or ready."
   "500", "Internal server error"
@@ -2334,7 +2422,9 @@ Start an instance
 
 Request method: GET
 
-Request format: http://{domain}/v1/modules/{module-type}/{module-name}/{module-version}/instance/{instance-name}/start/
+Request format:: 
+
+ http://{domain}/v1/modules/{module-type}/{module-name}/{module-version}/instance/{instance-name}/start/
 
 .. csv-table::  **Response**
   :header: "Status code",  "Description"
@@ -2345,9 +2435,9 @@ Request format: http://{domain}/v1/modules/{module-type}/{module-name}/{module-v
   "422", "Cannot start of instance. Instance has already launched."
   "500", "Internal server error"
 
-.. note:: To start an instance it must have a status: "failed", "stopped" or "ready". 
+.. note:: To start an instance it should have a status: "failed", "stopped" or "ready". 
 
-When instance is starting, framework starts on mesos.
+When instance is starting, framework starts on Mesos.
 
 Response example::
 
@@ -2364,7 +2454,9 @@ Get the information about instance tasks
 
 Request method: GET
 
-Request format: http://{domain}/v1/modules/{module-type}/{module-name}/{module-version}/instance/{instance-name}/tasks/
+Request format:: 
+
+ http://{domain}/v1/modules/{module-type}/{module-name}/{module-version}/instance/{instance-name}/tasks/
 
 .. csv-table::  
   :header: "Status code",  "Description"
@@ -2403,7 +2495,9 @@ Stop an instance
 
 Request method: GET
 
-Request format: http://{domain}/v1/modules/{module-type}/{module-name}/{module-version}/instance/{instance-name}/stop/
+Request format:: 
+ 
+ http://{domain}/v1/modules/{module-type}/{module-name}/{module-version}/instance/{instance-name}/stop/
 
 .. csv-table::  
   :header: "Status code",  "Description"
@@ -2414,7 +2508,7 @@ Request format: http://{domain}/v1/modules/{module-type}/{module-name}/{module-v
   "422", "Cannot stop instance. Instance has not been started."
   "500", "Internal server error (including erorrs related to incorrect module type or nonexistent module and «Instance '<instance_name>' has not been found.»)"
 
-.. note:: To stop instance a status must be "started". 
+.. note:: To stop an instance its status should be "started". 
 
 When instance stops, framework suspends on mesos.
 
