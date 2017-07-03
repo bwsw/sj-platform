@@ -19,12 +19,8 @@
 package com.bwsw.sj.common.engine.core.state
 
 import com.bwsw.common.ObjectSerializer
-import com.bwsw.sj.common.dal.model.stream.TStreamStreamDomain
-import com.bwsw.sj.common.engine.core.managment.CommonTaskManager
 import com.bwsw.sj.common.engine.core.state.StateLiterals.{deleteLiteral, setLiteral}
-import com.bwsw.tstreams.agents.consumer.ConsumerTransaction
-import com.bwsw.tstreams.agents.consumer.Offset.Oldest
-import com.bwsw.tstreams.agents.group.CheckpointGroup
+import com.bwsw.tstreams.agents.consumer.{Consumer, ConsumerTransaction}
 import org.slf4j.LoggerFactory
 
 import scala.collection.mutable
@@ -32,23 +28,11 @@ import scala.collection.mutable
 /**
   * Provides method for loading a last state
   *
-  * @param manager         manager of environment of regular module task
-  * @param checkpointGroup group of t-stream agents that have to make a checkpoint at the same time
-  * @param stateStream     stream that keeps a module state
+  * @param stateConsumer t-stream consumer for loading states
   * @author Pavel Tomskikh
   */
-class StateLoader(manager: CommonTaskManager, checkpointGroup: CheckpointGroup, stateStream: TStreamStreamDomain)
-  extends StateLoaderInterface {
-
+class StateLoader(stateConsumer: Consumer) extends StateLoaderInterface {
   private val logger = LoggerFactory.getLogger(this.getClass)
-  private val partition = 0
-
-  /**
-    * Consumer is responsible for retrieving a partial or full state
-    */
-  private val stateConsumer = manager.createConsumer(stateStream, List(partition, partition), Oldest)
-  stateConsumer.start()
-  addConsumerToCheckpointGroup()
 
   /**
     * Provides a serialization from a transaction data to a state variable or state change
@@ -61,6 +45,7 @@ class StateLoader(manager: CommonTaskManager, checkpointGroup: CheckpointGroup, 
   override def loadLastState(): (Option[Long], mutable.Map[String, Any]) = {
     logger.debug(s"Restore a state.")
     val initialState = mutable.Map[String, Any]()
+    val partition = stateConsumer.getPartitions.head
     val maybeTxn = stateConsumer.getLastTransaction(partition)
     if (maybeTxn.nonEmpty) {
       logger.debug(s"Get a transaction that was last. It contains a full or partial state.")
@@ -138,15 +123,10 @@ class StateLoader(manager: CommonTaskManager, checkpointGroup: CheckpointGroup, 
       case (key, (`deleteLiteral`, _)) => fullState.remove(key)
     }
   }
+}
 
-  /**
-    * Adds a state consumer to checkpoint group
-    */
-  private def addConsumerToCheckpointGroup(): Unit = {
-    logger.debug(s"Task: ${manager.taskName}. Start adding state consumer to checkpoint group.")
-    checkpointGroup.add(stateConsumer)
-    logger.debug(s"Task: ${manager.taskName}. Adding state consumer to checkpoint group is finished.")
-  }
+object StateLoader {
+
 }
 
 /**

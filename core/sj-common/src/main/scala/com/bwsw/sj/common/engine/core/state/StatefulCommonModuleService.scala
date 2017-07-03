@@ -26,6 +26,7 @@ import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
 import com.bwsw.sj.common.engine.{StateHandlers, StreamingExecutor}
 import com.bwsw.sj.common.si.model.instance.{BatchInstance, RegularInstance}
 import com.bwsw.sj.common.utils.EngineLiterals
+import com.bwsw.tstreams.agents.consumer.Offset.Oldest
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import scaldi.Injectable.inject
 import scaldi.Injector
@@ -50,8 +51,14 @@ class StatefulCommonModuleService(manager: CommonTaskManager,
   private var countOfCheckpoints: Int = 1
 
   private val stateStream = createStateStream()
-  private val stateLoader: StateLoader = new StateLoader(manager, checkpointGroup, stateStream)
-  private val stateSaver: StateSaver = new StateSaver(manager, checkpointGroup, stateStream)
+  private val stateProducer = manager.createProducer(stateStream)
+  private val partition = 0
+  private val stateConsumer = manager.createConsumer(stateStream, List(partition, partition), Oldest)
+  stateConsumer.start()
+  addAgentsToCheckpointGroup()
+
+  private val stateLoader: StateLoader = new StateLoader(stateConsumer)
+  private val stateSaver: StateSaver = new StateSaver(stateProducer)
   private val stateService: RAMStateService = new RAMStateService(stateSaver, stateLoader)
 
   val environmentManager = new StatefulModuleEnvironmentManager(
@@ -126,5 +133,15 @@ class StatefulCommonModuleService(manager: CommonTaskManager,
 
     manager.createStorageStream(stateStreamName, description, partitions)
     manager.getStream(stateStreamName, description, tags, partitions)
+  }
+
+  /**
+    * Adds a state producer and a state consumer to checkpoint group
+    */
+  private def addAgentsToCheckpointGroup(): Unit = {
+    logger.debug(s"Task: ${manager.taskName}. Start adding state consumer and producer to checkpoint group.")
+    checkpointGroup.add(stateConsumer)
+    checkpointGroup.add(stateProducer)
+    logger.debug(s"Task: ${manager.taskName}. Adding state consumer and producer to checkpoint group is finished.")
   }
 }

@@ -19,10 +19,7 @@
 package com.bwsw.sj.common.engine.core.state
 
 import com.bwsw.common.ObjectSerializer
-import com.bwsw.sj.common.dal.model.stream.TStreamStreamDomain
-import com.bwsw.sj.common.engine.core.managment.CommonTaskManager
-import com.bwsw.tstreams.agents.group.CheckpointGroup
-import com.bwsw.tstreams.agents.producer.NewProducerTransactionPolicy
+import com.bwsw.tstreams.agents.producer.{NewProducerTransactionPolicy, Producer}
 import org.slf4j.LoggerFactory
 
 import scala.collection.mutable
@@ -30,13 +27,10 @@ import scala.collection.mutable
 /**
   * Provides methods for saving states
   *
-  * @param manager         manager of environment of regular module task
-  * @param checkpointGroup group of t-stream agents that have to make a checkpoint at the same time
-  * @param stateStream     stream that keeps a module state
+  * @param stateProducer t-stream producer for saving states
   * @author Pavel Tomskikh
   */
-class StateSaver(manager: CommonTaskManager, checkpointGroup: CheckpointGroup, stateStream: TStreamStreamDomain)
-  extends StateSaverInterface {
+class StateSaver(stateProducer: Producer) extends StateSaverInterface {
 
   /**
     * @inheritdoc
@@ -44,12 +38,6 @@ class StateSaver(manager: CommonTaskManager, checkpointGroup: CheckpointGroup, s
   override var lastFullStateID: Option[Long] = None
 
   private val logger = LoggerFactory.getLogger(this.getClass)
-
-  /**
-    * Producer is responsible for saving a partial changes of state or a full state
-    */
-  private val stateProducer = manager.createProducer(stateStream)
-  addProducerToCheckpointGroup()
 
   /**
     * Provides a serialization from a transaction data to a state variable or state change
@@ -93,15 +81,6 @@ class StateSaver(manager: CommonTaskManager, checkpointGroup: CheckpointGroup, s
     val transaction = stateProducer.newTransaction(NewProducerTransactionPolicy.ErrorIfOpened)
     transaction.send(serializer.serialize(Long.box(id)))
     changes.foreach((x: (String, (String, Any))) => transaction.send(serializer.serialize(x)))
-  }
-
-  /**
-    * Adds a state producer to checkpoint group
-    */
-  private def addProducerToCheckpointGroup(): Unit = {
-    logger.debug(s"Task: ${manager.taskName}. Start adding state producer to checkpoint group.")
-    checkpointGroup.add(stateProducer)
-    logger.debug(s"Task: ${manager.taskName}. Adding state producer to checkpoint group is finished.")
   }
 }
 
