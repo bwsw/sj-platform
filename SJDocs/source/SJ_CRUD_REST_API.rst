@@ -44,7 +44,7 @@ Requirements for requests and responses
 
 Expected URI scheme for requests should include the version number of the REST API, for example: 
                  
-		 http://{domain}/{version}/. 
+http://{domain}/{version}/. 
 
 All text data must be encoded in UTF-8.
 
@@ -1523,11 +1523,10 @@ Example of source message::
   :widths: 10, 60
 
   "200", "Jar file '<file_name>' of module has been uploaded."
-  "400", "
-         1. Cannot upload jar file '<file_name>' of module. Errors: file '<file_name>' does not have the .jar extension. 
-         2. Cannot upload jar file '<file_name>' of module. Errors: module '<module-type>-<module-name>-<module-version>' already exists.
-         3. Cannot upload jar file '<file_name>' of module. Errors: file '<file_name>' already exists.
-         4. Other errors"
+  "400", "1. Cannot upload jar file '<file_name>' of module. Errors: file '<file_name>' does not have the .jar extension. 
+  2. Cannot upload jar file '<file_name>' of module. Errors: module '<module-type>-<module-name>-<module-version>' already exists.
+  3. Cannot upload jar file '<file_name>' of module. Errors: file '<file_name>' already exists.
+  4. Other errors"
   "500", "Internal server error"
 
 Response example::
@@ -1801,11 +1800,11 @@ Response entity: json example::
  * ready - a newly created instance and not started yet;
  * starting - a recently launched instance but not started yet (right after the "Start" button is pushed);
  * started - the launched instance started to work;
- * stopping - a started instance in the process of stopping (right after the "Stop" button is pushed)
- * stopped - an instance that has been stopped
- * deleting - an instance in the process of deleting (right after the "Delete" button is pressed)
- * failed - an instance that has been launched but in view of some errors is not started
- * error - an error is detected when stopping the instance
+ * stopping - a started instance in the process of stopping (right after the "Stop" button is pushed);
+ * stopped - an instance that has been stopped;
+ * deleting - an instance in the process of deleting (right after the "Delete" button is pressed);
+ * failed - an instance that has been launched but in view of some errors is not started;
+ * error - an error is detected at stopping or deleting an instance.
 
 .. figure:: _static/Возможные_состояния_инстанса.png
 
@@ -2056,12 +2055,10 @@ Request json example for creating batch-streaming instance::
   :widths: 10, 60
   
   "201", "Instance '<instance_name>' for module '<module_type>-<module_name>-<module_version>' has been created."
-  "400", "
-               1. Cannot create instance of module. The instance parameter 'options' haven't passed validation, which is declared in a method, called 'validate'. This method is owned by a validator class that implements StreamingValidator interface. Errors: {list-of-errors}.
-               2. Cannot create instance of module. Errors: {list-of-errors}."
-  "404", "
-                1. Module '<module_type>-<module_name>-<module_version>' has not been found.
-                2. Jar of module '<module_type>-<module_name>-<module_version>' has not been found in the storage."
+  "400", "1. Cannot create instance of module. The instance parameter 'options' haven't passed validation, which is declared in a method, called 'validate'. This method is owned by a validator class that implements StreamingValidator interface. Errors: {list-of-errors}.
+  2. Cannot create instance of module. Errors: {list-of-errors}."
+  "404", "1. Module '<module_type>-<module_name>-<module_version>' has not been found.
+  2. Jar of module '<module_type>-<module_name>-<module_version>' has not been found in the storage."
   "500", "Internal server error (including erorrs related to incorrect module type or nonexistent module)"
 
 
@@ -2188,14 +2185,14 @@ The stage consists of state, datetime and duration. Let's look at every paramete
 
 1. *State* can have one of the following values. The value corresponds to an instance status:
 
-* to-handle
-* starting
-* started
-* stopping
-* stopped
-* deleting
-* failed
-* error
+* to-handle - a newly created instance and not started yet;
+* starting -  a recently launched instance but not started yet (right after the "Start" button is pushed);
+* started - the launched instance started to work;
+* stopping - a started instance that has been stopped (right after the "Stop" button is pushed);
+* stopped - an instance that has been stopped;
+* deleting - an instance in the process of deleting (right after the "Delete" button is pressed);
+* failed - an instance that has been launched but in view of some errors is not started;
+* error - an error is detected when stopping the instance.
 
 2. *Datetime* defines the time when a state has been changed
 
@@ -2223,9 +2220,8 @@ Request format: http://{domain}/v1/modules/{module-type}/{module-name}/{module-v
   :widths: 10, 60
 
   "200", "List of instances"
-  "404", "
-               1. Module '<module_type>-<module_name>-<module_version>' has not been found.
-               2. Jar of module '<module_type>-<module_name>-<module_version>' has not been found in the storage."
+  "404", "1. Module '<module_type>-<module_name>-<module_version>' has not been found.
+  2. Jar of module '<module_type>-<module_name>-<module_version>' has not been found in the storage."
   "500", "Internal server error (including erorrs related to incorrect module type or nonexistent module)"
 
 Response entity json example::
@@ -2253,9 +2249,8 @@ Request format: http://{domain}/v1/modules/{module-type}/{module-name}/{module-v
   :widths: 15, 60
 
   "200", "List of instances of module"
-  "404", "
-               1. Module '<module_type>-<module_name>-<module_version>' has not been found.
-               2. Jar of module '<module_type>-<module_name>-<module_version>' has not been found in the storage."
+  "404", "1. Module '<module_type>-<module_name>-<module_version>' has not been found.
+  2. Jar of module '<module_type>-<module_name>-<module_version>' has not been found in the storage."
   "500", "Internal server error (including erorrs related to incorrect module type or nonexistent module)"
 
 Response entity: json example::
@@ -2305,9 +2300,8 @@ Request format: http://{domain}/v1/modules/{module-type}/{module-name}/{module-v
   :header: "Status code",  "Description"
   :widths: 10, 60
 
-  "200", "
-                1. Instance '<instance_name>' is being deleted.
-                2. Instance '<instance_name>' has been deleted."
+  "200", "1. Instance '<instance_name>' is being deleted.
+  2. Instance '<instance_name>' has been deleted."
   "404", "Instance '<instance_name>' has not been found."
   "422", "Cannot delete of instance '<instance_name>'. Instance is not been stopped, failed or ready."
   "500", "Internal server error"
@@ -2341,9 +2335,9 @@ Request format: http://{domain}/v1/modules/{module-type}/{module-name}/{module-v
   "422", "Cannot start of instance. Instance has already launched."
   "500", "Internal server error"
 
-.. note:: To start an instance it must have a status: "failed", "stopped" or "ready". 
+.. note:: To start an instance it should have a status: "failed", "stopped" or "ready". 
 
-When instance is starting, framework starts on mesos.
+When instance is starting, framework starts on Mesos.
 
 Response example::
 
@@ -2410,7 +2404,7 @@ Request format: http://{domain}/v1/modules/{module-type}/{module-name}/{module-v
   "422", "Cannot stop instance. Instance has not been started."
   "500", "Internal server error (including erorrs related to incorrect module type or nonexistent module and «Instance '<instance_name>' has not been found.»)"
 
-.. note:: To stop instance a status must be "started". 
+.. note:: To stop an instance its status should be "started". 
 
 When instance stops, framework suspends on mesos.
 
