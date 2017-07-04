@@ -29,6 +29,7 @@ Thus, Stream Juggler is a platform that enables high-throughput, fault-tolerant 
 
 In general, the main ideas of the Stream Juggler platform are:
 
+- Two ways of data processing: streaming and batch
 - Strict exactly-once processing on arbitrary processing graph
 - Ability to build sophisticated processing graphs
 - Ready-to-use components which can be reused in different pipelines
