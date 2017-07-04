@@ -21,12 +21,14 @@ package com.bwsw.sj.engine.batch
 import java.io.Closeable
 import java.util.concurrent.ExecutorCompletionService
 
+import com.bwsw.sj.common.config.SettingsUtils
 import com.bwsw.sj.common.engine.TaskEngine
 import com.bwsw.sj.engine.batch.task.BatchTaskEngine
 import com.bwsw.sj.common.engine.core.batch.BatchStreamingPerformanceMetrics
 import com.bwsw.sj.engine.core.engine.TaskRunner
 import com.bwsw.sj.common.engine.core.managment.{CommonTaskManager, TaskManager}
 import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
+import scaldi.Injectable.inject
 
 /**
   * Class is responsible for launching batch engine execution logic.
@@ -47,7 +49,8 @@ object BatchTaskRunner extends {
   }
 
   override protected def createTaskEngine(manager: TaskManager, performanceMetrics: PerformanceMetrics): TaskEngine = {
-    new BatchTaskEngine(manager.asInstanceOf[CommonTaskManager], performanceMetrics.asInstanceOf[BatchStreamingPerformanceMetrics])
+    val lowWatermark = inject[SettingsUtils].getLowWatermark()
+    new BatchTaskEngine(manager.asInstanceOf[CommonTaskManager], performanceMetrics.asInstanceOf[BatchStreamingPerformanceMetrics], lowWatermark)
   }
 
   override protected def createTaskInputService(manager: TaskManager, taskEngine: TaskEngine): Closeable = {

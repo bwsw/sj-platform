@@ -93,10 +93,6 @@ class SettingsUtils(implicit val injector: Injector) {
 
   def getJdbcDriverPrefix(driverName: String): String = getStringConfigSetting(s"$jdbcDriver.$driverName.prefix")
 
-  def getRestTimeout: Int = {
-    getIntConfigSetting(restTimeoutTag)
-  }
-
   def getBackoffSettings(): (Int, Double, Int) = {
     val backoffSeconds = Try(getFrameworkBackoffSeconds()) match {
       case Success(x) => x

@@ -34,10 +34,8 @@ object ConfigLiterals {
   val zkSessionTimeoutTag = s"$zookeeperDomain.session-timeout"
   val lowWatermark = s"$systemDomain.low-watermark"
 
-  val jdbcTimeoutTag = s"$jdbcDomain.timeout"
   val jdbcDriver = s"$jdbcDomain.driver"
 
-  val restTimeoutTag = s"$restDomain.rest-timeout"
   val kafkaSubscriberTimeoutTag = s"$systemDomain.subscriber-timeout"
   val geoIpAsNum = s"$systemDomain.geo-ip-as-num"
   val geoIpAsNumv6 = s"$systemDomain.geo-ip-as-num-v6"
