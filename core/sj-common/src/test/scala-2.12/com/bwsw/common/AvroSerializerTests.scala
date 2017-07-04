@@ -91,6 +91,7 @@ class AvroSerializerTests extends FlatSpec with Matchers with TableDrivenPropert
     val record = new Record(schema)
     record.put(field1, value1)
     record.put(field2, innerRecord)
+
     record
   }
 
@@ -100,6 +101,7 @@ class AvroSerializerTests extends FlatSpec with Matchers with TableDrivenPropert
     val writer = new GenericDatumWriter[GenericRecord](record.getSchema)
     writer.write(record, encoder)
     encoder.flush()
+
     writerOutput.toByteArray
   }
 }
