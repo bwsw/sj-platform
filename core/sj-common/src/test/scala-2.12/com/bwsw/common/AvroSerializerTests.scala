@@ -18,10 +18,12 @@
  */
 package com.bwsw.common
 
-import java.io.EOFException
+import java.io.{ByteArrayOutputStream, EOFException}
 
 import org.apache.avro.SchemaBuilder
 import org.apache.avro.generic.GenericData.Record
+import org.apache.avro.generic.{GenericDatumWriter, GenericRecord}
+import org.apache.avro.io.EncoderFactory
 import org.scalatest.prop.TableDrivenPropertyChecks
 import org.scalatest.{FlatSpec, Matchers}
 
@@ -46,20 +48,20 @@ class AvroSerializerTests extends FlatSpec with Matchers with TableDrivenPropert
     .endRecord()
 
   val records = Table(
-    ("record", "bytes"),
-    (createRecord(1, innerValue1 = true, 1), Array[Byte](2, 1, 0, 0, 0, 0, 0, 0, -16, 63)),
-    (createRecord(5, innerValue1 = true, 1), Array[Byte](10, 1, 0, 0, 0, 0, 0, 0, -16, 63)),
-    (createRecord(-7, innerValue1 = true, 1), Array[Byte](13, 1, 0, 0, 0, 0, 0, 0, -16, 63)),
-    (createRecord(1, innerValue1 = false, 1), Array[Byte](2, 0, 0, 0, 0, 0, 0, 0, -16, 63)),
-    (createRecord(1, innerValue1 = true, 10.101), Array[Byte](2, 1, -63, -54, -95, 69, -74, 51, 36, 64)),
-    (createRecord(1, innerValue1 = true, 55.55), Array[Byte](2, 1, 102, 102, 102, 102, 102, -58, 75, 64)),
-    (createRecord(1, innerValue1 = true, -68.112), Array[Byte](2, 1, -70, 73, 12, 2, 43, 7, 81, -64)))
+    "record",
+    createRecord(1, innerValue1 = true, 1),
+    createRecord(5, innerValue1 = true, 1),
+    createRecord(-7, innerValue1 = true, 1),
+    createRecord(1, innerValue1 = false, 1),
+    createRecord(1, innerValue1 = true, 10.101),
+    createRecord(1, innerValue1 = true, 55.55),
+    createRecord(1, innerValue1 = true, -68.112))
 
   val serializer = new AvroSerializer
 
   "AvroSerializer" should "serialize correct records properly" in {
-    forAll(records) { (record, bytes) =>
-      serializer.serialize(record) shouldBe bytes
+    forAll(records) { record =>
+      serializer.serialize(record) shouldBe getBytes(record)
     }
   }
 
@@ -70,8 +72,8 @@ class AvroSerializerTests extends FlatSpec with Matchers with TableDrivenPropert
   }
 
   it should "deserialize correct records properly" in {
-    forAll(records) { (record, bytes) =>
-      serializer.deserialize(bytes, schema) shouldBe record
+    forAll(records) { record =>
+      serializer.deserialize(getBytes(record), schema) shouldBe record
     }
   }
 
@@ -90,5 +92,16 @@ class AvroSerializerTests extends FlatSpec with Matchers with TableDrivenPropert
     record.put(field1, value1)
     record.put(field2, innerRecord)
     record
+  }
+
+  def getBytes(record: GenericRecord): Array[Byte] = {
+    val writerOutput = new ByteArrayOutputStream()
+    val encoder = EncoderFactory.get().binaryEncoder(writerOutput, null)
+    val writer = new GenericDatumWriter[GenericRecord](record.getSchema)
+    writer.write(record, encoder)
+    encoder.flush()
+    val serialized = writerOutput.toByteArray
+    writerOutput.reset()
+    serialized
   }
 }
