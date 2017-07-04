@@ -25,6 +25,7 @@ import com.bwsw.sj.common.engine.core.output.Entity
 import com.bwsw.sj.engine.core.output.types.rest.RestCommandBuilder
 import com.bwsw.sj.engine.output.task.OutputTaskManager
 import com.bwsw.sj.engine.output.task.reporting.OutputStreamingPerformanceMetrics
+import scaldi.Injector
 
 import scala.collection.JavaConverters._
 
@@ -36,6 +37,7 @@ class RestOutputProcessor[T <: AnyRef](restOutputStream: RestStreamDomain,
                                        performanceMetrics: OutputStreamingPerformanceMetrics,
                                        manager: OutputTaskManager,
                                        entity: Entity[_])
+                                      (implicit injector: Injector)
   extends OutputProcessor[T](restOutputStream, performanceMetrics) {
 
   override protected val commandBuilder: RestCommandBuilder = new RestCommandBuilder(transactionFieldName)

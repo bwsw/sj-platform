@@ -24,6 +24,8 @@ import org.apache.http.entity.ContentType
 import org.eclipse.jetty.client.api.Request
 import org.eclipse.jetty.client.util.StringContentProvider
 import org.eclipse.jetty.http.HttpMethod
+import scaldi.Injectable.inject
+import scaldi.Injector
 
 /**
   * Provides methods for building http requests to CRUD data
@@ -34,9 +36,10 @@ import org.eclipse.jetty.http.HttpMethod
   */
 class RestCommandBuilder(transactionFieldName: String,
                          contentType: String = ContentType.APPLICATION_JSON.toString)
+                        (implicit injector: Injector)
   extends CommandBuilder[(Request) => Request] {
 
-  private val serializer = new JsonSerializer
+  private val serializer = inject[JsonSerializer]
 
   /**
     * @inheritdoc
@@ -52,7 +55,8 @@ class RestCommandBuilder(transactionFieldName: String,
   /**
     * @inheritdoc
     */
-  override def buildDelete(transaction: Long): (Request) => Request = { (request: Request) =>
-    request.method(HttpMethod.DELETE).param(transactionFieldName, transaction.toString)
+  override def buildDelete(transaction: Long): (Request) => Request = {
+    (request: Request) =>
+      request.method(HttpMethod.DELETE).param(transactionFieldName, transaction.toString)
   }
 }
