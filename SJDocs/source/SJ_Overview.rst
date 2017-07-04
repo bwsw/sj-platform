@@ -33,7 +33,6 @@ In general, the main ideas of the Stream Juggler platform are:
 - Ability to build sophisticated processing graphs
 - Ready-to-use components which can be reused in different pipelines
 - Ability to decompose the task on small processing pieces and develop, upgrade and maintain them separately
-- Ready-to-use system (not constructor). 
 - Integrated REST and UI for DevOps
 - Integrated performance metrics
 - Able to scale horizontally to thousands of nodes
