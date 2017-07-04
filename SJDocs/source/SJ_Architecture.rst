@@ -14,7 +14,7 @@ Platform Components
 
 The diagram below presents the structure of the platform. 
 
-.. figure:: _static/SJ_General.jpg
+.. figure:: _static/SJ_General.png
 
 Figuratively, it can be divided into two layers. 
 
