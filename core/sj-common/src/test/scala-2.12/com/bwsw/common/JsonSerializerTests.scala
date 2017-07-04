@@ -18,6 +18,7 @@
  */
 package com.bwsw.common
 
+import com.bwsw.common.exceptions.{JsonDeserializationException, JsonIncorrectValueException, JsonUnrecognizedPropertyException}
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type
 import com.fasterxml.jackson.annotation.{JsonSubTypes, JsonTypeInfo}
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -45,14 +46,15 @@ class JsonSerializerTests extends FlatSpec with Matchers with TableDrivenPropert
     InnerObject(55, "test55"))
 
   val outerObjects = Seq(
-    new OuterObject("t", 1, InnerObject(1, "test1")),
+    new OuterObject("other-type", 1, InnerObject(1, "test1")),
     new OuterObjectType1(2, InnerObject(2, "test2"), true),
     new OuterObjectType1(3, InnerObject(3, "test3"), false),
     new OuterObjectType2(4, InnerObject(4, "test4"), "field4-value4"),
     new OuterObjectType2(5, InnerObject(5, "test5"), "field4-value5"),
-    new OuterObjectType2(6, InnerObject(6, "test5"), "field4-value6"))
+    new OuterObjectType2(6, InnerObject(6, "test5"), "field4-value6"),
+    new OuterObject("other-type", 7, InnerObject(1, "test1")))
 
-  "JsonSerializer" should "return FAIL_ON_UNKNOWN_PROPERTIES flag properly" in {
+  "JsonSerializer" should "return 'ignoreUnknown' flag properly" in {
     flags.foreach { flag =>
       val serializer = new JsonSerializer
 
@@ -61,7 +63,7 @@ class JsonSerializerTests extends FlatSpec with Matchers with TableDrivenPropert
     }
   }
 
-  it should "return FAIL_ON_NULL_FOR_PRIMITIVES flag properly" in {
+  it should "return 'disableNullForPrimitives' flag properly" in {
     flags.foreach { flag =>
       val serializer = new JsonSerializer
 
@@ -92,10 +94,104 @@ class JsonSerializerTests extends FlatSpec with Matchers with TableDrivenPropert
       serializer.deserialize[OuterObject](obj.toJson) shouldBe obj
     }
   }
+
+  it should "deserialize json with missed fields when 'disableNullForPrimitives' flag does not set" in {
+    val someType = "some-type"
+    val field1Value = 123
+    val field4Value = 456
+    val field5Value = "field 5 value"
+    val field2Value = InnerObject(field4Value, field5Value)
+    val objects = Table(
+      ("obj", "missedField", "expectedObject"),
+      (new OuterObject(someType, field1Value, field2Value), typeField, new OuterObject(null, field1Value, field2Value)),
+      (new OuterObject(someType, field1Value, field2Value), field1Name, new OuterObject(someType, 0, field2Value)),
+      (new OuterObject(someType, field1Value, field2Value), field2Name, new OuterObject(someType, field1Value, null)),
+      (new OuterObject(someType, field1Value, field2Value), field4Name,
+        new OuterObject(someType, field1Value, InnerObject(0, field5Value))),
+      (new OuterObject(someType, field1Value, field2Value), field5Name,
+        new OuterObject(someType, field1Value, InnerObject(field4Value, null))),
+      (new OuterObjectType1(field1Value, field2Value, true), field3Name,
+        new OuterObjectType1(field1Value, field2Value, false)),
+      (new OuterObjectType2(field1Value, field2Value, "field 3 value"), field3Name,
+        new OuterObjectType2(field1Value, field2Value, null)))
+
+    val serializer = new JsonSerializer(disableNullForPrimitives = false)
+
+    forAll(objects) { (obj, missedField, expectedObject) =>
+      val json = mapToJson(removeFieldFromMap(obj.toMap, missedField))
+      serializer.deserialize[OuterObject](json) shouldBe expectedObject
+    }
+  }
+
+  it should "not deserialize json without some primitive values when 'disableNullForPrimitives' flag is set" in {
+    val obj = new OuterObjectType1(123, InnerObject(456, "field 5 value"), true)
+    val missedFields = Seq(field1Name, field3Name, field4Name)
+    val serializer = new JsonSerializer(disableNullForPrimitives = true)
+    missedFields.foreach { missedField =>
+      val json = mapToJson(removeFieldFromMap(obj.toMap, missedField))
+      a[JsonIncorrectValueException] shouldBe thrownBy {
+        serializer.deserialize[OuterObject](json)
+      }
+    }
+  }
+
+  it should "deserialize json with unknown fields when 'ignoreUnknown' flag is set" in {
+    val obj = new OuterObjectType1(123, InnerObject(456, "field 5 value"), true)
+    val unknownField = "unknown-field"
+    val json = mapToJson(obj.toMap + (unknownField -> "value"))
+    val serializer = new JsonSerializer(ignoreUnknown = true)
+    serializer.deserialize[OuterObject](json) shouldBe obj
+  }
+
+  it should "not deserialize json with unknown fields when 'ignoreUnknown' flag does not set" in {
+    val obj = new OuterObjectType1(123, InnerObject(456, "field 5 value"), true)
+    val unknownField = "unknown-field"
+    val json = mapToJson(obj.toMap + (unknownField -> "value"))
+    val serializer = new JsonSerializer(ignoreUnknown = false)
+    val thrown = the[JsonUnrecognizedPropertyException] thrownBy {
+      serializer.deserialize[OuterObject](json) shouldBe obj
+    }
+
+    thrown.getMessage should include(unknownField)
+  }
+
+  it should "not deserialize json if field contain value with incorrect type" in {
+    val obj = new OuterObjectType1(123, InnerObject(456, "field 5 value"), true)
+    val map = obj.toMap
+    val incorrectValues = Table(
+      ("field", "value"),
+      (field1Name, "wrong type"),
+      (field2Name, "wrong type"),
+      (field3Name, "wrong type"),
+      (field4Name, "wrong type"),
+      (field5Name, Array()))
+
+    val serializer = new JsonSerializer(ignoreUnknown = true)
+    forAll(incorrectValues) { (field, value) =>
+      val json = mapToJson(replaceFieldValue(map, field, value))
+      val thrown = the[JsonIncorrectValueException] thrownBy {
+        serializer.deserialize[OuterObject](json)
+      }
+      thrown.getMessage should include(field)
+    }
+  }
+
+  it should "throws JsonDeserializationException for incorrect json" in {
+    val incorrectJsons = Seq(
+      null,
+      "",
+      """{"a":1,}""")
+
+    val serializer = new JsonSerializer()
+    incorrectJsons.foreach { incorrectJson =>
+      a[JsonDeserializationException] shouldBe thrownBy {
+        serializer.deserialize(incorrectJson)
+      }
+    }
+  }
 }
 
 object JsonSerializerTests {
-
   val typeField = "type"
   val field1Name = "field1"
   val field2Name = "field2"
@@ -110,7 +206,6 @@ object JsonSerializerTests {
     def toMap: Map[String, Any]
 
     def toJson: String = mapToJson(toMap)
-
   }
 
   case class InnerObject(field4: Int, field5: String) extends ObjectInterface {
@@ -126,8 +221,10 @@ object JsonSerializerTests {
   class OuterObject(val `type`: String, val field1: Int, val field2: InnerObject) extends ObjectInterface {
     override def toMap: Map[String, Any] = Map(
       typeField -> `type`,
-      field1Name -> field1,
-      field2Name -> field2.toMap)
+      field1Name -> field1) ++ {
+      if (field2 != null) Map(field2Name -> field2.toMap)
+      else Map.empty
+    }
 
     override def equals(obj: scala.Any): Boolean = obj match {
       case o: OuterObject => o.toMap == toMap
@@ -152,4 +249,19 @@ object JsonSerializerTests {
   def mapToJson(map: Map[String, Any]): String =
     new ObjectMapper().registerModule(DefaultScalaModule).writeValueAsString(map)
 
+  def removeFieldFromMap(map: Map[String, Any], field: String): Map[String, Any] = field match {
+    case `field4Name` | `field5Name` =>
+      val field2Value = map(field2Name).asInstanceOf[Map[String, Any]] - field
+      map + (field2Name -> field2Value)
+    case _ =>
+      map - field
+  }
+
+  def replaceFieldValue(map: Map[String, Any], field: String, value: Any): Map[String, Any] = field match {
+    case `field4Name` | `field5Name` =>
+      val field2Value = map(field2Name).asInstanceOf[Map[String, Any]] + (field -> value)
+      map + (field2Name -> field2Value)
+    case _ =>
+      map + (field -> value)
+  }
 }
