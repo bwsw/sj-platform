@@ -100,8 +100,6 @@ class AvroSerializerTests extends FlatSpec with Matchers with TableDrivenPropert
     val writer = new GenericDatumWriter[GenericRecord](record.getSchema)
     writer.write(record, encoder)
     encoder.flush()
-    val serialized = writerOutput.toByteArray
-    writerOutput.reset()
-    serialized
+    writerOutput.toByteArray
   }
 }
