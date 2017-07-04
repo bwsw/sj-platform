@@ -1,13 +1,19 @@
 Stream Juggler Platform Overview
 ================================
 
+What is Stream Juggler?
+----------------------------
+
 Stream Juggler (SJ) is an open source, scalable solution for real-time and batched stream processing. The system fits for building a Complex Event Processing systems (CEP) and allows a developer to construct pipelines for analyzing data streams.
 
 **CEP** (Complex Event Processing) is a general concept describing software systems that are used for sophisticated processing of streams of events.
 
 A **stream** is unbounded series of events organized in the chronological way.
 
-In sophisticated processing an algorithm can overview series of events to find dependencies, correlations, trends, etc. rather than just one event in a time
+In sophisticated processing an algorithm can overview series of events to find dependencies, correlations, trends, etc. rather than just one event in a time.
+
+What can Stream Juggler Do?
+-------------------------------
 
 Streams can be very intensive and all events can not be handled by a single server of arbitrary performance. The system allows **scaling** the computations horizontally to handle increasing demands. Infrastructure scalability of the platform is handled by `Apache Mesos <http://mesos.apache.org/>`_ –  a well-known and production-ready ecosystem which represents clusters as a single supercomputer with a pool of resources.
 
