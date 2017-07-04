@@ -1,5 +1,5 @@
-CRUD REST API Documentation
-=============================
+Stream Juggler REST API Guide
+========================================
 
 .. Contents::
 
