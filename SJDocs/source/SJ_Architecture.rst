@@ -40,7 +40,7 @@ The *second layer* is composed of prerequisites for the platform. These are the 
 
 - Data sources for the platform are Netty and `T-streams <https://t-streams.com>`_ libraries and `Kafka <https://kafka.apache.org/>`_. For starting Kafka we use https://github.com/mesos/kafka_.
 
-- bThe outcoming data is stored to Elasticsearch, JDBC or REST external storages.
+- The outcoming data is stored to Elasticsearch, JDBC or REST external storages.
 
 - We use `MongoDB <https://www.mongodb.com/>`_ as a document database that provides high performance and availability. To start MongoDB in Mesos we use https://hub.docker.com/r/tobilg/mongodb-marathon/_
 
