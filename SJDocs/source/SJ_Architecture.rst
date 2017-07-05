@@ -64,5 +64,6 @@ Every component deployed to the Stream Juggler platform contributes to the main 
     
 - Variety 
     The platform components are ready-to-use and can be reorganized in various pipelines. Besides, the system  is compatible with different types of data sources, data storages, services and systems. 
-    
+
+Stream Juggler provides UI and REST for a platform user to create a processing sequence of arbitrary complexity, watch it in action and manage it.
     
