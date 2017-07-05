@@ -18,7 +18,6 @@
  */
 package com.bwsw.sj.engine.core.simulation.state
 
-import com.bwsw.sj.common.engine.core.environment.EnvironmentLiterals.{partitionedOutput, roundRobinOutput}
 import com.bwsw.sj.common.engine.core.environment.{PartitionedOutput, RoundRobinOutput}
 import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
 import com.bwsw.tstreams.agents.producer.Producer
@@ -26,19 +25,19 @@ import com.bwsw.tstreams.agents.producer.Producer
 import scala.collection.mutable
 
 /**
-  * Provides buffer for storing output transactions
+  * Provides buffer for storing output elements
   *
   * @author Pavel Tomskikh
   */
 trait ModuleOutputMockHelper {
-  protected var transactions: mutable.Buffer[Transaction] = mutable.Buffer.empty
+  protected var outputElements: mutable.Buffer[OutputElement] = mutable.Buffer.empty
 
   /**
-    * Returns [[transactions]] and clears it
+    * Returns [[outputElements]] and clears it
     */
-  def readTransactions() = {
-    val buffer = transactions
-    transactions = mutable.Buffer.empty
+  def readOutputElements() = {
+    val buffer = outputElements
+    outputElements = mutable.Buffer.empty
     buffer
   }
 }
@@ -57,10 +56,10 @@ class PartitionedOutputMock(producer: Producer,
   extends PartitionedOutput(producer, performanceMetrics) with ModuleOutputMockHelper {
 
   /**
-    * Stores data in [[transactions]]
+    * Stores data in [[outputElements]]
     */
   override def put(data: AnyRef, partition: Int): Unit =
-    transactions += Transaction(data, partition, partitionedOutput)
+    outputElements += OutputElement(data, partition)
 }
 
 /**
@@ -79,10 +78,10 @@ class RoundRobinOutputMock(producer: Producer,
   private var currentPartition: Int = 0
 
   /**
-    * Stores data in [[transactions]]
+    * Stores data in [[outputElements]]
     */
   override def put(data: AnyRef): Unit = {
-    transactions += Transaction(data, currentPartition, roundRobinOutput)
+    outputElements += OutputElement(data, currentPartition)
     if (currentPartition < producer.stream.partitionsCount)
       currentPartition += 1
     else
@@ -91,6 +90,6 @@ class RoundRobinOutputMock(producer: Producer,
 }
 
 /**
-  * Contains transaction info
+  * Contains info about output
   */
-case class Transaction(data: AnyRef, partition: Int, `type`: String)
+case class OutputElement(data: AnyRef, partition: Int)

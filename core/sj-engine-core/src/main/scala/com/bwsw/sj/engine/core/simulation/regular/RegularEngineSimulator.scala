@@ -21,7 +21,7 @@ package com.bwsw.sj.engine.core.simulation.regular
 import com.bwsw.sj.common.engine.core.entities.{Envelope, KafkaEnvelope, TStreamEnvelope}
 import com.bwsw.sj.common.engine.core.regular.RegularStreamingExecutor
 import com.bwsw.sj.engine.core.simulation.SimulatorConstants.defaultConsumerName
-import com.bwsw.sj.engine.core.simulation.state.{ModuleEnvironmentManagerMock, ModuleOutputMockHelper, Transaction}
+import com.bwsw.sj.engine.core.simulation.state.{ModuleEnvironmentManagerMock, ModuleOutputMockHelper, OutputElement}
 
 import scala.collection.mutable
 
@@ -145,14 +145,14 @@ class RegularEngineSimulator[T <: AnyRef](executor: RegularStreamingExecutor[T],
       } else
         envelopesWithoutCheckpoint += 1
 
-      val transactions = manager.producerPolicyByOutput.mapValues {
+      val outputElements = manager.producerPolicyByOutput.mapValues {
         case (_, moduleOutput: ModuleOutputMockHelper) =>
-          moduleOutput.readTransactions()
+          moduleOutput.readOutputElements()
         case _ =>
           throw new IllegalStateException("Incorrect outputs")
       }.filter(_._2.nonEmpty)
 
-      SimulationResult(envelope.id, transactions, state)
+      SimulationResult(envelope.id, outputElements, state)
     }
 
     if (clearBuffer) clear()
@@ -170,9 +170,9 @@ class RegularEngineSimulator[T <: AnyRef](executor: RegularStreamingExecutor[T],
 /**
   * Contains results of simulation
   *
-  * @param transactionId ID of incoming transaction
-  * @param transactions  outgoing transactions
+  * @param transactionId  ID of incoming transaction
+  * @param outputElements outgoing entities
   */
 case class SimulationResult(transactionId: Long,
-                            transactions: collection.Map[String, mutable.Buffer[Transaction]],
+                            outputElements: collection.Map[String, mutable.Buffer[OutputElement]],
                             state: Map[String, Any])
