@@ -52,11 +52,10 @@ class PartitionedOutput(producer: Producer,
       transactions(partition).send(bytes)
     }
 
-    logger.debug(s"Add an element to output envelope of output stream:  '$streamName'.")
-    performanceMetrics.addElementToOutputEnvelope(
-      streamName,
-      transactions(partition).getTransactionID.toString,
-      bytes.length
-    )
+    updatePerformanceMetrics(streamName, transactions(partition), bytes)
+  }
+
+  override def clear(): Unit = {
+    transactions.clear()
   }
 }

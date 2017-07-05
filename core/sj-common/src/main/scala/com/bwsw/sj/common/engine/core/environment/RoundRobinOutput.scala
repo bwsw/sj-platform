@@ -51,11 +51,10 @@ class RoundRobinOutput(producer: Producer,
       maybeTransaction.get.send(bytes)
     }
 
-    logger.debug(s"Add an element to output envelope of output stream:  '$streamName'.")
-    performanceMetrics.addElementToOutputEnvelope(
-      streamName,
-      maybeTransaction.get.getTransactionID.toString,
-      bytes.length
-    )
+    updatePerformanceMetrics(streamName, maybeTransaction.get, bytes)
+  }
+
+  override def clear(): Unit = {
+    maybeTransaction = None
   }
 }

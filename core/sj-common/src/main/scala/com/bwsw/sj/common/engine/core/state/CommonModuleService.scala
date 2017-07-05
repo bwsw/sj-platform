@@ -62,7 +62,7 @@ abstract class CommonModuleService(manager: CommonTaskManager,
   }
 
   def doCheckpoint(): Unit = {
-    producerPolicyByOutput.clear()
+    producerPolicyByOutput.foreach(_._2._2.clear())
   }
 
   def isCheckpointInitiated: Boolean = environmentManager.isCheckpointInitiated
