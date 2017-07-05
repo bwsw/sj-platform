@@ -70,7 +70,7 @@ class CSVInputExecutorTests extends FlatSpec with Matchers with MockitoSugar {
   val serializedOptions = serializer.serialize(options)
 
   val manager = new InputEnvironmentManager(serializedOptions, Array(outputStream, fallbackStream))
-  val hazelcastConfig = HazelcastConfig(600, 1, 1, EngineLiterals.lruDefaultEvictionPolicy, 100)
+  val hazelcastConfig = HazelcastConfig(600, 1, 1, EngineLiterals.lruDefaultEvictionPolicy, 100, Seq("localhost"))
 
   val avroSchema = {
     var schemaBuilder = SchemaBuilder.record("csv").fields()

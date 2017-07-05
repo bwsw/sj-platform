@@ -29,9 +29,11 @@ import com.bwsw.sj.engine.core.engine.{NumericalCheckpointTaskEngine, TimeCheckp
 import com.bwsw.sj.common.engine.core.entities.InputEnvelope
 import com.bwsw.sj.common.engine.core.environment.InputEnvironmentManager
 import com.bwsw.sj.common.engine.core.input.{InputStreamingExecutor, Interval}
+import com.bwsw.sj.engine.input.config.InputEngineConfigNames
 import com.bwsw.sj.engine.input.eviction_policy.InputInstanceEvictionPolicy
 import com.bwsw.sj.engine.input.task.reporting.InputStreamingPerformanceMetrics
 import com.bwsw.tstreams.agents.producer.{NewProducerTransactionPolicy, ProducerTransaction}
+import com.typesafe.config.ConfigFactory
 import io.netty.buffer.ByteBuf
 import io.netty.channel.{ChannelFuture, ChannelHandlerContext}
 import org.slf4j.{Logger, LoggerFactory}
@@ -65,12 +67,16 @@ abstract class InputTaskEngine(manager: InputTaskManager,
   private val environmentManager = createModuleEnvironmentManager()
   private val executor: InputStreamingExecutor[AnyRef] = manager.getExecutor(environmentManager)
   private val hazelcastMapName: String = instance.name + "-" + "inputEngine"
+
+  private val applicationConfig = ConfigFactory.load()
+  private val tcpIpMembers = applicationConfig.getString(InputEngineConfigNames.hosts).split(",")
   private val hazelcastConfig: HazelcastConfig = HazelcastConfig(
     instance.lookupHistory,
     instance.asyncBackupCount,
     instance.backupCount,
     instance.defaultEvictionPolicy,
-    instance.queueMaxSize)
+    instance.queueMaxSize,
+    tcpIpMembers)
   private val hazelcast = new Hazelcast(hazelcastMapName, hazelcastConfig)
   private val evictionPolicy = InputInstanceEvictionPolicy(instance.evictionPolicy, hazelcast)
   protected val checkpointInterval: Long = instance.checkpointInterval
