@@ -21,7 +21,7 @@ package com.bwsw.sj.engine.core.simulation.output
 import com.bwsw.sj.common.engine.core.entities.TStreamEnvelope
 import com.bwsw.sj.common.engine.core.environment.OutputEnvironmentManager
 import com.bwsw.sj.common.engine.core.output.OutputStreamingExecutor
-import com.bwsw.sj.engine.core.simulation.SimulatorConstants.defaultConsumerName
+import com.bwsw.sj.engine.core.simulation.SimulatorConstants.{defaultConsumerName, defaultInputStream}
 
 import scala.collection.mutable
 
@@ -74,11 +74,14 @@ class OutputEngineSimulator[IT <: AnyRef, OT](executor: OutputStreamingExecutor[
     * @param consumerName name of consumer
     * @return ID of saved transaction
     */
-  def prepare(entities: Seq[IT], consumerName: String = defaultConsumerName): Long = {
+  def prepare(entities: Seq[IT],
+              stream: String = defaultInputStream,
+              consumerName: String = defaultConsumerName): Long = {
     val queue = mutable.Queue(entities: _*)
     val envelope = new TStreamEnvelope[IT](queue, consumerName)
     transactionId += 1
     envelope.id = transactionId
+    envelope.stream = stream
 
     inputEnvelopes += envelope
     transactionId

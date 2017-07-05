@@ -20,4 +20,5 @@ package com.bwsw.sj.engine.core.simulation
 
 object SimulatorConstants {
   val defaultConsumerName = "default-consumer-name"
+  val defaultInputStream = "default-input-stream"
 }
