@@ -59,7 +59,7 @@ class SjModule extends Module {
   bind[InstanceSI] to new InstanceSI
 
   bind[FileBuffer] toProvider new FileBuffer
-  bind[JsonSerializer] toProvider new JsonSerializer(ignore = true)
+  bind[JsonSerializer] toProvider new JsonSerializer(ignoreUnknown = true)
 
   bind[HttpClientBuilder] to new HttpClientBuilder
 }

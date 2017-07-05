@@ -1,5 +1,5 @@
-CRUD REST API Documentation
-=============================
+Stream Juggler REST API Guide
+========================================
 
 .. Contents::
 
@@ -1941,7 +1941,7 @@ Request format::
 
  http://{domain}/v1/modules/{module-type}/{module-name}/{module-version}/instance/
 
-.. note:: The name of an input stream should contain the  "/split" suffix (if stream's partitions should be distributed between the tasks) or "/full" (if each task should process all partitions of the stream). The stream has a 'split' mode as default. (see `CRUD Rest-API for Modules/Execution plan <Execution plan>`_)
+.. note:: The name of an input stream should contain the  "/split" suffix (if stream's partitions should be distributed between the tasks) or "/full" (if each task should process all partitions of the stream). The stream has a 'split' mode as default. (see `SJ_CRUD_REST_API.rst#execution-plan <Execution plan>`_)
 
 Instance fields
 ~~~~~~~~~~~~~~~~
@@ -1969,7 +1969,7 @@ Instance fields
   "checkpointMode*", "String", "Value must be time-interval or every-nth",  "every-nth" 
   "checkpointInterval*", "Int ", "Interval for creating checkpoint",  "100 "
   "outputs*", "List[String] ", "Names of output streams (must be stream.t-stream only)", "[s3, s4] "
-  "duplicateCheck",  "Boolean", "The flag points  if every envelope (an envelope key) has to be checked on duplication or not. (false by default) **Note**: You can indicate the 'duplicateCheck' field in the instance to set up a default policy for message checking on duplication. Use the InputEnvelope flag in the :ref: `input-module`_  for special cases* ", "true "
+  "duplicateCheck",  "Boolean", "The flag points  if every envelope (an envelope key) has to be checked on duplication or not. (false by default) **Note**: You can indicate the 'duplicateCheck' field in the instance to set up a default policy for message checking on duplication. Use the 'InputEnvelope' flag in the :ref:`input-module`  for special cases* ", "true "
   "lookupHistory*", "Int", "How long an unique key of envelope will stay in a queue for checking envelopes on duplication (in seconds). If it is not 0, entries that are older than this time and not updated for this time are evicted automatically accordingly to an eviction-policy. Valid values are integers between 0 and Integer.MAX VALUE. Default value is 0, which means infinite.", "1000"
   "queueMaxSize*", "Int", "Maximum size of the queue that contains the unique keys of envelopes. When maximum size is reached, the queue is evicted based on the policy defined at default-eviction-policy (should be greater than 271)", "500"
   "defaultEvictionPolicy", "String", "Must be only 'LRU' (Least Recently Used), 'LFU' (Least Frequently Used) or 'NONE' (NONE by default)", "LRU" 

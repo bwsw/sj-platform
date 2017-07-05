@@ -1,13 +1,19 @@
 Stream Juggler Platform Overview
 ================================
 
+What is Stream Juggler?
+----------------------------
+
 Stream Juggler (SJ) is an open source, scalable solution for real-time and batched stream processing. The system fits for building a Complex Event Processing systems (CEP) and allows a developer to construct pipelines for analyzing data streams.
 
 **CEP** (Complex Event Processing) is a general concept describing software systems that are used for sophisticated processing of streams of events.
 
 A **stream** is unbounded series of events organized in the chronological way.
 
-In sophisticated processing an algorithm can overview series of events to find dependencies, correlations, trends, etc. rather than just one event in a time
+In sophisticated processing an algorithm can overview series of events to find dependencies, correlations, trends, etc. rather than just one event in a time.
+
+What can Stream Juggler Do?
+-------------------------------
 
 Streams can be very intensive and all events can not be handled by a single server of arbitrary performance. The system allows **scaling** the computations horizontally to handle increasing demands. Infrastructure scalability of the platform is handled by `Apache Mesos <http://mesos.apache.org/>`_ –  a well-known and production-ready ecosystem which represents clusters as a single supercomputer with a pool of resources.
 
@@ -23,11 +29,11 @@ Thus, Stream Juggler is a platform that enables high-throughput, fault-tolerant 
 
 In general, the main ideas of the Stream Juggler platform are:
 
+- Two ways of data processing: streaming and batch
 - Strict exactly-once processing on arbitrary processing graph
 - Ability to build sophisticated processing graphs
 - Ready-to-use components which can be reused in different pipelines
 - Ability to decompose the task on small processing pieces and develop, upgrade and maintain them separately
-- Ready-to-use system (not constructor). 
 - Integrated REST and UI for DevOps
 - Integrated performance metrics
 - Able to scale horizontally to thousands of nodes

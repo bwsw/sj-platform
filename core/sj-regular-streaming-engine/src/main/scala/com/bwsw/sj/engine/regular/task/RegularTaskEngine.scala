@@ -58,6 +58,7 @@ abstract class RegularTaskEngine(manager: CommonTaskManager,
     CallableCheckpointTaskInput[AnyRef](manager, blockingQueue, checkpointGroup, executor)
       .asInstanceOf[CallableCheckpointTaskInput[Envelope]]
   private val moduleTimer: SjTimer = moduleService.moduleTimer
+  protected val checkpointInterval: Long = instance.checkpointInterval
 
   /**
     * It is in charge of running a basic execution logic of regular task engine

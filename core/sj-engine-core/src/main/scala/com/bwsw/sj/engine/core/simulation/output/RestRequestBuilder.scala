@@ -20,6 +20,7 @@ package com.bwsw.sj.engine.core.simulation.output
 
 import java.net.URI
 
+import com.bwsw.sj.common.SjModule
 import com.bwsw.sj.common.engine.core.entities.{OutputEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.output.types.rest.RestCommandBuilder
 import org.eclipse.jetty.client.HttpClient
@@ -33,7 +34,7 @@ import org.eclipse.jetty.client.api.Request
   */
 class RestRequestBuilder(url: URI = RestRequestBuilder.defaultUrl) extends OutputRequestBuilder[Request] {
 
-  override protected val commandBuilder = new RestCommandBuilder(transactionFieldName)
+  override protected val commandBuilder = new RestCommandBuilder(transactionFieldName)(SjModule.injector)
   private val client = new HttpClient
 
   /**
