@@ -68,6 +68,8 @@ class PartitionedOutputMock(producer: Producer,
       throw new IllegalArgumentException(s"'partition' must be non-negative and less that count of partitions in this " +
         s"output stream (partition = $partition, count of partitions = ${producer.stream.partitionsCount})")
   }
+
+  override def clear(): Unit = super.clear()
 }
 
 /**
@@ -94,6 +96,8 @@ class RoundRobinOutputMock(producer: Producer,
     if (currentPartition == producer.stream.partitionsCount)
       currentPartition = 0
   }
+
+  override def clear(): Unit = super.clear()
 }
 
 /**
