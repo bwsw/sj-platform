@@ -112,7 +112,8 @@ lazy val inputStreamingEngine = Project(id = "sj-input-streaming-engine",
   base = file("./core/sj-input-streaming-engine"))
   .settings(commonSettings: _*)
   .settings(
-    libraryDependencies ++= Dependencies.sjInputEngineDependencies.value
+    libraryDependencies ++= Dependencies.sjInputEngineDependencies.value,
+    libraryDependencies ++= Dependencies.sjTestDependencies.value
   )
   .dependsOn(engineCore)
 
