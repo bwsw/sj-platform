@@ -158,10 +158,11 @@ Example of the checking a state variable::
 ``<variable_value>`` can be any type (a user must be careful when casting a state variable value to a particular data type)
 
 2) "onMessage": 
-    It is invoked for every received message from one of the inputs that are defined within the instance. There are two possible data types of input sources - that's why there are two methods with appropriate signatures:
+    It is invoked for every received message from one of the inputs that are defined within the instance. There are two possible data types of input sources - that's why there are two methods with appropriate signatures::
+    
+``def onMessage(envelope: TStreamEnvelope[T]): Unit``
 
-  def onMessage(envelope: TStreamEnvelope[T]): Unit
-  def onMessage(envelope: KafkaEnvelope[T]): Unit
+``def onMessage(envelope: KafkaEnvelope[T]): Unit``
  
 Each envelope has a type parameter that defines the type of data in the envelope.
 
