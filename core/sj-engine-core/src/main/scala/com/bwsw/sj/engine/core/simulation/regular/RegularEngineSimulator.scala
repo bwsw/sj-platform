@@ -158,7 +158,7 @@ class RegularEngineSimulator[T <: AnyRef](executor: RegularStreamingExecutor[T],
   /**
     * Simulates behavior of [[com.bwsw.sj.common.engine.TaskEngine TaskEngine]] before checkpoint
     *
-    * @param isFullState indicates that the full state
+    * @param isFullState flag denotes that the full state(true) or partial changes of state(false) is going to be saved
     * @return output elements and state
     */
   def beforeCheckpoint(isFullState: Boolean): SimulationResult = {
@@ -171,7 +171,7 @@ class RegularEngineSimulator[T <: AnyRef](executor: RegularStreamingExecutor[T],
   /**
     * Simulates behavior of [[com.bwsw.sj.common.engine.TaskEngine TaskEngine]] after checkpoint
     *
-    * @param isFullState indicates that the full state
+    * @param isFullState flag denotes that there was saved the full state(true) or partial changes of state(false)
     * @return output elements and state
     */
   def afterCheckpoint(isFullState: Boolean): SimulationResult = {
