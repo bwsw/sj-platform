@@ -13,7 +13,7 @@ It includes an executor that processes data streams and a validator.
 
 - An executor of the module utilizes an instance/instances. An instance is a full range of settings for an exact module.
 
-An engine is required to start the module. A module can not process data streams without an engine (that is a .jar file) that launches the module and contains required configuration settings.
+An engine is required to start a module. A module can not process data streams without an engine (that is a .jar file containing required configuration settings) that launches the module ingesting raw data and sends the processed data further in the stream.
 
 The engine is getting started via a framework. 
 
