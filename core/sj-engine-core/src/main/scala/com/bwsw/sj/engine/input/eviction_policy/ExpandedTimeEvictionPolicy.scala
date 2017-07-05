@@ -39,11 +39,12 @@ class ExpandedTimeEvictionPolicy(hazelcast: HazelcastInterface) extends InputIns
     if (!uniqueEnvelopes.containsKey(key)) {
       logger.debug(s"The key: $key is not duplicate.")
       uniqueEnvelopes.set(key, stubValue)
+
       true
-    }
-    else {
+    } else {
       logger.debug(s"The key: $key is duplicate so update the TTL of key.")
       uniqueEnvelopes.set(key, stubValue)
+
       false
     }
   }

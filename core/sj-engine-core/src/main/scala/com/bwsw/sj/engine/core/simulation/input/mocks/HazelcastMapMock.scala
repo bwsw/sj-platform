@@ -51,16 +51,11 @@ abstract class HazelcastMapMock(config: HazelcastConfig) extends IMap[String, St
     map.contains(key.asInstanceOf[String])
   }
 
-  override def put(key: String, value: String): String = {
-    val oldValue = map.get(key)
-    val hits = oldValue.map(_.hits).getOrElse(0)
+  override def set(key: String, value: String): Unit = {
+    val hits = map.get(key).map(_.hits).getOrElse(0)
     map.put(key, HazelcastMapValue(value, hits + 1, System.currentTimeMillis))
     evict()
-    oldValue.map(_.value).orNull
   }
-
-  override def set(key: String, value: String): Unit =
-    put(key, value)
 
   /**
     * Performs eviction
@@ -248,6 +243,8 @@ abstract class HazelcastMapMock(config: HazelcastConfig) extends IMap[String, St
   override def getPartitionKey: String = ???
 
   override def getServiceName: String = ???
+
+  override def put(key: String, value: String): String = ???
 }
 
 object HazelcastMapMock {

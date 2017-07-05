@@ -38,11 +38,12 @@ class FixTimeEvictionPolicy(hazelcast: HazelcastInterface) extends InputInstance
     logger.debug(s"Check for duplicate a key: $key.")
     if (!uniqueEnvelopes.containsKey(key)) {
       logger.debug(s"The key: $key is not duplicate.")
-      uniqueEnvelopes.put(key, stubValue)
+      uniqueEnvelopes.set(key, stubValue)
+
       true
-    }
-    else {
+    } else {
       logger.debug(s"The key: $key is duplicate.")
+
       false
     }
   }

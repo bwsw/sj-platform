@@ -101,7 +101,7 @@ class RegexInputExecutorTests extends FlatSpec with Matchers with MockitoSugar {
   val serializer = new JsonSerializer
   val serializedOptions = serializer.serialize(options)
   val manager = new InputEnvironmentManager(serializedOptions, Array(outputStream1, outputStream2, fallbackStream))
-  val hazelcastConfig = HazelcastConfig(600, 1, 1, EngineLiterals.lruDefaultEvictionPolicy, 100)
+  val hazelcastConfig = HazelcastConfig(600, 1, 1, EngineLiterals.lruDefaultEvictionPolicy, 100, Seq("localhost"))
 
 
   "RegexInputExecutor" should "handle correct input data properly" in new TestPreparation {
