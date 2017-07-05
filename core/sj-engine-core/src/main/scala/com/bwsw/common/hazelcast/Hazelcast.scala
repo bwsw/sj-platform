@@ -19,10 +19,8 @@
 package com.bwsw.common.hazelcast
 
 import com.bwsw.sj.common.utils.EngineLiterals
-import com.bwsw.sj.engine.input.config.InputEngineConfigNames
 import com.hazelcast.config._
 import com.hazelcast.core.{HazelcastInstance, IMap, Hazelcast => OriginalHazelcast}
-import com.typesafe.config.ConfigFactory
 import org.slf4j.{Logger, LoggerFactory}
 
 import scala.collection.JavaConverters._
@@ -89,8 +87,7 @@ class Hazelcast(mapName: String, configParams: HazelcastConfig) extends Hazelcas
   private def createTcpIpConfig(): TcpIpConfig = {
     logger.debug("Create a hazelcast tcp/ip config.")
     val tcpIpConfig = new TcpIpConfig()
-    val config = ConfigFactory.load()
-    val hosts = config.getString(InputEngineConfigNames.hosts).split(",").toList.asJava
+    val hosts = configParams.tcpIpMembers.asJava
     tcpIpConfig.setMembers(hosts).setEnabled(true)
   }
 

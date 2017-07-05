@@ -27,4 +27,5 @@ case class HazelcastConfig(ttlSeconds: Int,
                            asyncBackupCount: Int,
                            backupCount: Int,
                            evictionPolicy: String,
-                           maxSize: Int)
+                           maxSize: Int,
+                           tcpIpMembers: Seq[String])
