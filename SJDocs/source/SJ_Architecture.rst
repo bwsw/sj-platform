@@ -62,7 +62,7 @@ Every component deployed to the Stream Juggler platform contributes to the main 
 - Velocity 
     Stream Juggler is the solution for real-time processing that means the system can handle events as soon as they are available inside the system without specific delay
     
-- Veriety 
-    The platform components are ready-to-use and can be reorganized in different pipelines. Besides, the system  is compatible with diferent types of data sources, data storages, services and systems. 
+- Variety 
+    The platform components are ready-to-use and can be reorganized in various pipelines. Besides, the system  is compatible with different types of data sources, data storages, services and systems. 
     
     
