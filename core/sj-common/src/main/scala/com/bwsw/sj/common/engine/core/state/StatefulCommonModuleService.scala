@@ -18,7 +18,7 @@
  */
 package com.bwsw.sj.common.engine.core.state
 
-import com.bwsw.sj.common.dal.model.stream.StreamDomain
+import com.bwsw.sj.common.dal.model.stream.{StreamDomain, TStreamStreamDomain}
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
 import com.bwsw.sj.common.engine.core.environment.StatefulModuleEnvironmentManager
 import com.bwsw.sj.common.engine.core.managment.CommonTaskManager
@@ -26,7 +26,10 @@ import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
 import com.bwsw.sj.common.engine.{StateHandlers, StreamingExecutor}
 import com.bwsw.sj.common.si.model.instance.{BatchInstance, RegularInstance}
 import com.bwsw.sj.common.utils.EngineLiterals
+import com.bwsw.tstreams.agents.consumer.Consumer
+import com.bwsw.tstreams.agents.consumer.Offset.Oldest
 import com.bwsw.tstreams.agents.group.CheckpointGroup
+import com.bwsw.tstreams.agents.producer.Producer
 import scaldi.Injectable.inject
 import scaldi.Injector
 
@@ -48,7 +51,23 @@ class StatefulCommonModuleService(manager: CommonTaskManager,
 
   private val streamService: GenericMongoRepository[StreamDomain] = inject[ConnectionRepository].getStreamRepository
   private var countOfCheckpoints: Int = 1
-  private val stateService: RAMStateService = new RAMStateService(manager, checkpointGroup)
+  private val stateService: RAMStateService = createStateService()
+  private val stateFullCheckpoint: Int = {
+    instance match {
+      case regularInstance: RegularInstance => regularInstance.stateFullCheckpoint
+      case batchInstance: BatchInstance => batchInstance.stateFullCheckpoint
+    }
+  }
+
+  private def createStateService() = {
+    val stateStream = createStateStream()
+    val stateProducer = createStateProducer(stateStream)
+    val stateConsumer = createStateConsumer(stateStream)
+    val stateLoader = new StateLoader(stateConsumer)
+    val stateSaver = new StateSaver(stateProducer)
+
+    new RAMStateService(stateSaver, stateLoader)
+  }
 
   val environmentManager = new StatefulModuleEnvironmentManager(
     new StateStorage(stateService),
@@ -67,7 +86,7 @@ class StatefulCommonModuleService(manager: CommonTaskManager,
     * Does group checkpoint of t-streams state consumers/producers
     */
   override def doCheckpoint(): Unit = {
-    if (countOfCheckpoints != getStateFullCheckpoint()) {
+    if (countOfCheckpoints != stateFullCheckpoint) {
       doCheckpointOfPartOfState()
     } else {
       doCheckpointOfFullState()
@@ -101,10 +120,42 @@ class StatefulCommonModuleService(manager: CommonTaskManager,
     countOfCheckpoints = 1
   }
 
-  private def getStateFullCheckpoint(): Int = {
-    instance match {
-      case regularInstance: RegularInstance => regularInstance.stateFullCheckpoint
-      case batchInstance: BatchInstance => batchInstance.stateFullCheckpoint
-    }
+  /**
+    * Creates [[TStreamStreamDomain]] to keep a module state
+    */
+  private def createStateStream(): TStreamStreamDomain = {
+    logger.debug(s"Task name: ${manager.taskName} " +
+      s"Get stream for keeping state of module.")
+
+    val description = "store state of module"
+    val tags = Array("state")
+    val partitions = 1
+    val stateStreamName = manager.taskName + "_state"
+
+    manager.createStorageStream(stateStreamName, description, partitions)
+    manager.getStream(stateStreamName, description, tags, partitions)
+  }
+
+  /**
+    * Create a state producer and adds it to checkpoint group
+    */
+  private def createStateProducer(stateStream: TStreamStreamDomain): Producer = {
+    val stateProducer = manager.createProducer(stateStream)
+    checkpointGroup.add(stateProducer)
+
+    stateProducer
+  }
+
+  /**
+    * Create a state consumer and adds it to checkpoint group
+    */
+  private def createStateConsumer(stateStream: TStreamStreamDomain): Consumer = {
+    val partition = 0
+    val stateConsumer = manager.createConsumer(stateStream, List(partition, partition), Oldest)
+    stateConsumer.start()
+
+    checkpointGroup.add(stateConsumer)
+
+    stateConsumer
   }
 }

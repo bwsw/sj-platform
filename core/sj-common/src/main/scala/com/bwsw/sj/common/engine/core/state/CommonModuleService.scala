@@ -82,8 +82,8 @@ object CommonModuleService {
       case batchInstance: BatchInstance =>
         batchInstance.stateManagement
       case _ =>
-        logger.error("CommonModuleService can be used only for ${EngineLiterals.regularStreamingType} or ${EngineLiterals.batchStreamingType} engine.")
-        throw new RuntimeException("CommonModuleService can be used only for ${EngineLiterals.regularStreamingType} or ${EngineLiterals.batchStreamingType} engine.")
+        logger.error(s"CommonModuleService can be used only for ${EngineLiterals.regularStreamingType} or ${EngineLiterals.batchStreamingType} engine.")
+        throw new RuntimeException(s"CommonModuleService can be used only for ${EngineLiterals.regularStreamingType} or ${EngineLiterals.batchStreamingType} engine.")
     }
 
     stateManagement match {

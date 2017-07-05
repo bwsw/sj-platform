@@ -20,6 +20,7 @@ package com.bwsw.sj.common.engine.core.environment
 
 import com.bwsw.sj.common.dal.model.instance.InstanceDomain
 import com.bwsw.sj.common.dal.model.stream.StreamDomain
+import com.bwsw.sj.common.engine.core.environment.EnvironmentLiterals.{partitionedOutput, roundRobinOutput}
 import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
 import com.bwsw.sj.common.engine.core.state.StateStorage
 import com.bwsw.sj.common.utils.{EngineLiterals, SjTimer}
@@ -58,24 +59,26 @@ class ModuleEnvironmentManager(options: String,
     */
   def getPartitionedOutput(streamName: String)(implicit serialize: AnyRef => Array[Byte]): PartitionedOutput = {
     logger.info(s"Get partitioned output for stream: $streamName\n")
-    if (producers.contains(streamName)) {
-      if (producerPolicyByOutput.contains(streamName)) {
-        if (producerPolicyByOutput(streamName)._1 == "partitioned") {
-          producerPolicyByOutput(streamName)._2.asInstanceOf[PartitionedOutput]
-        }
-        else {
-          logger.error(s"For output stream: $streamName partitioned output is set")
-          throw new Exception(s"For output stream: $streamName partitioned output is set")
-        }
-      } else {
-        producerPolicyByOutput(streamName) = ("partitioned",
-          new PartitionedOutput(producers(streamName), performanceMetrics))
+    producers.get(streamName) match {
+      case Some(producer) =>
+        producerPolicyByOutput.get(streamName) match {
+          case Some((`partitionedOutput`, moduleOutput: PartitionedOutput)) =>
+            moduleOutput
 
-        producerPolicyByOutput(streamName)._2.asInstanceOf[PartitionedOutput]
-      }
-    } else {
-      logger.error(s"There is no output for name $streamName")
-      throw new IllegalArgumentException(s"There is no output for name $streamName")
+          case Some(_) =>
+            logger.error(s"For output stream: $streamName partitioned output is set")
+            throw new Exception(s"For output stream: $streamName partitioned output is set")
+
+          case None =>
+            producerPolicyByOutput(streamName) = (partitionedOutput, createPartitionedOutput(producer))
+
+            producerPolicyByOutput(streamName)._2.asInstanceOf[PartitionedOutput]
+        }
+
+      case None =>
+        logger.error(s"There is no output for name $streamName")
+        throw new IllegalArgumentException(s"There is no output for name $streamName")
+
     }
   }
 
@@ -87,24 +90,26 @@ class ModuleEnvironmentManager(options: String,
     */
   def getRoundRobinOutput(streamName: String)(implicit serialize: AnyRef => Array[Byte]): RoundRobinOutput = {
     logger.info(s"Get round-robin output for stream: $streamName\n")
-    if (producers.contains(streamName)) {
-      if (producerPolicyByOutput.contains(streamName)) {
-        if (producerPolicyByOutput(streamName)._1 == "round-robin") {
-          producerPolicyByOutput(streamName)._2.asInstanceOf[RoundRobinOutput]
-        }
-        else {
-          logger.error(s"For output stream: $streamName partitioned output is set")
-          throw new Exception(s"For output stream: $streamName partitioned output is set")
-        }
-      } else {
-        producerPolicyByOutput(streamName) = ("round-robin",
-          new RoundRobinOutput(producers(streamName), performanceMetrics))
+    producers.get(streamName) match {
+      case Some(producer) =>
+        producerPolicyByOutput.get(streamName) match {
+          case Some((`roundRobinOutput`, moduleOutput: RoundRobinOutput)) =>
+            moduleOutput
 
-        producerPolicyByOutput(streamName)._2.asInstanceOf[RoundRobinOutput]
-      }
-    } else {
-      logger.error(s"There is no output for name $streamName")
-      throw new IllegalArgumentException(s"There is no output for name $streamName")
+          case Some(_) =>
+            logger.error(s"For output stream: $streamName partitioned output is set")
+            throw new Exception(s"For output stream: $streamName partitioned output is set")
+
+          case None =>
+            producerPolicyByOutput(streamName) = (roundRobinOutput, createRoundRobinOutput(producer))
+
+            producerPolicyByOutput(streamName)._2.asInstanceOf[RoundRobinOutput]
+        }
+
+      case None =>
+        logger.error(s"There is no output for name $streamName")
+        throw new IllegalArgumentException(s"There is no output for name $streamName")
+
     }
   }
 
@@ -124,6 +129,12 @@ class ModuleEnvironmentManager(options: String,
     logger.error("Module has no state")
     throw new Exception("Module has no state")
   }
+
+  protected def createPartitionedOutput(producer: Producer)
+                                       (implicit serialize: AnyRef => Array[Byte]): PartitionedOutput =
+    new PartitionedOutput(producer, performanceMetrics)
+
+  protected def createRoundRobinOutput(producer: Producer)
+                                      (implicit serialize: AnyRef => Array[Byte]): RoundRobinOutput =
+    new RoundRobinOutput(producer, performanceMetrics)
 }
-
-

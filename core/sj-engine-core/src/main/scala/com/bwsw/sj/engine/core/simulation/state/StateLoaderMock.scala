@@ -16,25 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.sj.common.engine
+package com.bwsw.sj.engine.core.simulation.state
+
+import com.bwsw.sj.common.engine.core.state.StateLoaderInterface
+
+import scala.collection.mutable
 
 /**
-  * Provides methods for handle events (before and after state saving) in a stateful module
+  * Mock for [[StateLoaderInterface]]
+  *
+  * @param lastState last state
+  * @author Pavel Tomskikh
   */
-
-trait StateHandlers {
-
-  /**
-    * Handler triggered before saving of the state
-    *
-    * @param isFullState flag denotes that the full state(true) or partial changes of state(false) is going to be saved
-    */
-  def onBeforeStateSave(isFullState: Boolean): Unit = {}
+class StateLoaderMock(lastState: mutable.Map[String, Any] = mutable.Map.empty)
+  extends StateLoaderInterface {
 
   /**
-    * Handler triggered after saving of the state
-    *
-    * @param isFullState flag denotes that there was saved the full state(true) or partial changes of state(false)
+    * @inheritdoc
     */
-  def onAfterStateSave(isFullState: Boolean): Unit = {}
+  override def loadLastState(): (Option[Long], mutable.Map[String, Any]) = (None, lastState)
 }

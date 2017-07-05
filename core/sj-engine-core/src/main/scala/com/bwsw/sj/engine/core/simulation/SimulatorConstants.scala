@@ -16,25 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.sj.common.engine
+package com.bwsw.sj.engine.core.simulation
 
-/**
-  * Provides methods for handle events (before and after state saving) in a stateful module
-  */
-
-trait StateHandlers {
-
-  /**
-    * Handler triggered before saving of the state
-    *
-    * @param isFullState flag denotes that the full state(true) or partial changes of state(false) is going to be saved
-    */
-  def onBeforeStateSave(isFullState: Boolean): Unit = {}
-
-  /**
-    * Handler triggered after saving of the state
-    *
-    * @param isFullState flag denotes that there was saved the full state(true) or partial changes of state(false)
-    */
-  def onAfterStateSave(isFullState: Boolean): Unit = {}
+object SimulatorConstants {
+  val defaultConsumerName = "default-consumer-name"
+  val defaultInputStream = "default-input-stream"
 }
