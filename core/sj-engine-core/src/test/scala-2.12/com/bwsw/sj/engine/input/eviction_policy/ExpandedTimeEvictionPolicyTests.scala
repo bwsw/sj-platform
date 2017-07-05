@@ -43,7 +43,7 @@ class ExpandedTimeEvictionPolicyTests
   val tcpIpMembers = Seq("localhost")
   val hazelcastConfig = HazelcastConfig(ttlSeconds, asyncBackupCount, backupCount, evictionPolicy, maxSize, tcpIpMembers)
 
-  val mapName = "FixTimeEvictionPolicyTestMap"
+  val mapName = "ExpandedTimeEvictionPolicyTestMap"
   val hazelcast = new Hazelcast(mapName, hazelcastConfig)
   val hazelcastMap = hazelcast.getMap
 
