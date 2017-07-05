@@ -36,34 +36,33 @@ import scala.collection.mutable
   * val stateService = new RAMStateService(stateSaver, stateLoader)
   * val stateStorage = new StateStorage(stateService)
   * val options = ""
-  * val output = new TStreamStreamDomain("out", mock(classOf[TStreamServiceDomain]), 1, tags = Array("output"))
+  * val output = new TStreamStreamDomain("out", mock(classOf[TStreamServiceDomain]), 3, tags = Array("output"))
   * val manager = new ModuleEnvironmentManagerMock(stateStorage, options, Array(output))
   * val executor: RegularStreamingExecutor[String] = new MyExecutor(manager)
-  * val checkpointInterval = 3
   * val tstreamInput = "t-stream-input"
   * val kafkaInput = "kafka-input"
   *
-  * val simulator = new RegularEngineSimulator(executor, manager, checkpointInterval)
-  * simulator.prepareState(Map("var1" -> 1, "var2" -> 2))
-  * simulator.prepareTstream(Seq("a", "b", "c"), tstreamInput)
-  * simulator.prepareKafka(Seq("d", "e"), kafkaInput)
-  * val results = simulator.process()
+  * val simulator = new RegularEngineSimulator(executor, manager)
+  * simulator.prepareState(Map("idleCalls" -> 0, "symbols" -> 0))
+  * simulator.prepareTstream(Seq("ab", "c", "de"), tstreamInput)
+  * simulator.prepareKafka(Seq("fgh", "g"), kafkaInput)
+  * simulator.prepareTstream(Seq("ijk", "lm"), tstreamInput)
+  *
+  * val envelopesNumberBeforeIdle = 2
+  * val results = simulator.process(envelopesNumberBeforeIdle)
   * println(results)
   * }}}
   *
-  * @param executor           implementation of [[RegularStreamingExecutor]] under test
-  * @param manager            environment manager that used by executor
-  * @param checkpointInterval number of envelopes before between checkpoints
+  * @param executor implementation of [[RegularStreamingExecutor]] under test
+  * @param manager  environment manager that used by executor
   * @tparam T type of incoming data
   * @author Pavel Tomskikh
   */
 class RegularEngineSimulator[T <: AnyRef](executor: RegularStreamingExecutor[T],
-                                          manager: ModuleEnvironmentManagerMock,
-                                          checkpointInterval: Long) {
+                                          manager: ModuleEnvironmentManagerMock) {
 
   private var transactionID: Long = 0
   private val inputEnvelopes: mutable.Buffer[Envelope] = mutable.Buffer.empty
-  private var envelopesWithoutCheckpoint: Long = 0
 
   /**
     * Load state in state storage
@@ -123,41 +122,37 @@ class RegularEngineSimulator[T <: AnyRef](executor: RegularStreamingExecutor[T],
     entities.map(prepareKafka(_, stream))
 
   /**
-    * Sends all incoming envelopes from local buffer to [[executor]] and builds simulation results
+    * Sends all incoming envelopes from local buffer to [[executor]] and returns output elements and state
     *
-    * @param clearBuffer indicates that local buffer must be cleared
-    * @return collection of simulation results
+    * @param envelopesNumberBeforeIdle number of envelopes between invocations of [[executor.onIdle()]].
+    *                                  '0' means that [[executor.onIdle()]] will never be called.
+    * @param clearBuffer               indicates that local buffer must be cleared
+    * @return output elements and state
     */
-  def process(clearBuffer: Boolean = true): mutable.Buffer[SimulationResult] = {
-    val results = inputEnvelopes.map { envelope =>
+  def process(envelopesNumberBeforeIdle: Int = 0, clearBuffer: Boolean = true): SimulationResult = {
+    var envelopesAfterIdle: Int = 0
+
+    inputEnvelopes.foreach { envelope =>
       envelope match {
         case tStreamEnvelope: TStreamEnvelope[T] =>
           executor.onMessage(tStreamEnvelope)
         case kafkaEnvelope: KafkaEnvelope[T] =>
           executor.onMessage(kafkaEnvelope)
       }
-      val state = manager.getState.getAll
 
-      if (envelopesWithoutCheckpoint == checkpointInterval || manager.isCheckpointInitiated) {
-        executor.onBeforeCheckpoint()
-        executor.onAfterCheckpoint()
-        envelopesWithoutCheckpoint = 0
-      } else
-        envelopesWithoutCheckpoint += 1
 
-      val outputElements = manager.producerPolicyByOutput.mapValues {
-        case (_, moduleOutput: ModuleOutputMockHelper) =>
-          moduleOutput.readOutputElements()
-        case _ =>
-          throw new IllegalStateException("Incorrect outputs")
-      }.filter(_._2.nonEmpty)
-
-      SimulationResult(envelope.id, outputElements, state)
+      if (envelopesNumberBeforeIdle > 0) {
+        envelopesAfterIdle += 1
+        if (envelopesAfterIdle == envelopesNumberBeforeIdle) {
+          executor.onIdle()
+          envelopesAfterIdle = 0
+        }
+      }
     }
 
     if (clearBuffer) clear()
 
-    results
+    simulationResult()
   }
 
   /**
@@ -165,14 +160,24 @@ class RegularEngineSimulator[T <: AnyRef](executor: RegularStreamingExecutor[T],
     */
   def clear(): Unit =
     inputEnvelopes.clear()
+
+
+  private def simulationResult(): SimulationResult = {
+    val outputElements = manager.producerPolicyByOutput.mapValues {
+      case (_, moduleOutput: ModuleOutputMockHelper) =>
+        moduleOutput.readOutputElements()
+      case _ =>
+        throw new IllegalStateException("Incorrect outputs")
+    }.filter(_._2.nonEmpty)
+
+    SimulationResult(outputElements, manager.getState.getAll)
+  }
 }
 
 /**
-  * Contains results of simulation
+  * Contains output elements and state
   *
-  * @param transactionId  ID of incoming transaction
   * @param outputElements outgoing entities
   */
-case class SimulationResult(transactionId: Long,
-                            outputElements: collection.Map[String, mutable.Buffer[OutputElement]],
+case class SimulationResult(outputElements: collection.Map[String, mutable.Buffer[OutputElement]],
                             state: Map[String, Any])
