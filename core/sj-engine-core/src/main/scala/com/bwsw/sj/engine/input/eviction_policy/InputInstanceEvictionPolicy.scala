@@ -50,6 +50,7 @@ abstract class InputInstanceEvictionPolicy(hazelcast: HazelcastInterface) {
     */
   def getUniqueEnvelopes: IMap[String, String] = {
     logger.debug(s"Get a hazelcast map for checking of there are duplicates (input envelopes) or not.")
+
     hazelcast.getMap
   }
 }
