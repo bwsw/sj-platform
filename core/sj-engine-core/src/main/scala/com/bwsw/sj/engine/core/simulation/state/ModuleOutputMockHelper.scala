@@ -82,9 +82,8 @@ class RoundRobinOutputMock(producer: Producer,
     */
   override def put(data: AnyRef): Unit = {
     outputElements += OutputElement(data, currentPartition)
-    if (currentPartition < producer.stream.partitionsCount)
-      currentPartition += 1
-    else
+    currentPartition += 1
+    if (currentPartition == producer.stream.partitionsCount)
       currentPartition = 0
   }
 }
