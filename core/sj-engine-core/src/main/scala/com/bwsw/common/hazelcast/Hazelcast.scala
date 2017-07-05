@@ -44,6 +44,12 @@ class Hazelcast(mapName: String, configParams: HazelcastConfig) extends Hazelcas
   override def getMap: IMap[String, String] =
     hazelcastInstance.getMap(mapName)
 
+  /**
+    * @inheritdoc
+    */
+  override def shutdown(): Unit =
+    hazelcastInstance.shutdown()
+
   private def createConfig(mapName: String): Config = {
     logger.debug(s"Create a hazelcast cluster configuration with map '$mapName'.")
     val config = new XmlConfigBuilder().build()
