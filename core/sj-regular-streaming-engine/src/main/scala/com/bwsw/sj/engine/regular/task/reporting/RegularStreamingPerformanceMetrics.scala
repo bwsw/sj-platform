@@ -41,8 +41,8 @@ class RegularStreamingPerformanceMetrics(manager: CommonTaskManager)
   private val inputStreamNames: Array[String] = manager.inputs.map(_._1.name).toArray
   private val outputStreamNames: Array[String] = manager.instance.outputs
 
-  override protected var inputEnvelopesPerStream: mutable.Map[String, ListBuffer[List[Int]]] = createStorageForInputEnvelopes(inputStreamNames)
-  override protected var outputEnvelopesPerStream: mutable.Map[String, mutable.Map[String, ListBuffer[Int]]] = createStorageForOutputEnvelopes(outputStreamNames)
+  override protected var inputEnvelopesPerStream: mutable.Map[String, ListBuffer[List[Long]]] = createStorageForInputEnvelopes(inputStreamNames)
+  override protected var outputEnvelopesPerStream: mutable.Map[String, mutable.Map[String, ListBuffer[Long]]] = createStorageForOutputEnvelopes(outputStreamNames)
 
   /**
     * Increases time when there are no messages (envelopes)
@@ -107,8 +107,8 @@ class RegularStreamingPerformanceMetrics(manager: CommonTaskManager)
 
   override def clear(): Unit = {
     logger.debug(s"Reset variables for performance report for next reporting.")
-    inputEnvelopesPerStream = mutable.Map(inputStreamNames.map(x => (x, mutable.ListBuffer[List[Int]]())): _*)
-    outputEnvelopesPerStream = mutable.Map(outputStreamNames.map(x => (x, mutable.Map[String, mutable.ListBuffer[Int]]())): _*)
+    inputEnvelopesPerStream = mutable.Map(inputStreamNames.map(x => (x, mutable.ListBuffer[List[Long]]())): _*)
+    outputEnvelopesPerStream = mutable.Map(outputStreamNames.map(x => (x, mutable.Map[String, mutable.ListBuffer[Long]]())): _*)
     totalIdleTime = 0L
   }
 }

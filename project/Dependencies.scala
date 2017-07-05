@@ -62,7 +62,8 @@ object Dependencies {
     ("org.everit.json" % "org.everit.json.schema" % "1.4.1")
       .exclude("commons-logging", "commons-logging"),
     "org.scaldi" %% "scaldi" % "0.5.8",
-    "org.mock-server" % "mockserver-netty" % "3.10.8" % "test"
+    "org.mock-server" % "mockserver-netty" % "3.10.8" % "test",
+    "com.carrotsearch" % "java-sizeof" % "0.0.5"
   ))
 
   lazy val sjEngineCoreDependencies = Def.setting(Seq(

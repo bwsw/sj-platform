@@ -42,8 +42,8 @@ class InputStreamingPerformanceMetrics(manager: InputTaskManager)
   private val inputStreamName: String = manager.agentsHost + ":" + manager.entryPort
   private val outputStreamNames: Array[String] = instance.outputs
 
-  override protected var inputEnvelopesPerStream: mutable.Map[String, ListBuffer[List[Int]]] = createStorageForInputEnvelopes(Array(inputStreamName))
-  override protected var outputEnvelopesPerStream: mutable.Map[String, mutable.Map[String, ListBuffer[Int]]] = createStorageForOutputEnvelopes(outputStreamNames)
+  override protected var inputEnvelopesPerStream: mutable.Map[String, ListBuffer[List[Long]]] = createStorageForInputEnvelopes(Array(inputStreamName))
+  override protected var outputEnvelopesPerStream: mutable.Map[String, mutable.Map[String, ListBuffer[Long]]] = createStorageForOutputEnvelopes(outputStreamNames)
 
   /**
     * Invokes when a new envelope from the input stream is received
@@ -100,7 +100,7 @@ class InputStreamingPerformanceMetrics(manager: InputTaskManager)
 
   override def clear(): Unit = {
     logger.debug(s"Reset variables of performance report for next reporting.")
-    inputEnvelopesPerStream = mutable.Map(inputStreamName -> mutable.ListBuffer[List[Int]]())
-    outputEnvelopesPerStream = mutable.Map(outputStreamNames.map(x => (x, mutable.Map[String, mutable.ListBuffer[Int]]())): _*)
+    inputEnvelopesPerStream = mutable.Map(inputStreamName -> mutable.ListBuffer[List[Long]]())
+    outputEnvelopesPerStream = mutable.Map(outputStreamNames.map(x => (x, mutable.Map[String, mutable.ListBuffer[Long]]())): _*)
   }
 }

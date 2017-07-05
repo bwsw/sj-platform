@@ -40,8 +40,8 @@ class OutputStreamingPerformanceMetrics(manager: OutputTaskManager)
   private val inputStreamNames: Array[String] = instance.getInputsWithoutStreamMode
   private val outputStreamNames: Array[String] = instance.outputs
 
-  override protected var inputEnvelopesPerStream: mutable.Map[String, ListBuffer[List[Int]]] = createStorageForInputEnvelopes(inputStreamNames)
-  override protected var outputEnvelopesPerStream: mutable.Map[String, mutable.Map[String, ListBuffer[Int]]] = createStorageForOutputEnvelopes(outputStreamNames)
+  override protected var inputEnvelopesPerStream: mutable.Map[String, ListBuffer[List[Long]]] = createStorageForInputEnvelopes(inputStreamNames)
+  override protected var outputEnvelopesPerStream: mutable.Map[String, mutable.Map[String, ListBuffer[Long]]] = createStorageForOutputEnvelopes(outputStreamNames)
 
   /**
     * Constructs a report of performance metrics of task work (one module could have multiple tasks)
@@ -86,7 +86,7 @@ class OutputStreamingPerformanceMetrics(manager: OutputTaskManager)
 
   override def clear(): Unit = {
     logger.debug(s"Reset variables for performance report for next reporting.")
-    inputEnvelopesPerStream = mutable.Map(inputStreamNames.head -> mutable.ListBuffer[List[Int]]())
-    outputEnvelopesPerStream = mutable.Map(outputStreamNames.head -> mutable.Map[String, mutable.ListBuffer[Int]]())
+    inputEnvelopesPerStream = mutable.Map(inputStreamNames.head -> mutable.ListBuffer[List[Long]]())
+    outputEnvelopesPerStream = mutable.Map(outputStreamNames.head -> mutable.Map[String, mutable.ListBuffer[Long]]())
   }
 }

@@ -18,10 +18,10 @@
  */
 package com.bwsw.common
 
-object ObjectSizeFetcher {
-  private val serializer = new ObjectSerializer()
+import com.carrotsearch.sizeof.RamUsageEstimator
 
-  def getObjectSize(anyRef: AnyRef): Int = {
-    serializer.serialize(anyRef).length
+object ObjectSizeFetcher {
+  def getObjectSize(anyRef: AnyRef): Long = {
+    RamUsageEstimator.sizeOf(anyRef)
   }
 }

@@ -44,8 +44,8 @@ class BatchStreamingPerformanceMetrics(manager: CommonTaskManager)
   private val inputStreamNames: Array[String] = manager.inputs.map(_._1.name).toArray
   private val outputStreamNames: Array[String] = batchInstance.outputs
 
-  override protected var inputEnvelopesPerStream: mutable.Map[String, ListBuffer[List[Int]]] = createStorageForInputEnvelopes(inputStreamNames)
-  override protected var outputEnvelopesPerStream: mutable.Map[String, mutable.Map[String, ListBuffer[Int]]] = createStorageForOutputEnvelopes(outputStreamNames)
+  override protected var inputEnvelopesPerStream: mutable.Map[String, ListBuffer[List[Long]]] = createStorageForInputEnvelopes(inputStreamNames)
+  override protected var outputEnvelopesPerStream: mutable.Map[String, mutable.Map[String, ListBuffer[Long]]] = createStorageForOutputEnvelopes(outputStreamNames)
 
   private var batchesPerStream: mutable.Map[String, ListBuffer[Int]] = createStorageForBatches()
   private var windowsPerStream: mutable.Map[String, Int] = createStorageForWindows()
@@ -123,8 +123,8 @@ class BatchStreamingPerformanceMetrics(manager: CommonTaskManager)
 
   override def clear(): Unit = {
     logger.debug(s"Reset variables for performance report for next reporting.")
-    inputEnvelopesPerStream = mutable.Map(inputStreamNames.map(x => (x, mutable.ListBuffer[List[Int]]())): _*)
-    outputEnvelopesPerStream = mutable.Map(outputStreamNames.map(x => (x, mutable.Map[String, mutable.ListBuffer[Int]]())): _*)
+    inputEnvelopesPerStream = mutable.Map(inputStreamNames.map(x => (x, mutable.ListBuffer[List[Long]]())): _*)
+    outputEnvelopesPerStream = mutable.Map(outputStreamNames.map(x => (x, mutable.Map[String, mutable.ListBuffer[Long]]())): _*)
     batchesPerStream = createStorageForBatches()
     windowsPerStream = createStorageForWindows()
     totalIdleTime = 0L

@@ -45,8 +45,8 @@ abstract class PerformanceMetrics(manager: TaskManager) extends Callable[Unit] {
   protected val mutex: ReentrantLock = new ReentrantLock(true)
   protected val reportSerializer: JsonSerializer = new JsonSerializer()
   protected val startTime: Long = System.currentTimeMillis()
-  protected var inputEnvelopesPerStream: mutable.Map[String, ListBuffer[List[Int]]]
-  protected var outputEnvelopesPerStream: mutable.Map[String, mutable.Map[String, ListBuffer[Int]]]
+  protected var inputEnvelopesPerStream: mutable.Map[String, ListBuffer[List[Long]]]
+  protected var outputEnvelopesPerStream: mutable.Map[String, mutable.Map[String, ListBuffer[Long]]]
   protected val taskName: String = manager.taskName
   protected val instance: Instance = manager.instance
   private val reportingInterval: Long = instance.performanceReportingInterval
@@ -111,7 +111,7 @@ abstract class PerformanceMetrics(manager: TaskManager) extends Callable[Unit] {
     }
   }
 
-  protected def addEnvelopeToInputStream(name: String, elementsSize: List[Int]): Unit = {
+  protected def addEnvelopeToInputStream(name: String, elementsSize: List[Long]): Unit = {
     mutex.lock()
     logger.debug(s"Indicate that a new envelope is received from input stream: $name.")
     if (inputEnvelopesPerStream.contains(name)) {
@@ -130,7 +130,7 @@ abstract class PerformanceMetrics(manager: TaskManager) extends Callable[Unit] {
     * @param envelopeID  id of envelope of output stream
     * @param elementSize size of appended element
     */
-  def addElementToOutputEnvelope(name: String, envelopeID: String, elementSize: Int): Unit = {
+  def addElementToOutputEnvelope(name: String, envelopeID: String, elementSize: Long): Unit = {
     mutex.lock()
     logger.debug(s"Indicate that a new element is sent to txn: $envelopeID of output stream: $name.")
     if (outputEnvelopesPerStream.contains(name)) {
@@ -180,11 +180,11 @@ abstract class PerformanceMetrics(manager: TaskManager) extends Callable[Unit] {
     reportTxn.send(reportSerializerForTxn.serialize(report))
   }
 
-  protected def createStorageForInputEnvelopes(inputStreamNames: Array[String]): mutable.Map[String, ListBuffer[List[Int]]] = {
-    mutable.Map(inputStreamNames.map(x => (x, mutable.ListBuffer[List[Int]]())): _*)
+  protected def createStorageForInputEnvelopes(inputStreamNames: Array[String]): mutable.Map[String, ListBuffer[List[Long]]] = {
+    mutable.Map(inputStreamNames.map(x => (x, mutable.ListBuffer[List[Long]]())): _*)
   }
 
-  protected def createStorageForOutputEnvelopes(outputStreamNames: Array[String]): mutable.Map[String, mutable.Map[String, ListBuffer[Int]]] = {
-    mutable.Map(outputStreamNames.map(x => (x, mutable.Map[String, mutable.ListBuffer[Int]]())): _*)
+  protected def createStorageForOutputEnvelopes(outputStreamNames: Array[String]): mutable.Map[String, mutable.Map[String, ListBuffer[Long]]] = {
+    mutable.Map(outputStreamNames.map(x => (x, mutable.Map[String, mutable.ListBuffer[Long]]())): _*)
   }
 }

@@ -34,18 +34,18 @@ class PerformanceMetricsMetadata {
   var host: String = _
   @JsonProperty("total-input-envelopes") var totalInputEnvelopes: Int = 0
   @JsonProperty("total-input-elements") var totalInputElements: Int = 0
-  @JsonProperty("total-input-bytes") var totalInputBytes: Int = 0
+  @JsonProperty("total-input-bytes") var totalInputBytes: Long = 0
   @JsonProperty("average-size-input-envelope") var averageSizeInputEnvelope: Int = 0
   @JsonProperty("max-size-input-envelope") var maxSizeInputEnvelope: Int = 0
   @JsonProperty("min-size-input-envelope") var minSizeInputEnvelope: Int = 0
-  @JsonProperty("average-size-input-element") var averageSizeInputElement: Int = 0
+  @JsonProperty("average-size-input-element") var averageSizeInputElement: Long = 0
   @JsonProperty("total-output-envelopes") var totalOutputEnvelopes: Int = 0
   @JsonProperty("total-output-elements") var totalOutputElements: Int = 0
-  @JsonProperty("total-output-bytes") var totalOutputBytes: Int = 0
+  @JsonProperty("total-output-bytes") var totalOutputBytes: Long = 0
   @JsonProperty("average-size-output-envelope") var averageSizeOutputEnvelope: Int = 0
   @JsonProperty("max-size-output-envelope") var maxSizeOutputEnvelope: Int = 0
   @JsonProperty("min-size-output-envelope") var minSizeOutputEnvelope: Int = 0
-  @JsonProperty("average-size-output-element") var averageSizeOutputElement: Int = 0
+  @JsonProperty("average-size-output-element") var averageSizeOutputElement: Long = 0
   var uptime: Long = 0
 
   @JsonInclude(Include.NON_DEFAULT) @JsonProperty("total-idle-time") var totalIdleTime: Long = -1
