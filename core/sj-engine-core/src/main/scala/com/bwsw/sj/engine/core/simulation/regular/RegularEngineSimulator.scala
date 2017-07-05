@@ -156,6 +156,32 @@ class RegularEngineSimulator[T <: AnyRef](executor: RegularStreamingExecutor[T],
   }
 
   /**
+    * Simulates behavior of [[com.bwsw.sj.common.engine.TaskEngine TaskEngine]] before checkpoint
+    *
+    * @param isFullState indicates that the full state
+    * @return output elements and state
+    */
+  def beforeCheckpoint(isFullState: Boolean): SimulationResult = {
+    executor.onBeforeCheckpoint()
+    executor.onBeforeStateSave(isFullState)
+
+    simulationResult()
+  }
+
+  /**
+    * Simulates behavior of [[com.bwsw.sj.common.engine.TaskEngine TaskEngine]] after checkpoint
+    *
+    * @param isFullState indicates that the full state
+    * @return output elements and state
+    */
+  def afterCheckpoint(isFullState: Boolean): SimulationResult = {
+    executor.onAfterCheckpoint()
+    executor.onAfterStateSave(isFullState)
+
+    simulationResult()
+  }
+
+  /**
     * Removes all envelopes from local buffer
     */
   def clear(): Unit =
