@@ -58,8 +58,13 @@ class PartitionedOutputMock(producer: Producer,
   /**
     * Stores data in [[outputElements]]
     */
-  override def put(data: AnyRef, partition: Int): Unit =
-    outputElements += OutputElement(data, partition)
+  override def put(data: AnyRef, partition: Int): Unit = {
+    if (partition >= 0 && partition < producer.stream.partitionsCount)
+      outputElements += OutputElement(data, partition)
+    else
+      throw new IllegalArgumentException(s"'partition' must be non-negative and less that count of partitions in this " +
+        s"output stream (partition = $partition, count of partitions = ${producer.stream.partitionsCount})")
+  }
 }
 
 /**
