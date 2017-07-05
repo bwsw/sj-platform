@@ -152,7 +152,7 @@ class RegularEngineSimulator[T <: AnyRef](executor: RegularStreamingExecutor[T],
 
     if (clearBuffer) clear()
 
-    simulationResult()
+    simulationResult
   }
 
   /**
@@ -165,7 +165,7 @@ class RegularEngineSimulator[T <: AnyRef](executor: RegularStreamingExecutor[T],
     executor.onBeforeCheckpoint()
     executor.onBeforeStateSave(isFullState)
 
-    simulationResult()
+    simulationResult
   }
 
   /**
@@ -175,10 +175,17 @@ class RegularEngineSimulator[T <: AnyRef](executor: RegularStreamingExecutor[T],
     * @return output elements and state
     */
   def afterCheckpoint(isFullState: Boolean): SimulationResult = {
+    manager.producerPolicyByOutput.values.foreach {
+      case (_, moduleOutput: ModuleOutputMockHelper) =>
+        moduleOutput.clear()
+      case _ =>
+        throw new IllegalStateException("Incorrect outputs")
+    }
+
     executor.onAfterCheckpoint()
     executor.onAfterStateSave(isFullState)
 
-    simulationResult()
+    simulationResult
   }
 
   /**
@@ -188,10 +195,10 @@ class RegularEngineSimulator[T <: AnyRef](executor: RegularStreamingExecutor[T],
     inputEnvelopes.clear()
 
 
-  private def simulationResult(): SimulationResult = {
+  private def simulationResult: SimulationResult = {
     val outputElements = manager.producerPolicyByOutput.mapValues {
       case (_, moduleOutput: ModuleOutputMockHelper) =>
-        moduleOutput.readOutputElements()
+        moduleOutput.getOutputElements
       case _ =>
         throw new IllegalStateException("Incorrect outputs")
     }.filter(_._2.nonEmpty)

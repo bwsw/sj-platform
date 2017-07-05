@@ -33,13 +33,16 @@ trait ModuleOutputMockHelper {
   protected var outputElements: mutable.Buffer[OutputElement] = mutable.Buffer.empty
 
   /**
-    * Returns [[outputElements]] and clears it
+    * Returns output elements
     */
-  def readOutputElements() = {
-    val buffer = outputElements
+  def getOutputElements: mutable.Buffer[OutputElement] =
+    outputElements
+
+  /**
+    * Removes all output elements
+    */
+  def clear(): Unit =
     outputElements = mutable.Buffer.empty
-    buffer
-  }
 }
 
 /**
