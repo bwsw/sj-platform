@@ -50,7 +50,7 @@ The Stream Juggler provides a developer with three generic event processor types
 
 3. *Pipeline Stream Processor* (PSP) – handles data processing inside the pipeline, two types of PSP exist: 
 
-- Regular – the most generic processor which receives event, does some data transformation and (probably) sends transformation to the next processing step. 
+- Regular – the most generic processor which receives event, does some data transformation and sends transformation to the next processing step. 
 
 - Windowed (Batch)– the processor which organizes incoming data into batches and processing is done with sliding window. Windowed PSP may be used to implement streaming joins and processing where algorithm must observe range of input messages rather than current one. 
 
@@ -58,6 +58,7 @@ A module handles data flow making it into streams. The data elements in a stream
 
  
 The PSP modules perform **checkpoint** and, if the module has a state, stores the variables in a state. That fulfills the idea of Platform`s fault-tolerance. In case of the live datastream processing failure the variables stored in the state are recovered and the module is restarted.
+
 The modules also fulfill a **group** **checkpoint** conception. It means that all producers and consumers are bunched into a group and do a checkpoint automatically fixing the current state. This is the key idea of exactly-once processing.
 
 
