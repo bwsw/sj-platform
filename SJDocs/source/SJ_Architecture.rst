@@ -53,3 +53,16 @@ The UI is presented via Node JS.
 The diagram below represents the interconnections between platform components.
 
 .. figure:: _static/SJ_Сomponent_diagram.png
+
+Every component deployed to the Stream Juggler platform contributes to the main idea of hitting three V-s of data processing:
+
+- Volume 
+    The system is scalable and perfectly fits for large data processing
+    
+- Velocity 
+    Stream Juggler is the solution for real-time processing that means the system can handle events as soon as they are available inside the system without specific delay
+    
+- Veriety 
+    The platform components are ready-to-use and can be reorganized in different pipelines. Besides, the system  is compatible with diferent types of data sources, data storages, services and systems. 
+    
+    
