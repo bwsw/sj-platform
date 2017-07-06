@@ -21,7 +21,7 @@ package com.bwsw.sj.engine.core.simulation.regular
 import com.bwsw.sj.common.engine.core.entities.{Envelope, KafkaEnvelope, TStreamEnvelope}
 import com.bwsw.sj.common.engine.core.regular.RegularStreamingExecutor
 import com.bwsw.sj.engine.core.simulation.SimulatorConstants.defaultConsumerName
-import com.bwsw.sj.engine.core.simulation.state.{ModuleEnvironmentManagerMock, ModuleOutputMockHelper, OutputElement}
+import com.bwsw.sj.engine.core.simulation.state.{ModuleEnvironmentManagerMock, ModuleOutputMockHelper, SimulationResult}
 
 import scala.collection.mutable
 
@@ -207,10 +207,4 @@ class RegularEngineSimulator[T <: AnyRef](executor: RegularStreamingExecutor[T],
   }
 }
 
-/**
-  * Contains output elements and state
-  *
-  * @param outputElements outgoing entities
-  */
-case class SimulationResult(outputElements: collection.Map[String, mutable.Buffer[OutputElement]],
-                            state: Map[String, Any])
+
