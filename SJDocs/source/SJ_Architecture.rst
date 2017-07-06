@@ -1,3 +1,5 @@
+.. _Architecture:
+
 Stream Juggler Architecture
 ==============================
 
