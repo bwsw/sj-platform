@@ -1,3 +1,5 @@
+.. _Modules:
+
 Modules: types, structure, pipeline
 ===================================
 
