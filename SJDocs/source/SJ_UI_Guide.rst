@@ -1,4 +1,6 @@
-Stream Juggler UI Guide
+.. _UI_Guide:
+
+UI Guide
 =======================
 
 |juggler-logo|
