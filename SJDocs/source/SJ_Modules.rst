@@ -23,7 +23,12 @@ A general structure of a module can be rendered as at the scheme below:
 
 .. figure:: _static/ModuleGeneralStructure.png
 
-A module handles data flow making it into streams. Raw data are transformed to objects referred to as an envelope. An envelope is a container for messages or events with data records.
+A module handles data flow making it into streams. Raw data are transformed to objects referred to as an envelope. 
+
+An envelope is a container for messages or events with data records.
+
+Module types
+--------------
 
 The platform supports 4 types of modules:
 
@@ -44,7 +49,7 @@ In this document each module is described in detail.
 .. _input-module:
 
 Input module
-----------------
+~~~~~~~~~~~~~~~~~~~
 An input type of modules handles external input streams, does data deduplication, transforms raw data to objects. In the SJ platform the TCP Input Stream processor is currently implemented in an Input module.
 
 .. figure:: _static/InputModuleStructure.png
@@ -121,7 +126,7 @@ InputStreamingResponse:
 
 
 Output module
-------------------
+~~~~~~~~~~~~~~~~~~~~
 
 An Output module handles external output from event processing pipeline to external data destinations (Elasticsearch, JDBC, etc.)
 
@@ -140,7 +145,7 @@ The output executor provides the following methods that does not perform any wor
 
 
 Regular module
--------------------
+~~~~~~~~~~~~~~~~~~~~~~~
 A simplified definition of a Regular module is a handler that performs data transformation and put the processed data into a T-stream.
 
 .. figure:: _static/RegularModule2.png
@@ -197,7 +202,7 @@ Inside of the module there is a manager allowing to get an access to:
 
 
 Batch module
------------------
+~~~~~~~~~~~~~~~~~
 A batch is a minimum data set for a handler to collect the events in the stream. The size of a batch is defined by a user. It can be a period of time or a quantity of events or a specific type of event after receiving which the batch is considered closed.  Then, the queue of batches is sent further in the flow for the next stage of processing. 
 
 In the module it is a Batch Collector that is responsible for the logic of collecting batches. It provides the following methods, implementation of which you should specify. 
@@ -356,7 +361,7 @@ Modules` performance is determined with the work of engine. An engine structure,
 
 
 Prerequisites For Modules. Streaming Components.
-================================================
+--------------------------------------------------
  .. Warning:: The section is under development!
 
 A module requires the following elements to be created for its performance:
