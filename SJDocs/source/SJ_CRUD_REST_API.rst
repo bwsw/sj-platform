@@ -82,13 +82,13 @@ Config settings must contain (<driver> is a value of the "driver" field):
 - driver.<driver>.prefix - prefix of server url: (prefix)://(host:port)/(database), one of [jdbc:mysql, jdbc:postgresql, jdbc:oracle:thin]
 
 Create a new provider
-~~~~~~~~~~~~~~~~~~~~~~~~~~~`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Request method: POST
 
 Request format::
  
- http://{domain}/v1/providers
+ /v1/providers
 
 .. csv-table::  Response
   :header: "Status code","Description"
@@ -141,7 +141,7 @@ Request method: GET
 
 Request format:: 
 
- http://{domain}/v1/providers/{name}
+ /v1/providers/{name}
 
 .. csv-table::  Response
   :header: "Status code","Description"
@@ -188,7 +188,7 @@ Request method: GET
 
 Request format:: 
 
- http://{domain}/v1/providers
+ /v1/providers
 
 .. csv-table::  Response
   :header: "Status code","Description"
@@ -236,7 +236,7 @@ Request method: GET
 
 Request format:: 
  
- http://{domain}/v1/providers/_types
+ /v1/providers/_types
 
 .. csv-table::  Response
   :header: "Status code","Description"
@@ -270,7 +270,7 @@ Request method: DELETE
 
 Request format:: 
 
- http://{domain}/v1/providers/{name}
+ /v1/providers/{name}
 
 .. csv-table::  Response
   :header: "Status code","Description"
@@ -299,7 +299,7 @@ Method: GET
 
 Request format:: 
 
- http://{domain}/v1/providers/{name}/connection
+ /v1/providers/{name}/connection
 
 .. csv-table::  Response
   :header: "Status code","Description"
@@ -348,7 +348,7 @@ Request method: GET
 
 Request format:: 
 
- http://{domain}/v1/providers/{name}/related
+ /v1/providers/{name}/related
 
 .. csv-table::  Response
   :header: "Status code","Description"
@@ -395,7 +395,7 @@ Each particular service has its own set of fields.
   "RESTful service", "REST"
 
 Elasticsearch Index (ESInd)
-""""""""""""""""""""""""""""""""""""""'
+""""""""""""""""""""""""""""""""""""""
 
 .. csv-table::  
    :header: "Field", "Format", "Description"
@@ -502,7 +502,7 @@ Request method: POST
 
 Request format:: 
  
- http://{domain}/v1/services
+ /v1/services
 
 .. csv-table::  Response
   :header: "Status code",  "Description"
@@ -550,7 +550,7 @@ Request method: GET
 
 Request format:: 
 
- http://{domain}/v1/services/{name}
+ /v1/services/{name}
 
 .. csv-table::  Response
   :header: "Status code",  "Description"
@@ -583,7 +583,7 @@ Request method: GET
 
 Request format:: 
 
- http://{domain}/v1/services
+ /v1/services
 
 .. csv-table::  Response
   :header: "Status code",  "Description"
@@ -625,7 +625,7 @@ Request method: GET
 
 Request format:: 
 
- http://{domain}/v1/services/_types
+ /v1/services/_types
 
 .. csv-table::  Response
   :header: "Status code",  "Description"
@@ -652,13 +652,13 @@ Success response example::
 
 
 Delete service by name
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Request method: DELETE
 
 Request format:: 
 
- http://{domain}/v1/services/{name}
+ /v1/services/{name}
 
 .. csv-table::  Response
   :header: "Status code",  "Description"
@@ -688,7 +688,7 @@ Request method: GET
 
 Request format:: 
 
- http://{domain}/v1/services/{name}/related
+ /v1/services/{name}/related
 
 .. csv-table::  Response
   :header: "Status code",  "Description"
@@ -760,7 +760,7 @@ Request method: POST
 
 Request format:: 
 
- http://{domain}/v1/streams
+ /v1/streams
 
 .. csv-table::  Response
   :header: "Status code",  "Description"
@@ -801,13 +801,13 @@ Error response example::
  }
 
 Get list of all streams
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Request method: GET
 
 Request format:: 
 
- http://{domain}/v1/streams
+ /v1/streams
 
 .. csv-table::  Response
   :header: "Status code",  "Description"
@@ -851,7 +851,7 @@ Request method: GET
 
 Request format:: 
 
- http://{domain}/v1/streams/_types
+ /v1/streams/_types
 
 .. csv-table::  Response
   :header: "Status code",  "Description"
@@ -882,7 +882,7 @@ Request method: GET
 
 Request format:: 
 
- http://{domain}/v1/streams/{name}
+ /v1/streams/{name}
 
 .. csv-table::  Response
   :header: "Status code",  "Description"
@@ -922,13 +922,13 @@ Error response example::
  }
 
 Delete stream by name
-~~~~~~~~~~~~~~~~~~~~~~~~~~``
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Request method: DELETE
 
 Request format:: 
 
- http://{domain}/v1/streams/{name}
+ /v1/streams/{name}
 
 .. csv-table::  Response
   :header: "Status code",  "Description"
@@ -956,7 +956,7 @@ Request method: GET
 
 Request format:: 
 
- http://{domain}/v1/streams/{name}/related
+ /v1/streams/{name}/related
 
 .. csv-table::  Response
   :header: "Status code",  "Description"
@@ -1006,7 +1006,7 @@ Request method: POST
 
 Request format:: 
  
- http://{domain}/v1/config/settings
+ /v1/config/settings
 
 .. csv-table::  Response
   :header: "Status code",  "Description"
@@ -1044,7 +1044,7 @@ Request method: GET
 
 Request format:: 
 
- http://{domain}/v1/config/settings/{config-domain}/{name}
+ /v1/config/settings/{config-domain}/{name}
 
 .. csv-table::  Response
   :header: "Status code",  "Description"
@@ -1075,7 +1075,7 @@ Request method: GET
 
 Request format:: 
 
- http://{domain}/v1/config/settings/{config-domain}
+ /v1/config/settings/{config-domain}
 
 .. csv-table::  Response
   :header: "Status code",  "Description"
@@ -1112,7 +1112,7 @@ Request method: DELETE
 
 Request format:: 
 
- http://{domain}/v1/config/settings/{config-domain}/{name}
+ /v1/config/settings/{config-domain}/{name}
 
 .. csv-table::  Response
   :header: "Status code",  "Description"
@@ -1140,7 +1140,7 @@ Request method: GET
 
 Request format:: 
 
- http://{domain}/v1/config/settings
+ /v1/config/settings
 
 .. csv-table::  Response
   :header: "Status code",  "Description"
@@ -1176,13 +1176,13 @@ Response example::
 
 
 Get list of domains
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Request method: GET
 
 Request format:: 
 
- http://{domain}/v1/config/settings/domains
+ /v1/config/settings/domains
 
 .. csv-table::  Response
   :header: "Status code",  "Description"
@@ -1220,7 +1220,7 @@ Request method: POST
 
 Request format::
 
- http://{domain}/v1/custom/jars
+ /v1/custom/jars
 
 Content-type: `multipart/form-data`
 
@@ -1265,7 +1265,7 @@ Request method: GET
 
 Request format:: 
 
- http://{domain}/v1/custom/jars/{custom-jar-file-name}
+ /v1/custom/jars/{custom-jar-file-name}
 
 Response headers example::
 
@@ -1294,7 +1294,7 @@ Request method: GET
 
 Request format:: 
 
- http://{domain}/v1/custom/jars/{custom-jar-name}/{custom-jar-version}/
+ /v1/custom/jars/{custom-jar-name}/{custom-jar-version}/
 
 .. csv-table::  Response
   :header: "Status code",  "Description"
@@ -1311,7 +1311,7 @@ Request method: DELETE
 
 Request format:: 
 
- http://{domain}/v1/custom/jars/{custom-jar-file-name}/
+ /v1/custom/jars/{custom-jar-file-name}/
 
 .. csv-table::  Response
   :header: "Status code",  "Description"
@@ -1337,7 +1337,7 @@ Request method: DELETE
 
 Request format:: 
 
- http://{domain}/v1/custom/jars/{custom-jar-name}/{custom-jar-version}/
+ /v1/custom/jars/{custom-jar-name}/{custom-jar-version}/
 
 .. csv-table::  Response
   :header: "Status code",  "Description"
@@ -1364,7 +1364,7 @@ Request method: GET
 
 Request format:: 
 
- http://{domain}/v1/custom/jars
+ /v1/custom/jars
 
 .. csv-table::  Response
   :header: "Status code",  "Description"
@@ -1403,7 +1403,7 @@ Request method: POST
 
 Request format:: 
   
- http://{domain}/v1/custom/files
+ /v1/custom/files
 
 Content-type: `multipart/form-data`
 
@@ -1435,7 +1435,7 @@ Request method: GET
 
 Request format:: 
 
- http://{domain}/v1/custom/files/{custom-jar-file-name}
+ /v1/custom/files/{custom-jar-file-name}
 
 Response format for file download::
 
@@ -1464,7 +1464,7 @@ Request method: DELETE
 
 Request format:: 
 
- http://{domain}/v1/custom/files/{custom-jar-file-name}
+ /v1/custom/files/{custom-jar-file-name}
 
 .. csv-table::  Response
   :header: "Status code",  "Description"
@@ -1491,7 +1491,7 @@ Request method: GET
 
 Request format:: 
 
- http://{domain}/v1/custom/files
+ /v1/custom/files
 
 .. csv-table::  Response
   :header: "Status code",  "Description"
@@ -1573,7 +1573,7 @@ Request method: POST
 
 Request format:: 
 
- http://{domain}/v1/modules
+ /v1/modules
 
 Content-type: `multipart/form-data`
 
@@ -1614,13 +1614,13 @@ Response example::
 
 
 Download jar of uploaded module
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Request method: GET
 
 Request format:: 
 
- http://{domain}/v1/modules/{module-type}/{module-name}/{module-version}/
+ /v1/modules/{module-type}/{module-name}/{module-version}/
 
 Response headers example::
 
@@ -1650,7 +1650,7 @@ Request method: DELETE
 
 Request format:: 
 
- http://{domain}/v1/modules/{module-type}/{module-name}/{module-version}/
+ /v1/modules/{module-type}/{module-name}/{module-version}/
 
 .. csv-table::  **Response**
   :header: "Status code",  "Description"
@@ -1680,7 +1680,7 @@ Request method: GET
 
 Request format:: 
 
- http://{domain}/v1/modules
+ /v1/modules
 
 .. csv-table::  **Response**
   :header: "Status code",  "Description"
@@ -1719,7 +1719,7 @@ Request method: GET
 
 Request format:: 
 
- http://{domain}/v1/modules/_types
+ /v1/modules/_types
 
 .. csv-table::  **Response**
   :header: "Status code",  "Description"
@@ -1750,7 +1750,7 @@ Request method: GET
 
 Request format:: 
 
- http://{domain}/v1/modules/{module-type}
+ /v1/modules/{module-type}
 
 .. csv-table:: **Response**
   :header: "Status code",  "Description"
@@ -1784,7 +1784,7 @@ Request method: GET
 
 Request format:: 
 
- http://{domain}/v1/modules/{module-type}/{module-name}/{module-version}/specification
+ /v1/modules/{module-type}/{module-name}/{module-version}/specification
 
 .. csv-table::  **Response**
   :header: "Status code",  "Description"
@@ -1848,7 +1848,7 @@ Request method: GET
 
 Request format:: 
  
- http://{domain}/v1/modules/instances
+ /v1/modules/instances
 
 .. csv-table:: **Response**
   :header: "Status code",  "Description"
@@ -1941,7 +1941,7 @@ Request method: POST
 
 Request format:: 
 
- http://{domain}/v1/modules/{module-type}/{module-name}/{module-version}/instance/
+ /v1/modules/{module-type}/{module-name}/{module-version}/instance/
 
 .. note:: The name of an input stream should contain the  "/split" suffix (if stream's partitions should be distributed between the tasks) or "/full" (if each task should process all partitions of the stream). The stream has a 'split' mode as default. (see `SJ_CRUD_REST_API.rst#execution-plan <Execution plan>`_)
 
@@ -2307,7 +2307,7 @@ Request method: GET
 
 Request format:: 
 
- http://{domain}/v1/modules/{module-type}/{module-name}/{module-version}/related
+ /v1/modules/{module-type}/{module-name}/{module-version}/related
 
 .. csv-table:: **Response**
   :header: "Status code",  "Description"
@@ -2338,7 +2338,7 @@ Request method: GET
 
 Request format:: 
  
- http://{domain}/v1/modules/{module-type}/{module-name}/{module-version}/instance/
+ /v1/modules/{module-type}/{module-name}/{module-version}/instance/
 
 .. csv-table:: **Response**
   :header: "Status code",  "Description"
@@ -2377,7 +2377,7 @@ Request method: GET
 
 Request format:: 
 
- http://{domain}/v1/modules/{module-type}/{module-name}/{module-version}/instance/{instance-name}/
+ /v1/modules/{module-type}/{module-name}/{module-version}/instance/{instance-name}/
 
 .. csv-table:: **Response**
   :header: "Status code",  "Description"
@@ -2388,13 +2388,13 @@ Request format::
   "500", "Internal server error"
 
 Delete an instance of a specific module
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Request method: DELETE
 
 Request format:: 
 
- http://{domain}/v1/modules/{module-type}/{module-name}/{module-version}/instance/{instance-name}/
+ /v1/modules/{module-type}/{module-name}/{module-version}/instance/{instance-name}/
 
 .. csv-table:: **Response**
   :header: "Status code",  "Description"
@@ -2426,7 +2426,7 @@ Request method: GET
 
 Request format:: 
 
- http://{domain}/v1/modules/{module-type}/{module-name}/{module-version}/instance/{instance-name}/start/
+ /v1/modules/{module-type}/{module-name}/{module-version}/instance/{instance-name}/start/
 
 .. csv-table::  **Response**
   :header: "Status code",  "Description"
@@ -2458,7 +2458,7 @@ Request method: GET
 
 Request format:: 
 
- http://{domain}/v1/modules/{module-type}/{module-name}/{module-version}/instance/{instance-name}/tasks/
+ /v1/modules/{module-type}/{module-name}/{module-version}/instance/{instance-name}/tasks/
 
 .. csv-table::  
   :header: "Status code",  "Description"
@@ -2499,7 +2499,7 @@ Request method: GET
 
 Request format:: 
  
- http://{domain}/v1/modules/{module-type}/{module-name}/{module-version}/instance/{instance-name}/stop/
+ /v1/modules/{module-type}/{module-name}/{module-version}/instance/{instance-name}/stop/
 
 .. csv-table::  
   :header: "Status code",  "Description"
