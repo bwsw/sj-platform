@@ -1,6 +1,6 @@
 .. _REST_API:
 
-Stream Juggler REST API Guide
+REST API Guide
 ========================================
 
 .. Contents::
