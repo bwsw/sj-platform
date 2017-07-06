@@ -40,15 +40,15 @@ The *second layer* is composed of prerequisites for the platform. These are the 
 
 - For starting periodic tasks `Chronos <https://mesos.github.io/chronos/>`_ is used.
 
-- To perform leader election in the event that the currently leading Marathon instance fails `ZooKeeper <https://zookeeper.apache.org/>`_ is used.
+- To perform leader election in the event that the currently leading Marathon instance fails `ZooKeeper <https://zookeeper.apache.org/>`_ is used. ZooKeeper is also responsible for instance task synchronization for a Batch module.
 
-- For base service search  https://github.com/CiscoCloud/mesos-consul_ is used.
+- For base service search `Mesos+Consul <https://github.com/CiscoCloud/mesos-consul>`_ is used.
 
-- Data sources for the platform are Netty and `T-streams <https://t-streams.com>`_ libraries and `Kafka <https://kafka.apache.org/>`_. For starting Kafka we use https://github.com/mesos/kafka_.
+- Data sources for the platform are Netty and `T-streams <https://t-streams.com>`_ libraries and `Kafka <https://kafka.apache.org/>`_. For starting Kafka we use `Kafka on Mesos <https://github.com/mesos/kafka>`_.
 
 - The outcoming data is stored to Elasticsearch, JDBC or REST external storages.
 
-- We use `MongoDB <https://www.mongodb.com/>`_ as a document database that provides high performance and availability. To start MongoDB in Mesos we use https://hub.docker.com/r/tobilg/mongodb-marathon/_
+- We use `MongoDB <https://www.mongodb.com/>`_ as a document database that provides high performance and availability. All created platform instances (Providers, Services, Streams, Instances, etc.) as well as Config Settings are stored here. To start MongoDB in Mesos we use `MongoDB-Marathon Docker <https://hub.docker.com/r/tobilg/mongodb-marathon/>`_
 
 - For external access a custom-container on `NGINX <https://www.nginx.com>`_ is used. 
 
