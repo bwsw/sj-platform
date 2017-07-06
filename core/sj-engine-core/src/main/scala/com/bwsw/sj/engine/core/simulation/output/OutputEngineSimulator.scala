@@ -49,7 +49,7 @@ import scala.collection.mutable
   * The [[OutputEngineSimulator]] automatically updates a wasFirstCheckpoint if [[executor]] invokes a
   * [[manager.initiateCheckpoint()]].
   *
-  * @param executor             class under test [[OutputStreamingExecutor]]
+  * @param executor             implementation of [[OutputStreamingExecutor]] under tests
   * @param outputRequestBuilder builder of requests for output service
   * @param manager              environment manager that used by executor
   * @tparam IT type of incoming data
@@ -71,6 +71,7 @@ class OutputEngineSimulator[IT <: AnyRef, OT](executor: OutputStreamingExecutor[
     * Creates [[TStreamEnvelope]] and saves it in a local buffer
     *
     * @param entities     incoming data
+    * @param stream       name of stream in which will be that envelope
     * @param consumerName name of consumer
     * @return ID of saved transaction
     */
