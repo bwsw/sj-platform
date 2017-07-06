@@ -1,3 +1,5 @@
+Glossary
+================
 
 :Aggregation: A function applied to the grouped values.
 

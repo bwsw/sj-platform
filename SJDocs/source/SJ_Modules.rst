@@ -1,3 +1,5 @@
+.. _Modules:
+
 Modules: types, structure, pipeline
 ===================================
 
@@ -379,6 +381,6 @@ For example, a Batch module that receives data from Kafka will require a Kafka s
 
 The diagram below may help you to understand the dependency of instances in the platform.
 
-.. figure:: _static/СвязиСущностей.png
+.. figure:: _static/InstanceCorrelation.png
 
 The data elements in a stream are assembled in partitions. A partition is a part of a data stream allocated for convenience in operation. The streams with many partitions allow to handle the idea of parallelism properly. In such case, an engine divides existing partitions fairly among executors and it enables to scale the data processing.  

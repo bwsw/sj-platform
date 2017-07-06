@@ -23,6 +23,25 @@ Data queues are implemented with `Apache Kafka <https://kafka.apache.org/>`_ and
 
 SJ provides a developer with **comprehensive** **API** and **UI**, which allow him to develop event processing pipeline.
 
+The Stream Juggler provides a developer with three generic event processor types, which handle data streams:
+
+1. **Input Stream Processor** (ISP) – handles external inputs, does data deduplication, transforms raw data to objects, currently TCP Input Stream Processor; 
+
+2. **Output Stream Processor** (OSP) – handles external output from event processing pipeline to external data destinations (Elasticsearch, JDBC, etc.);
+
+3. **Pipeline Stream Processor** (PSP) – handles data processing inside the pipeline, two types of PSP exist: 
+
+- *Regular* – the most generic processor which receives event, does some data transformation and sends transformation to the next processing step. 
+
+- *Windowed (Batch)* – the processor which organizes incoming data into batches and processing is done with sliding window. Windowed PSP may be used to implement streaming joins and processing where algorithm must observe range of input messages rather than current one. 
+
+A processor contains Module with an executor and a validator and Engine that uses module settings to handle data flow making it into streams. The data elements in a stream are assembled in partitions. A **partition** is a part of a data stream allocated for convenience in operation.  Upon creation, every stream gets a name and a certain amount of partitions. The streams with many partitions allow to handle the idea of **parallelism** properly. In such case, an engine divides existing partitions fairly among executors and it enables to scale the data processing. Partitions are also helpful in distributing processing load between several workers.
+
+ 
+The PSP modules perform **checkpoint** and, if the module has a state, stores the variables in a state. That fulfills the idea of Platform`s fault-tolerance. In case of the live datastream processing failure the variables stored in the state are recovered and the module is restarted.
+
+The modules also fulfill a **group** **checkpoint** conception. It means that all producers and consumers are bunched into a group and do a checkpoint automatically fixing the current state. This is the key idea of exactly-once processing.
+
 Thus, Stream Juggler is a platform that enables high-throughput, fault-tolerant stream processing of live data streams. Data can be ingested from different sources like Kafka, or TCP sockets, and can be processed using complex algorithms. Finally, processed data can be pushed out to filesystems, external databases.
 
 .. figure:: _static/Overview.png
@@ -39,35 +58,13 @@ In general, the main ideas of the Stream Juggler platform are:
 - Able to scale horizontally to thousands of nodes
 - Relies on open source technologies
 
-General Concepts
-----------------------
 
-The Stream Juggler provides a developer with three generic event processor types, which handle data streams:
+To find more about the platform, please, visit the pages below:
 
-1. *Input Stream Processor* (ISP) – handles external inputs, does data deduplication, transforms raw data to objects, currently TCP Input Stream Processor; 
+:ref:`Architecture` - here the architecture of the Stream Juggler is presented, its components,connections between them, necessary services and other prerequisits for the Platform operation.
 
-2. *Output Stream Processor* (OSP) – handles external output from event processing pipeline to external data destinations (Elasticsearch, JDBC, etc.);
+:ref:`Modules` - here more information on modules is given: what module types are supported in the Platform, how they work, etc.
 
-3. *Pipeline Stream Processor* (PSP) – handles data processing inside the pipeline, two types of PSP exist: 
+:ref:`REST_API` - the REST API service is described here to work with the platform without the UI.
 
-- Regular – the most generic processor which receives event, does some data transformation and sends transformation to the next processing step. 
-
-- Windowed (Batch)– the processor which organizes incoming data into batches and processing is done with sliding window. Windowed PSP may be used to implement streaming joins and processing where algorithm must observe range of input messages rather than current one. 
-
-A processor contains Module with an executor and a validator and Engine that uses module settings to handle data flow making it into streams. The data elements in a stream are assembled in partitions. A **partition** is a part of a data stream allocated for convenience in operation.  Upon creation, every stream gets a name and a certain amount of partitions. The streams with many partitions allow to handle the idea of **parallelism** properly. In such case, an engine divides existing partitions fairly among executors and it enables to scale the data processing. Partitions are also helpful in distributing processing load between several workers.
-
- 
-The PSP modules perform **checkpoint** and, if the module has a state, stores the variables in a state. That fulfills the idea of Platform`s fault-tolerance. In case of the live datastream processing failure the variables stored in the state are recovered and the module is restarted.
-
-The modules also fulfill a **group** **checkpoint** conception. It means that all producers and consumers are bunched into a group and do a checkpoint automatically fixing the current state. This is the key idea of exactly-once processing.
-
-
-.. Read more about:
- 
-.. `Platform Architecture`_
-
-.. `Modules: types, structure, pipeline`_
-
-.. `Stream Juggler REST API Guide`_
-
-.. `Stream Juggler UI Guide`_
+:ref:`UI_Guide` - the section is devoted to the UI and its basic features.

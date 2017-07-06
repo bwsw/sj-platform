@@ -1,3 +1,5 @@
+.. _Architecture:
+
 Stream Juggler Architecture
 ==============================
 
@@ -10,6 +12,10 @@ A good real-time data processing architecture needs to be fault-tolerant and sca
 
 The Stream Juggler is an integrated processing system. It means the system includes all the parts required to achieve goals.  At the same time these ready-to-use components can be reused in different pipelines. That allows to build sophisticated processing graphs to customize the system.
 At this section we will take a closer look into the system components, their functions within the data flow pipeline.
+
+Juggler's architecture is designed so that exactly-once processing is performed not only within a single processing block but throughout the entire sequence, starting from the moment stream events are fed to the system and up to the moment when the output data is stored to conventional data storage.
+
+The approach based on loosely coupled blocks with exactly-once processing support throughout the entire sequence allows for decomposing data processing in order to provide better modularity, performance management and simplicity in development.
 
 Platform Components
 ------------------------
@@ -66,4 +72,8 @@ Every component deployed to the Stream Juggler platform contributes to the main 
     The platform components are ready-to-use and can be reorganized in various pipelines. Besides, the system  is compatible with different types of data sources, data storages, services and systems. 
 
 Stream Juggler provides UI and REST for a platform user to create a processing sequence of arbitrary complexity, watch it in action and manage it.
+
+Stream Juggler easily integrates with in-memory grid systems, for example, Hazelcast, Apache Ignite.
+
+The systems is available under Apache License v2. 
     
