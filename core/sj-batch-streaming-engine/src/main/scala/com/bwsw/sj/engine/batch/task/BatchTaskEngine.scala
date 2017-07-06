@@ -72,7 +72,6 @@ class BatchTaskEngine(manager: CommonTaskManager,
       executor
     ).asInstanceOf[RetrievableCheckpointTaskInput[Envelope]]
   private val envelopeFetcher = new EnvelopeFetcher(taskInputService, lowWatermark)
-  private val moduleTimer = moduleService.moduleTimer
   private var retrievableStreams = instance.getInputsWithoutStreamMode
   private var counterOfBatchesPerStream = createCountersOfBatches()
   private val currentWindowPerStream = createStorageOfWindows()
@@ -119,12 +118,6 @@ class BatchTaskEngine(manager: CommonTaskManager,
 
     while (true) {
       retrieveAndProcessEnvelopes()
-
-      if (moduleTimer.isTime) {
-        logger.debug(s"Invoke onTimer() handler.")
-        executor.onTimer(System.currentTimeMillis() - moduleTimer.responseTime)
-        moduleTimer.reset()
-      }
     }
   }
 
@@ -136,11 +129,14 @@ class BatchTaskEngine(manager: CommonTaskManager,
           batchCollector.onReceive(envelope)
           processBatches()
 
+          moduleService.onTimer()
+
           if (allWindowsCollected) {
             onWindow()
           }
 
         case None =>
+          moduleService.onTimer()
       }
     })
   }
@@ -253,6 +249,5 @@ class BatchTaskEngine(manager: CommonTaskManager,
     moduleService.doCheckpoint()
     envelopeFetcher.doCheckpoint()
     logger.debug(s"Invoke onAfterCheckpoint() handler.")
-    executor.onAfterCheckpoint()
   }
 }

@@ -18,16 +18,12 @@
  */
 package com.bwsw.sj.common.engine
 
-/**
-  * Provides methods for handle events in a stateful module
-  */
-
-trait StateHandlers {
+trait TimerHandlers {
 
   /**
-    * Handler triggered before saving of the state
+    * Is invoked every time when a set timer goes out
     *
-    * @param isFullState flag denotes that the full state(true) or partial changes of state(false) is going to be saved
+    * @param jitter Delay between a real response time and an invocation of this handler
     */
-  def onBeforeStateSave(isFullState: Boolean): Unit = {}
+  def onTimer(jitter: Long): Unit = {}
 }

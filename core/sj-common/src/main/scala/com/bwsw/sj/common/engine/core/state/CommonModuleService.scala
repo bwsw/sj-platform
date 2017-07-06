@@ -18,7 +18,7 @@
  */
 package com.bwsw.sj.common.engine.core.state
 
-import com.bwsw.sj.common.engine.StreamingExecutor
+import com.bwsw.sj.common.engine.{StreamingExecutor, TimerHandlers}
 import com.bwsw.sj.common.si.model.instance.{BatchInstance, Instance, RegularInstance}
 import com.bwsw.sj.common.utils.{EngineLiterals, SjTimer}
 import com.bwsw.sj.common.engine.core.environment.{ModuleEnvironmentManager, ModuleOutput}
@@ -35,30 +35,26 @@ import scala.collection.mutable
   * Class is in charge of creating a specific ModuleEnvironmentManager (and executor)
   * depending on an instance parameter [[com.bwsw.sj.common.dal.model.instance.BatchInstanceDomain.stateManagement]] and performing the appropriate actions related with checkpoint
   *
-  * @param manager            manager of environment of task of [[EngineLiterals.regularStreamingType]] or [[EngineLiterals.batchStreamingType]] module
-  * @param performanceMetrics set of metrics that characterize performance of a regular or batch streaming module
   */
-abstract class CommonModuleService(manager: CommonTaskManager,
-                                   checkpointGroup: CheckpointGroup,
-                                   performanceMetrics: PerformanceMetrics) {
+abstract class CommonModuleService(protected val instance: Instance,
+                                   protected val outputProducers: Map[String, Producer],
+                                   checkpointGroup: CheckpointGroup) {
 
   protected val logger: Logger = LoggerFactory.getLogger(this.getClass)
-  protected val instance: Instance = manager.instance
-  protected val outputProducers: Map[String, Producer] = manager.outputProducers
-  val moduleTimer: SjTimer = new SjTimer()
+  protected val moduleTimer: SjTimer = new SjTimer()
   protected val producerPolicyByOutput: mutable.Map[String, (String, ModuleOutput)] = mutable.Map[String, (String, ModuleOutput)]()
 
   addProducersToCheckpointGroup()
 
   protected val environmentManager: ModuleEnvironmentManager
-  val executor: StreamingExecutor
+  val executor: StreamingExecutor with TimerHandlers
 
   private def addProducersToCheckpointGroup(): Unit = {
-    logger.debug(s"Task: ${manager.taskName}. Start adding t-stream producers to checkpoint group.")
+    logger.debug(s"Start adding t-stream producers to checkpoint group.")
     outputProducers.foreach(x => {
       checkpointGroup.add(x._2)
     })
-    logger.debug(s"Task: ${manager.taskName}. The t-stream producers are added to checkpoint group.")
+    logger.debug(s"The t-stream producers are added to checkpoint group.")
   }
 
   def doCheckpoint(): Unit = {
@@ -66,6 +62,14 @@ abstract class CommonModuleService(manager: CommonTaskManager,
   }
 
   def isCheckpointInitiated: Boolean = environmentManager.isCheckpointInitiated
+
+  def onTimer(): Unit = {
+    if (moduleTimer.isTime) {
+      logger.debug(s"Invoke onTimer() handler.")
+      executor.onTimer(System.currentTimeMillis() - moduleTimer.responseTime)
+      moduleTimer.reset()
+    }
+  }
 }
 
 object CommonModuleService {

@@ -23,7 +23,7 @@ import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepo
 import com.bwsw.sj.common.engine.core.environment.StatefulModuleEnvironmentManager
 import com.bwsw.sj.common.engine.core.managment.CommonTaskManager
 import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
-import com.bwsw.sj.common.engine.{StateHandlers, StreamingExecutor}
+import com.bwsw.sj.common.engine.{StateHandlers, StreamingExecutor, TimerHandlers}
 import com.bwsw.sj.common.si.model.instance.{BatchInstance, RegularInstance}
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.tstreams.agents.consumer.Consumer
@@ -47,7 +47,7 @@ class StatefulCommonModuleService(manager: CommonTaskManager,
                                   checkpointGroup: CheckpointGroup,
                                   performanceMetrics: PerformanceMetrics)
                                  (implicit injector: Injector)
-  extends CommonModuleService(manager, checkpointGroup, performanceMetrics) {
+  extends CommonModuleService(manager.instance, manager.outputProducers, checkpointGroup) {
 
   private val streamService: GenericMongoRepository[StreamDomain] = inject[ConnectionRepository].getStreamRepository
   private var countOfCheckpoints: Int = 1
@@ -78,7 +78,7 @@ class StatefulCommonModuleService(manager: CommonTaskManager,
     moduleTimer,
     performanceMetrics)
 
-  val executor: StreamingExecutor = manager.getExecutor(environmentManager)
+  val executor: StreamingExecutor with TimerHandlers = manager.getExecutor(environmentManager).asInstanceOf[StreamingExecutor with TimerHandlers]
 
   private val statefulExecutor: StateHandlers = executor.asInstanceOf[StateHandlers]
 
@@ -103,7 +103,6 @@ class StatefulCommonModuleService(manager: CommonTaskManager,
     statefulExecutor.onBeforeStateSave(false)
     stateService.savePartialState()
     logger.debug(s"Task: ${manager.taskName}. Invoke onAfterStateSave() handler.")
-    statefulExecutor.onAfterStateSave(false)
     countOfCheckpoints += 1
   }
 
@@ -116,7 +115,6 @@ class StatefulCommonModuleService(manager: CommonTaskManager,
     statefulExecutor.onBeforeStateSave(true)
     stateService.saveFullState()
     logger.debug(s"Task: ${manager.taskName}. Invoke onAfterStateSave() handler.")
-    statefulExecutor.onAfterStateSave(true)
     countOfCheckpoints = 1
   }
 
