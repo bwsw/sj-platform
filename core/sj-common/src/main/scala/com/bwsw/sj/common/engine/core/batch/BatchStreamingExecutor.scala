@@ -18,8 +18,8 @@
  */
 package com.bwsw.sj.common.engine.core.batch
 
-import com.bwsw.sj.common.engine.{StateHandlers, StreamingExecutor}
 import com.bwsw.sj.common.engine.core.environment.ModuleEnvironmentManager
+import com.bwsw.sj.common.engine.{CheckpointHandlers, StateHandlers, StreamingExecutor}
 
 /**
   * Class is responsible for batch module execution logic.
@@ -30,7 +30,10 @@ import com.bwsw.sj.common.engine.core.environment.ModuleEnvironmentManager
   */
 
 
-class BatchStreamingExecutor[T <: AnyRef](manager: ModuleEnvironmentManager) extends StreamingExecutor with StateHandlers {
+class BatchStreamingExecutor[T <: AnyRef](manager: ModuleEnvironmentManager)
+  extends StreamingExecutor
+    with StateHandlers
+    with CheckpointHandlers {
 
   /**
     * Is invoked only once at the beginning of launching of module
@@ -42,16 +45,6 @@ class BatchStreamingExecutor[T <: AnyRef](manager: ModuleEnvironmentManager) ext
     * from one of the inputs that are defined within the instance.
     */
   def onWindow(windowRepository: WindowRepository): Unit = {}
-
-  /**
-    * Handler triggered before every checkpoint
-    */
-  def onBeforeCheckpoint(): Unit = {}
-
-  /**
-    * Handler triggered after every checkpoint
-    */
-  def onAfterCheckpoint(): Unit = {}
 
   /**
     * Is invoked every time when a set timer goes out
