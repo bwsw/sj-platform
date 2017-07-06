@@ -28,7 +28,7 @@ Figuratively, it can be divided into two layers.
 
 The *first layer* – data processing – is provided by Stream Juggler. At this layer the data processing itself is performed via custom modules. The ingested data is transformed into streams, processed and sent to an external storage. Data transformation and computation are the two major tasks of this layer.
 
-This layer is marked with green in the diagram.
+This layer is marked with green in the diagram. More information on module workflow you can find at the :ref:`Modules` page.
 
 The *second layer* is composed of prerequisites for the platform. These are the services and settings that should be deployed prior to exploring the Stream Juggler features. The services at this layer are responsible for input data ingestion, platform management, data storage. In the diagram they are placed in the blue sector.
 
