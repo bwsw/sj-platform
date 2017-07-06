@@ -1894,7 +1894,7 @@ Response entity: json example::
  * failed - an instance that has been launched but in view of some errors is not started;
  * error - an error is detected at stopping or deleting an instance.
 
-.. figure:: _static/Возможные_состояния_инстанса.png
+.. figure:: _static/InstanceStatuses.png
 
 
 Stream Juggler Mesos Framework Rest
