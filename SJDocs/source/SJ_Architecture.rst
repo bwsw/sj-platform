@@ -58,7 +58,7 @@ The UI is presented via Node JS.
 
 The diagram below represents the interconnections between platform components.
 
-.. figure:: _static/SJ_Сomponent_diagram.png
+.. figure:: _static/SJComponentDiagram.png
 
 Every component deployed to the Stream Juggler platform contributes to the main idea of hitting three V-s of data processing:
 
