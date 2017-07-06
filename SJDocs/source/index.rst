@@ -6,7 +6,7 @@
 Welcome to Stream Juggler!
 =======================================
 
-.. figure:: _static/logo-juggler-prj.png
+.. figure:: _static/logo.png
 
 Stream Juggler (SJ) is an open source, scalable solution for real-time and batched stream processing. The system fits for building both simple and complex event processing systems (CEP) and allows a developer to construct pipelines for analyzing data streams.
 

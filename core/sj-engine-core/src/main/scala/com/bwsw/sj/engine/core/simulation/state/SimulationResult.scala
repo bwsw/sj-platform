@@ -18,12 +18,29 @@
  */
 package com.bwsw.sj.engine.core.simulation.state
 
-import scala.collection.mutable
+/**
+  * Contains data elements for each output stream and a state at a certain point in time
+  *
+  * @param streamDataList list of data elements that written in output streams
+  * @param state          key/map value
+  */
+case class SimulationResult(streamDataList: Seq[StreamData], state: Map[String, Any])
 
 /**
-  * Contains output elements and state
+  * Contains data elements that has been sent in an output stream
   *
-  * @param outputElements outgoing entities
+  * @param stream            stream name
+  * @param partitionDataList list of data that elements written in partitions of that stream
   */
-case class SimulationResult(outputElements: collection.Map[String, mutable.Buffer[OutputElement]],
-                            state: Map[String, Any])
+case class StreamData(stream: String, partitionDataList: Seq[PartitionData])
+
+/**
+  * Contains data elements that has been sent in a partition of output stream
+  *
+  * @param partition partition index
+  * @param dataList  data elements
+  */
+case class PartitionData(partition: Int, dataList: Seq[AnyRef] = Seq.empty) {
+  def +(data: AnyRef): PartitionData =
+    PartitionData(partition, dataList :+ data)
+}
