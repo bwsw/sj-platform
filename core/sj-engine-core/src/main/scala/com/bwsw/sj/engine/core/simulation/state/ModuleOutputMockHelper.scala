@@ -30,19 +30,24 @@ import scala.collection.mutable
   * @author Pavel Tomskikh
   */
 trait ModuleOutputMockHelper {
-  protected var outputElements: mutable.Buffer[OutputElement] = mutable.Buffer.empty
+  protected var partitionDataList: mutable.Map[Int, PartitionData] = mutable.Map.empty
 
   /**
-    * Returns output elements
+    * Returns partitions with data
     */
-  def getOutputElements: mutable.Buffer[OutputElement] =
-    outputElements
+  def getPartitionDataList: Seq[PartitionData] =
+    partitionDataList.values.toList.sortBy(_.partition)
 
   /**
-    * Removes all output elements
+    * Removes data from partitions
     */
   def clear(): Unit =
-    outputElements = mutable.Buffer.empty
+    partitionDataList.clear()
+
+  protected def append(data: AnyRef, partition: Int): Unit = {
+    val partitionData = partitionDataList.getOrElse(partition, PartitionData(partition))
+    partitionDataList += (partition -> (partitionData + data))
+  }
 }
 
 /**
@@ -59,17 +64,18 @@ class PartitionedOutputMock(producer: Producer,
   extends PartitionedOutput(producer, performanceMetrics) with ModuleOutputMockHelper {
 
   /**
-    * Stores data in [[outputElements]]
+    * Stores data in [[partitionDataList]]
     */
   override def put(data: AnyRef, partition: Int): Unit = {
     if (partition >= 0 && partition < producer.stream.partitionsCount)
-      outputElements += OutputElement(data, partition)
+      append(data, partition)
     else
       throw new IllegalArgumentException(s"'partition' must be non-negative and less that count of partitions in this " +
         s"output stream (partition = $partition, count of partitions = ${producer.stream.partitionsCount})")
   }
 
-  override def clear(): Unit = super.clear()
+  override def clear(): Unit =
+    super[ModuleOutputMockHelper].clear()
 }
 
 /**
@@ -88,16 +94,17 @@ class RoundRobinOutputMock(producer: Producer,
   private var currentPartition: Int = 0
 
   /**
-    * Stores data in [[outputElements]]
+    * Stores data in [[partitionDataList]]
     */
   override def put(data: AnyRef): Unit = {
-    outputElements += OutputElement(data, currentPartition)
+    append(data, currentPartition)
     currentPartition += 1
     if (currentPartition == producer.stream.partitionsCount)
       currentPartition = 0
   }
 
-  override def clear(): Unit = super.clear()
+  override def clear(): Unit =
+    super[ModuleOutputMockHelper].clear()
 }
 
 /**

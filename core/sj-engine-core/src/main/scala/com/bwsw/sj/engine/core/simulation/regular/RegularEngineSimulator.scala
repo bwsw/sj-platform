@@ -21,7 +21,7 @@ package com.bwsw.sj.engine.core.simulation.regular
 import com.bwsw.sj.common.engine.core.entities.{Envelope, KafkaEnvelope, TStreamEnvelope}
 import com.bwsw.sj.common.engine.core.regular.RegularStreamingExecutor
 import com.bwsw.sj.engine.core.simulation.SimulatorConstants.defaultConsumerName
-import com.bwsw.sj.engine.core.simulation.state.{ModuleEnvironmentManagerMock, ModuleOutputMockHelper, SimulationResult}
+import com.bwsw.sj.engine.core.simulation.state.{ModuleEnvironmentManagerMock, ModuleOutputMockHelper, SimulationResult, StreamData}
 
 import scala.collection.mutable
 
@@ -194,16 +194,15 @@ class RegularEngineSimulator[T <: AnyRef](executor: RegularStreamingExecutor[T],
   def clear(): Unit =
     inputEnvelopes.clear()
 
-
-  private def simulationResult: SimulationResult = {
-    val outputElements = manager.producerPolicyByOutput.mapValues {
-      case (_, moduleOutput: ModuleOutputMockHelper) =>
-        moduleOutput.getOutputElements
+  private def simulationResult = {
+    val streamData = manager.producerPolicyByOutput.map {
+      case (stream, (_, moduleOutput: ModuleOutputMockHelper)) =>
+        StreamData(stream, moduleOutput.getPartitionDataList)
       case _ =>
         throw new IllegalStateException("Incorrect outputs")
-    }.filter(_._2.nonEmpty)
+    }.toSeq
 
-    SimulationResult(outputElements, manager.getState.getAll)
+    SimulationResult(streamData, manager.getState.getAll)
   }
 }
 
