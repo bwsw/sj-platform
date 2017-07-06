@@ -983,7 +983,7 @@ CRUD Rest-API for Config Settings
 -----------------------------------
 
 Config setting fields
--------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. csv-table::  
   :header: "Field", "Format",  "Description"
@@ -1000,7 +1000,7 @@ Config setting name should contain digits, lowercase letters, hyphens or periods
 {config-domain} should be one of the following values: 'system', 't-streams', 'kafka', 'es', 'zk', 'jdbc'
 
 Create a new config setting
----------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Request method: POST
 
@@ -1106,7 +1106,7 @@ Response example::
  }
 
 Delete a config setting by name
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Request method: DELETE
 
