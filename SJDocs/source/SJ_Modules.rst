@@ -132,7 +132,7 @@ An Output module handles external output from event processing pipeline to exter
 
 .. figure:: _static/OutputModule.png
 
-It transforms the processing data results into T-streams and put them into an external data storage. It allows to transform one data item from incoming streaming into one and more data output items.
+It transforms the processing data results received from T-streams and put them into an external data storage. It allows to transform one data item from incoming streaming into one and more data output items.
 
 The output executor provides the following methods that does not perform any work by default so you should define their implementation by yourself.
 
