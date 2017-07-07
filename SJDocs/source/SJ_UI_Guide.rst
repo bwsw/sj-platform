@@ -637,7 +637,7 @@ Click "Cancel" to drop all the specified settings. The strem will not be created
 
 In the list of instances the following actions can be performed:
 
-1. **View** an instance`s name and status. An instance nay have the following statuses:
+1. **View** an instance`s name and status. An instance may have the following statuses:
      
 - ready - a newly created instance and not started yet;
 
