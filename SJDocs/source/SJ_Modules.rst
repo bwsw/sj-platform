@@ -205,6 +205,8 @@ Batch module
 ~~~~~~~~~~~~~~~~~
 A batch is a minimum data set for a handler to collect the events in the stream. The size of a batch is defined by a user. It can be a period of time or a quantity of events or a specific type of event after receiving which the batch is considered closed.  Then, the queue of batches is sent further in the flow for the next stage of processing. 
 
+.. _Batch-Collector:
+
 In the module it is a Batch Collector that is responsible for the logic of collecting batches. It provides the following methods, implementation of which you should specify. 
 
 1) “getBatchesToCollect”:
