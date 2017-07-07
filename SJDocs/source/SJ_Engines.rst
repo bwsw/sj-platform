@@ -40,7 +40,7 @@ Regular Streaming Engine receives incoming events and then passes data after tra
 
 The processing flow for Regular Engine is presented below. 
 
-.. figure:: _static/RegularEngine.jpg
+.. figure:: _static/Regular_Engine.jpg
 
 The processing differs for stateless (the left schema) and statefull (the right schema) mode of processing.
 
