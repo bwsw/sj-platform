@@ -30,6 +30,42 @@ import scala.collection.mutable
   * Simulates behavior of [[com.bwsw.sj.common.engine.TaskEngine TaskEngine]] for testing an implementation of
   * [[BatchStreamingExecutor]]
   *
+  * Usage example:
+  * {{{
+  * val stateSaver = mock(classOf[StateSaverInterface])
+  * val stateLoader = new StateLoaderMock
+  * val stateService = new RAMStateService(stateSaver, stateLoader)
+  * val stateStorage = new StateStorage(stateService)
+  * val options = ""
+  * val output = new TStreamStreamDomain("out", mock(classOf[TStreamServiceDomain]), 3, tags = Array("output"))
+  * val manager = new ModuleEnvironmentManagerMock(stateStorage, options, Array(output))
+  * val executor: BatchStreamingExecutor[String] = new SomeExecutor(manager)
+  * val tstreamInput = new TStreamStreamDomain("t-stream-input", mock(classOf[TStreamServiceDomain]), 1)
+  * val kafkaInput = new KafkaStreamDomain("kafka-input", mock(classOf[KafkaServiceDomain]), 1, 1)
+  * val inputs = Array(tstreamInput, kafkaInput)
+  * *
+  * val batchInstanceDomain = mock(classOf[BatchInstanceDomain])
+  * when(batchInstanceDomain.getInputsWithoutStreamMode).thenReturn(inputs.map(_.name))
+  *
+  * val batchCollector = new SomeBatchCollector(batchInstanceDomain, mock(classOf[BatchStreamingPerformanceMetrics]), inputs)
+  *
+  * val simulator = new BatchEngineSimulator(executor, manager, batchCollector)
+  * simulator.prepareState(Map("idleCalls" -> 0, "symbols" -> 0))
+  * simulator.prepareTstream(Seq("ab", "c", "de"), tstreamInput.name)
+  * simulator.prepareKafka(Seq("fgh", "g"), kafkaInput.name)
+  * simulator.prepareTstream(Seq("ijk", "lm"), tstreamInput.name)
+  * simulator.prepareTstream(Seq("n"), tstreamInput.name)
+  * simulator.prepareTstream(Seq("o"), tstreamInput.name)
+  * simulator.prepareKafka(Seq("p", "r", "s"), kafkaInput.name)
+  *
+  * val windowsNumberBeforeIdle = 2
+  * val window = 3
+  * val slidingInterval = 1
+  * val results = simulator.process(windowsNumberBeforeIdle, window, slidingInterval)
+  *
+  * println(results)
+  * }}}
+  *
   * @param executor       implementation [[BatchStreamingExecutor]] under test
   * @param manager        environment manager that used by executor
   * @param batchCollector implementation of [[BatchCollector]] that used with executor
