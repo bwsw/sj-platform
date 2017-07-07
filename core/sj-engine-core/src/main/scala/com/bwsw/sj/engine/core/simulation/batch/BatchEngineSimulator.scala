@@ -27,10 +27,13 @@ import org.mockito.Mockito.{mock, when}
 import scala.collection.mutable
 
 /**
-  * @param manager
-  * @param executor
-  * @param batchCollector
-  * @tparam T
+  * Simulates behavior of [[com.bwsw.sj.common.engine.TaskEngine TaskEngine]] for testing an implementation of
+  * [[BatchStreamingExecutor]]
+  *
+  * @param executor       implementation [[BatchStreamingExecutor]] under test
+  * @param manager        environment manager that used by executor
+  * @param batchCollector implementation of [[BatchCollector]] that used with executor
+  * @tparam T type of incoming data
   * @author Pavel Tomskikh
   */
 class BatchEngineSimulator[T <: AnyRef](executor: BatchStreamingExecutor[T],
@@ -39,20 +42,25 @@ class BatchEngineSimulator[T <: AnyRef](executor: BatchStreamingExecutor[T],
   extends CommonEngineSimulator[T](executor, manager) {
 
   /**
-    * @param windowsNumberBeforeIdle
-    * @param window
-    * @param slidingInterval
-    * @param removeHandledEnvelopes
-    * @return
+    * Sends incoming envelopes from local buffer to [[executor]] as long as simulator can creates windows and returns
+    * output elements, state and envelopes that does not processed
+    *
+    * @param windowsNumberBeforeIdle  number of windows between invocations of [[executor.onIdle()]]. '0' means that
+    *                                 [[executor.onIdle()]] will never be called.
+    * @param window                   count of batches that will be contained into a window ([[BatchInstance.window]])
+    * @param slidingInterval          the interval at which a window will be shifted (сount of batches that will be
+    *                                 removed from the window after its processing)
+    * @param removeProcessedEnvelopes indicates that processed envelopes must be removed from local buffer
+    * @return output elements, state and envelopes that does not processed
     */
   def process(windowsNumberBeforeIdle: Int = 0,
               window: Int,
               slidingInterval: Int,
-              removeHandledEnvelopes: Boolean = true) = {
+              removeProcessedEnvelopes: Boolean = true) = {
 
     val remainingEnvelopes = new Processor(windowsNumberBeforeIdle, window, slidingInterval).process()
 
-    if (removeHandledEnvelopes) {
+    if (removeProcessedEnvelopes) {
       clear()
       inputEnvelopes ++= remainingEnvelopes
     }
@@ -162,4 +170,10 @@ class BatchEngineSimulator[T <: AnyRef](executor: BatchStreamingExecutor[T],
 
 }
 
+/**
+  * Contains output elements, state and list of envelopes
+  *
+  * @param simulationResult   output elements and state
+  * @param remainingEnvelopes list of envelopes
+  */
 case class BatchSimulationResult(simulationResult: SimulationResult, remainingEnvelopes: Seq[Envelope])
