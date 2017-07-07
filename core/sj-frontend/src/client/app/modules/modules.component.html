@@ -78,12 +78,12 @@
       <div class="card-block">
         <div class="overflow-x-scroll">
           <ul *ngIf="currentModuleSpecification">
-            <li>Name: {{currentModuleSpecification.name}}</li>
-            <li>Description: {{currentModuleSpecification.description}}</li>
-            <li>Version: {{currentModuleSpecification.version}}</li>
-            <li>Author: {{currentModuleSpecification.author}}</li>
-            <li>Licence: {{currentModuleSpecification.license}}</li>
-            <li>Inputs:
+            <li><span class="title">Name:</span>{{currentModuleSpecification.name}}</li>
+            <li *ngIf="currentModuleSpecification.description"><span class="title">Description:</span>{{currentModuleSpecification.description}}</li>
+            <li><span class="title">Version:</span>{{currentModuleSpecification.version}}</li>
+            <li><span class="title">Author:</span>{{currentModuleSpecification.author}}</li>
+            <li><span class="title">Licence:</span>{{currentModuleSpecification.license}}</li>
+            <li><span class="title">Inputs:</span>
               <ul>
                 <li>Cardinality:
                   <ul>
@@ -97,7 +97,7 @@
                 </li>
               </ul>
             </li>
-            <li>Outputs:
+            <li><span class="title">Outputs:</span>
               <ul>
                 <li>Cardinality:
                   <ul>
@@ -111,11 +111,21 @@
                 </li>
               </ul>
             </li>
-            <li>Module-type: {{currentModuleSpecification.moduleType}}</li>
-            <li>Engine: {{currentModuleSpecification.engineName}} {{currentModuleSpecification.engineVersion}}</li>
-            <li>Options : {{currentModuleSpecification.options | json}}</li>
-            <li>Validator-class: {{currentModuleSpecification.validateClass}}</li>
-            <li>Executor-class: {{currentModuleSpecification.executorClass}}</li>
+            <li *ngIf="currentModuleSpecification.moduleType">
+              <span class="title">Module-type:</span>{{currentModuleSpecification.moduleType}}
+            </li>
+            <li *ngIf="currentModuleSpecification.engineName">
+              <span class="title">Engine:</span>{{currentModuleSpecification.engine}}
+            </li>
+            <li *ngIf="currentModuleSpecification.options">
+              <span class="title">Options:</span>{{currentModuleSpecification.options | json}}
+            </li>
+            <li *ngIf="currentModuleSpecification.validateClass">
+              <span class="title">Validator-class:</span>{{currentModuleSpecification.validateClass}}
+            </li>
+            <li *ngIf="currentModuleSpecification.executorClass">
+              <span class="title">Executor-class:</span>{{currentModuleSpecification.executorClass}}
+            </li>
           </ul>
         </div>
       </div>

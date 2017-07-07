@@ -106,62 +106,129 @@
       <div class="card-block">
         <div class="overflow-x-scroll">
           <ul *ngIf="currentInstance">
-            <li>Stages: {{currentInstance.stage | json}}</li>
-            <li>Status: {{currentInstance.status}}</li>
-            <li>Name : {{currentInstance.name}}</li>
-            <li>Module-type : {{currentInstance.module.moduleType}}</li>
-            <li>Module-name : {{currentInstance.module.moduleName}}</li>
-            <li>Module-version: {{currentInstance.module.moduleVersion}}</li>
-            <li *ngIf="currentInstance.description">Description : {{currentInstance.description}}</li>
-            <li>Engine : {{currentInstance.engine}}</li>
-            <li *ngIf="currentInstance.inputs">Inputs: {{currentInstance.inputs}}</li>
-            <li *ngIf="currentInstance.outputs">Outputs: {{currentInstance.outputs}}</li>
-            <li *ngIf="currentInstance.input">Input: {{currentInstance.input}}</li>
-            <li *ngIf="currentInstance.output">Output: {{currentInstance.output}}</li>
-            <li *ngIf="currentInstance.checkpointMode">Checkpoint mode : {{currentInstance.checkpointMode}}</li>
-            <li *ngIf="currentInstance.checkpointInterval">Checkpoint interval : {{currentInstance.checkpointInterval}}</li>
-            <li *ngIf="currentInstance.stateManagement">State management :
-              {{currentInstance.stateManagement}}</li>
-            <li *ngIf="currentInstance.duplicateCheck || currentInstance.duplicateCheck === false">Duplicate check :
-              {{currentInstance.duplicateCheck}}</li>
-            <li *ngIf="currentInstance.lookupHistory">Lookup history : {{currentInstance.lookupHistory}}</li>
-            <li *ngIf="currentInstance.queueMaxSize">Queue max-size : {{currentInstance.queueMaxSize}}</li>
-            <li *ngIf="currentInstance.defaultEvictionPolicy">Default eviction policy :
-              {{currentInstance.defaultEvictionPolicy}}</li>
-            <li *ngIf="currentInstance.evictionPolicy">Eviction policy :
-              {{currentInstance.evictionPolicy}}</li>
-            <li *ngIf="currentInstance.stateFullCheckpoint">State full checkpoint :
-              {{currentInstance.stateFullCheckpoint}}</li>
-            <li>Parallelism : {{currentInstance.parallelism}}</li>
-            <li>Options : {{currentInstance.options | json }}</li>
-            <li *ngIf="currentInstance.startFrom">Start-from : {{currentInstance.startFrom}}</li>
-            <li>Per-task cores : {{currentInstance.perTaskCorese}}</li>
-            <li>Per-task ram" : {{currentInstance.perTaskRam}}</li>
-            <li>Coordination service : {{currentInstance.coordinationService}}</li>
-            <li *ngIf="currentInstance.eventWaitIdleTime">Event-wait-idle-time :
-              {{currentInstance.eventWaitIdleTime}}</li>
-            <li *ngIf="currentInstance.window">Window :
-              {{currentInstance.window}}</li>
-            <li *ngIf="currentInstance.slidingInterval">Sliding interval :
-              {{currentInstance.slidingInterval}}</li>
-            <li *ngIf="currentInstance.mainStream">Main stream :
-              {{currentInstance.mainStream}}</li>
-            <li *ngIf="currentInstance.relatedStreams">Related streams :
-              {{currentInstance.relatedStreams}}</li>
-            <li *ngIf="currentInstance.batchFillType">Batch-fill-type :
-              {{currentInstance.batchFillType | json}}</li>
-            <li *ngIf="currentInstance.performanceReportingInterval">Performance reporting interval :
-              {{currentInstance.performanceReportingInterval}}</li>
-            <li *ngIf="currentInstance.jvmOptions">Jvm options : {{currentInstance.jvmOptions | json}}</li>
-            <li *ngIf="currentInstance.environmentVariables">Environment variables :
-              {{currentInstance.environmentVariables| json}}</li>
-            <li *ngIf="currentInstance.nodeAttributes">Node attributes : {{currentInstance.nodeAttributes |
-              json}}</li>
-            <li *ngIf="currentInstance.backupCount || currentInstance.backupCount === 0">Backup count : {{currentInstance.backupCount}}</li>
-            <li *ngIf="currentInstance.asyncBackupCount || currentInstance.asyncBackupCount === 0">Async-backup count :
-              {{currentInstance.asyncBackupCount}}</li>
-            <li>{{currentInstance.module.moduleType !== 'input-streaming' ? 'Execution-plan:': 'Tasks:'}}
-              <ul *ngIf="currentInstance !== undefined">
+            <li *ngIf="currentInstance.stage">
+              <span class="title">Stages:</span>{{currentInstance.stage | json}}
+            </li>
+            <li *ngIf="currentInstance.status">
+              <span class="title">Status:</span>{{currentInstance.status}}
+            </li>
+            <li *ngIf="currentInstance.name">
+              <span class="title">Name:</span>{{currentInstance.name}}
+            </li>
+            <li *ngIf="currentInstance.module.moduleType">
+              <span class="title">Module-type:</span>{{currentInstance.module.moduleType}}
+            </li>
+            <li *ngIf="currentInstance.module.moduleName">
+              <span class="title">Module-name:</span>{{currentInstance.module.moduleName}}
+            </li>
+            <li *ngIf="currentInstance.module.moduleVersion">
+              <span class="title">Module-version:</span>{{currentInstance.module.moduleVersion}}
+            </li>
+            <li *ngIf="currentInstance.description">
+              <span class="title">Description:</span>{{currentInstance.description}}
+            </li>
+            <li *ngIf="currentInstance.engine">
+              <span class="title">Engine:</span>{{currentInstance.engine}}
+            </li>
+            <li *ngIf="currentInstance.inputs">
+              <span class="title">Inputs:</span>{{currentInstance.inputs}}
+            </li>
+            <li *ngIf="currentInstance.outputs">
+              <span class="title">Outputs:</span>{{currentInstance.outputs}}
+            </li>
+            <li *ngIf="currentInstance.input">
+              <span class="title">Input:</span>{{currentInstance.input}}
+            </li>
+            <li *ngIf="currentInstance.output">
+              <span class="title">Output:</span>{{currentInstance.output}}
+            </li>
+            <li *ngIf="currentInstance.checkpointMode">
+              <span class="title">Checkpoint mode:</span>{{currentInstance.checkpointMode}}
+            </li>
+            <li *ngIf="currentInstance.checkpointInterval">
+              <span class="title">Checkpoint interval:</span>{{currentInstance.checkpointInterval}}
+            </li>
+            <li *ngIf="currentInstance.stateManagement">
+              <span class="title">State management:</span>{{currentInstance.stateManagement}}
+            </li>
+            <li *ngIf="currentInstance.duplicateCheck || currentInstance.duplicateCheck === false">
+              <span class="title">Duplicate check:</span>{{currentInstance.duplicateCheck}}
+            </li>
+            <li *ngIf="currentInstance.lookupHistory">
+              <span class="title">Lookup history:</span>{{currentInstance.lookupHistory}}
+            </li>
+            <li *ngIf="currentInstance.queueMaxSize">
+              <span class="title">Queue max-size:</span>{{currentInstance.queueMaxSize}}
+            </li>
+            <li *ngIf="currentInstance.defaultEvictionPolicy">
+              <span class="title">Default eviction policy:</span>{{currentInstance.defaultEvictionPolicy}}
+            </li>
+            <li *ngIf="currentInstance.evictionPolicy">
+              <span class="title">Eviction policy:</span>{{currentInstance.evictionPolicy}}
+            </li>
+            <li *ngIf="currentInstance.stateFullCheckpoint">
+              <span class="title">State full checkpoint:</span>{{currentInstance.stateFullCheckpoint}}
+            </li>
+            <li *ngIf="currentInstance.parallelism">
+              <span class="title">Parallelism:</span>{{currentInstance.parallelism}}
+            </li>
+            <li *ngIf="currentInstance.options">
+              <span class="title">Options:</span>{{currentInstance.options | json }}
+            </li>
+            <li *ngIf="currentInstance.startFrom">
+              <span class="title">Start-from:</span>{{currentInstance.startFrom}}
+            </li>
+            <li *ngIf="currentInstance.perTaskCores">
+              <span class="title">Per-task cores:</span>{{currentInstance.perTaskCores}}
+            </li>
+            <li *ngIf="currentInstance.perTaskRam">
+              <span class="title">Per-task ram:</span>{{currentInstance.perTaskRam}}
+            </li>
+            <li *ngIf="currentInstance.coordinationService">
+              <span class="title">Coordination service:</span>{{currentInstance.coordinationService}}
+            </li>
+            <li *ngIf="currentInstance.eventWaitIdleTime">
+              <span class="title">Event-wait-idle-time:</span>{{currentInstance.eventWaitIdleTime}}
+            </li>
+            <li *ngIf="currentInstance.window">
+              <span class="title">Window:</span>{{currentInstance.window}}
+            </li>
+            <li *ngIf="currentInstance.slidingInterval">
+              <span class="title">Sliding interval:</span>{{currentInstance.slidingInterval}}
+            </li>
+            <li *ngIf="currentInstance.mainStream">
+              <span class="title">Main stream:</span>{{currentInstance.mainStream}}
+            </li>
+            <li *ngIf="currentInstance.relatedStreams">
+              <span class="title">Related streams:</span>{{currentInstance.relatedStreams}}
+            </li>
+            <li *ngIf="currentInstance.batchFillType">
+              <span class="title">Batch-fill-type:</span>{{currentInstance.batchFillType | json}}
+            </li>
+            <li *ngIf="currentInstance.performanceReportingInterval">
+              <span class="title">Performance reporting interval:</span>{{currentInstance.performanceReportingInterval}}
+            </li>
+            <li *ngIf="currentInstance.jvmOptions">
+              <span class="title">Jvm options:</span>{{currentInstance.jvmOptions | json}}
+            </li>
+            <li *ngIf="currentInstance.environmentVariables">
+              <span class="title">Environment variables:</span>{{currentInstance.environmentVariables| json}}
+            </li>
+            <li *ngIf="currentInstance.nodeAttributes">
+              <span class="title">Node attributes:</span>{{currentInstance.nodeAttributes |
+              json}}
+            </li>
+            <li *ngIf="currentInstance.backupCount || currentInstance.backupCount === 0">
+              <span class="title">Backup count:</span>{{currentInstance.backupCount}}
+            </li>
+            <li *ngIf="currentInstance.asyncBackupCount || currentInstance.asyncBackupCount === 0">
+              <span class="title">Async-backup count:</span>{{currentInstance.asyncBackupCount}}
+            </li>
+            <li *ngIf="currentInstanceTasks">
+              <span class="title">
+                {{currentInstance.module.moduleType !== 'input-streaming' ? 'Execution-plan:': 'Tasks:'}}
+              </span>
+              <ul>
                 <li>{{currentInstanceTasks | json}}</li>
               </ul>
             </li>
@@ -753,15 +820,33 @@
       </div>
 
       <div class="modal-body" *ngIf="tasks">
-        <ul *ngFor="let task of tasks">
-          <li>{{task.id}}</li>
-          <li>{{task.state}}</li>
-          <li>{{task.directories}}</li>
-          <li>{{task.stateChange}}</li>
-          <li>{{task.reason}}</li>
-          <li>{{task.lastNode}}</li>
-          <li>{{task.node}}</li>
-        </ul>
+        <span *ngFor="let task of tasks">
+          <h5>{{task.id}}</h5>
+          <ul>
+            <li *ngIf="task.state">
+              <span class="title">State:</span>{{task.state}}
+            </li>
+            <li *ngIf="task.directories">
+              <span class="title">Directories:</span>
+              <ul>
+                <li *ngFor="let dir of task.directories">
+                  <a href="{{dir.path}}">{{dir.name}}</a></li>
+              </ul>
+            </li>
+            <li *ngIf="task.stateChange">
+              <span class="title">State change:</span>{{task.stateChange}}
+            </li>
+            <li *ngIf="task.reason">
+              <span class="title">Reason:</span>{{task.reason}}
+            </li>
+            <li *ngIf="task.lastNode">
+              <span class="title">Last node:</span>{{task.lastNode}}
+            </li>
+            <li *ngIf="task.node">
+              <span class="title">Node:</span>{{task.node}}
+            </li>
+          </ul>
+        </span>
       </div>
 
       <div class="modal-footer">

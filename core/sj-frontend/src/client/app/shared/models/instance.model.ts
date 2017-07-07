@@ -33,6 +33,7 @@ export class InstanceModel extends BaseModel {
   options: Object;
   output: string = '';
   outputs: string[] = [''];
+  mainStream: string;
   parallelism: string = '1';
   perTaskCores: number = 1;
   perTaskRam: number = 1024;
@@ -70,6 +71,7 @@ export class SubtypedInstance {
   eventWaitIdleTime: number;
   inputs: string[] = [''];
   outputs: string[] = [''];
+  mainStream: string;
   startFrom: string;
   stateFullCheckpoint: number;
   stateManagement: string;
@@ -103,6 +105,7 @@ export class BatchStreamingInstance extends SubtypedInstance {
   window: number;
   slidingInterval: number;
   inputs: string[] = [''];
+  mainStream: string;
   startFrom: string;
   stateManagement: string;
   stateFullCheckpoint: number;

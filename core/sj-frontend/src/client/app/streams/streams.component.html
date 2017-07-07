@@ -75,12 +75,19 @@
       <div class="card-block">
         <div class="overflow-x-scroll">
           <ul *ngIf="currentStream">
-            <li>Name: {{currentStream.name}}</li>
-            <li>Type: {{currentStream.type}}</li>
-            <li>Description: {{currentStream.description}}</li>
-            <li *ngIf="currentStream.type !== 'elasticsearch-output'">Partitions: {{currentStream.partitions}}</li>
-            <li>Tags: {{currentStream.tags}}</li>
-            <li>Service: <span class="btn-lookup action-link" (click)="getServiceInfo(ServiceInfo, currentStream.service)">{{ currentStream.service }}</span>
+            <li><span class="title">Name:</span>{{currentStream.name}}</li>
+            <li><span class="title">Type:</span>{{currentStream.type}}</li>
+            <li *ngIf="currentStream.description">
+              <span class="title">Description:</span>{{currentStream.description}}
+            </li>
+            <li *ngIf="currentStream.type !== 'elasticsearch-output'">
+              <span class="title">Partitions:</span>{{currentStream.partitions}}
+            </li>
+            <li *ngIf="currentStream.tags"><span class="title">Tags:</span>{{currentStream.tags}}</li>
+            <li *ngIf="currentStream.service">
+              <span class="title">Service:</span>
+              <span class="btn-lookup action-link"
+                    (click)="getServiceInfo(ServiceInfo, currentStream.service)">{{ currentStream.service }}</span>
             </li>
             <!--<li *ngIf="currentStream['stream-type'] === 'stream.t-stream'">Generator:
               <ul>
@@ -89,7 +96,9 @@
                 <li>Instance count: {{currentStream.generator.instanceCount}}</li>
               </ul>
             </li-->
-            <li *ngIf="currentStream.replicationFactor">Replication factor: {{currentStream.replicationFactor}}</li>
+            <li *ngIf="currentStream.replicationFactor">
+              <span class="title">Replication factor:</span>{{currentStream.replicationFactor}}
+            </li>
           </ul>
         </div>
       </div>
@@ -276,33 +285,34 @@
       </div>
       <div class="modal-body">
         <ul *ngIf="currentStreamService">
-          <li>Name: {{currentStreamService.name}}</li>
-          <li>Type: {{currentStreamService.type}}</li>
-          <li>Description: {{currentStreamService.description}}</li>
-          <li *ngIf="currentStreamService.type == 'CassDB'">Keyspace: {{currentStreamService.keyspace}}</li>
-          <li *ngIf="currentStreamService.type == 'ESInd'">Index: {{currentStreamService.index}}</li>
-          <li *ngIf="currentStreamService.type == 'TstrQ' || currentStreamService.type == 'ZKCoord'
-              || currentStreamService.type == 'RdsCoord' || currentStreamService.type == 'ArspkDB'">
-            Namespace: {{currentStreamService.namespace}}
+          <li>
+            <span class="title">Name:</span>{{currentStreamService.name}}
           </li>
-          <li *ngIf="currentStreamService.type != 'TstrQ'">Provider: {{ currentStreamService.provider }}</li>
-          <li *ngIf="currentStreamService.type == 'TstrQ'">Metadata provider:
-            {{currentStreamService.metadataProvider}}
+          <li>
+            <span class="title">Type:</span>{{currentStreamService.type}}
           </li>
-          <li *ngIf="currentStreamService.type == 'TstrQ'">Metadata namespace:
-            {{currentStreamService.metadataNamespace}}
+          <li *ngIf="currentStreamService.description">
+            <span class="title">Description:</span>{{currentStreamService.description}}
           </li>
-          <li *ngIf="currentStreamService.type == 'TstrQ'">Data provider:
-            {{currentStreamService.dataProvider}}
+          <li *ngIf="currentStreamService.type === 'CassDB' && currentStreamService.keyspace">
+            <span class="title">Keyspace:</span>{{currentStreamService.keyspace}}
           </li>
-          <li *ngIf="currentStreamService.type == 'TstrQ'">Data namespace:
-            {{currentStreamService.dataNamespace}}
+          <li *ngIf="currentStreamService.type === 'ESInd' && currentStreamService.index">
+            <span class="title">Index:</span>{{currentStreamService.index}}
           </li>
-          <li *ngIf="currentStreamService.type == 'TstrQ'">Lock-provider:
-            {{currentStreamService.lockProvider}}
+          <li *ngIf="(currentStreamService.type == 'TstrQ' || currentStreamService.type === 'ZKCoord'
+                        || currentStreamService.type === 'RdsCoord' ||
+                        currentStreamService.type === 'ArspkDB') && currentStreamService.namespace">
+            <span class="title">Namespace:</span>{{currentStreamService.namespace}}
           </li>
-          <li *ngIf="currentStreamService.type == 'TstrQ'">Lock-namespace:
-            {{currentStreamService.lockNamespace}}
+          <li *ngIf="currentStreamService.type !== 'TstrQ' && currentStreamService.provider">
+            <span class="title">Provider:</span>{{currentStreamService.provider}}
+          </li>
+          <li *ngIf="currentStreamService.type === 'KfkQ' && currentStreamService.zkProvider">
+            <span class="title">ZK provider:</span>{{currentStreamService.zkProvider}}
+          </li>
+          <li *ngIf="currentStreamService.type === 'KfkQ' && currentStreamService.zkNamespace">
+            <span class="title">ZK namespace:</span>{{currentStreamService.zkNamespace}}
           </li>
         </ul>
         <fieldset class="form-actions">
