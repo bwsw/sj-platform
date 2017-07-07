@@ -84,15 +84,15 @@ class BatchEngineSimulator[T <: AnyRef](executor: BatchStreamingExecutor[T],
     * @param windowsNumberBeforeIdle  number of windows between invocations of [[executor.onIdle()]]. '0' means that
     *                                 [[executor.onIdle()]] will never be called.
     * @param window                   count of batches that will be contained into a window ([[BatchInstance.window]])
-    * @param slidingInterval          the interval at which a window will be shifted (сount of batches that will be
-    *                                 removed from the window after its processing)
+    * @param slidingInterval          the interval at which a window will be shifted (count of processed batches that will be
+    *                                 removed from the window)
     * @param removeProcessedEnvelopes indicates that processed envelopes must be removed from local buffer
-    * @return output elements, state and envelopes that does not processed
+    * @return output elements, state and envelopes that haven't been processed
     */
   def process(windowsNumberBeforeIdle: Int = 0,
               window: Int,
               slidingInterval: Int,
-              removeProcessedEnvelopes: Boolean = true) = {
+              removeProcessedEnvelopes: Boolean = true): BatchSimulationResult = {
 
     val remainingEnvelopes = new Processor(windowsNumberBeforeIdle, window, slidingInterval).process()
 
@@ -215,6 +215,6 @@ class BatchEngineSimulator[T <: AnyRef](executor: BatchStreamingExecutor[T],
   * Contains output elements, state and list of envelopes
   *
   * @param simulationResult   output elements and state
-  * @param remainingEnvelopes list of envelopes
+  * @param remainingEnvelopes list of envelopes that haven't been processed
   */
 case class BatchSimulationResult(simulationResult: SimulationResult, remainingEnvelopes: Seq[Envelope])

@@ -48,10 +48,10 @@ object RetrievableCheckpointTaskInput {
                          checkpointGroup: CheckpointGroup,
                          envelopeDataSerializer: SerializerInterface)
                         (implicit injector: Injector): RetrievableCheckpointTaskInput[_ <: Envelope] = {
-    val isKafkaInputExist = manager.inputs.exists(x => x._1.streamType == StreamLiterals.kafkaStreamType)
-    val isTstreamInputExist = manager.inputs.exists(x => x._1.streamType == StreamLiterals.tstreamType)
+    val kafkaInputExists = manager.inputs.exists(x => x._1.streamType == StreamLiterals.kafkaStreamType)
+    val tstreamInputExists = manager.inputs.exists(x => x._1.streamType == StreamLiterals.tstreamType)
 
-    (isKafkaInputExist, isTstreamInputExist) match {
+    (kafkaInputExists, tstreamInputExists) match {
       case (true, true) => new RetrievableCompleteCheckpointTaskInput[T](manager, checkpointGroup, envelopeDataSerializer)
       case (false, true) => new RetrievableTStreamCheckpointTaskInput[T](manager, checkpointGroup, envelopeDataSerializer)
       case (true, false) => new RetrievableKafkaCheckpointTaskInput[T](manager, checkpointGroup, envelopeDataSerializer)

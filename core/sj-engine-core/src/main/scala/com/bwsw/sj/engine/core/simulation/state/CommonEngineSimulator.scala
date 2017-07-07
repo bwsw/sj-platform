@@ -37,7 +37,7 @@ class CommonEngineSimulator[T <: AnyRef](executor: StreamingExecutor with StateH
   protected val inputEnvelopes: mutable.Buffer[Envelope] = mutable.Buffer.empty
 
   /**
-    * Load state in state storage
+    * Load a state in a state storage
     *
     * @param state key/value map
     */
@@ -83,8 +83,8 @@ class CommonEngineSimulator[T <: AnyRef](executor: StreamingExecutor with StateH
   }
 
   /**
-    * Creates [[KafkaEnvelope]]s and saves it in a local buffer. For each element from entities creates one
-    * [[KafkaEnvelope]].
+    * Creates [[KafkaEnvelope]]s and saves it in a local buffer.
+    * For each element from list creates a new [[KafkaEnvelope]].
     *
     * @param entities incoming data
     * @param stream   name of stream
@@ -107,13 +107,13 @@ class CommonEngineSimulator[T <: AnyRef](executor: StreamingExecutor with StateH
   }
 
   /**
-    * Removes all envelopes from local buffer
+    * Removes all envelopes from a local buffer
     */
   def clear(): Unit =
     inputEnvelopes.clear()
 
 
-  protected def simulationResult = {
+  protected def simulationResult: SimulationResult = {
     val streamData = manager.producerPolicyByOutput.map {
       case (stream, (_, moduleOutput: ModuleOutputMockHelper)) =>
         StreamData(stream, moduleOutput.getPartitionDataList)

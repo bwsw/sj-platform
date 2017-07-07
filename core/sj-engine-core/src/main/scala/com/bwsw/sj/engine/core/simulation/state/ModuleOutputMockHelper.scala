@@ -106,8 +106,3 @@ class RoundRobinOutputMock(producer: Producer,
   override def clear(): Unit =
     super[ModuleOutputMockHelper].clear()
 }
-
-/**
-  * Contains info about output
-  */
-case class OutputElement(data: AnyRef, partition: Int)
