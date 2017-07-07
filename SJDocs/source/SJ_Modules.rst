@@ -122,7 +122,7 @@ InputStreamingResponse:
  
 - sendResponsesNow - a boolean flag denoting whether response should be saved in temporary storage or all responses from this storage should be send to the source right now (including this one)
  
-.. To see a flow chart about how these methods intercommunicate, please, visit the `Input Streaming Engine`_ page.
+To see a flow chart on how these methods intercommunicate, please, visit the :ref:`Input_Streaming_Engine` section.
 
 
 Output module
@@ -132,7 +132,7 @@ An Output module handles external output from event processing pipeline to exter
 
 .. figure:: _static/OutputModule.png
 
-It transforms the processing data results received from T-streams and put them into an external data storage. It allows to transform one data item from incoming streaming into one and more data output items.
+It transforms the processing data results received from T-streams and pass them to an external data storage. It allows to transform one data item from incoming streaming into one and more data output items.
 
 The output executor provides the following methods that does not perform any work by default so you should define their implementation by yourself.
 
@@ -141,6 +141,10 @@ The output executor provides the following methods that does not perform any wor
 
 2. "getOutputEntity":
     It is invoked once when module running. This method returns the current working entity, i.e. fields and types. This method must be overridden. 
+
+A type is assigned to an output envelope that corresponds to the type of an external storage (Elasticsearch, JDBC, REST).
+
+To see a flow chart on how these methods intercommunicate, please, visit the :ref:`Output_Streaming_Engine` section.
 
 
 
@@ -198,7 +202,7 @@ Inside of the module there is a manager allowing to get an access to:
 - list of output names (by calling "getStreamsByTags()"). Every output contains its own set of tags which are used to retrieve it. 
 -  initiation of checkpoint (by calling "initiateCheckpoint()").
 
-.. To see a flow chart on how these methods intercommunicate see the page `Regular Streaming Engine`_ .
+To see a flow chart on how these methods intercommunicate see the :ref:`Regular_Streaming_Engine` section.
 
 
 Batch module
@@ -340,7 +344,7 @@ The following handlers are used for synchronizing the tasks' work. It can be use
 
 .. 4) "onLeaderLeave": It is invoked by a leader-task after passing an output barrier
 
-.. To see a flow chart about how these methods intercommunicate see the page `Batch Streaming Engine`_ .
+To see a flow chart about how these methods intercommunicate see the :ref:`Batch_Streaming_Engine` section .
 
 The Batch module can either have a state or not. A state is a sort of a key-value storage and can be used to keep some global module variables related to processing. These variables are persisted and are recovered after a fail. A fail means that something is going wrong in one of the methods described above. In this case a whole module will be restarted. And the work will start on onInit method invocation.
 There is a manager inside module which grants access to:
@@ -357,14 +361,13 @@ The state is performed alongside with the checkpoint. At a checkpoint the data r
 
 .. A detailed manual on how to write a module you may find at `page`_ .
 
-Modules` performance is determined with the work of engine. An engine structure, components and  the workflow are determined with the type of module. 
+Modules` performance is determined with the work of engine. Engines of different types (Input, Regular/Batch, Output) have different structure, components and the workflow corresponding to the type of a module. 
 
-.. Please, find more information about engines at the `Engines`_  page.
+Please, find more information about engines at the :ref:`Engines` page.
 
 
 Prerequisites For Modules. Streaming Components.
 --------------------------------------------------
- .. Warning:: The section is under development!
 
 A module requires the following elements to be created for its performance:
 
@@ -383,8 +386,6 @@ As stated above, modules process the data arranged in streams. The Stream Juggle
 To transform data into a stream of exact type you need to create a service and a provider for this service. The type of a service and a provider is determined by the type of a stream you need for the module.
 
 For example, a Batch module that receives data from Kafka will require a Kafka service (KfkQ) and two provider types for it: Kafka and ZooKeeper. 
-
-.. Or if you work with an Output module and you want to store the processed data to ElasticSearch index, you are going to work with  the ElasticSearch output type stream that in its turn requires a service and a provider of ElasticSearch type.
 
 The diagram below may help you to understand the dependency of instances in the platform.
 
