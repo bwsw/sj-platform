@@ -18,6 +18,8 @@ The types of the engines correspond to the types of :ref:`Modules` in the platfo
 
 Each engine has its unique workflow. 
 
+.. _Input_Streaming_Engine:
+
 Input Streaming Engine
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 Input streaming engine is required to run an input module (currently TCP Input Stream Module); it handles external inputs, does data deduplication, transforms raw data to objects. 
@@ -33,6 +35,7 @@ Once an Interval is set the buffer of incoming data is validated to define wheth
 Via T-streams the message is sent further in the pipeline to the next stage of processing (to a Regular/Batch module).
 
 
+.. _Regular_Streaming_Engine:
 
 Regular Streaming Engine
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -52,6 +55,8 @@ A checkpoint is performed after a set period of time or after a set number of me
 If the module has a state the processed data are stored at the moment of checkpoint. In case of a falure the stored data from the state will be recovered and the module will be restarted.
 
 If there is no state the checkpoint is performed and the cycle starts again from receiving a new message.
+
+.. _Batch_Streaming_Engine:
 
 Batch Streaming Engine
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -81,6 +86,8 @@ After the data is processed the checkpoint is performed and the result of proces
 If the module has a state the processed data are stored at the moment of checkpoint. In case of a failure the stored data from the state will be recovered and the module will be restarted.
 
 If there is no state the checkpoint is performed and the cycle starts again from collecting new messages into batches.
+
+.. _Output_Streaming_Engine:
 
 Output Streaming Engine
 ~~~~~~~~~~~~~~~~~~~~~~~~
