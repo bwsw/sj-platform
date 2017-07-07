@@ -42,17 +42,15 @@ class BatchEngineSimulator[T <: AnyRef](executor: BatchStreamingExecutor[T],
     * @param windowsNumberBeforeIdle
     * @param window
     * @param slidingInterval
-    * @param inputs
     * @param removeHandledEnvelopes
     * @return
     */
   def process(windowsNumberBeforeIdle: Int = 0,
               window: Int,
               slidingInterval: Int,
-              inputs: Array[String],
               removeHandledEnvelopes: Boolean = true) = {
 
-    val remainingEnvelopes = new Processor(windowsNumberBeforeIdle, window, slidingInterval, inputs).process()
+    val remainingEnvelopes = new Processor(windowsNumberBeforeIdle, window, slidingInterval).process()
 
     if (removeHandledEnvelopes) {
       clear()
@@ -64,12 +62,13 @@ class BatchEngineSimulator[T <: AnyRef](executor: BatchStreamingExecutor[T],
 
   private class Processor(windowsNumberBeforeIdle: Int = 0,
                           window: Int,
-                          slidingInterval: Int,
-                          inputs: Array[String]) {
+                          slidingInterval: Int) {
 
+    private val inputs: Array[String] = inputEnvelopes.map(_.stream).toSet.toArray
     private var windowsAfterIdle: Int = 0
-    private val envelopesByStream = inputs.map(stream => stream -> mutable.Queue.empty[Envelope]).toMap
-    private var retrievableStreams = inputs
+    private val envelopesByStream: Map[String, mutable.Queue[Envelope]] =
+      inputs.map(stream => stream -> mutable.Queue.empty[Envelope]).toMap
+    private var retrievableStreams: Array[String] = inputs
     private val windowRepository: WindowRepository = createWindowRepository
     private val currentWindowPerStream: mutable.Map[String, Window] = mutable.Map(inputs.map(x => (x, new Window(x))): _*)
     private val counterOfBatchesPerStream: mutable.Map[String, Int] = mutable.Map(inputs.map(x => (x, 0)): _*)
