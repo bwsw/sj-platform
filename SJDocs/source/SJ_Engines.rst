@@ -24,7 +24,7 @@ Input streaming engine is required to run an input module (currently TCP Input S
 
 Here is the engine processing flow.
 
-.. figure:: _static/InputEngine.png
+.. figure:: _static/InputEngine.jpg
 
 Input module waits for new events (messages) from the TCP channel. A wait time period (‘event-wait-time’) is 1000 ms by default. Once a new data portion is received, the “tokenize” method determins the beginning and the end of the Interval (i.e. significant set of bytes in the incoming flow of bytes). 
 
@@ -40,7 +40,7 @@ Regular Streaming Engine receives incoming events and then passes data after tra
 
 The processing flow for Regular Engine is presented below. 
 
-.. figure:: _static/RegularEngine.png
+.. figure:: _static/RegularEngine.jpg
 
 The processing differs for stateless (the left schema) and statefull (the right schema) mode of processing.
 
@@ -59,7 +59,7 @@ Batch Streaming Engine receives incoming events and organizes incoming data into
 
 The processing flow for Batch engine is presented below.
 
-.. figure:: _static/BatchEngine.png
+.. figure:: _static/BatchEngine.jpg
 
 The processing differs for stateless (the left schema) and statefull (the right schema) mode of processing.
 
@@ -88,7 +88,7 @@ Output Streaming Engine handles external output from event processing pipeline t
 
 The processing flow for Output Engine is presented below. 
 
-.. figure:: _static/OutputEngine.png
+.. figure:: _static/OutputEngine.jpg
 
 It waits for an event (message) in T-streams outcoming from a Regular/Batch module. A wait time period (‘event-wait-time’) is 1000 ms by default. When receiving an envelope of T-streams type, it processes the data transforming it into a data type appropriate for an external datastorage. 
 
