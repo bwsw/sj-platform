@@ -76,17 +76,17 @@
       <div class="card-block">
         <div class="overflow-x-scroll">
           <ul *ngIf="currentProvider">
-            <li>Name: {{currentProvider.name}}</li>
-            <li>Type: {{currentProvider.type}}</li>
-            <li>Description: {{currentProvider.description}}</li>
-            <li>Hosts:
+            <li><span class="title">Name:</span>{{currentProvider.name}}</li>
+            <li><span class="title">Type:</span>{{currentProvider.type}}</li>
+            <li><span class="title">Description:</span>{{currentProvider.description}}</li>
+            <li><span class="title">Hosts:</span>
               <ul>
                 <li *ngFor="let host of currentProvider.hosts">{{host}}</li>
               </ul>
             </li>
-            <li *ngIf="currentProvider.login">Login: {{currentProvider.login}}</li>
-            <li *ngIf="currentProvider.password">Password: {{currentProvider.password}}</li>
-            <li *ngIf="currentProvider.type === 'JDBC'">Driver: {{currentProvider.driver}}</li>
+            <li *ngIf="currentProvider.login"><span class="title">Login:</span>{{currentProvider.login}}</li>
+            <li *ngIf="currentProvider.password"><span class="title">Password:</span>{{currentProvider.password}}</li>
+            <li *ngIf="currentProvider.type === 'JDBC'"><span class="title">Driver:</span>{{currentProvider.driver}}</li>
           </ul>
         </div>
       </div>
