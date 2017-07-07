@@ -1,6 +1,8 @@
 Engines: types, workflow 
 ==============================
 
+.. Contents::
+
 An engine is a framework that performs processing of streams. It runs an application code and handles data from an input stream providing results to an output stream.
 
 An engine is required to start a module. A module can not process data streams without an engine (that is a .jar file containing necessary configuration settings) that launches the module ingesting raw data and sends the processed data further in the pipeline.
