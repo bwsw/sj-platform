@@ -52,7 +52,7 @@ object TestStorageServer {
       .withCommitLogOptions(CommitLogOptions(commitLogCloseDelayMs = 100))
       .build()
 
-    println("START SERVER")
+    println(s"START SERVER")
     transactionServer.start()
   }
 }

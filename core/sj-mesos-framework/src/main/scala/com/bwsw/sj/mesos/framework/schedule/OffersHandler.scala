@@ -149,9 +149,9 @@ object OffersHandler {
 
   def updateOfferNumber(tasksOnSlaves: mutable.ListBuffer[(Offer, Int)]): mutable.ListBuffer[(Offer, Int)] = {
     var result: mutable.ListBuffer[(Offer, Int)] = tasksOnSlaves
-    while (tasksOnSlaves(offerNumber)._2 == 0) {
+    while (result.length > 1 && tasksOnSlaves(offerNumber)._2 == 0) {
       result = tasksOnSlaves.filterNot(_ == tasksOnSlaves(offerNumber))
-      if (offerNumber > tasksOnSlaves.size - 1) offerNumber = 0
+      if (offerNumber > result.size - 1) offerNumber = 0
     }
     result
   }
@@ -160,13 +160,12 @@ object OffersHandler {
     * Get random free ports
  *
     * @param offer:Offer
-    * @param task:String
     * @return Resource
     */
-  def getPortsResource(offer: Offer, task: String): Resource = {
+  def getPortsResource(offer: Offer): Resource = {
     val portsResource = OffersHandler.getResource(offer, "ports")
     for (range <- portsResource.getRanges.getRangeList.asScala) {
-      TasksList.getAvailablePorts ++= (range.getBegin to range.getEnd).to[mutable.ListBuffer]
+      TasksList.addAvailablePorts((range.getBegin to range.getEnd).to[mutable.ListBuffer])
     }
 
     val ports: mutable.ListBuffer[Long] = TasksList.getAvailablePorts.take(TasksList.perTaskPortsCount)
