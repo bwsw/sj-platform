@@ -72,6 +72,11 @@ class BatchEngineSimulator[T <: AnyRef](executor: BatchStreamingExecutor[T],
                           window: Int,
                           slidingInterval: Int) {
 
+    require(window > 0, "'window' must be positive")
+    require(
+      slidingInterval > 0 && slidingInterval <= window,
+      "'slidingInterval' must be positive and less or equal than 'window'")
+
     private val inputs: Array[String] = inputEnvelopes.map(_.stream).toSet.toArray
     private var windowsAfterIdle: Int = 0
     private val envelopesByStream: Map[String, mutable.Queue[Envelope]] =
