@@ -132,7 +132,7 @@ An Output module handles external output from event processing pipeline to exter
 
 .. figure:: _static/OutputModule.png
 
-It transforms the processing data results into T-streams and put them into an external data storage. It allows to transform one data item from incoming streaming into one and more data output items.
+It transforms the processing data results received from T-streams and put them into an external data storage. It allows to transform one data item from incoming streaming into one and more data output items.
 
 The output executor provides the following methods that does not perform any work by default so you should define their implementation by yourself.
 
@@ -204,6 +204,8 @@ Inside of the module there is a manager allowing to get an access to:
 Batch module
 ~~~~~~~~~~~~~~~~~
 A batch is a minimum data set for a handler to collect the events in the stream. The size of a batch is defined by a user. It can be a period of time or a quantity of events or a specific type of event after receiving which the batch is considered closed.  Then, the queue of batches is sent further in the flow for the next stage of processing. 
+
+.. _Batch-Collector:
 
 In the module it is a Batch Collector that is responsible for the logic of collecting batches. It provides the following methods, implementation of which you should specify. 
 
