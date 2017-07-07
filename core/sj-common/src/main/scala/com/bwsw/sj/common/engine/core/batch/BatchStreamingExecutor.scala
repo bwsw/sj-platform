@@ -19,7 +19,7 @@
 package com.bwsw.sj.common.engine.core.batch
 
 import com.bwsw.sj.common.engine.core.environment.ModuleEnvironmentManager
-import com.bwsw.sj.common.engine.{CheckpointHandlers, StateHandlers, StreamingExecutor}
+import com.bwsw.sj.common.engine.{CheckpointHandlers, StateHandlers, StreamingExecutor, TimerHandlers}
 
 /**
   * Class is responsible for batch module execution logic.
@@ -33,7 +33,8 @@ import com.bwsw.sj.common.engine.{CheckpointHandlers, StateHandlers, StreamingEx
 class BatchStreamingExecutor[T <: AnyRef](manager: ModuleEnvironmentManager)
   extends StreamingExecutor
     with StateHandlers
-    with CheckpointHandlers {
+    with CheckpointHandlers
+    with TimerHandlers {
 
   /**
     * Is invoked only once at the beginning of launching of module
@@ -45,13 +46,6 @@ class BatchStreamingExecutor[T <: AnyRef](manager: ModuleEnvironmentManager)
     * from one of the inputs that are defined within the instance.
     */
   def onWindow(windowRepository: WindowRepository): Unit = {}
-
-  /**
-    * Is invoked every time when a set timer goes out
-    *
-    * @param jitter Delay between a real response time and an invocation of this handler
-    */
-  def onTimer(jitter: Long): Unit = {}
 
   /**
     * Handler triggered if idle timeout goes out but a new message hasn't appeared.

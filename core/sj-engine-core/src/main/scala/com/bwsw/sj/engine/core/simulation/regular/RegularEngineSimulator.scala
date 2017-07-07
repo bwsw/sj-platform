@@ -18,12 +18,9 @@
  */
 package com.bwsw.sj.engine.core.simulation.regular
 
-import com.bwsw.sj.common.engine.core.entities.{Envelope, KafkaEnvelope, TStreamEnvelope}
+import com.bwsw.sj.common.engine.core.entities.{KafkaEnvelope, TStreamEnvelope}
 import com.bwsw.sj.common.engine.core.regular.RegularStreamingExecutor
-import com.bwsw.sj.engine.core.simulation.SimulatorConstants.defaultConsumerName
 import com.bwsw.sj.engine.core.simulation.state._
-
-import scala.collection.mutable
 
 /**
   * Simulates behavior of [[com.bwsw.sj.common.engine.TaskEngine TaskEngine]] for testing an implementation of
@@ -95,10 +92,4 @@ class RegularEngineSimulator[T <: AnyRef](executor: RegularStreamingExecutor[T],
 
     simulationResult
   }
-
-  /**
-    * Removes all envelopes from local buffer
-    */
-  def clear(): Unit =
-    inputEnvelopes.clear()
 }

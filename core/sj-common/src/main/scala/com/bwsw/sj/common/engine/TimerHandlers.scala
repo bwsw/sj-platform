@@ -18,15 +18,12 @@
  */
 package com.bwsw.sj.common.engine
 
-/**
-  * Provide methods for handle checkpoints
-  *
-  * @author Pavel Tomskikh
-  */
-trait CheckpointHandlers {
+trait TimerHandlers {
 
   /**
-    * Handler triggered before every checkpoint
+    * Is invoked every time when a set timer goes out
+    *
+    * @param jitter Delay between a real response time and an invocation of this handler
     */
-  def onBeforeCheckpoint(): Unit = {}
+  def onTimer(jitter: Long): Unit = {}
 }
