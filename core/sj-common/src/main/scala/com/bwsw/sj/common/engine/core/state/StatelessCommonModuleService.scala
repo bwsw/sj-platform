@@ -19,7 +19,7 @@
 package com.bwsw.sj.common.engine.core.state
 
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
-import com.bwsw.sj.common.engine.StreamingExecutor
+import com.bwsw.sj.common.engine.{StreamingExecutor, TimerHandlers}
 import com.bwsw.sj.common.engine.core.environment.ModuleEnvironmentManager
 import com.bwsw.sj.common.engine.core.managment.CommonTaskManager
 import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
@@ -40,7 +40,8 @@ class StatelessCommonModuleService(manager: CommonTaskManager,
                                    checkpointGroup: CheckpointGroup,
                                    performanceMetrics: PerformanceMetrics)
                                   (implicit injector: Injector)
-  extends CommonModuleService(manager, checkpointGroup, performanceMetrics) {
+  extends CommonModuleService(manager.instance, manager.outputProducers, checkpointGroup) {
+
   private val streamService = inject[ConnectionRepository].getStreamRepository
 
   val environmentManager: ModuleEnvironmentManager = new ModuleEnvironmentManager(
@@ -51,5 +52,5 @@ class StatelessCommonModuleService(manager: CommonTaskManager,
     moduleTimer,
     performanceMetrics)
 
-  val executor: StreamingExecutor = manager.getExecutor(environmentManager)
+  val executor: StreamingExecutor with TimerHandlers = manager.getExecutor(environmentManager).asInstanceOf[StreamingExecutor with TimerHandlers]
 }

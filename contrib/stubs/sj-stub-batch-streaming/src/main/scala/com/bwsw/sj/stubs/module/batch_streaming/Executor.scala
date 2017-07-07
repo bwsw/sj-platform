@@ -34,10 +34,6 @@ class Executor(manager: ModuleEnvironmentManager) extends BatchStreamingExecutor
     println("new init")
   }
 
-  override def onAfterCheckpoint(): Unit = {
-    println("on after checkpoint")
-  }
-
   override def onWindow(windowRepository: WindowRepository): Unit = {
     val outputs = manager.getStreamsByTags(Array("output"))
     val output = manager.getRoundRobinOutput(outputs(new Random().nextInt(outputs.length)))
@@ -70,12 +66,6 @@ class Executor(manager: ModuleEnvironmentManager) extends BatchStreamingExecutor
 
   override def onTimer(jitter: Long): Unit = {
     println("onTimer")
-  }
-
-  override def onAfterStateSave(isFull: Boolean): Unit = {
-    if (isFull) {
-      println("on after full state saving")
-    } else println("on after partial state saving")
   }
 
   override def onBeforeCheckpoint(): Unit = {

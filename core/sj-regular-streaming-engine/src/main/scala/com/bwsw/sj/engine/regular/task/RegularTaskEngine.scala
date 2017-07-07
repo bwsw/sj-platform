@@ -26,7 +26,7 @@ import com.bwsw.sj.common.engine.core.managment.CommonTaskManager
 import com.bwsw.sj.common.engine.core.regular.RegularStreamingExecutor
 import com.bwsw.sj.common.engine.core.state.CommonModuleService
 import com.bwsw.sj.common.si.model.instance.RegularInstance
-import com.bwsw.sj.common.utils.{EngineLiterals, SjTimer}
+import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.core.engine.input.CallableCheckpointTaskInput
 import com.bwsw.sj.engine.core.engine.{NumericalCheckpointTaskEngine, TimeCheckpointTaskEngine}
 import com.bwsw.sj.engine.regular.task.reporting.RegularStreamingPerformanceMetrics
@@ -57,7 +57,6 @@ abstract class RegularTaskEngine(manager: CommonTaskManager,
   val taskInputService: CallableCheckpointTaskInput[Envelope] =
     CallableCheckpointTaskInput[AnyRef](manager, blockingQueue, checkpointGroup, executor)
       .asInstanceOf[CallableCheckpointTaskInput[Envelope]]
-  private val moduleTimer: SjTimer = moduleService.moduleTimer
   protected val checkpointInterval: Long = instance.checkpointInterval
 
   /**
@@ -93,13 +92,9 @@ abstract class RegularTaskEngine(manager: CommonTaskManager,
           executor.onIdle()
       }
 
-      if (isItTimeToCheckpoint(moduleService.isCheckpointInitiated)) doCheckpoint()
+      moduleService.onTimer()
 
-      if (moduleTimer.isTime) {
-        logger.debug(s"Task: ${manager.taskName}. Invoke onTimer() handler.")
-        executor.onTimer(System.currentTimeMillis() - moduleTimer.responseTime)
-        moduleTimer.reset()
-      }
+      if (isItTimeToCheckpoint(moduleService.isCheckpointInitiated)) doCheckpoint()
     }
   }
 
@@ -130,7 +125,6 @@ abstract class RegularTaskEngine(manager: CommonTaskManager,
     moduleService.doCheckpoint()
     taskInputService.doCheckpoint()
     logger.debug(s"Task: ${manager.taskName}. Invoke onAfterCheckpoint() handler.")
-    executor.onAfterCheckpoint()
     prepareForNextCheckpoint()
   }
 

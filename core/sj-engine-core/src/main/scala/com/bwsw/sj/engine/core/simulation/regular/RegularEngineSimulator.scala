@@ -169,26 +169,6 @@ class RegularEngineSimulator[T <: AnyRef](executor: RegularStreamingExecutor[T],
   }
 
   /**
-    * Simulates behavior of [[com.bwsw.sj.common.engine.TaskEngine TaskEngine]] after checkpoint
-    *
-    * @param isFullState flag denotes that there was saved the full state(true) or partial changes of state(false)
-    * @return output elements and state
-    */
-  def afterCheckpoint(isFullState: Boolean): SimulationResult = {
-    manager.producerPolicyByOutput.values.foreach {
-      case (_, moduleOutput: ModuleOutputMockHelper) =>
-        moduleOutput.clear()
-      case _ =>
-        throw new IllegalStateException("Incorrect outputs")
-    }
-
-    executor.onAfterCheckpoint()
-    executor.onAfterStateSave(isFullState)
-
-    simulationResult
-  }
-
-  /**
     * Removes all envelopes from local buffer
     */
   def clear(): Unit =
