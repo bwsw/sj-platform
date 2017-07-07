@@ -59,10 +59,10 @@ It performs the transformation of the streams incoming from TCP to T-streams. T-
 An Input module executor provides the following methods with default implementations but they can be overridden.
 
 1) "tokenize": 
-      It is invoked every time when a new portion of data is received. It processes a flow of bytes to determine the beginning and the end of the Interval (significant set of bytes in incoming flow of bytes). By default it returns None value (means that it is impossible to determine an Interval). If Interval detected, method should return it (first and last indexes of Interval's elements in flow of bytes). Resulting interval can either contain message or not.
+      It is invoked every time when a new portion of data is received. It processes a flow of bytes to determine the beginning and the end of the Interval (significant set of bytes in incoming flow of bytes). By default it returns None value (meaning that it is impossible to determine an Interval). If Interval detected, method should return it (the first and the last indexes of Interval elements in the flow of bytes). The resulting interval can either contain message or not.
 
 2) "parse": 
-      If "tokenize" method returns an Interval, this method is invoked. It processes both a buffer with incoming data (a flow of bytes) and an Interval (an output of "tokenize" method). Its purpose is to define whether the Interval contains a message or meaningless data. Default return value is None. The same value should be returned if Interval contains meaningless data. If Interval contains message, return value should be "InputEnvelope".
+     This method is invoked once the "tokenize" method returns an Interval. It processes both a buffer with incoming data (a flow of bytes) and an Interval (an output of "tokenize" method). Its purpose is to define whether the Interval contains a message or meaningless data. Default return value is None. The same value should be returned if Interval contains meaningless data. If Interval contains a message, the "InputEnvelope" value should be returned.
 
 3) "createProcessedMessageResponse": 
       It is invoked after each call of parse method. Its purpose is to create response to the source of data - instance of InputStreamingResponse.
