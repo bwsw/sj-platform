@@ -58,10 +58,10 @@ import scala.collection.mutable
   * simulator.prepareTstream(Seq("o"), tstreamInput.name)
   * simulator.prepareKafka(Seq("p", "r", "s"), kafkaInput.name)
   *
-  * val windowsNumberBeforeIdle = 2
+  * val batchesNumberBeforeIdle = 2
   * val window = 3
   * val slidingInterval = 1
-  * val results = simulator.process(windowsNumberBeforeIdle, window, slidingInterval)
+  * val results = simulator.process(batchesNumberBeforeIdle, window, slidingInterval)
   *
   * println(results)
   * }}}
@@ -81,20 +81,20 @@ class BatchEngineSimulator[T <: AnyRef](executor: BatchStreamingExecutor[T],
     * Sends incoming envelopes from local buffer to [[executor]] as long as simulator can creates windows and returns
     * output elements, state and envelopes that does not processed
     *
-    * @param windowsNumberBeforeIdle  number of windows between invocations of [[executor.onIdle()]]. '0' means that
-    *                                 [[executor.onIdle()]] will never be called.
+    * @param batchesNumberBeforeIdle  number of retrieved batches between invocations of [[executor.onIdle()]].
+    *                                 '0' means that [[executor.onIdle()]] will never be called.
     * @param window                   count of batches that will be contained into a window ([[BatchInstance.window]])
     * @param slidingInterval          the interval at which a window will be shifted (count of processed batches that will be
     *                                 removed from the window)
     * @param removeProcessedEnvelopes indicates that processed envelopes must be removed from local buffer
     * @return output elements, state and envelopes that haven't been processed
     */
-  def process(windowsNumberBeforeIdle: Int = 0,
+  def process(batchesNumberBeforeIdle: Int = 0,
               window: Int,
               slidingInterval: Int,
               removeProcessedEnvelopes: Boolean = true): BatchSimulationResult = {
 
-    val remainingEnvelopes = new Processor(windowsNumberBeforeIdle, window, slidingInterval).process()
+    val remainingEnvelopes = new Processor(batchesNumberBeforeIdle, window, slidingInterval).process()
 
     if (removeProcessedEnvelopes) {
       clear()
@@ -104,7 +104,7 @@ class BatchEngineSimulator[T <: AnyRef](executor: BatchStreamingExecutor[T],
     BatchSimulationResult(simulationResult, remainingEnvelopes)
   }
 
-  private class Processor(windowsNumberBeforeIdle: Int = 0,
+  private class Processor(batchesNumberBeforeIdle: Int = 0,
                           window: Int,
                           slidingInterval: Int) {
 
@@ -114,7 +114,7 @@ class BatchEngineSimulator[T <: AnyRef](executor: BatchStreamingExecutor[T],
       "'slidingInterval' must be positive and less or equal than 'window'")
 
     private val inputs: Array[String] = inputEnvelopes.map(_.stream).toSet.toArray
-    private var windowsAfterIdle: Int = 0
+    private var batchesAfterIdle: Int = 0
     private val envelopesByStream: Map[String, mutable.Queue[Envelope]] =
       inputs.map(stream => stream -> mutable.Queue.empty[Envelope]).toMap
     private var retrievableStreams: Array[String] = inputs
@@ -158,6 +158,14 @@ class BatchEngineSimulator[T <: AnyRef](executor: BatchStreamingExecutor[T],
           collectWindow(batch.stream)
           retrievableStreams = retrievableStreams.filter(_ != batch.stream)
         }
+
+        if (batchesNumberBeforeIdle > 0) {
+          batchesAfterIdle += 1
+          if (batchesAfterIdle == batchesNumberBeforeIdle) {
+            executor.onIdle()
+            batchesAfterIdle = 0
+          }
+        }
       }
     }
 
@@ -177,14 +185,6 @@ class BatchEngineSimulator[T <: AnyRef](executor: BatchStreamingExecutor[T],
       prepareCollectedWindows()
       executor.onWindow(windowRepository)
       retrievableStreams = inputs
-
-      if (windowsNumberBeforeIdle > 0) {
-        windowsAfterIdle += 1
-        if (windowsAfterIdle == windowsNumberBeforeIdle) {
-          executor.onIdle()
-          windowsAfterIdle = 0
-        }
-      }
     }
 
     private def prepareCollectedWindows(): Unit = {
