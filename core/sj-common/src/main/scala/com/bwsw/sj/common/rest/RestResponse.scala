@@ -49,7 +49,9 @@ case class FrameworkTask(id: String,
                          reason: String,
                          node: String,
                          lastNode: String,
-                         directories: Seq[String])
+                         directories: scala.collection.mutable.ListBuffer[Directory])
+
+case class Directory(name: String, path: String)
 
 case class FrameworkRestEntity(tasks: Seq[FrameworkTask]) extends ResponseEntity
 

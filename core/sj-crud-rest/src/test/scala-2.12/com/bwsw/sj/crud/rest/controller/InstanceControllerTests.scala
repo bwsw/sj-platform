@@ -405,7 +405,7 @@ class InstanceControllerTests extends FlatSpec with Matchers with MockitoSugar w
 
     val tasksCount = 4
     val tasks = Range(0, tasksCount).map { i =>
-      val task = FrameworkTask(i.toString, null, null, null, null, null, Seq.empty)
+      val task = FrameworkTask(i.toString, null, null, null, null, null, scala.collection.mutable.ListBuffer.empty)
       val serialized = s"""{"id":"$i"}"""
       (task, serialized)
     }
