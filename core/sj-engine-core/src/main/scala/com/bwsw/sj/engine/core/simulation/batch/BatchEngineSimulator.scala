@@ -94,7 +94,7 @@ class BatchEngineSimulator[T <: AnyRef](executor: BatchStreamingExecutor[T],
               slidingInterval: Int,
               removeProcessedEnvelopes: Boolean = true): BatchSimulationResult = {
 
-    val remainingEnvelopes = new Processor(batchesNumberBeforeIdle, window, slidingInterval).process()
+    val remainingEnvelopes = new EnvelopesProcessor(batchesNumberBeforeIdle, window, slidingInterval).process()
 
     if (removeProcessedEnvelopes) {
       clear()
@@ -104,9 +104,9 @@ class BatchEngineSimulator[T <: AnyRef](executor: BatchStreamingExecutor[T],
     BatchSimulationResult(simulationResult, remainingEnvelopes)
   }
 
-  private class Processor(batchesNumberBeforeIdle: Int = 0,
-                          window: Int,
-                          slidingInterval: Int) {
+  private class EnvelopesProcessor(batchesNumberBeforeIdle: Int = 0,
+                                   window: Int,
+                                   slidingInterval: Int) {
 
     require(window > 0, "'window' must be positive")
     require(
