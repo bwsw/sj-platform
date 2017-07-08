@@ -122,29 +122,29 @@ class BatchEngineSimulator[T <: AnyRef](executor: BatchStreamingExecutor[T],
     private val currentWindowPerStream: mutable.Map[String, Window] = mutable.Map(inputs.map(x => (x, new Window(x))): _*)
     private val counterOfBatchesPerStream: mutable.Map[String, Int] = mutable.Map(inputs.map(x => (x, 0)): _*)
     private val collectedWindowPerStream: mutable.Map[String, Window] = mutable.Map.empty
+    private var notProcessedEnvelopes = inputEnvelopes
 
     def process(): Seq[Envelope] = {
       inputEnvelopes.foreach(envelope => envelopesByStream(envelope.stream).enqueue(envelope))
-      var canContinue: Boolean = envelopesByStream.forall(_._2.length >= window)
 
-      while (canContinue) {
+      while (envelopesByStream.forall(_._2.nonEmpty)) {
+        println(envelopesByStream)
         retrievableStreams.foreach { stream =>
           envelopesByStream(stream).dequeueFirst(_ => true) match {
             case Some(envelope) =>
               batchCollector.onReceive(envelope)
               processBatches()
 
-              if (inputs.forall(collectedWindowPerStream.isDefinedAt)) {
+              if (inputs.forall(collectedWindowPerStream.isDefinedAt))
                 onWindow()
-                canContinue = envelopesByStream.forall(_._2.length >= slidingInterval)
-              }
 
             case None =>
           }
         }
       }
+      inputs.foreach(batchCollector.collectBatch)
 
-      envelopesByStream.flatMap(_._2).toSeq
+      notProcessedEnvelopes
     }
 
 
@@ -183,6 +183,9 @@ class BatchEngineSimulator[T <: AnyRef](executor: BatchStreamingExecutor[T],
 
     private def onWindow(): Unit = {
       prepareCollectedWindows()
+      val envelopesInWindowRepository = windowRepository.getAll().flatMap(_._2.batches.flatMap(_.envelopes)).toSeq
+      notProcessedEnvelopes = notProcessedEnvelopes.filterNot(envelopesInWindowRepository.contains)
+
       executor.onWindow(windowRepository)
       retrievableStreams = inputs
     }
