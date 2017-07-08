@@ -103,7 +103,15 @@ class CommonEngineSimulator[T <: AnyRef](executor: StreamingExecutor with StateH
     executor.onBeforeCheckpoint()
     executor.onBeforeStateSave(isFullState)
 
-    simulationResult
+    val result = simulationResult
+    manager.producerPolicyByOutput.values.foreach {
+      case (_, moduleOutput: ModuleOutputMockHelper) =>
+        moduleOutput.clear()
+      case _ =>
+        throw new IllegalStateException("Incorrect outputs")
+    }
+
+    result
   }
 
   /**
