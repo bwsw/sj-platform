@@ -124,6 +124,7 @@ InputStreamingResponse:
  
 To see a flow chart on how these methods intercommunicate, please, visit the :ref:`Input_Streaming_Engine` section.
 
+.. _regular-module:
 
 Regular module
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -181,6 +182,7 @@ Inside of the module there is a manager allowing to get an access to:
 
 To see a flow chart on how these methods intercommunicate see the :ref:`Regular_Streaming_Engine` section.
 
+.. _batch-module:
 
 Batch module
 ~~~~~~~~~~~~~~~~~
@@ -335,6 +337,8 @@ There is a manager inside module which grants access to:
 
 A Batch and a Regular modules may have a state. A state is a sort of a key-value storage that can be used to keep some global module variables related to processing. These variables are persisted and are recovered after a fail. A fail means that something is going wrong in one of the methods used in an executor. In this case a whole module will be restarted. 
 The state is performed alongside with the checkpoint. At a checkpoint the data received after processing is checked for completeness. The checkpoint is an event that provides an exactly-once processing. 
+
+.. _output-module:
 
 Output module
 ~~~~~~~~~~~~~~~~~~~~
