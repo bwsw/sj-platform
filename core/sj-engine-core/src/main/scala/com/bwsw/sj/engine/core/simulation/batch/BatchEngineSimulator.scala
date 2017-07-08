@@ -127,8 +127,7 @@ class BatchEngineSimulator[T <: AnyRef](executor: BatchStreamingExecutor[T],
     def process(): Seq[Envelope] = {
       inputEnvelopes.foreach(envelope => envelopesByStream(envelope.stream).enqueue(envelope))
 
-      while (envelopesByStream.forall(_._2.nonEmpty)) {
-        println(envelopesByStream)
+      while (canContinue) {
         retrievableStreams.foreach { stream =>
           envelopesByStream(stream).dequeueFirst(_ => true) match {
             case Some(envelope) =>
@@ -147,6 +146,11 @@ class BatchEngineSimulator[T <: AnyRef](executor: BatchStreamingExecutor[T],
       notProcessedEnvelopes
     }
 
+    private def canContinue: Boolean = {
+      envelopesByStream.filter {
+        case (stream, _) => retrievableStreams.contains(stream)
+      }.exists(_._2.nonEmpty)
+    }
 
     private def processBatches(): Unit = {
       val batches = batchCollector.getBatchesToCollect().map(batchCollector.collectBatch)
