@@ -169,6 +169,18 @@ class RegularEngineSimulator[T <: AnyRef](executor: RegularStreamingExecutor[T],
   }
 
   /**
+    * Invokes [[executor.onTimer(jitter)]]
+    *
+    * @param jitter Delay between a real response time and an invocation of this handler
+    * @return output elements and state
+    */
+  def timer(jitter: Long): SimulationResult = {
+    executor.onTimer(jitter)
+
+    simulationResult
+  }
+
+  /**
     * Removes all envelopes from local buffer
     */
   def clear(): Unit =
