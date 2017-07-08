@@ -125,29 +125,6 @@ InputStreamingResponse:
 To see a flow chart on how these methods intercommunicate, please, visit the :ref:`Input_Streaming_Engine` section.
 
 
-Output module
-~~~~~~~~~~~~~~~~~~~~
-
-An Output module handles external output from event processing pipeline to external data destinations (Elasticsearch, JDBC, etc.)
-
-.. figure:: _static/OutputModule.png
-
-It transforms the processing data results received from T-streams and pass them to an external data storage. It allows to transform one data item from incoming streaming into one and more data output items.
-
-The output executor provides the following methods that does not perform any work by default so you should define their implementation by yourself.
-
-1. "onMessage": 
-    It is invoked for every received message from one of the inputs that are defined within the instance. Inside the method you have an access to the message that has the TStreamEnvelope type. 
-
-2. "getOutputEntity":
-    It is invoked once when module running. This method returns the current working entity, i.e. fields and types. This method must be overridden. 
-
-A type is assigned to an output envelope that corresponds to the type of an external storage (Elasticsearch, JDBC, REST).
-
-To see a flow chart on how these methods intercommunicate, please, visit the :ref:`Output_Streaming_Engine` section.
-
-
-
 Regular module
 ~~~~~~~~~~~~~~~~~~~~~~~
 A simplified definition of a Regular module is a handler that performs data transformation and put the processed data into a T-stream.
@@ -181,15 +158,15 @@ Each envelope has a type parameter that defines the type of data in the envelope
 
 3) "onBeforeCheckpoint": 
     It is invoked before every checkpoint.
-4) "onAfterCheckpoint": 
+.. 4) "onAfterCheckpoint": 
     It is invoked after every checkpoint.
-5) "onTimer": 
+4) "onTimer": 
     It is invoked every time when a set timer goes out. Inside the method there is an access to a parameter that defines a delay between a real response time and an invocation of this handler.
-6) "onIdle": 
+5) "onIdle": 
     It is invoked every time when idle timeout goes out but a new message hadn't appeared. It is a moment when there is nothing to process.
-7) "onBeforeStateSave": 
+6) "onBeforeStateSave": 
     It is invoked prior to every saving of the state. Inside the method there is a flag denoting the full state (true) or partial changes of state (false) will be saved.
-8) "onAfterStateSave": 
+.. 8) "onAfterStateSave": 
     It is invoked after every saving of the state. Inside the method there is a flag denoting the full state (true) or partial changes of state (false) have(s) been saved
 
 The module may have a state. A state is a sort of a key-value storage and can be used to keep some global module variables related to processing. These variables are persisted and are recovered after a fail. In case of a fail (when something is going wrong in one of the methods described above) a whole module will be restarted. And the work will start on `onInit` method invocation.
@@ -323,15 +300,15 @@ The data type of the envelope can be "KafkaEnvelope" data type or "TStreamEnvelo
 
 3) "onBeforeCheckpoint": 
     It is invoked before every checkpoint
-4) "onAfterCheckpoint": 
+.. 4) "onAfterCheckpoint": 
     It is invoked after every checkpoint
-5) "onTimer": 
+4) "onTimer": 
     It is invoked every time when a set timer goes out. Inside the method there is an access to a parameter that defines a delay between a real response time and an invocation of this handler
-6) "onIdle": 
+5) "onIdle": 
     It is invoked every time when idle timeout goes out but a new message hasn't appeared. It is a moment when there is nothing to process
-7) "onBeforeStateSave": 
+6) "onBeforeStateSave": 
     It is invoked before every saving of the state. Inside the method there is a flag denoting the full state (true) or partial changes of state (false) will be saved
-8) "onAfterStateSave": 
+.. 8) "onAfterStateSave": 
     It is invoked after every saving of the state. Inside the method there is a flag denoting the full state (true) or partial changes of state (false) have(s) been saved
 
 The following handlers are used for synchronizing the tasks' work. It can be useful when at information aggregation using shared memory, e.g. Hazelcast or any other.
@@ -358,6 +335,28 @@ There is a manager inside module which grants access to:
 
 A Batch and a Regular modules may have a state. A state is a sort of a key-value storage that can be used to keep some global module variables related to processing. These variables are persisted and are recovered after a fail. A fail means that something is going wrong in one of the methods used in an executor. In this case a whole module will be restarted. 
 The state is performed alongside with the checkpoint. At a checkpoint the data received after processing is checked for completeness. The checkpoint is an event that provides an exactly-once processing. 
+
+Output module
+~~~~~~~~~~~~~~~~~~~~
+
+An Output module handles external output from event processing pipeline to external data destinations (Elasticsearch, JDBC, etc.)
+
+.. figure:: _static/OutputModule.png
+
+It transforms the processing data results received from T-streams and pass them to an external data storage. It allows to transform one data item from incoming streaming into one and more data output items.
+
+The output executor provides the following methods that does not perform any work by default so you should define their implementation by yourself.
+
+1. "onMessage": 
+    It is invoked for every received message from one of the inputs that are defined within the instance. Inside the method you have an access to the message that has the TStreamEnvelope type. 
+
+2. "getOutputEntity":
+    It is invoked once when module running. This method returns the current working entity, i.e. fields and types. This method must be overridden. 
+
+A type is assigned to an output envelope that corresponds to the type of an external storage (Elasticsearch, JDBC, REST).
+
+To see a flow chart on how these methods intercommunicate, please, visit the :ref:`Output_Streaming_Engine` section.
+
 
 .. A detailed manual on how to write a module you may find at `page`_ .
 
