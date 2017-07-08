@@ -25,12 +25,12 @@ import org.apache.curator.retry.RetryOneTime
 import org.apache.curator.test.TestingServer
 import org.apache.zookeeper.ZooKeeper
 import org.apache.zookeeper.data.Stat
-import org.scalatest.concurrent.TimeLimitedTests
-import org.scalatest.time.{Seconds, Span}
 import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers, Outcome}
 
 import scala.collection.JavaConverters._
-import scala.util.Try
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration._
+import scala.concurrent.{Await, Future}
 
 
 /**
@@ -38,7 +38,7 @@ import scala.util.Try
   *
   * @author Pavel Tomskikh
   */
-class LeaderLatchTests extends FlatSpec with Matchers with BeforeAndAfterAll with TimeLimitedTests {
+class LeaderLatchTests extends FlatSpec with Matchers with BeforeAndAfterAll {
 
   val server = new TestingServer(true)
   val connectString = server.getConnectString
@@ -46,6 +46,13 @@ class LeaderLatchTests extends FlatSpec with Matchers with BeforeAndAfterAll wit
   client.start()
   client.blockUntilConnectedOrTimedOut()
   val zooKeeper = client.getZooKeeper
+
+  val timeLimit = 1.second
+
+  override def withFixture(test: NoArgTest): Outcome = {
+    // TimeLimitedTest does not work in some cases (e.g. infinite loop)
+    Await.result(Future(super.withFixture(test)), timeLimit)
+  }
 
 
   "LeaderLatch" should "create master node on ZK server" in {
@@ -112,6 +119,25 @@ class LeaderLatchTests extends FlatSpec with Matchers with BeforeAndAfterAll wit
     nodeInfo.children.size shouldBe 0
   }
 
+  it should "wait until does not take leadership" in {
+    val masterNode = newMasterNode
+    val delay = 10
+    val leaderLatchCount = 3
+    val leaderLatchIds = Seq.fill(leaderLatchCount)(UUID.randomUUID().toString)
+    val leaderLatches = leaderLatchIds.map(id => id -> new LeaderLatch(Set(connectString), masterNode, id)).toMap
+    leaderLatches.values.head.start()
+    leaderLatches.values.head.takeLeadership(delay)
+
+    leaderLatches.values.tail.foreach(_.start())
+
+    val leaderId = leaderLatches.values.head.getLeaderInfo()
+    val notLeader = (leaderLatches - leaderId).values.head
+    val future = Future(notLeader.takeLeadership(delay))
+    Thread.sleep(timeLimit.toMillis / 2)
+
+    future.isCompleted shouldBe false
+  }
+
 
   "LeaderLatch instances" should "give same leader ID" in {
     val masterNode = newMasterNode
@@ -124,16 +150,45 @@ class LeaderLatchTests extends FlatSpec with Matchers with BeforeAndAfterAll wit
     leaderLatches.head.takeLeadership(delay)
 
     leaderLatches.tail.foreach(_.start())
+    val leaderId = leaderLatches.head.getLeaderInfo()
 
-    val leaderInfo = leaderLatches.map(_.getLeaderInfo()).toSet
-    leaderInfo.size shouldBe 1
-    leaderInfo.foreach(leaderLatchIds.contains)
+    leaderLatchIds should contain(leaderId)
+    leaderLatches.foreach { leaderLatch =>
+      leaderLatch.getLeaderInfo() shouldBe leaderId
+    }
+  }
+
+  it should "elect new leadership if current leadership was stopped" in {
+    val masterNode = newMasterNode
+    val delay = 10
+    val leaderLatchCount = 3
+    val leaderLatchIds = Seq.fill(leaderLatchCount)(UUID.randomUUID().toString)
+    val leaderLatches = leaderLatchIds.map(id => id -> new LeaderLatch(Set(connectString), masterNode, id)).toMap
+    leaderLatches.values.head.start()
+    leaderLatches.values.head.takeLeadership(delay)
+
+    leaderLatches.values.tail.foreach(_.start())
+
+    val oldLeaderId = leaderLatches.values.head.getLeaderInfo()
+    leaderLatches(oldLeaderId).close()
+
+    Thread.sleep(100)
+
+    val leaderLathesWithoutOldLeader = leaderLatches - oldLeaderId
+    val newLeaderId = leaderLathesWithoutOldLeader.values.head.getLeaderInfo()
+
+    newLeaderId should not be oldLeaderId
+    leaderLatchIds should contain(newLeaderId)
+    leaderLathesWithoutOldLeader.values.foreach { leaderLatch =>
+      leaderLatch.getLeaderInfo() shouldBe newLeaderId
+    }
   }
 
   override def afterAll(): Unit = {
     client.close()
     server.close()
   }
+
 
   case class NodeInfo(node: String, data: String, stat: Stat, children: Seq[NodeInfo])
 
@@ -148,8 +203,6 @@ class LeaderLatchTests extends FlatSpec with Matchers with BeforeAndAfterAll wit
         children = zooKeeper.getChildren(node, null).asScala.map(c => apply(s"$node/$c", zooKeeper)))
     }
   }
-
-  override def timeLimit: Span = Span(3, Seconds)
 
   def newMasterNode: String =
     "/leader-latch/test/" + UUID.randomUUID().toString
