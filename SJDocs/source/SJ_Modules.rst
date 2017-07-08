@@ -190,6 +190,8 @@ A batch is a minimum data set for a handler to collect the events in the stream.
 
 .. _Batch-Collector:
 
+Batch Collector
+""""""""""""""""""
 In the module it is a Batch Collector that is responsible for the logic of collecting batches. It provides the following methods, implementation of which you should specify. 
 
 1) “getBatchesToCollect”:
