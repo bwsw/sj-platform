@@ -21,6 +21,7 @@ package com.bwsw.sj.common.engine.core.regular
 import com.bwsw.sj.common.engine.{StateHandlers, StreamingExecutor, TimerHandlers}
 import com.bwsw.sj.common.engine.core.entities.{KafkaEnvelope, TStreamEnvelope}
 import com.bwsw.sj.common.engine.core.environment.ModuleEnvironmentManager
+import com.bwsw.sj.common.engine.{CheckpointHandlers, StateHandlers, StreamingExecutor}
 
 /**
   * Class is responsible for regular module execution logic.
@@ -30,7 +31,11 @@ import com.bwsw.sj.common.engine.core.environment.ModuleEnvironmentManager
   * @author Kseniya Mikhaleva
   */
 
-class RegularStreamingExecutor[T <: AnyRef](manager: ModuleEnvironmentManager) extends StreamingExecutor with StateHandlers with TimerHandlers {
+class RegularStreamingExecutor[T <: AnyRef](manager: ModuleEnvironmentManager)
+  extends StreamingExecutor
+    with StateHandlers
+    with CheckpointHandlers
+    with TimerHandlers {
   /**
     * Is invoked only once at the beginning of launching of module
     */
@@ -47,11 +52,6 @@ class RegularStreamingExecutor[T <: AnyRef](manager: ModuleEnvironmentManager) e
     * from one of the inputs that are defined within the instance.
     */
   def onMessage(envelope: KafkaEnvelope[T]): Unit = {}
-
-  /**
-    * Handler triggered before every checkpoint
-    */
-  def onBeforeCheckpoint(): Unit = {}
 
   /**
     * Handler triggered if idle timeout goes out but a new message hasn't appeared.

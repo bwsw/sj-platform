@@ -37,7 +37,7 @@ case class StreamData(stream: String, partitionDataList: Seq[PartitionData])
 /**
   * Contains data elements that has been sent in a partition of output stream
   *
-  * @param partition partition index
+  * @param partition partition number
   * @param dataList  data elements
   */
 case class PartitionData(partition: Int, dataList: Seq[AnyRef] = Seq.empty) {
