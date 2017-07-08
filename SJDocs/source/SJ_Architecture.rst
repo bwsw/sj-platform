@@ -44,7 +44,7 @@ The *second layer* is composed of prerequisites for the platform. These are the 
 
 - For base service search `Mesos+Consul <https://github.com/CiscoCloud/mesos-consul>`_ is used.
 
-- Data sources for the platform are Netty and `T-streams <https://t-streams.com>`_ libraries and `Kafka <https://kafka.apache.org/>`_. For starting Kafka we use `Kafka on Mesos <https://github.com/mesos/kafka>`_.
+- Data sources for the platform are `Netty <https://netty.io/>`_ and `T-streams <https://t-streams.com>`_ libraries and `Kafka <https://kafka.apache.org/>`_. For starting Kafka we use `Kafka on Mesos <https://github.com/mesos/kafka>`_.
 
 - The outcoming data is stored to Elasticsearch, JDBC or REST external storages.
 
