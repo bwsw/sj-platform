@@ -54,7 +54,7 @@ Then a new message is received. The incoming data is ingested via T-streams or K
 
 A checkpoint is performed after a set period of time or after a set number of messages is received.
 
-If the module has a state the processed data are stored at the moment of checkpoint. In case of a falure the stored data from the state will be recovered and the module will be restarted.
+If the module has a state the data is stored at the moment of checkpoint. In case of a falure the stored data from the state will be recovered and the module will be restarted.
 
 If there is no state the checkpoint is performed and the cycle starts again from receiving a new message.
 
@@ -85,7 +85,7 @@ The Batch module allows for intercommunication between tasks that process incomi
 
 After the data is processed the checkpoint is performed and the result of processing is sent further into T-streams.
 
-If the module has a state the processed data are stored at the moment of checkpoint. In case of a failure the stored data from the state will be recovered and the module will be restarted.
+If the module has a state the data are stored at the moment of checkpoint. In case of a failure the stored data from the state will be recovered and the module will be restarted.
 
 If there is no state the checkpoint is performed and the cycle starts again from collecting new messages into batches.
 
@@ -101,11 +101,11 @@ The processing flow for Output Engine is presented below.
 
 It waits for an event (message) in T-streams outcoming from a Regular/Batch module. A wait time period (‘event-wait-time’) is 1000 ms by default. When receiving an envelope of T-streams type, it processes the data transforming it into a data type appropriate for an external datastorage. 
 
-The data is passed to the external storage (Elasticsearch, JDBC, REST, etc.) after the checkpoint is done. And the cycle repeats again starting from receiving a new message.
+The data is passed to the external storage (Elasticsearch, JDBC, REST, etc.) right after the processing. 
 
-To avoid data duplication in the storage, in case of module failure before a checkpoint the data received prior to the checkpoint is deleted and the engine is restarted. The messages will start to be written again up to the checkpoint.
+To avoid data duplication in the storage, in case of module failure prior to a checkpoint the engine is restarted and incoming messages are written instead of the previously received data. The messages will be written again up to the checkpoint.
 
-
+After a checkpoint the cycle repeats again starting from receiving a new message.
 
 
 
