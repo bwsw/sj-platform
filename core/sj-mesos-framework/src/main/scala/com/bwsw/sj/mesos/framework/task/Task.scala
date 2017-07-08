@@ -20,12 +20,13 @@ package com.bwsw.sj.mesos.framework.task
 
 import java.util.{Calendar, Date}
 
-import com.bwsw.sj.common.rest.FrameworkTask
+import com.bwsw.sj.common.rest.{Directory, FrameworkTask}
 import com.bwsw.sj.mesos.framework.config.FrameworkConfigNames
 import com.typesafe.config.ConfigFactory
+import org.apache.mesos.Protos.Resource
 
 import scala.util.Try
-
+import scala.collection.mutable
 
 class Task(taskId: String) {
   private val config = ConfigFactory.load()
@@ -38,8 +39,9 @@ class Task(taskId: String) {
   var lastNode: String = ""
   //  var description: InstanceTask = _
   var maxDirectories = Try(config.getInt(FrameworkConfigNames.maxSandboxView)).getOrElse(7)
-  var directories: Array[String] = Array()
+  var directories: mutable.ListBuffer[Directory] = mutable.ListBuffer()
   var host: Option[String] = None
+  var ports: Resource = _
 
 
   def update(state: String = state,
@@ -48,16 +50,19 @@ class Task(taskId: String) {
              node: String = node,
              lastNode: String = lastNode,
              directory: String = "",
-             host: String = this.host.orNull): Unit = {
+             host: String = this.host.orNull,
+             ports: Resource = ports): Unit = {
     this.state = state
     this.stateChanged = stateChanged
     this.reason = reason
     this.node = node
     this.lastNode = lastNode
     this.host = Option(host)
-    if (!directories.contains(directory) && directory.nonEmpty) directories = (directories :+ directory).reverse
-    if (directories.length > maxDirectories) directories = directories.reverse.tail.reverse
-
+    this.ports = ports
+    if (!directories.exists(_.path == directory) && directory.nonEmpty)
+      directories.append(
+        Directory(new Date(stateChanged).toString, directory))
+    if (directories.toList.length > maxDirectories) directories = directories.dropRight(1)
   }
 
   def toFrameworkTask: FrameworkTask = {

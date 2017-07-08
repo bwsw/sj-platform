@@ -5,5 +5,10 @@ export class TaskModel {
   reason: string;
   node: string;
   lastNode: string;
-  directories: string;
+  directories: Directory[];
+}
+
+export class Directory {
+  name: string;
+  path: string;
 }

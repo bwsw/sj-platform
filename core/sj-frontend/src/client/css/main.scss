@@ -117,3 +117,11 @@ input, select {
     box-shadow:none;
   }
 }
+
+/* detail view */
+li {
+  .title {
+    font-weight: bold;
+    padding-right: 5px;
+  }
+}
