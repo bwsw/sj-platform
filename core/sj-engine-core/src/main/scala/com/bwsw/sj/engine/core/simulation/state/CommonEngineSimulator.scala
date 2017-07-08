@@ -19,7 +19,7 @@
 package com.bwsw.sj.engine.core.simulation.state
 
 import com.bwsw.sj.common.engine.core.entities.{Envelope, KafkaEnvelope, TStreamEnvelope}
-import com.bwsw.sj.common.engine.{CheckpointHandlers, StateHandlers, StreamingExecutor}
+import com.bwsw.sj.common.engine.{CheckpointHandlers, StateHandlers, StreamingExecutor, TimerHandlers}
 import com.bwsw.sj.engine.core.simulation.SimulatorConstants.defaultConsumerName
 
 import scala.collection.mutable
@@ -30,7 +30,7 @@ import scala.collection.mutable
   *
   * @author Pavel Tomskikh
   */
-class CommonEngineSimulator[T <: AnyRef](executor: StreamingExecutor with StateHandlers with CheckpointHandlers,
+class CommonEngineSimulator[T <: AnyRef](executor: StreamingExecutor with StateHandlers with CheckpointHandlers with TimerHandlers,
                                          manager: ModuleEnvironmentManagerMock) {
 
   protected var transactionID: Long = 0
@@ -102,6 +102,18 @@ class CommonEngineSimulator[T <: AnyRef](executor: StreamingExecutor with StateH
   def beforeCheckpoint(isFullState: Boolean): SimulationResult = {
     executor.onBeforeCheckpoint()
     executor.onBeforeStateSave(isFullState)
+
+    simulationResult
+  }
+
+  /**
+    * Invokes [[executor.onTimer(jitter)]]
+    *
+    * @param jitter Delay between a real response time and an invocation of this handler
+    * @return output elements and state
+    */
+  def timer(jitter: Long): SimulationResult = {
+    executor.onTimer(jitter)
 
     simulationResult
   }
