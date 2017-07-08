@@ -86,27 +86,31 @@ class BatchEngineSimulator[T <: AnyRef](executor: BatchStreamingExecutor[T],
     * @param window                   count of batches that will be contained into a window ([[BatchInstance.window]])
     * @param slidingInterval          the interval at which a window will be shifted (count of processed batches that will be
     *                                 removed from the window)
+    * @param saveFullState            flag denotes that the full state(true) or partial changes of state(false) is going to be
+    *                                 saved after every checkpoint
     * @param removeProcessedEnvelopes indicates that processed envelopes must be removed from local buffer
     * @return output elements, state and envelopes that haven't been processed
     */
   def process(batchesNumberBeforeIdle: Int = 0,
               window: Int,
               slidingInterval: Int,
+              saveFullState: Boolean = false,
               removeProcessedEnvelopes: Boolean = true): BatchSimulationResult = {
 
-    val remainingEnvelopes = new EnvelopesProcessor(batchesNumberBeforeIdle, window, slidingInterval).process()
+    val result = new EnvelopesProcessor(batchesNumberBeforeIdle, window, slidingInterval, saveFullState).process()
 
     if (removeProcessedEnvelopes) {
       clear()
-      inputEnvelopes ++= remainingEnvelopes
+      inputEnvelopes ++= result.remainingEnvelopes
     }
 
-    BatchSimulationResult(simulationResult, remainingEnvelopes)
+    result
   }
 
   private class EnvelopesProcessor(batchesNumberBeforeIdle: Int = 0,
                                    window: Int,
-                                   slidingInterval: Int) {
+                                   slidingInterval: Int,
+                                   saveFullState: Boolean) {
 
     require(window > 0, "'window' must be positive")
     require(
@@ -123,8 +127,9 @@ class BatchEngineSimulator[T <: AnyRef](executor: BatchStreamingExecutor[T],
     private val counterOfBatchesPerStream: mutable.Map[String, Int] = mutable.Map(inputs.map(x => (x, 0)): _*)
     private val collectedWindowPerStream: mutable.Map[String, Window] = mutable.Map.empty
     private var notProcessedEnvelopes = inputEnvelopes
+    private var simulationResult = SimulationResult(Seq.empty, Map.empty)
 
-    def process(): Seq[Envelope] = {
+    def process(): BatchSimulationResult = {
       inputEnvelopes.foreach(envelope => envelopesByStream(envelope.stream).enqueue(envelope))
 
       while (canContinue) {
@@ -143,7 +148,7 @@ class BatchEngineSimulator[T <: AnyRef](executor: BatchStreamingExecutor[T],
       }
       inputs.foreach(batchCollector.collectBatch)
 
-      notProcessedEnvelopes
+      BatchSimulationResult(simulationResult, notProcessedEnvelopes)
     }
 
     private def canContinue: Boolean = {
@@ -191,6 +196,9 @@ class BatchEngineSimulator[T <: AnyRef](executor: BatchStreamingExecutor[T],
       notProcessedEnvelopes = notProcessedEnvelopes.filterNot(envelopesInWindowRepository.contains)
 
       executor.onWindow(windowRepository)
+      executor.onEnter()
+      executor.onLeaderEnter()
+      simulationResult += beforeCheckpoint(saveFullState)
       retrievableStreams = inputs
     }
 
