@@ -367,7 +367,7 @@ Click «Create» at the bottom and see the stream is in the list of streams now.
 
 .. figure:: _static/StreamsList.png
 
-Click "Cancel" to drop all the specified settings. The strem will not be created then.
+Click "Cancel" to drop all the specified settings. The stream will not be created then.
 
 In the list of streams the following actions can be performed:
 
@@ -499,7 +499,7 @@ Please, review the tables with general and specific fields description below.
     Amount of RAM for task (1024 by default)
     
 - JVM Options
-    Json with jvm-options. It is important to emphasize that MESOS kills a task if it uses more memory than it is specified in the 'perTaskRam' parameter. There are no default options. The options defined in the example fit the Per-Task-Ram = 192 and it's recommended for launching modules. In general, the sum of the following parameters: `Xmx`, `XX:MaxDirectMemorySize` and `XX:MaxMetaspaceSize` should be less than `Per-Task-Ram`; `XX:MaxMetaspaceSize` must be grater or larger than `Xmx` by 32m.
+    Json with jvm-options. It is important to emphasize that Mesos deletes a task if it uses more memory than it is specified in the 'perTaskRam' parameter. There are no default options. The options defined in the example fit the Per-Task-Ram = 192 and it's recommended for launching modules. In general, the sum of the following parameters: `Xmx`, `XX:MaxDirectMemorySize` and `XX:MaxMetaspaceSize` should be less than `Per-Task-Ram`; `XX:MaxMetaspaceSize` must be grater or larger than `Xmx` by 32m.
 
 - Node Attributes
     Json with map attributes for framework
@@ -621,9 +621,7 @@ Please, review the tables with general and specific fields description below.
     
 ..  "InputAvroSchema", "Avro schema for input objects. Requires if input object is instance of 'org.apache.avro.generic.GenericRecord':https://avro.apache.org/docs/1.8.1/api/java/org/apache/avro/generic/GenericRecord.html@.", "{'type':'record', 'name':'rec', 'fields':[{'name':'f1','type':string'}]}"
   .. note:: Required fields are marked with an asterisk (*)
-Click «Create» at the bottom and see the instance is in the list of instances now. Details of the node are displayed to the right when clicking the instance in the list. 
-
-.. figure:: _static/InstancesList.png
+Click «Create» at the bottom and see the instance is in the list of instances now. 
 
 Click "Cancel" to drop all the specified settings. The instance will not be created then.
 
@@ -633,11 +631,27 @@ An instance can be created by copying the settings of an existing instance. Just
 
 The form will show the settings of the selected instance. They can be edited and saved by clicking at the "Create" button. The new instance will appear in the list of instances.
 
-Click "Cancel" to drop all the specified settings. The strem will not be created then.
+Details of the node are displayed to the right when clicking the instance in the list. 
+
+.. figure:: _static/InstancesList.png
+
+Please, note, the details of an Instance show not only the instance settings but also:
+
+- Stages
+   Stages display information about current status of the framework that starts Instance. It allows you to follow the start or stop processes of Instance.
+   
+The stages include:
+
+- state - Instance status
+- datetime - The time when a state has been changed 
+- duration  -  How long a stage has got a current state. This field makes sense if a state field is 'starting', 'stopping' or 'deleting'.
+  
+- Execution plan
+    Execution plan consists of tasks. The number of tasks equals to a 'Parallelism' parameter. Each task has a unique name within the execution plan. Also the task has a set of Input stream names and their intervals of partitions. In general, it provides the information of the sources from which the data will be consumed.
 
 In the list of instances the following actions can be performed:
 
-1. **View** an instance`s name and status. An instance nay have the following statuses:
+1. **View** an instance`s name and status. An instance may have the following statuses:
      
 - ready - a newly created instance and not started yet;
 
@@ -667,6 +681,12 @@ If an instance stucks in 'failed' or 'error' status, you should use the followin
 4) Check that there is a setting with name specified in the 'current-framework' and also a file with name and version (divide 'current-framework' by '-') is uploaded
 
 If all described above is correct, but the "failed" or the "error" status still takes place, please contact the support team.
+
+The *statistics* on the task execution is also available from the list of instances. Click at the "Information" icon next to the Instance name you want to get the statistics for. 
+
+.. figure:: _static/FrameworkStatsIcon.png
+
+A window will pop-up to show the stats. This is the statistic data from a Mesos framework that starts a module. The statistics starts aggregation once the instance is started.
 
 2. **Start** an instance by clicking the «Start» button in the Actions section. The instance status will first change to «Starting» and in a few seconds to «Started». That means the instance is launched and is working now.
 3. **Stop** the instance that has been started i.e. has the «Started» status. Click at the «Stop» button and wait for a while till the status changes to «Stopping» and then to «Stopped».

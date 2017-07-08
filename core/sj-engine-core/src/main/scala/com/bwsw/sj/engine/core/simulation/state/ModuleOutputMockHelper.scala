@@ -21,6 +21,7 @@ package com.bwsw.sj.engine.core.simulation.state
 import com.bwsw.sj.common.engine.core.environment.{PartitionedOutput, RoundRobinOutput}
 import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
 import com.bwsw.tstreams.agents.producer.Producer
+import com.bwsw.tstreams.common.RoundRobinPartitionIterationPolicy
 
 import scala.collection.mutable
 
@@ -91,17 +92,15 @@ class RoundRobinOutputMock(producer: Producer,
                           (implicit serialize: AnyRef => Array[Byte])
   extends RoundRobinOutput(producer, performanceMetrics) with ModuleOutputMockHelper {
 
-  private var currentPartition: Int = 0
+  private val partitionPolicy = new RoundRobinPartitionIterationPolicy(
+    producer.stream.partitionsCount,
+    (0 until producer.stream.partitionsCount).toSet)
 
   /**
     * Stores data in [[partitionDataList]]
     */
-  override def put(data: AnyRef): Unit = {
-    append(data, currentPartition)
-    currentPartition += 1
-    if (currentPartition == producer.stream.partitionsCount)
-      currentPartition = 0
-  }
+  override def put(data: AnyRef): Unit =
+    append(data, partitionPolicy.getNextPartition())
 
   override def clear(): Unit =
     super[ModuleOutputMockHelper].clear()

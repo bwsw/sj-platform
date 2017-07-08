@@ -76,37 +76,38 @@
       <div class="card-block">
         <div class="overflow-x-scroll">
           <ul *ngIf="currentService">
-            <li>Name: {{currentService.name}}</li>
-            <li>Type: {{currentService.type}}</li>
-            <li>Description: {{currentService.description}}</li>
-            <li *ngIf="currentService.type === 'CassDB'">Keyspace: {{currentService.keyspace}}</li>
-            <li *ngIf="currentService.type === 'ESInd'">Index: {{currentService.index}}</li>
-            <li *ngIf="currentService.type === 'ZKCoord'
-              || currentService.type === 'RdsCoord' || currentService.type === 'ArspkDB'">
-              Namespace: {{currentService.namespace}}
+            <li>
+              <span class="title">Name:</span>{{currentService.name}}
             </li>
-            <li *ngIf="currentService.type !== 'TstrQ'">Provider:
+            <li>
+              <span class="title">Type:</span>{{currentService.type}}
+            </li>
+            <li *ngIf="currentService.description">
+              <span class="title">Description:</span>{{currentService.description}}
+            </li>
+            <li *ngIf="currentService.type === 'CassDB' && currentService.keyspace">
+              <span class="title">Keyspace:</span>{{currentService.keyspace}}
+            </li>
+            <li *ngIf="currentService.type === 'ESInd' && currentService.index">
+              <span class="title">Index:</span>{{currentService.index}}
+            </li>
+            <li *ngIf="(currentService.type == 'TstrQ' || currentService.type === 'ZKCoord'
+                        || currentService.type === 'RdsCoord' ||
+                        currentService.type === 'ArspkDB') && currentService.namespace">
+              <span class="title">Namespace:</span>{{currentService.namespace}}
+            </li>
+            <li *ngIf="currentService.type !== 'TstrQ' && currentService.provider">
+              <span class="title">Provider:</span>
               <span class="btn-lookup action-link" (click)="getProviderInfo(ProviderInfo, currentService.provider)">
-        {{ currentService.provider }}
-      </span>
+                {{ currentService.provider }}
+              </span>
             </li>
-            <li *ngIf="currentService.type === 'TstrQ'">Metadata provider:
-              <span class="btn-lookup action-link"
-                    (click)="getProviderInfo(ProviderInfo, currentService.metadataProvider)">{{currentService.metadataProvider}}</span>
+            <li *ngIf="currentService.type === 'KfkQ' && currentService.zkProvider">
+              <span class="title">ZK provider:</span>{{currentService.zkProvider}}
             </li>
-            <li *ngIf="currentService.type === 'TstrQ'">Metadata namespace: {{currentService.metadataNamespace}}</li>
-            <li *ngIf="currentService.type === 'TstrQ'">Data provider:
-              <span class="btn-lookup action-link"
-                    (click)="getProviderInfo(ProviderInfo, currentService.dataProvider)">{{currentService.dataProvider}}</span>
+            <li *ngIf="currentService.type === 'KfkQ' && currentService.zkNamespace">
+              <span class="title">ZK namespace:</span>{{currentService.zkNamespace}}
             </li>
-            <li *ngIf="currentService.type === 'TstrQ'">Data namespace: {{currentService.dataNamespace}}</li>
-            <li *ngIf="currentService.type === 'TstrQ'">Lock-provider:
-              <span class="btn-lookup action-link"
-                    (click)="getProviderInfo(ProviderInfo, currentService.lockProvider)">{{currentService.lockProvider}}</span>
-            </li>
-            <li *ngIf="currentService.type === 'TstrQ'">Lock-namespace: {{currentService.lockNamespace}}</li>
-            <li *ngIf="currentService.type === 'KfkQ'">ZK provider: {{currentService.zkProvider}}</li>
-            <li *ngIf="currentService.type === 'KfkQ'">ZK namespace: {{currentService.zkNamespace}}</li>
           </ul>
         </div>
       </div>
@@ -351,16 +352,20 @@
       </div>
       <div class="modal-body">
         <ul *ngIf="currentServiceProvider">
-          <li>Name: {{currentServiceProvider.name}}</li>
-          <li>Type: {{currentServiceProvider.type}}</li>
-          <li>Description: {{currentServiceProvider.description}}</li>
-          <li>Hosts:
+          <li><span class="title">Name:</span>{{currentServiceProvider.name}}</li>
+          <li><span class="title">Type:</span>{{currentServiceProvider.type}}</li>
+          <li><span class="title">Description:</span>{{currentServiceProvider.description}}</li>
+          <li><span class="title">Hosts:</span>
             <ul>
               <li *ngFor="let host of currentServiceProvider.hosts">{{host}}</li>
             </ul>
           </li>
-          <li *ngIf="currentServiceProvider.login">Login: {{currentServiceProvider.login}}</li>
-          <li *ngIf="currentServiceProvider.password">Password: {{currentServiceProvider.password}}</li>
+          <li *ngIf="currentServiceProvider.login">
+            <span class="title">Login:</span>{{currentServiceProvider.login}}
+          </li>
+          <li *ngIf="currentServiceProvider.password">
+            <span class="title">Password:</span>{{currentServiceProvider.password}}
+          </li>
         </ul>
       </div>
       <div class="modal-footer">
