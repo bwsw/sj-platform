@@ -3,8 +3,6 @@
 Stream Juggler Architecture
 ==============================
 
-.. warning:: *The section is under development!*
-
 Architecture Overview
 -------------------------
 
