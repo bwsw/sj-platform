@@ -3,17 +3,20 @@
 Modules: types, structure, pipeline
 ===================================
 
-
-.. contents:: Contents
-   
+ 
 Module is a processor that handles events in data streams.
 
 It includes an executor that processes data streams and a validator.
 
-- Streaming validator provides a method to validate "options" or "InstanceMetadata" parameter of run module specification.
-  This method returns a tuple that contains two values. The first value indicates whether the "options" or "InstanceMetadata" is proper or not (true value by default). The second value is a list of errors in case of the validation fail (empty list by default). It is used when you try to create a new instance of a specific module and if the validate method returns false value the instance will not be created.
+**Streaming validator**
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+It provides a method to validate "options" or "InstanceMetadata" parameter of run module specification.
 
-- An executor of the module utilizes an instance/instances. An instance is a full range of settings for an exact module.
+This method returns a tuple that contains two values. The first value indicates whether the "options" or "InstanceMetadata" is proper or not (true value by default). The second value is a list of errors in case of the validation failure (empty list by default). It is used when you try to create a new instance of a specific module, and if the validation method returns false value the instance will not be created.
+
+**Executor**
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+An executor of the module utilizes an instance/instances. An instance is a full range of settings for an exact module.
 
 An engine is required to start a module. A module can not process data streams without an engine (that is a .jar file containing required configuration settings) that launches the module ingesting raw data and sends the processed data further in the stream.
 
