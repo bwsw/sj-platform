@@ -10,10 +10,16 @@ Module is a processor that handles events in data streams.
 
 It includes an executor that processes data streams and a validator.
 
-- Streaming validator provides a method to validate "options" or "InstanceMetadata" parameter of run module specification.
-  This method returns a tuple that contains two values. The first value indicates whether the "options" or "InstanceMetadata" is proper or not (true value by default). The second value is a list of errors in case of the validation fail (empty list by default). It is used when you try to create a new instance of a specific module and if the validate method returns false value the instance will not be created.
+.. _validator:
+**Streaming validator**
 
-- An executor of the module utilizes an instance/instances. An instance is a full range of settings for an exact module.
+It provides a method to validate "options" or "InstanceMetadata" parameter of run module specification.
+
+This method returns a tuple that contains two values. The first value indicates whether the "options" or "InstanceMetadata" is proper or not (true value by default). The second value is a list of errors in case of the validation failure (empty list by default). It is used when you try to create a new instance of a specific module, and if the validation method returns false value the instance will not be created.
+
+**Executor**
+
+An executor of the module utilizes an instance/instances. An instance is a full range of settings for an exact module.
 
 An engine is required to start a module. A module can not process data streams without an engine (that is a .jar file containing required configuration settings) that launches the module ingesting raw data and sends the processed data further in the stream.
 
@@ -124,6 +130,7 @@ InputStreamingResponse:
  
 To see a flow chart on how these methods intercommunicate, please, visit the :ref:`Input_Streaming_Engine` section.
 
+.. _regular-module:
 
 Regular module
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -181,6 +188,7 @@ Inside of the module there is a manager allowing to get an access to:
 
 To see a flow chart on how these methods intercommunicate see the :ref:`Regular_Streaming_Engine` section.
 
+.. _batch-module:
 
 Batch module
 ~~~~~~~~~~~~~~~~~
@@ -188,6 +196,8 @@ A batch is a minimum data set for a handler to collect the events in the stream.
 
 .. _Batch-Collector:
 
+Batch Collector
+""""""""""""""""""
 In the module it is a Batch Collector that is responsible for the logic of collecting batches. It provides the following methods, implementation of which you should specify. 
 
 1) “getBatchesToCollect”:
@@ -335,6 +345,8 @@ There is a manager inside module which grants access to:
 
 A Batch and a Regular modules may have a state. A state is a sort of a key-value storage that can be used to keep some global module variables related to processing. These variables are persisted and are recovered after a fail. A fail means that something is going wrong in one of the methods used in an executor. In this case a whole module will be restarted. 
 The state is performed alongside with the checkpoint. At a checkpoint the data received after processing is checked for completeness. The checkpoint is an event that provides an exactly-once processing. 
+
+.. _output-module:
 
 Output module
 ~~~~~~~~~~~~~~~~~~~~

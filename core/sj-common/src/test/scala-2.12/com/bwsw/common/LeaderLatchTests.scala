@@ -66,7 +66,7 @@ class LeaderLatchTests extends FlatSpec with Matchers with BeforeAndAfterAll {
     zooKeeper.exists(masterNode, false) should not be null
   }
 
-  it should "not have leadership if it did not started" in {
+  it should "not be a leader if it hasn't been started" in {
     val masterNode = newMasterNode
     val leaderLatchId = UUID.randomUUID().toString
     val leaderLatch = new LeaderLatch(Set(connectString), masterNode, leaderLatchId)
@@ -74,7 +74,7 @@ class LeaderLatchTests extends FlatSpec with Matchers with BeforeAndAfterAll {
     leaderLatch.hasLeadership() shouldBe false
   }
 
-  it should "takes leadership if master node does not have other LeaderLatches" in {
+  it should "acquire leadership if there is only one participant of the master node" in {
     val masterNode = newMasterNode
     val delay = 10
     val leaderLatchId = UUID.randomUUID().toString
@@ -91,7 +91,7 @@ class LeaderLatchTests extends FlatSpec with Matchers with BeforeAndAfterAll {
     leaderLatch.hasLeadership() shouldBe true
   }
 
-  it should "gives its ID if it has leadership" in {
+  it should "return its ID if it acquires leadership" in {
     val masterNode = newMasterNode
     val delay = 10
     val leaderLatchId = UUID.randomUUID().toString
@@ -103,7 +103,7 @@ class LeaderLatchTests extends FlatSpec with Matchers with BeforeAndAfterAll {
     leaderLatch.getLeaderInfo() shouldBe leaderLatchId
   }
 
-  it should "delete node from server after closing" in {
+  it should "delete its node from a server after closing" in {
     val masterNode = newMasterNode
     val delay = 10
     val leaderLatchId = UUID.randomUUID().toString
@@ -119,7 +119,7 @@ class LeaderLatchTests extends FlatSpec with Matchers with BeforeAndAfterAll {
     nodeInfo.children.size shouldBe 0
   }
 
-  it should "wait until does not take leadership" in {
+  it should "wait until does not acquire leadership" in {
     val masterNode = newMasterNode
     val delay = 10
     val leaderLatchCount = 3
@@ -139,7 +139,7 @@ class LeaderLatchTests extends FlatSpec with Matchers with BeforeAndAfterAll {
   }
 
 
-  "LeaderLatch instances" should "give same leader ID" in {
+  "LeaderLatch instances" should "return the same leader ID" in {
     val masterNode = newMasterNode
     val delay = 10
     val leaderLatchCount = 3
@@ -158,7 +158,7 @@ class LeaderLatchTests extends FlatSpec with Matchers with BeforeAndAfterAll {
     }
   }
 
-  it should "elect new leadership if current leadership was stopped" in {
+  it should "elect a new leader if current leader has been stopped" in {
     val masterNode = newMasterNode
     val delay = 10
     val leaderLatchCount = 3
