@@ -36,6 +36,7 @@ Once an Interval is set the buffer of incoming data is validated to define wheth
 
 Via T-streams the message is sent further in the pipeline to the next stage of processing (to a Regular/Batch module).
 
+.. tip:: The engine utilizes methods provided by its module. The description of the methods you can find at the :ref:`input-module` section.
 
 .. _Regular_Streaming_Engine:
 
@@ -57,6 +58,8 @@ A checkpoint is performed after a set period of time or after a set number of me
 If the module has a state the data is stored at the moment of checkpoint. In case of a falure the stored data from the state will be recovered and the module will be restarted.
 
 If there is no state the checkpoint is performed and the cycle starts again from receiving a new message.
+
+.. tip:: The engine utilizes methods provided by its module. The description of the methods you can find at the :ref:`regular-module` section.
 
 .. _Batch_Streaming_Engine:
 
@@ -89,6 +92,8 @@ If the module has a state the data are stored at the moment of checkpoint. In ca
 
 If there is no state the checkpoint is performed and the cycle starts again from collecting new messages into batches.
 
+.. tip:: The engine utilizes methods provided by its module. The description of the methods you can find at the :ref:`batch-module` section.
+
 .. _Output_Streaming_Engine:
 
 Output Streaming Engine
@@ -107,7 +112,7 @@ To avoid data duplication in the storage, in case of module failure prior to a c
 
 After a checkpoint the cycle repeats again starting from receiving a new message.
 
-
+.. tip:: The engine utilizes methods provided by its module. The description of the methods you can find at the :ref:`output-module` section.
 
 
 
