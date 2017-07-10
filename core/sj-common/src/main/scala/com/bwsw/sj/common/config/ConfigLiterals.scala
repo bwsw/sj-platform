@@ -37,8 +37,6 @@ object ConfigLiterals {
   val jdbcDriver = s"$jdbcDomain.driver"
 
   val kafkaSubscriberTimeoutTag = s"$systemDomain.subscriber-timeout"
-  val geoIpAsNum = s"$systemDomain.geo-ip-as-num"
-  val geoIpAsNumv6 = s"$systemDomain.geo-ip-as-num-v6"
 
   val frameworkTag = s"$systemDomain.current-framework"
   val frameworkPrincipalTag = s"$systemDomain.framework-principal"
