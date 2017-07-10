@@ -103,8 +103,8 @@ object StartFramework {
   }
 
 
-  private def getZooKeeperServers(marathonMaster: String): String = {
-    val marathonMasterUrl = new URI(marathonMaster)
-    marathonMasterUrl.getHost + ":" + marathonMasterUrl.getPort
+  private def getZooKeeperServers(mesosMaster: String): String = {
+    val mesosMasterUrl = new URI(mesosMaster)
+    mesosMasterUrl.getHost + ":" + mesosMasterUrl.getPort
   }
 }
