@@ -27,7 +27,6 @@ import org.mockserver.integration.ClientAndServer
 import org.mockserver.model.HttpRequest
 import org.mockserver.model.HttpResponse.response
 import org.mockserver.model.HttpStatusCode._
-import org.mockserver.verify.VerificationTimes
 import org.scalatest.prop.TableDrivenPropertyChecks
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, FlatSpec, Matchers}
 
@@ -41,6 +40,7 @@ class RestClientTests extends FlatSpec with Matchers with BeforeAndAfterEach wit
   val server = new ClientAndServer()
   val port = server.getPort
   val hosts = Set(s"localhost:$port")
+  val responseOk200 = response().withStatusCode(OK_200.code())
 
   override def afterEach(): Unit = server.reset()
 
@@ -61,7 +61,7 @@ class RestClientTests extends FlatSpec with Matchers with BeforeAndAfterEach wit
     val client = new RestClient(hosts, path, HTTP_1_1, Map.empty[String, String])
 
     forAll(requestTransformations) { (requestTransformation, expectedRequest) =>
-      server.when(expectedRequest).respond(response().withStatusCode(OK_200.code()))
+      server.when(expectedRequest).respond(responseOk200)
       val isSuccess = client.execute(requestTransformation)
       server.verify(expectedRequest)
       isSuccess shouldBe true
@@ -85,7 +85,7 @@ class RestClientTests extends FlatSpec with Matchers with BeforeAndAfterEach wit
       val client = new RestClient(hosts, path, HTTP_1_1, Map.empty[String, String])
       val expectedRequest = partialRequest.withPath(path)
 
-      server.when(expectedRequest).respond(response().withStatusCode(OK_200.code()))
+      server.when(expectedRequest).respond(responseOk200)
       val isSuccess = client.execute(requestTransformation)
       server.verify(expectedRequest)
       isSuccess shouldBe true
@@ -117,7 +117,7 @@ class RestClientTests extends FlatSpec with Matchers with BeforeAndAfterEach wit
       val expectedRequest = partialRequest
       headers.foreach(header => expectedRequest.withHeader(header._1, header._2))
 
-      server.when(expectedRequest).respond(response().withStatusCode(OK_200.code()))
+      server.when(expectedRequest).respond(responseOk200)
       val isSuccess = client.execute(requestTransformation)
       server.verify(expectedRequest)
       isSuccess shouldBe true
@@ -156,12 +156,18 @@ class RestClientTests extends FlatSpec with Matchers with BeforeAndAfterEach wit
     val path = "/some/path"
     val requestTransformation = (r: Request) => r.method(GET)
     val expectedRequest = HttpRequest.request(path).withMethod(GET.asString())
-    val client = new RestClient(hosts, path, HTTP_1_1, Map.empty[String, String], timeout = 1)
+    val timeout: Long = 500
+    val client = new RestClient(hosts, path, HTTP_1_1, Map.empty[String, String], timeout = timeout)
 
-    server.when(expectedRequest).respond(response().withStatusCode(OK_200.code()))
+
+    server.when(HttpRequest.request()).callback { httpRequest: HttpRequest =>
+      if (httpRequest.getPath.getValue == path && httpRequest.getMethod.getValue == GET.asString())
+        Thread.sleep(timeout * 2)
+
+      responseOk200
+    }
 
     val isSuccess = client.execute(requestTransformation)
-    server.verify(expectedRequest, VerificationTimes.atLeast(0))
     isSuccess shouldBe false
 
     server.clear(expectedRequest)
@@ -178,11 +184,11 @@ class RestClientTests extends FlatSpec with Matchers with BeforeAndAfterEach wit
     val encoded = BaseEncoding.base64().encode(s"$username:$password".getBytes)
     val expectedRequest = HttpRequest.request(path).withMethod(GET.asString())
       .withHeader("Authorization", "Basic " + encoded)
-    server.when(expectedRequest).respond(response().withStatusCode(OK_200.code()))
+    server.when(expectedRequest).respond(responseOk200)
 
     val client = new RestClient(hosts, path, HTTP_1_1, Map.empty[String, String], Some(username), Some(password))
     val isSuccess = client.execute(requestTransformation)
-    server.verify(expectedRequest, VerificationTimes.atLeast(0))
+    server.verify(expectedRequest)
     isSuccess shouldBe true
 
     client.close()
