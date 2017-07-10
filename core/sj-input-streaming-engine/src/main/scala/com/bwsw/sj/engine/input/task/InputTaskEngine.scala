@@ -203,14 +203,14 @@ abstract class InputTaskEngine(manager: InputTaskManager,
     * 2) if (1) is true an input envelope is sent to output stream(s)
     *
     * @param envelope may be input envelope
-    * @return True if a processed envelope is processed, e.i. it is not duplicate or empty, and false in other case
+    * @return True if a processed envelope is processed, e.i. it is not duplicate or empty, and false otherwise
     */
   private def processEnvelope(envelope: Option[InputEnvelope[AnyRef]]): Boolean = {
     envelope match {
       case Some(inputEnvelope) =>
         logger.info(s"Task name: ${manager.taskName}. Envelope is defined. Process it.")
         performanceMetrics.addEnvelopeToInputStream(inputEnvelope)
-        if (checkForDuplication(inputEnvelope.key, inputEnvelope.duplicateCheck)) {
+        if (!isDuplicate(inputEnvelope.key, inputEnvelope.duplicateCheck)) {
           logger.debug(s"Task name: ${manager.taskName}. Envelope is not duplicate so send it.")
           inputEnvelope.outputMetadata.foreach(x => {
             sendData(x._1, x._2, inputEnvelope.data)
@@ -227,16 +227,16 @@ abstract class InputTaskEngine(manager: InputTaskManager,
     *
     * @param key            key for checking
     * @param duplicateCheck flag points a key has to be checked or not.
-    * @return True if a processed envelope is not duplicate and false in other case
+    * @return True if a processed envelope is a duplicate and false otherwise
     */
-  private def checkForDuplication(key: String, duplicateCheck: Option[Boolean]): Boolean = {
+  private def isDuplicate(key: String, duplicateCheck: Option[Boolean]): Boolean = {
     logger.info(s"Task name: ${manager.taskName}. " +
       s"Try to check key: '$key' for duplication with a setting duplicateCheck = '$duplicateCheck' " +
       s"and an instance setting - 'duplicate-check' : '${instance.duplicateCheck}'.")
     if (duplicateCheck.isDefined) {
-      if (duplicateCheck.get) evictionPolicy.checkForDuplication(key) else true
+      if (duplicateCheck.get) evictionPolicy.isDuplicate(key) else false
     } else {
-      if (instance.duplicateCheck) evictionPolicy.checkForDuplication(key) else true
+      if (instance.duplicateCheck) evictionPolicy.isDuplicate(key) else false
     }
   }
 
@@ -247,7 +247,7 @@ abstract class InputTaskEngine(manager: InputTaskManager,
     *
     * @param envelope              Input envelope
     * @param isNotEmptyOrDuplicate Flag points whether a processed envelope is empty or duplicate  or not.
-    *                              If it is true it means a processed envelope is duplicate or empty and false in other case
+    *                              If it is true it means a processed envelope is duplicate or empty and false otherwise
     * @param ctx                   Channel context related with this input envelope to send a message about this event
     */
   private def sendClientResponse(envelope: Option[InputEnvelope[AnyRef]], isNotEmptyOrDuplicate: Boolean, ctx: ChannelHandlerContext): ChannelFuture = {

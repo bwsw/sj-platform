@@ -59,33 +59,33 @@ class ExpandedTimeEvictionPolicyTests
     val evictionPolicy = new ExpandedTimeEvictionPolicy(hazelcast)
 
     forAll(allKeys) { key =>
-      evictionPolicy.checkForDuplication(key) shouldBe true
+      evictionPolicy.isDuplicate(key) shouldBe false
     }
 
     Thread.sleep(200)
 
     forAll(allKeys) { key =>
-      evictionPolicy.checkForDuplication(key) shouldBe false
+      evictionPolicy.isDuplicate(key) shouldBe true
     }
   }
 
   it should "does not evict not expired elements" in {
     val evictionPolicy = new ExpandedTimeEvictionPolicy(hazelcast)
-    forAll(allKeys)(evictionPolicy.checkForDuplication)
+    forAll(allKeys)(evictionPolicy.isDuplicate)
 
     Thread.sleep(ttlSeconds * 500)
     forAll(allKeys) { key =>
-      evictionPolicy.checkForDuplication(key) shouldBe false
+      evictionPolicy.isDuplicate(key) shouldBe true
     }
   }
 
   it should "evict expired elements" in {
     val evictionPolicy = new ExpandedTimeEvictionPolicy(hazelcast)
-    forAll(allKeys)(evictionPolicy.checkForDuplication)
+    forAll(allKeys)(evictionPolicy.isDuplicate)
 
     Thread.sleep(ttlSeconds * 1000)
     forAll(allKeys) { key =>
-      evictionPolicy.checkForDuplication(key) shouldBe true
+      evictionPolicy.isDuplicate(key) shouldBe false
     }
   }
 
@@ -99,18 +99,18 @@ class ExpandedTimeEvictionPolicyTests
       (key3, true),
       (key4, false))
 
-    forAll(keysForUpdate)((key, _) => evictionPolicy.checkForDuplication(key))
+    forAll(keysForUpdate)((key, _) => evictionPolicy.isDuplicate(key))
 
     val waitingTimeout = ttlSeconds * 500
     Thread.sleep(waitingTimeout)
     forAll(keysForUpdate) { (key, update) =>
       if (update)
-        evictionPolicy.checkForDuplication(key)
+        evictionPolicy.isDuplicate(key)
     }
 
     Thread.sleep(waitingTimeout)
     forAll(keysForUpdate) { (key, update) =>
-      evictionPolicy.checkForDuplication(key) shouldBe !update
+      evictionPolicy.isDuplicate(key) shouldBe update
     }
   }
 

@@ -72,7 +72,7 @@ class JsonSerializerTests extends FlatSpec with Matchers with TableDrivenPropert
     }
   }
 
-  it should "serialize objects properly" in {
+  it should "serialize nested objects properly" in {
     val serializer = new JsonSerializer
     (innerObjects ++ outerObjects).foreach { obj =>
       val json = serializer.serialize(obj)
@@ -88,14 +88,14 @@ class JsonSerializerTests extends FlatSpec with Matchers with TableDrivenPropert
     }
   }
 
-  it should "deserialize object with different type properly" in {
+  it should "deserialize objects of different types properly" in {
     val serializer = new JsonSerializer
     outerObjects.foreach { obj =>
       serializer.deserialize[OuterObject](obj.toJson) shouldBe obj
     }
   }
 
-  it should "deserialize json with missed fields when 'disableNullForPrimitives' flag does not set" in {
+  it should "deserialize json with missed fields when 'disableNullForPrimitives' flag isn't set" in {
     val someType = "some-type"
     val field1Value = 123
     val field4Value = 456
@@ -143,7 +143,7 @@ class JsonSerializerTests extends FlatSpec with Matchers with TableDrivenPropert
     serializer.deserialize[OuterObject](json) shouldBe obj
   }
 
-  it should "not deserialize json with unknown fields when 'ignoreUnknown' flag does not set" in {
+  it should "not deserialize json with unknown fields when 'ignoreUnknown' flag isn't set" in {
     val obj = new OuterObjectType1(123, InnerObject(456, "field 5 value"), true)
     val unknownField = "unknown-field"
     val json = mapToJson(obj.toMap + (unknownField -> "value"))
@@ -155,7 +155,7 @@ class JsonSerializerTests extends FlatSpec with Matchers with TableDrivenPropert
     thrown.getMessage should include(unknownField)
   }
 
-  it should "not deserialize json if field contain value with incorrect type" in {
+  it should "not deserialize json if a field contains a value of incorrect type" in {
     val obj = new OuterObjectType1(123, InnerObject(456, "field 5 value"), true)
     val map = obj.toMap
     val incorrectValues = Table(
@@ -176,7 +176,7 @@ class JsonSerializerTests extends FlatSpec with Matchers with TableDrivenPropert
     }
   }
 
-  it should "throws JsonDeserializationException for incorrect json" in {
+  it should "throw JsonDeserializationException for incorrect json" in {
     val incorrectJsons = Seq(
       null,
       "",

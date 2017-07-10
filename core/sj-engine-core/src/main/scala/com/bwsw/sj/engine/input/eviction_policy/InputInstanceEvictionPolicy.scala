@@ -39,9 +39,9 @@ abstract class InputInstanceEvictionPolicy(hazelcast: HazelcastInterface) {
     * Checks whether a specific key is duplicate or not
     *
     * @param key Key that will be checked
-    * @return True if the key is not duplicate and false in other case
+    * @return True if the key is a duplicate and false otherwise
     */
-  def checkForDuplication(key: String): Boolean
+  def isDuplicate(key: String): Boolean
 
   /**
     * Returns a keys storage (Hazelcast map) for checking of there are duplicates (input envelopes) or not
