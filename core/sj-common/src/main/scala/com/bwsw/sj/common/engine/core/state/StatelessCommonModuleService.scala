@@ -43,7 +43,7 @@ class StatelessCommonModuleService(manager: CommonTaskManager,
   extends CommonModuleService(manager.instance, manager.outputProducers, checkpointGroup) {
 
   private val connectionRepository = inject[ConnectionRepository]
-  private val streamService = inject[ConnectionRepository].getStreamRepository
+  private val streamService = connectionRepository.getStreamRepository
 
   val environmentManager: ModuleEnvironmentManager = new ModuleEnvironmentManager(
     instance.options,
@@ -52,7 +52,7 @@ class StatelessCommonModuleService(manager: CommonTaskManager,
     producerPolicyByOutput,
     moduleTimer,
     performanceMetrics,
-    connectionRepository)
+    connectionRepository.getFileStorage)
 
   val executor: StreamingExecutor with TimerHandlers = manager.getExecutor(environmentManager).asInstanceOf[StreamingExecutor with TimerHandlers]
 }

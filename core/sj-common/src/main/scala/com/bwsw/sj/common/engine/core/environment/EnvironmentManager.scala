@@ -21,19 +21,18 @@ package com.bwsw.sj.common.engine.core.environment
 import com.bwsw.common.file.utils.FileStorage
 import com.bwsw.sj.common.dal.model.instance.InstanceDomain
 import com.bwsw.sj.common.dal.model.stream.StreamDomain
-import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import org.slf4j.{Logger, LoggerFactory}
 
 /**
   * A common class providing for user methods that can be used in a module of specific type
   *
-  * @param options              user defined options from instance [[InstanceDomain.options]]
-  * @param outputs              set of output streams [[StreamDomain]] from instance [[InstanceDomain.outputs]]
-  * @param connectionRepository repository for connection to MongoDB and file storage
+  * @param options     user defined options from instance [[InstanceDomain.options]]
+  * @param outputs     set of output streams [[StreamDomain]] from instance [[InstanceDomain.outputs]]
+  * @param fileStorage file storage
   * @author Kseniya Mikhaleva
   */
 
-class EnvironmentManager(val options: String, val outputs: Array[StreamDomain], connectionRepository: ConnectionRepository) {
+class EnvironmentManager(val options: String, val outputs: Array[StreamDomain], val fileStorage: FileStorage) {
 
   protected val logger: Logger = LoggerFactory.getLogger(this.getClass)
 
@@ -51,10 +50,4 @@ class EnvironmentManager(val options: String, val outputs: Array[StreamDomain], 
     logger.info(s"Get names of the streams that have set of tags: ${tags.mkString(",")}\n")
     outputs.filter(x => tags.forall(x.tags.contains)).map(_.name)
   }
-
-  /**
-    * Returns file storage
-    */
-  def getFileStorage: FileStorage =
-    connectionRepository.getFileStorage
 }

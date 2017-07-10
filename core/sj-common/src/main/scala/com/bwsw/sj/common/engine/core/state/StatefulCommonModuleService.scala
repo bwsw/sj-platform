@@ -78,7 +78,7 @@ class StatefulCommonModuleService(manager: CommonTaskManager,
     producerPolicyByOutput,
     moduleTimer,
     performanceMetrics,
-    connectionRepository)
+    connectionRepository.getFileStorage)
 
   val executor: StreamingExecutor with TimerHandlers = manager.getExecutor(environmentManager).asInstanceOf[StreamingExecutor with TimerHandlers]
 

@@ -21,10 +21,10 @@ package com.bwsw.sj.module.input.regex
 import java.nio.charset.Charset
 
 import com.bwsw.common.JsonSerializer
+import com.bwsw.common.file.utils.FileStorage
 import com.bwsw.common.hazelcast.HazelcastConfig
 import com.bwsw.sj.common.dal.model.service.TStreamServiceDomain
 import com.bwsw.sj.common.dal.model.stream.TStreamStreamDomain
-import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.engine.core.entities.InputEnvelope
 import com.bwsw.sj.common.engine.core.environment.InputEnvironmentManager
 import com.bwsw.sj.common.engine.core.input.InputStreamingResponse
@@ -34,8 +34,8 @@ import com.bwsw.sj.engine.core.simulation.input.mocks.HazelcastMock
 import com.bwsw.sj.engine.core.simulation.input.{InputEngineSimulator, OutputData}
 import com.bwsw.sj.engine.input.eviction_policy.FixTimeEvictionPolicy
 import com.bwsw.sj.module.input.regex.RegexInputOptionsNames.{fallbackFieldName, fallbackRecordName, firstMatchWinPolicy, outputRecordName}
-import org.apache.avro.{Schema, SchemaBuilder}
 import org.apache.avro.generic.GenericData.Record
+import org.apache.avro.{Schema, SchemaBuilder}
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FlatSpec, Matchers}
 
@@ -104,7 +104,7 @@ class RegexInputExecutorTests extends FlatSpec with Matchers with MockitoSugar {
   val manager = new InputEnvironmentManager(
     serializedOptions,
     Array(outputStream1, outputStream2, fallbackStream),
-    mock[ConnectionRepository])
+    mock[FileStorage])
   val hazelcastConfig = HazelcastConfig(600, 1, 1, EngineLiterals.lruDefaultEvictionPolicy, 100, Seq("localhost"))
 
 

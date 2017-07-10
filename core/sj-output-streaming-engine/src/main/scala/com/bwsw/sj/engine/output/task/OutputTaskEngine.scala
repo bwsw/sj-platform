@@ -81,7 +81,7 @@ abstract class OutputTaskEngine(manager: OutputTaskManager,
     val outputs = instance.outputs
       .flatMap(x => streamService.get(x))
     val options = instance.options
-    new OutputEnvironmentManager(options, outputs, connectionRepository)
+    new OutputEnvironmentManager(options, outputs, connectionRepository.getFileStorage)
   }
 
   /**

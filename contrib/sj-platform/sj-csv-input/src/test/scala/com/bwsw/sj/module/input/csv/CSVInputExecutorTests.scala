@@ -21,10 +21,10 @@ package com.bwsw.sj.module.input.csv
 import java.nio.charset.Charset
 
 import com.bwsw.common.JsonSerializer
+import com.bwsw.common.file.utils.FileStorage
 import com.bwsw.common.hazelcast.HazelcastConfig
 import com.bwsw.sj.common.dal.model.service.TStreamServiceDomain
 import com.bwsw.sj.common.dal.model.stream.TStreamStreamDomain
-import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.engine.core.entities.InputEnvelope
 import com.bwsw.sj.common.engine.core.environment.InputEnvironmentManager
 import com.bwsw.sj.common.engine.core.input.InputStreamingResponse
@@ -70,7 +70,7 @@ class CSVInputExecutorTests extends FlatSpec with Matchers with MockitoSugar {
   val serializer = new JsonSerializer
   val serializedOptions = serializer.serialize(options)
 
-  val manager = new InputEnvironmentManager(serializedOptions, Array(outputStream, fallbackStream), mock[ConnectionRepository])
+  val manager = new InputEnvironmentManager(serializedOptions, Array(outputStream, fallbackStream), mock[FileStorage])
   val hazelcastConfig = HazelcastConfig(600, 1, 1, EngineLiterals.lruDefaultEvictionPolicy, 100, Seq("localhost"))
 
   val avroSchema = {

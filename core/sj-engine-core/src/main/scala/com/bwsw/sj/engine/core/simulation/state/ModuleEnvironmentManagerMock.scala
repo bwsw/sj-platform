@@ -20,7 +20,6 @@ package com.bwsw.sj.engine.core.simulation.state
 
 import com.bwsw.common.file.utils.MongoFileStorage
 import com.bwsw.sj.common.dal.model.stream.{StreamDomain, TStreamStreamDomain}
-import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.engine.core.environment.{ModuleOutput, StatefulModuleEnvironmentManager}
 import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
 import com.bwsw.sj.common.engine.core.state.StateStorage
@@ -39,6 +38,7 @@ import scala.collection.{Map, mutable}
   * @param stateStorage storage of state
   * @param options      user defined options from instance
   * @param outputs      set of output streams from instance
+  * @param fileStorage  file storage
   * @author Pavel Tomskikh
   */
 class ModuleEnvironmentManagerMock(stateStorage: StateStorage,
@@ -57,13 +57,6 @@ class ModuleEnvironmentManagerMock(stateStorage: StateStorage,
       s.name -> producer
     }.toMap
 
-    val connectionRepository = {
-      val connectionRepositoryMock = mock(classOf[ConnectionRepository])
-      when(connectionRepositoryMock.getFileStorage).thenReturn(fileStorage)
-
-      connectionRepositoryMock
-    }
-
     val producerPolicyByOutput = mutable.Map.empty[String, (String, ModuleOutput)]
     val moduleTimer = mock(classOf[SjTimer])
     val performanceMetrics = mock(classOf[PerformanceMetrics])
@@ -75,7 +68,7 @@ class ModuleEnvironmentManagerMock(stateStorage: StateStorage,
     producerPolicyByOutput,
     moduleTimer,
     performanceMetrics,
-    connectionRepository) {
+    fileStorage) {
 
   /**
     * @inheritdoc

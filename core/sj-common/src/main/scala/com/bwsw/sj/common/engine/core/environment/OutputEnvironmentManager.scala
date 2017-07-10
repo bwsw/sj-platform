@@ -18,17 +18,17 @@
  */
 package com.bwsw.sj.common.engine.core.environment
 
+import com.bwsw.common.file.utils.FileStorage
 import com.bwsw.sj.common.dal.model.instance.InstanceDomain
 import com.bwsw.sj.common.dal.model.stream.StreamDomain
-import com.bwsw.sj.common.dal.repository.ConnectionRepository
 
 /**
   * Provides for user methods that can be used in an output module
   *
-  * @param options              user defined options from instance [[InstanceDomain.options]]
-  * @param outputs              set of output streams [[StreamDomain]] from instance [[InstanceDomain.outputs]]
-  * @param connectionRepository repository for connection to MongoDB and file storage
+  * @param options     user defined options from instance [[InstanceDomain.options]]
+  * @param outputs     set of output streams [[StreamDomain]] from instance [[InstanceDomain.outputs]]
+  * @param fileStorage file storage
   * @author Kseniya Mikhaleva
   */
-class OutputEnvironmentManager(options: String, outputs: Array[StreamDomain], connectionRepository: ConnectionRepository)
-  extends EnvironmentManager(options, outputs, connectionRepository)
+class OutputEnvironmentManager(options: String, outputs: Array[StreamDomain], fileStorage: FileStorage)
+  extends EnvironmentManager(options, outputs, fileStorage)

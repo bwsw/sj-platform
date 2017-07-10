@@ -94,7 +94,7 @@ abstract class InputTaskEngine(manager: InputTaskManager,
     val streamService = connectionRepository.getStreamRepository
     val taggedOutputs = instance.outputs.flatMap(x => streamService.get(x))
 
-    new InputEnvironmentManager(instance.options, taggedOutputs, connectionRepository)
+    new InputEnvironmentManager(instance.options, taggedOutputs, connectionRepository.getFileStorage)
   }
 
   private def addProducersToCheckpointGroup(): Unit = {
