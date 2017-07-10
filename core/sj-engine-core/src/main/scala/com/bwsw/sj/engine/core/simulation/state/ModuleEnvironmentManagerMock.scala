@@ -18,7 +18,7 @@
  */
 package com.bwsw.sj.engine.core.simulation.state
 
-import com.bwsw.common.file.utils.MongoFileStorage
+import com.bwsw.common.file.utils.FileStorage
 import com.bwsw.sj.common.dal.model.stream.{StreamDomain, TStreamStreamDomain}
 import com.bwsw.sj.common.engine.core.environment.{ModuleOutput, StatefulModuleEnvironmentManager}
 import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
@@ -44,7 +44,7 @@ import scala.collection.{Map, mutable}
 class ModuleEnvironmentManagerMock(stateStorage: StateStorage,
                                    options: String,
                                    outputs: Array[TStreamStreamDomain],
-                                   fileStorage: MongoFileStorage = mock(classOf[MongoFileStorage]))
+                                   fileStorage: FileStorage = mock(classOf[FileStorage]))
   extends {
     val producers: Map[String, Producer] = outputs.map { s =>
       val stream = mock(classOf[streams.Stream])
