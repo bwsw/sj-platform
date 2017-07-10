@@ -1,7 +1,7 @@
 Custom Module Development Guide
 ======================================
 
-.. warning:: The section is under development!
+.. warning:: *The section is under development!*
 
 Under this section how to write your own module for the Stream Juggler will be described.
 
