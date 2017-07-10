@@ -94,7 +94,7 @@ Default implementation of the method::
       message = s"Input envelope is empty\n"
     }
   InputStreamingResponse(message, sendResponsesNow)
-}
+ }
 
 
 4) "createCheckpointResponse": 
