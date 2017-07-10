@@ -30,14 +30,6 @@ import scala.util.{Failure, Success, Try}
 class SettingsUtils(implicit val injector: Injector) {
   private val configService = inject[ConnectionRepository].getConfigRepository
 
-  def getGeoIpAsNumFileName(): String = {
-    getStringConfigSetting(geoIpAsNum)
-  }
-
-  def getGeoIpAsNumv6FileName(): String = {
-    getStringConfigSetting(geoIpAsNumv6)
-  }
-
   def getKafkaSubscriberTimeout(): Int = {
     getIntConfigSetting(kafkaSubscriberTimeoutTag)
   }
