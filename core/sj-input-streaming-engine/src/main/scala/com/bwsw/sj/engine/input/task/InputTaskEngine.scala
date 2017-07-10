@@ -23,12 +23,12 @@ import java.util.concurrent.{ArrayBlockingQueue, TimeUnit}
 import com.bwsw.common.hazelcast.{Hazelcast, HazelcastConfig}
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.engine.TaskEngine
-import com.bwsw.sj.common.si.model.instance.InputInstance
-import com.bwsw.sj.common.utils.EngineLiterals
-import com.bwsw.sj.engine.core.engine.{NumericalCheckpointTaskEngine, TimeCheckpointTaskEngine}
 import com.bwsw.sj.common.engine.core.entities.InputEnvelope
 import com.bwsw.sj.common.engine.core.environment.InputEnvironmentManager
 import com.bwsw.sj.common.engine.core.input.{InputStreamingExecutor, Interval}
+import com.bwsw.sj.common.si.model.instance.InputInstance
+import com.bwsw.sj.common.utils.EngineLiterals
+import com.bwsw.sj.engine.core.engine.{NumericalCheckpointTaskEngine, TimeCheckpointTaskEngine}
 import com.bwsw.sj.engine.input.config.InputEngineConfigNames
 import com.bwsw.sj.engine.input.eviction_policy.InputInstanceEvictionPolicy
 import com.bwsw.sj.engine.input.task.reporting.InputStreamingPerformanceMetrics
@@ -67,6 +67,7 @@ abstract class InputTaskEngine(manager: InputTaskManager,
   private val environmentManager = createModuleEnvironmentManager()
   private val executor: InputStreamingExecutor[AnyRef] = manager.getExecutor(environmentManager)
   private val hazelcastMapName: String = instance.name + "-" + "inputEngine"
+  private val connectionRepository = inject[ConnectionRepository]
 
   private val applicationConfig = ConfigFactory.load()
   private val tcpIpMembers = applicationConfig.getString(InputEngineConfigNames.hosts).split(",")
@@ -90,10 +91,10 @@ abstract class InputTaskEngine(manager: InputTaskManager,
   addProducersToCheckpointGroup()
 
   private def createModuleEnvironmentManager(): InputEnvironmentManager = {
-    val streamService = inject[ConnectionRepository].getStreamRepository
+    val streamService = connectionRepository.getStreamRepository
     val taggedOutputs = instance.outputs.flatMap(x => streamService.get(x))
 
-    new InputEnvironmentManager(instance.options, taggedOutputs)
+    new InputEnvironmentManager(instance.options, taggedOutputs, connectionRepository)
   }
 
   private def addProducersToCheckpointGroup(): Unit = {

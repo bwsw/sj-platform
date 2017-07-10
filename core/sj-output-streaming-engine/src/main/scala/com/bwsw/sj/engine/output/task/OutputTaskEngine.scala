@@ -54,7 +54,8 @@ abstract class OutputTaskEngine(manager: OutputTaskManager,
   currentThread.setName(s"output-task-${manager.taskName}-engine")
   private val blockingQueue: ArrayBlockingQueue[Envelope] = new ArrayBlockingQueue[Envelope](EngineLiterals.queueSize)
   private val instance: OutputInstance = manager.instance.asInstanceOf[OutputInstance]
-  private val streamService = inject[ConnectionRepository].getStreamRepository
+  private val connectionRepository = inject[ConnectionRepository]
+  private val streamService = connectionRepository.getStreamRepository
   private val outputStream: StreamDomain = getOutputStream
   private val environmentManager: OutputEnvironmentManager = createModuleEnvironmentManager()
   private val executor: OutputStreamingExecutor[AnyRef] = manager.getExecutor(environmentManager)
@@ -80,7 +81,7 @@ abstract class OutputTaskEngine(manager: OutputTaskManager,
     val outputs = instance.outputs
       .flatMap(x => streamService.get(x))
     val options = instance.options
-    new OutputEnvironmentManager(options, outputs)
+    new OutputEnvironmentManager(options, outputs, connectionRepository)
   }
 
   /**

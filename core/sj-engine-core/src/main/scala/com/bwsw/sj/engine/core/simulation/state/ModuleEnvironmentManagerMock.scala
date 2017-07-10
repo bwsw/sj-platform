@@ -18,7 +18,9 @@
  */
 package com.bwsw.sj.engine.core.simulation.state
 
+import com.bwsw.common.file.utils.MongoFileStorage
 import com.bwsw.sj.common.dal.model.stream.{StreamDomain, TStreamStreamDomain}
+import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.engine.core.environment.{ModuleOutput, StatefulModuleEnvironmentManager}
 import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
 import com.bwsw.sj.common.engine.core.state.StateStorage
@@ -41,29 +43,39 @@ import scala.collection.{Map, mutable}
   */
 class ModuleEnvironmentManagerMock(stateStorage: StateStorage,
                                    options: String,
-                                   outputs: Array[TStreamStreamDomain]) extends {
-  val producers: Map[String, Producer] = outputs.map { s =>
-    val stream = mock(classOf[streams.Stream])
-    when(stream.partitionsCount).thenReturn(s.partitions)
-    when(stream.name).thenReturn(s.name)
+                                   outputs: Array[TStreamStreamDomain],
+                                   fileStorage: MongoFileStorage = mock(classOf[MongoFileStorage]))
+  extends {
+    val producers: Map[String, Producer] = outputs.map { s =>
+      val stream = mock(classOf[streams.Stream])
+      when(stream.partitionsCount).thenReturn(s.partitions)
+      when(stream.name).thenReturn(s.name)
 
-    val producer = mock(classOf[Producer])
-    when(producer.stream).thenReturn(stream)
+      val producer = mock(classOf[Producer])
+      when(producer.stream).thenReturn(stream)
 
-    s.name -> producer
-  }.toMap
+      s.name -> producer
+    }.toMap
 
-  val producerPolicyByOutput = mutable.Map.empty[String, (String, ModuleOutput)]
-  val moduleTimer = mock(classOf[SjTimer])
-  val performanceMetrics = mock(classOf[PerformanceMetrics])
-} with StatefulModuleEnvironmentManager(
-  stateStorage,
-  options,
-  producers,
-  outputs.asInstanceOf[Array[StreamDomain]],
-  producerPolicyByOutput,
-  moduleTimer,
-  performanceMetrics) {
+    val connectionRepository = {
+      val connectionRepositoryMock = mock(classOf[ConnectionRepository])
+      when(connectionRepositoryMock.getFileStorage).thenReturn(fileStorage)
+
+      connectionRepositoryMock
+    }
+
+    val producerPolicyByOutput = mutable.Map.empty[String, (String, ModuleOutput)]
+    val moduleTimer = mock(classOf[SjTimer])
+    val performanceMetrics = mock(classOf[PerformanceMetrics])
+  } with StatefulModuleEnvironmentManager(
+    stateStorage,
+    options,
+    producers,
+    outputs.asInstanceOf[Array[StreamDomain]],
+    producerPolicyByOutput,
+    moduleTimer,
+    performanceMetrics,
+    connectionRepository) {
 
   /**
     * @inheritdoc
