@@ -1,6 +1,6 @@
 .. _Json_schema:
 
-Json schema for specification of module
+Json schema for module specification 
 ===========================================
 
 Below you will find a Json schema for specification file of a module::
