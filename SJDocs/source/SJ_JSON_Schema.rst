@@ -3,6 +3,7 @@
 Json schema for specification of module
 ===========================================
 
+Below you will find a Json schema for specification file of a module::
 
  {
   "$schema": "http://json-schema.org/draft-04/schema#",
@@ -117,8 +118,7 @@ Json schema for specification of module
   ]
  }
 
-Example of valid json::
-
+An example of valid specification for a **regular** module::
 
  {
   "name": "com.bw-sw.sj.demux",
@@ -153,3 +153,111 @@ Example of valid json::
   "executor-class": "com.bw-sw.sj.Executor" 
  }
 
+
+An example of valid specification for a **batch** module::
+
+ {
+  "name": "BatchModule",
+  "description": "Universal demux module by BW",
+  "version": "1.1",
+  "author": "John Smith",
+  "license": "Apache 2.0",
+  "inputs": {
+    "cardinality": [
+      1,
+      1
+    ],
+    "types": [
+      "stream.kafka",
+      "stream.t-stream"
+    ]
+  },
+  "outputs": {
+    "cardinality": [
+      1,
+      1
+    ],
+    "types": [
+      "stream.t-stream"
+    ]
+  },
+  "module-type": "batch-streaming",
+  "engine-name": "com.bwsw.batch.streaming.engine",
+  "engine-version": "1.0",
+  
+  "validator-class": "com.bwsw.sj.stubs.module.windowed_streaming.Validator",
+  "executor-class": "com.bwsw.sj.stubs.module.windowed_streaming.Executor",
+  "batch-collector-class": "com.bwsw.sj.stubs.module.windowed_streaming.NumericalBatchCollector"
+ }
+
+
+An example of valid specification for an **input** module::
+
+ {
+  "name": "InputModule",
+  "description": "Universal demux module by BW",
+  "version": "1.0",
+  "author": "John Smith",
+  "license": "Apache 1.0",
+  "inputs": {
+    "cardinality": [
+      0,
+      0
+    ],
+    "types": [
+      "input"
+    ]
+  },
+  "outputs": {
+    "cardinality": [
+      1,
+      1
+    ],
+    "types": [
+      "stream.t-stream"
+    ]
+  },
+  "module-type": "input-streaming",
+  "engine-name": "com.bwsw.input.streaming.engine",
+  "engine-version": "1.0",
+  
+  "validator-class": "com.bwsw.sj.stubs.module.input_streaming.Validator",
+  "executor-class": "com.bwsw.sj.stubs.module.input_streaming.Executor"
+
+ }
+
+
+An example of valid specification for an **output** module::
+
+ {
+  "name": "OutputModule",
+  "description": "Universal demux module by BW",
+  "version": "1.0",
+  "author": "John Smith",
+  "license": "Apache 2.0",
+  "inputs": {
+    "cardinality": [
+      1,
+      1
+    ],
+    "types": [
+      "stream.t-stream"
+    ]
+  },
+  "outputs": {
+    "cardinality": [
+      1,
+      1
+    ],
+    "types": [
+      "elasticsearch-output"
+    ]
+  },
+  "module-type": "output-streaming",
+  "engine-name": "com.bwsw.output.streaming.engine",
+  "engine-version": "1.0",
+  
+  "validator-class": "com.bwsw.sj.stubs.module.output.StubOutputValidator",
+  "executor-class": "com.bwsw.sj.stubs.module.output.StubOutputExecutor",
+  "entity-class" : "com.bwsw.sj.stubs.module.output.data.StubEsData"
+ }
