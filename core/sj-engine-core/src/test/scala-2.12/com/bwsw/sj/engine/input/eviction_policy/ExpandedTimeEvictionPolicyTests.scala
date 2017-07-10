@@ -62,6 +62,8 @@ class ExpandedTimeEvictionPolicyTests
       evictionPolicy.checkForDuplication(key) shouldBe true
     }
 
+    Thread.sleep(200)
+
     forAll(allKeys) { key =>
       evictionPolicy.checkForDuplication(key) shouldBe false
     }
