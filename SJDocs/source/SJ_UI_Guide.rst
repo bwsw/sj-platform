@@ -651,7 +651,13 @@ The stages include:
 
 In the list of instances the following actions can be performed:
 
-1. **View** an instance`s name and status. An instance may have the following statuses:
+1. **Start** an instance by clicking the «Start» button in the Actions section. The instance status will first change to «Starting» and in a few seconds to «Started». That means the instance is launched and is working now.
+2. **Stop** the instance that has been started i.e. has the «Started» status. Click at the «Stop» button and wait for a while till the status changes to «Stopping» and then to «Stopped».
+3. **Delete** a stream clicking at the corresponding icon in the Action block near the name of the stream you want to delete.
+
+.. note:: An instance with statuses «Starting», «Started», «Stopping», «Deleting» can not be deleted.
+
+4. **View** an instance`s name and status. An instance may have the following statuses:
      
 - ready - a newly created instance and not started yet;
 
@@ -686,13 +692,17 @@ The *statistics* on the task execution is also available from the list of instan
 
 .. figure:: _static/FrameworkStatsIcon.png
 
-A window will pop-up to show the stats. This is the statistic data from a Mesos framework that starts a module. The statistics starts aggregation once the instance is started.
+A window will pop-up to show the stats. It includes the following information for each task in the list:
 
-2. **Start** an instance by clicking the «Start» button in the Actions section. The instance status will first change to «Starting» and in a few seconds to «Started». That means the instance is launched and is working now.
-3. **Stop** the instance that has been started i.e. has the «Started» status. Click at the «Stop» button and wait for a while till the status changes to «Stopping» and then to «Stopped».
-4. **Delete** a stream clicking at the corresponding icon in the Action block near the name of the stream you want to delete.
+- Task name
+- State - Task status
+- Directories - Directories of tasks of the instance
+- State change - The date of the last status change
+- Reason - The reason of the status change
+- Last node - Name of node that was used by a task before the status change (task failure)
+- Node - Name of node used by the task
 
-.. note:: An instance with statuses «Starting», «Started», «Stopping», «Deleting» can not be deleted.
+This is the statistic data from a Mesos framework that starts a module. The statistics is aggregated for started instances. 
 
 The list of instances can be filtered by its type and/or a name using the search tool above the list.
 
