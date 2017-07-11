@@ -44,7 +44,7 @@ The platform supports 4 types of modules:
 
 3. *Regular-streaming* (base type) - a generic processor which receives an event, does some data transformation and sends transformation to the next processing step. 
 
-4. *Batch-streaming* — It organizes incoming data into batches and processing is performed with sliding window. Batch module may be used to implement streaming joins and processing where algorithm must observe range of input messages rather than current one. 
+4. *Batch-streaming* — It organizes incoming data into batches and processing is performed with sliding window. Batch module may be used to implement streaming joins and processing where algorithm must observe the range of input messages rather than a current one. 
 
 The modules can be strung in a pipeline as illustrated below:
 
