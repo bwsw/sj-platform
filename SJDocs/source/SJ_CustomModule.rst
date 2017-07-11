@@ -43,11 +43,11 @@ It is meant that all necessary services are deployed for the module and you know
 
 Input Streaming Custom Module
 ---------------------------------
-1) Create an executor class inheriting InputStreamingExecutor class and override some of methods if necessary (:ref:`input-module`)
-2) Create a validator class inheriting StreamingValidator class and override the validate method if necessary (:ref:`validator`)
-3) Create a new sbt project depending on sj-engine-core library, i.e. use the latest version from https://mvnrepository.com/artifact/com.bwsw in your `build.sbt` file.
+1) Create a new sbt project depending on sj-engine-core library, i.e. use the latest version from https://mvnrepository.com/artifact/com.bwsw in your `build.sbt` file.
+2) Create an executor class inheriting InputStreamingExecutor class and override some methods if necessary (:ref:`input-module`)
+3) Create a validator class inheriting StreamingValidator class and override the validate method if necessary (:ref:`validator`)
 4) Create `specification.json` in a resources folder and fill it in as shown in the example (:ref:`Json_schema`).
-5) Assembly a jar of your module by calling sbt instruction from project folder, e.g. 'sbt my-input-module/assembly'
+5) Assemble a jar of your module by calling sbt instruction from the project folder, e.g. 'sbt my-input-module/assembly'
 6) Upload the module (via UI or REST)
 7) Create an instance of the module (via UI or REST)
 8) Launch InputTaskRunner.scala with the following environment variables:
@@ -63,11 +63,11 @@ Input Streaming Custom Module
 
 Regular Streaming Custom Module
 ---------------------------------
-1) Create an executor class inheriting RegularStreamingExecutor class and override some of methods if necessary (:ref:`regular-module`)
-2) Create a validator class inheriting StreamingValidator class and override the validate method if necessary (:ref:`validator`)
-3) Create a new project depending on sj-engine-core library, i.e. use the latest version from https://mvnrepository.com/artifact/com.bwsw in your build.sbt file.
+1) Create a new sbt project depending on sj-engine-core library, i.e. use the latest version from https://mvnrepository.com/artifact/com.bwsw in your build.sbt file.
+2) Create an executor class inheriting RegularStreamingExecutor class and override some methods if necessary (:ref:`regular-module`)
+3) Create a validator class inheriting StreamingValidator class and override the validate method if necessary (:ref:`validator`)
 4) Create `specification.json` in a resources folder and fill it in as shown in the example (:ref:`Json_schema`). 
-5) Assembly a jar of your module by calling sbt instruction from project folder, e.g. 'sbt my-regular-module/assembly' 
+5) Assemble a jar of your module by calling sbt instruction from project folder, e.g. 'sbt my-regular-module/assembly' 
 6) Upload the module (via REST or UI)
 7) Create an instance of the module (via REST or UI)
 8) Launch `RegularTaskRunner.scala` with the following environment variables:
@@ -82,13 +82,12 @@ Regular Streaming Custom Module
 
 Batch Streaming Custom Module
 ------------------------------------
-
-1) Create an executor class inheriting BatchStreamingExecutor class and override some of methods if necessary (:ref:`batch-module`)
-2) Create a batch collector inheriting BatchCollector class and override the required methods (:ref:`Batch-Collector`)
-3) Create a validator class inheriting StreamingValidator class and override the validate method if necessary (:ref:`validator`)
-4) Create a new project depending on sj-engine-core library, i.e. use the latest version from https://mvnrepository.com/artifact/com.bwsw in your build.sbt file.
+1) Create a new sbt project depending on sj-engine-core library, i.e. use the latest version from https://mvnrepository.com/artifact/com.bwsw in your build.sbt file.
+2) Create an executor class inheriting BatchStreamingExecutor class and override some methods if necessary (:ref:`batch-module`)
+3) Create a batch collector inheriting BatchCollector class and override the required methods (:ref:`Batch-Collector`)
+4) Create a validator class inheriting StreamingValidator class and override the validate method if necessary (:ref:`validator`)
 5) Create `specification.json` in a resources folder and fill it in as shown in the example (:ref:`Json_schema`).
-6) Assembly a jar of your module by calling sbt instruction from project folder, e.g. 'sbt my-batch-module/assembly' 
+6) Assemble a jar of your module by calling sbt instruction from project folder, e.g. 'sbt my-batch-module/assembly' 
 7) Upload the module (via REST or UI)
 8) Create an instance of the module (via REST or UI)
 9) Launch BatchTaskRunner.scala with the following environment variables:
@@ -103,9 +102,9 @@ Batch Streaming Custom Module
 
 Output Streaming Custom Module
 -----------------------------------------------
-1) Create an executor class inheriting OutputStreamingExecutor class and override some of methods if necessary (:ref:`output-module`)
-2) Create a validator class inheriting StreamingValidator class and override the validate method if necessary (:ref:`validator`)
-3) Create a new project depending on sj-engine-core library, i.e. use the latest version from https://mvnrepository.com/artifact/com.bwsw in your build.sbt file.
+1) Create a new sbt project depending on sj-engine-core library, i.e. use the latest version from https://mvnrepository.com/artifact/com.bwsw in your build.sbt file.
+2) Create an executor class inheriting OutputStreamingExecutor class and override some of methods if necessary (:ref:`output-module`)
+3) Create a validator class inheriting StreamingValidator class and override the validate method if necessary (:ref:`validator`)
 4) Create `specification.json` in a resources folder and fill it in as shown in the example (:ref:`Json_schema`).
 
 .. note:: Stream types for output-streaming module:
@@ -114,8 +113,8 @@ Output Streaming Custom Module
 * jdbc-output (output stream)
 * rest-output (output stream)
 
-5) Create class of entity extended on OutputEnvelope. Override method "getFieldsValue".
-6) Assembly a jar of your module by calling sbt instruction from project folder, e.g. 'sbt my-output-module/assembly' 
+5) Create class of entity that extends OutputEnvelope. Override method "getFieldsValue".
+6) Assemble a jar of your module by calling sbt instruction from the project folder, e.g. 'sbt my-output-module/assembly' 
 7) Create an index in Elasticsearch and the index mapping, or a table in a database, or deploy some REST service. Name of index is provided in Elasticsearch service. A table name and a document type is a stream name. A full URL to entities of the REST service is "http://<host>:<port><basePath>/<stream-name>"
 8) Upload the module (via Rest API or UI)
 9) Create an instance of the module  (via Rest API or UI)
