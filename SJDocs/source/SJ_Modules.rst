@@ -15,7 +15,11 @@ It includes an executor that processes data streams and a validator.
 
 It provides a method to validate "options" or "InstanceMetadata" parameter of run module specification.
 
-This method returns a tuple that contains two values. The first value indicates whether the "options" or "InstanceMetadata" is proper or not (true value by default). The second value is a list of errors in case of the validation failure (empty list by default). It is used when you try to create a new instance of a specific module, and if the validation method returns false value the instance will not be created.
+This method returns a tuple that contains two values. 
+
+The first value indicates whether "options" or "InstanceMetadata" is proper or not (true value by default). 
+
+The second value is a list of errors in case of the validation failure (empty list by default). It is used when you try to create a new instance of a specific module, and if the validation method returns false value the instance will not be created.
 
 **Executor**
 
