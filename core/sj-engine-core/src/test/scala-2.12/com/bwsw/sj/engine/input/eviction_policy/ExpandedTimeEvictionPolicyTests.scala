@@ -69,7 +69,7 @@ class ExpandedTimeEvictionPolicyTests
     }
   }
 
-  it should "does not evict not expired elements" in {
+  it should "do not evict not expired elements" in {
     val evictionPolicy = new ExpandedTimeEvictionPolicy(hazelcast)
     forAll(allKeys)(evictionPolicy.isDuplicate)
 
@@ -89,27 +89,27 @@ class ExpandedTimeEvictionPolicyTests
     }
   }
 
-  it should "update hazelcast entries ttl" in {
+  it should "update hazelcast entries' ttl" in {
     val evictionPolicy = new ExpandedTimeEvictionPolicy(hazelcast)
 
-    val keysForUpdate = Table(
+    val keysToUpdate = Table(
       ("key", "update"),
       (key1, true),
       (key2, false),
       (key3, true),
       (key4, false))
 
-    forAll(keysForUpdate)((key, _) => evictionPolicy.isDuplicate(key))
+    forAll(keysToUpdate)((key, _) => evictionPolicy.isDuplicate(key))
 
     val waitingTimeout = ttlSeconds * 500
     Thread.sleep(waitingTimeout)
-    forAll(keysForUpdate) { (key, update) =>
+    forAll(keysToUpdate) { (key, update) =>
       if (update)
         evictionPolicy.isDuplicate(key)
     }
 
     Thread.sleep(waitingTimeout)
-    forAll(keysForUpdate) { (key, update) =>
+    forAll(keysToUpdate) { (key, update) =>
       evictionPolicy.isDuplicate(key) shouldBe update
     }
   }
