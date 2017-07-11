@@ -18,6 +18,7 @@
  */
 package com.bwsw.sj.engine.output.processing
 
+import com.bwsw.common.JsonSerializer
 import com.bwsw.common.rest.RestClient
 import com.bwsw.sj.common.dal.model.stream.RestStreamDomain
 import com.bwsw.sj.common.engine.core.entities.{OutputEnvelope, TStreamEnvelope}
@@ -25,7 +26,6 @@ import com.bwsw.sj.common.engine.core.output.Entity
 import com.bwsw.sj.engine.core.output.types.rest.RestCommandBuilder
 import com.bwsw.sj.engine.output.task.OutputTaskManager
 import com.bwsw.sj.engine.output.task.reporting.OutputStreamingPerformanceMetrics
-import scaldi.Injector
 
 import scala.collection.JavaConverters._
 
@@ -37,10 +37,12 @@ class RestOutputProcessor[T <: AnyRef](restOutputStream: RestStreamDomain,
                                        performanceMetrics: OutputStreamingPerformanceMetrics,
                                        manager: OutputTaskManager,
                                        entity: Entity[_])
-                                      (implicit injector: Injector)
   extends OutputProcessor[T](restOutputStream, performanceMetrics) {
 
-  override protected val commandBuilder: RestCommandBuilder = new RestCommandBuilder(transactionFieldName)
+  private val jsonSerializer = new JsonSerializer(ignoreUnknown = true)
+  override protected val commandBuilder: RestCommandBuilder = new RestCommandBuilder(
+    transactionFieldName = transactionFieldName,
+    jsonSerializer = jsonSerializer)
 
   private val service = restOutputStream.service
   private val client = new RestClient(

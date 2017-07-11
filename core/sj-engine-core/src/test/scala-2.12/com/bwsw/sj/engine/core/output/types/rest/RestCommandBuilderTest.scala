@@ -30,7 +30,6 @@ import org.mockito.Mockito.when
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.prop.TableDrivenPropertyChecks
 import org.scalatest.{FlatSpec, Matchers}
-import scaldi.Module
 
 import scala.collection.JavaConverters._
 import scala.util.parsing.json.JSONObject
@@ -47,10 +46,6 @@ class RestCommandBuilderTest extends FlatSpec with Matchers with MockitoSugar wi
   val client = new HttpClient
   val url = new URI("http://localhost/")
 
-  val injector = new Module {
-    bind[JsonSerializer] to jsonSerializer
-  }
-
   "RestCommandBuilder" should "return correct request transformation for insert requests" in {
     val transaction = 123456789l
     val maps = Table(
@@ -62,7 +57,7 @@ class RestCommandBuilderTest extends FlatSpec with Matchers with MockitoSugar wi
           "field4" -> 4)),
       Map.empty[String, Any])
 
-    val restCommandBuilder = new RestCommandBuilder(transactionFieldName, contentType)(injector)
+    val restCommandBuilder = new RestCommandBuilder(transactionFieldName, contentType, jsonSerializer)
     forAll(maps) { map =>
       val mapWithTransaction = map + (transactionFieldName -> transaction)
       val serializedMap = JSONObject(mapWithTransaction).toString()
@@ -80,7 +75,7 @@ class RestCommandBuilderTest extends FlatSpec with Matchers with MockitoSugar wi
 
   it should "return correct request transformation for delete requests" in {
     val transaction = 123456789l
-    val restCommandBuilder = new RestCommandBuilder(transactionFieldName, contentType)(injector)
+    val restCommandBuilder = new RestCommandBuilder(transactionFieldName, contentType, jsonSerializer)
     val requestTransformation = restCommandBuilder.buildDelete(transaction)
     val request = requestTransformation(client.newRequest(url))
 

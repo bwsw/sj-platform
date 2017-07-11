@@ -26,7 +26,6 @@ import com.bwsw.sj.engine.core.output.types.CommandBuilder
 import com.bwsw.sj.engine.output.task.OutputTaskManager
 import com.bwsw.sj.engine.output.task.reporting.OutputStreamingPerformanceMetrics
 import org.slf4j.{Logger, LoggerFactory}
-import scaldi.Injector
 
 /**
   * This class used in [[com.bwsw.sj.engine.output.task.OutputTaskEngine]] for sending data to storage (storage could be different).
@@ -111,8 +110,7 @@ object OutputProcessor {
   def apply[T <: AnyRef](outputStream: StreamDomain,
                          performanceMetrics: OutputStreamingPerformanceMetrics,
                          manager: OutputTaskManager,
-                         entity: Entity[_])
-                        (implicit injector: Injector): OutputProcessor[T] = {
+                         entity: Entity[_]): OutputProcessor[T] = {
     outputStream match {
       case esStreamDomain: ESStreamDomain =>
         new EsOutputProcessor[T](esStreamDomain, performanceMetrics, manager, entity)
