@@ -139,7 +139,7 @@ class CommonEngineSimulator[T <: AnyRef](executor: StreamingExecutor with StateH
         StreamData(stream, moduleOutput.getPartitionDataList)
       case _ =>
         throw new IllegalStateException("Incorrect outputs")
-    }.toSeq
+    }.filter(_.partitionDataList.nonEmpty).toSeq
 
     SimulationResult(streamData, manager.getState.getAll)
   }
