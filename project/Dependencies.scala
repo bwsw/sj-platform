@@ -135,4 +135,8 @@ object Dependencies {
     "org.scalatest" % "scalatest_2.12" % "3.0.1" % "test",
     "org.mockito" % "mockito-core" % "2.8.9" % "test"
   ))
+
+  lazy val sjKafkaDataLoader = Def.setting(Seq(
+    "org.apache.kafka" % "kafka-clients" % "0.11.0.0"
+  ))
 }
