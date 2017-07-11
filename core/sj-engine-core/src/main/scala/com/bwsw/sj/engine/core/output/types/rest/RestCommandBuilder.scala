@@ -24,29 +24,26 @@ import org.apache.http.entity.ContentType
 import org.eclipse.jetty.client.api.Request
 import org.eclipse.jetty.client.util.StringContentProvider
 import org.eclipse.jetty.http.HttpMethod
-import scaldi.Injectable.inject
-import scaldi.Injector
 
 /**
   * Provides methods for building http requests to CRUD data
   *
   * @param transactionFieldName name of transaction field to check data on duplicate
   * @param contentType          content-type HTTP field
+  * @param jsonSerializer       JSON serializer
   * @author Pavel Tomskikh
   */
 class RestCommandBuilder(transactionFieldName: String,
-                         contentType: String = ContentType.APPLICATION_JSON.toString)
-                        (implicit injector: Injector)
+                         contentType: String = ContentType.APPLICATION_JSON.toString,
+                         jsonSerializer: JsonSerializer)
   extends CommandBuilder[(Request) => Request] {
-
-  private val serializer = inject[JsonSerializer]
 
   /**
     * @inheritdoc
     */
   override def buildInsert(transaction: Long, values: Map[String, Any]): (Request) => Request = {
     val entity = values + (transactionFieldName -> transaction)
-    val data = serializer.serialize(entity)
+    val data = jsonSerializer.serialize(entity)
 
     (request: Request) =>
       request.method(HttpMethod.POST).content(new StringContentProvider(data), contentType)

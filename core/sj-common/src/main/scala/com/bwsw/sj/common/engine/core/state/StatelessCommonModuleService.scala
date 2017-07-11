@@ -19,10 +19,10 @@
 package com.bwsw.sj.common.engine.core.state
 
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
-import com.bwsw.sj.common.engine.{StreamingExecutor, TimerHandlers}
 import com.bwsw.sj.common.engine.core.environment.ModuleEnvironmentManager
 import com.bwsw.sj.common.engine.core.managment.CommonTaskManager
 import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
+import com.bwsw.sj.common.engine.{StreamingExecutor, TimerHandlers}
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import scaldi.Injectable.inject
@@ -42,7 +42,8 @@ class StatelessCommonModuleService(manager: CommonTaskManager,
                                   (implicit injector: Injector)
   extends CommonModuleService(manager.instance, manager.outputProducers, checkpointGroup) {
 
-  private val streamService = inject[ConnectionRepository].getStreamRepository
+  private val connectionRepository = inject[ConnectionRepository]
+  private val streamService = connectionRepository.getStreamRepository
 
   val environmentManager: ModuleEnvironmentManager = new ModuleEnvironmentManager(
     instance.options,
@@ -50,7 +51,8 @@ class StatelessCommonModuleService(manager: CommonTaskManager,
     instance.outputs.flatMap(x => streamService.get(x)),
     producerPolicyByOutput,
     moduleTimer,
-    performanceMetrics)
+    performanceMetrics,
+    connectionRepository.getFileStorage)
 
   val executor: StreamingExecutor with TimerHandlers = manager.getExecutor(environmentManager).asInstanceOf[StreamingExecutor with TimerHandlers]
 }

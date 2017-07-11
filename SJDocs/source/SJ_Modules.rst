@@ -10,10 +10,20 @@ Module is a processor that handles events in data streams.
 
 It includes an executor that processes data streams and a validator.
 
-- Streaming validator provides a method to validate "options" or "InstanceMetadata" parameter of run module specification.
-  This method returns a tuple that contains two values. The first value indicates whether the "options" or "InstanceMetadata" is proper or not (true value by default). The second value is a list of errors in case of the validation fail (empty list by default). It is used when you try to create a new instance of a specific module and if the validate method returns false value the instance will not be created.
+.. _validator:
+**Streaming validator**
 
-- An executor of the module utilizes an instance/instances. An instance is a full range of settings for an exact module.
+It provides a method to validate "options" or "InstanceMetadata" parameter of run module specification.
+
+This method returns a tuple that contains two values. 
+
+The first value indicates whether "options" or "InstanceMetadata" is proper or not (true value by default). 
+
+The second value is a list of errors in case of the validation failure (empty list by default). It is used when you try to create a new instance of a specific module, and if the validation method returns false value the instance will not be created.
+
+**Executor**
+
+An executor of the module utilizes an instance/instances. An instance is a full range of settings for an exact module.
 
 An engine is required to start a module. A module can not process data streams without an engine (that is a .jar file containing required configuration settings) that launches the module ingesting raw data and sends the processed data further in the stream.
 
@@ -38,7 +48,7 @@ The platform supports 4 types of modules:
 
 3. *Regular-streaming* (base type) - a generic processor which receives an event, does some data transformation and sends transformation to the next processing step. 
 
-4. *Batch-streaming* — It organizes incoming data into batches and processing is performed with sliding window. Batch module may be used to implement streaming joins and processing where algorithm must observe range of input messages rather than current one. 
+4. *Batch-streaming* — It organizes incoming data into batches and processing is performed with sliding window. Batch module may be used to implement streaming joins and processing where algorithm must observe the range of input messages rather than a current one. 
 
 The modules can be strung in a pipeline as illustrated below:
 
@@ -88,7 +98,7 @@ Default implementation of the method::
       message = s"Input envelope is empty\n"
     }
   InputStreamingResponse(message, sendResponsesNow)
-}
+ }
 
 
 4) "createCheckpointResponse": 
@@ -122,27 +132,9 @@ InputStreamingResponse:
  
 - sendResponsesNow - a boolean flag denoting whether response should be saved in temporary storage or all responses from this storage should be send to the source right now (including this one)
  
-.. To see a flow chart about how these methods intercommunicate, please, visit the `Input Streaming Engine`_ page.
+To see a flow chart on how these methods intercommunicate, please, visit the :ref:`Input_Streaming_Engine` section.
 
-
-Output module
-~~~~~~~~~~~~~~~~~~~~
-
-An Output module handles external output from event processing pipeline to external data destinations (Elasticsearch, JDBC, etc.)
-
-.. figure:: _static/OutputModule.png
-
-It transforms the processing data results received from T-streams and put them into an external data storage. It allows to transform one data item from incoming streaming into one and more data output items.
-
-The output executor provides the following methods that does not perform any work by default so you should define their implementation by yourself.
-
-1. "onMessage": 
-    It is invoked for every received message from one of the inputs that are defined within the instance. Inside the method you have an access to the message that has the TStreamEnvelope type. 
-
-2. "getOutputEntity":
-    It is invoked once when module running. This method returns the current working entity, i.e. fields and types. This method must be overridden. 
-
-
+.. _regular-module:
 
 Regular module
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -177,15 +169,15 @@ Each envelope has a type parameter that defines the type of data in the envelope
 
 3) "onBeforeCheckpoint": 
     It is invoked before every checkpoint.
-4) "onAfterCheckpoint": 
+.. 4) "onAfterCheckpoint": 
     It is invoked after every checkpoint.
-5) "onTimer": 
+4) "onTimer": 
     It is invoked every time when a set timer goes out. Inside the method there is an access to a parameter that defines a delay between a real response time and an invocation of this handler.
-6) "onIdle": 
+5) "onIdle": 
     It is invoked every time when idle timeout goes out but a new message hadn't appeared. It is a moment when there is nothing to process.
-7) "onBeforeStateSave": 
+6) "onBeforeStateSave": 
     It is invoked prior to every saving of the state. Inside the method there is a flag denoting the full state (true) or partial changes of state (false) will be saved.
-8) "onAfterStateSave": 
+.. 8) "onAfterStateSave": 
     It is invoked after every saving of the state. Inside the method there is a flag denoting the full state (true) or partial changes of state (false) have(s) been saved
 
 The module may have a state. A state is a sort of a key-value storage and can be used to keep some global module variables related to processing. These variables are persisted and are recovered after a fail. In case of a fail (when something is going wrong in one of the methods described above) a whole module will be restarted. And the work will start on `onInit` method invocation.
@@ -198,8 +190,9 @@ Inside of the module there is a manager allowing to get an access to:
 - list of output names (by calling "getStreamsByTags()"). Every output contains its own set of tags which are used to retrieve it. 
 -  initiation of checkpoint (by calling "initiateCheckpoint()").
 
-.. To see a flow chart on how these methods intercommunicate see the page `Regular Streaming Engine`_ .
+To see a flow chart on how these methods intercommunicate see the :ref:`Regular_Streaming_Engine` section.
 
+.. _batch-module:
 
 Batch module
 ~~~~~~~~~~~~~~~~~
@@ -207,6 +200,8 @@ A batch is a minimum data set for a handler to collect the events in the stream.
 
 .. _Batch-Collector:
 
+Batch Collector
+""""""""""""""""""
 In the module it is a Batch Collector that is responsible for the logic of collecting batches. It provides the following methods, implementation of which you should specify. 
 
 1) “getBatchesToCollect”:
@@ -319,15 +314,15 @@ The data type of the envelope can be "KafkaEnvelope" data type or "TStreamEnvelo
 
 3) "onBeforeCheckpoint": 
     It is invoked before every checkpoint
-4) "onAfterCheckpoint": 
+.. 4) "onAfterCheckpoint": 
     It is invoked after every checkpoint
-5) "onTimer": 
+4) "onTimer": 
     It is invoked every time when a set timer goes out. Inside the method there is an access to a parameter that defines a delay between a real response time and an invocation of this handler
-6) "onIdle": 
+5) "onIdle": 
     It is invoked every time when idle timeout goes out but a new message hasn't appeared. It is a moment when there is nothing to process
-7) "onBeforeStateSave": 
+6) "onBeforeStateSave": 
     It is invoked before every saving of the state. Inside the method there is a flag denoting the full state (true) or partial changes of state (false) will be saved
-8) "onAfterStateSave": 
+.. 8) "onAfterStateSave": 
     It is invoked after every saving of the state. Inside the method there is a flag denoting the full state (true) or partial changes of state (false) have(s) been saved
 
 The following handlers are used for synchronizing the tasks' work. It can be useful when at information aggregation using shared memory, e.g. Hazelcast or any other.
@@ -340,7 +335,7 @@ The following handlers are used for synchronizing the tasks' work. It can be use
 
 .. 4) "onLeaderLeave": It is invoked by a leader-task after passing an output barrier
 
-.. To see a flow chart about how these methods intercommunicate see the page `Batch Streaming Engine`_ .
+To see a flow chart about how these methods intercommunicate see the :ref:`Batch_Streaming_Engine` section .
 
 The Batch module can either have a state or not. A state is a sort of a key-value storage and can be used to keep some global module variables related to processing. These variables are persisted and are recovered after a fail. A fail means that something is going wrong in one of the methods described above. In this case a whole module will be restarted. And the work will start on onInit method invocation.
 There is a manager inside module which grants access to:
@@ -355,16 +350,39 @@ There is a manager inside module which grants access to:
 A Batch and a Regular modules may have a state. A state is a sort of a key-value storage that can be used to keep some global module variables related to processing. These variables are persisted and are recovered after a fail. A fail means that something is going wrong in one of the methods used in an executor. In this case a whole module will be restarted. 
 The state is performed alongside with the checkpoint. At a checkpoint the data received after processing is checked for completeness. The checkpoint is an event that provides an exactly-once processing. 
 
+.. _output-module:
+
+Output module
+~~~~~~~~~~~~~~~~~~~~
+
+An Output module handles external output from event processing pipeline to external data destinations (Elasticsearch, JDBC, etc.)
+
+.. figure:: _static/OutputModule.png
+
+It transforms the processing data results received from T-streams and pass them to an external data storage. It allows to transform one data item from incoming streaming into one and more data output items.
+
+The output executor provides the following methods that does not perform any work by default so you should define their implementation by yourself.
+
+1. "onMessage": 
+    It is invoked for every received message from one of the inputs that are defined within the instance. Inside the method you have an access to the message that has the TStreamEnvelope type. 
+
+2. "getOutputEntity":
+    It is invoked once when module running. This method returns the current working entity, i.e. fields and types. This method must be overridden. 
+
+A type is assigned to an output envelope that corresponds to the type of an external storage (Elasticsearch, JDBC, REST).
+
+To see a flow chart on how these methods intercommunicate, please, visit the :ref:`Output_Streaming_Engine` section.
+
+
 .. A detailed manual on how to write a module you may find at `page`_ .
 
-Modules` performance is determined with the work of engine. An engine structure, components and  the workflow are determined with the type of module. 
+Modules` performance is determined with the work of engine. Engines of different types (Input, Regular/Batch, Output) have different structure, components and the workflow corresponding to the type of a module. 
 
-.. Please, find more information about engines at the `Engines`_  page.
+Please, find more information about engines at the :ref:`Engines` page.
 
 
 Prerequisites For Modules. Streaming Components.
 --------------------------------------------------
- .. Warning:: The section is under development!
 
 A module requires the following elements to be created for its performance:
 
@@ -383,8 +401,6 @@ As stated above, modules process the data arranged in streams. The Stream Juggle
 To transform data into a stream of exact type you need to create a service and a provider for this service. The type of a service and a provider is determined by the type of a stream you need for the module.
 
 For example, a Batch module that receives data from Kafka will require a Kafka service (KfkQ) and two provider types for it: Kafka and ZooKeeper. 
-
-.. Or if you work with an Output module and you want to store the processed data to ElasticSearch index, you are going to work with  the ElasticSearch output type stream that in its turn requires a service and a provider of ElasticSearch type.
 
 The diagram below may help you to understand the dependency of instances in the platform.
 

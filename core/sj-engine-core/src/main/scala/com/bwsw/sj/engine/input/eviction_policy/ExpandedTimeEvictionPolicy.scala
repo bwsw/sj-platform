@@ -34,18 +34,18 @@ class ExpandedTimeEvictionPolicy(hazelcast: HazelcastInterface) extends InputIns
     * @param key Key that will be checked
     * @return True if the key is not duplicate and false in other case
     */
-  def checkForDuplication(key: String): Boolean = {
+  def isDuplicate(key: String): Boolean = {
     logger.debug(s"Check for duplicate a key: $key.")
     if (!uniqueEnvelopes.containsKey(key)) {
       logger.debug(s"The key: $key is not duplicate.")
       uniqueEnvelopes.set(key, stubValue)
 
-      true
+      false
     } else {
       logger.debug(s"The key: $key is duplicate so update the TTL of key.")
       uniqueEnvelopes.set(key, stubValue)
 
-      false
+      true
     }
   }
 }

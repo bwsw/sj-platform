@@ -43,7 +43,7 @@ abstract class BatchCollector(protected val instance: BatchInstanceDomain,
     inputs.map(x => (x.name, new Batch(x.name, x.tags))).toMap
   }
 
-  def onReceive(envelope: Envelope): Unit = {
+  final def onReceive(envelope: Envelope): Unit = {
     logger.debug(s"Invoke onReceive() handler.")
     registerEnvelope(envelope)
     afterEnvelopeReceive(envelope)
@@ -55,7 +55,7 @@ abstract class BatchCollector(protected val instance: BatchInstanceDomain,
     performanceMetrics.addEnvelopeToInputStream(envelope)
   }
 
-  def collectBatch(streamName: String): Batch = {
+  final def collectBatch(streamName: String): Batch = {
     logger.info(s"It's time to collect batch (stream: $streamName)\n")
     val batch = currentBatchPerStream(streamName).copy()
     currentBatchPerStream(streamName).envelopes.clear()

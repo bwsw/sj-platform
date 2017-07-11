@@ -36,9 +36,6 @@ object TempHelperForConfigSetup extends App {
 
   val connectionRepository: ConnectionRepository = inject[ConnectionRepository]
 
-  //connectionRepository.getFileStorage.put(new File("GeoIPASNum.dat"), "GeoIPASNum.dat")
-  //connectionRepository.getFileStorage.put(new File("GeoIPASNumv6.dat"), "GeoIPASNumv6.dat")
-
   val configService: GenericMongoRepository[ConfigurationSettingDomain] = connectionRepository.getConfigRepository
 
   configService.save(ConfigurationSettingDomain(ConfigLiterals.frameworkTag, "com.bwsw.fw-1.0", ConfigLiterals.systemDomain))
@@ -61,9 +58,6 @@ object TempHelperForConfigSetup extends App {
 
   configService.save(ConfigurationSettingDomain(ConfigLiterals.kafkaSubscriberTimeoutTag, "100", ConfigLiterals.systemDomain))
   configService.save(ConfigurationSettingDomain(ConfigLiterals.lowWatermark, "100", ConfigLiterals.systemDomain))
-
-  //  configService.save(ConfigurationSettingDomain(ConfigLiterals.geoIpAsNum, "GeoIPASNum.dat", ConfigLiterals.systemDomain))
-  //  configService.save(ConfigurationSettingDomain(ConfigLiterals.geoIpAsNumv6, "GeoIPASNumv6.dat", ConfigLiterals.systemDomain))
 
   val driverName: String = "mysql"
   val driverFileName: String = s"$driverName.jar"
@@ -93,8 +87,6 @@ object TempHelperForConfigDestroy extends App {
   connectionRepository.getConfigRepository.delete(ConfigLiterals.zkSessionTimeoutTag)
   connectionRepository.getConfigRepository.delete(ConfigLiterals.kafkaSubscriberTimeoutTag)
   connectionRepository.getConfigRepository.delete(ConfigLiterals.lowWatermark)
-  connectionRepository.getConfigRepository.delete(ConfigLiterals.geoIpAsNum)
-  connectionRepository.getConfigRepository.delete(ConfigLiterals.geoIpAsNumv6)
 
   val driverName: String = "mysql"
   connectionRepository.getConfigRepository.delete(s"${ConfigLiterals.jdbcDriver}.$driverName")

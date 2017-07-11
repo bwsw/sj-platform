@@ -18,16 +18,17 @@
  */
 package com.bwsw.sj.common.engine.core.environment
 
+import com.bwsw.common.file.utils.FileStorage
 import com.bwsw.sj.common.dal.model.instance.InstanceDomain
 import com.bwsw.sj.common.dal.model.stream.StreamDomain
 
 /**
   * Provides for user methods that can be used in an output module
   *
-  * @param options user defined options from instance [[InstanceDomain.options]]
-  * @param outputs set of output streams [[StreamDomain]] from instance [[InstanceDomain.outputs]]
+  * @param options     user defined options from instance [[InstanceDomain.options]]
+  * @param outputs     set of output streams [[StreamDomain]] from instance [[InstanceDomain.outputs]]
+  * @param fileStorage file storage
   * @author Kseniya Mikhaleva
   */
-class OutputEnvironmentManager(options: String, outputs: Array[StreamDomain]) extends EnvironmentManager(options, outputs) {
-
-}
+class OutputEnvironmentManager(options: String, outputs: Array[StreamDomain], fileStorage: FileStorage)
+  extends EnvironmentManager(options, outputs, fileStorage)

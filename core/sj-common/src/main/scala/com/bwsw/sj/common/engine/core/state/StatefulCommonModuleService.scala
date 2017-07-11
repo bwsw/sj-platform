@@ -49,7 +49,8 @@ class StatefulCommonModuleService(manager: CommonTaskManager,
                                  (implicit injector: Injector)
   extends CommonModuleService(manager.instance, manager.outputProducers, checkpointGroup) {
 
-  private val streamService: GenericMongoRepository[StreamDomain] = inject[ConnectionRepository].getStreamRepository
+  private val connectionRepository = inject[ConnectionRepository]
+  private val streamService: GenericMongoRepository[StreamDomain] = connectionRepository.getStreamRepository
   private var countOfCheckpoints: Int = 1
   private val stateService: RAMStateService = createStateService()
   private val stateFullCheckpoint: Int = {
@@ -76,7 +77,8 @@ class StatefulCommonModuleService(manager: CommonTaskManager,
     instance.outputs.flatMap(x => streamService.get(x)),
     producerPolicyByOutput,
     moduleTimer,
-    performanceMetrics)
+    performanceMetrics,
+    connectionRepository.getFileStorage)
 
   val executor: StreamingExecutor with TimerHandlers = manager.getExecutor(environmentManager).asInstanceOf[StreamingExecutor with TimerHandlers]
 

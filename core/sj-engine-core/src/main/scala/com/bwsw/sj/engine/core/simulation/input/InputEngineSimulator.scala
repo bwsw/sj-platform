@@ -85,7 +85,7 @@ class InputEngineSimulator[T <: AnyRef](executor: InputStreamingExecutor[T],
       val maybeOutputData = executor.tokenize(inputBuffer).map {
         interval =>
           val maybeInputEnvelope = executor.parse(inputBuffer, interval)
-          val isNotDuplicate = maybeInputEnvelope.map(checkDuplication(duplicateCheck))
+          val isNotDuplicate = maybeInputEnvelope.map(x => !isDuplicate(duplicateCheck)(x))
           val response = executor.createProcessedMessageResponse(maybeInputEnvelope, isNotDuplicate.getOrElse(false))
           inputBuffer.readerIndex(interval.finalValue + 1)
           inputBuffer.discardReadBytes()
@@ -109,11 +109,11 @@ class InputEngineSimulator[T <: AnyRef](executor: InputStreamingExecutor[T],
     */
   def clear(): Unit = inputBuffer.clear()
 
-  private def checkDuplication(duplicateCheck: Boolean)(inputEnvelope: InputEnvelope[T]): Boolean = {
+  private def isDuplicate(duplicateCheck: Boolean)(inputEnvelope: InputEnvelope[T]): Boolean = {
     if (inputEnvelope.duplicateCheck.isDefined) {
-      if (inputEnvelope.duplicateCheck.get) evictionPolicy.checkForDuplication(inputEnvelope.key) else true
+      if (inputEnvelope.duplicateCheck.get) evictionPolicy.isDuplicate(inputEnvelope.key) else false
     } else {
-      if (duplicateCheck) evictionPolicy.checkForDuplication(inputEnvelope.key) else true
+      if (duplicateCheck) evictionPolicy.isDuplicate(inputEnvelope.key) else false
     }
   }
 }

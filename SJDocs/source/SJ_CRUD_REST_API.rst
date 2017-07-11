@@ -1915,22 +1915,30 @@ Request format::
 
 Response entity: json example::
 
- entity: {
- "tasks": [
  {
- "state": "TASK_RUNNING",
- "directories": [
- "http://stream-juggler.z1.netpoint-dc.com:5050/#/slaves/3599865a-47b1-4a17-9381-b708d42eb0fc- S0/browse?path=/var/lib/mesos/slaves/3599865a-47b1-4a17-9381-b708d42eb0fc- S0/frameworks/c69ce526-c420-44f4-a401-6b566b1a0823-0003/executors/pingstation-process- task0/runs/d9748d7a-3d0e-4bb6-88eb-3a3340d133d8",
- "http://stream-juggler.z1.netpoint-dc.com:5050/#/slaves/3599865a-47b1-4a17-9381-b708d42eb0fc- S0/browse?path=/var/lib/mesos/slaves/3599865a-47b1-4a17-9381-b708d42eb0fc- S0/frameworks/c69ce526-c420-44f4-a401-6b566b1a0823-0003/executors/pingstation-process- task0/runs/8a62f2a4-6f3c-412f-9d17-4f63e9052868"
- ],
- "state-change": "Mon Dec 05 11:56:47 NOVT 2016",
- "reason": "Executor terminated",
- "id": "pingstation-process-task0",
- "node": "3599865a-47b1-4a17-9381-b708d42eb0fc-S0",
- "last-node": "3599865a-47b1-4a17-9381-b708d42eb0fc-S0"
- }
- ],
- "message": "Tasks launched"
+  "status-code": 200,
+  "entity": {
+    "tasks": [
+      {
+        "state": "TASK_RUNNING",
+        "directories": [
+          {
+            "name": "Mon Dec 05 11:33:47 NOVT 2016",
+            "path": "http://stream-juggler.z1.netpoint-dc.com:5050/#/slaves/3599865a-47b1-4a17-9381-b708d42eb0fc-S0/browse?path=/var/lib/mesos/slaves/3599865a-47b1-4a17-9381-b708d42eb0fc-S0/frameworks/c69ce526-c420-44f4-a401-                       6b566b1a0823-0003/executors/pingstation-process-task0/runs/d9748d7a-3d0e-4bb6-88eb-3a3340d133d8" 
+          },
+          {
+            "name": "Mon Dec 05 11:56:47 NOVT 2016",
+            "path": "http://stream-juggler.z1.netpoint-dc.com:5050/#/slaves/3599865a-47b1-4a17-9381-b708d42eb0fc-S0/browse?path=/var/lib/mesos/slaves/3599865a-47b1-4a17-9381-b708d42eb0fc-S0/frameworks/c69ce526-c420-44f4-a401-                       6b566b1a0823-0003/executors/pingstation-process-task0/runs/8a62f2a4-6f3c-412f-9d17-4f63e9052868" 
+          }
+        ],
+        "state-change": "Mon Dec 05 11:56:47 NOVT 2016",
+        "reason": "Executor terminated",
+        "id": "pingstation-process-task0",
+        "node": "3599865a-47b1-4a17-9381-b708d42eb0fc-S0",
+        "last-node": "3599865a-47b1-4a17-9381-b708d42eb0fc-S0" 
+      }
+    ]
+  }
  }
 
 

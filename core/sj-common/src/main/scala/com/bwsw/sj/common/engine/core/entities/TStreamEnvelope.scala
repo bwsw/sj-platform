@@ -19,6 +19,7 @@
 package com.bwsw.sj.common.engine.core.entities
 
 import com.bwsw.sj.common.utils.StreamLiterals
+import com.fasterxml.jackson.annotation.JsonIgnore
 
 import scala.collection.mutable
 
@@ -33,6 +34,20 @@ import scala.collection.mutable
 
 class TStreamEnvelope[T <: AnyRef](var data: mutable.Queue[T], var consumerName: String) extends Envelope {
   streamType = StreamLiterals.tstreamType
+
+  @JsonIgnore
+  override def equals(obj: Any): Boolean = obj match {
+    case t: TStreamEnvelope[_] =>
+      data.toList == t.data.toList &&
+        consumerName == t.consumerName &&
+        streamType == t.streamType &&
+        id == t.id &&
+        stream == t.stream &&
+        (tags sameElements t.tags) &&
+        partition == t.partition
+
+    case _ => super.equals(obj)
+  }
 }
 
 

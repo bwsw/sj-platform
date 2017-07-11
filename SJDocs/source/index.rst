@@ -22,8 +22,10 @@ Contents:
 
    SJ_Overview
    SJ_Architecture
-   Sj_Engines
+   SJ_Engines
    SJ_Modules
+   SJ_CustomModule
+   SJ_Deployment
    SJ_UI_Guide
    SJ_CRUD_REST_API
    Glossary

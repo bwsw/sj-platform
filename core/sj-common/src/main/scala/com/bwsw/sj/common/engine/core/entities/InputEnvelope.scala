@@ -20,6 +20,7 @@ package com.bwsw.sj.common.engine.core.entities
 
 import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
 import com.bwsw.sj.common.si.model.instance.InputInstance
+import com.fasterxml.jackson.annotation.JsonIgnore
 
 /**
   * Provides a wrapper for t-stream transaction that is formed by [[EngineLiterals.inputStreamingType]] engine.
@@ -37,4 +38,20 @@ case class InputEnvelope[T <: AnyRef](key: String,
                                       data: T,
                                       duplicateCheck: Option[Boolean] = None) extends Envelope {
   streamType = StreamLiterals.inputDummy
+
+  @JsonIgnore
+  override def equals(obj: Any): Boolean = obj match {
+    case i: InputEnvelope[_] =>
+      key == i.key &&
+        outputMetadata.toList == i.outputMetadata.toList &&
+        data == i.data &&
+        duplicateCheck == i.duplicateCheck &&
+        streamType == i.streamType &&
+        id == i.id &&
+        stream == i.stream &&
+        (tags sameElements i.tags) &&
+        partition == i.partition
+
+    case _ => super.equals(obj)
+  }
 }

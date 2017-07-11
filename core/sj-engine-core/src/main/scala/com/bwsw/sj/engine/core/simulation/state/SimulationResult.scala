@@ -24,7 +24,28 @@ package com.bwsw.sj.engine.core.simulation.state
   * @param streamDataList list of data elements that written in output streams
   * @param state          key/map value
   */
-case class SimulationResult(streamDataList: Seq[StreamData], state: Map[String, Any])
+case class SimulationResult(streamDataList: Seq[StreamData], state: Map[String, Any]) {
+  def +(streamData: StreamData): SimulationResult = {
+    val newStreamDataList = {
+      if (streamDataList.exists(_.stream == streamData.stream)) {
+        streamDataList.map {
+          case s if s.stream == streamData.stream =>
+            s + streamData.partitionDataList
+          case s => s
+        }
+      } else
+        streamDataList :+ streamData
+    }
+
+    SimulationResult(newStreamDataList, state)
+  }
+
+  def +(simulationResult: SimulationResult): SimulationResult = {
+    simulationResult.streamDataList
+      .foldLeft(SimulationResult(streamDataList, simulationResult.state))((simulationResult, streamData) =>
+        simulationResult + streamData)
+  }
+}
 
 /**
   * Contains data elements that has been sent in an output stream
@@ -32,15 +53,38 @@ case class SimulationResult(streamDataList: Seq[StreamData], state: Map[String, 
   * @param stream            stream name
   * @param partitionDataList list of data that elements written in partitions of that stream
   */
-case class StreamData(stream: String, partitionDataList: Seq[PartitionData])
+case class StreamData(stream: String, partitionDataList: Seq[PartitionData]) {
+  def +(partitionData: PartitionData): StreamData = {
+    val newPartitionDataList = {
+      if (partitionDataList.exists(_.partition == partitionData.partition)) {
+        partitionDataList.map {
+          case p if p.partition == partitionData.partition =>
+            p ++ partitionData.dataList
+          case p => p
+        }
+      } else
+        partitionDataList :+ partitionData
+    }
+
+    StreamData(stream, newPartitionDataList)
+  }
+
+  def +(otherPartitionDataList: Seq[PartitionData]): StreamData = {
+    otherPartitionDataList
+      .foldLeft(StreamData(stream, partitionDataList))((streamData, partitionData) => streamData + partitionData)
+  }
+}
 
 /**
   * Contains data elements that has been sent in a partition of output stream
   *
-  * @param partition partition index
+  * @param partition partition number
   * @param dataList  data elements
   */
 case class PartitionData(partition: Int, dataList: Seq[AnyRef] = Seq.empty) {
   def +(data: AnyRef): PartitionData =
     PartitionData(partition, dataList :+ data)
+
+  def ++(otherDataList: Seq[AnyRef]): PartitionData =
+    PartitionData(partition, dataList ++ otherDataList)
 }

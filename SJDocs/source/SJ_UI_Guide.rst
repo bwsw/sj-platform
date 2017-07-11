@@ -8,7 +8,7 @@ Overview
 
 Juggler is a real time stream processing platform designed for building both simple and complex event processing (CEP). 
 
-Juggler uses Apache Messos, Kafka and T-streams to construct scalable and flexible processing algorithms. Juggler functions on the same principle as Apache Samza, but enables exactly-once processing and provides an integrated solution with a RESTful interface, JavaScript UI and an ad hoc repository for modules, services, streams and other data processing pipeline components.
+Juggler uses Apache Mesos, Kafka and T-streams to construct scalable and flexible processing algorithms. Juggler functions on the same principle as Apache Samza, but enables exactly-once processing and provides an integrated solution with a RESTful interface, JavaScript UI and an ad hoc repository for modules, services, streams and other data processing pipeline components.
 
 .. contents:: Contents
 
@@ -40,15 +40,15 @@ For example, if you want to create a regular module that will process Kafka inpu
 
 A module can not process data streams without uploading an engine (that is a .jar file) that launches the module and contains required configuration settings. More information about these settings can be found in the `Configuration Settings`_ and the `Custom Files`_ sections of this document.
 
-An executor of the module utilises an instance/instances, i.e. a full range of settings for an exact handler/executor.
+An executor of the module utilizes an instance/instances, i.e. a full range of settings for an exact handler/executor.
 
-See more information on the platform struture and architecture at the :ref:`Architecture` section.
+See more information on the platform structure and architecture at the :ref:`Architecture` section.
 
 Below you will find the information on uploading your module via UI and starting data processing.
 
 Providers 
 ---------
-At the first step a provider should be created.  That is the provider of sevices for input data transformation into a stream.
+At the first step a provider should be created.  That is the provider of services for input data transformation into a stream.
 
 .. figure:: _static/CreateProvider.png
 
@@ -85,7 +85,7 @@ The type of the provider is determined with the type of the instance you want to
        Enter a description for the provider here.
 
 - *Hosts* *
-       Enter a provider host that determines a file locaction.
+       Enter a provider host that determines a file location.
        Add more hosts clicking at the «Add Host» button and entering host names in the appeared lines.
 
 - *Login*
@@ -131,7 +131,7 @@ Under the Services section of the main navigation bar you will find the list of 
 
 Please, press the «Create services» button and fill in the form where general and specific fields should be completed:
 
-**General fileds:**
+**General fields:**
 
 - *Choose* *type* *
         Select from the dropdown a type of the services:
@@ -221,7 +221,7 @@ Please, press the «Create services» button and fill in the form where general 
 
 .. note:: Required fields are marked with an asterisk (*)
 
-Click «Create» at the bottom and see the servces are in the list of services now. Details of the node are displayed to the right when clicking the services in the list. 
+Click «Create» at the bottom and see the services are in the list of services now. Details of the node are displayed to the right when clicking the services in the list. 
 
 .. figure:: _static/ServicesList.png
 
@@ -231,7 +231,7 @@ In the list of services the following actions can be performed:
 
 1. **View** services` name and description
 
-2. **View** a provider for the services and get the provider`s information in a popup window by clicking at the active provider`s name in the «Providers» column.
+2. **View** a provider for the services and get the provider`s information in a pop-up window by clicking at the active provider`s name in the «Providers» column.
 
 .. figure:: _static/ServicesList_ProviderInfo.png
 
@@ -259,7 +259,7 @@ Under the Streams section of the main navigation bar you will find the list of s
 
 Please, press the «Create Stream» button and fill in the form where generals and specific fields should be completed:
 
-**General fileds:**
+**General fields:**
 
 - *Choose* *type* *
 
@@ -290,7 +290,7 @@ Select from the dropdown a type of a stream:
 
         The range of available services is determined by a selected stream type.
 
-**Specific fileds:**
+**Specific fields:**
 
 
 **stream.t-stream** **Stream** **Type**
@@ -367,13 +367,13 @@ Click «Create» at the bottom and see the stream is in the list of streams now.
 
 .. figure:: _static/StreamsList.png
 
-Click "Cancel" to drop all the specified settings. The strem will not be created then.
+Click "Cancel" to drop all the specified settings. The stream will not be created then.
 
 In the list of streams the following actions can be performed:
 
 1. **View** a stream` name and description
 
-2. **View** a service for the stream and get the service`s information in a popup window by clicking at the active service`s name in the «Service» column.
+2. **View** a service for the stream and get the service`s information in a pop-up window by clicking at the active service`s name in the «Service» column.
 
 .. figure:: _static/StreamsList_ServiceInfo.png
 
@@ -468,7 +468,7 @@ Before creating an instance make sure all necessary *configuration* *settings* a
 
 .. note:: Read more about necessary configuration settings in the `Configuration Settings`_ section below.
 
-Under the «Instances» section of the main navigation menu there is a list of instances.  In the upper-right corner click the «Create Instance» button and choose the module from the dropdown. This is the module an instance will be created for. 
+Under the «Instances» section of the main navigation menu there is a list of instances.  In the upper-right corner click the «Create Instance» button and choose the module from the drop-down. This is the module an instance will be created for. 
 
 .. figure:: _static/CreateInstance_Type.png
 
@@ -487,7 +487,7 @@ Please, review the tables with general and specific fields description below.
     Description of an instance
     
 - Parallelism
-    Value may be integer or `max` string. If `max`, then parallelism equals minimum count of partitions of streams (1 by default). For an input streaming instance it can not exceed the total number of back-ups (Backup count + Async-backup-count)
+    This field determines the number of tasks that will process the streams. For load reduction and the enhancement of velocity Parallelism should be over 1. Value may be integer or `max` string. If `max`, then parallelism equals minimum count of partitions of streams (1 by default). For an input streaming instance it can not exceed the total number of back-ups (Backup count + Async-backup-count)
     
 - Options
     Json with options for module
@@ -499,7 +499,7 @@ Please, review the tables with general and specific fields description below.
     Amount of RAM for task (1024 by default)
     
 - JVM Options
-    Json with jvm-options. It is important to emphasize that MESOS kills a task if it uses more memory than it is specified in the 'perTaskRam' parameter. There are no default options. The options defined in the example fit the Per-Task-Ram = 192 and it's recommended for launching modules. In general, the sum of the following parameters: `Xmx`, `XX:MaxDirectMemorySize` and `XX:MaxMetaspaceSize` should be less than `Per-Task-Ram`; `XX:MaxMetaspaceSize` must be grater or larger than `Xmx` by 32m.
+    Json with jvm-options. It is important to emphasize that Mesos deletes a task if it uses more memory than it is specified in the 'perTaskRam' parameter. There are no default options. The options defined in the example fit the Per-Task-Ram = 192 and it's recommended for launching modules. In general, the sum of the following parameters: `Xmx`, `XX:MaxDirectMemorySize` and `XX:MaxMetaspaceSize` should be less than `Per-Task-Ram`; `XX:MaxMetaspaceSize` must be grater or larger than `Xmx` by 32m.
 
 - Node Attributes
     Json with map attributes for framework
@@ -601,8 +601,8 @@ Please, review the tables with general and specific fields description below.
 - Window 
     Number of batches that will be contained in a window (1 by default). Must be greater than zero.
     
-- Sliding Interva
-    The interval at which a window will be shifted (сount of batches that will be removed from the window after its processing). Must be greater than zero and less than or equal to the window (1 by default)
+- Sliding Interval
+    The interval at which a window will be shifted (count of batches that will be removed from the window after its processing). Must be greater than zero and less than or equal to the window (1 by default)
    
 - Inputs*
     Names of input streams. Requires input mode: 'full' or 'split' ('split' is default). The stream must exist in database (must be stream.t-stream or stream.kafka)
@@ -621,9 +621,7 @@ Please, review the tables with general and specific fields description below.
     
 ..  "InputAvroSchema", "Avro schema for input objects. Requires if input object is instance of 'org.apache.avro.generic.GenericRecord':https://avro.apache.org/docs/1.8.1/api/java/org/apache/avro/generic/GenericRecord.html@.", "{'type':'record', 'name':'rec', 'fields':[{'name':'f1','type':string'}]}"
   .. note:: Required fields are marked with an asterisk (*)
-Click «Create» at the bottom and see the instance is in the list of instances now. Details of the node are displayed to the right when clicking the instance in the list. 
-
-.. figure:: _static/InstancesList.png
+Click «Create» at the bottom and see the instance is in the list of instances now. 
 
 Click "Cancel" to drop all the specified settings. The instance will not be created then.
 
@@ -633,11 +631,33 @@ An instance can be created by copying the settings of an existing instance. Just
 
 The form will show the settings of the selected instance. They can be edited and saved by clicking at the "Create" button. The new instance will appear in the list of instances.
 
-Click "Cancel" to drop all the specified settings. The strem will not be created then.
+Details of the node are displayed to the right when clicking the instance in the list. 
+
+.. figure:: _static/InstancesList.png
+
+Please, note, the details of an Instance show not only the instance settings but also:
+
+- Stages
+   Stages display information about current status of the framework that starts Instance. It allows you to follow the start or stop processes of Instance.
+   
+The stages include:
+
+- state - Instance status
+- datetime - The time when a state has been changed 
+- duration  -  How long a stage has got a current state. This field makes sense if a state field is 'starting', 'stopping' or 'deleting'.
+  
+- Execution plan
+    Execution plan consists of tasks. The number of tasks equals to a 'Parallelism' parameter. Each task has a unique name within the execution plan. Also the task has a set of Input stream names and their intervals of partitions. In general, it provides the information of the sources from which the data will be consumed.
 
 In the list of instances the following actions can be performed:
 
-1. **View** an instance`s name and status. An instance nay have the following statuses:
+1. **Start** an instance by clicking the «Start» button in the Actions section. The instance status will first change to «Starting» and in a few seconds to «Started». That means the instance is launched and is working now.
+2. **Stop** the instance that has been started i.e. has the «Started» status. Click at the «Stop» button and wait for a while till the status changes to «Stopping» and then to «Stopped».
+3. **Delete** a stream clicking at the corresponding icon in the Action block near the name of the stream you want to delete.
+
+.. note:: An instance with statuses «Starting», «Started», «Stopping», «Deleting» can not be deleted.
+
+4. **View** an instance`s name and status. An instance may have the following statuses:
      
 - ready - a newly created instance and not started yet;
 
@@ -653,7 +673,7 @@ In the list of instances the following actions can be performed:
 
 - error - an error is detected when stopping the instance.
 
-If an instance stucks in 'failed' or 'error' status, you should use the following instruction:
+If an instance stuck in 'failed' or 'error' status, you should use the following instruction:
 
 1) Check that all of the following settings exist (see the table_ for more information on Config Settings):
 
@@ -668,11 +688,21 @@ If an instance stucks in 'failed' or 'error' status, you should use the followin
 
 If all described above is correct, but the "failed" or the "error" status still takes place, please contact the support team.
 
-2. **Start** an instance by clicking the «Start» button in the Actions section. The instance status will first change to «Starting» and in a few seconds to «Started». That means the instance is launched and is working now.
-3. **Stop** the instance that has been started i.e. has the «Started» status. Click at the «Stop» button and wait for a while till the status changes to «Stopping» and then to «Stopped».
-4. **Delete** a stream clicking at the corresponding icon in the Action block near the name of the stream you want to delete.
+The *statistics* on the task execution is also available from the list of instances. Click at the "Information" icon next to the Instance name you want to get the statistics for. 
 
-.. note:: An instance with statuses «Starting», «Started», «Stopping», «Deleting» can not be deleted.
+.. figure:: _static/FrameworkStatsIcon.png
+
+A window will pop-up to show the stats. It includes the following information for each task in the list:
+
+- Task name
+- State - Task status
+- Directories - Directories of tasks of the instance
+- State change - The date of the last status change
+- Reason - The reason of the status change
+- Last node - Name of node that was used by a task before the status change (task failure)
+- Node - Name of node used by the task
+
+This is the statistic data from a Mesos framework that starts a module. The statistics is aggregated for started instances. 
 
 The list of instances can be filtered by its type and/or a name using the search tool above the list.
 
@@ -684,7 +714,7 @@ Here the basic settings necessary for the platform are described. Besides, the f
 
 Configuration settings are the setting required for the modules start working.
  
-The config settings can be added under the "Config Settings" tab of the main navigation bar. Please, click at "Add Settings" in the upper-right corner aboce the list and fill in the form (the information of the required settings can be found in the table_ below):
+The config settings can be added under the "Config Settings" tab of the main navigation bar. Please, click at "Add Settings" in the upper-right corner above the list and fill in the form (the information of the required settings can be found in the table_ below):
 
 1. *Name* *
         Enter a setting name here. 
@@ -699,11 +729,11 @@ The config settings can be added under the "Config Settings" tab of the main nav
 	
 .. note:: Required fields are marked with an asterisk (*)
 
-Once the fileds are correctly filled in, click at the "Create" button and see the setting has appeared in the list of settings.
+Once the fields are correctly filled in, click at the "Create" button and see the setting has appeared in the list of settings.
 
-Click "Cancel" to drop all the specified settings. The settnig will not be added then.
+Click "Cancel" to drop all the specified settings. The setting will not be added then.
 
-The list of settings added to the platform can be viewed under the Cofig Settings section of the navigation bar. 
+The list of settings added to the platform can be viewed under the Config Settings section of the navigation bar. 
  
 Please, find the required config settings in the table below and make sure they are added to your platform so that your modules could work.
 

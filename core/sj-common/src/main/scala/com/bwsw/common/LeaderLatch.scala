@@ -68,9 +68,8 @@ class LeaderLatch(zkServers: Set[String], masterNode: String, id: String = "") {
   }
 
   def takeLeadership(delay: Long): Unit = {
-    logger.debug("Try to start a leader latch.")
     while (!hasLeadership) {
-      logger.debug("Waiting until the leader latch takes a leadership.")
+      logger.debug("Waiting until the leader latch acquires leadership.")
       Thread.sleep(delay)
     }
   }

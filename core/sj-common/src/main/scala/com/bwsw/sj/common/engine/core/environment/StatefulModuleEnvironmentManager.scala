@@ -18,6 +18,7 @@
  */
 package com.bwsw.sj.common.engine.core.environment
 
+import com.bwsw.common.file.utils.FileStorage
 import com.bwsw.sj.common.dal.model.instance.InstanceDomain
 import com.bwsw.sj.common.dal.model.stream.StreamDomain
 import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
@@ -39,6 +40,7 @@ import scala.collection.{mutable, _}
   * @param moduleTimer            provides a possibility to set a timer inside a module
   * @param performanceMetrics     set of metrics that characterize performance of [[EngineLiterals.regularStreamingType]]
   *                               or [[EngineLiterals.batchStreamingType]] module
+  * @param fileStorage            file storage
   * @author Kseniya Mikhaleva
   */
 
@@ -48,8 +50,16 @@ class StatefulModuleEnvironmentManager(stateStorage: StateStorage,
                                        outputs: Array[StreamDomain],
                                        producerPolicyByOutput: mutable.Map[String, (String, ModuleOutput)],
                                        moduleTimer: SjTimer,
-                                       performanceMetrics: PerformanceMetrics)
-  extends ModuleEnvironmentManager(options, producers, outputs, producerPolicyByOutput, moduleTimer, performanceMetrics) {
+                                       performanceMetrics: PerformanceMetrics,
+                                       fileStorage: FileStorage)
+  extends ModuleEnvironmentManager(
+    options,
+    producers,
+    outputs,
+    producerPolicyByOutput,
+    moduleTimer,
+    performanceMetrics,
+    fileStorage) {
 
   override def getState: StateStorage = {
     logger.info(s"Get a storage where states are kept.")

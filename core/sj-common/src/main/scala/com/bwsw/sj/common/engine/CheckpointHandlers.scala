@@ -16,31 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.sj.common.engine.core.entities
-
-import com.bwsw.sj.common.utils.StreamLiterals
-import com.fasterxml.jackson.annotation.JsonIgnore
+package com.bwsw.sj.common.engine
 
 /**
-  * Provides a wrapper for kafka message.
+  * Provide methods for handle checkpoints
   *
-  * @param data message data
-  * @tparam T type of data containing in a message
+  * @author Pavel Tomskikh
   */
+trait CheckpointHandlers {
 
-class KafkaEnvelope[T <: AnyRef](var data: T) extends Envelope {
-  streamType = StreamLiterals.kafkaStreamType
-
-  @JsonIgnore
-  override def equals(obj: Any): Boolean = obj match {
-    case k: KafkaEnvelope[_] =>
-      data == k.data &&
-        streamType == k.streamType &&
-        id == k.id &&
-        stream == k.stream &&
-        (tags sameElements k.tags) &&
-        partition == k.partition
-
-    case _ => super.equals(obj)
-  }
+  /**
+    * Handler triggered before every checkpoint
+    */
+  def onBeforeCheckpoint(): Unit = {}
 }
