@@ -209,5 +209,6 @@ lazy val kafkaDataLoader = Project(id = "sj-kafka-data-sender",
   base = file("./contrib/sj-kafka-data-sender"))
   .settings(commonSettings: _*)
   .settings(
-    libraryDependencies ++= Dependencies.sjKafkaDataLoader.value
+    libraryDependencies ++= Dependencies.sjKafkaDataLoader.value,
+    mainClass in assembly := Some("com.bwsw.sj.kafka.data_sender.DataSenderRunner")
   )
