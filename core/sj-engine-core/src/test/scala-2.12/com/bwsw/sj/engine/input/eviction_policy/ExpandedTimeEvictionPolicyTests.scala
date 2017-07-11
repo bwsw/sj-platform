@@ -35,7 +35,7 @@ class ExpandedTimeEvictionPolicyTests
     with BeforeAndAfterEach
     with BeforeAndAfterAll {
 
-  val ttlSeconds = 1
+  val ttlSeconds = 3
   val asyncBackupCount = 1
   val backupCount = 1
   val evictionPolicy = lruDefaultEvictionPolicy
@@ -62,7 +62,7 @@ class ExpandedTimeEvictionPolicyTests
       evictionPolicy.isDuplicate(key) shouldBe false
     }
 
-    Thread.sleep(200)
+    Thread.sleep(1000)
 
     forAll(allKeys) { key =>
       evictionPolicy.isDuplicate(key) shouldBe true
