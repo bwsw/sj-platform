@@ -50,16 +50,8 @@ Input Streaming Custom Module
 5) Assemble a jar of your module by calling sbt instruction from the project folder, e.g. 'sbt my-input-module/assembly'
 6) Upload the module (via UI or REST)
 7) Create an instance of the module (via UI or REST)
-8) Launch InputTaskRunner.scala with the following environment variables:
-
-- `INSTANCE_NAME` - the name of the instance.
-- `TASK_NAME` - name of the task from 'tasks' field of the instance.
-- `MONGO_HOSTS` - comma separated list of Mongo hosts.
-- `MONGO_USER` - Mongo readWrite role user for stream_juggler db.
-- `MONGO_PASSWORD` - Mongo readWrite role password for stream_juggler db user.
-- `AGENTS_HOST` - host for holding input TCP connection (you should use 'localhost').
-- `ENTRY_PORT` - port for holding input TCP connection (you should use any numbers from 8000 to 9000).
-
+8) Launch the instance.
+.. note:: You can use a module simulator for preliminary testing of executor work (:ref:`Input_Engine_Simulator`).
 
 Regular Streaming Custom Module
 ---------------------------------
@@ -70,15 +62,8 @@ Regular Streaming Custom Module
 5) Assemble a jar of your module by calling sbt instruction from project folder, e.g. 'sbt my-regular-module/assembly' 
 6) Upload the module (via REST or UI)
 7) Create an instance of the module (via REST or UI)
-8) Launch `RegularTaskRunner.scala` with the following environment variables:
-
-* `INSTANCE_NAME`- the name of the instance.
-* `TASK_NAME` - name of the task from execution plan of instance.
-* `MONGO_HOSTS` - comma separated list of Mongo hosts.
-* `MONGO_USER` - mongo readWrite role user for stream_juggler db.
-* `MONGO_PASSWORD` - mongo readWrite role password for stream_juggler db user.
-* `AGENTS_HOST` - host for T-stream agents (you should use 'localhost').
-* `AGENTS_PORTS`- set of ports for T-stream agents (you should use any numbers from 8000 to 9000 in accordance with the number of instance T-stream inputs).
+8) Launch the instance.
+.. note:: You can use a module simulator for preliminary testing of executor work (:ref:`Regular_Engine_Simulator`).
 
 Batch Streaming Custom Module
 ------------------------------------
@@ -90,15 +75,8 @@ Batch Streaming Custom Module
 6) Assemble a jar of your module by calling sbt instruction from project folder, e.g. 'sbt my-batch-module/assembly' 
 7) Upload the module (via REST or UI)
 8) Create an instance of the module (via REST or UI)
-9) Launch BatchTaskRunner.scala with the following environment variables:
-
-* `INSTANCE_NAME` - the name of the instance.
-* `TASK_NAME`- name of the task from execution plan of instance.
-* `MONGO_HOSTS` - comma separated list of hosts.
-* `MONGO_USER` - mongo readWrite role user for stream_juggler db.
-* `MONGO_PASSWORD` - mongo readWrite role password for stream_juggler db user.
-* `AGENTS_HOST` - host for t-stream agents (you should use 'localhost').
-* `AGENTS_PORTS` - set of ports for t-stream agents (you should use any numbers from 8000 to 9000 in accordance with the number of instance t-stream inputs).
+9) Launch the instance.
+.. note:: You can use a module simulator for preliminary testing of executor work (:ref:`Batch_Engine_Simulator`).
 
 Output Streaming Custom Module
 -----------------------------------------------
@@ -118,19 +96,8 @@ Output Streaming Custom Module
 7) Create an index in Elasticsearch and the index mapping, or a table in a database, or deploy some REST service. Name of index is provided in Elasticsearch service. A table name and a document type is a stream name. A full URL to entities of the REST service is "http://<host>:<port><basePath>/<stream-name>"
 8) Upload the module (via Rest API or UI)
 9) Create an instance of the module  (via Rest API or UI)
-10) Launch `InputTaskRunner.scala` with the following environment variables:
-   
-* `INSTANCE_NAME`- the name of the instance.
-* `TASK_NAME`- name of task from execution plan of instance.
-* `MONGO_HOSTS`- comma separated list of mongo hosts.
-* `MONGO_USER` - mongo readWrite role user for stream_juggler db.
-* `MONGO_PASSWORD` - mongo readWrite role password for stream_juggler db user.
-* `AGENTS_HOST` - host for t-stream agents (you should use 'localhost').
-* `AGENTS_PORTS` - set of ports for t-stream agents (you should use any numbers from 8000 to 9000 in accordance with the number of instance t-stream inputs).
-
-
-
-
+10) Launch the instance.
+.. note:: You can use a module simulator for preliminary testing of executor work (:ref:`Output_Engine_Simulator`).
 
 Hello World Custom Module
 ------------------------------
