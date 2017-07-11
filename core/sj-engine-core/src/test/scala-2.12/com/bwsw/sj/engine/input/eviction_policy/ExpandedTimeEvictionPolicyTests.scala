@@ -36,6 +36,9 @@ class ExpandedTimeEvictionPolicyTests
     with BeforeAndAfterAll {
 
   val ttlSeconds = 3
+  val ttlMillis = ttlSeconds * 1000
+  val halfTtlMillis = ttlMillis / 2
+
   val asyncBackupCount = 1
   val backupCount = 1
   val evictionPolicy = lruDefaultEvictionPolicy
@@ -73,7 +76,7 @@ class ExpandedTimeEvictionPolicyTests
     val evictionPolicy = new ExpandedTimeEvictionPolicy(hazelcast)
     forAll(allKeys)(evictionPolicy.isDuplicate)
 
-    Thread.sleep(ttlSeconds * 500)
+    Thread.sleep(halfTtlMillis)
     forAll(allKeys) { key =>
       evictionPolicy.isDuplicate(key) shouldBe true
     }
@@ -83,7 +86,7 @@ class ExpandedTimeEvictionPolicyTests
     val evictionPolicy = new ExpandedTimeEvictionPolicy(hazelcast)
     forAll(allKeys)(evictionPolicy.isDuplicate)
 
-    Thread.sleep(ttlSeconds * 1000)
+    Thread.sleep(ttlMillis)
     forAll(allKeys) { key =>
       evictionPolicy.isDuplicate(key) shouldBe false
     }
@@ -101,14 +104,13 @@ class ExpandedTimeEvictionPolicyTests
 
     forAll(keysToUpdate)((key, _) => evictionPolicy.isDuplicate(key))
 
-    val waitingTimeout = ttlSeconds * 500
-    Thread.sleep(waitingTimeout)
+    Thread.sleep(halfTtlMillis)
     forAll(keysToUpdate) { (key, update) =>
       if (update)
         evictionPolicy.isDuplicate(key)
     }
 
-    Thread.sleep(waitingTimeout)
+    Thread.sleep(halfTtlMillis)
     forAll(keysToUpdate) { (key, update) =>
       evictionPolicy.isDuplicate(key) shouldBe update
     }
