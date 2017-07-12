@@ -100,7 +100,7 @@ class InstanceStarter(instance: Instance,
     val zkServers = getZooKeeperServers(marathonMaster)
     val leader = new LeaderLatch(Set(zkServers), RestLiterals.masterNode)
     leader.start()
-    leader.takeLeadership(delay)
+    leader.acquireLeadership(delay)
 
     leader
   }
