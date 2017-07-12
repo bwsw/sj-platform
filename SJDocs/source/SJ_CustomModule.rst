@@ -120,9 +120,9 @@ Prerequisites
 First of all you should:
 
 - follow the deployment process described in :ref:`Minimesos_deployment` up to Point 9 inclusive
-- OR follow the eployment process described :ref:`Mesos_deployment` up to Point 7 inclusive
+- OR follow the deployment process described :ref:`Mesos_deployment` up to Point 7 inclusive
 
-And remember <ip> of the machine we deployed everything on and <port> of deployed SJ-REST (in Minimesos deployment it is written in Point 7 in variable `$address`, in Mesos deployment it is written in Point 4 in variable `$address`).
+And remember <ip> of the machine that everything is deployed on and <port> of deployed SJ-REST (in Minimesos deployment it is written in Point 7 in variable `$address`, in Mesos deployment it is written in Point 4 in variable `$address`).
 
 Task description 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -162,9 +162,9 @@ So, there could be 2 types of lines:
 
 And we are interested only in three values from it: 
 
-* IP (91.221.60.77), 
-* response time (0.40 ms), 
-* timestamp (1499143417151)
+- IP (91.221.60.77), 
+- response time (0.40 ms), 
+- timestamp (1499143417151)
 
 * Error answer::
 
@@ -287,13 +287,13 @@ Netcat appears here because we will send our data to SJ-module via TCP connectio
 
 That is general description.
 
-If we look deeper, we will see the following structure:
+If we look deeper in the structure, we will see the following data flow:
 
 .. figure:: _static/SJStructure.png
 
-All input data are going as a flow of bytes to particular interface provided by `InputTaskEngine`. That flow is going straight to `RegexInputModule` (which extends `InputStreamingExecutor` interface) and converted to an `InputEnvelope` instance which stores all data as `AvroRecord` inside. 
+All input data elements are going as a flow of bytes to particular interface provided by `InputTaskEngine`. That flow is going straight to `RegexInputModule` (which extends `InputStreamingExecutor` interface) and converted to an `InputEnvelope` instance which stores all data as `AvroRecord` inside. 
 
-The `InputEnvelope` instance then goes to `InputTaskEngine` which serializes it to the stream of bytes and then sends to T-Streams. 
+An `InputEnvelope` instance then goes to `InputTaskEngine` which serializes it to the stream of bytes and then sends to T-Streams. 
 
 `RegularTaskEngine` deserializes the flow of bytes to `TStreamsEnvelope[AvroRecord]` which is then put to `RegularStreamingExecutor`. 
 
@@ -301,14 +301,16 @@ The `InputEnvelope` instance then goes to `InputTaskEngine` which serializes it 
 
 `RegularTaskEngine` serializes all the received data to the flow of bytes and puts it back to T-Streams. 
 
-Then `OutputTaskEngine` deserializes the stream of bytes from T-Streams to TStreamsEnvelope[String] and sends it to `OutputStreamingExecutor`. `OutputStreamingExecutor` returns Entities back to `OutputTaskEngine` which are then put to ElasticSearch.
+Then `OutputTaskEngine` deserializes the stream of bytes from T-Streams to TStreamsEnvelope[String] and sends it to `OutputStreamingExecutor`. `OutputStreamingExecutor` returns Entities back to `OutputTaskEngine`. They are then put to ElasticSearch.
 
 Input module 
 """"""""""""""""""
 
-Input module is `RegexInputExecutor` (it extends `InputStreamingExecutor`) and it is provided via Sonatype repository. It's purpose (in general) is to process input stream of strings using regexp rules provided by a user and create `InputEnvelope` objects as a result.
+Input module is `RegexInputExecutor` (it extends `InputStreamingExecutor`) and it is provided via Sonatype repository. Its purpose (in general) is to process input stream of strings using regexp rules provided by a user and create `InputEnvelope` objects as a result.
 
-Rules are described into `pingstation-input.json` and as we can see, there are rules for each type of input records and each has its own value in the `outputStream` fields: "echo-response" and "unreachable-response". So, `InputEnvelope` objects will be put into two corresponding streams.
+The rules are described in `pingstation-input.json`. As we can see, there are rules for each type of input records and each has its own value in the `outputStream` fields: "echo-response" and "unreachable-response". 
+
+So, `InputEnvelope` objects will be put into two corresponding streams.
 
 
 Regular module
@@ -320,7 +322,7 @@ Data from both of these streams will be sent to Regular module. We choose Regula
 
 A manager (of `ModuleEnvironmentManager` type) here is just a source of information and a point of access to several useful methods: get output, get state (for stateful modules to store some global variables), etc. We use Record (avro record) type here as a generic type because output elements of input module are stored as avro records.
 
-The data will be received from two streams, each of them will has its own name, so let's create the following object to store their names::
+The data will be received from two streams, each of them will have its own name, so let's create the following object to store their names::
 
  object StreamNames {
   val unreachableResponseStream = "unreachable-response"
@@ -346,11 +348,11 @@ To describe the whole logic we need to override the following methods:
 Validator 
 ++++++++++++++++++
 
-There is a field in instance: options of String type. That field is used to send some configuration into module (for example, via this field regexp rules are passed to InputModule). This field is described in json-file for particular module.
+An instance contains a field `options` of String type. That field is used to send some configuration into module (for example, via this field regexp rules are passed to InputModule). This field is described in json-file for a particular module.
 
-When this field is used it is possible to describe Validator class which is dedicated to validation of this field.
+When this field is used its validation is handled with Validator class. So it is necessary to describe the Validator class here.
 
-Input module uses this field to pass avro schema to Regular module. That's why we create Validator class in the following way (with constant field in singleton `OptionsLiterals` object)::
+Input module uses `options` field to pass avro schema to Regular module. That's why we create Validator class in the following way (with constant field in singleton `OptionsLiterals` object)::
 
  object OptionsLiterals {
   val schemaField = "schema"
@@ -384,7 +386,7 @@ And then just try to parse the schema.
 onMessage
 +++++++++++++++
 
-The 'onMessage' method is called every time our Executor receives an envelope.
+The 'onMessage' method is called every time the Executor receives an envelope.
 
 As we remember, there are two possible types of envelopes: echo-response and unreachable-response, which are stored in two different streams. 
 
@@ -392,14 +394,16 @@ We obtain envelopes from both of them and the name of the stream is stored in th
 
  val maybePingResponse = envelope.stream match {
 	case `echoResponseStream` =>
-	// create EchoResponse and fill it's fields
+	// create EchoResponse and fill its fields
 	case `unreachableResponseStream` =>
-	// create UnreachableResponse and fill it's fields
+	// create UnreachableResponse and fill its fields
 	case stream =>
 	// if we receive something we don't need
  }
 
-The `envelope.data.head` field contains all data we need and it's type is avro record. So the next step is obvious - we will use Try scala type to cope with possibility of a wrong or a corrupted envelope::
+The `envelope.data.head` field contains all data we need and its type is avro record. 
+
+So the next step is obvious - we will use Try scala type to cope with possibility of a wrong or a corrupted envelope::
 
  val maybePingResponse = envelope.stream match {
   case `echoResponseStream` =>
@@ -441,7 +445,7 @@ The following code does what we need::
   state.set(pingResponse.ip, PingState() + pingResponse)
  }
 
-So, here is the whole code we need to process a new message in our Executor class::
+So, here is the whole code that we need to process a new message in our Executor class::
 
  class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecutor[Record](manager) {
   private val state = manager.getState
@@ -485,12 +489,12 @@ So, here is the whole code we need to process a new message in our Executor clas
 onBeforeCheckpoint
 ++++++++++++++++++++++
 
-The `onBeforeCheckpoint` method calling condition is described in 'pingstation-input.json' configuration file::
+A `onBeforeCheckpoint` method calling condition is described in 'pingstation-input.json' configuration file::
 
  "checkpointMode" : "every-nth",
  "checkpointInterval" : 10
 
-So we can see, that it will be called after each 10 responses received in the `onMessage` method.
+So we can see it will be called after each 10 responses received in the `onMessage` method.
 
 First of all we need to obtain an output object to send all data into. In this example we will use `RoundRobinOutput` because it is not important for us in this example how data would be spread out of partitions::
 
@@ -531,11 +535,11 @@ deserialize
 
 This method is called when we need to correctly deserialize the flow of bytes from T-Streams into AvroRecord.
 
-There is `AvroSerializer` class which shall be used for this purpose. But due to the features of Avro format we need avroSchema to do that properly. 
+There is `AvroSerializer` class which shall be used for this purpose. But due to the features of Avro format we need `avroSchema` to do that properly. 
 
-Avro schema is stored into manager.options field. 
+Avro schema is stored into `manager.options` field. 
 
-So, the next code listing shows the way of creating `AvroSerivaliser` and obtaining avro scheme::
+So, the next code listing shows the way of creating `AvroSerialiser` and obtaining avro scheme::
 
  private val jsonSerializer: JsonSerializer = new JsonSerializer
  private val mapOptions: Map[String, Any] = jsonSerializer.deserialize[Map[String, Any]](manager.options)
@@ -561,7 +565,7 @@ Manager here (of `OutputEnvironmentManager` type) is also a point of access to s
 
 Type of data sent by Regular module is String that's why this type is used as a template type.
 
-We will need to override two methods::
+We will need to override two methods:
 
 - onMessage(envelope: TStreamEnvelope[String]) - to get and process messages
 - getOutputEntity() - to return format of output records
@@ -569,7 +573,7 @@ We will need to override two methods::
 Validator 
 +++++++++++++
 
-Validator class here is empty due to absence of extra information on how we need to process data from RegularModule.
+Validator class here is empty due to absence of extra information on how we need to process data from Regular module.
 
 onMessage 
 +++++++++++++
@@ -594,18 +598,18 @@ The full code of this method is listed below::
 
 All data are in the 'envelope' data field. 
 
-So, for each record in this field we create a new PingMetrics instance and fill in all corresponding fields. Then just return sequence of these objects.
+So, for each record in this field we create a new `PingMetrics` instance and fill in all corresponding fields. Then just return sequence of these objects.
 
 getOutputEntity 
 ++++++++++++++++++
 
-Signature of method looks like::
+Signature of the method looks like::
 
  override def getOutputEntity: Entity[String]
 
 It returns instances of Entity[String] - that class contains metadata on `OutputEnvelope` structure: map (field name -> field type) (Map[String, NamedType[T]]).
 
-In file 'es-echo-response-1m.json' we use "elasticsearch-output" string as value of field "type". It means that we will use ElasticSearch as output of our sj-module. Other possible variants are REST and JDBC.
+In file 'es-echo-response-1m.json' we use `elasticsearch-output` string as a value of `type` field. It means that we will use ElasticSearch as output of our sj-module. Other possible variants are REST and JDBC.
 
 So, for ElasticSearch destination type we shall use appropriate builder in 'getOutputEntity' (there are three of them - one for each type) and just describe all fields we have::
 
@@ -625,4 +629,4 @@ So, for ElasticSearch destination type we shall use appropriate builder in 'getO
 specification.json 
 +++++++++++++++++++++
 
-This file describes module. Examples of description can be found here :ref:`Json_schema`.
+This file describes the module. Examples of description can be found at :ref:`Json_schema`.
