@@ -248,7 +248,7 @@ So, we need a set of variables with names of fields. Looks like all of them will
   val totalField = "total"
  }
 
-And override the `getFieldsValue` method in following way::
+And override the `getFieldsValue` method in the following way::
 
  class PingMetrics extends OutputEnvelope {
 
