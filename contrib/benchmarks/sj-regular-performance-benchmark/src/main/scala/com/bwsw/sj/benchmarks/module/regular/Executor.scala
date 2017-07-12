@@ -27,10 +27,10 @@ import com.bwsw.sj.common.engine.core.regular.RegularStreamingExecutor
 import com.bwsw.sj.common.utils.BenchmarkLiterals.OptionsFieldNames
 
 /**
-  * Count milliseconds between receiving first and last messages and writes it into a file. Options in instance should contain
+  * Count milliseconds between receiving first and last messages and write it into a file. Options of instance should contain
   * a JSON with two fields:
   *
-  * 1. outputFile - path to file to write result
+  * 1. outputFile - path to the file to write the result
   *
   * 2. messagesCount - count of input messages
   *
