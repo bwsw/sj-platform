@@ -213,3 +213,13 @@ object CommonAppConfigNames {
   val zooKeeperHost = zookeeper + ".host"
   val zooKeeperPort = zookeeper + ".port"
 }
+
+
+object BenchmarkLiterals {
+
+  object OptionsFieldNames {
+    val outputFile = "outputFile"
+    val messagesCount = "messagesCount"
+  }
+
+}

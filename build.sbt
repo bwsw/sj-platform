@@ -79,7 +79,8 @@ lazy val sj = (project in file(".")).settings(publish := {})
     framework,
     stubInput, stubRegular, stubBatch, stubESOutput, stubJDBCOutput, stubRestOutput,
     pmOutput, csvInput, regexInput,
-    sumBatch
+    sumBatch,
+    kafkaDataLoader, regularPerformanceBenchmark
   )
 
 lazy val common = Project(id = "sj-common",
@@ -212,3 +213,8 @@ lazy val kafkaDataLoader = Project(id = "sj-kafka-data-sender",
     libraryDependencies ++= Dependencies.sjKafkaDataLoader.value,
     mainClass in assembly := Some("com.bwsw.sj.kafka.data_sender.DataSenderRunner")
   )
+
+lazy val regularPerformanceBenchmark = Project(id = "sj-regular-performance-benchmark",
+  base = file("./contrib/benchmarks/sj-regular-performance-benchmark"))
+  .settings(commonSettings: _*)
+  .dependsOn(engineCore % "provided")
