@@ -1,8 +1,6 @@
 Custom Module Development Guide
 ======================================
 
-.. warning:: *The section is under development!*
-
 .. Contents::
 
 Under this section how to write your own module for the Stream Juggler will be described.
@@ -111,8 +109,6 @@ Output Streaming Custom Module
 Hello World Custom Module
 ------------------------------
 
-.. warning:: The section is under development!
-
 This tutorial explains how to write a module using a simple Hello World example. Let's create a module together!
 
 Prerequisites 
@@ -162,9 +158,9 @@ So, there could be 2 types of lines:
 
 And we are interested only in three values from it: 
 
-- IP (91.221.60.77), 
-- response time (0.40 ms), 
-- timestamp (1499143417151)
+ - IP (91.221.60.77), 
+ - response time (0.40 ms), 
+ - timestamp (1499143417151)
 
 * Error answer::
 
