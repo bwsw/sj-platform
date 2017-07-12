@@ -46,11 +46,11 @@ class LeaderLatchTests extends FlatSpec with Matchers with BeforeAndAfterAll {
   client.blockUntilConnectedOrTimedOut()
   val zooKeeper = client.getZooKeeper
 
-  val timeLimit = 4.second
+  val timeLimitPerTest = 4.second
 
   override def withFixture(test: NoArgTest): Outcome = {
     // TimeLimitedTest does not work in some cases (e.g. infinite loop)
-    Await.result(Future(super.withFixture(test)), timeLimit)
+    Await.result(Future(super.withFixture(test)), timeLimitPerTest)
   }
 
 
@@ -88,6 +88,20 @@ class LeaderLatchTests extends FlatSpec with Matchers with BeforeAndAfterAll {
     nodeInfo.children.size shouldBe 1
     nodeInfo.children.head.data shouldBe leaderLatchId
     leaderLatch.hasLeadership() shouldBe true
+  }
+
+  it should "not acquire leadership if it hasn't been started" in {
+    val masterNode = newMasterNode
+    val delay = 10
+    val leaderLatchId = UUID.randomUUID().toString
+
+    val leaderLatch = new LeaderLatch(Set(connectString), masterNode, leaderLatchId)
+    val future = Future(leaderLatch.acquireLeadership(delay))
+
+    val waitingTimeout = timeLimitPerTest.toMillis / 2
+    Thread.sleep(waitingTimeout)
+
+    future.isCompleted shouldBe false
   }
 
   it should "return its ID if it acquires leadership" in {
@@ -132,7 +146,7 @@ class LeaderLatchTests extends FlatSpec with Matchers with BeforeAndAfterAll {
     val leaderId = leaderLatches.values.head.getLeaderInfo()
     val notLeader = (leaderLatches - leaderId).values.head
     val future = Future(notLeader.acquireLeadership(delay))
-    Thread.sleep(timeLimit.toMillis / 4)
+    Thread.sleep(timeLimitPerTest.toMillis / 4)
 
     future.isCompleted shouldBe false
   }
