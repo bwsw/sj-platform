@@ -91,10 +91,11 @@ Output Streaming Custom Module
 4) Create `specification.json` in a resources folder and fill it in as shown in the example (:ref:`Json_schema`).
 
 .. note:: Stream types for output-streaming module:
-* stream.t-stream (only for incoming streams)
-* elasticsearch-output (output stream)
-* jdbc-output (output stream)
-* rest-output (output stream)
+ 
+ - stream.t-stream (only for incoming streams)
+ - elasticsearch-output (output stream)
+ - jdbc-output (output stream)
+ - rest-output (output stream)
 
 5) Create class of entity that extends OutputEnvelope. Override method "getFieldsValue".
 6) Assemble a jar of your module by calling sbt instruction from the project folder, e.g. 'sbt my-output-module/assembly' 
