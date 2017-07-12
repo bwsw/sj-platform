@@ -24,7 +24,6 @@ import org.apache.curator.CuratorZookeeperClient
 import org.apache.curator.retry.RetryOneTime
 import org.apache.curator.test.TestingServer
 import org.apache.zookeeper.ZooKeeper
-import org.apache.zookeeper.data.Stat
 import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers, Outcome}
 
 import scala.collection.JavaConverters._
@@ -190,16 +189,13 @@ class LeaderLatchTests extends FlatSpec with Matchers with BeforeAndAfterAll {
   }
 
 
-  case class NodeInfo(node: String, data: String, stat: Stat, children: Seq[NodeInfo])
+  case class NodeInfo(node: String, data: String, children: Seq[NodeInfo])
 
   object NodeInfo {
     def apply(node: String, zooKeeper: ZooKeeper): NodeInfo = {
-      val stat = new Stat
-
       new NodeInfo(
         node = node,
-        data = new String(zooKeeper.getData(node, null, stat)),
-        stat = stat,
+        data = new String(zooKeeper.getData(node, null, null)),
         children = zooKeeper.getChildren(node, null).asScala.map(c => apply(s"$node/$c", zooKeeper)))
     }
   }
