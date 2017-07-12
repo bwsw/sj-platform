@@ -162,11 +162,9 @@ class LeaderLatchTests extends FlatSpec with Matchers with BeforeAndAfterAll {
     val leaderLatches = leaderLatchIds.map(id => new LeaderLatch(Set(connectString), masterNode, id))
     leaderLatches.head.start()
     leaderLatches.head.acquireLeadership(delay)
-    val leaderId = leaderLatches.head.getLeaderInfo()
 
-    leaderId shouldBe leaderLatchIds.head
-    leaderLatches.tail.foreach { leaderLatch =>
-      leaderLatch.getLeaderInfo() shouldBe leaderId
+    leaderLatches.foreach { leaderLatch =>
+      leaderLatch.getLeaderInfo() shouldBe leaderLatchIds.head
     }
   }
 
@@ -180,11 +178,10 @@ class LeaderLatchTests extends FlatSpec with Matchers with BeforeAndAfterAll {
 
     Thread.sleep(updatingTimeout)
 
-    val leaderId = leaderLatches.head.getLeaderInfo()
-
-    leaderLatchIds should contain(leaderId)
-    leaderLatches.foreach { leaderLatch =>
-      leaderLatch.getLeaderInfo() shouldBe leaderId
+    val leaderIdSet = leaderLatches.map(_.getLeaderInfo()).toSet
+    leaderIdSet.size shouldBe 1
+    leaderIdSet.foreach { leaderId =>
+      leaderLatchIds should contain(leaderId)
     }
   }
 
