@@ -47,6 +47,8 @@ class LeaderLatchTests extends FlatSpec with Matchers with BeforeAndAfterAll {
   val zooKeeper = client.getZooKeeper
 
   val timeLimitPerTest = 4.second
+  val halfTimeLimitPerTest = timeLimitPerTest.toMillis / 2
+  val updatingTimeout = timeLimitPerTest.toMillis / 10
 
   override def withFixture(test: NoArgTest): Outcome = {
     // TimeLimitedTest does not work in some cases (e.g. infinite loop)
@@ -98,8 +100,7 @@ class LeaderLatchTests extends FlatSpec with Matchers with BeforeAndAfterAll {
     val leaderLatch = new LeaderLatch(Set(connectString), masterNode, leaderLatchId)
     val future = Future(leaderLatch.acquireLeadership(delay))
 
-    val waitingTimeout = timeLimitPerTest.toMillis / 2
-    Thread.sleep(waitingTimeout)
+    Thread.sleep(halfTimeLimitPerTest)
 
     future.isCompleted shouldBe false
   }
@@ -126,7 +127,7 @@ class LeaderLatchTests extends FlatSpec with Matchers with BeforeAndAfterAll {
     leaderLatch.acquireLeadership(delay)
     leaderLatch.close()
 
-    Thread.sleep(100)
+    Thread.sleep(updatingTimeout)
     val nodeInfo = NodeInfo(masterNode, zooKeeper)
 
     nodeInfo.children.size shouldBe 0
@@ -146,13 +147,13 @@ class LeaderLatchTests extends FlatSpec with Matchers with BeforeAndAfterAll {
     val leaderId = leaderLatches.values.head.getLeaderInfo()
     val notLeader = (leaderLatches - leaderId).values.head
     val future = Future(notLeader.acquireLeadership(delay))
-    Thread.sleep(timeLimitPerTest.toMillis / 4)
+    Thread.sleep(halfTimeLimitPerTest)
 
     future.isCompleted shouldBe false
   }
 
 
-  "LeaderLatch instances" should "return the same leader ID" in {
+  "LeaderLatch instances" should "return leader ID if it hasn't been started" in {
     val masterNode = newMasterNode
     val delay = 10
     val leaderLatchCount = 3
@@ -161,8 +162,24 @@ class LeaderLatchTests extends FlatSpec with Matchers with BeforeAndAfterAll {
     val leaderLatches = leaderLatchIds.map(id => new LeaderLatch(Set(connectString), masterNode, id))
     leaderLatches.head.start()
     leaderLatches.head.acquireLeadership(delay)
+    val leaderId = leaderLatches.head.getLeaderInfo()
 
-    leaderLatches.tail.foreach(_.start())
+    leaderId shouldBe leaderLatchIds.head
+    leaderLatches.tail.foreach { leaderLatch =>
+      leaderLatch.getLeaderInfo() shouldBe leaderId
+    }
+  }
+
+  it should "return the same leader ID" in {
+    val masterNode = newMasterNode
+    val leaderLatchCount = 3
+    val leaderLatchIds = Seq.fill(leaderLatchCount)(UUID.randomUUID().toString)
+
+    val leaderLatches = leaderLatchIds.map(id => new LeaderLatch(Set(connectString), masterNode, id))
+    leaderLatches.foreach(_.start())
+
+    Thread.sleep(updatingTimeout)
+
     val leaderId = leaderLatches.head.getLeaderInfo()
 
     leaderLatchIds should contain(leaderId)
@@ -185,7 +202,7 @@ class LeaderLatchTests extends FlatSpec with Matchers with BeforeAndAfterAll {
     val oldLeaderId = leaderLatches.values.head.getLeaderInfo()
     leaderLatches(oldLeaderId).close()
 
-    Thread.sleep(100)
+    Thread.sleep(updatingTimeout)
 
     val leaderLatchesWithoutOldLeader = leaderLatches - oldLeaderId
     val newLeaderId = leaderLatchesWithoutOldLeader.values.head.getLeaderInfo()
