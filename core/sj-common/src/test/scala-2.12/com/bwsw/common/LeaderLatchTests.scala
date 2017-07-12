@@ -132,7 +132,7 @@ class LeaderLatchTests extends FlatSpec with Matchers with BeforeAndAfterAll {
     nodeInfo.children.size shouldBe 0
   }
 
-  it should "wait until does not acquire leadership" in {
+  it should "not acquire leadership until there is another leader" in {
     val masterNode = newMasterNode
     val delay = 10
     val leaderLatchCount = 3
@@ -187,12 +187,12 @@ class LeaderLatchTests extends FlatSpec with Matchers with BeforeAndAfterAll {
 
     Thread.sleep(100)
 
-    val leaderLathesWithoutOldLeader = leaderLatches - oldLeaderId
-    val newLeaderId = leaderLathesWithoutOldLeader.values.head.getLeaderInfo()
+    val leaderLatchesWithoutOldLeader = leaderLatches - oldLeaderId
+    val newLeaderId = leaderLatchesWithoutOldLeader.values.head.getLeaderInfo()
 
     newLeaderId should not be oldLeaderId
     leaderLatchIds should contain(newLeaderId)
-    leaderLathesWithoutOldLeader.values.foreach { leaderLatch =>
+    leaderLatchesWithoutOldLeader.values.foreach { leaderLatch =>
       leaderLatch.getLeaderInfo() shouldBe newLeaderId
     }
   }
