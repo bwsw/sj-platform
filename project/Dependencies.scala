@@ -99,7 +99,8 @@ object Dependencies {
       .exclude("org.slf4j", "slf4j-log4j12")
       .exclude("org.slf4j", "slf4j-api")
       .exclude("log4j", "log4j")
-      .exclude("io.netty", "netty")
+      .exclude("io.netty", "netty"),
+    "de.flapdoodle.embed" % "de.flapdoodle.embed.mongo" % "2.0.0" % "test"
   ))
 
   lazy val sjBatchEngineDependencies = Def.setting(Seq(
