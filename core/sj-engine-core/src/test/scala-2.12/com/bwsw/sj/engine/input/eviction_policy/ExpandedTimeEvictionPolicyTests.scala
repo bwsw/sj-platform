@@ -72,7 +72,7 @@ class ExpandedTimeEvictionPolicyTests
     }
   }
 
-  it should "do not evict not expired elements" in {
+  it should "not evict not expired elements" in {
     val evictionPolicy = new ExpandedTimeEvictionPolicy(hazelcast)
     forAll(allKeys)(evictionPolicy.isDuplicate)
 

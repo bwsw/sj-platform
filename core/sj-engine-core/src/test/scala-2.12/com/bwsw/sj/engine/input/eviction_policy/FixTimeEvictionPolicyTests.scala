@@ -72,7 +72,7 @@ class FixTimeEvictionPolicyTests
     }
   }
 
-  it should "do not evict not expired elements" in {
+  it should "not evict not expired elements" in {
     val evictionPolicy = new FixTimeEvictionPolicy(hazelcast)
     forAll(allKeys)(evictionPolicy.isDuplicate)
 
@@ -92,7 +92,7 @@ class FixTimeEvictionPolicyTests
     }
   }
 
-  it should "do not update hazelcast entries' ttl" in {
+  it should "not update hazelcast entries' ttl" in {
     val evictionPolicy = new FixTimeEvictionPolicy(hazelcast)
     forAll(allKeys)(evictionPolicy.isDuplicate)
 
