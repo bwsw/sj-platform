@@ -91,7 +91,7 @@ object StartFramework {
     val zkServers: String = getZooKeeperServers(master_path)
     val leader: LeaderLatch = new LeaderLatch(Set(zkServers), s"/framework/$frameworkTaskId/lock")
     leader.start()
-    leader.takeLeadership(5)
+    leader.acquireLeadership(5)
 
 
     driver.start()
