@@ -36,6 +36,9 @@ class FixTimeEvictionPolicyTests
     with BeforeAndAfterAll {
 
   val ttlSeconds = 1
+  val ttlMillis = ttlSeconds * 1000
+  val halfTtlMillis = ttlMillis / 2
+
   val asyncBackupCount = 1
   val backupCount = 1
   val evictionPolicy = lruDefaultEvictionPolicy
@@ -69,11 +72,11 @@ class FixTimeEvictionPolicyTests
     }
   }
 
-  it should "does not evict not expired elements" in {
+  it should "not evict not expired elements" in {
     val evictionPolicy = new FixTimeEvictionPolicy(hazelcast)
     forAll(allKeys)(evictionPolicy.isDuplicate)
 
-    Thread.sleep(ttlSeconds * 500)
+    Thread.sleep(halfTtlMillis)
     forAll(allKeys) { key =>
       evictionPolicy.isDuplicate(key) shouldBe true
     }
@@ -83,21 +86,20 @@ class FixTimeEvictionPolicyTests
     val evictionPolicy = new FixTimeEvictionPolicy(hazelcast)
     forAll(allKeys)(evictionPolicy.isDuplicate)
 
-    Thread.sleep(ttlSeconds * 1000)
+    Thread.sleep(ttlMillis)
     forAll(allKeys) { key =>
       evictionPolicy.isDuplicate(key) shouldBe false
     }
   }
 
-  it should "does not update hazelcast entries ttl" in {
+  it should "not update hazelcast entries' ttl" in {
     val evictionPolicy = new FixTimeEvictionPolicy(hazelcast)
     forAll(allKeys)(evictionPolicy.isDuplicate)
 
-    val waitingTimeout = ttlSeconds * 500
-    Thread.sleep(waitingTimeout)
+    Thread.sleep(halfTtlMillis)
     forAll(allKeys)(evictionPolicy.isDuplicate)
 
-    Thread.sleep(waitingTimeout)
+    Thread.sleep(halfTtlMillis)
     forAll(allKeys) { key =>
       evictionPolicy.isDuplicate(key) shouldBe false
     }
