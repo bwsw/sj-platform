@@ -44,9 +44,12 @@ class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecut
   private var firstMessageTimestamp: Long = 0
   private var lastMessageTimestamp: Long = 0
 
+
   override def onMessage(envelope: KafkaEnvelope[String]): Unit = stopWatcher()
 
   override def onMessage(envelope: TStreamEnvelope[String]): Unit = stopWatcher()
+
+  override def deserialize(bytes: Array[Byte]): AnyRef = new String(bytes)
 
 
   private def stopWatcher(): Unit = {
@@ -60,7 +63,7 @@ class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecut
 
       val outputFile = new File(options.outputFilePath)
       val writer = new FileWriter(outputFile)
-      writer.write(s"${lastMessageTimestamp - firstMessageTimestamp}")
+      writer.append(s"${lastMessageTimestamp - firstMessageTimestamp}\n")
       writer.close()
     }
   }
