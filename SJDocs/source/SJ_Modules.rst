@@ -150,7 +150,7 @@ Module configuration is located in the ``options`` field of instance configurati
  :header: "Field Name", "Format", "Description", "Example"
  :widths: 15, 10, 25, 40
 
- "outputStream*", "String", "Name of output stream for avro records", "s1" 
+ "outputStream*", "String", "Name of output stream for Avro Records", "s1" 
  "fallbackStream*", "String", "Name of output stream for incorrect CSV-lines", "s2" 
  "fields*", "List[String]", "Names of record fields", "['f1', 'f2', 'f3']" 
  "lineSeparator*", "String", "String which separates lines", "\n" 
@@ -185,7 +185,7 @@ E.g. for ``"fields": ["f1", "f2", "f3"]``)::
 Regex Input Module
 """"""""""""""""""""""""
 
-In fact this is a *RegextInputExecutor* that is provided via Sonatype repository and which extends *InputStreamingExecutor* interface. Its aim is to process input stream of strings using regexp rules and create InputEnvelope instance which stores all data as AvroRecord inside. Thus, it takes the free-form data, filter and convert them into Avro Records.
+This module is provided via Sonatype repository and it extends *InputStreamingExecutor* interface. Its aim is to process input stream of strings using regexp rules and create InputEnvelope instance which stores all data as AvroRecord inside. Thus, it takes the free-form data, filter and convert them into Avro Records.
 
 **Policy**
 
