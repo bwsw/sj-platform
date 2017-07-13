@@ -21,10 +21,10 @@ package com.bwsw.sj.benchmarks.module.regular
 import java.io.{File, FileWriter}
 
 import com.bwsw.common.JsonSerializer
+import com.bwsw.sj.common.benchmark.RegularExecutorOptions
 import com.bwsw.sj.common.engine.core.entities.{KafkaEnvelope, TStreamEnvelope}
 import com.bwsw.sj.common.engine.core.environment.ModuleEnvironmentManager
 import com.bwsw.sj.common.engine.core.regular.RegularStreamingExecutor
-import com.bwsw.sj.common.utils.BenchmarkLiterals.OptionsFieldNames
 
 /**
   * Count milliseconds between receiving first and last messages and write it into a file. Options of instance should contain
@@ -38,14 +38,11 @@ import com.bwsw.sj.common.utils.BenchmarkLiterals.OptionsFieldNames
   */
 class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecutor[String](manager) {
   private val jsonSerializer = new JsonSerializer(ignoreUnknown = true)
-  private val optionsMap = jsonSerializer.deserialize[Map[String, Any]](manager.options)
-  private val outputFilePath = optionsMap(OptionsFieldNames.outputFile).asInstanceOf[String]
-  private val messagesCount: Long = optionsMap(OptionsFieldNames.messagesCount).asInstanceOf[Long]
+  private val options = jsonSerializer.deserialize[RegularExecutorOptions](manager.options)
 
   private var processedMessages: Long = 0
   private var firstMessageTimestamp: Long = 0
   private var lastMessageTimestamp: Long = 0
-
 
   override def onMessage(envelope: KafkaEnvelope[String]): Unit = stopWatcher()
 
@@ -58,10 +55,10 @@ class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecut
 
     processedMessages += 1
 
-    if (processedMessages == messagesCount) {
+    if (processedMessages == options.messagesCount) {
       lastMessageTimestamp = System.currentTimeMillis()
 
-      val outputFile = new File(outputFilePath)
+      val outputFile = new File(options.outputFilePath)
       val writer = new FileWriter(outputFile)
       writer.write(s"${lastMessageTimestamp - firstMessageTimestamp}")
       writer.close()
