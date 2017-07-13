@@ -204,7 +204,7 @@ If none of the rules is matched, data is converted to unified fallback avro reco
 Module configuration is located in the "options" field of instance configuration (:ref:`REST_API_Instance_Create`).
 The configuration contains a three-tier structure that consists of the following levels: options (0-level), rules (1-level), fields (2-level).
 
-``options``
+**Options**
 
 .. csv-table:: 
  :header: "Field Name", "Format", "Description", "Example"
