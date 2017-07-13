@@ -62,8 +62,8 @@ class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecut
       lastMessageTimestamp = System.currentTimeMillis()
 
       val outputFile = new File(options.outputFilePath)
-      val writer = new FileWriter(outputFile)
-      writer.append(s"${lastMessageTimestamp - firstMessageTimestamp}\n")
+      val writer = new FileWriter(outputFile, true)
+      writer.write(s"${lastMessageTimestamp - firstMessageTimestamp}\n")
       writer.close()
     }
   }
