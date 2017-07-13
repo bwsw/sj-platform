@@ -25,7 +25,7 @@ RUN echo "deb http://dl.bintray.com/sbt/debian /" | tee -a /etc/apt/sources.list
 RUN set -x && \
     apt-get update && \
     apt-get install -y curl bzip2 git make build-essential && \
-    curl -sL https://deb.nodesource.com/setup_4.x | bash - && \
+    curl -sL https://deb.nodesource.com/setup_6.x | bash - && \
     apt-get update && \
     apt-get install -y ca-certificates nodejs && \
     apt-get clean && \
