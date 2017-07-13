@@ -139,11 +139,10 @@ To see a flow chart on how these methods intercommunicate, please, visit the :re
 
 CSV Input Module
 """""""""""""""""""""""
-.. warning:: *The section is under development!*
 
-Takes CSV-lines and gives avro records.
+In fact this is a *CSVInputExecutor* which extends *InputStreamingExecutor* interface. Its aim is to process CSV lines and create ``InputEnvelope`` instance which stores all data as AvroRecord inside.
 
-Module configuration is located in an ``options`` field of instance configuration ([[CRUD Rest-API for Modules#Create-an-instance-of-a-module]]).
+Module configuration is located in an ``options`` field of instance configuration (:ref:`REST_API_Instance_Create`).
 
 .. csv-table:: 
  :header: "Field Name", "Format", "Description", "Example"
@@ -167,8 +166,7 @@ This module puts ``"org.apache.avro.generic.GenericRecord":https://avro.apache.o
  ...
  }
 
-
-In executor of the next module must be defined avro schema (``org.apache.avro.Schema``) and overrided method ``deserialize`` for deserialization ``org.apache.avro.generic.GenericRecord``. In ``deserialize`` could be used method ``deserialize(bytes : Array[Byte], schema : org.apache.avro.Schema)`` from ``AvroSerializer`` class.
+In executor of the next module must be defined in Avro Schema (``org.apache.avro.Schema``) and in the overrided ``deserialize`` method for deserialization ``org.apache.avro.generic.GenericRecord``. In the ``deserialize`` method the ``deserialize(bytes : Array[Byte], schema : org.apache.avro.Schema)`` method from ``AvroSerializer`` class could be used.
 
 E.g. for ``"fields": ["f1", "f2", "f3"]``)::
 
@@ -184,7 +182,106 @@ E.g. for ``"fields": ["f1", "f2", "f3"]``)::
 
 Regex Input Module
 """"""""""""""""""""""""
-.. warning:: *The section is under development!*
+
+In fact this is a *RegextInputExecutor* that is provided via Sonatype repository and which extends *InputStreamingExecutor* interface. Its aim is to process input stream of strings using regexp rules and create InputEnvelope instance which stores all data as AvroRecord inside. Thus, it takes the free-form data, filter and convert them into Avro Records.
+
+**Policy**
+
+Regex input used the following policies:
+
+1. first-match-win
+       To each data the regular expressions from list of rules are applied until the first match is found; then this data is converted into Avro Record and put into the output stream. Matching process for this data is stopped. 
+
+If none of the rules is matched, data is converted to unified fallback avro record and put into the fallback stream.
+
+2. check-every
+      To each data the regular expressions from the list of rules are applied. When matched, the data is converted to Avro Record and put into the output stream. Matching process will continue using the next rule.
+ 
+If none of the rules is matched, data is converted to unified fallback avro record and put into the fallback stream.
+
+**Configuration**
+
+Module configuration is located in the "options" field of instance configuration (:ref:`REST_API_Instance_Create`).
+The configuration contains a three-tier structure that consists of the following levels: options (0-level), rules (1-level), fields (2-level).
+
+``options``
+
+.. csv-table:: 
+ :header: "Field Name", "Format", "Description", "Example"
+ :widths: 15, 10, 25, 40
+ 
+ "lineSeparator *", "String", "String that separates lines", "\n"
+ "policy*", "String", "Defines the behavior of the module", "first-match-win"
+ "encoding*", "String", "Name of input encoding", "UTF-8"
+ "fallbackStream*", "String", "Name of an output stream for lines that are not matched to any regex (from the 'rules' field)", "fallback-output"
+ "rules*", "List[Rule]", "List of rules that defines: regex, an output stream and avro record structure", "`-`"
+
+**Rule**
+
+.. csv-table:: 
+ :header: "Field Name", "Format", "Description", "Example"
+ :widths: 15, 10, 25, 40
+ 
+ "regex*", "String", "Regular expression used to filter and transform input data", "(?<day>[0-3]\d)-(?<month>[0-1]\d)-(?<year>\d{4})"
+ "outputStream*", "String", "Name of output stream for successful converted data", "output-stream"
+ "uniqueKey", "List[String]", "Set of field names which uniquely identifies a record (all record fields by default)","['day','month']"
+ "distribution", "List[String]", "Set of fields that define in which partition of an output stream a record will be put. Partition computed as hash(fields) mod partitions_number. If this field is not defined, the module uses the Round Robin policy for partition distribution.", "['month','year']"
+ "fields*", "List[Field]", "List of fields used for creation the avro record scheme", "`-`"
+
+**Field**
+
+.. csv-table:: 
+ :header: "Field Name", "Format", "Description", "Example"
+ :widths: 15, 10, 25, 40
+ 
+ "name*", "String", "Name of the record field", "day"
+ "defaultValue*", "String", "Value that used in case of missing field in data", "01"
+ "type*", "String", "Type of the record field [boolean, int, long, float, double, string]", "string"
+
+.. note:: `*` - required fields
+
+Configuration example::
+
+ {
+	"lineSeparator": "\n",
+	"policy": "first-match-win",
+	"encoding": "UTF-8",
+	"fallbackStream": "fallback-stream",
+	"rules": [{
+		"regex": "(?<day>[0-3]\\d)-(?<month>[0-1]\\d)-(?<year>\\d{4})",
+		"outputStream": "date-output-stream",
+		"uniqueKey": ["day", "month"],
+		"distribution": ["month", "year"],
+		"fields": [{
+			"name": "day",
+			"default-value": "01",
+			"type": "int"
+		}, {
+			"name": "month",
+			"default-value": "01",
+			"type": "int"
+		}, {
+			"name": "year",
+			"default-value": "1970",
+			"type": "int"
+		}]
+	}, {
+		"regex": "(?<word>\\w+) (?<digit>\\d+)",
+		"fields": [{
+			"name": "word",
+			"default-value": "abc",
+			"type": "string"
+		}, {
+			"name": "digit",
+			"default-value": "123",
+			"type": "int"
+		}],
+		"outputStream": "namedigit-output-stream",
+		"uniqueKey": ["word"],
+		"distribution": ["word", "digit"]
+	}]
+ }
+
 
 .. _regular-module:
 
