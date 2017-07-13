@@ -287,7 +287,7 @@ If we look deeper in the structure, we will see the following data flow:
 
 .. figure:: _static/SJStructure.png
 
-All input data elements are going as a flow of bytes to particular interface provided by `InputTaskEngine`. That flow is going straight to `RegexInputModule` (which extends `InputStreamingExecutor` interface) and converted to an `InputEnvelope` instance which stores all data as `AvroRecord` inside. 
+All input data elements are going as a flow of bytes to particular interface provided by `InputTaskEngine`. That flow is going straight to `RegexInputModule` (which extends `InputStreamingExecutor` interface) and is converted to an `InputEnvelope` instance which stores all data as `AvroRecord` inside. 
 
 An `InputEnvelope` instance then goes to `InputTaskEngine` which serializes it to the stream of bytes and then sends to T-Streams. 
 
