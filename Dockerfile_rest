@@ -23,7 +23,7 @@ RUN echo "deb http://dl.bintray.com/sbt/debian /" | tee -a /etc/apt/sources.list
 
 # Install npm and node.js
 RUN set -x && \
-    apt-get purge --auto-remove nodejs \
+    apt-get --purge remove nodejs \
     apt-get update && \
     apt-get install -y curl bzip2 git make build-essential && \
     curl -sL https://deb.nodesource.com/setup_6.x | bash - && \
