@@ -168,7 +168,7 @@ This module puts ``"org.apache.avro.generic.GenericRecord":https://avro.apache.o
  ...
  }
 
-In the executor of the next module the Avro Schema (``org.apache.avro.Schema``) and the overridden ``deserialize`` method for deserialization ``org.apache.avro.generic.GenericRecord`` must be defined . In the ``deserialize`` method the ``deserialize(bytes : Array[Byte], schema : org.apache.avro.Schema)`` method from the ``AvroSerializer`` class could be used.
+In the executor of the next module the Avro Schema (``org.apache.avro.Schema``) and the overridden ``deserialize`` method for deserialization of ``org.apache.avro.generic.GenericRecord`` must be defined . In the ``deserialize`` method the ``deserialize(bytes : Array[Byte], schema : org.apache.avro.Schema)`` method from the ``AvroSerializer`` class could be used.
 
 E.g. for ``"fields": ["f1", "f2", "f3"]``)::
 
