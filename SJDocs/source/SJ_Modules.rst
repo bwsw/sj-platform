@@ -185,11 +185,11 @@ E.g. for ``"fields": ["f1", "f2", "f3"]``)::
 Regex Input Module
 """"""""""""""""""""""""
 
-This module is provided via Sonatype repository and it extends *InputStreamingExecutor* interface. Its aim is to process input stream of strings using regexp rules and create `InputEnvelope` instance which stores all data as ``AvroRecord`` inside. Thus, it takes the free-form data, filter and convert them into Avro Records.
+This module is provided via Sonatype repository and it extends *InputStreamingExecutor* interface. Its aim is to process input stream of strings using RegExp rules and create `InputEnvelope` instance which stores all data as ``AvroRecord`` inside. Thus, it takes the free-form data, filter and convert them into Avro Records.
 
 **Policy**
 
-Regex input uses the following policies:
+Regex input module uses the following policies:
 
 1. first-match-win
        To each data the regular expressions from list of rules are applied until the first match is found; then this data is converted into Avro Record and put into the output stream. Matching process for this data is stopped. 
