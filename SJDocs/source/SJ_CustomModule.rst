@@ -107,7 +107,7 @@ Output Streaming Custom Module
 .. _hello-world-module:
 
 Hello World Custom Module
-========================================
+---------------------------------
 
 This tutorial explains how to write a module using a simple Hello World example. Let's create a module together!
 
