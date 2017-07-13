@@ -137,7 +137,7 @@ There is a manager inside the module which allows to:
  
 To see a flow chart on how these methods intercommunicate, please, visit the :ref:`Input_Streaming_Engine` section.
 
-Stream Juggler offers two types of Input Module implementation. These are ready-to-use modules for two most general input data formats: CSV and Regex.
+Stream Juggler offers two examples of Input Module implementation. These are ready-to-use input modules for two most general input data formats: CSV and Regex.
 
 CSV Input Module
 """""""""""""""""""""""
