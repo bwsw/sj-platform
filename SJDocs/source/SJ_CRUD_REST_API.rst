@@ -1837,6 +1837,7 @@ Response example::
   "statusCode": 200
  }
 
+.. _REST_API_Instance:
 
 CRUD Rest-API for Instances
 -----------------------------------
@@ -1941,6 +1942,7 @@ Response entity: json example::
   }
  }
 
+.. _REST_API_Instance_Create:
 
 Create an instance of a module
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
