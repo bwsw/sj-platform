@@ -283,7 +283,7 @@ Netcat appears here because we will send our data to SJ-module via TCP connectio
 
 That is general description.
 
-If we look deeper in the structure, we will see the following data flow:
+If we look deeper into the structure, we will see the following data flow:
 
 .. figure:: _static/SJStructure.png
 
