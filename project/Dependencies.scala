@@ -63,7 +63,8 @@ object Dependencies {
       .exclude("commons-logging", "commons-logging"),
     "org.scaldi" %% "scaldi" % "0.5.8",
     "org.mock-server" % "mockserver-netty" % "3.10.8" % "test",
-    "com.carrotsearch" % "java-sizeof" % "0.0.5"
+    "com.carrotsearch" % "java-sizeof" % "0.0.5",
+    "de.flapdoodle.embed" % "de.flapdoodle.embed.mongo" % "2.0.0"
   ))
 
   lazy val sjEngineCoreDependencies = Def.setting(Seq(
@@ -99,8 +100,7 @@ object Dependencies {
       .exclude("org.slf4j", "slf4j-log4j12")
       .exclude("org.slf4j", "slf4j-api")
       .exclude("log4j", "log4j")
-      .exclude("io.netty", "netty"),
-    "de.flapdoodle.embed" % "de.flapdoodle.embed.mongo" % "2.0.0" % "test"
+      .exclude("io.netty", "netty")
   ))
 
   lazy val sjBatchEngineDependencies = Def.setting(Seq(

@@ -16,30 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.sj.engine.regular.benchmark.performance
+package com.bwsw.common.embedded
 
 import de.flapdoodle.embed.mongo.MongodStarter
 import de.flapdoodle.embed.mongo.config.{MongodConfigBuilder, Net}
 import de.flapdoodle.embed.mongo.distribution.Version
-import org.apache.curator.test.TestingServer
 
 /**
-  * Launches embedded mongodb and zookeeper
+  * Used for testing purposes only. Mongo DB server.
   *
-  * @param mongoPort     mongo port
-  * @param zookeeperPort zookeeper port
+  * @param port mongo port
   * @author Pavel Tomskikh
   */
-class EmbeddedServicesRunner(mongoPort: Int, zookeeperPort: Int) {
-  private val config = new MongodConfigBuilder().net(new Net(mongoPort, false)).version(Version.V3_5_1).build()
+class EmbeddedMongo(port: Int) {
+  private val config = new MongodConfigBuilder().net(new Net(port, false)).version(Version.V3_5_1).build()
   private val mongodStarter = MongodStarter.getDefaultInstance
   private val mongo = mongodStarter.prepare(config)
-  mongo.start()
 
-  private val zookeeper = new TestingServer(zookeeperPort, true)
+  def start(): Unit = mongo.start()
 
-  def close() = {
-    zookeeper.close()
-    mongo.stop()
-  }
+  def stop(): Unit = mongo.stop()
 }
