@@ -137,12 +137,14 @@ There is a manager inside the module which allows to:
  
 To see a flow chart on how these methods intercommunicate, please, visit the :ref:`Input_Streaming_Engine` section.
 
+Stream Juggler offers two types of Input Module implementation. These are ready-to-use modules for two most general input data formats: CSV and Regex.
+
 CSV Input Module
 """""""""""""""""""""""
 
-In fact this is a *CSVInputExecutor* which extends *InputStreamingExecutor* interface. Its aim is to process CSV lines and create ``InputEnvelope`` instance which stores all data as AvroRecord inside.
+This module extends *InputStreamingExecutor* interface. Its aim is to process CSV lines and create ``InputEnvelope`` instance which stores all data as AvroRecord inside.
 
-Module configuration is located in an ``options`` field of instance configuration (:ref:`REST_API_Instance_Create`).
+Module configuration is located in the ``options`` field of instance configuration (:ref:`REST_API_Instance_Create`).
 
 .. csv-table:: 
  :header: "Field Name", "Format", "Description", "Example"
@@ -166,7 +168,7 @@ This module puts ``"org.apache.avro.generic.GenericRecord":https://avro.apache.o
  ...
  }
 
-In executor of the next module must be defined in Avro Schema (``org.apache.avro.Schema``) and in the overrided ``deserialize`` method for deserialization ``org.apache.avro.generic.GenericRecord``. In the ``deserialize`` method the ``deserialize(bytes : Array[Byte], schema : org.apache.avro.Schema)`` method from ``AvroSerializer`` class could be used.
+In the executor of the next module the Avro Schema (``org.apache.avro.Schema``) and the overridden ``deserialize`` method for deserialization ``org.apache.avro.generic.GenericRecord`` must be defined . In the ``deserialize`` method the ``deserialize(bytes : Array[Byte], schema : org.apache.avro.Schema)`` method from the ``AvroSerializer`` class could be used.
 
 E.g. for ``"fields": ["f1", "f2", "f3"]``)::
 
