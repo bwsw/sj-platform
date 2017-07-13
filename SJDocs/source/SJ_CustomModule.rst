@@ -563,8 +563,8 @@ Type of data sent by Regular module is String that's why this type is used as a 
 
 We will need to override two methods:
 
-- onMessage(envelope: TStreamEnvelope[String]) - to get and process messages
-- getOutputEntity() - to return format of output records
+- ``onMessage(envelope: TStreamEnvelope[String])`` - to get and process messages
+- ``getOutputEntity()`` - to return format of output records
 
 Validator 
 +++++++++++++
