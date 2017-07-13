@@ -11,7 +11,9 @@ Module is a processor that handles events in data streams.
 It includes an executor that processes data streams and a validator.
 
 .. _validator:
-**Streaming validator**
+
+Streaming validator
+-------------------------
 
 It provides a method to validate "options" or "InstanceMetadata" parameter of run module specification.
 
@@ -21,13 +23,14 @@ The first value indicates whether "options" or "InstanceMetadata" is proper or n
 
 The second value is a list of errors in case of the validation failure (empty list by default). It is used when you try to create a new instance of a specific module, and if the validation method returns false value the instance will not be created.
 
-**Executor**
+Executor
+---------------------
 
 An executor of the module utilizes an instance/instances. An instance is a full range of settings for an exact module.
 
 An engine is required to start a module. A module can not process data streams without an engine (that is a .jar file containing required configuration settings) that launches the module ingesting raw data and sends the processed data further in the stream.
 
-The engine is getting started via a framework. 
+The engine is getting started via a Mesos framework. The framework then renders the statistics on task execution for a started instance.
 
 A general structure of a module can be rendered as at the scheme below:
 
@@ -68,20 +71,20 @@ It performs the transformation of the streams incoming from TCP to T-streams. T-
 
 An Input module executor provides the following methods with default implementations but they can be overridden.
 
-1) "tokenize": 
+1) ``tokenize``: 
       It is invoked every time when a new portion of data is received. It processes a flow of bytes to determine the beginning and the end of the Interval (significant set of bytes in incoming flow of bytes). By default it returns None value (meaning that it is impossible to determine an Interval). If Interval detected, method should return it (the first and the last indexes of Interval elements in the flow of bytes). The resulting interval can either contain message or not.
 
-2) "parse": 
+2) ``parse``: 
      This method is invoked once the "tokenize" method returns an Interval. It processes both a buffer with incoming data (a flow of bytes) and an Interval (an output of "tokenize" method). Its purpose is to define whether the Interval contains a message or meaningless data. Default return value is None. The same value should be returned if Interval contains meaningless data. If Interval contains a message, the "InputEnvelope" value should be returned.
 
-3) "createProcessedMessageResponse": 
+3) ``createProcessedMessageResponse``:
       It is invoked after each call of parse method. Its purpose is to create response to the source of data - instance of InputStreamingResponse.
 
 The parameters of the method are:
 
-- "InputEnvelope" (it can be defined or not)
+- ``InputEnvelope`` (it can be defined or not)
 
-- "isNotEmptyOrDuplicate" - a boolean flag (denoting whether an "InputEnvelope" is defined and isn't a duplicate (true) or an "InputEnvelope" is a duplicate or empty (false))
+- ``isNotEmptyOrDuplicate`` - a boolean flag (denoting whether an "InputEnvelope" is defined and isn't a duplicate (true) or an ``InputEnvelope`` is a duplicate or empty (false))
 
 Default implementation of the method::
 
@@ -101,8 +104,8 @@ Default implementation of the method::
  }
 
 
-4) "createCheckpointResponse": 
-      It is invoked on checkpoint's finish. It's purpose is to create response for data source to inform that checkpoint has been done. It returns an instance of "InputStreamingResponse".
+4) ``createCheckpointResponse``: 
+      It is invoked on checkpoint's finish. It's purpose is to create response for data source to inform that checkpoint has been done. It returns an instance of ``InputStreamingResponse``.
 
 Default implementation of the method::
 
@@ -113,26 +116,75 @@ Default implementation of the method::
 
 There is a manager inside the module which allows to:
 
-- retrieve a list of output names by a set of tags (by calling "getStreamsByTags()")
+- retrieve a list of output names by a set of tags (by calling ``getStreamsByTags()``) 
 
-- initiate checkpoint at any time (by calling `initiateCheckpoint()`) which would be performed only at the end of processing step (check diagram at the Input Streaming Engine page)
+- initiate checkpoint at any time (by calling ``initiateCheckpoint()``) which would be performed only at the end of processing step (check diagram at the Input Streaming Engine page)
 
 **Entities description**
 
-InputEnvelope: 
+``InputEnvelope``: 
 
 - key of an envelope 
 - information about the destination 
-- "check on duplication" boolean flag (it has higher priority than 'duplicateCheck' in InputInstance)
+- "check on duplication" boolean flag (it has higher priority than ``duplicateCheck`` in ``InputInstance``)
 - message data 
 
-InputStreamingResponse: 
+``InputStreamingResponse``: 
 
-- message - string message
+- ``message`` - string message
  
-- sendResponsesNow - a boolean flag denoting whether response should be saved in temporary storage or all responses from this storage should be send to the source right now (including this one)
+- ``sendResponsesNow`` - a boolean flag denoting whether response should be saved in temporary storage or all responses from this storage should be send to the source right now (including this one)
  
 To see a flow chart on how these methods intercommunicate, please, visit the :ref:`Input_Streaming_Engine` section.
+
+CSV Input Module
+"""""""""""""""""""""""
+.. warning:: *The section is under development!*
+
+Takes CSV-lines and gives avro records.
+
+Module configuration is located in an ``options`` field of instance configuration ([[CRUD Rest-API for Modules#Create-an-instance-of-a-module]]).
+
+.. csv-table:: 
+ :header: "Field Name", "Format", "Description", "Example"
+ :widths: 15, 10, 25, 40
+
+ "outputStream*", "String", "Name of output stream for avro records", "s1" 
+ "fallbackStream*", "String", "Name of output stream for incorrect CSV-lines", "s2" 
+ "fields*", "List[String]", "Names of record fields", "['f1', 'f2', 'f3']" 
+ "lineSeparator*", "String", "String which separates lines", "\n" 
+ "encoding*", "tring", "Name of input encoding", "UTF-8" 
+ "uniqueKey", "List[String]", "Set of field names which uniquely identifies a record (all record fields by default)", "['f1', 'f3']" 
+ "fieldSeparator", "String", "A delimiter to use for separating entries (',' by default)", ";" 
+ "quoteSymbol", "String", "A character to use for quoted elements ('\' by default)", ``*``
+ "distribution", "List[String]",  "Set of fields that define in which partition of output stream will be put record. Partition computed as ``hash(fields) mod partitions_number``. If this field not defined, module uses Round Robin policy for partition distribution.", "['f2', 'f3']"
+
+.. note:: `*` - required field.
+
+This module puts ``"org.apache.avro.generic.GenericRecord":https://avro.apache.org/docs/1.8.1/api/java/org/apache/avro/generic/GenericRecord.html`` in output streams. Executor in the next module must be ``GenericRecord`` type, e.g::
+
+ class Executor(manager: ModuleEnvironmentManager) extends BatchStreamingExecutor[Record](manager) {
+ ...
+ }
+
+
+In executor of the next module must be defined avro schema (``org.apache.avro.Schema``) and overrided method ``deserialize`` for deserialization ``org.apache.avro.generic.GenericRecord``. In ``deserialize`` could be used method ``deserialize(bytes : Array[Byte], schema : org.apache.avro.Schema)`` from ``AvroSerializer`` class.
+
+E.g. for ``"fields": ["f1", "f2", "f3"]``)::
+
+ val schema = SchemaBuilder.record("csv").fields()
+  .name("f1").`type`().stringType().noDefault()
+  .name("f2").`type`().stringType().noDefault()
+  .name("f3").`type`().stringType().noDefault()
+  .endRecord()
+ val serializer = new AvroSerializer
+
+ override def deserialize(bytes: Array[Byte]): GenericRecord = serializer.deserialize(bytes, schema)
+
+
+Regex Input Module
+""""""""""""""""""""""""
+.. warning:: *The section is under development!*
 
 .. _regular-module:
 
