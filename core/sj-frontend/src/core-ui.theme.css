@@ -2968,7 +2968,9 @@ header.navbar .navbar-brand {
 
 header.navbar .navbar-nav .nav-link {
   padding-top: 15px;
-  padding-bottom: 15px; }
+  padding-bottom: 15px;
+  height: 54px;
+}
 
 .navbar-brand {
   color: rgba(0, 0, 0, 0.8); }
