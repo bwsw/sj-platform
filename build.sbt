@@ -79,7 +79,8 @@ lazy val sj = (project in file(".")).settings(publish := {})
     framework,
     stubInput, stubRegular, stubBatch, stubESOutput, stubJDBCOutput, stubRestOutput,
     pmOutput, csvInput, regexInput,
-    sumBatch
+    sumBatch,
+    kafkaDataSender
   )
 
 lazy val common = Project(id = "sj-common",
@@ -205,8 +206,8 @@ lazy val regexInput = Project(id = "sj-regex-input",
   )
   .dependsOn(engineCore)
 
-lazy val kafkaDataLoader = Project(id = "sj-kafka-data-sender",
-  base = file("./contrib/sj-kafka-data-sender"))
+lazy val kafkaDataSender = Project(id = "sj-kafka-data-sender",
+  base = file("./contrib/benchmarks/sj-kafka-data-sender"))
   .settings(commonSettings: _*)
   .settings(
     libraryDependencies ++= Dependencies.sjKafkaDataLoader.value,
