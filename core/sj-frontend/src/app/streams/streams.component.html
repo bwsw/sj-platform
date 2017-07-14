@@ -295,15 +295,11 @@
           <li *ngIf="currentStreamService.description">
             <span class="title">Description:</span>{{currentStreamService.description}}
           </li>
-          <li *ngIf="currentStreamService.type === 'CassDB' && currentStreamService.keyspace">
-            <span class="title">Keyspace:</span>{{currentStreamService.keyspace}}
-          </li>
           <li *ngIf="currentStreamService.type === 'ESInd' && currentStreamService.index">
             <span class="title">Index:</span>{{currentStreamService.index}}
           </li>
           <li *ngIf="(currentStreamService.type == 'TstrQ' || currentStreamService.type === 'ZKCoord'
-                        || currentStreamService.type === 'RdsCoord' ||
-                        currentStreamService.type === 'ArspkDB') && currentStreamService.namespace">
+                        || currentStreamService.type === 'RdsCoord') && currentStreamService.namespace">
             <span class="title">Namespace:</span>{{currentStreamService.namespace}}
           </li>
           <li *ngIf="currentStreamService.type !== 'TstrQ' && currentStreamService.provider">

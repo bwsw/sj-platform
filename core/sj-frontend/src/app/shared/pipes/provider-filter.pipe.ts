@@ -6,14 +6,10 @@ import { ProviderModel } from '../../providers/provider.model';
 })
 export class ProviderFilterPipe implements PipeTransform {
   public transform(value: [ProviderModel], term: string) {
-    const service_types = ['CassDB', 'ESInd', 'KfkQ', 'TstrQ', 'ZKCoord', 'RdsCoord', 'ArspkDB', 'JDBC', 'REST'];
-    const provider_types = ['cassandra', 'ES', 'kafka', 'zookeeper', 'zookeeper', 'redis', 'aerospike', 'JDBC', 'REST'];
+    const service_types = ['ESInd', 'KfkQ', 'TstrQ', 'ZKCoord', 'RdsCoord', 'JDBC', 'REST'];
+    const provider_types = ['ES', 'kafka', 'zookeeper', 'zookeeper', 'redis', 'JDBC', 'REST'];
     if (term !== undefined && value !== undefined) {
-      if (term === 'DataProvider') {
-        return value.filter(function (item) {
-          return item.type === 'cassandra' || item.type === 'aerospike';
-        });
-      } else if (term === 'LockProvider') {
+      if (term === 'LockProvider') {
         return value.filter(function (item) {
           return item.type === 'zookeeper' || item.type === 'redis';
         });

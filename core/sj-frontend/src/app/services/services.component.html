@@ -85,15 +85,11 @@
             <li *ngIf="currentService.description">
               <span class="title">Description:</span>{{currentService.description}}
             </li>
-            <li *ngIf="currentService.type === 'CassDB' && currentService.keyspace">
-              <span class="title">Keyspace:</span>{{currentService.keyspace}}
-            </li>
             <li *ngIf="currentService.type === 'ESInd' && currentService.index">
               <span class="title">Index:</span>{{currentService.index}}
             </li>
             <li *ngIf="(currentService.type == 'TstrQ' || currentService.type === 'ZKCoord'
-                        || currentService.type === 'RdsCoord' ||
-                        currentService.type === 'ArspkDB') && currentService.namespace">
+                        || currentService.type === 'RdsCoord') && currentService.namespace">
               <span class="title">Namespace:</span>{{currentService.namespace}}
             </li>
             <li *ngIf="currentService.type !== 'TstrQ' && currentService.provider">
@@ -161,13 +157,13 @@
           </fieldset>
 
           <!-- Key space -->
-          <fieldset *ngIf="newService.type === 'CassDB'" class="form-group row">
+          <!--fieldset *ngIf="newService.type === 'CassDB'" class="form-group row">
             <label class="col-sm-2 col-form-label required">Keyspace</label>
             <div class="col-sm-10">
               <input [(ngModel)]="newService.keyspace" name="serviceKeyspace" type="text"
                      class="form-control" required>
             </div>
-          </fieldset>
+          </fieldset-->
 
           <!-- Namespace -->
           <fieldset *ngIf="newService.type === 'ZKCoord' ||
