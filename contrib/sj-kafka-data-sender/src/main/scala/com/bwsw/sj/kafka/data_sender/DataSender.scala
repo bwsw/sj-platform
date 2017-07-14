@@ -43,8 +43,6 @@ class DataSender(address: String, topic: String, words: Seq[String], separator: 
   producerProps.put("key.serializer", stringSerializerClass)
   producerProps.put("value.serializer", stringSerializerClass)
 
-  val producer = new KafkaProducer[String, String](producerProps)
-
   /**
     * Generates data and send it to a kafka server
     *
@@ -52,6 +50,8 @@ class DataSender(address: String, topic: String, words: Seq[String], separator: 
     * @param messages    count of messages
     */
   def send(messageSize: Long, messages: Long): Unit = {
+    val producer = new KafkaProducer[String, String](producerProps)
+
     (0l until messages).foreach { _ =>
       val message = mutable.Buffer.empty[String]
       var currentMessageSize: Long = 0
@@ -64,8 +64,7 @@ class DataSender(address: String, topic: String, words: Seq[String], separator: 
       val record = new ProducerRecord[String, String](topic, message.mkString(separator))
       producer.send(record)
     }
-  }
 
-  def close(): Unit =
     producer.close()
+  }
 }

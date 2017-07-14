@@ -18,21 +18,25 @@
  */
 package com.bwsw.sj.engine.regular.benchmark.performance
 
+import java.util.Calendar
+
 import com.bwsw.sj.common.SjModule
 import com.bwsw.sj.common.engine.core.config.EngineConfigNames
 import com.bwsw.sj.common.utils.BenchmarkConfigNames._
-import com.bwsw.sj.common.utils.CommonAppConfigNames.{mongoHosts, zooKeeperPort}
+import com.bwsw.sj.common.utils.CommonAppConfigNames.{mongoHosts, zooKeeperHost, zooKeeperPort}
 import com.typesafe.config.ConfigFactory
 
 /**
   * @author Pavel Tomskikh
   */
 object PerformanceBenchmarkRunner extends App {
+  println(Calendar.getInstance().getTime)
+
   private val config = ConfigFactory.load()
   private val mongoPort = config.getString(mongoHosts).split(":")(1).toInt
   private val zkPort = config.getInt(zooKeeperPort)
+  private val zkHost = config.getString(zooKeeperHost)
   private val kafkaAddress = config.getString(kafkaAddressConfig)
-  private val kafkaTopic = config.getString(kafkaTopicConfig)
   private val messagesCount = config.getLong(messagesCountConfig)
   private val instanceName = config.getString(EngineConfigNames.instanceName)
   private val words = config.getString(wordsConfig).split(",")
@@ -41,9 +45,9 @@ object PerformanceBenchmarkRunner extends App {
 
   private val performanceBenchmark = new PerformanceBenchmark(
     mongoPort,
+    zkHost,
     zkPort,
     kafkaAddress,
-    kafkaTopic,
     messagesCount,
     instanceName,
     words,
@@ -58,6 +62,7 @@ object PerformanceBenchmarkRunner extends App {
   performanceBenchmark.stopServices()
 
   println("DONE")
+  println(Calendar.getInstance().getTime)
 
   System.exit(0)
 }

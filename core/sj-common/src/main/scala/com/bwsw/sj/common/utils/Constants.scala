@@ -222,9 +222,7 @@ object BenchmarkConfigNames {
   val messageSizesConfig = messageConfig + ".sizes"
   val messagesCountConfig = messageConfig + ".count"
 
-  val kafkaConfig = performanceBenchmarkConfig + ".kafka"
-  val kafkaAddressConfig = kafkaConfig + ".address"
-  val kafkaTopicConfig = kafkaConfig + ".topic"
+  val kafkaAddressConfig = performanceBenchmarkConfig + ".kafka.address"
 
   val outputFileConfig = performanceBenchmarkConfig + ".output-file"
   val wordsConfig = performanceBenchmarkConfig + ".words"

@@ -19,14 +19,15 @@
 package com.bwsw.sj.engine.regular.benchmark.performance
 
 import java.io.{File, FileWriter}
+import java.util.UUID
 
+import com.bwsw.common.KafkaClient
 import com.bwsw.common.embedded.EmbeddedMongo
 import com.bwsw.sj.common.config.TempHelperForConfigSetup
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.engine.core.testutils.{Server, TestStorageServer}
 import com.bwsw.sj.engine.regular.RegularTaskRunner
 import com.bwsw.sj.kafka.data_sender.DataSender
-import org.apache.curator.test.TestingServer
 import scaldi.Injectable.inject
 import scaldi.Injector
 
@@ -34,28 +35,31 @@ import scaldi.Injector
   * @author Pavel Tomskikh
   */
 class PerformanceBenchmark(mongoPort: Int,
+                           zkHost: String,
                            zkPort: Int,
                            kafkaAddress: String,
-                           kafkaTopic: String,
                            messagesCount: Long,
                            instanceName: String,
                            words: Array[String],
                            outputFileName: String)
                           (implicit injector: Injector) {
 
+  private val kafkaTopic = "performance-benchmark-test-" + UUID.randomUUID().toString
   private val outputFile = new File(outputFileName)
   private val moduleFilename = "./contrib/benchmarks/sj-regular-performance-benchmark/target/scala-2.12/" +
     "sj-regular-performance-benchmark-1.0-SNAPSHOT.jar"
   private val module = new File(moduleFilename)
 
+  private val zkAddress = s"$zkHost:$zkPort"
   private val mongoServer = new EmbeddedMongo(mongoPort)
-  private val zooKeeperServer = new TestingServer(zkPort, false)
+  private val kafkaClient = new KafkaClient(Array(zkAddress))
   private val kafkaSender = new DataSender(kafkaAddress, kafkaTopic, words, " ")
   private val fileCheckTimeout = 5000
   private val taskName = instanceName + "-task"
 
   private val benchmarkPreparation = new BenchmarkPreparation(
     mongoPort = mongoPort,
+    zooKeeperHost = zkHost,
     zooKeeperPort = zkPort,
     module = module,
     kafkaAddress = kafkaAddress,
@@ -68,17 +72,16 @@ class PerformanceBenchmark(mongoPort: Int,
 
   private var maybeTtsProcess: Option[Process] = None
 
-  private val environment = Map(
+  private val environment: Map[String, String] = Map(
+    "ZOOKEEPER_HOST" -> zkHost,
+    "ZOOKEEPER_PORT" -> zkPort.toString,
     "MONGO_HOSTS" -> s"localhost:$mongoPort",
     "INSTANCE_NAME" -> instanceName,
     "TASK_NAME" -> taskName,
     "AGENTS_HOST" -> "localhost")
 
   def startServices(): Unit = {
-    zooKeeperServer.start()
-    println("ZooKeeper server started")
-
-    val ttsEnv = Map("ZOOKEEPER_HOSTS" -> s"localhost:$zkPort")
+    val ttsEnv = Map("ZOOKEEPER_HOSTS" -> zkAddress)
     maybeTtsProcess = Some(new SeparateProcess(classOf[Server], ttsEnv).start())
     Thread.sleep(1000)
     println("TTS server starte")
@@ -104,6 +107,13 @@ class PerformanceBenchmark(mongoPort: Int,
 
     val lastModified = outputFile.lastModified()
 
+
+    kafkaClient.createTopic(kafkaTopic, 1, 1)
+    while (!kafkaClient.topicExists(kafkaTopic))
+      Thread.sleep(100)
+
+    println(s"Kafka topic $kafkaTopic created")
+
     kafkaSender.send(messageSize, messagesCount)
     println("Data sent to the Kafka")
 
@@ -112,18 +122,19 @@ class PerformanceBenchmark(mongoPort: Int,
     while (outputFile.lastModified() == lastModified)
       Thread.sleep(fileCheckTimeout)
 
+    kafkaClient.deleteTopic(kafkaTopic)
     process.destroy()
 
-    // todo: cleanup kafka
+    while (kafkaClient.topicExists(kafkaTopic))
+      Thread.sleep(100)
+
+    println(s"Kafka topic $kafkaTopic deleted")
   }
 
   def stopServices() = {
-    kafkaSender.close()
-
+    kafkaClient.close()
     maybeTtsProcess.foreach(_.destroy())
-
-    zooKeeperServer.close()
-    println("ZooKeeper server stopped")
+    println("TTS server stopped")
 
     mongoServer.stop()
     println("Mongo server stopped")

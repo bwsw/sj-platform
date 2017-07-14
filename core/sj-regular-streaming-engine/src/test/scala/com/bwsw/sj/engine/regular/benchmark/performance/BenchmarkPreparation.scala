@@ -36,6 +36,7 @@ import scala.collection.JavaConverters._
   * @author Pavel Tomskikh
   */
 class BenchmarkPreparation(mongoPort: Int,
+                           zooKeeperHost: String,
                            zooKeeperPort: Int,
                            module: File,
                            kafkaAddress: String,
@@ -59,7 +60,7 @@ class BenchmarkPreparation(mongoPort: Int,
   val zooKeeperProvider: ProviderDomain = new ProviderDomain(
     name = "benchmark-zk-provider",
     description = "ZooKeeper provider for benchmark",
-    hosts = Array("localhost:" + zooKeeperPort),
+    hosts = Array(zooKeeperHost + ":" + zooKeeperPort),
     login = null,
     password = null,
     providerType = ProviderLiterals.zookeeperType)

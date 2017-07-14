@@ -54,7 +54,6 @@ object DataSenderRunner extends App {
 
   private val dataLoader = new DataSender(address, topic, getWords, separator)
   dataLoader.send(messageSize, messageCount)
-  dataLoader.close()
 
   private def getWords: Seq[String] = {
     Option(System.getProperty(PropertiesNames.words)) match {
