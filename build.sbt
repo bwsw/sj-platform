@@ -208,7 +208,7 @@ lazy val regexInput = Project(id = "sj-regex-input",
   .dependsOn(engineCore)
 
 lazy val kafkaDataSender = Project(id = "sj-kafka-data-sender",
-  base = file("./contrib/sj-kafka-data-sender"))
+  base = file("./contrib/benchmarks/sj-kafka-data-sender"))
   .settings(commonSettings: _*)
   .settings(
     libraryDependencies ++= Dependencies.sjKafkaDataLoader.value,
