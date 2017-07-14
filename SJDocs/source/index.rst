@@ -24,6 +24,7 @@ Contents:
    SJ_Architecture
    SJ_Engines
    SJ_Modules
+   SJ_Demo_Deployment
    SJ_Deployment
    SJ_CustomModule
    SJ_UI_Guide
