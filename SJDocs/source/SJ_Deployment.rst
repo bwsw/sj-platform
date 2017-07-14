@@ -23,7 +23,3 @@ Docker Stack Mesos
 
 .. warning:: The section is under development!
 
-Deployment on Virtual Machine
-------------------------------------
-
-.. warning:: The section is under development!
