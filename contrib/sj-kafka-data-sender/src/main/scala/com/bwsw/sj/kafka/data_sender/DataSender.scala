@@ -53,13 +53,9 @@ class DataSender(address: String, topic: String, words: Seq[String], separator: 
     */
   def send(messageSize: Long, messages: Long): Unit = {
     (0l until messages).foreach { _ =>
-      val message = mutable.Buffer.empty[String]
-      var currentMessageSize: Long = 0
-      while (currentMessageSize < messageSize) {
-        val word = words(Random.nextInt(words.length))
-        message += word
-        currentMessageSize += word.length
-      }
+      var message = words(Random.nextInt(words.length))
+      while (message.getBytes.length < messageSize)
+        message += separator + words(Random.nextInt(words.length))
 
       val record = new ProducerRecord[String, String](topic, message.mkString(separator))
       producer.send(record)
