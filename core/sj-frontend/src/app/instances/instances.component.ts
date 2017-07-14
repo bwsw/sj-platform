@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, AfterViewChecked } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewChecked, OnDestroy } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { ModalDirective } from 'ngx-bootstrap';
 import { NotificationModel } from '../shared/model/notification.model';
@@ -11,7 +11,8 @@ import { InstancesService } from './instances.service';
 import { ModulesService } from '../modules/modules.service';
 import { StreamsService } from '../streams/streams.service';
 import { ServicesService } from '../services/services.service';
-
+import { AnonymousSubscription } from 'rxjs/Subscription';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'sj-instances',
@@ -23,7 +24,7 @@ import { ServicesService } from '../services/services.service';
     ModulesService
   ]
 })
-export class InstancesComponent implements OnInit, AfterViewChecked {
+export class InstancesComponent implements OnInit, AfterViewChecked, OnDestroy {
 
   public alerts: NotificationModel[] = [];
   public formAlerts: NotificationModel[] = [];
@@ -46,6 +47,8 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
   public startFromDateTimeAcceptable: boolean = true;
   public tasks: TaskModel[];
   public message: string;
+
+  private timerSubscription: AnonymousSubscription;
 
   @ViewChild('instanceForm') currentForm: NgForm;
 
@@ -86,13 +89,19 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
     this.getServicesList();
   }
 
+  public ngOnDestroy(): void {
+    if (this.timerSubscription) {
+      this.timerSubscription.unsubscribe();
+    }
+  }
+
   public getInstancesList() {
     this.instancesService.getList('instances')
       .subscribe(
         response => {
           this.instancesList = response.instances;
           this.cloneInstancesList = response.instances;
-          if (this.instancesList.length > 0 ) {
+          if (this.instancesList.length > 0) {
             this.getInstanceInfo(this.instancesList[0]);
           }
         },
@@ -137,19 +146,25 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
   }
 
   public getInstanceInfo(currentInstance: InstanceModel) {
-    this.instancesService.getInstanceInfo(currentInstance)
-      .subscribe(
-        instance => {
-          this.currentInstance = instance;
-          this.currentInstance.module = new ModuleModel();
-          this.currentInstance.module.moduleName = currentInstance.moduleName;
-          this.currentInstance.module.moduleType = currentInstance.moduleType;
-          this.currentInstance.module.moduleVersion = currentInstance.moduleVersion;
-          this.currentInstanceTasks = this.currentInstance.module.moduleType !== 'input-streaming' ?
-            this.currentInstance.executionPlan.tasks :
-            this.currentInstance.tasks;
-        },
-        error => this.errorMessage = <any>error);
+    if ( !this.currentInstance || this.currentInstance.name != currentInstance.name &&
+      this.currentInstance.module.moduleName != currentInstance.moduleName &&
+      this.currentInstance.module.moduleType != currentInstance.moduleType &&
+      this.currentInstance.module.moduleVersion != currentInstance.moduleVersion
+    ) {
+      this.instancesService.getInstanceInfo(currentInstance)
+        .subscribe(
+          instance => {
+            this.currentInstance = instance;
+            this.currentInstance.module = new ModuleModel();
+            this.currentInstance.module.moduleName = currentInstance.moduleName;
+            this.currentInstance.module.moduleType = currentInstance.moduleType;
+            this.currentInstance.module.moduleVersion = currentInstance.moduleVersion;
+            this.currentInstanceTasks = this.currentInstance.module.moduleType !== 'input-streaming' ?
+              this.currentInstance.executionPlan.tasks :
+              this.currentInstance.tasks;
+          },
+          error => this.errorMessage = <any>error);
+    }
   }
 
   public getInstanceTasks(instance: InstanceModel) {
@@ -268,7 +283,9 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
       .subscribe(
         response => {
           this.showAlert({ message: response.message, type: 'success', closable: true, timeout: 3000 });
-          this.getInstancesList();
+          this.timerSubscription = Observable.interval(3000).subscribe(() => {
+            return this.getInstancesList();
+          });
         },
         error => {
           this.showAlert({ message: error, type: 'danger', closable: true, timeout: 0 });
@@ -280,7 +297,9 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
       .subscribe(
         response => {
           this.showAlert({ message: response.message, type: 'success', closable: true, timeout: 3000 });
-          this.getInstancesList();
+          this.timerSubscription = Observable.interval(3000).subscribe(() => {
+            return this.getInstancesList();
+          });
         },
         error => {
           this.showAlert({ message: error, type: 'danger', closable: true, timeout: 0 });
@@ -307,7 +326,7 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
     this.newInstance.outputs.splice(i, 1);
   }
 
-    public checkTimestampAcceptable(): void {
+  public checkTimestampAcceptable(): void {
     switch (this.newInstance.module.moduleType) {
       case 'regular-streaming':
       case 'batch-streaming':

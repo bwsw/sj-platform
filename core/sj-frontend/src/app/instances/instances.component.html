@@ -830,7 +830,7 @@
               <span class="title">Directories:</span>
               <ul>
                 <li *ngFor="let dir of task.directories">
-                  <a href="{{dir.path}}">{{dir.name}}</a></li>
+                  <a target="_blank"   href="{{dir.path}}">{{dir.name}}</a></li>
               </ul>
             </li>
             <li *ngIf="task.stateChange">
