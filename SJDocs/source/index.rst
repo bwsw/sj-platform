@@ -27,6 +27,7 @@ Contents:
    SJ_Demo_Deployment
    SJ_Deployment
    SJ_CustomModule
+   SJ_Simulators
    SJ_UI_Guide
    SJ_CRUD_REST_API
    Glossary
