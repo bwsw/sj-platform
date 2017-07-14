@@ -44,8 +44,17 @@ export class CustomComponent implements OnInit {
   public getCustomList() {
     this.customService.getList(this.path)
       .subscribe(
-        response => this.fileList = this.path === 'files' ? response.customFiles : response.customJars
+        response => {
+          this.fileList = this.path === 'files' ? response.customFiles : response.customJars;
+          if (this.fileList.length > 0) {
+            this.currentFile = this.fileList[0];
+          }
+        }
       );
+  }
+
+  public selectFile(file: FileModel) {
+    this.currentFile = file;
   }
 
   public setNewFile(event: any) {

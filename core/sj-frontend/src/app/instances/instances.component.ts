@@ -92,6 +92,9 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
         response => {
           this.instancesList = response.instances;
           this.cloneInstancesList = response.instances;
+          if (this.instancesList.length > 0 ) {
+            this.getInstanceInfo(this.instancesList[0]);
+          }
         },
         error => this.errorMessage = <any>error);
   }

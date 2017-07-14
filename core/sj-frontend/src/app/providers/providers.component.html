@@ -41,7 +41,7 @@
               <td colspan="20" class="text-center">No providers have been found.</td>
             </tr>
 
-            <tr *ngFor="let provider of providerList | orderBy: 'name' | listFilter : {name : nameterm, type: typeterm} "
+            <tr *ngFor="let provider of providerList | listFilter : {name : nameterm, type: typeterm} "
                 [ngClass]="{ 'table-info': provider === currentProvider }"
                 (click)="selectProvider(provider)">
               <td>{{ provider.name }}</td>

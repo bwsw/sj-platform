@@ -42,7 +42,7 @@
                 <td colspan="20" class="text-center">No modules have been found.</td>
               </tr>
 
-              <tr *ngFor="let module of moduleList | orderBy: 'moduleName' | listFilter : { name: term, type: typeterm}"
+              <tr *ngFor="let module of moduleList | listFilter : { name: term, type: typeterm}"
                   [ngClass]="{ 'table-info': module === currentModule }"
                   (click)="selectModule(module)">
                 <td>{{ module.moduleName }}</td>

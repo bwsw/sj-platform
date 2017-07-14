@@ -41,7 +41,7 @@
                 <td colspan="20" class="text-center">No services have been found.</td>
               </tr>
 
-              <tr *ngFor="let service of serviceList | orderBy: 'name' | listFilter : {name: term, type: typeterm}"
+              <tr *ngFor="let service of serviceList | listFilter : {name: term, type: typeterm}"
                   [ngClass]="{ 'table-info': service === currentService }"
                   (click)="selectService(service)">
                 <td>{{ service.name }}</td>
@@ -211,6 +211,33 @@
             <div class="col-sm-10">
               <input [(ngModel)]="newService.token" name="serviceToken" type="text"  maxlength="32"
                      class="form-control" required>
+            </div>
+          </fieldset>
+
+          <!-- basePath -->
+          <fieldset *ngIf="newService.type === 'REST'" class="form-group row">
+            <label class="col-sm-2 col-form-label">Base path</label>
+            <div class="col-sm-10">
+              <input [(ngModel)]="newService.basePath" name="serviceToken" type="text"
+                     class="form-control">
+            </div>
+          </fieldset>
+
+          <!-- httpVersion -->
+          <fieldset *ngIf="newService.type === 'REST'" class="form-group row">
+            <label class="col-sm-2 col-form-label">Http version</label>
+            <div class="col-sm-10">
+              <input [(ngModel)]="newService.httpVersion" name="serviceToken" type="text"
+                     class="form-control">
+            </div>
+          </fieldset>
+
+          <!-- headers -->
+          <fieldset *ngIf="newService.type === 'REST'" class="form-group row">
+            <label class="col-sm-2 col-form-label">Headers</label>
+            <div class="col-sm-10">
+              <input [(ngModel)]="newService.headers" validJson name="serviceToken" type="text"
+                     class="form-control">
             </div>
           </fieldset>
 
