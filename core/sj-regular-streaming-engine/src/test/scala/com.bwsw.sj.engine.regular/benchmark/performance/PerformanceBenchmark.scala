@@ -84,7 +84,7 @@ class PerformanceBenchmark(mongoPort: Int,
 
     Future(testStorageServer.start())
 
-    TempHelperForConfigSetup.main(Array())
+    TempHelperForConfigSetup.setupConfigs()
     println("Config settings loaded")
 
     benchmarkPreparation.prepare(outputFile.getAbsolutePath, messagesCount, inject[ConnectionRepository])
