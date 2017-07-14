@@ -223,7 +223,7 @@ object BenchmarkConfigNames {
   val messagesCountConfig = messageConfig + ".count"
 
   val kafkaAddressConfig = performanceBenchmarkConfig + ".kafka.address"
-
+  val mongoPortConfig = performanceBenchmarkConfig + ".mongo.port"
   val outputFileConfig = performanceBenchmarkConfig + ".output-file"
   val wordsConfig = performanceBenchmarkConfig + ".words"
 }

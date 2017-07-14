@@ -32,6 +32,20 @@ import scaldi.Injectable.inject
 import scaldi.Injector
 
 /**
+  * Provides methods for testing speed of reading data from Kafka.
+  *
+  * Topic deletion must be enabled on the Kafka server.
+  *
+  * Host and port must point to the ZooKeeper server that used by the Kafka server.
+  *
+  * @param mongoPort      port for [[EmbeddedMongo]]
+  * @param zkHost         ZooKeeper server's host
+  * @param zkPort         ZooKeeper server's port
+  * @param kafkaAddress   Kafka server's port
+  * @param messagesCount  count of messages
+  * @param instanceName   instance's name
+  * @param words          list of words that sends to the kafka server
+  * @param outputFileName name of file for results
   * @author Pavel Tomskikh
   */
 class PerformanceBenchmark(mongoPort: Int,
@@ -80,6 +94,10 @@ class PerformanceBenchmark(mongoPort: Int,
     "TASK_NAME" -> taskName,
     "AGENTS_HOST" -> "localhost")
 
+
+  /**
+    * Starts tts and mongo servers
+    */
   def startServices(): Unit = {
     val ttsEnv = Map("ZOOKEEPER_HOSTS" -> zkAddress)
     maybeTtsProcess = Some(new SeparateProcess(classOf[Server], ttsEnv).start())
@@ -90,6 +108,9 @@ class PerformanceBenchmark(mongoPort: Int,
     println("Mongo server started")
   }
 
+  /**
+    * Upload data in a mongo storage
+    */
   def prepare(): Unit = {
     TempHelperForConfigSetup.setupConfigs()
     println("Config settings loaded")
@@ -98,6 +119,11 @@ class PerformanceBenchmark(mongoPort: Int,
     println("Entities loaded")
   }
 
+  /**
+    * Sends data into the Kafka server and runs module
+    *
+    * @param messageSize size of one message that sends to the Kafka server
+    */
   def runTest(messageSize: Long): Unit = {
     println(s"$messageSize bytes messages")
 
@@ -131,6 +157,9 @@ class PerformanceBenchmark(mongoPort: Int,
     println(s"Kafka topic $kafkaTopic deleted")
   }
 
+  /**
+    * Stops tts and mongo servers
+    */
   def stopServices() = {
     kafkaClient.close()
     maybeTtsProcess.foreach(_.destroy())

@@ -21,6 +21,10 @@ package com.bwsw.sj.engine.regular.benchmark.performance
 import scala.collection.JavaConverters._
 
 /**
+  * Executes class in a separate process
+  *
+  * @param clazz       class to execute, must contain method main
+  * @param environment environment variables
   * @author Pavel Tomskikh
   */
 class SeparateProcess(clazz: Class[_], environment: Map[String, String] = Map.empty) {
