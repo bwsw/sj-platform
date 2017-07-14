@@ -211,11 +211,19 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
         this.showSpinner = false;
         this.showAlert({message: response.message, type: 'success', closable: true, timeout: 3000});
         this.getInstancesList();
+        this.currentForm.reset();
       },
       error => {
         this.showSpinner = false;
-        this.formAlerts.push({message: error, type: 'danger', closable: true, timeout: 3000});
+        this.formAlerts.push({message: error, type: 'danger', closable: true, timeout: 0});
       });
+  }
+
+  public closeModal(modal: ModalDirective) {
+    this.newInstance = new InstanceModel();
+    modal.hide();
+    this.formAlerts = [];
+    this.currentForm.reset();
   }
 
   public showAlert(notification: NotificationModel): void {

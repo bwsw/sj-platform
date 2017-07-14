@@ -12,4 +12,8 @@ export class AlertsComponent {
     this.alerts.splice(i, 1);
   }
 
+  public getTimeOut(alert: NotificationModel) {
+    return alert.timeout != 0 ? alert.timeout : '';
+  }
+
 }

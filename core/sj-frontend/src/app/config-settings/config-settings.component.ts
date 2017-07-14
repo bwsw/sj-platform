@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { ModalDirective } from 'ngx-bootstrap';
 import { ConfigSettingModel } from './config-setting.model';
 import { NotificationModel } from '../shared/model/notification.model';
 import { ConfigSettingsService } from './config-settings.service';
+import { NgForm } from '@angular/forms';
 
 
 @Component({
@@ -20,6 +21,8 @@ export class ConfigSettingsComponent implements OnInit {
   public newSetting: ConfigSettingModel;
   public currentSetting: ConfigSettingModel;
   public showSpinner: boolean;
+
+  @ViewChild('settingForm') currentForm: NgForm;
 
   constructor(private configSettingsService: ConfigSettingsService) { }
 
@@ -56,12 +59,20 @@ export class ConfigSettingsComponent implements OnInit {
           this.getSettingsList();
           this.showSpinner = false;
           this.showAlert({ message: setting.message, type: 'success', closable: true, timeout: 3000 });
+          this.currentForm.reset();
         },
         error => {
           this.showSpinner = false;
           this.newSetting = new ConfigSettingModel();
           this.formAlerts.push({ message: error, type: 'danger', closable: true, timeout: 0 });
         });
+  }
+
+  public closeModal(modal: ModalDirective) {
+    this.newSetting = new ConfigSettingModel();
+    modal.hide();
+    this.formAlerts = [];
+    this.currentForm.reset();
   }
 
   public deleteSetting(modal: ModalDirective) {

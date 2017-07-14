@@ -3,7 +3,7 @@
          *ngFor="let alert of alerts; let i = index"
          type="{{alert.type}}"
          dismissible="{{alert.closable}}"
-         dismissOnTimeout="{{alert.timeout}}"
+         dismissOnTimeout="{{getTimeOut(alert)}}"
          (close)="closeAlert(i)">
     {{ alert.message }}
   </alert>

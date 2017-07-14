@@ -1,11 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { ModalDirective } from 'ngx-bootstrap';
 
 import { NotificationModel } from '../shared/model/notification.model';
-import {ServiceModel} from './service.model';
-import {ProviderModel} from '../providers/provider.model';
-import {ServicesService} from './services.service';
-import {ProvidersService} from '../providers/providers.service';
+import { ServiceModel } from './service.model';
+import { ProviderModel } from '../providers/provider.model';
+import { ServicesService } from './services.service';
+import { ProvidersService } from '../providers/providers.service';
+import { NgForm } from '@angular/forms';
 
 @Component({
   selector: 'sj-services',
@@ -28,6 +29,8 @@ export class ServicesComponent implements OnInit {
   public currentServiceProvider: ProviderModel;
   public newService: ServiceModel;
   public showSpinner: boolean;
+
+  @ViewChild('serviceForm') currentForm: NgForm;
 
   constructor(private servicesService: ServicesService,
               private providersService: ProvidersService) { }
@@ -114,13 +117,22 @@ export class ServicesComponent implements OnInit {
           modal.hide();
           this.showAlert({ message: response.message, type: 'success', closable: true, timeout: 3000 });
           this.newService = new ServiceModel();
+          this.formAlerts = [];
           this.showSpinner = false;
           this.getServiceList();
+          this.currentForm.reset();
         },
         error => {
           this.formAlerts.push({ message: error, type: 'danger', closable: true, timeout: 0 });
           this.showSpinner = false;
         });
+  }
+
+  public closeModal(modal: ModalDirective) {
+    this.newService = new ServiceModel();
+    this.formAlerts = [];
+    modal.hide();
+    this.currentForm.reset();
   }
 
   public selectService(service: ServiceModel) {

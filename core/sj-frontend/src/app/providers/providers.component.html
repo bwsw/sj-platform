@@ -197,7 +197,7 @@
       </div>
 
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" (click)="CreateProvider.hide()">Cancel</button>
+        <button type="button" class="btn btn-secondary" (click)="closeModal(CreateProvider)">Cancel</button>
         <button [disabled]="!providerForm.form.valid" type="submit" class="btn btn-primary"
                 (click)="createProvider(CreateProvider)">Create
         </button>

@@ -757,8 +757,8 @@
 
           <!-- Action buttons -->
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" (click)="CreateInstance.hide()">Cancel</button>
-            <button type="submit"
+            <button type="button" class="btn btn-secondary" (click)="closeModal(CreateInstance)">Cancel</button>
+            <button type="button"
                     [disabled]="!(instanceForm.form.valid)"
                     (click)="createInstance(CreateInstance)"
                     class="btn btn-primary">Create</button>

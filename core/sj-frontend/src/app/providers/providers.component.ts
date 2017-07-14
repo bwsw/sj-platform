@@ -45,14 +45,14 @@ export class ProvidersComponent implements OnInit {
             this.currentProvider = this.providerList[0];
           }
         },
-        error => this.showAlert({ message: error, type: 'danger', closable: true, timeout: 3000 }));
+        error => this.showAlert({ message: error, type: 'danger', closable: true, timeout: 0 }));
   }
 
   public getProviderTypes() {
     this.providersService.getTypes()
       .subscribe(
         response => this.providerTypes = response.types,
-        error => this.showAlert({ message: error, type: 'danger', closable: true, timeout: 3000 })
+        error => this.showAlert({ message: error, type: 'danger', closable: true, timeout: 0 })
       );
   }
 
@@ -79,7 +79,7 @@ export class ProvidersComponent implements OnInit {
           this.currentConnectors.splice(this.currentConnectors.indexOf(provider.name));
         },
         error => {
-          this.showAlert({ message: error, type: 'danger', closable: true, timeout: 3000 });
+          this.showAlert({ message: error, type: 'danger', closable: true, timeout: 0 });
           this.currentConnectors.splice(this.currentConnectors.indexOf(provider.name));
         });
   }
@@ -103,7 +103,7 @@ export class ProvidersComponent implements OnInit {
           this.showAlert({ message: response.message, type: 'success', closable: true, timeout: 3000 });
           this.getProviderList();
         },
-        error => this.showAlert({ message: error, type: 'danger', closable: true, timeout: 3000 }));
+        error => this.showAlert({ message: error, type: 'danger', closable: true, timeout: 0 }));
     modal.hide();
   }
 
@@ -117,12 +117,20 @@ export class ProvidersComponent implements OnInit {
           this.showAlert({ message: response.message, type: 'success', closable: true, timeout: 3000 });
           this.getProviderList();
           this.newProvider = new ProviderModel;
-
+          this.formAlerts = [];
+          this.currentForm.reset();
         },
         error => {
           this.showSpinner = false;
-          this.formAlerts.push({ message: error, type: 'danger', closable: true, timeout: 3000 });
+          this.formAlerts.push({ message: error, type: 'danger', closable: true, timeout: 0 });
         });
+  }
+
+  public closeModal(modal: ModalDirective) {
+    this.newProvider = new ProviderModel();
+    modal.hide();
+    this.formAlerts = [];
+    this.currentForm.reset();
   }
 
   public showAlert(notification: NotificationModel): void {

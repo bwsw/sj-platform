@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { ModalDirective } from 'ngx-bootstrap';
 import { NotificationModel } from '../shared/model/notification.model';
 import { StreamModel } from './stream.model';
@@ -6,6 +6,7 @@ import { ServiceModel } from '../services/service.model';
 import { StreamsService } from './streams.service';
 import { ServicesService } from '../services/services.service';
 import { ProvidersService } from '../providers/providers.service';
+import { NgForm } from '@angular/forms';
 
 
 
@@ -31,6 +32,8 @@ export class StreamsComponent implements OnInit {
   public currentTag: string;
   public currentStreamService: ServiceModel;
   public newStream: StreamModel;
+
+  @ViewChild('streamForm') currentForm: NgForm;
 
   constructor(private streamsService: StreamsService,
               private servicesService: ServicesService) { }
@@ -139,11 +142,19 @@ export class StreamsComponent implements OnInit {
           this.getStreamList();
           this.newStream = new StreamModel();
           this.newStream.tags = [];
+          this.currentForm.reset();
         },
         error => {
           this.showSpinner = false;
           this.formAlerts.push({ message: error, type: 'danger', closable: true, timeout: 0 });
         });
+  }
+
+  public closeModal(modal: ModalDirective) {
+    this.newStream = new StreamModel();
+    modal.hide();
+    this.formAlerts = [];
+    this.currentForm.reset();
   }
 
   public selectStream(stream: StreamModel) {
