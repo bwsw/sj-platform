@@ -45,6 +45,8 @@ class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecut
   private var lastMessageTimestamp: Long = 0
 
 
+  override def onInit(): Unit = println("onInit")
+
   override def onMessage(envelope: KafkaEnvelope[String]): Unit = stopWatcher()
 
   override def onMessage(envelope: TStreamEnvelope[String]): Unit = stopWatcher()

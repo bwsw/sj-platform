@@ -22,7 +22,7 @@ import java.io.File
 import java.util.logging.LogManager
 
 import com.bwsw.sj.common.config.TempHelperForConfigDestroy
-import DataFactory._
+import com.bwsw.sj.engine.regular.module.DataFactory._
 
 object SjRegularModuleDestroy extends App {
   LogManager.getLogManager.reset()
