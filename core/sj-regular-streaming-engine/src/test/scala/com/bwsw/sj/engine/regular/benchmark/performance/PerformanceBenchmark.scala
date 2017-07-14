@@ -23,15 +23,12 @@ import java.io.{File, FileWriter}
 import com.bwsw.common.embedded.EmbeddedMongo
 import com.bwsw.sj.common.config.TempHelperForConfigSetup
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
-import com.bwsw.sj.engine.core.testutils.TestStorageServer
+import com.bwsw.sj.engine.core.testutils.{Server, TestStorageServer}
 import com.bwsw.sj.engine.regular.RegularTaskRunner
 import com.bwsw.sj.kafka.data_sender.DataSender
 import org.apache.curator.test.TestingServer
 import scaldi.Injectable.inject
 import scaldi.Injector
-
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 
 /**
   * @author Pavel Tomskikh
@@ -55,13 +52,7 @@ class PerformanceBenchmark(mongoPort: Int,
   private val zooKeeperServer = new TestingServer(zkPort, false)
   private val kafkaSender = new DataSender(kafkaAddress, kafkaTopic, words, " ")
   private val fileCheckTimeout = 5000
-
-  private val testStorageServer = new TestStorageServer(
-    token = TestStorageServer.defaultToken,
-    prefix = TestStorageServer.defaultPrefix,
-    streamPath = TestStorageServer.defaultStreamPath,
-    zkHosts = "localhost",
-    host = "localhost")
+  private val taskName = instanceName + "-task"
 
   private val benchmarkPreparation = new BenchmarkPreparation(
     mongoPort = mongoPort,
@@ -72,18 +63,31 @@ class PerformanceBenchmark(mongoPort: Int,
     zkNamespace = "benchmark",
     tStreamPrefix = TestStorageServer.defaultPrefix,
     tStreamToken = TestStorageServer.defaultToken,
-    instanceName)
+    instanceName,
+    taskName)
 
+  private var maybeTtsProcess: Option[Process] = None
 
-  def prepare(): Unit = {
-    mongoServer.start()
-    println("Mongo server started")
+  private val environment = Map(
+    "MONGO_HOSTS" -> s"localhost:$mongoPort",
+    "INSTANCE_NAME" -> instanceName,
+    "TASK_NAME" -> taskName,
+    "AGENTS_HOST" -> "localhost")
 
+  def startServices(): Unit = {
     zooKeeperServer.start()
     println("ZooKeeper server started")
 
-    Future(testStorageServer.start())
+    val ttsEnv = Map("ZOOKEEPER_HOSTS" -> s"localhost:$zkPort")
+    maybeTtsProcess = Some(new SeparateProcess(classOf[Server], ttsEnv).start())
+    Thread.sleep(1000)
+    println("TTS server starte")
 
+    mongoServer.start()
+    println("Mongo server started")
+  }
+
+  def prepare(): Unit = {
     TempHelperForConfigSetup.setupConfigs()
     println("Config settings loaded")
 
@@ -92,6 +96,8 @@ class PerformanceBenchmark(mongoPort: Int,
   }
 
   def runTest(messageSize: Long): Unit = {
+    println(s"$messageSize bytes messages")
+
     val writer = new FileWriter(outputFile, true)
     writer.write(messageSize + ",")
     writer.close()
@@ -101,16 +107,21 @@ class PerformanceBenchmark(mongoPort: Int,
     kafkaSender.send(messageSize, messagesCount)
     println("Data sent to the Kafka")
 
-    Future(RegularTaskRunner.main(Array()))
+    val process = new SeparateProcess(classOf[RegularTaskRunner], environment).start()
 
     while (outputFile.lastModified() == lastModified)
       Thread.sleep(fileCheckTimeout)
 
-    // todo: stop regular task runner
+    process.destroy()
+
     // todo: cleanup kafka
   }
 
-  def stop() = {
+  def stopServices() = {
+    kafkaSender.close()
+
+    maybeTtsProcess.foreach(_.destroy())
+
     zooKeeperServer.close()
     println("ZooKeeper server stopped")
 

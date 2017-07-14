@@ -22,9 +22,9 @@ import java.io.Closeable
 import java.util.concurrent.{Callable, ExecutorCompletionService}
 
 import com.bwsw.sj.common.engine.TaskEngine
-import com.bwsw.sj.engine.core.engine.TaskRunner
 import com.bwsw.sj.common.engine.core.managment.{CommonTaskManager, TaskManager}
 import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
+import com.bwsw.sj.engine.core.engine.TaskRunner
 import com.bwsw.sj.engine.regular.task.RegularTaskEngine
 import com.bwsw.sj.engine.regular.task.reporting.RegularStreamingPerformanceMetrics
 
@@ -53,3 +53,5 @@ object RegularTaskRunner extends {
     taskEngine.asInstanceOf[RegularTaskEngine].taskInputService
   }
 }
+
+class RegularTaskRunner

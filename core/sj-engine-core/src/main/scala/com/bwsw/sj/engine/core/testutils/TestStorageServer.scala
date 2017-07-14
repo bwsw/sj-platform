@@ -71,3 +71,5 @@ object Server extends App {
     zkHosts,
     host).start()
 }
+
+class Server

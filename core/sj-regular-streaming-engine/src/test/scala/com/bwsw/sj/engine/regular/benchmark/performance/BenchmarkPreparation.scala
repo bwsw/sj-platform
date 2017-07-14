@@ -43,7 +43,8 @@ class BenchmarkPreparation(mongoPort: Int,
                            zkNamespace: String,
                            tStreamPrefix: String,
                            tStreamToken: String,
-                           instanceName: String) {
+                           instanceName: String,
+                           taskName: String) {
 
   private val jsonSerializer = new JsonSerializer(ignoreUnknown = true)
 
@@ -158,6 +159,6 @@ class BenchmarkPreparation(mongoPort: Int,
       eventWaitIdleTime = 1,
       checkpointMode = EngineLiterals.everyNthMode,
       startFrom = EngineLiterals.oldestStartMode,
-      executionPlan = new ExecutionPlan(Map(instanceName + "-task0" -> task).asJava))
+      executionPlan = new ExecutionPlan(Map(taskName -> task).asJava))
   }
 }

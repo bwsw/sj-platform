@@ -49,11 +49,15 @@ object PerformanceBenchmarkRunner extends App {
     words,
     outputFileName)(SjModule.injector)
 
+  performanceBenchmark.startServices()
+
   performanceBenchmark.prepare()
 
-  performanceBenchmark.runTest(messageSizes.head)
+  messageSizes.foreach(performanceBenchmark.runTest)
+
+  performanceBenchmark.stopServices()
 
   println("DONE")
 
-  performanceBenchmark.stop()
+  System.exit(0)
 }
