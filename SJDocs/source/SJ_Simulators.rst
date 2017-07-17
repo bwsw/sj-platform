@@ -201,6 +201,168 @@ Batch Engine Simulator
 
 .. warning:: *The section is under development!*
 
+It is a class for testing an implementation of :ref:`batch-module` (Executor).
+
+Simulator imitates the behavior of the :ref:`Batch_Streaming_Engine` (stateful mode): it sends envelopes to the Executor, allows invoking checkpoint's handlers, gets data from output streams and state.
+
+Constructor arguments
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. csv-table:: 
+ :header: "Argument", "Type", "Description"
+ :widths: 25, 25, 50 
+
+ "``executor``", "BatchStreamingExecutor[T]", "Implementation of :ref:`Batch_Streaming_Executor` under test"
+ "``manager``", "ModuleEnvironmentManagerMock", "Mock for StatefulModuleEnvironmentManager (see :ref:`Module-Environment-Manager-Mock`)"
+ "``batchCollector``", "BatchCollector", "Implementation of :ref:`Batch-Collector`"
+
+.. note:: T - the type of data received by Executor
+
+Provided methods
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* ``prepareState(state: Map[String, Any])`` - loads state in a state storage.
+ * ``state`` - key/value map.
+
+* ``prepareTstream(entities: Seq[T], stream: String, consumerName: String = "default-consumer-name"): Long`` - creates *one* t-stream envelope (``TStreamEnvelope[T]`` type) and saves it in a local buffer. Returns ID of the envelope.
+ * ``entities`` - the list of incoming data.
+ * ``stream`` - the name of a stream with incoming data.
+ * ``consumerName`` - the name of a consumer ('default-consumer-name' by default).
+
+* ``prepareKafka(entity: T, stream: String): Long`` - creates *one* kafka envelope ('KafkaEnvelope[T]' type) and saves it in a local buffer. Returns ID of that envelope.
+ * ``entity`` - incoming data
+ * ``stream`` - the name of a stream with incoming data.
+
+* ``prepareKafka(entities: Seq[T], stream: String): Seq[Long]`` - creates a *list* of kafka envelopes ('KafkaEnvelope[T]' type) - *one* envelope for *one* element from ``entities``, and saves it in a local buffer. Returns a list of envelopes IDs.
+ * ``entities`` - the list of incoming data
+ * ``stream`` - the name of a stream of incoming data
+
+* ``process(batchesNumberBeforeIdle: Int = 0,`` 
+``&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; window: Int, ``
+``&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; slidingInterval: Int, ``
+``&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; saveFullState: Boolean = false,`` 
+``&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; removeProcessedEnvelopes: Boolean = true): BatchSimulationResult`` - sends all envelopes from local buffer and returns output streams, state and envelopes that haven't been processed (see :ref:`Batch-Simulation-Result`). This method retrieves batches using ``batchCollector``, creates a window repository and invoke ``onWindow``, ``onEnter``, ``onLeaderEnter``, ``onBeforeCheckpoint``, ``onBeforeStateSave`` methods of Executor for *every* created window repository. At the end of this method all envelopes will be removed from ``batchCollector``.
+ * ``batchesNumberBeforeIdle`` - the number of retrieved batches between invocations of ``executor.onIdle()`` ('0' by default). '0' means that ``executor.onIdle()`` will never be called.
+ * ``window`` - count of batches that will be contained into a window (see "Batch-streaming instance fields" at :ref:`Rest-API-Instance-Create`.
+ * ``slidingInterval`` - the interval at which a window will be shifted (count of processed batches that will be removed from the window) (see "Batch-streaming instance fields" at :ref:`Rest-API-Instance-Create`.
+ * ``saveFullState`` - the flag denoting that the full state ('true') or partial changes of state ('false') are going to be saved after every checkpoint.
+ * ``removeProcessedEnvelopes`` - indicates that all processed envelopes will be removed from a local buffer after processing.
+
+* ``beforeCheckpoint(isFullState: Boolean): SimulationResult`` - imitates the behavior of the :ref:`Batch_Streaming_Engine` before checkpoint: invokes ``executor.onBeforeCheckpoint()``, then invokes ``executor.onBeforeStateSave(isFullState)`` and returns output streams and state (see :ref:`Simulation-Result`).
+ * ``isFullState`` - the flag denotes that there was saved the full state ('true') or partial changes of state ('false').
+
+* ``timer(jitter: Long): SimulationResult`` - imitates that a timer went out (invokes ``executor.onTimer(jitter)``).
+ * ``jitter`` - delay between a real response time and an invocation of this handler.
+
+* ``clear()`` - removes all envelopes from a local buffer.
+
+Batch Simulation Result
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+After invocation of method ``process`` some envelopes could remain not processed by Executor when there are not enough batches for collecting windows.
+
+``case class BatchSimulationResult(simulationResult: SimulationResult, remainingEnvelopes: Seq[Envelope])`` - contains output streams, state (see :ref:`Simulation-Result` (``simulationResult``) and envelopes that haven't been processed (``remainingEnvelopes``).
+
+Usage Example
+~~~~~~~~~~~~~~~~~~~~~~
+
+E.g. you implement your own Executor that takes strings and calculates their length::
+
+ class SomeExecutor(manager: ModuleEnvironmentManager) extends BatchStreamingExecutor[String](manager) {
+  private val state = manager.getState
+  private val output = manager.getRoundRobinOutput("out")
+
+  override def onIdle(): Unit = {
+    val idleCalls = state.get("idleCalls").asInstanceOf[Int]
+    state.set("idleCalls", idleCalls + 1)
+  }
+
+  override def onWindow(windowRepository: WindowRepository): Unit = {
+    val symbols = state.get("symbols").asInstanceOf[Int]
+
+    val batches = {
+      if (symbols == 0)
+        windowRepository.getAll().values.flatMap(_.batches)
+      else
+        windowRepository.getAll().values.flatMap(_.batches.takeRight(windowRepository.slidingInterval))
+    }
+
+    val length = batches.flatMap(_.envelopes).map {
+      case t: TStreamEnvelope[String] =>
+        t.data.dequeueAll(_ => true).mkString
+      case k: KafkaEnvelope[String] =>
+        k.data
+    }.mkString.length
+    state.set("symbols", symbols + length)
+  }
+
+  override def onBeforeCheckpoint(): Unit = {
+    val symbols: Integer = state.get("symbols").asInstanceOf[Int]
+    output.put(symbols)
+  }
+ }
+ 
+If you want to see what the Executor puts in output stream and state after processing, Batch Engine Simulator can be used in the following way::
+
+ val stateSaver = mock(classOf[StateSaverInterface])
+ val stateLoader = new StateLoaderMock
+ val stateService = new RAMStateService(stateSaver, stateLoader)
+ val stateStorage = new StateStorage(stateService)
+ val options = ""
+ val output = new TStreamStreamDomain("out", mock(classOf[TStreamServiceDomain]), 3, tags = Array("output"))
+ val manager = new ModuleEnvironmentManagerMock(stateStorage, options, Array(output))
+ val executor: BatchStreamingExecutor[String] = new SomeExecutor(manager)
+ val tstreamInput = new TStreamStreamDomain("t-stream-input", mock(classOf[TStreamServiceDomain]), 1)
+ val kafkaInput = new KafkaStreamDomain("kafka-input", mock(classOf[KafkaServiceDomain]), 1, 1)
+ val inputs = Array(tstreamInput, kafkaInput)
+
+ val batchInstanceDomain = mock(classOf[BatchInstanceDomain])
+ when(batchInstanceDomain.getInputsWithoutStreamMode).thenReturn(inputs.map(_.name))
+
+ val batchCollector = new SomeBatchCollector(batchInstanceDomain, mock(classOf[BatchStreamingPerformanceMetrics]), inputs)
+
+ val simulator = new BatchEngineSimulator(executor, manager, batchCollector)
+ simulator.prepareState(Map("idleCalls" -> 0, "symbols" -> 0))
+ simulator.prepareTstream(Seq("a", "b"), tstreamInput.name)
+ simulator.prepareTstream(Seq("c", "de"), tstreamInput.name)
+ simulator.prepareKafka(Seq("fgh", "g"), kafkaInput.name)
+ simulator.prepareTstream(Seq("ijk", "lm"), tstreamInput.name)
+ simulator.prepareTstream(Seq("n"), tstreamInput.name)
+ simulator.prepareKafka(Seq("p", "r", "s"), kafkaInput.name)
+
+ val batchesNumberBeforeIdle = 2
+ val window = 4
+ val slidingInterval = 2
+ val results = simulator.process(batchesNumberBeforeIdle, window, slidingInterval)
+
+ println(results)
+ 
+``println(results)`` will print::
+ BatchSimulationResult(SimulationResult(List(StreamData(out,List(PartitionData(0,List(17))))),Map(symbols -> 17, idleCalls -> 4)),ArrayBuffer(<last envelope>))
+ 
+ <last-envelope> is a ``KafkaEnvelope[String]`` that contains string "s".
+
+The ``mock`` method from the ``org.mockito.Mockito.mock`` library.
+
+``SomeBatchCollector`` is an example of ``BatchCollector`` implementation. Method ``getBatchesToCollect`` returns all nonempty batches, ``afterEnvelopeReceive`` counts envelopes in batches, ``prepareForNextCollecting`` resets counters. Accumulation of batches is implemented in ``BatchCollector``::
+
+ class SomeBatchCollector(instance: BatchInstanceDomain,
+                         performanceMetrics: BatchStreamingPerformanceMetrics,
+                         inputs: Array[StreamDomain])
+  extends BatchCollector(instance, performanceMetrics, inputs) {
+  private val countOfEnvelopesPerStream = mutable.Map(instance.getInputsWithoutStreamMode.map(x => (x, 0)): _*)
+
+  def getBatchesToCollect(): Seq[String] =
+    countOfEnvelopesPerStream.filter(x => x._2 > 0).keys.toSeq
+
+  def afterEnvelopeReceive(envelope: Envelope): Unit =
+    countOfEnvelopesPerStream(envelope.stream) += 1
+
+  def prepareForNextCollecting(streamName: String): Unit =
+    countOfEnvelopesPerStream(streamName) = 0
+ }
+
+For more complicated examples see `sj-sflow-process-test <https://github.com/bwsw/sj-sflow-demo/blob/develop/sflow-process/src/test/scala/com/bwsw/sj/examples/sflow/module/process/ExecutorTests.scala.>`_.
+
 .. _Output_Engine_Simulator:
 
 Output Engine Simulator
