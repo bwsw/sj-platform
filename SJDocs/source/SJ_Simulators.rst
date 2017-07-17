@@ -101,12 +101,13 @@ The simulator imitates the behavior of the :ref:`Regular_Streaming_Engine` (stat
 
 Constructor arguments
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 .. csv-table:: 
  :header: "Argument", "Type", "Description"
  :widths: 25, 25, 50 
 
- "``executor``", "RegularStreamingExecutor[T]", "Implementation of a :ref:`regular_module` under testing   
- "``manager``", "ModuleEnvironmentManagerMock", "Mock for StatefulModuleEnvironmentManager (see :ref:`Module-Environment-Manager-Mock`)"
+ "executor", "RegularStreamingExecutor[T]", "Implementation of a :ref:`regular_module` under testing"   
+ "manager", "ModuleEnvironmentManagerMock", "Mock for StatefulModuleEnvironmentManager (see :ref:`Module-Environment-Manager-Mock`)"
 
 .. note:: T - the type of data received by Executor.
 
@@ -211,9 +212,9 @@ Constructor arguments
  :header: "Argument", "Type", "Description"
  :widths: 25, 25, 50 
 
- "``executor``", "BatchStreamingExecutor[T]", "Implementation of :ref:`Batch_Streaming_Executor` under test"
- "``manager``", "ModuleEnvironmentManagerMock", "Mock for StatefulModuleEnvironmentManager (see :ref:`Module-Environment-Manager-Mock`)"
- "``batchCollector``", "BatchCollector", "Implementation of :ref:`Batch-Collector`"
+ "executor", "BatchStreamingExecutor[T]", "Implementation of :ref:`Batch_Streaming_Executor` under test"
+ "manager", "ModuleEnvironmentManagerMock", "Mock for StatefulModuleEnvironmentManager (see :ref:`Module-Environment-Manager-Mock`)"
+ "batchCollector", "BatchCollector", "Implementation of :ref:`Batch-Collector`"
 
 .. note:: T - the type of data received by Executor
 
