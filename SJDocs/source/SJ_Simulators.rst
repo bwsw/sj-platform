@@ -237,7 +237,7 @@ Provided methods
  * ``entities`` - the list of incoming data
  * ``stream`` - the name of a stream of incoming data
 
-* ``process(batchesNumberBeforeIdle: Int = 0,
+* ``process(batchesNumberBeforeIdle: Int = 0,``
         
         ``&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; window: Int,``
         
