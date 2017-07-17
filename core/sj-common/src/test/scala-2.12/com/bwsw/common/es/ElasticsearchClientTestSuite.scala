@@ -18,6 +18,7 @@
  */
 package com.bwsw.common.es
 
+import com.bwsw.common.embedded.EmbeddedElasticsearch
 import org.elasticsearch.ResourceAlreadyExistsException
 import org.elasticsearch.index.IndexNotFoundException
 import org.elasticsearch.index.query.QueryBuilders

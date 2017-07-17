@@ -47,7 +47,7 @@ object SjESOutputModuleDestroy extends App {
   deleteInstance(esInstanceName)
   deleteModule(module.getName)
   close()
-  TempHelperForConfigDestroy.main(Array())
+  TempHelperForConfigDestroy.deleteConfigs()
   connectionRepository.close()
 
   println("DONE")
@@ -64,7 +64,8 @@ object SjJDBCOutputModuleDestroy extends App {
   deleteModule(jdbcModule.getName)
 
   close()
-  TempHelperForConfigDestroy.main(Array())
+  TempHelperForConfigDestroy.deleteJdbcDriver()
+  TempHelperForConfigDestroy.deleteConfigs()
   connectionRepository.close()
 
   println("DONE")
@@ -80,7 +81,7 @@ object SjRestOutputModuleDestroy extends App {
   deleteModule(restModule.getName)
 
   close()
-  TempHelperForConfigDestroy.main(Array())
+  TempHelperForConfigDestroy.deleteConfigs()
   connectionRepository.close()
 
   println("DONE")

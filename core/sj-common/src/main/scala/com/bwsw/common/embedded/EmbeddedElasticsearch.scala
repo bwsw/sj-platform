@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.common.es
+package com.bwsw.common.embedded
 
 import java.nio.file.Files
 import java.util.Collections

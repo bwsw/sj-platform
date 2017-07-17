@@ -161,6 +161,7 @@ class InstanceStarter(instance: Instance,
     val command = FrameworkLiterals.createCommandToLaunch(frameworkJarName)
     val restUrl = new URI(s"$restAddress/v1/custom/jars/$frameworkJarName")
     val environmentVariables = getFrameworkEnvironmentVariables(marathonMaster)
+
     val backoffSettings = settingsUtils.getBackoffSettings()
     val request = MarathonRequest(
       frameworkName,
@@ -208,7 +209,7 @@ class InstanceStarter(instance: Instance,
               marathonManager.destroyMarathonApplication(frameworkName)
               instanceManager.updateFrameworkStage(instance, failed)
               instanceManager.updateInstanceRestAddress(instance, None)
-              throw new InterruptedException(s"Framework has not started due to: ${x.message}; " +
+              throw new IllegalStateException(s"Framework has not started due to: ${x.message}; " +
                 s"Framework '$frameworkName' is marked as failed.")
             case _ =>
           }

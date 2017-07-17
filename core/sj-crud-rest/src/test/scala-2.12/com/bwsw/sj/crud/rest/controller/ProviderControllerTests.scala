@@ -169,12 +169,12 @@ class ProviderControllerTests extends FlatSpec with Matchers with MockitoSugar {
   it should "tell that provider can connect to server" in {
     allProviders.foreach {
       case ProviderInfo(_, _, _, name) =>
-        controller.checkConnection(name) shouldBe OkRestResponse(ConnectionSuccessResponseEntity)
+        controller.checkConnection(name) shouldBe OkRestResponse(ConnectionResponseEntity())
     }
   }
 
   it should "tell that provider cannot connect to server" in {
-    val expected = ConflictRestResponse(ConnectionFailedResponseEntity(connectionFailedError))
+    val expected = ConflictRestResponse(TestConnectionResponseEntity(connection = false, connectionFailedError))
     controller.checkConnection(connectionFailedProviderName) shouldBe expected
   }
 

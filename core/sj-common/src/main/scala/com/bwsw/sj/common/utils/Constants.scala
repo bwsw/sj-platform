@@ -213,3 +213,17 @@ object CommonAppConfigNames {
   val zooKeeperHost = zookeeper + ".host"
   val zooKeeperPort = zookeeper + ".port"
 }
+
+
+object BenchmarkConfigNames {
+  val performanceBenchmarkConfig = "sj-benchmark.performance"
+
+  val messageConfig = performanceBenchmarkConfig + ".message"
+  val messageSizesConfig = messageConfig + ".sizes"
+  val messagesCountConfig = messageConfig + ".count"
+
+  val kafkaAddressConfig = performanceBenchmarkConfig + ".kafka.address"
+  val mongoPortConfig = performanceBenchmarkConfig + ".mongo.port"
+  val outputFileConfig = performanceBenchmarkConfig + ".output-file"
+  val wordsConfig = performanceBenchmarkConfig + ".words"
+}

@@ -15,11 +15,11 @@ It includes an executor that processes data streams and a validator.
 Streaming validator
 -------------------------
 
-It provides a method to validate "options" or "InstanceMetadata" parameter of run module specification.
+It provides a method to validate ``options`` or ``InstanceMetadata`` parameter of run module specification.
 
 This method returns a tuple that contains two values. 
 
-The first value indicates whether "options" or "InstanceMetadata" is proper or not (true value by default). 
+The first value indicates whether ``options`` or ``InstanceMetadata`` is proper or not (true value by default). 
 
 The second value is a list of errors in case of the validation failure (empty list by default). It is used when you try to create a new instance of a specific module, and if the validation method returns false value the instance will not be created.
 
@@ -69,7 +69,7 @@ An input type of modules handles external input streams, does data deduplication
 
 It performs the transformation of the streams incoming from TCP to T-streams. T-streams are persistent streams designed for exactly-once processing (so it includes transactional producer, consumer and subscriber). Find more information about T-streams at `the site: <http://t-streams.com>`_ 
 
-An Input module executor provides the following methods with default implementations but they can be overridden.
+An Input module executor provides the following methods with default implementation but they can be overridden.
 
 1) ``tokenize``: 
       It is invoked every time when a new portion of data is received. It processes a flow of bytes to determine the beginning and the end of the Interval (significant set of bytes in incoming flow of bytes). By default it returns None value (meaning that it is impossible to determine an Interval). If Interval detected, method should return it (the first and the last indexes of Interval elements in the flow of bytes). The resulting interval can either contain message or not.
@@ -137,19 +137,20 @@ There is a manager inside the module which allows to:
  
 To see a flow chart on how these methods intercommunicate, please, visit the :ref:`Input_Streaming_Engine` section.
 
+Stream Juggler offers two examples of Input Module implementation. These are ready-to-use input modules for two most general input data formats: CSV and Regex.
+
 CSV Input Module
 """""""""""""""""""""""
-.. warning:: *The section is under development!*
 
-Takes CSV-lines and gives avro records.
+This module extends *InputStreamingExecutor* interface. Its aim is to process CSV lines and create ``InputEnvelope`` instance which stores all data as AvroRecord inside.
 
-Module configuration is located in an ``options`` field of instance configuration ([[CRUD Rest-API for Modules#Create-an-instance-of-a-module]]).
+Module configuration is located in the ``options`` field of instance configuration (:ref:`REST_API_Instance_Create`).
 
 .. csv-table:: 
  :header: "Field Name", "Format", "Description", "Example"
  :widths: 15, 10, 25, 40
 
- "outputStream*", "String", "Name of output stream for avro records", "s1" 
+ "outputStream*", "String", "Name of output stream for Avro Records", "s1" 
  "fallbackStream*", "String", "Name of output stream for incorrect CSV-lines", "s2" 
  "fields*", "List[String]", "Names of record fields", "['f1', 'f2', 'f3']" 
  "lineSeparator*", "String", "String which separates lines", "\n" 
@@ -167,8 +168,7 @@ This module puts ``"org.apache.avro.generic.GenericRecord":https://avro.apache.o
  ...
  }
 
-
-In executor of the next module must be defined avro schema (``org.apache.avro.Schema``) and overrided method ``deserialize`` for deserialization ``org.apache.avro.generic.GenericRecord``. In ``deserialize`` could be used method ``deserialize(bytes : Array[Byte], schema : org.apache.avro.Schema)`` from ``AvroSerializer`` class.
+In the executor of the next module the Avro Schema (``org.apache.avro.Schema``) and the overridden ``deserialize`` method for deserialization of ``org.apache.avro.generic.GenericRecord`` must be defined . In the ``deserialize`` method the ``deserialize(bytes : Array[Byte], schema : org.apache.avro.Schema)`` method from the ``AvroSerializer`` class could be used.
 
 E.g. for ``"fields": ["f1", "f2", "f3"]``)::
 
@@ -184,7 +184,106 @@ E.g. for ``"fields": ["f1", "f2", "f3"]``)::
 
 Regex Input Module
 """"""""""""""""""""""""
-.. warning:: *The section is under development!*
+
+This module is provided via Sonatype repository and it extends *InputStreamingExecutor* interface. Its aim is to process input stream of strings using RegExp rules and create `InputEnvelope` instance which stores all data as ``AvroRecord`` inside. Thus, it takes the free-form data, filter and convert them into Avro Records.
+
+**Policy**
+
+Regex input module uses the following policies:
+
+1. first-match-win
+       To each data the regular expressions from list of rules are applied until the first match is found; then this data is converted into Avro Record and put into the output stream. Matching process for this data is stopped. 
+
+If none of the rules is matched, data is converted to unified fallback avro record and put into the fallback stream.
+
+2. check-every
+      To each data the regular expressions from the list of rules are applied. When matched, the data is converted to Avro Record and put into the output stream. Matching process will continue using the next rule.
+ 
+If none of the rules is matched, data is converted to unified fallback avro record and put into the fallback stream.
+
+**Configuration**
+
+Module configuration is located in the "options" field of instance configuration (:ref:`REST_API_Instance_Create`).
+The configuration contains a three-tier structure that consists of the following levels: options (0-level), rules (1-level), fields (2-level).
+
+**Options**
+
+.. csv-table:: 
+ :header: "Field Name", "Format", "Description", "Example"
+ :widths: 15, 10, 25, 40
+ 
+ "lineSeparator *", "String", "String that separates lines", "\n"
+ "policy*", "String", "Defines the behavior of the module", "first-match-win"
+ "encoding*", "String", "Name of input encoding", "UTF-8"
+ "fallbackStream*", "String", "Name of an output stream for lines that are not matched to any regex (from the 'rules' field)", "fallback-output"
+ "rules*", "List[Rule]", "List of rules that defines: regex, an output stream and avro record structure", "`-`"
+
+**Rule**
+
+.. csv-table:: 
+ :header: "Field Name", "Format", "Description", "Example"
+ :widths: 15, 10, 25, 40
+ 
+ "regex*", "String", "Regular expression used to filter and transform input data", "(?<day>[0-3]\d)-(?<month>[0-1]\d)-(?<year>\d{4})"
+ "outputStream*", "String", "Name of output stream for successful converted data", "output-stream"
+ "uniqueKey", "List[String]", "Set of field names which uniquely identifies a record (all record fields by default)","['day','month']"
+ "distribution", "List[String]", "Set of fields that define in which partition of an output stream a record will be put. Partition computed as hash(fields) mod partitions_number. If this field is not defined, the module uses the Round Robin policy for partition distribution.", "['month','year']"
+ "fields*", "List[Field]", "List of fields used for creation the avro record scheme", "`-`"
+
+**Field**
+
+.. csv-table:: 
+ :header: "Field Name", "Format", "Description", "Example"
+ :widths: 15, 10, 25, 40
+ 
+ "name*", "String", "Name of the record field", "day"
+ "defaultValue*", "String", "Value that used in case of missing field in data", "01"
+ "type*", "String", "Type of the record field [boolean, int, long, float, double, string]", "string"
+
+.. note:: `*` - required fields
+
+Configuration example::
+
+ {
+	"lineSeparator": "\n",
+	"policy": "first-match-win",
+	"encoding": "UTF-8",
+	"fallbackStream": "fallback-stream",
+	"rules": [{
+		"regex": "(?<day>[0-3]\\d)-(?<month>[0-1]\\d)-(?<year>\\d{4})",
+		"outputStream": "date-output-stream",
+		"uniqueKey": ["day", "month"],
+		"distribution": ["month", "year"],
+		"fields": [{
+			"name": "day",
+			"default-value": "01",
+			"type": "int"
+		}, {
+			"name": "month",
+			"default-value": "01",
+			"type": "int"
+		}, {
+			"name": "year",
+			"default-value": "1970",
+			"type": "int"
+		}]
+	}, {
+		"regex": "(?<word>\\w+) (?<digit>\\d+)",
+		"fields": [{
+			"name": "word",
+			"default-value": "abc",
+			"type": "string"
+		}, {
+			"name": "digit",
+			"default-value": "123",
+			"type": "int"
+		}],
+		"outputStream": "namedigit-output-stream",
+		"uniqueKey": ["word"],
+		"distribution": ["word", "digit"]
+	}]
+ }
+
 
 .. _regular-module:
 
@@ -194,10 +293,9 @@ A simplified definition of a Regular module is a handler that performs data tran
 
 .. figure:: _static/RegularModule2.png
 
-
 In the Regular module the executor provides the following methods that does not perform any work by default so you should define their implementation by yourself.
 
-1) "onInit": 
+1) ``onInit``: 
         It is invoked only once, when a module is launched. This method can be used to initialize some auxiliary variables, or check the state variables on existence and create them if necessary . Thus, you should do preparation of the executor before usage.
 
 Example of the checking a state variable::
@@ -208,7 +306,7 @@ Example of the checking a state variable::
 
 ``<variable_value>`` can be any type (a user must be careful when casting a state variable value to a particular data type)
 
-2) "onMessage": 
+2) ``onMessage``: 
     It is invoked for every received message from one of the inputs that are defined within the instance. There are two possible data types of input sources - that's why there are two methods with appropriate signatures::
     
 ``def onMessage(envelope: TStreamEnvelope[T]): Unit``
@@ -219,15 +317,15 @@ Each envelope has a type parameter that defines the type of data in the envelope
 
 .. note:: The data type of the envelope can be only KafkaEnvelope data type or TStreamEnvelope data type. A user may specify one of them or both, depending on which type(s) is(are) used. 
 
-3) "onBeforeCheckpoint": 
+3) ``onBeforeCheckpoint``: 
     It is invoked before every checkpoint.
 .. 4) "onAfterCheckpoint": 
     It is invoked after every checkpoint.
-4) "onTimer": 
+4) ``onTimer``: 
     It is invoked every time when a set timer goes out. Inside the method there is an access to a parameter that defines a delay between a real response time and an invocation of this handler.
-5) "onIdle": 
+5) ``onIdle``: 
     It is invoked every time when idle timeout goes out but a new message hadn't appeared. It is a moment when there is nothing to process.
-6) "onBeforeStateSave": 
+6) ``onBeforeStateSave``: 
     It is invoked prior to every saving of the state. Inside the method there is a flag denoting the full state (true) or partial changes of state (false) will be saved.
 .. 8) "onAfterStateSave": 
     It is invoked after every saving of the state. Inside the method there is a flag denoting the full state (true) or partial changes of state (false) have(s) been saved
@@ -256,13 +354,13 @@ Batch Collector
 """"""""""""""""""
 In the module it is a Batch Collector that is responsible for the logic of collecting batches. It provides the following methods, implementation of which you should specify. 
 
-1) “getBatchesToCollect”:
+1) ``getBatchesToCollect``:
        It should return a list of stream names that are ready to collect.
 
-2) “afterEnvelopeReceive”:
+2) ``afterEnvelopeReceive``:
        It is invoked when a new envelope is received.
 
-3) “prepareForNextCollecting”:
+3) ``prepareForNextCollecting``:
      It is invoked when a batch is collected. If several batches are collected at the same time then the method is invoked for each batch.
 
 Let us consider an example:
@@ -321,7 +419,6 @@ The diagram below is a simple illustration of how a sliding widow operation look
 
 .. figure:: _static/BatchModule.png
 
-
 As shown in the figure, every time the window slides over an input stream, the batches of events that fall within the window are combined and operated upon to produce the transformed data of the windowed stream. It is important that any window operation needs to specify the parameters:
 
 - *batch size* — The quantity of events within a batch, or a period of time during which the events are collected in one batch.
@@ -336,7 +433,7 @@ In general, a window consists of batches, a batch consists of events (messages) 
 
 The executor of the batch module provides the following methods that does not perform any work by default. So you should define their implementation by yourself.
 
-1) "onInit": 
+1) ``onInit``: 
     It is invoked only once, when a module is launched. This method can be used to initialize some auxiliary variables or check the state variables on existence and if it's necessary create them. Thus, you should do preparation of the executor before usage.
 
 Example of the checking a state variable::
@@ -347,7 +444,7 @@ Example of the checking a state variable::
 
 ``<variable_value>`` can be of any type (be careful when you will cast a state variable value to a particular data type)
 
-2) "onWindow": 
+2) ``onWindow``: 
     It is invoked when a window for each input stream is collected (a list of input streams are defined within the instance). These collected windows are accessible via a window repository within the method. A window consists of batches, a batch consists of envelopes (messages). There are two possible data types of envelopes - that's why you should cast the envelope inside the method. Each envelope has a type parameter that defines the type of message data.
 
 Example of a message casting to a particular data type::
@@ -364,24 +461,24 @@ The data type of the envelope can be "KafkaEnvelope" data type or "TStreamEnvelo
   val tstreamEnvelope =
   envelope.asInstanceOf[TStreamEnvelope[Integer]]
 
-3) "onBeforeCheckpoint": 
+3) ``onBeforeCheckpoint``: 
     It is invoked before every checkpoint
 .. 4) "onAfterCheckpoint": 
     It is invoked after every checkpoint
-4) "onTimer": 
+4) ``onTimer``: 
     It is invoked every time when a set timer goes out. Inside the method there is an access to a parameter that defines a delay between a real response time and an invocation of this handler
-5) "onIdle": 
+5) ``onIdle``: 
     It is invoked every time when idle timeout goes out but a new message hasn't appeared. It is a moment when there is nothing to process
-6) "onBeforeStateSave": 
+6) ``onBeforeStateSave``: 
     It is invoked before every saving of the state. Inside the method there is a flag denoting the full state (true) or partial changes of state (false) will be saved
 .. 8) "onAfterStateSave": 
     It is invoked after every saving of the state. Inside the method there is a flag denoting the full state (true) or partial changes of state (false) have(s) been saved
 
 The following handlers are used for synchronizing the tasks' work. It can be useful when at information aggregation using shared memory, e.g. Hazelcast or any other.
  
-1) "onEnter": The system awaits for every task to finish the "onWindow" method and then the "onEnter" method of all tasks is invoked.
+1) ``onEnter``: The system awaits for every task to finish the ``onWindow`` method and then the ``onEnter`` method of all tasks is invoked.
 
-2) "onLeaderEnter": The system awaits for every task to finishe the "onEnter" method and then the "onLeaderEnter" method of a leader task is invoked.
+2) ``onLeaderEnter``: The system awaits for every task to finishe the ``onEnter`` method and then the ``onLeaderEnter`` method of a leader task is invoked.
 
 .. 3) "onLeave": It is invoked by every task and waits for a leader-task stop processing
 
@@ -392,12 +489,11 @@ To see a flow chart about how these methods intercommunicate see the :ref:`Batch
 The Batch module can either have a state or not. A state is a sort of a key-value storage and can be used to keep some global module variables related to processing. These variables are persisted and are recovered after a fail. A fail means that something is going wrong in one of the methods described above. In this case a whole module will be restarted. And the work will start on onInit method invocation.
 There is a manager inside module which grants access to:
 
-- output that was defined within the instance (by calling getPartitionedOutput() or getRoundRobinOutput()),
-- timer (by calling setTimer())
-- state (by calling getState()) (only if it is a stateful module)
-- list of output's names (by calling getStreamsByTags()). Every output contains it's own set of tags which are used to retrieve it.
-- initiation of checkpoint (by calling initiateCheckpoint())
-
+- output that was defined within the instance (by calling ``getPartitionedOutput()`` or ``getRoundRobinOutput()``),
+- timer (by ``calling setTimer()``)
+- state (by calling ``getState()``) (only if it is a stateful module)
+- list of output names (by calling ``getStreamsByTags()``). Every output contains its own set of tags which are used to retrieve it.
+- initiation of checkpoint (by calling ``initiateCheckpoint()``)
 
 A Batch and a Regular modules may have a state. A state is a sort of a key-value storage that can be used to keep some global module variables related to processing. These variables are persisted and are recovered after a fail. A fail means that something is going wrong in one of the methods used in an executor. In this case a whole module will be restarted. 
 The state is performed alongside with the checkpoint. At a checkpoint the data received after processing is checked for completeness. The checkpoint is an event that provides an exactly-once processing. 
@@ -415,18 +511,17 @@ It transforms the processing data results received from T-streams and pass them 
 
 The output executor provides the following methods that does not perform any work by default so you should define their implementation by yourself.
 
-1. "onMessage": 
+1. ``onMessage``: 
     It is invoked for every received message from one of the inputs that are defined within the instance. Inside the method you have an access to the message that has the TStreamEnvelope type. 
 
-2. "getOutputEntity":
+2. ``getOutputEntity``:
     It is invoked once when module running. This method returns the current working entity, i.e. fields and types. This method must be overridden. 
 
 A type is assigned to an output envelope that corresponds to the type of an external storage (Elasticsearch, JDBC, REST).
 
 To see a flow chart on how these methods intercommunicate, please, visit the :ref:`Output_Streaming_Engine` section.
 
-
-.. A detailed manual on how to write a module you may find at `page`_ .
+A detailed manual on how to write a module you may find at the :ref:`hello-world-module` page.
 
 Modules` performance is determined with the work of engine. Engines of different types (Input, Regular/Batch, Output) have different structure, components and the workflow corresponding to the type of a module. 
 

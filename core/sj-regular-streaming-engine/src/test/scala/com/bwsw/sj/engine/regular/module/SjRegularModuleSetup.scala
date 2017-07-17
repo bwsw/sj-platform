@@ -21,27 +21,34 @@ package com.bwsw.sj.engine.regular.module
 import java.io.File
 import java.util.logging.LogManager
 
-import com.bwsw.sj.common.config.TempHelperForConfigDestroy
-import DataFactory._
+import com.bwsw.sj.common.config.TempHelperForConfigSetup
+import com.bwsw.sj.common.utils.EngineLiterals
+import com.bwsw.sj.engine.regular.module.DataFactory._
 
-object SjRegularModuleDestroy extends App {
+object SjRegularModuleSetup extends App {
   LogManager.getLogManager.reset()
+  TempHelperForConfigSetup.setupConfigs()
   val streamService = connectionRepository.getStreamRepository
   val serviceManager = connectionRepository.getServiceRepository
   val providerService = connectionRepository.getProviderRepository
   val instanceService = connectionRepository.getInstanceRepository
   val fileStorage = connectionRepository.getFileStorage
+  val defaultValueOfTxns = 4
+  val defaultValueOfElements = 4
+  val checkpointInterval = 2
+  val stateManagement = EngineLiterals.ramStateMode
+  val stateFullCheckpoint = 2
   val _type = commonMode
 
   val module = new File("./contrib/stubs/sj-stub-regular-streaming/target/scala-2.12/sj-stub-regular-streaming-1.0-SNAPSHOT.jar")
 
-  deleteStreams(streamService, _type, serviceManager, inputCount, outputCount)
-  deleteServices(serviceManager)
-  deleteProviders(providerService)
-  deleteInstance(instanceService)
-  deleteModule(fileStorage, module.getName)
+  loadModule(module, fileStorage)
+  createProviders(providerService)
+  createServices(serviceManager, providerService)
+  createStreams(streamService, serviceManager, partitions, _type, inputCount, outputCount)
+  createInstance(serviceManager, instanceService, checkpointInterval, stateManagement, stateFullCheckpoint)
 
-  TempHelperForConfigDestroy.main(Array())
+  createData(defaultValueOfTxns, defaultValueOfElements, partitions, _type, inputCount)
   connectionRepository.close()
 
   println("DONE")

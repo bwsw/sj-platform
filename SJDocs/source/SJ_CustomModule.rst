@@ -3,7 +3,7 @@ Custom Module Development Guide
 
 .. Contents::
 
-Under this section how to write your own module for the Stream Juggler will be described.
+Under this section how to write your own module for Stream Juggler will be described.
 
 Stream Juggler is a platform for your custom module implementation. It allows to adjust the system to your custom aims. Creation of a custom module will not become a challenge for a practicing developer or a programmer as no special tools or services are necessary.
 
@@ -44,8 +44,8 @@ It is meant that all necessary services are deployed for the module and you know
 Input Streaming Custom Module
 ---------------------------------
 1) Create a new sbt project depending on sj-engine-core library, i.e. use the latest version from https://mvnrepository.com/artifact/com.bwsw in your `build.sbt` file.
-2) Create an executor class inheriting InputStreamingExecutor class and override some methods if necessary (:ref:`input-module`)
-3) Create a validator class inheriting StreamingValidator class and override the validate method if necessary (:ref:`validator`)
+2) Create an executor class inheriting ``InputStreamingExecutor`` class and override some methods if necessary (:ref:`input-module`)
+3) Create a validator class inheriting ``StreamingValidator`` class and override the validate method if necessary (:ref:`validator`)
 4) Create `specification.json` in a resources folder and fill it in as shown in the example (:ref:`Json_schema`).
 5) Assemble a jar of your module by calling sbt instruction from the project folder, e.g. 'sbt my-input-module/assembly'
 6) Upload the module (via UI or REST)
@@ -57,8 +57,8 @@ Input Streaming Custom Module
 Regular Streaming Custom Module
 ---------------------------------
 1) Create a new sbt project depending on sj-engine-core library, i.e. use the latest version from https://mvnrepository.com/artifact/com.bwsw in your build.sbt file.
-2) Create an executor class inheriting RegularStreamingExecutor class and override some methods if necessary (:ref:`regular-module`)
-3) Create a validator class inheriting StreamingValidator class and override the validate method if necessary (:ref:`validator`)
+2) Create an executor class inheriting ``RegularStreamingExecutor`` class and override some methods if necessary (:ref:`regular-module`)
+3) Create a validator class inheriting ``StreamingValidator`` class and override the validate method if necessary (:ref:`validator`)
 4) Create `specification.json` in a resources folder and fill it in as shown in the example (:ref:`Json_schema`). 
 5) Assemble a jar of your module by calling sbt instruction from project folder, e.g. 'sbt my-regular-module/assembly' 
 6) Upload the module (via REST or UI)
@@ -70,9 +70,9 @@ Regular Streaming Custom Module
 Batch Streaming Custom Module
 ------------------------------------
 1) Create a new sbt project depending on sj-engine-core library, i.e. use the latest version from https://mvnrepository.com/artifact/com.bwsw in your build.sbt file.
-2) Create an executor class inheriting BatchStreamingExecutor class and override some methods if necessary (:ref:`batch-module`)
-3) Create a batch collector inheriting BatchCollector class and override the required methods (:ref:`Batch-Collector`)
-4) Create a validator class inheriting StreamingValidator class and override the validate method if necessary (:ref:`validator`)
+2) Create an executor class inheriting ``BatchStreamingExecutor`` class and override some methods if necessary (:ref:`batch-module`)
+3) Create a batch collector inheriting ``BatchCollector`` class and override the required methods (:ref:`Batch-Collector`)
+4) Create a validator class inheriting ``StreamingValidator`` class and override the validate method if necessary (:ref:`validator`)
 5) Create `specification.json` in a resources folder and fill it in as shown in the example (:ref:`Json_schema`).
 6) Assemble a jar of your module by calling sbt instruction from project folder, e.g. 'sbt my-batch-module/assembly' 
 7) Upload the module (via REST or UI)
@@ -84,8 +84,8 @@ Batch Streaming Custom Module
 Output Streaming Custom Module
 -----------------------------------------------
 1) Create a new sbt project depending on sj-engine-core library, i.e. use the latest version from https://mvnrepository.com/artifact/com.bwsw in your build.sbt file.
-2) Create an executor class inheriting OutputStreamingExecutor class and override some of methods if necessary (:ref:`output-module`)
-3) Create a validator class inheriting StreamingValidator class and override the validate method if necessary (:ref:`validator`)
+2) Create an executor class inheriting ``OutputStreamingExecutor`` class and override some of methods if necessary (:ref:`output-module`)
+3) Create a validator class inheriting ``StreamingValidator`` class and override the validate method if necessary (:ref:`validator`)
 4) Create `specification.json` in a resources folder and fill it in as shown in the example (:ref:`Json_schema`).
 
 .. note:: Stream types for output-streaming module:
@@ -95,7 +95,7 @@ Output Streaming Custom Module
  - jdbc-output (output stream)
  - rest-output (output stream)
 
-5) Create class of entity that extends OutputEnvelope. Override method "getFieldsValue".
+5) Create class of entity that extends ``OutputEnvelope``. Override method ``getFieldsValue``.
 6) Assemble a jar of your module by calling sbt instruction from the project folder, e.g. 'sbt my-output-module/assembly' 
 7) Create an index in Elasticsearch and the index mapping, or a table in a database, or deploy some REST service. Name of index is provided in Elasticsearch service. A table name and a document type is a stream name. A full URL to entities of the REST service is "http://<host>:<port><basePath>/<stream-name>"
 8) Upload the module (via Rest API or UI)
@@ -104,10 +104,10 @@ Output Streaming Custom Module
 
 .. note:: You can use a module simulator for preliminary testing of executor work (:ref:`Output_Engine_Simulator`).
 
-
+.. _hello-world-module:
 
 Hello World Custom Module
-------------------------------
+---------------------------------
 
 This tutorial explains how to write a module using a simple Hello World example. Let's create a module together!
 
@@ -192,7 +192,7 @@ So, we can create abstract common class::
   val ip: String
  }
 
-And then extend it by `EchoResponse` and `UnreachableResponse` classes::
+And then extend it by ``EchoResponse`` and ``UnreachableResponse`` classes::
 
  case class EchoResponse(ts: Long, ip: String, time: Double) extends PingResponse
  case class UnreachableResponse(ts: Long, ip: String) extends PingResponse
@@ -229,13 +229,13 @@ Let's then create an output class (name it `PingMetrics`), which contains all fi
   var total: Long = 0
  }
 
-But there is a condition: an output class should extend `OutputEnvelope` abstract class of the stream-juggler engine::
+But there is a condition: an output class should extend ``OutputEnvelope`` abstract class of the stream-juggler engine::
 
  abstract class OutputEnvelope {
   def getFieldsValue: Map[String, Any]
  }
 
-It has one method - `getFieldsValue` - which is needed to obtain map[fieldName: String -> fieldValue: Any].
+It has one method - ``getFieldsValue`` - which is needed to obtain map[fieldName: String -> fieldValue: Any].
 
 So, we need a set of variables with names of fields. Looks like all of them will be constants, that's why we include them into companion class::
 
@@ -248,7 +248,7 @@ So, we need a set of variables with names of fields. Looks like all of them will
   val totalField = "total"
  }
 
-And override the `getFieldsValue` method in the following way::
+And override the ``getFieldsValue`` method in the following way::
 
  class PingMetrics extends OutputEnvelope {
 
@@ -283,11 +283,11 @@ Netcat appears here because we will send our data to SJ-module via TCP connectio
 
 That is general description.
 
-If we look deeper in the structure, we will see the following data flow:
+If we look deeper into the structure, we will see the following data flow:
 
 .. figure:: _static/SJStructure.png
 
-All input data elements are going as a flow of bytes to particular interface provided by `InputTaskEngine`. That flow is going straight to `RegexInputModule` (which extends `InputStreamingExecutor` interface) and is converted to an `InputEnvelope` instance which stores all data as `AvroRecord` inside. 
+All input data elements are going as a flow of bytes to particular interface provided by `InputTaskEngine`. That flow is going straight to `RegexInputModule` (which extends `InputStreamingExecutor` interface) and is converted to an `InputEnvelope` instance which stores all data as ``AvroRecord`` inside. 
 
 An `InputEnvelope` instance then goes to `InputTaskEngine` which serializes it to the stream of bytes and then sends to T-Streams. 
 
@@ -344,11 +344,11 @@ To describe the whole logic we need to override the following methods:
 Validator 
 ++++++++++++++++++
 
-An instance contains a field `options` of String type. That field is used to send some configuration into module (for example, via this field regexp rules are passed to InputModule). This field is described in json-file for a particular module.
+An instance contains an ``options`` field of String type. That field is used to send some configuration into module (for example, via this field regexp rules are passed to `InputModule`). This field is described in json-file for a particular module.
 
-When this field is used its validation is handled with Validator class. So it is necessary to describe the Validator class here.
+When this field is used, its validation is handled with Validator class. So it is necessary to describe the Validator class here.
 
-Input module uses `options` field to pass avro schema to Regular module. That's why we create Validator class in the following way (with constant field in singleton `OptionsLiterals` object)::
+Input module uses an ``options`` field to pass Avro Schema to Regular module. That's why we create Validator class in the following way (with constant field in singleton ``OptionsLiterals`` object)::
 
  object OptionsLiterals {
   val schemaField = "schema"
@@ -382,11 +382,11 @@ And then just try to parse the schema.
 onMessage
 +++++++++++++++
 
-The 'onMessage' method is called every time the Executor receives an envelope.
+The ``onMessage`` method is called every time the Executor receives an envelope.
 
 As we remember, there are two possible types of envelopes: echo-response and unreachable-response, which are stored in two different streams. 
 
-We obtain envelopes from both of them and the name of the stream is stored in the `envelope.stream` field::
+We obtain envelopes from both of them and the name of the stream is stored in the ``envelope.stream`` field::
 
  val maybePingResponse = envelope.stream match {
 	case `echoResponseStream` =>
@@ -397,7 +397,7 @@ We obtain envelopes from both of them and the name of the stream is stored in th
 	// if we receive something we don't need
  }
 
-The `envelope.data.head` field contains all data we need and its type is avro record. 
+The ``envelope.data.head`` field contains all data we need and its type is avro record. 
 
 So the next step is obvious - we will use Try scala type to cope with possibility of a wrong or a corrupted envelope::
 
@@ -424,7 +424,7 @@ So the next step is obvious - we will use Try scala type to cope with possibilit
     Failure(throw new Exception)
  }
 
-And then just process `maybePingResponse` variable to obtain actual `pingResponse` or to finish execution in case of an error::
+And then just process ``maybePingResponse`` variable to obtain actual ``pingResponse`` or to finish execution in case of an error::
 
  val pingResponses = maybePingResponse.get
 
@@ -441,7 +441,7 @@ The following code does what we need::
   state.set(pingResponse.ip, PingState() + pingResponse)
  }
 
-So, here is the whole code that we need to process a new message in our Executor class::
+So, here is the whole code that we need to process a new message in our ``Executor`` class::
 
  class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecutor[Record](manager) {
   private val state = manager.getState
@@ -485,21 +485,21 @@ So, here is the whole code that we need to process a new message in our Executor
 onBeforeCheckpoint
 ++++++++++++++++++++++
 
-A `onBeforeCheckpoint` method calling condition is described in 'pingstation-input.json' configuration file::
+A ``onBeforeCheckpoint`` method calling condition is described in 'pingstation-input.json' configuration file::
 
  "checkpointMode" : "every-nth",
  "checkpointInterval" : 10
 
-So we can see it will be called after each 10 responses received in the `onMessage` method.
+So we can see it will be called after each 10 responses received in the ``onMessage`` method.
 
-First of all we need to obtain an output object to send all data into. In this example we will use `RoundRobinOutput` because it is not important for us in this example how data would be spread out of partitions::
+First of all we need to obtain an output object to send all data into. In this example we will use ``RoundRobinOutput`` because it is not important for us in this example how data would be spread out of partitions::
 
  val outputName: String = manager.outputs.head.name
  val output: RoundRobinOutput = manager.getRoundRobinOutput(outputName)
 
-In `manager.outputs` all output streams are returned. In this project there would be only one output stream, so we just get its name. And then we obtain `RoundRobinOutput` object for this stream via `getRoundRobinOutput`.
+In ``manager.outputs`` all output streams are returned. In this project there would be only one output stream, so we just get its name. And then we obtain ``RoundRobinOutput`` object for this stream via ``getRoundRobinOutput``.
 
-Then we will use a `state.getAll()` method to obtain all data we collect right now. 
+Then we will use a ``state.getAll()`` method to obtain all data we collect right now. 
 
 It returns Map[String, Any]. We use the following code to process all elements::
 
@@ -531,11 +531,11 @@ deserialize
 
 This method is called when we need to correctly deserialize the flow of bytes from T-Streams into AvroRecord.
 
-There is `AvroSerializer` class which shall be used for this purpose. But due to the features of Avro format we need `avroSchema` to do that properly. 
+There is ``AvroSerializer`` class which shall be used for this purpose. But due to the features of Avro format we need `avroSchema` to do that properly. 
 
-Avro schema is stored into `manager.options` field. 
+Avro schema is stored into ``manager.options`` field. 
 
-So, the next code listing shows the way of creating `AvroSerialiser` and obtaining avro scheme::
+So, the next code listing shows the way of creating ``AvroSerialiser`` and obtaining avro scheme::
 
  private val jsonSerializer: JsonSerializer = new JsonSerializer
  private val mapOptions: Map[String, Any] = jsonSerializer.deserialize[Map[String, Any]](manager.options)
@@ -553,18 +553,18 @@ This file describes the module. Examples of description can be found here :ref:`
 Output module 
 """"""""""""""""""
 
-We define Executor class (in another package), which extends `OutputStreamingExecutor`::
+We define Executor class (in another package), which extends ``OutputStreamingExecutor``::
 
  class Executor(manager: OutputEnvironmentManager) extends OutputStreamingExecutor[String](manager)
 
-Manager here (of `OutputEnvironmentManager` type) is also a point of access to some information but in this example we will not use it.
+Manager here (of ``OutputEnvironmentManager`` type) is also a point of access to some information but in this example we will not use it.
 
 Type of data sent by Regular module is String that's why this type is used as a template type.
 
 We will need to override two methods:
 
-- onMessage(envelope: TStreamEnvelope[String]) - to get and process messages
-- getOutputEntity() - to return format of output records
+- ``onMessage(envelope: TStreamEnvelope[String])`` - to get and process messages
+- ``getOutputEntity()`` - to return format of output records
 
 Validator 
 +++++++++++++
@@ -594,7 +594,7 @@ The full code of this method is listed below::
 
 All data are in the 'envelope' data field. 
 
-So, for each record in this field we create a new `PingMetrics` instance and fill in all corresponding fields. Then just return sequence of these objects.
+So, for each record in this field we create a new ``PingMetrics`` instance and fill in all corresponding fields. Then just return sequence of these objects.
 
 getOutputEntity 
 ++++++++++++++++++
@@ -603,9 +603,9 @@ Signature of the method looks like::
 
  override def getOutputEntity: Entity[String]
 
-It returns instances of Entity[String] - that class contains metadata on `OutputEnvelope` structure: map (field name -> field type) (Map[String, NamedType[T]]).
+It returns instances of Entity[String] - that class contains metadata on ``OutputEnvelope`` structure: map (field name -> field type) (Map[String, NamedType[T]]).
 
-In file 'es-echo-response-1m.json' we use `elasticsearch-output` string as a value of `type` field. It means that we will use ElasticSearch as output of our sj-module. Other possible variants are REST and JDBC.
+In file 'es-echo-response-1m.json' we use `elasticsearch-output` string as a value of the ``type`` field. It means that we will use ElasticSearch as output of our sj-module. Other possible variants are REST and JDBC.
 
 So, for ElasticSearch destination type we shall use appropriate builder in 'getOutputEntity' (there are three of them - one for each type) and just describe all fields we have::
 
