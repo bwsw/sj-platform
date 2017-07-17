@@ -3,6 +3,8 @@ Testing Modules on Simulators
 
 .. warning:: *The section is under development!*
 
+Stream Juggler provides 
+
 .. _Input_Engine_Simulator:
 
 Input Engine Simulator
@@ -76,13 +78,13 @@ If you want to see what the executor returns after processing, Input Engine Simu
  val evictionPolicy = InputInstanceEvictionPolicy(EngineLiterals.fixTimeEvictionPolicy, hazelcast)
 
  val simulator = new InputEngineSimulator(executor, evictionPolicy, ",")
- simulator.prepare(Seq("1", "2", "a", "3", "b")) // byte buffer in simulator will be contatins "1,2,a,3,b,"
+ simulator.prepare(Seq("1", "2", "a", "3", "b")) // byte buffer in simulator will contain "1,2,a,3,b,"
 
  val outputDataList = simulator.process(duplicateCheck = true)
  println(outputDataList)
 
 
-For more complicated examples see: `sj-csv-input-test <https://github.com/bwsw/sj-platform/blob/develop/contrib/sj-platform/sj-csv-input/src/test/scala/com/bwsw/sj/module/input/csv/CSVInputExecutorTests.scala>`, `sj-regex-input-test <https://github.com/bwsw/sj-platform/blob/develop/contrib/sj-platform/sj-regex-input/src/test/scala/com/bwsw/sj/module/input/regex/RegexInputExecutorTests.scala>`.
+For more complicated examples see: `sj-csv-input-test <https://github.com/bwsw/sj-platform/blob/develop/contrib/sj-platform/sj-csv-input/src/test/scala/com/bwsw/sj/module/input/csv/CSVInputExecutorTests.scala>`_, `sj-regex-input-test <https://github.com/bwsw/sj-platform/blob/develop/contrib/sj-platform/sj-regex-input/src/test/scala/com/bwsw/sj/module/input/regex/RegexInputExecutorTests.scala>`_.
 
 .. _Regular_Engine_Simulator:
 
