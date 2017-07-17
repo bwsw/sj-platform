@@ -109,7 +109,7 @@ Constructor arguments
  "executor", "RegularStreamingExecutor[T]", "Implementation of a :ref:`regular_module` under testing"   
  "manager", "ModuleEnvironmentManagerMock", "Mock for StatefulModuleEnvironmentManager (see :ref:`Module-Environment-Manager-Mock`)"
 
-.. note:: T - the type of data received by Executor.
+.. important:: T - the type of data received by Executor.
 
 Provided methods
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -216,7 +216,7 @@ Constructor arguments
  "manager", "ModuleEnvironmentManagerMock", "Mock for StatefulModuleEnvironmentManager (see :ref:`Module-Environment-Manager-Mock`)"
  "batchCollector", "BatchCollector", "Implementation of :ref:`Batch-Collector`"
 
-.. note:: T - the type of data received by Executor
+.. important:: T - the type of data received by Executor
 
 Provided methods
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -237,15 +237,11 @@ Provided methods
  * ``entities`` - the list of incoming data
  * ``stream`` - the name of a stream of incoming data
 
-* ``process(batchesNumberBeforeIdle: Int = 0,`` 
-
-       ``&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; window: Int,``
-       
-       ``&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; slidingInterval: Int,``
-       
-       ``&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; saveFullState: Boolean = false,`` 
-       
-       ``&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; removeProcessedEnvelopes: Boolean = true): BatchSimulationResult`` - sends all envelopes from local buffer and returns output streams, state and envelopes that haven't been processed (see :ref:`Batch-Simulation-Result`). This method retrieves batches using ``batchCollector``, creates a window repository and invoke ``onWindow``, ``onEnter``, ``onLeaderEnter``, ``onBeforeCheckpoint``, ``onBeforeStateSave`` methods of Executor for *every* created window repository. At the end of this method all envelopes will be removed from ``batchCollector``.
+* ``process(batchesNumberBeforeIdle: Int = 0,
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; window: Int,
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; slidingInterval: Int,
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; saveFullState: Boolean = false, 
+       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; removeProcessedEnvelopes: Boolean = true): BatchSimulationResult`` - sends all envelopes from local buffer and returns output streams, state and envelopes that haven't been processed (see :ref:`Batch-Simulation-Result`). This method retrieves batches using ``batchCollector``, creates a window repository and invoke ``onWindow``, ``onEnter``, ``onLeaderEnter``, ``onBeforeCheckpoint``, ``onBeforeStateSave`` methods of Executor for *every* created window repository. At the end of this method all envelopes will be removed from ``batchCollector``.
  * ``batchesNumberBeforeIdle`` - the number of retrieved batches between invocations of ``executor.onIdle()`` ('0' by default). '0' means that ``executor.onIdle()`` will never be called.
  * ``window`` - count of batches that will be contained into a window (see "Batch-streaming instance fields" at :ref:`Rest-API-Instance-Create`.
  * ``slidingInterval`` - the interval at which a window will be shifted (count of processed batches that will be removed from the window) (see "Batch-streaming instance fields" at :ref:`Rest-API-Instance-Create`.
