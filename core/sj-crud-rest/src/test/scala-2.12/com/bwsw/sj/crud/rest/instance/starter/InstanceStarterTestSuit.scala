@@ -399,7 +399,7 @@ class InstanceStarterTestSuit extends FlatSpec with Matchers with PrivateMethodT
     val instanceManager = mock[InstanceDomainRenewer]
 
     //act and assert
-    assertThrows[InterruptedException](instanceStarterMock(marathonManager, instanceManager) invokePrivate waitForFrameworkToStart())
+    assertThrows[IllegalStateException](instanceStarterMock(marathonManager, instanceManager) invokePrivate waitForFrameworkToStart())
     verify(marathonManager, times(1)).destroyMarathonApplication(frameworkName)
     verify(instanceManager, times(1)).updateFrameworkStage(instanceMock, EngineLiterals.failed)
     verify(instanceManager, times(1)).updateInstanceRestAddress(instanceMock, None)
