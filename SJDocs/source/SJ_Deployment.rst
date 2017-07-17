@@ -8,14 +8,14 @@ Overall Deployment Infrastructure
 
 .. warning:: The section is under development!
 
-.. _Mesos_deployment::
+.. _Mesos_deployment:
 
 Mesos Deployment
 --------------------
 
 .. warning:: The section is under development!
 
-.. _Minimesos_deployment::
+.. _Minimesos_deployment:
 
 Minimesos Deployment
 ----------------------------
