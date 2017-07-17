@@ -2254,7 +2254,7 @@ Execution plan example::
 
 .. note:: The execution plan doesn't exist in instances of an input module. An instance of an input-module contains a 'tasks' field.
 
-Each task has a name, host and port. The host and port defines an address to which the data should be sent for the input module to process them.
+Each task has a name, host and port. A host and a port define an address to which the data should be sent for the input module to process them.
 
 Json format of 'tasks' field for instance of input module::
 
