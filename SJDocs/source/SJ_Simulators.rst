@@ -221,12 +221,12 @@ Provided methods
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 * ``prepareState(state: Map[String, Any])`` - loads state in a state storage.
- * ``state`` - key/value map.
+ - ``state`` - key/value map.
 
 * ``prepareTstream(entities: Seq[T], stream: String, consumerName: String = "default-consumer-name"): Long`` - creates *one* t-stream envelope (``TStreamEnvelope[T]`` type) and saves it in a local buffer. Returns ID of the envelope.
- * ``entities`` - the list of incoming data.
- * ``stream`` - the name of a stream with incoming data.
- * ``consumerName`` - the name of a consumer ('default-consumer-name' by default).
+ - ``entities`` - the list of incoming data.
+ - ``stream`` - the name of a stream with incoming data.
+ - ``consumerName`` - the name of a consumer ('default-consumer-name' by default).
 
 * ``prepareKafka(entity: T, stream: String): Long`` - creates *one* kafka envelope ('KafkaEnvelope[T]' type) and saves it in a local buffer. Returns ID of that envelope.
  * ``entity`` - incoming data
