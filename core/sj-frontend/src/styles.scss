@@ -25,6 +25,9 @@ header.navbar {
     background: none;
   }
 }
+tbody tr {
+  cursor: pointer;
+}
 
 /* Form styles */
 label.required::after {

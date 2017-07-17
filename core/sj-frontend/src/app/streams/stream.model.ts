@@ -6,7 +6,7 @@ export class StreamModel extends BaseModel {
   service: string;
   type: string;
   tags: string[];
-  partitions: number;
+  partitions: number = 1;
   replicationFactor: number;
   force = false;
   primary: string;

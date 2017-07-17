@@ -58,6 +58,13 @@
 
                 <button type="button"
                         class="btn btn-sm btn-secondary"
+                        title="Clone instance"
+                        (click)="cloneInstance(instance, CreateInstance)">
+                  <i class="fa fa-clone"></i>
+                </button>
+
+                <button type="button"
+                        class="btn btn-sm btn-secondary"
                         *ngIf="instance.restAddress"
                         [disabled]="instance.status === 'starting'"
                         title="Show instance tasks"
@@ -102,7 +109,7 @@
   <!-- Detailed info -->
   <div class="col col-xs-4">
     <div class="card">
-      <div class="card-header">Detailed information about node</div>
+      <div class="card-header">Instance details</div>
       <div class="card-block">
         <div class="overflow-x-scroll">
           <ul *ngIf="currentInstance">
@@ -254,16 +261,16 @@
       <div class="modal-body">
 
         <!-- Clone from existing component -->
-        <fieldset class="form-check">
+        <!--fieldset class="form-check">
           <label class="form-check-label"><input class="form-check-input" [(ngModel)]="cloneInstance" (click)="clearInstance()" type="checkbox">&nbsp;Clone from
             existing instance</label>
-        </fieldset>
+        </fieldset-->
 
         <!-- Create instance form -->
         <form #instanceForm="ngForm" *ngIf="isFormReady" (ngSubmit)="createInstance(CreateInstance)">
 
           <!-- Choose instnce -->
-          <fieldset *ngIf="cloneInstance" class="form-group row">
+          <!--fieldset *ngIf="isInstanceClone" class="form-group row">
             <label class="col-form-label col-sm-2 required">Choose instance</label>
             <div class="col col-sm-10">
               <select [(ngModel)]="cloningInstance" name="instanceToClone"
@@ -272,11 +279,11 @@
                 <option *ngFor="let instance of cloneInstancesList" [ngValue]="instance">{{instance.name}}</option>
               </select>
             </div>
-          </fieldset>
+          </fieldset-->
 
           <!-- Choose module -->
-          <fieldset *ngIf="!cloneInstance" class="form-group row">
-            <label class="col-form-label col-sm-2 required">Choose module</label>
+          <fieldset *ngIf="!isInstanceClone" class="form-group row">
+            <label class="col-form-label col-sm-2 required">Module</label>
             <div class="col col-sm-10">
               <select [(ngModel)]="newInstance.module" name="instanceModule" required
                       class="form-control">
@@ -288,7 +295,7 @@
           </fieldset>
 
           <!-- Module -->
-          <fieldset *ngIf="cloneInstance && newInstance.module" class="form-group row">
+          <fieldset *ngIf="isInstanceClone && newInstance.module" class="form-group row">
             <label class="col-form-label col-sm-2 required">Module</label>
             <div class="col col-sm-10">
               <select disabled [(ngModel)]="newInstance.module" name="instanceModule" required
@@ -561,8 +568,8 @@
             <fieldset class="form-group row">
               <label class="col-form-label col-sm-2">Options</label>
               <div class="col col-sm-10">
-                <input [(ngModel)]="newInstance.options" validJson name="instanceOptions" type="text"
-                       #instanceOptions="ngModel" class="form-control">
+                <textarea [(ngModel)]="newInstance.options" validJson name="instanceOptions"
+                          #instanceOptions="ngModel" class="form-control"></textarea>
               </div>
             </fieldset>
 

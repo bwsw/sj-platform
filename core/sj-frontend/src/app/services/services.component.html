@@ -72,7 +72,7 @@
   <!-- Detailed info -->
   <div class="col col-xs-4">
     <div class="card">
-      <div class="card-header">Detailed information about node</div>
+      <div class="card-header">Service details</div>
       <div class="card-block">
         <div class="overflow-x-scroll">
           <ul *ngIf="currentService">
@@ -127,7 +127,7 @@
         <form #serviceForm="ngForm" (ngSubmit)="createService(CreateService)" class="form-create-entity">
           <!-- Type -->
           <fieldset class="form-group row">
-            <label class="col-sm-2 col-form-label required">Choose type</label>
+            <label class="col-sm-2 col-form-label required">Type</label>
             <div class="col-sm-10">
               <select required [(ngModel)]="newService.type" name="serviceType"
                       class="form-control">
@@ -184,6 +184,18 @@
             </div>
           </fieldset>
 
+          <!-- Connection Type -->
+          <fieldset *ngIf="newService.type" class="form-group row">
+            <label class="col-sm-2 col-form-label required">Connection type</label>
+            <div class="col-sm-10">
+              <select [(ngModel)]="newService.connectionType" name="conntype" required
+                      class="form-control">
+                <option>http</option>
+                <option>https</option>
+              </select>
+            </div>
+          </fieldset>
+
           <!-- Provider -->
           <fieldset *ngIf="newService.type" class="form-group row">
             <label class="col-sm-2 col-form-label required">Provider</label>
@@ -218,7 +230,7 @@
           <fieldset *ngIf="newService.type === 'REST'" class="form-group row">
             <label class="col-sm-2 col-form-label">Base path</label>
             <div class="col-sm-10">
-              <input [(ngModel)]="newService.basePath" name="serviceToken" type="text"
+              <input [(ngModel)]="newService.basePath" name="basePath" type="text"
                      class="form-control">
             </div>
           </fieldset>
@@ -227,8 +239,12 @@
           <fieldset *ngIf="newService.type === 'REST'" class="form-group row">
             <label class="col-sm-2 col-form-label">Http version</label>
             <div class="col-sm-10">
-              <input [(ngModel)]="newService.httpVersion" name="serviceToken" type="text"
-                     class="form-control">
+              <select [(ngModel)]="newService.httpVersion" name="httpVersion"
+                      class="form-control">
+                <option>1.0</option>
+                <option selected>1.1</option>
+                <option>2</option>
+              </select>
             </div>
           </fieldset>
 
@@ -236,8 +252,9 @@
           <fieldset *ngIf="newService.type === 'REST'" class="form-group row">
             <label class="col-sm-2 col-form-label">Headers</label>
             <div class="col-sm-10">
-              <input [(ngModel)]="newService.headers" validJson name="serviceToken" type="text"
-                     class="form-control">
+              <textarea [(ngModel)]="newService.headers" validJson name="headers"
+                        placeholder="use JSON notation"
+                        class="form-control"></textarea>
             </div>
           </fieldset>
 

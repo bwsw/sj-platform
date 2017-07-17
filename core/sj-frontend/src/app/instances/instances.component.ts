@@ -40,7 +40,7 @@ export class InstancesComponent implements OnInit, AfterViewChecked, OnDestroy {
   public currentInstance: InstanceModel;
   public currentInstanceTasks: {};
   public newInstance: InstanceModel;
-  public cloneInstance: boolean = false;
+  public isInstanceClone: boolean = false;
   public cloningInstance: InstanceModel;
   public instanceForm: NgForm;
   public showSpinner: boolean;
@@ -182,8 +182,7 @@ export class InstancesComponent implements OnInit, AfterViewChecked, OnDestroy {
     this.getInstanceInfo(instance);
   }
 
-  public createByClone(instanceIndex: number) {
-    const instance = this.cloneInstancesList[instanceIndex];
+  public createByClone(instance: InstanceModel) {
     this.instancesService.getInstanceInfo(instance)
       .subscribe(
         instanceInfo => {
@@ -217,6 +216,12 @@ export class InstancesComponent implements OnInit, AfterViewChecked, OnDestroy {
           }
         },
         error => this.errorMessage = <any>error);
+  }
+
+  public cloneInstance(instance: InstanceModel, modal: ModalDirective) {
+    this.isInstanceClone = true;
+    this.createByClone(instance);
+    modal.show();
   }
 
   public createInstance(modal: ModalDirective) {
