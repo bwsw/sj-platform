@@ -28,9 +28,10 @@ Constructor arguments
 .. note:: `*` - required field
 .. important:: T - is a type of data created by the executor 
 
-The data record is a string that will be parsed by @executor.parse()@ to some entity.
+The data record is a string that will be parsed by ``executor.parse()`` to some entity.
 
 The simulator provides the following methods:
+
 * ``prepare(record: String)`` - writes one data record to a byte buffer.
 * ``prepare(records: Seq[String])`` - writes a collection of data records to a byte buffer.
 * ``process(duplicateCheck: Boolean, clearBuffer: Boolean = true): Seq[OutputData[T]]`` - sends byte buffer to the executor as long as it can tokenize the buffer. The ``duplicateCheck`` argument indicates that every envelope has to be checked on duplication, the ``clearBuffer`` argument indicates that byte buffer with data records has to be cleared after processing ('true' by default). Method returns list of :ref:`Input_Engine_Simulator_Output_Data`.
@@ -49,7 +50,7 @@ Provides information on the processing of incoming data by the :ref:`input_modul
 
  "inputEnvelope", "Option[InputEnvelope[T]]", "Result of the ``executor.parse()`` method"
  "isNotDuplicate", "Option[Boolean]", "Indicates that ``inputEnvelope`` is not a duplicate if ``inputEnvelope`` is defined; otherwise it is 'None' "
- "response", "InputStreamingResponse" , "Response that will be sent to a client after an ``inputEnvelope`` has been processed"
+ "response", "InputStreamingResponse", "Response that will be sent to a client after an ``inputEnvelope`` has been processed"
 
 .. important:: T - is a type of data created by the executor 
 
