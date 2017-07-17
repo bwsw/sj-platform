@@ -41,22 +41,14 @@ object TempHelperForConfigSetup {
   def setupConfigs(): Unit = {
     configService.save(ConfigurationSettingDomain(ConfigLiterals.frameworkTag, "com.bwsw.fw-1.0", ConfigLiterals.systemDomain))
 
-    configService.save(ConfigurationSettingDomain(
-      ConfigurationSetting.createConfigurationSettingName(ConfigLiterals.systemDomain, regularStreamingValidatorClass),
-      "com.bwsw.sj.crud.rest.validator.instance.RegularInstanceValidator",
-      ConfigLiterals.systemDomain))
-    configService.save(ConfigurationSettingDomain(
-      ConfigurationSetting.createConfigurationSettingName(ConfigLiterals.systemDomain, batchStreamingValidatorClass),
-      "com.bwsw.sj.crud.rest.validator.instance.BatchInstanceValidator",
-      ConfigLiterals.systemDomain))
-    configService.save(ConfigurationSettingDomain(
-      ConfigurationSetting.createConfigurationSettingName(ConfigLiterals.systemDomain, outputStreamingValidatorClass),
-      "com.bwsw.sj.crud.rest.validator.instance.OutputInstanceValidator",
-      ConfigLiterals.systemDomain))
-    configService.save(ConfigurationSettingDomain(
-      ConfigurationSetting.createConfigurationSettingName(ConfigLiterals.systemDomain, inputStreamingValidatorClass),
-      "com.bwsw.sj.crud.rest.validator.instance.InputInstanceValidator",
-      ConfigLiterals.systemDomain))
+  configService.save(ConfigurationSettingDomain(ConfigurationSetting.createConfigurationSettingName(ConfigLiterals.systemDomain, "regular-streaming-validator-class"),
+    "com.bwsw.sj.crud.rest.instance.validator.RegularInstanceValidator", ConfigLiterals.systemDomain))
+  configService.save(ConfigurationSettingDomain(ConfigurationSetting.createConfigurationSettingName(ConfigLiterals.systemDomain, "batch-streaming-validator-class"),
+    "com.bwsw.sj.crud.rest.instance.validator.BatchInstanceValidator", ConfigLiterals.systemDomain))
+  configService.save(ConfigurationSettingDomain(ConfigurationSetting.createConfigurationSettingName(ConfigLiterals.systemDomain, "output-streaming-validator-class"),
+    "com.bwsw.sj.crud.rest.instance.validator.OutputInstanceValidator", ConfigLiterals.systemDomain))
+  configService.save(ConfigurationSettingDomain(ConfigurationSetting.createConfigurationSettingName(ConfigLiterals.systemDomain, "input-streaming-validator-class"),
+    "com.bwsw.sj.crud.rest.instance.validator.InputInstanceValidator", ConfigLiterals.systemDomain))
 
     configService.save(ConfigurationSettingDomain(
       ConfigLiterals.marathonTag,

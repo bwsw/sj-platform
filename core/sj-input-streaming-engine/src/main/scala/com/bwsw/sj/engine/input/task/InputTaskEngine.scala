@@ -67,7 +67,7 @@ abstract class InputTaskEngine(manager: InputTaskManager,
   private val environmentManager = createModuleEnvironmentManager()
   private val executor: InputStreamingExecutor[AnyRef] = manager.getExecutor(environmentManager)
   private val hazelcastMapName: String = instance.name + "-" + "inputEngine"
-  private val connectionRepository = inject[ConnectionRepository]
+
 
   private val applicationConfig = ConfigFactory.load()
   private val tcpIpMembers = applicationConfig.getString(InputEngineConfigNames.hosts).split(",")
@@ -82,6 +82,10 @@ abstract class InputTaskEngine(manager: InputTaskManager,
   private val evictionPolicy = InputInstanceEvictionPolicy(instance.evictionPolicy, hazelcast)
   protected val checkpointInterval: Long = instance.checkpointInterval
 
+  //TODO find trouble with ConnectionRepository injection.
+  //TODO It seems like ConnectionRepository injected after InputTaskEngine creation.
+//  private val connectionRepository = inject[ConnectionRepository]
+
   /**
     * Set of channel contexts related to the input envelopes to send a response to client
     * that a checkpoint has been initiated
@@ -91,10 +95,10 @@ abstract class InputTaskEngine(manager: InputTaskManager,
   addProducersToCheckpointGroup()
 
   private def createModuleEnvironmentManager(): InputEnvironmentManager = {
-    val streamService = connectionRepository.getStreamRepository
+    val streamService = inject[ConnectionRepository].getStreamRepository
     val taggedOutputs = instance.outputs.flatMap(x => streamService.get(x))
 
-    new InputEnvironmentManager(instance.options, taggedOutputs, connectionRepository.getFileStorage)
+    new InputEnvironmentManager(instance.options, taggedOutputs, inject[ConnectionRepository].getFileStorage)
   }
 
   private def addProducersToCheckpointGroup(): Unit = {

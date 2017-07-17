@@ -22,7 +22,6 @@ import java.util.Properties
 
 import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
 
-import scala.collection.mutable
 import scala.util.Random
 
 /**
@@ -57,7 +56,7 @@ class DataSender(address: String, topic: String, words: Seq[String], separator: 
       while (message.getBytes.length < messageSize)
         message += separator + words(Random.nextInt(words.length))
 
-      val record = new ProducerRecord[String, String](topic, message.mkString(separator))
+      val record = new ProducerRecord[String, String](topic, message)
       producer.send(record)
     }
 
