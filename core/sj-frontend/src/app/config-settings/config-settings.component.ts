@@ -37,9 +37,6 @@ export class ConfigSettingsComponent implements OnInit {
       .subscribe(
         response => {
           this.settingsList = response.configSettings;
-          if (this.settingsList.length > 0) {
-            this.currentSetting = this.settingsList[0];
-          }
         },
         error => this.showAlert({ message: error, type: 'danger', closable: true, timeout: 0 }));
   }

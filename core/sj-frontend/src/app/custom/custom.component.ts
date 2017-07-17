@@ -46,9 +46,6 @@ export class CustomComponent implements OnInit {
       .subscribe(
         response => {
           this.fileList = this.path === 'files' ? response.customFiles : response.customJars;
-          if (this.fileList.length > 0) {
-            this.currentFile = this.fileList[0];
-          }
         }
       );
   }
