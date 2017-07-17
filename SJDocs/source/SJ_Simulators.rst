@@ -3,7 +3,9 @@ Testing Modules on Simulators
 
 .. warning:: *The section is under development!*
 
-Stream Juggler provides 
+Stream Juggler provides a user with a range of simulators for module testing purposes. A simulator is a ready-to-use environment that allows you to rapidly test modules during the development process.
+
+Four types of simulators is provided - one per each module type. Choose that you want to use in accordance with the type of a module you want to test. And follow the instructions below.
 
 .. _Input_Engine_Simulator:
 
