@@ -1,0 +1,133 @@
+/* You can add global styles to this file, and also import other style files */
+/* Logo styles */
+header.navbar {
+  a.navbar-brand {
+    background-image: none;
+    text-align: center;
+    font-size: 0;
+    line-height: 38px;
+    img {
+      max-width: 100%;
+      max-height: 90%;
+    }
+  }
+}
+
+
+/* Table action buttons */
+.actions-column {
+  width: 1%;
+  white-space: nowrap;
+  text-align: right;
+  .btn.btn-sm {
+    padding: 0 0.2rem;
+    border: none;
+    background: none;
+  }
+}
+
+/* Form styles */
+label.required::after {
+  content: '*';
+  color: #ff706f;
+  padding-left: 3px;
+}
+
+
+/* Action link */
+.action-link {
+  color: #20a8d8;
+  border-bottom: 1px dashed transparent;
+  cursor: pointer;
+  &:hover, &:focus {
+    color: #167495;
+    border-bottom: 1px dashed #167495;
+  }
+}
+
+/* Button upload */
+.btn-upload {
+  input {
+    display: none;
+  }
+  input[type="file"] {
+    display: none;
+  }
+  &.inProgress {
+    pointer-events: none;
+  }
+}
+
+
+.upload-progress {
+  float: right;
+  margin-left: 10px;
+  margin-top: 8px;
+}
+
+.table-wrapper, .overflow-x-scroll {
+  overflow-x: scroll;
+}
+
+/* Stream tags*/
+ul.tags {
+  display: block;
+  width: 100%;
+  padding: 6px 12px;
+  line-height: 1.4;
+  color: #555;
+  background-color: #fff;
+  background-image: none;
+  border: 1px solid #ccc;
+}
+li.tag {
+  font-size: initial;
+  font-weight: normal;
+  background-color: #20a8d8;
+  color: #FFFFFF;
+  margin-right: 2px;
+  span {
+    margin-right: 2px;
+  }
+  &.nopadding {
+    color: #20a8d8;
+    background-color: #FFFFFF;
+    padding: 0px;
+    input{
+      border: 0px none;
+      outline: none;
+      padding: 0px;
+      box-shadow: none;
+    }
+  }
+}
+
+/*filter-box*/
+.right-inner-addon {
+  margin: 0 5px 10px;
+}
+
+/*mozila validated input style disable*/
+:-moz-submit-invalid {
+  box-shadow: none;
+}
+
+:-moz-ui-invalid {
+  box-shadow:none;
+}
+input, select {
+  &:invalid {
+    box-shadow: 0.5px 0.5px 0.5px 0.5px rgba(255, 0, 0, 0.25);
+  }
+  &.ng-untouched {
+    box-shadow:none;
+  }
+}
+
+/* detail view */
+li {
+  .title {
+    font-weight: bold;
+    padding-right: 5px;
+  }
+}

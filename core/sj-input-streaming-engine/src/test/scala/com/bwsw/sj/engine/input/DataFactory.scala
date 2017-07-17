@@ -60,7 +60,7 @@ object DataFactory {
   private val partitions = 1
   private val serializer = new JsonSerializer()
   private val zookeeperProvider = new ProviderDomain(zookeeperProviderName, zookeeperProviderName, zookeeperHosts.split(","), "", "", ProviderLiterals.zookeeperType)
-  private val tstrqService = new TStreamServiceDomain(tstreamServiceName, tstreamServiceName, zookeeperProvider, TestStorageServer.prefix, TestStorageServer.token)
+  private val tstrqService = new TStreamServiceDomain(tstreamServiceName, tstreamServiceName, zookeeperProvider, TestStorageServer.defaultPrefix, TestStorageServer.defaultToken)
   private val tstreamFactory = new TStreamsFactory()
   setTStreamFactoryProperties()
   val storageClient = tstreamFactory.getStorageClient()

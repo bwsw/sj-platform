@@ -22,13 +22,16 @@ npm start
 ## Use NPM scripts
 to build an optimized version of your application in /dist
 ```bash
-npm run build.prod
+npm run build
 ```
-to build and serve an optimized version of your application
+to start tslint and check application
 ```bash
-npm run serve.prod
+npm run tslint
 ```
-
+to test application
+```bash
+npm run test
+```
 
 ## Code style agreements
 Use this article to https://github.com/Microsoft/TypeScript/wiki/Coding-guidelines 

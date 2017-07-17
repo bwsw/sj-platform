@@ -27,24 +27,13 @@ import com.typesafe.config.ConfigFactory
 /**
   * TTS server to launch benchmarks
   */
-object TestStorageServer {
+class TestStorageServer(token: String, prefix: String, streamPath: String, zkHosts: String, host: String) {
 
   private val serverBuilder = new ServerBuilder()
 
   private def getTmpDir(): String = Files.createTempDir().toString
 
-  val token = "token"
-  val prefix = "/bench-prefix/master"
-  val streamPath = "/bench-prefix/streams"
-  val rootConfig = "test-storage-server"
-  val zkHostsConfig = rootConfig + ".zookeeper.hosts"
-  val hostConfig = rootConfig + ".host"
-
   def start(): Unit = {
-    val config = ConfigFactory.load()
-    val zkHosts = config.getString(zkHostsConfig)
-    val host = config.getString(hostConfig)
-
     val transactionServer = serverBuilder.withZookeeperOptions(ZookeeperOptions(endpoints = zkHosts, prefix))
       .withBootstrapOptions(BootstrapOptions(host))
       .withAuthOptions(AuthOptions(token))
@@ -57,6 +46,30 @@ object TestStorageServer {
   }
 }
 
-object Server extends App {
-  TestStorageServer.start()
+object TestStorageServer {
+  val defaultToken = "token"
+  val defaultPrefix = "/bench-prefix/master"
+  val defaultStreamPath = "/bench-prefix/streams"
 }
+
+object Server extends App {
+
+  import TestStorageServer._
+
+  val rootConfig = "test-storage-server"
+  val zkHostsConfig = rootConfig + ".zookeeper.hosts"
+  val hostConfig = rootConfig + ".host"
+
+  val config = ConfigFactory.load()
+  val zkHosts = config.getString(zkHostsConfig)
+  val host = config.getString(hostConfig)
+
+  new TestStorageServer(
+    defaultToken,
+    defaultPrefix,
+    defaultStreamPath,
+    zkHosts,
+    host).start()
+}
+
+class Server

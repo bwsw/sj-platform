@@ -1,0 +1,171 @@
+<sj-spinner [isRunning]="showSpinner" [progress]="true"></sj-spinner>
+
+<div class="row">
+  <!-- Content -->
+  <div class="col col-xs-8">
+    <div class="card">
+      <div class="card-block">
+        <!-- Card title -->
+        <div class="row">
+          <div class="col col-xs-4"><h4 class="card-title">Modules list</h4></div>
+          <div class="col col-xs-8">
+            <label [ngClass]="{inProgress:isUploading}" class="btn btn-primary btn-upload pull-right ml-1 mb-1">
+              <span *ngIf="!isUploading"><i class="fa fa-upload mr-1"></i>Upload module</span>
+              <i *ngIf="isUploading" class="fa fa-spinner fa-spin" aria-hidden="true"></i>
+              <input type="file" (change)="uploadFile($event)">
+            </label>
+
+            <sj-search-box class="pull-right"
+                           (update)="term = $event"></sj-search-box>
+            <sj-filter class="pull-right" [filterList]="moduleTypes"
+                       (update)="typeterm = $event"></sj-filter>
+          </div>
+        </div>
+
+        <!-- Alerts -->
+        <sj-alerts [alerts]="alerts"></sj-alerts>
+
+        <!-- Modules list -->
+        <div class="table-wrapper">
+          <table class="table table-hover table-sm mt-1 mb-0">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Version</th>
+                <th>Size</th>
+                <th class="actions-column">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngIf="!moduleList || (moduleList && moduleList.length === 0)">
+                <td colspan="20" class="text-center">No modules have been found.</td>
+              </tr>
+
+              <tr *ngFor="let module of moduleList | listFilter : { name: term, type: typeterm}"
+                  [ngClass]="{ 'table-info': module === currentModule }"
+                  (click)="selectModule(module)">
+                <td>{{ module.moduleName }}</td>
+                <td>{{ module.moduleType }}</td>
+                <td>{{ module.moduleVersion }}</td>
+                <td>{{ module.size | fileSize : { decimals: 1 } }}</td>
+                <td class="actions-column">
+                  <button type="button"
+                          class="btn btn-sm btn-secondary"
+                          title="Download module"
+                          (click)="downloadModule(module)">
+                    <i class="fa fa-download"></i>
+                  </button>
+                  <button type="button"
+                          class="btn btn-sm btn-secondary"
+                          title="Delete module"
+                          (click)="deleteModuleConfirm(DeleteModule, module)">
+                    <i class="fa fa-trash"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detailed info -->
+  <div class="col col-xs-4">
+    <div class="card">
+      <div class="card-header">Detailed information about node</div>
+      <div class="card-block">
+        <div class="overflow-x-scroll">
+          <ul *ngIf="currentModuleSpecification">
+            <li><span class="title">Name:</span>{{currentModuleSpecification.name}}</li>
+            <li *ngIf="currentModuleSpecification.description"><span class="title">Description:</span>{{currentModuleSpecification.description}}</li>
+            <li><span class="title">Version:</span>{{currentModuleSpecification.version}}</li>
+            <li><span class="title">Author:</span>{{currentModuleSpecification.author}}</li>
+            <li><span class="title">Licence:</span>{{currentModuleSpecification.license}}</li>
+            <li><span class="title">Inputs:</span>
+              <ul>
+                <li>Cardinality:
+                  <ul>
+                    <li *ngFor="let parameter of currentModuleSpecification.inputs.cardinality">{{parameter}}</li>
+                  </ul>
+                </li>
+                <li>Types:
+                  <ul>
+                    <li *ngFor="let type of currentModuleSpecification.inputs.types">{{type}}</li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+            <li><span class="title">Outputs:</span>
+              <ul>
+                <li>Cardinality:
+                  <ul>
+                    <li *ngFor="let parameter of currentModuleSpecification.outputs.cardinality">{{parameter}}</li>
+                  </ul>
+                </li>
+                <li>Types:
+                  <ul>
+                    <li *ngFor="let type of currentModuleSpecification.outputs.types">{{type}}</li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+            <li *ngIf="currentModuleSpecification.moduleType">
+              <span class="title">Module-type:</span>{{currentModuleSpecification.moduleType}}
+            </li>
+            <li *ngIf="currentModuleSpecification.engineName">
+              <span class="title">Engine:</span>{{currentModuleSpecification.engine}}
+            </li>
+            <li *ngIf="currentModuleSpecification.options">
+              <span class="title">Options:</span>{{currentModuleSpecification.options | json}}
+            </li>
+            <li *ngIf="currentModuleSpecification.validateClass">
+              <span class="title">Validator-class:</span>{{currentModuleSpecification.validateClass}}
+            </li>
+            <li *ngIf="currentModuleSpecification.executorClass">
+              <span class="title">Executor-class:</span>{{currentModuleSpecification.executorClass}}
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div bsModal #DeleteModule="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-md">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" aria-label="Close" (click)="DeleteModule.hide()">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title">Delete confirmation</h4>
+      </div>
+
+      <div class="modal-body" *ngIf="currentModule && (blockingInstances.length === 0)">
+        <p>Do you really want to delete module "{{ currentModule.moduleName }}"? This action can not be
+          undone!</p>
+      </div>
+
+      <div class="modal-body" *ngIf="currentModule && (blockingInstances.length > 0)">
+        <p>Unable to delete module! Next instances are using the module: "{{ currentModule.moduleName }}"</p>
+        <ul>
+          <li *ngFor="let instance of blockingInstances">{{instance}}</li>
+        </ul>
+      </div>
+
+      <div class="modal-footer">
+        <template [ngIf]="currentModule && (blockingInstances.length === 0)">
+          <button type="button" class="btn btn-secondary" (click)="DeleteModule.hide()">Cancel</button>
+          <button type="button" class="btn btn-danger"
+                  (click)="deleteModule(DeleteModule)">Delete
+          </button>
+        </template>
+        <template [ngIf]="currentModule && (blockingInstances.length > 0)">
+          <button type="button" class="btn btn-primary" (click)="DeleteModule.hide()">OK</button>
+        </template>
+      </div>
+    </div>
+  </div>
+</div>

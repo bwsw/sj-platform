@@ -63,7 +63,8 @@ object Dependencies {
       .exclude("commons-logging", "commons-logging"),
     "org.scaldi" %% "scaldi" % "0.5.8",
     "org.mock-server" % "mockserver-netty" % "3.10.8" % "test",
-    "com.carrotsearch" % "java-sizeof" % "0.0.5"
+    "com.carrotsearch" % "java-sizeof" % "0.0.5",
+    "de.flapdoodle.embed" % "de.flapdoodle.embed.mongo" % "2.0.0"
   ))
 
   lazy val sjEngineCoreDependencies = Def.setting(Seq(
@@ -134,5 +135,9 @@ object Dependencies {
   lazy val sjTestDependencies = Def.setting(Seq(
     "org.scalatest" % "scalatest_2.12" % "3.0.1" % "test",
     "org.mockito" % "mockito-core" % "2.8.9" % "test"
+  ))
+
+  lazy val sjKafkaDataLoader = Def.setting(Seq(
+    "org.apache.kafka" % "kafka-clients" % "0.11.0.0"
   ))
 }

@@ -45,7 +45,7 @@ object SjInputServices {
 
 object SjInputModuleSetup extends App {
   LogManager.getLogManager.reset()
-  TempHelperForConfigSetup.main(Array())
+  TempHelperForConfigSetup.setupConfigs()
 
   loadModule(SjInputServices.inputModule, SjInputServices.fileStorage)
   createProviders(SjInputServices.providerService)
@@ -111,7 +111,7 @@ object SjInputModuleDestroy extends App {
   deleteInstance(SjInputServices.instanceService)
   deleteModule(SjInputServices.fileStorage, SjInputServices.inputModule.getName)
 
-  TempHelperForConfigDestroy.main(Array())
+  TempHelperForConfigDestroy.deleteConfigs()
   connectionRepository.close()
 
   println("DONE")

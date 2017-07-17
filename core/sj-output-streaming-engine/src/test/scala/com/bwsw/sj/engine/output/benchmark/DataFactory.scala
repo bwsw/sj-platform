@@ -124,7 +124,7 @@ object DataFactory {
   private val zookeeperHosts = config.getString(BenchmarkConfigNames.zkHosts).split(",").map(host => host.trim)
   private val zookeeperProvider = new ProviderDomain(zookeeperProviderName, zookeeperProviderName,
     zookeeperHosts, "", "", ProviderLiterals.zookeeperType)
-  private val tstrqService = new TStreamServiceDomain(tstreamServiceName, tstreamServiceName, zookeeperProvider, TestStorageServer.prefix, TestStorageServer.token)
+  private val tstrqService = new TStreamServiceDomain(tstreamServiceName, tstreamServiceName, zookeeperProvider, TestStorageServer.defaultPrefix, TestStorageServer.defaultToken)
   private val tstreamFactory = new TStreamsFactory()
 
   setTStreamFactoryProperties()

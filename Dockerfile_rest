@@ -25,7 +25,7 @@ RUN echo "deb http://dl.bintray.com/sbt/debian /" | tee -a /etc/apt/sources.list
 RUN set -x && \
     apt-get update && \
     apt-get install -y curl bzip2 git make build-essential && \
-    curl -sL https://deb.nodesource.com/setup_4.x | bash - && \
+    curl -sL https://deb.nodesource.com/setup_6.x | bash - && \
     apt-get update && \
     apt-get install -y ca-certificates nodejs && \
     apt-get clean && \
@@ -41,13 +41,12 @@ COPY ./core/sj-frontend /opt/bin/juggler/core/sj-frontend
 #Prepare UI
 RUN cd /opt/bin/juggler/core/sj-frontend && \
     npm cache clear && \
-    npm install -g npm && \
     npm install -g n && \
     npm install -g typings && \
     npm install --unsafe-perm && \
-    npm run-script build.prod && \
+    npm run build && \
 #    mkdir /var/www && \
-    cp dist/prod/. /var/www/ -R && \
+    cp dist/. /var/www/ -R && \
     rm -rf /root/.npm *
 
 # Prepare Rest

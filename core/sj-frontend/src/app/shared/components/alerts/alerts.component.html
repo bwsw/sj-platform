@@ -1,0 +1,10 @@
+<div class="main-alerts mt-1">
+  <alert class="custom-alert"
+         *ngFor="let alert of alerts; let i = index"
+         type="{{alert.type}}"
+         dismissible="{{alert.closable}}"
+         dismissOnTimeout="{{getTimeOut(alert)}}"
+         (close)="closeAlert(i)">
+    {{ alert.message }}
+  </alert>
+</div>

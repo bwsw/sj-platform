@@ -18,4 +18,4 @@ WORKDIR $HOME/$APP_NAME
 
 RUN npm install
 
-CMD ["npm", "run", "serve.prod"]
+CMD ["npm", "run", "build"]

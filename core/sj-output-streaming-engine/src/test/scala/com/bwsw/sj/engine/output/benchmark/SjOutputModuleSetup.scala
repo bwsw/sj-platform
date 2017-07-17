@@ -39,7 +39,7 @@ import com.bwsw.sj.engine.output.benchmark.DataFactory._
   *         RESTFUL_HOSTS=
   */
 object SjESOutputModuleSetup extends App {
-  TempHelperForConfigSetup.main(Array())
+  TempHelperForConfigSetup.setupConfigs()
   val checkpointInterval = 3
   val checkpointMode = EngineLiterals.everyNthMode
   val partitions = 4
@@ -74,7 +74,8 @@ object SjESOutputModuleSetup extends App {
 }
 
 object SjJDBCOutputModuleSetup extends App {
-  TempHelperForConfigSetup.main(Array())
+  TempHelperForConfigSetup.setupConfigs()
+  TempHelperForConfigSetup.loadJdbcDriver()
   val checkpointInterval = 3
   val checkpointMode = EngineLiterals.everyNthMode
   val partitions = 4
@@ -110,7 +111,7 @@ object SjJDBCOutputModuleSetup extends App {
 }
 
 object SjRestOutputModuleSetup extends App {
-  TempHelperForConfigSetup.main(Array())
+  TempHelperForConfigSetup.setupConfigs()
   val checkpointInterval = 3
   val checkpointMode = EngineLiterals.everyNthMode
   val partitions = 4
