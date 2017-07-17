@@ -45,13 +45,20 @@ object SjInputServices {
 
 object SjInputModuleSetup extends App {
   LogManager.getLogManager.reset()
+
   TempHelperForConfigSetup.setupConfigs()
+  println("config loaded")
 
   loadModule(SjInputServices.inputModule, SjInputServices.fileStorage)
+  println("module loaded")
   createProviders(SjInputServices.providerService)
+  println("providers created")
   createServices(SjInputServices.serviceManager, SjInputServices.providerService)
+  println("services created")
   createStreams(SjInputServices.streamService, SjInputServices.serviceManager, outputCount)
+  println("streams created")
   createInstance(SjInputServices.serviceManager, SjInputServices.instanceService, checkpointInterval)
+  println("instances created")
 
   connectionRepository.close()
 

@@ -37,8 +37,6 @@ import com.typesafe.config.ConfigFactory
 import io.netty.buffer.ByteBuf
 import io.netty.channel.{ChannelFuture, ChannelHandlerContext}
 import org.slf4j.{Logger, LoggerFactory}
-import scaldi.Injectable.inject
-import scaldi.Injector
 
 
 /**
@@ -53,8 +51,8 @@ import scaldi.Injector
 abstract class InputTaskEngine(manager: InputTaskManager,
                                performanceMetrics: InputStreamingPerformanceMetrics,
                                channelContextQueue: ArrayBlockingQueue[ChannelHandlerContext],
-                               bufferForEachContext: scala.collection.concurrent.Map[ChannelHandlerContext, ByteBuf])
-                              (implicit injector: Injector) extends TaskEngine {
+                               bufferForEachContext: scala.collection.concurrent.Map[ChannelHandlerContext, ByteBuf],
+                               connectionRepository: ConnectionRepository) extends TaskEngine {
 
   import InputTaskEngine.logger
 
@@ -82,10 +80,6 @@ abstract class InputTaskEngine(manager: InputTaskManager,
   private val evictionPolicy = InputInstanceEvictionPolicy(instance.evictionPolicy, hazelcast)
   protected val checkpointInterval: Long = instance.checkpointInterval
 
-  //TODO find trouble with ConnectionRepository injection.
-  //TODO It seems like ConnectionRepository injected after InputTaskEngine creation.
-//  private val connectionRepository = inject[ConnectionRepository]
-
   /**
     * Set of channel contexts related to the input envelopes to send a response to client
     * that a checkpoint has been initiated
@@ -95,10 +89,10 @@ abstract class InputTaskEngine(manager: InputTaskManager,
   addProducersToCheckpointGroup()
 
   private def createModuleEnvironmentManager(): InputEnvironmentManager = {
-    val streamService = inject[ConnectionRepository].getStreamRepository
+    val streamService = connectionRepository.getStreamRepository
     val taggedOutputs = instance.outputs.flatMap(x => streamService.get(x))
 
-    new InputEnvironmentManager(instance.options, taggedOutputs, inject[ConnectionRepository].getFileStorage)
+    new InputEnvironmentManager(instance.options, taggedOutputs, connectionRepository.getFileStorage)
   }
 
   private def addProducersToCheckpointGroup(): Unit = {
@@ -337,16 +331,16 @@ object InputTaskEngine {
   def apply(manager: InputTaskManager,
             performanceMetrics: InputStreamingPerformanceMetrics,
             channelContextQueue: ArrayBlockingQueue[ChannelHandlerContext],
-            bufferForEachContext: scala.collection.concurrent.Map[ChannelHandlerContext, ByteBuf])
-           (implicit injector: Injector): InputTaskEngine = {
+            bufferForEachContext: scala.collection.concurrent.Map[ChannelHandlerContext, ByteBuf],
+            connectionRepository: ConnectionRepository): InputTaskEngine = {
 
     manager.inputInstance.checkpointMode match {
       case EngineLiterals.`timeIntervalMode` =>
         logger.info(s"Task: ${manager.taskName}. Input module has a '${EngineLiterals.timeIntervalMode}' checkpoint mode, create an appropriate task engine.")
-        new InputTaskEngine(manager, performanceMetrics, channelContextQueue, bufferForEachContext) with TimeCheckpointTaskEngine
+        new InputTaskEngine(manager, performanceMetrics, channelContextQueue, bufferForEachContext, connectionRepository) with TimeCheckpointTaskEngine
       case EngineLiterals.`everyNthMode` =>
         logger.info(s"Task: ${manager.taskName}. Input module has an '${EngineLiterals.everyNthMode}' checkpoint mode, create an appropriate task engine.")
-        new InputTaskEngine(manager, performanceMetrics, channelContextQueue, bufferForEachContext) with NumericalCheckpointTaskEngine
+        new InputTaskEngine(manager, performanceMetrics, channelContextQueue, bufferForEachContext, connectionRepository) with NumericalCheckpointTaskEngine
     }
   }
 }
