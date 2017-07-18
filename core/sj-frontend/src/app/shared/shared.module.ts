@@ -15,10 +15,13 @@ import { ServiceFilterPipe } from './pipes/service-filter.pipe';
 import { ProviderFilterPipe } from './pipes/provider-filter.pipe';
 import { StreamFilterPipe } from './pipes/stream-filter.pipe';
 import { FileSizePipe } from './pipes/file-size.pipe';
+import { JsonPrintPipe } from './pipes/json-print.pipe';
 import { SpinnerComponent } from './components/spinner/spinner.component';
 import { BreadcrumbsComponent } from './components/breadcrumbs/breadcrumbs.component';
 import { FooterComponent } from './components/footer/footer.component';
 import { AlertsComponent } from './components/alerts/alerts.component';
+import { CollapseDirective } from './directives/collapse.directive';
+import { ExtendedElementComponent } from './components/extended-element/extended-element.component';
 
 @NgModule({
   imports: [
@@ -37,13 +40,16 @@ import { AlertsComponent } from './components/alerts/alerts.component';
     FooterComponent,
     FilterComponent,
     AlertsComponent,
+    ExtendedElementComponent,
     // Pipes
     ListFilterPipe,
     OrderByPipe,
     ServiceFilterPipe,
     ProviderFilterPipe,
     StreamFilterPipe,
-    FileSizePipe
+    FileSizePipe,
+    JsonPrintPipe,
+    CollapseDirective
   ],
   exports: [
     // Components
@@ -55,6 +61,7 @@ import { AlertsComponent } from './components/alerts/alerts.component';
     FooterComponent,
     FilterComponent,
     AlertsComponent,
+    ExtendedElementComponent,
     // Pipes
     ListFilterPipe,
     OrderByPipe,
@@ -62,6 +69,8 @@ import { AlertsComponent } from './components/alerts/alerts.component';
     ProviderFilterPipe,
     StreamFilterPipe,
     FileSizePipe,
+    JsonPrintPipe,
+    CollapseDirective,
     // Modules
     CommonModule,
     FormsModule,

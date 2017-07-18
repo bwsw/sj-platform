@@ -32,6 +32,7 @@
               <th>Name</th>
               <th>Description</th>
               <th>Service</th>
+              <th>Date</th>
               <th class="actions-column">Actions</th>
             </tr>
             </thead>
@@ -52,6 +53,7 @@
                         (click)="getServiceInfo(ServiceInfo, stream.service)">{{ stream.service }}</span>
                 </span>
                 </td>
+                <td>{{ stream.creationDate }}</td>
                 <td class="actions-column">
                   <button type="button"
                           class="btn btn-sm btn-secondary"
@@ -302,6 +304,9 @@
                         || currentStreamService.type === 'RdsCoord') && currentStreamService.namespace">
             <span class="title">Namespace:</span>{{currentStreamService.namespace}}
           </li>
+          <li *ngIf="currentStreamService.httpScheme">
+            <span class="title">Http scheme:</span>{{currentStreamService.httpScheme}}
+          </li>
           <li *ngIf="currentStreamService.type !== 'TstrQ' && currentStreamService.provider">
             <span class="title">Provider:</span>{{currentStreamService.provider}}
           </li>
@@ -310,6 +315,17 @@
           </li>
           <li *ngIf="currentStreamService.type === 'KfkQ' && currentStreamService.zkNamespace">
             <span class="title">ZK namespace:</span>{{currentStreamService.zkNamespace}}
+          </li>
+          <li *ngIf="currentStreamService.type === 'REST' && currentStreamService.httpVersion">
+            <span class="title">Http version:</span>{{currentStreamService.httpVersion}}
+          </li>
+          <li *ngIf="currentStreamService.type === 'REST' && currentStreamService.headers &&
+                      (currentStreamService.headers | json) != '{}'">
+            <sj-extended-element [title]="'Headers'"
+                                 [content]="currentStreamService.headers | jsonPrint"></sj-extended-element>
+          </li>
+          <li *ngIf="currentStreamService.type === 'REST' && currentStreamService.basePath">
+            <span class="title">Base path:</span>{{currentStreamService.basePath}}
           </li>
         </ul>
         <fieldset class="form-actions">

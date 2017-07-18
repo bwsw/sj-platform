@@ -1,0 +1,6 @@
+<a href="javascript:void(0)"
+        (click)="isCollapsed = !isCollapsed">{{title}}
+</a>
+<div [collapse]="isCollapsed" class="card card-block card-header card-extended">
+  <div [innerHtml]="content"></div>
+</div>
