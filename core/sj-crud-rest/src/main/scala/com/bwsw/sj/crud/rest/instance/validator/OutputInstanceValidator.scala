@@ -31,7 +31,7 @@ import scala.collection.mutable.ArrayBuffer
 import scala.util.{Failure, Success, Try}
 
 /**
-  * Validator for [[OutputInstance]]
+  * Validator for [[com.bwsw.sj.common.si.model.instance.OutputInstance]]
   *
   * @author Kseniya Tomskikh
   */

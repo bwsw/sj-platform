@@ -22,10 +22,10 @@ import com.bwsw.sj.common.dal.repository.GenericMongoRepository
 import com.bwsw.sj.common.si.result.{CreationResult, DeletionResult}
 
 /**
-  * Provides methods to access entities in [[GenericMongoRepository]]
+  * Provides methods to access entities in [[com.bwsw.sj.common.dal.repository.GenericMongoRepository]]
   *
   * @tparam M type of entities
-  * @tparam T type of domain entities, storing in [[GenericMongoRepository]]
+  * @tparam T type of domain entities, storing in [[com.bwsw.sj.common.dal.repository.GenericMongoRepository]]
   */
 trait ServiceInterface[M, T] {
   protected val entityRepository: GenericMongoRepository[T]

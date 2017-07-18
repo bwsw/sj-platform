@@ -60,7 +60,7 @@ class LocalStorage(pathToLocalStorage: String) extends FileStorage {
   }
 
   /**
-    * Retrieve file as [[InputStream]]
+    * Retrieve file as [[java.io.InputStream]]
     */
   override def getStream(fileName: String): InputStream = {
     logger.debug(s"Try to get a file: '$fileName' from a local storage (path to local storage: $pathToLocalStorage).")

@@ -28,7 +28,8 @@ import scaldi.Injector
 import scala.collection.mutable
 
 /**
-  * Provides methods to access [[ConfigurationSetting]]s in [[GenericMongoRepository]]
+  * Provides methods to access [[com.bwsw.sj.common.si.model.config.ConfigurationSetting]]s
+  * in [[com.bwsw.sj.common.dal.repository.GenericMongoRepository]]
   */
 class ConfigSettingsSI(implicit injector: Injector) extends ServiceInterface[ConfigurationSetting, ConfigurationSettingDomain] {
   private val connectionRepository = inject[ConnectionRepository]

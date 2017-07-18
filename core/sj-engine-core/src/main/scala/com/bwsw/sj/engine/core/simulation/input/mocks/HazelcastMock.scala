@@ -22,7 +22,7 @@ import com.bwsw.common.hazelcast.{HazelcastConfig, HazelcastInterface}
 import com.hazelcast.core.IMap
 
 /**
-  * Mock for [[HazelcastInterface]]
+  * Mock for [[com.bwsw.common.hazelcast.HazelcastInterface]]
   *
   * @param config configuration parameters for hazelcast cluster
   * @author Pavel Tomskikh

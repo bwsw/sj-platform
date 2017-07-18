@@ -19,11 +19,11 @@
 package com.bwsw.sj.common.engine.core.entities
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import com.bwsw.sj.common.utils.StreamLiterals
+
 /**
- * Represents a message envelope that is received by an Executor for each message
- * that is received from a partition of a specific input stream [[StreamLiterals.types]]
- */
+  * Represents a message envelope that is received by an Executor for each message
+  * that is received from a partition of a specific input stream [[com.bwsw.sj.common.utils.StreamLiterals.types]]
+  */
 
 class Envelope extends Serializable {
   protected var streamType: String = _

@@ -32,7 +32,7 @@ import scala.collection.mutable.ArrayBuffer
 import scala.util.{Failure, Success, Try}
 
 /**
-  * Validator for [[BatchInstance]]
+  * Validator for [[com.bwsw.sj.common.si.model.instance.BatchInstance]]
   *
   * @author Kseniya Tomskikh
   */

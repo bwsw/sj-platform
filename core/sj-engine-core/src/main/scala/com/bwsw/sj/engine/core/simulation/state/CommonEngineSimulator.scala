@@ -47,7 +47,7 @@ class CommonEngineSimulator[T <: AnyRef](executor: StreamingExecutor with StateH
   }
 
   /**
-    * Creates [[TStreamEnvelope]] and saves it in a local buffer.
+    * Creates [[com.bwsw.sj.common.engine.core.entities.TStreamEnvelope]] and saves it in a local buffer.
     *
     * @param entities     incoming data
     * @param stream       name of stream
@@ -66,7 +66,7 @@ class CommonEngineSimulator[T <: AnyRef](executor: StreamingExecutor with StateH
   }
 
   /**
-    * Creates [[KafkaEnvelope]] and saves it in a local buffer
+    * Creates [[com.bwsw.sj.common.engine.core.entities.KafkaEnvelope]] and saves it in a local buffer
     *
     * @param entity incoming data
     * @param stream name of stream
@@ -83,8 +83,8 @@ class CommonEngineSimulator[T <: AnyRef](executor: StreamingExecutor with StateH
   }
 
   /**
-    * Creates [[KafkaEnvelope]]s and saves it in a local buffer.
-    * For each element from list creates a new [[KafkaEnvelope]].
+    * Creates [[com.bwsw.sj.common.engine.core.entities.KafkaEnvelope]]s and saves it in a local buffer.
+    * For each element from list creates a new [[com.bwsw.sj.common.engine.core.entities.KafkaEnvelope]].
     *
     * @param entities incoming data
     * @param stream   name of stream
@@ -115,7 +115,7 @@ class CommonEngineSimulator[T <: AnyRef](executor: StreamingExecutor with StateH
   }
 
   /**
-    * Invokes [[executor.onTimer(jitter)]]
+    * Invokes [[com.bwsw.sj.common.engine.TimerHandlers executor.onTimer(jitter)]]
     *
     * @param jitter Delay between a real response time and an invocation of this handler
     * @return output elements and state

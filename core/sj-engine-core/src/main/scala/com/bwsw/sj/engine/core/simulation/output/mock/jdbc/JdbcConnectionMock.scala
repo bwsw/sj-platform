@@ -23,10 +23,8 @@ import java.util.Properties
 import java.util.concurrent.Executor
 import java.{sql, util}
 
-import com.bwsw.sj.engine.core.simulation.output.JdbcRequestBuilder
-
 /**
-  * Mock of [[Connection]] for [[JdbcRequestBuilder]]
+  * Mock of [[java.sql.Connection]] for [[com.bwsw.sj.engine.core.simulation.output.JdbcRequestBuilder]]
   *
   * @author Pavel Tomskikh
   */

@@ -30,7 +30,10 @@ import com.bwsw.sj.engine.output.task.reporting.OutputStreamingPerformanceMetric
 import scala.collection.JavaConverters._
 
 /**
-  * @inheritdoc
+  * This class used in [[com.bwsw.sj.engine.output.task.OutputTaskEngine]] for sending data to a RESTful storage
+  *
+  * @param restOutputStream   stream indicating the specific RESTful storage
+  * @param performanceMetrics set of metrics that characterize performance of an output streaming module
   * @author Pavel Tomskikh
   */
 class RestOutputProcessor[T <: AnyRef](restOutputStream: RestStreamDomain,

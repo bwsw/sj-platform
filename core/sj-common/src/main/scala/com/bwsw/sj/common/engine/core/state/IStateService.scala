@@ -18,12 +18,11 @@
  */
 package com.bwsw.sj.common.engine.core.state
 
-import com.bwsw.sj.common.dal.model.instance._
-
 /**
   * Trait represents a service to manage a state of module.
   * State will be saved from time to time.
-  * How often a full state will be saved depends on [[RegularInstanceDomain.stateFullCheckpoint]]/[[BatchInstanceDomain.stateFullCheckpoint]].
+  * How often a full state will be saved depends on
+  * [[com.bwsw.sj.common.dal.model.instance.RegularInstanceDomain.stateFullCheckpoint]]/[[com.bwsw.sj.common.dal.model.instance.BatchInstanceDomain.stateFullCheckpoint]].
   * This parameter indicating a number of checkponts. Until then a partial state will be saved (difference between previous and current state)
   *
   * @author Kseniya Mikhaleva

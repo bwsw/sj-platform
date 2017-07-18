@@ -26,7 +26,7 @@ import com.bwsw.sj.common.utils.{EngineLiterals, RestLiterals}
 import org.mongodb.morphia.annotations.Property
 
 /**
-  * Domain entity for [[EngineLiterals.inputStreamingType]] instance
+  * Domain entity for [[com.bwsw.sj.common.utils.EngineLiterals.inputStreamingType]] instance
   *
   * @author Kseniya Tomskikh
   */

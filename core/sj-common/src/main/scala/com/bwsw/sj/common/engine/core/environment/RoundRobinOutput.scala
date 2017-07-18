@@ -19,7 +19,6 @@
 package com.bwsw.sj.common.engine.core.environment
 
 import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
-import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.tstreams.agents.producer.{NewProducerTransactionPolicy, Producer, ProducerTransaction}
 
 /**
@@ -27,8 +26,9 @@ import com.bwsw.tstreams.agents.producer.{NewProducerTransactionPolicy, Producer
   * Recording of transaction goes with the use of round-robin policy
   *
   * @param producer           producer of specific output
-  * @param performanceMetrics set of metrics that characterize performance of [[EngineLiterals.regularStreamingType]]
-  *                           or [[EngineLiterals.batchStreamingType]] module
+  * @param performanceMetrics set of metrics that characterize performance
+  *                           of [[com.bwsw.sj.common.utils.EngineLiterals.regularStreamingType]]
+  *                           or [[com.bwsw.sj.common.utils.EngineLiterals.batchStreamingType]] module
   * @author Kseniya Mikhaleva
   */
 

@@ -29,7 +29,8 @@ import scaldi.Injectable.inject
 import scaldi.Injector
 
 /**
-  * Provides methods to access custom files represented by [[FileMetadata]] in [[GenericMongoRepository]]
+  * Provides methods to access custom files represented by [[com.bwsw.sj.common.si.model.FileMetadata]]
+  * in [[com.bwsw.sj.common.dal.repository.GenericMongoRepository]]
   */
 class CustomFilesSI(implicit injector: Injector) extends ServiceInterface[FileMetadata, FileMetadataDomain] {
   private val connectionRepository = inject[ConnectionRepository]

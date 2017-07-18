@@ -19,21 +19,20 @@
 package com.bwsw.sj.engine.batch
 
 import java.io.Closeable
-import java.util.concurrent.ExecutorCompletionService
 
 import com.bwsw.sj.common.config.SettingsUtils
 import com.bwsw.sj.common.engine.TaskEngine
-import com.bwsw.sj.engine.batch.task.BatchTaskEngine
 import com.bwsw.sj.common.engine.core.batch.BatchStreamingPerformanceMetrics
-import com.bwsw.sj.engine.core.engine.TaskRunner
 import com.bwsw.sj.common.engine.core.managment.{CommonTaskManager, TaskManager}
 import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
+import com.bwsw.sj.engine.batch.task.BatchTaskEngine
+import com.bwsw.sj.engine.core.engine.TaskRunner
 import scaldi.Injectable.inject
 
 /**
   * Class is responsible for launching batch engine execution logic.
   * First, there are created all services needed to start engine. All of those services implement Callable interface
-  * Next, each service are launched as a separate task using [[ExecutorCompletionService]]
+  * Next, each service are launched as a separate task using [[java.util.concurrent.ExecutorCompletionService]]
   * Finally, handle a case if some task will fail and stop the execution. In other case the execution will go on indefinitely
   *
   * @author Kseniya Mikhaleva

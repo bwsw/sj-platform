@@ -32,7 +32,8 @@ import scaldi.Injector
 import scala.collection.mutable
 
 /**
-  * Class allows to manage an environment of [[EngineLiterals.regularStreamingType]] or [[EngineLiterals.batchStreamingType]] task
+  * Class allows to manage an environment of [[com.bwsw.sj.common.utils.EngineLiterals.regularStreamingType]] or
+  * [[com.bwsw.sj.common.utils.EngineLiterals.batchStreamingType]] task
   *
   * @author Kseniya Mikhaleva
   */

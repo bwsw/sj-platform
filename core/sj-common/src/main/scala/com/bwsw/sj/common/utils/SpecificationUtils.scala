@@ -31,7 +31,7 @@ class SpecificationUtils {
   private var maybeSpecification: Option[SpecificationDomain] = None
 
   /**
-    * Retrieves [[SpecificationDomain]] from jar file
+    * Retrieves [[com.bwsw.sj.common.dal.model.module.SpecificationDomain]] from jar file
     *
     * @param jarFile
     * @return specification

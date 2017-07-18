@@ -23,7 +23,7 @@ import com.bwsw.common.file.utils.{ClosableClassLoader, FileStorage}
 import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
 
 /**
-  * Provides method for loading class from file in [[com.bwsw.common.file.utils.FileStorage FileStorage]]
+  * Provides method for loading class from file in [[com.bwsw.common.file.utils.FileStorage]]
   */
 class FileClassLoader(storage: FileStorage, filename: String) extends ClosableClassLoader{
   /**
@@ -34,7 +34,7 @@ class FileClassLoader(storage: FileStorage, filename: String) extends ClosableCl
   private val file = storage.get(filename, tmpDirectory + filename)
 
   /**
-    * Loads the class from file that is in [[com.bwsw.common.file.utils.FileStorage FileStorage]]
+    * Loads the class from file that is in [[com.bwsw.common.file.utils.FileStorage]]
     * and returns an instance of this class
     *
     * @param className    name of class

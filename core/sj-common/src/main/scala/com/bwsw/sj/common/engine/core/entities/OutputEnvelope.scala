@@ -18,10 +18,8 @@
  */
 package com.bwsw.sj.common.engine.core.entities
 
-import com.bwsw.sj.common.utils.EngineLiterals
-
 /**
-  * Provides a wrapper for message that is formed by [[EngineLiterals.outputStreamingType]] engine.
+  * Provides a wrapper for message that is formed by [[com.bwsw.sj.common.utils.EngineLiterals.outputStreamingType]] engine.
   */
 
 abstract class OutputEnvelope {

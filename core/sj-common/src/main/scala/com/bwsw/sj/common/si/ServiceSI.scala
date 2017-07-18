@@ -29,7 +29,8 @@ import scaldi.Injector
 import scala.collection.mutable
 
 /**
-  * Provides methods to access [[Service]]s in [[GenericMongoRepository]]
+  * Provides methods to access [[com.bwsw.sj.common.si.model.service.Service]]s
+  * in [[com.bwsw.sj.common.dal.repository.GenericMongoRepository]]
   */
 class ServiceSI(implicit injector: Injector) extends ServiceInterface[Service, ServiceDomain] {
   private val messageResourceUtils = inject[MessageResourceUtils]
@@ -84,8 +85,8 @@ class ServiceSI(implicit injector: Injector) extends ServiceInterface[Service, S
   }
 
   /**
-    * Returns [[com.bwsw.sj.common.si.model.stream.SjStream SjStream]]s and
-    * [[com.bwsw.sj.common.dal.model.instance.InstanceDomain InstanceDomain]]s related with [[Service]]
+    * Returns [[com.bwsw.sj.common.si.model.stream.SjStream]]s and [[com.bwsw.sj.common.dal.model.instance.InstanceDomain]]s
+    * related with [[com.bwsw.sj.common.si.model.service.Service]]
     *
     * @param name name of service
     * @return Right((streams, instances)) if service exists, Left(false) otherwise

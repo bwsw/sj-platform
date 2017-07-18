@@ -27,8 +27,9 @@ import scaldi.Injectable.inject
 import scaldi.Injector
 
 /**
-  * Class is responsible for keeping under surveillance an instance status to be [[EngineLiterals.started]].
-  * The status can be changed [[EngineLiterals.instanceStatusModes]] and in this case an engine have to be stopped
+  * Class is responsible for keeping under surveillance an instance status to be [[com.bwsw.sj.common.utils.EngineLiterals.started]].
+  * The status can be changed [[com.bwsw.sj.common.utils.EngineLiterals.instanceStatusModes]] and in this case an engine
+  * have to be stopped
   *
   * @param instanceName name of instance that contains the running task name
   */

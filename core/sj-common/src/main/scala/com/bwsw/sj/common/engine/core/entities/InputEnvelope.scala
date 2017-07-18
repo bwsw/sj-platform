@@ -18,17 +18,17 @@
  */
 package com.bwsw.sj.common.engine.core.entities
 
-import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
-import com.bwsw.sj.common.si.model.instance.InputInstance
+import com.bwsw.sj.common.utils.StreamLiterals
 import com.fasterxml.jackson.annotation.JsonIgnore
 
 /**
-  * Provides a wrapper for t-stream transaction that is formed by [[EngineLiterals.inputStreamingType]] engine.
+  * Provides a wrapper for t-stream transaction that is formed
+  * by [[com.bwsw.sj.common.utils.EngineLiterals.inputStreamingType]] engine.
   *
   * @param key            a key for check on duplicate
   * @param outputMetadata information (stream -> partition) - where data should be placed
-  * @param duplicateCheck whether a message should be checked on duplicate or not.
-  *                       If it is None than a default value is used ([[InputInstance.duplicateCheck]])
+  * @param duplicateCheck whether a message should be checked on duplicate or not. If it is None than a default value is used
+  *                       ([[com.bwsw.sj.common.si.model.instance.InputInstance.duplicateCheck]])
   * @param data           message data
   * @tparam T type of data containing in a message
   */

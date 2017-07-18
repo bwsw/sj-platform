@@ -27,7 +27,7 @@ import scala.collection.mutable
 
 /**
   * Simulates behavior of [[com.bwsw.sj.common.engine.TaskEngine TaskEngine]] for testing of
-  * [[OutputStreamingExecutor]].
+  * [[com.bwsw.sj.common.engine.core.output.OutputStreamingExecutor]].
   *
   * Usage example:
   * {{{
@@ -46,10 +46,10 @@ import scala.collection.mutable
   * val requestsAfterFirstCheckpoint = simulator.process()
   * println(requestsAfterFirstCheckpoint)
   * }}}
-  * The [[OutputEngineSimulator]] automatically updates a wasFirstCheckpoint if [[executor]] invokes a
-  * [[manager.initiateCheckpoint()]].
+  * The [[OutputEngineSimulator]] automatically updates a wasFirstCheckpoint if executor invokes a
+  * [[com.bwsw.sj.common.engine.core.environment.OutputEnvironmentManager.initiateCheckpoint]]().
   *
-  * @param executor             implementation of [[OutputStreamingExecutor]] under tests
+  * @param executor             implementation of [[com.bwsw.sj.common.engine.core.output.OutputStreamingExecutor]] under tests
   * @param outputRequestBuilder builder of requests for output service
   * @param manager              environment manager that used by executor
   * @tparam IT type of incoming data
@@ -68,7 +68,7 @@ class OutputEngineSimulator[IT <: AnyRef, OT](executor: OutputStreamingExecutor[
   private var transactionId: Long = 0
 
   /**
-    * Creates [[TStreamEnvelope]] and saves it in a local buffer
+    * Creates [[com.bwsw.sj.common.engine.core.entities.TStreamEnvelope]] and saves it in a local buffer
     *
     * @param entities     incoming data
     * @param stream       name of stream in which will be that envelope
@@ -89,8 +89,8 @@ class OutputEngineSimulator[IT <: AnyRef, OT](executor: OutputStreamingExecutor[
   }
 
   /**
-    * Sends all [[TStreamEnvelope]]s from local buffer to [[OutputStreamingExecutor]] and builds requests for output
-    * service
+    * Sends all [[com.bwsw.sj.common.engine.core.entities.TStreamEnvelope]]s from local buffer
+    * to [[com.bwsw.sj.common.engine.core.output.OutputStreamingExecutor]] and builds requests for output service
     *
     * @param clearBuffer indicates that local buffer must be cleared
     * @return collection of requests
