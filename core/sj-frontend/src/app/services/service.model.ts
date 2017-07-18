@@ -17,5 +17,5 @@ export class ServiceModel extends BaseModel {
   basePath: string = '/';
   httpVersion: string = '1.1';
   headers: Object;
-  connectionType: string;
+  httpScheme: string = 'http';
 }

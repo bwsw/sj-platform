@@ -33,6 +33,7 @@
                 <th>Name</th>
                 <th>Description</th>
                 <th>Provider</th>
+                <th>Date</th>
                 <th class="actions-column">Actions</th>
               </tr>
             </thead>
@@ -53,6 +54,7 @@
                         (click)="getProviderInfo(ProviderInfo, service.provider)">{{ service.provider }}</span>
                 </span>
                 </td>
+                <td>{{ service.creationDate }}</td>
                 <td class="actions-column">
                   <button type="button"
                           class="btn btn-sm btn-secondary"
@@ -92,6 +94,9 @@
                         || currentService.type === 'RdsCoord') && currentService.namespace">
               <span class="title">Namespace:</span>{{currentService.namespace}}
             </li>
+            <li *ngIf="currentService.httpScheme">
+              <span class="title">Http scheme:</span>{{currentService.httpScheme}}
+            </li>
             <li *ngIf="currentService.type !== 'TstrQ' && currentService.provider">
               <span class="title">Provider:</span>
               <span class="btn-lookup action-link" (click)="getProviderInfo(ProviderInfo, currentService.provider)">
@@ -103,6 +108,16 @@
             </li>
             <li *ngIf="currentService.type === 'KfkQ' && currentService.zkNamespace">
               <span class="title">ZK namespace:</span>{{currentService.zkNamespace}}
+            </li>
+            <li *ngIf="currentService.type === 'REST' && currentService.httpVersion">
+              <span class="title">Http version:</span>{{currentService.httpVersion}}
+            </li>
+            <li *ngIf="currentService.type === 'REST' && currentService.headers && (currentService.headers | json) != '{}'">
+              <sj-extended-element [title]="'Headers'"
+                                   [content]="currentService.headers | jsonPrint"></sj-extended-element>
+            </li>
+            <li *ngIf="currentService.type === 'REST' && currentService.basePath">
+              <span class="title">Base path:</span>{{currentService.basePath}}
             </li>
           </ul>
         </div>
@@ -184,11 +199,11 @@
             </div>
           </fieldset>
 
-          <!-- Connection Type -->
+          <!-- http Scheme -->
           <fieldset *ngIf="newService.type" class="form-group row">
-            <label class="col-sm-2 col-form-label required">Connection type</label>
+            <label class="col-sm-2 col-form-label required">Http scheme</label>
             <div class="col-sm-10">
-              <select [(ngModel)]="newService.connectionType" name="conntype" required
+              <select [(ngModel)]="newService.httpScheme" name="httpScheme" required
                       class="form-control">
                 <option>http</option>
                 <option>https</option>

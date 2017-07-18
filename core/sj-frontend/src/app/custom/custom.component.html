@@ -45,7 +45,7 @@
               <th>Name</th>
               <th *ngIf="path === 'files'">Description</th>
               <th *ngIf="path === 'jars'">Version</th>
-              <th *ngIf="path === 'files'">Upload date</th>
+              <th>Upload date</th>
               <th>Size</th>
               <th class="actions-column">Actions</th>
             </tr>
@@ -60,7 +60,7 @@
               <td>{{file.name}}</td>
               <td *ngIf="path === 'files'">{{file.description}}</td>
               <td *ngIf="path === 'jars'">{{file.version}}</td>
-              <td *ngIf="path === 'files'">{{file['upload-date']}}</td>
+              <td>{{file.uploadDate}}</td>
               <td>{{ file.size | fileSize : { decimals: 1 } }}</td>
               <td class="actions-column">
                 <button type="button"

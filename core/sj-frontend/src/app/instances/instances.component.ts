@@ -12,7 +12,7 @@ import { ModulesService } from '../modules/modules.service';
 import { StreamsService } from '../streams/streams.service';
 import { ServicesService } from '../services/services.service';
 import { AnonymousSubscription } from 'rxjs/Subscription';
-import { Observable } from 'rxjs';
+import { Observable } from 'rxjs/Observable';
 
 @Component({
   selector: 'sj-instances',
@@ -48,7 +48,8 @@ export class InstancesComponent implements OnInit, AfterViewChecked, OnDestroy {
   public tasks: TaskModel[];
   public message: string;
 
-  private timerSubscription: AnonymousSubscription;
+  private startSubscription: AnonymousSubscription;
+  private stopSubscription: AnonymousSubscription;
 
   @ViewChild('instanceForm') currentForm: NgForm;
 
@@ -90,8 +91,11 @@ export class InstancesComponent implements OnInit, AfterViewChecked, OnDestroy {
   }
 
   public ngOnDestroy(): void {
-    if (this.timerSubscription) {
-      this.timerSubscription.unsubscribe();
+    if (this.startSubscription) {
+      this.startSubscription.unsubscribe();
+    }
+    if (this.stopSubscription) {
+      this.stopSubscription.unsubscribe();
     }
   }
 
@@ -101,7 +105,7 @@ export class InstancesComponent implements OnInit, AfterViewChecked, OnDestroy {
         response => {
           this.instancesList = response.instances;
           this.cloneInstancesList = response.instances;
-          if (this.instancesList.length > 0) {
+          if (this.instancesList.length > 0 && !this.currentInstance) {
             this.getInstanceInfo(this.instancesList[0]);
           }
         },
@@ -146,10 +150,10 @@ export class InstancesComponent implements OnInit, AfterViewChecked, OnDestroy {
   }
 
   public getInstanceInfo(currentInstance: InstanceModel) {
-    if ( !this.currentInstance || this.currentInstance.name != currentInstance.name &&
-      this.currentInstance.module.moduleName != currentInstance.moduleName &&
-      this.currentInstance.module.moduleType != currentInstance.moduleType &&
-      this.currentInstance.module.moduleVersion != currentInstance.moduleVersion
+    if ( !this.currentInstance || this.currentInstance.name !== currentInstance.name ||
+      this.currentInstance.module.moduleName !== currentInstance.moduleName ||
+      this.currentInstance.module.moduleType !== currentInstance.moduleType ||
+      this.currentInstance.module.moduleVersion !== currentInstance.moduleVersion
     ) {
       this.instancesService.getInstanceInfo(currentInstance)
         .subscribe(
@@ -240,6 +244,7 @@ export class InstancesComponent implements OnInit, AfterViewChecked, OnDestroy {
         this.showSpinner = false;
         this.formAlerts.push({message: error, type: 'danger', closable: true, timeout: 0});
       });
+    this.isInstanceClone = false;
   }
 
   public closeModal(modal: ModalDirective) {
@@ -288,7 +293,10 @@ export class InstancesComponent implements OnInit, AfterViewChecked, OnDestroy {
       .subscribe(
         response => {
           this.showAlert({ message: response.message, type: 'success', closable: true, timeout: 3000 });
-          this.timerSubscription = Observable.interval(3000).subscribe(() => {
+          if (this.stopSubscription) {
+            this.stopSubscription.unsubscribe();
+          }
+          this.startSubscription = Observable.interval(3000).subscribe(() => {
             return this.getInstancesList();
           });
         },
@@ -302,7 +310,10 @@ export class InstancesComponent implements OnInit, AfterViewChecked, OnDestroy {
       .subscribe(
         response => {
           this.showAlert({ message: response.message, type: 'success', closable: true, timeout: 3000 });
-          this.timerSubscription = Observable.interval(3000).subscribe(() => {
+          if (this.startSubscription) {
+            this.startSubscription.unsubscribe();
+          }
+          this.stopSubscription = Observable.interval(3000).subscribe(() => {
             return this.getInstancesList();
           });
         },

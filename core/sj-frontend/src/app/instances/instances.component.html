@@ -31,6 +31,7 @@
             <tr>
               <th>Name</th>
               <th>Status</th>
+              <th>Date</th>
               <th class="actions-column">Actions</th>
             </tr>
             </thead>
@@ -54,6 +55,7 @@
                         'tag-primary': instance.status === 'ready'
                       }">{{ instance.status }}</span>
               </td>
+              <td>{{ instance.creationDate }}</td>
               <td class="actions-column">
 
                 <button type="button"
@@ -114,7 +116,7 @@
         <div class="overflow-x-scroll">
           <ul *ngIf="currentInstance">
             <li *ngIf="currentInstance.stage">
-              <span class="title">Stages:</span>{{currentInstance.stage | json}}
+              <sj-extended-element [title]="'Stages'" [content]="currentInstance.stage | jsonPrint"></sj-extended-element>
             </li>
             <li *ngIf="currentInstance.status">
               <span class="title">Status:</span>{{currentInstance.status}}
@@ -180,7 +182,7 @@
               <span class="title">Parallelism:</span>{{currentInstance.parallelism}}
             </li>
             <li *ngIf="currentInstance.options">
-              <span class="title">Options:</span>{{currentInstance.options | json }}
+              <sj-extended-element [title]="'Options'" [content]="currentInstance.options | jsonPrint"></sj-extended-element>
             </li>
             <li *ngIf="currentInstance.startFrom">
               <span class="title">Start-from:</span>{{currentInstance.startFrom}}
@@ -216,7 +218,7 @@
               <span class="title">Performance reporting interval:</span>{{currentInstance.performanceReportingInterval}}
             </li>
             <li *ngIf="currentInstance.jvmOptions">
-              <span class="title">Jvm options:</span>{{currentInstance.jvmOptions | json}}
+              <sj-extended-element [title]="'Jvm options'" [content]="currentInstance.jvmOptions | jsonPrint"></sj-extended-element>
             </li>
             <li *ngIf="currentInstance.environmentVariables">
               <span class="title">Environment variables:</span>{{currentInstance.environmentVariables| json}}
@@ -232,12 +234,8 @@
               <span class="title">Async-backup count:</span>{{currentInstance.asyncBackupCount}}
             </li>
             <li *ngIf="currentInstanceTasks">
-              <span class="title">
-                {{currentInstance.module.moduleType !== 'input-streaming' ? 'Execution-plan:': 'Tasks:'}}
-              </span>
-              <ul>
-                <li>{{currentInstanceTasks | json}}</li>
-              </ul>
+              <sj-extended-element [title]="currentInstance.module.moduleType !== 'input-streaming' ? 'Execution-plan': 'Tasks'"
+                                   [content]="currentInstanceTasks | jsonPrint"></sj-extended-element>
             </li>
           </ul>
         </div>
