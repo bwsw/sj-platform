@@ -30,7 +30,8 @@ import scaldi.Injector
 import scala.collection.mutable
 
 /**
-  * Provides methods to access [[SjStream]]s in [[GenericMongoRepository]]
+  * Provides methods to access [[com.bwsw.sj.common.si.model.stream.SjStream]]s
+  * in [[com.bwsw.sj.common.dal.repository.GenericMongoRepository]]
   */
 class StreamSI(implicit injector: Injector) extends ServiceInterface[SjStream, StreamDomain] {
   private val messageResourceUtils = inject[MessageResourceUtils]
@@ -78,7 +79,8 @@ class StreamSI(implicit injector: Injector) extends ServiceInterface[SjStream, S
   }
 
   /**
-    * Returns [[com.bwsw.sj.common.dal.model.instance.InstanceDomain InstanceDomain]]s related with [[SjStream]]
+    * Returns [[com.bwsw.sj.common.dal.model.instance.InstanceDomain]]s related
+    * with [[com.bwsw.sj.common.si.model.stream.SjStream]]
     *
     * @param name name of stream
     * @return Some(instances) if stream exists, None otherwise

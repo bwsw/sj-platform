@@ -40,7 +40,8 @@ class JdbcClientConnectionData(val hosts: Array[String],
   private val settingsUtils = inject[SettingsUtils]
 
   /**
-    * This method returns a driver class name related to driver name provided in [[JDBCProviderDomain.driver]]
+    * This method returns a driver class name related to driver name provided in
+    * [[com.bwsw.sj.common.dal.model.provider.JDBCProviderDomain.driver]]
     *
     * @return String: name of class of using driver
     */

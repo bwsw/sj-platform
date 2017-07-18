@@ -31,8 +31,8 @@ import com.bwsw.sj.common.engine.core.environment.EnvironmentManager
 import com.bwsw.sj.common.si.model.config.ConfigurationSetting
 import com.bwsw.sj.common.si.model.instance.{Instance, InstanceCreator}
 import com.bwsw.sj.common.utils.EngineLiterals._
-import com.bwsw.sj.common.utils.{EngineLiterals, FileClassLoader}
 import com.bwsw.sj.common.utils.StreamLiterals._
+import com.bwsw.sj.common.utils.{EngineLiterals, FileClassLoader}
 import com.bwsw.tstreams.agents.consumer.Consumer
 import com.bwsw.tstreams.agents.consumer.Offset.IOffset
 import com.bwsw.tstreams.agents.consumer.subscriber.{Callback, Subscriber}
@@ -55,7 +55,8 @@ import scala.util.Try
   * 1) create stream in storage (kind of storage depends on t-stream implementation)
   * 2) get an executor created via reflection
   * 3) create t-stream consumers/subscribers and producers
-  * for this purposes firstly [[TStreamsFactory]] is configured using [[com.bwsw.sj.common.dal.model.instance.InstanceDomain]]
+  * for this purposes firstly [[com.bwsw.tstreams.env.TStreamsFactory]] is configured using
+  * [[com.bwsw.sj.common.dal.model.instance.InstanceDomain]]
   */
 abstract class TaskManager(implicit injector: Injector) {
   protected val connectionRepository: ConnectionRepository = inject[ConnectionRepository]
@@ -213,9 +214,9 @@ abstract class TaskManager(implicit injector: Injector) {
   /**
     * Creates a t-stream consumer with pub/sub property
     *
-    * @param stream     stream [[TStreamStreamDomain]] from which massages are consumed
+    * @param stream     stream [[com.bwsw.sj.common.dal.model.stream.TStreamStreamDomain]] from which massages are consumed
     * @param partitions range of stream partition
-    * @param offset     offset policy [[IOffset]] that describes where a consumer starts
+    * @param offset     offset policy [[com.bwsw.tstreams.agents.consumer.Offset.IOffset]] that describes where a consumer starts
     * @param callback   subscriber callback for t-stream consumer
     * @return T-stream subscribing consumer
     */
@@ -246,9 +247,9 @@ abstract class TaskManager(implicit injector: Injector) {
   /**
     * Creates a t-stream consumer
     *
-    * @param stream     stream [[TStreamStreamDomain]] from which massages are consumed
+    * @param stream     stream [[com.bwsw.sj.common.dal.model.stream.TStreamStreamDomain]] from which massages are consumed
     * @param partitions range of stream partition
-    * @param offset     offset policy [[IOffset]] that describes where a consumer starts
+    * @param offset     offset policy [[com.bwsw.tstreams.agents.consumer.Offset.IOffset]] that describes where a consumer starts
     * @param name       name of consumer (it is optional parameter)
     * @return T-stream consumer
     */

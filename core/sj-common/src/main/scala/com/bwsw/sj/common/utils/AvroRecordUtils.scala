@@ -21,7 +21,7 @@ package com.bwsw.sj.common.utils
 import org.apache.avro.generic.GenericData.Record
 
 /**
-  * Utils for [[Record]]
+  * Utils for [[org.apache.avro.generic.GenericData.Record]]
   *
   * @author Pavel Tomskikh
   */

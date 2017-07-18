@@ -23,7 +23,7 @@ import java.io.{InputStream, ObjectInputStream, ObjectStreamClass}
 import scala.util.{Failure, Success, Try}
 
 /**
-  * Wrapper for [[ObjectInputStream]] with additional [[ClassLoader]] to load user defined classes from module
+  * Wrapper for [[java.io.ObjectInputStream]] with additional [[ClassLoader]] to load user defined classes from module
   *
   * @param classLoader extended class loader (with classes from module)
   * @param in          an input stream of bytes

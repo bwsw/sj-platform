@@ -22,7 +22,7 @@ import com.bwsw.sj.common.engine.core.entities.InputEnvelope
 
 /**
   * Class represents an interval of buffer, which contains incoming data of input module,
-  * that defines the boundaries of [[InputEnvelope]]
+  * that defines the boundaries of [[com.bwsw.sj.common.engine.core.entities.InputEnvelope]]
   *
   * @param initialValue a number of byte that indicates the beginning of message
   * @param finalValue   a number of byte that indicates the end of message

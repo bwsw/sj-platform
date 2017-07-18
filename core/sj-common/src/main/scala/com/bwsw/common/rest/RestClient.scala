@@ -21,7 +21,6 @@ package com.bwsw.common.rest
 import java.net.URI
 import java.util.concurrent.TimeUnit
 
-import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
 import org.eclipse.jetty.client.HttpClient
 import org.eclipse.jetty.client.api.Request
 import org.eclipse.jetty.client.util.BasicAuthentication
@@ -29,9 +28,9 @@ import org.eclipse.jetty.http.{HttpStatus, HttpVersion}
 
 import scala.util.{Failure, Success, Try}
 
-
 /**
-  * Client for [[EngineLiterals.outputStreamingType]] that has got [[StreamLiterals.restOutputType]] output.
+  * Client for [[com.bwsw.sj.common.utils.EngineLiterals.outputStreamingType]] that has got
+  * [[com.bwsw.sj.common.utils.StreamLiterals.restOutputType]] output.
   *
   * @param hosts       set of services hosts
   * @param path        path to entities

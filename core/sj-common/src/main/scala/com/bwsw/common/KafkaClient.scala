@@ -27,7 +27,7 @@ import org.I0Itec.zkclient.ZkConnection
 import org.apache.kafka.common.requests.MetadataResponse.TopicMetadata
 
 /**
-  * Provides methods to CRUD kafka topics using [[AdminUtils]] and [[ZkUtils]]
+  * Provides methods to CRUD kafka topics using [[kafka.admin.AdminUtils]] and [[kafka.utils.ZkUtils]]
   *
   * @param zkServers set of zookeeper servers
   * @param timeout   zookeeper session or connection timeout

@@ -21,12 +21,12 @@ package com.bwsw.sj.common.dal.model.instance
 import java.util
 
 import com.bwsw.sj.common.dal.model.service.ZKServiceDomain
-import com.bwsw.sj.common.utils.{EngineLiterals, RestLiterals}
 import com.bwsw.sj.common.utils.StreamUtils._
+import com.bwsw.sj.common.utils.{EngineLiterals, RestLiterals}
 import org.mongodb.morphia.annotations.{Embedded, Property}
 
 /**
-  * Domain entity for [[EngineLiterals.batchStreamingType]] instance
+  * Domain entity for [[com.bwsw.sj.common.utils.EngineLiterals.batchStreamingType]] instance
   *
   * @author Kseniya Tomskikh
   */

@@ -19,15 +19,15 @@
 package com.bwsw.sj.common.engine.core.environment
 
 import com.bwsw.common.file.utils.FileStorage
-import com.bwsw.sj.common.dal.model.instance.InstanceDomain
 import com.bwsw.sj.common.dal.model.stream.StreamDomain
 import org.slf4j.{Logger, LoggerFactory}
 
 /**
   * A common class providing for user methods that can be used in a module of specific type
   *
-  * @param options     user defined options from instance [[InstanceDomain.options]]
-  * @param outputs     set of output streams [[StreamDomain]] from instance [[InstanceDomain.outputs]]
+  * @param options     user defined options from instance [[com.bwsw.sj.common.dal.model.instance.InstanceDomain.options]]
+  * @param outputs     set of output streams [[com.bwsw.sj.common.dal.model.stream.StreamDomain]] from instance
+  *                    [[com.bwsw.sj.common.dal.model.instance.InstanceDomain.outputs]]
   * @param fileStorage file storage
   * @author Kseniya Mikhaleva
   */

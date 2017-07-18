@@ -32,7 +32,8 @@ import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
 /**
-  * Provides methods to access [[Provider]]s in [[GenericMongoRepository]]
+  * Provides methods to access [[com.bwsw.sj.common.si.model.provider.Provider]]s
+  * in [[com.bwsw.sj.common.dal.repository.GenericMongoRepository]]
   */
 class ProviderSI(implicit injector: Injector) extends ServiceInterface[Provider, ProviderDomain] {
   private val messageResourceUtils = inject[MessageResourceUtils]
@@ -83,7 +84,7 @@ class ProviderSI(implicit injector: Injector) extends ServiceInterface[Provider,
   }
 
   /**
-    * Establishes connection to [[Provider.hosts]]
+    * Establishes connection to [[com.bwsw.sj.common.si.model.provider.Provider.hosts]]
     *
     * @param name name of provider
     * @return Right(true) if connection established, Right(false) if provider not found in [[entityRepository]],
@@ -104,7 +105,7 @@ class ProviderSI(implicit injector: Injector) extends ServiceInterface[Provider,
   }
 
   /**
-    * Returns [[com.bwsw.sj.common.si.model.service.Service Service]]s related with [[Provider]]
+    * Returns [[com.bwsw.sj.common.si.model.service.Service]]s related with [[com.bwsw.sj.common.si.model.provider.Provider]]
     *
     * @param name name of provider
     * @return Right(services) if provider exists, Left(false) otherwise

@@ -20,13 +20,12 @@ package com.bwsw.sj.common.dal.model.instance
 
 import java.util.Date
 
-import com.bwsw.sj.common.utils.EngineLiterals._
-import com.bwsw.sj.common.utils.EngineLiterals
+import com.bwsw.sj.common.utils.EngineLiterals.toHandle
 
 /**
   * Information about an instance that has been launched
   *
-  * @param state    state of instance one of the following [[EngineLiterals.instanceStatusModes]]
+  * @param state    state of instance one of the following [[com.bwsw.sj.common.utils.EngineLiterals.instanceStatusModes]]
   * @param datetime last time when a state has been changed
   * @param duration how long a stage has got a current state
   * @author Kseniya Tomskikh

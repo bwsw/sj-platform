@@ -26,7 +26,7 @@ import org.apache.avro.io.{DecoderFactory, EncoderFactory}
 import org.slf4j.LoggerFactory
 
 /**
-  * Serializer from [[org.apache.avro.generic.GenericRecord GenericRecord]] and vice versa.
+  * Serializer from [[org.apache.avro.generic.GenericRecord]] and vice versa.
   *
   * @author Pavel Tomskikh
   */

@@ -39,7 +39,7 @@ trait FileStorage {
   def get(fileName: String, newFileName: String): File
 
   /**
-    * Retrieve file as [[InputStream]]
+    * Retrieve file as [[java.io.InputStream]]
     */
   def getStream(fileName: String): InputStream
 

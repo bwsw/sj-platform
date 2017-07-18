@@ -19,15 +19,15 @@
 package com.bwsw.sj.common.engine.core.environment
 
 import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
-import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.tstreams.agents.producer.ProducerTransaction
 import org.slf4j.{Logger, LoggerFactory}
 
 /**
   * Common class that is a wrapper for output stream
   *
-  * @param performanceMetrics set of metrics that characterize performance of [[EngineLiterals.regularStreamingType]]
-  *                           or [[EngineLiterals.batchStreamingType]] module
+  * @param performanceMetrics set of metrics that characterize performance
+  *                           of [[com.bwsw.sj.common.utils.EngineLiterals.regularStreamingType]]
+  *                           or [[com.bwsw.sj.common.utils.EngineLiterals.batchStreamingType]] module
   */
 abstract class ModuleOutput(private val performanceMetrics: PerformanceMetrics) {
   protected val logger: Logger = LoggerFactory.getLogger(this.getClass)
