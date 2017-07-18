@@ -21,7 +21,6 @@ package com.bwsw.sj.engine.core.output.types.jdbc
 import java.sql.Connection
 
 import com.bwsw.common.jdbc.{IJdbcClient, JdbcClientConnectionData}
-import com.bwsw.sj.common.config.ConfigLiterals.jdbcDriver
 import com.bwsw.sj.common.config.SettingsUtils
 import com.mockrunner.jdbc.BasicJDBCTestCaseAdapter
 import org.mockito.ArgumentMatchers.anyString
@@ -45,10 +44,11 @@ class JdbcMock extends BasicJDBCTestCaseAdapter with IJdbcClient {
 
 class JdbcSettingsUtilsMock extends MockitoSugar {
   private val settingsUtils = mock[SettingsUtils]
+  private val driverName = "driver-name"
 
-  when(settingsUtils.getJdbcDriverFileName(anyString())).thenReturn(s"$jdbcDriver.driver-name")
-  when(settingsUtils.getJdbcDriverClass(anyString())).thenReturn(s"$jdbcDriver.driver-name.class")
-  when(settingsUtils.getJdbcDriverPrefix(anyString())).thenReturn(s"$jdbcDriver.driver-name.prefix")
+  when(settingsUtils.getJdbcDriverFilename(anyString())).thenReturn("mysql-connector-java-5.1.6.jar")
+  when(settingsUtils.getJdbcDriverClass(anyString())).thenReturn("com.mysql.jdbc.Driver")
+  when(settingsUtils.getJdbcDriverPrefix(anyString())).thenReturn("jdbc:mysql")
 
   private val module = new Module {
     bind[SettingsUtils] to settingsUtils

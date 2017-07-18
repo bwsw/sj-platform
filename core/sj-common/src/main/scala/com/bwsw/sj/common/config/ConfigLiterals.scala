@@ -34,7 +34,10 @@ object ConfigLiterals {
   val zkSessionTimeoutTag = s"$zookeeperDomain.session-timeout"
   val lowWatermark = s"$systemDomain.low-watermark"
 
-  val jdbcDriver = s"$jdbcDomain.driver"
+  private val jdbcDriver = s"$jdbcDomain.driver"
+  def getDriverPrefix(driverName: String) = s"$jdbcDriver.$driverName.prefix"
+  def getDriverClass(driverName: String) = s"$jdbcDriver.$driverName.class"
+  def getDriverFilename(driverName: String) = s"$jdbcDriver.$driverName"
 
   val kafkaSubscriberTimeoutTag = s"$systemDomain.subscriber-timeout"
 

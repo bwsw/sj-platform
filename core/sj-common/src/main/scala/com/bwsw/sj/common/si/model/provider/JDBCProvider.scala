@@ -18,7 +18,7 @@
  */
 package com.bwsw.sj.common.si.model.provider
 
-import com.bwsw.sj.common.config.{ConfigLiterals, SettingsUtils}
+import com.bwsw.sj.common.config.{ConfigLiterals, NoSuchConfigException, SettingsUtils}
 import com.bwsw.sj.common.dal.model.provider.JDBCProviderDomain
 import com.bwsw.sj.common.utils.JdbcLiterals
 import scaldi.Injectable.inject
@@ -67,28 +67,28 @@ class JDBCProvider(name: String,
           errors += createMessage("entity.error.attribute.required", "Driver")
         }
         else {
-          Try(settingsUtils.getJdbcDriverFileName(x)) match {
+          Try(settingsUtils.getJdbcDriverFilename(x)) match {
             case Success(driverFileName) =>
               if (!connectionRepository.getFileStorage.exists(driverFileName))
                 errors += createMessage("entity.error.file.required", driverFileName)
-            case Failure(_: NoSuchFieldException) =>
-              errors += createMessage("entity.error.config.required", s"${ConfigLiterals.jdbcDriver}.$x")
+            case Failure(_: NoSuchConfigException) =>
+              errors += createMessage("entity.error.config.required", ConfigLiterals.getDriverFilename(x))
             case Failure(e) => throw e
           }
 
           Try(settingsUtils.getJdbcDriverClass(x)) match {
             case Success(_) =>
-            case Failure(_: NoSuchFieldException) =>
-              errors += createMessage("entity.error.config.required", s"${ConfigLiterals.jdbcDriver}.$x.class")
+            case Failure(_: NoSuchConfigException) =>
+              errors += createMessage("entity.error.config.required", ConfigLiterals.getDriverClass(x))
             case Failure(e) => throw e
           }
 
-          val prefixSettingName = s"${ConfigLiterals.jdbcDriver}.$x.prefix"
+          val prefixSettingName = ConfigLiterals.getDriverPrefix(x)
           Try(settingsUtils.getJdbcDriverPrefix(x)) match {
             case Success(prefix) =>
               if (!JdbcLiterals.validPrefixes.contains(prefix))
                 errors += createMessage("entity.error.jdbc.incorrect.prefix", prefix, prefixSettingName)
-            case Failure(_: NoSuchFieldException) =>
+            case Failure(_: NoSuchConfigException) =>
               errors += createMessage("entity.error.config.required", prefixSettingName)
             case Failure(e) => throw e
           }

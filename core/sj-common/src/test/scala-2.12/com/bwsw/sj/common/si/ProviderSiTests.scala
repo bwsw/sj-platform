@@ -190,8 +190,8 @@ class ProviderSiTests extends FlatSpec with Matchers {
     when(connectionRepository.getProviderRepository).thenReturn(providerRepository)
     when(connectionRepository.getConfigRepository).thenReturn(configRepository)
 
-    val createProvider = mock[ProviderCreator]
-    when(createProvider.from(any[ProviderDomain])(any[Injector]))
+    val providerCreator = mock[ProviderCreator]
+    when(providerCreator.from(any[ProviderDomain])(any[Injector]))
       .thenAnswer((invocationOnMock: InvocationOnMock) => {
         val providerDomain = invocationOnMock.getArgument[ProviderDomain](0)
         providers.find(_.name == providerDomain.name).get
@@ -200,7 +200,7 @@ class ProviderSiTests extends FlatSpec with Matchers {
     val module = new Module {
       bind[ConnectionRepository] to connectionRepository
       bind[MessageResourceUtils] to messageResourceUtils
-      bind[ProviderCreator] to createProvider
+      bind[ProviderCreator] to providerCreator
     }
     val injector = module.injector
     val providerSI = new ProviderSI()(injector)

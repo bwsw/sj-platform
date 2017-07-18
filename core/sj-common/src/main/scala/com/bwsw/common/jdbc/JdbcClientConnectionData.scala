@@ -58,7 +58,7 @@ class JdbcClientConnectionData(val hosts: Array[String],
     *
     * @return String: name of file with jdbc driver
     */
-  def driverFileName: String = settingsUtils.getJdbcDriverFileName(driver)
+  def driverFileName: String = settingsUtils.getJdbcDriverFilename(driver)
 
   /**
     * This method returns a server URL
