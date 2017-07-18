@@ -120,13 +120,13 @@ class ProviderDomainTestSuit extends FlatSpec with Matchers with PrivateMethodTe
     when(provider.hosts).thenReturn(Array.fill(numberOfChecks)("example"))
     when(provider.checkConnection(any())).thenCallRealMethod()
     when(provider.checkProviderConnectionByType(any(), any(), any())).thenCallRealMethod()
-    when(provider.checkHttpConnection(any())).thenCallRealMethod()
+    when(provider.checkRestConnection(any())).thenCallRealMethod()
 
     //act
     provider.checkConnection(ConfigLiterals.zkSessionTimeoutDefault)
 
     //assert
-    verify(provider, times(numberOfChecks)).checkHttpConnection(any())
+    verify(provider, times(numberOfChecks)).checkRestConnection(any())
   }
 
   it should s"checkConnection() method checks zookeeper connection for each host " +
@@ -156,7 +156,7 @@ trait ProviderDomainMocks extends MockitoSugar {
 class ProviderDomainMock extends ProviderDomain(null, null, Array("host"), null, null, null) {
   override def checkESConnection(address: String): ArrayBuffer[String] = ArrayBuffer()
 
-  override def checkHttpConnection(address: String): ArrayBuffer[String] = ArrayBuffer()
+  override def checkRestConnection(address: String): ArrayBuffer[String] = ArrayBuffer()
 
   override def checkJdbcConnection(address: String): ArrayBuffer[String] = ArrayBuffer()
 

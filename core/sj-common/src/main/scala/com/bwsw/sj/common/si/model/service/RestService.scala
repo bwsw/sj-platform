@@ -31,6 +31,7 @@ import scala.collection.mutable.ArrayBuffer
 class RestService(name: String,
                   provider: String,
                   val basePath: String,
+                  val httpScheme: String,
                   val httpVersion: String,
                   val headers: Map[String, String],
                   description: String,
@@ -49,6 +50,7 @@ class RestService(name: String,
         description = this.description,
         provider = providerRepository.get(this.provider).get,
         basePath = this.basePath,
+        httpScheme = RestLiterals.httpSchemeFromString(this.httpScheme),
         httpVersion = RestLiterals.httpVersionFromString(this.httpVersion),
         headers = this.headers.asJava
       )
@@ -59,6 +61,7 @@ class RestService(name: String,
   override def validate(): ArrayBuffer[String] = {
     val basePathAttributeName = "basePath"
     val httpVersionAttributeName = "httpVersion"
+    val httpSchemeAttributeName = "httpScheme"
     val errors = new ArrayBuffer[String]()
     errors ++= super.validate()
 
@@ -85,6 +88,18 @@ class RestService(name: String,
             "entity.error.attribute.must.one_of",
             httpVersionAttributeName,
             RestLiterals.httpVersions.mkString("[", ", ", "]"))
+    }
+
+    // 'httpScheme' field
+    Option(httpScheme) match {
+      case None =>
+        errors += createMessage("entity.error.attribute.required", httpSchemeAttributeName)
+      case Some(x) =>
+        if (!RestLiterals.httpSchemes.contains(x))
+          errors += createMessage(
+            "entity.error.attribute.must.one_of",
+            httpSchemeAttributeName,
+            RestLiterals.httpSchemes.mkString("[", ", ", "]"))
     }
 
     errors

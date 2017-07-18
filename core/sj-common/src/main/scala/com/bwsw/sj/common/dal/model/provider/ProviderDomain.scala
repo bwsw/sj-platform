@@ -18,10 +18,9 @@
  */
 package com.bwsw.sj.common.dal.model.provider
 
-import java.net.URI
+import java.net.{Socket, URI}
 import java.nio.channels.ClosedChannelException
 import java.util.Collections
-import java.util.concurrent.TimeUnit
 
 import com.bwsw.common.es.ElasticsearchClient
 import com.bwsw.sj.common.dal.morphia.MorphiaAnnotations.{IdField, PropertyField}
@@ -29,7 +28,6 @@ import com.bwsw.sj.common.utils.ProviderLiterals
 import kafka.javaapi.TopicMetadataRequest
 import kafka.javaapi.consumer.SimpleConsumer
 import org.apache.zookeeper.ZooKeeper
-import org.eclipse.jetty.client.HttpClient
 import org.mongodb.morphia.annotations.Entity
 
 import scala.collection.mutable.ArrayBuffer
@@ -72,7 +70,7 @@ class ProviderDomain(@IdField val name: String,
       case ProviderLiterals.jdbcType =>
         checkJdbcConnection(host)
       case ProviderLiterals.restType =>
-        checkHttpConnection(host)
+        checkRestConnection(host)
       case _ =>
         throw new Exception(s"Host checking for provider type '$providerType' is not implemented")
     }
@@ -129,23 +127,18 @@ class ProviderDomain(@IdField val name: String,
 
   protected def checkJdbcConnection(address: String): ArrayBuffer[String] = ArrayBuffer()
 
-  protected def checkHttpConnection(address: String): ArrayBuffer[String] = {
+  protected def checkRestConnection(address: String): ArrayBuffer[String] = {
     val errors = ArrayBuffer[String]()
-    val uri = new URI("http://" + address)
-    val client = new HttpClient()
-    val timeout = 10
-    client.start()
+    val (host, port) = getHostAndPort(address)
+    var socket: Option[Socket] = None
     Try {
-      client
-        .newRequest(uri)
-        .timeout(timeout, TimeUnit.SECONDS)
-        .send()
+       socket = Some(new Socket(host, port))
     } match {
       case Success(_) =>
-      case Failure(_) =>
-        errors += s"Can not establish connection to REST on '$address'"
+      case Failure(a) =>
+        errors += s"Can not establish connection to Rest on '$address'"
     }
-    client.stop()
+    socket.foreach(_.close())
 
     errors
   }

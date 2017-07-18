@@ -40,7 +40,7 @@ import com.bwsw.tstreams.agents.consumer.Offset.Oldest
 import com.bwsw.tstreams.agents.producer.{NewProducerTransactionPolicy, Producer}
 import com.bwsw.tstreams.env.{ConfigurationOptions, TStreamsFactory}
 import com.typesafe.config.ConfigFactory
-import org.eclipse.jetty.http.HttpVersion
+import org.eclipse.jetty.http.{HttpScheme, HttpVersion}
 import org.elasticsearch.common.xcontent.XContentBuilder
 import org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder
 import scaldi.Injectable.inject
@@ -83,6 +83,7 @@ object DataFactory {
     "header2" -> "value2"
   ).asJava
   val restHttpVersion = HttpVersion.HTTP_1_1
+  val restHttpScheme = HttpScheme.HTTP
 
   val zookeeperServiceName: String = "output-zookeeper-test-service"
   val testNamespace = "test_namespace"
@@ -294,7 +295,7 @@ object DataFactory {
     serviceManager.save(jdbcService)
 
     val restProvider = providerService.get(restProviderName).get
-    val restService = new RestServiceDomain(restServiceName, restServiceName, restProvider, restBasePath, restHttpVersion, restHeaders)
+    val restService = new RestServiceDomain(restServiceName, restServiceName, restProvider, restBasePath, restHttpScheme, restHttpVersion, restHeaders)
     serviceManager.save(restService)
   }
 
