@@ -979,22 +979,21 @@ Success response example::
 CRUD Rest-API for Config Settings
 -----------------------------------
 
+The range of REST API methods described below allows to create or delete config settings, get the information on the config setting, get the list of config settings existing in the system, get list of domains.
+
 Config setting fields
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. csv-table::  
-  :header: "Field", "Format",  "Description"
-  :widths: 20, 20, 60
+  :header: "Field", "Format",  "Description", "Requirements"
+  :widths: 15, 15, 20, 20
 
-  "name*", "String", "Name of setting (key)"
-  "value*", "String", "Value of setting"
-  "domain*", "String", "Name of config-domain"
+  "name*", "String", "Name of the setting (key).", "Should be unique and contain digits, lowercase letters, hyphens or periods and start with a letter."
+  "value*", "String", "Value of setting.", ""
+  "domain*", "String", "Name of config-domain.", "Should be one of the following values: 'system', 't-streams', 'kafka', 'es', 'zk', 'jdbc'"
 
 .. note:: `*` - required field.
 
-Config setting name should contain digits, lowercase letters, hyphens or periods and start with a letter.
-
-{config-domain} should be one of the following values: 'system', 't-streams', 'kafka', 'es', 'zk', 'jdbc'
 
 Create a new config setting
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1009,9 +1008,9 @@ Request format::
   :header: "Status code",  "Description"
   :widths: 25, 60
 
-  "201", "{config-domain} config setting {name} has been created."
-  "400", "Cannot create {config-domain} config setting. Errors: {list-of-errors}."
-  "500", "Internal server error"
+  "201", "<config-domain> config setting <name> has been created."
+  "400", "Cannot create <config-domain> config setting. Errors: <list-of-errors>."
+  "500", "Internal server error."
 
 
 Request json example::
@@ -1023,7 +1022,7 @@ Request json example::
  }
 
 
-Response example::
+Error response example::
 
 
  {
@@ -1044,15 +1043,15 @@ Request format::
  /v1/config/settings/{config-domain}/{name}
 
 .. csv-table::  Response
-  :header: "Status code",  "Description"
+  :header: "Status code", "Description"
   :widths: 25, 60
 
-  "200", "Json with requested config setting for specific config domain"
-  "400",  "Cannot recognize config setting domain '{config-domain}'. Domain must be one of the following values: 'system, t-streams, kafka, es, zk, jdbc, rest'."
-  "404", "{config-domain} сonfig setting {name} has not been found."
-  "500", "Internal server error"
+  "200", "Json with requested config setting for specific config domain."
+  "400",  "Cannot recognize config setting domain <config-domain>. Domain must be one of the following values: 'system, t-streams, kafka, es, zk, jdbc, rest'."
+  "404", "<config-domain> сonfig setting <name> has not been found."
+  "500", "Internal server error."
 
-Response example::
+Success response example::
 
  {
   "status-code": 200,
@@ -1078,11 +1077,11 @@ Request format::
   :header: "Status code",  "Description"
   :widths: 25, 60
 
-  "200", "Json of set of config settings for specific config domain"
-  "400", "Cannot recognize config setting domain '{config-domain}'. Domain must be one of the following values: 'system, t-streams, kafka, es, zk, jdbc, rest'."
-  "500", "Internal server error"
+  "200", "Json of set of config settings for specific config domain."
+  "400", "Cannot recognize config setting domain <config-domain>. Domain must be one of the following values: 'system, t-streams, kafka, es, zk, jdbc, rest'."
+  "500", "Internal server error."
 
-Response example::
+Success response example::
 
  {
   "status-code": 200,
@@ -1115,12 +1114,12 @@ Request format::
   :header: "Status code",  "Description"
   :widths: 25, 60
 
-  "200", "config-domain} config setting {name} has been deleted."
-  "400", "Cannot recognize config setting domain '{config-domain}'. Domain must be one of the following values: 'system, t-streams, kafka, es, zk, jdbc, rest'."
-  "404", "{config-domain} сonfig setting {name} has not been found."
-  "500", "Internal server error"
+  "200", "<config-domain> config setting <name> has been deleted."
+  "400", "Cannot recognize config setting domain <config-domain>. Domain must be one of the following values: 'system, t-streams, kafka, es, zk, jdbc, rest'."
+  "404", "<config-domain> сonfig setting <name> has not been found."
+  "500", "Internal server error."
 
-Response example::
+Success response example::
 
  {
   "status-code" : 200,
@@ -1146,7 +1145,7 @@ Request format::
   "200", "Json of set of config settings"
   "500", "Internal server error"
 
-Response example::
+Success response example::
 
  {
   "status-code": 200,
@@ -1185,10 +1184,10 @@ Request format::
   :header: "Status code",  "Description"
   :widths: 25, 60
 
-  "200", "Set of domains"
-  "500", "Internal server error"
+  "200", "Set of domains."
+  "500", "Internal server error."
 
-Response example::
+Success response example::
 
  {
   "entity": {
