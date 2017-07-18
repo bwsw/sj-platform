@@ -392,7 +392,7 @@ Constructor arguments
  "outputRequestBuilder", ":ref:`Output_Request_Builder`[OT]", "Builder of requests for output service"
  "manager", "OutputEnvironmentManager", "Instance of the OutputEnvironmentManager used by Executor"
 
-.. important::* IT - the type of data received by Executor
+.. important:: * IT - the type of data received by Executor
    * OT - the type of requests that ``outputRequestBuilder`` creates. The type depends on the type of output service (see "Request format" column of the table in :ref:`Output_Request_Builder`).
 
 
