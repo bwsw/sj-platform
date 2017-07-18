@@ -721,23 +721,23 @@ Success response example::
 CRUD Rest-API for Streams
 --------------------------------------
 
-.. note::  Method PUT is not available yet
+The range of REST API methods described below allows to create or delete a stream, get the information on the stream, get the list of streams and stream types in the system, get instances related to a stream.
 
 Stream fields
 ~~~~~~~~~~~~~~~~~
 .. csv-table:: Response
-   :header: "Stream type", "Field", "Format", "Description"
-   :widths: 20, 20, 20, 40
-
-   "all", "name*", "String", "Stream name. Must contains only lowercase letters, digits or hyphens."
-   "all", "description", "String", "Stream description"
-   "all", "service*", "String", "Service id"
-   "all", "type*", "String", "Stream type [stream.t-stream, stream.kafka, jdbc-output, elasticsearch-output, rest-output]"
-   "all", "tags", "Array[String]", "Tags"
-   "stream.t-stream, stream.kafka", "partitions*", "Int", "partitions"
-   "stream.kafka", "replicationFactor*", "Int", "Replication factor (how many zookeeper nodes to utilize)"
-   "jdbc-output", "primary", "String", "Primary key field name used in sql database"
-   "all", "force", "Boolean", "Indicates if a stream should be removed and re-created by force (if it exists). False by default."
+   :header: "Field", "Format", "Description", "Requirements"
+   :widths: 10, 10, 20, 20
+ 
+   "name*", "String", "Stream name.", "Must be unique and contain only lowercase letters, digits or hyphens."
+   "description", "String", "Stream description", ""
+   "service*", "String", "Service id", ""
+   "type*", "String", "Stream type", "One of the following values : stream.t-stream, stream.kafka, jdbc-output, elasticsearch-output, rest-output."
+   "tags", "Array[String]", "Tags.", ""
+   "partitions*", "Int", "Partitions.", "For stream.t-stream, stream.kafka types"
+   "replicationFactor*", "Int", "Replication factor (how many zookeeper nodes to utilize).", "For stream.kafka stream type only."
+   "primary", "String", "Primary key field name used in sql database.", "For jdbc-output stream type only."
+   "force", "Boolean", "Indicates if a stream should be removed and re-created by force (if it exists). False by default.", ""
 
 
 .. important:: 
@@ -762,11 +762,11 @@ Request format::
   :header: "Status code",  "Description"
   :widths: 25, 60
 
-  "201", "Stream 'kafka' has been created."
+  "201", "Stream <stream name> has been created."
   "400", "Cannot create stream. Errors: <list-of-errors>."
-  "500", "Internal server error"
+  "500", "Internal server error."
 
-Request example::
+Request json example::
 
  {
       "name": "tstream-2",
@@ -809,10 +809,10 @@ Request format::
   :header: "Status code",  "Description"
   :widths: 25, 60
 
-  "200", "List of streams"
-  "500", "Internal server error"
+  "200", "List of streams."
+  "500", "Internal server error."
 
-Response example::
+Success response example::
 
  {
   "status-code": 200,
@@ -853,8 +853,8 @@ Request format::
   :header: "Status code",  "Description"
   :widths: 25, 60
 
-  "200", "List of types"
-  "500", "Internal server error"
+  "200", "List of types."
+  "500", "Internal server error."
 
 Success response example::
 
@@ -884,9 +884,9 @@ Request format::
   :header: "Status code",  "Description"
   :widths: 25, 60
 
-  "200", "Stream"
-  "404", "Stream 'kafka' has not been found."
-  "500", "Internal server error"
+  "200", "Stream."
+  "404", "Stream <stream name> has not been found."
+  "500", "Internal server error."
 
 Success response example::
 
@@ -933,9 +933,9 @@ Request format::
   "200", "Stream 'kafka' has been deleted."
   "404", "Stream 'kafka' has not been found."
   "422", "Cannot delete stream 'kafka'. Stream is used in instances."
-  "500", "Internal server error"
+  "500", "Internal server error."
 
-Response example::
+Success response example::
 
  {
   "status-code": 200,
@@ -959,20 +959,21 @@ Request format::
   :widths: 25, 60
 
   "200", "List of instances"
-  "404", "Stream 'kafka' has not been found."
+  "404", "Stream <stream name> has not been found."
   "500", "Internal server error"
 
-Response example::
+Success response example::
 
  {
   "entity": {
     "instances": [
       "pingstation-output",
-      "ivan"
+      "john"
     ]
   },
   "statusCode": 200
  }
+
 
 
 CRUD Rest-API for Config Settings
