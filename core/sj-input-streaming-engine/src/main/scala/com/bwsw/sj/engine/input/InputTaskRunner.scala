@@ -38,7 +38,7 @@ import scala.collection.JavaConverters._
 /**
   * Class is responsible for launching input engine execution logic.
   * First, there are created all services needed to start engine. All of those services implement Callable interface
-  * Next, each service are launched as a separate task using [[ExecutorCompletionService]]
+  * Next, each service are launched as a separate task using [[java.util.concurrent.ExecutorCompletionService]]
   * Finally, handle a case if some task will fail and stop the execution. Otherwise the execution will go on indefinitely
   *
   * @author Kseniya Mikhaleva

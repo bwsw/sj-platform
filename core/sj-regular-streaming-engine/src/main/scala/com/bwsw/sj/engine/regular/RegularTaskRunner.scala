@@ -19,7 +19,7 @@
 package com.bwsw.sj.engine.regular
 
 import java.io.Closeable
-import java.util.concurrent.{Callable, ExecutorCompletionService}
+import java.util.concurrent.Callable
 
 import com.bwsw.sj.common.engine.TaskEngine
 import com.bwsw.sj.common.engine.core.managment.{CommonTaskManager, TaskManager}
@@ -31,7 +31,7 @@ import com.bwsw.sj.engine.regular.task.reporting.RegularStreamingPerformanceMetr
 /**
   * Class is responsible for launching regular engine execution logic.
   * First, there are created all services needed to start engine. All of those services implement Callable interface
-  * Next, each service are launched as a separate task using [[ExecutorCompletionService]]
+  * Next, each service are launched as a separate task using [[java.util.concurrent.ExecutorCompletionService]]
   * Finally, handle a case if some task will fail and stop the execution. In other case the execution will go on indefinitely
   *
   * @author Kseniya Mikhaleva
