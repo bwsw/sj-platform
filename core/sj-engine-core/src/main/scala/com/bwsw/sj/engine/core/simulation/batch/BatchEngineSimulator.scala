@@ -28,7 +28,7 @@ import scala.collection.mutable
 
 /**
   * Simulates behavior of [[com.bwsw.sj.common.engine.TaskEngine TaskEngine]] for testing an implementation of
-  * [[BatchStreamingExecutor]]
+  * [[com.bwsw.sj.common.engine.core.batch.BatchStreamingExecutor]]
   *
   * Usage example:
   * {{{
@@ -66,9 +66,9 @@ import scala.collection.mutable
   * println(results)
   * }}}
   *
-  * @param executor       implementation [[BatchStreamingExecutor]] under test
+  * @param executor       implementation [[com.bwsw.sj.common.engine.core.batch.BatchStreamingExecutor]] under test
   * @param manager        environment manager that used by executor
-  * @param batchCollector implementation of [[BatchCollector]] that used with executor
+  * @param batchCollector implementation of [[com.bwsw.sj.common.engine.core.batch.BatchCollector]] that used with executor
   * @tparam T type of incoming data
   * @author Pavel Tomskikh
   */
@@ -78,12 +78,15 @@ class BatchEngineSimulator[T <: AnyRef](executor: BatchStreamingExecutor[T],
   extends CommonEngineSimulator[T](executor, manager) {
 
   /**
-    * Sends incoming envelopes from local buffer to [[executor]] as long as simulator can creates windows and returns
+    * Sends incoming envelopes from local buffer to executor as long as simulator can creates windows and returns
     * output elements, state and envelopes that does not processed
     *
-    * @param batchesNumberBeforeIdle  number of retrieved batches between invocations of [[executor.onIdle()]].
-    *                                 '0' means that [[executor.onIdle()]] will never be called.
-    * @param window                   count of batches that will be contained into a window ([[BatchInstance.window]])
+    * @param batchesNumberBeforeIdle  number of retrieved batches between invocations of
+    *                                 [[com.bwsw.sj.common.engine.core.batch.BatchStreamingExecutor.onIdle]]().
+    *                                 '0' means that [[com.bwsw.sj.common.engine.core.batch.BatchStreamingExecutor.onIdle]]()(
+    *                                 will never be called.
+    * @param window                   count of batches that will be contained into a window
+    *                                 ([[com.bwsw.sj.common.si.model.instance.BatchInstance.window]])
     * @param slidingInterval          the interval at which a window will be shifted (count of processed batches that will be
     *                                 removed from the window)
     * @param saveFullState            flag denotes that the full state(true) or partial changes of state(false) is going to be

@@ -23,7 +23,7 @@ import com.bwsw.sj.common.engine.core.state.StateLoaderInterface
 import scala.collection.mutable
 
 /**
-  * Mock for [[StateLoaderInterface]]
+  * Mock for [[com.bwsw.sj.common.engine.core.state.StateLoaderInterface]]
   *
   * @param lastState last state
   * @author Pavel Tomskikh
@@ -32,7 +32,9 @@ class StateLoaderMock(lastState: mutable.Map[String, Any] = mutable.Map.empty)
   extends StateLoaderInterface {
 
   /**
-    * @inheritdoc
+    * Allows getting last state. Needed for restoring after crashing
+    *
+    * @return (ID of the last state, state variables)
     */
   override def loadLastState(): (Option[Long], mutable.Map[String, Any]) = (None, lastState)
 }
