@@ -56,7 +56,7 @@ The data format in the body of the response is JSON.
 CRUD Rest-API for Providers
 -----------------------------------
 
-The range of REST API methods described below allow to create or delete a provider, get the information on the provider, get the list of providers in the system, test connection to a provider.
+The range of REST API methods described below allows to create or delete a provider, get the information on the provider, get the list of providers in the system, test connection to a provider.
 
 .. csv-table::  Provider fields
   :header: "Field", "Format",  "Description", "Requirements"
@@ -371,7 +371,7 @@ Success response example::
 CRUD Rest-API for Services
 --------------------------------------
 
-The range of REST API methods described below allow to create or delete a service, get the information on the service, get the list of services and service types in the system, get streams and instances related to a service.
+The range of REST API methods described below allows to create or delete a service, get the information on the service, get the list of services and service types in the system, get streams and instances related to a service.
 
 Service fields
 ~~~~~~~~~~~~~~~~~
