@@ -342,11 +342,12 @@ If you want to see what the Executor puts in output stream and state after proce
  println(results)
  
 ``println(results)`` will print::
+ 
  BatchSimulationResult(SimulationResult(List(StreamData(out,List(PartitionData(0,List(17))))),Map(symbols -> 17, idleCalls -> 4)),ArrayBuffer(<last envelope>))
  
  <last-envelope> is a `KafkaEnvelope[String]` that contains string "s".
 
-The ``mock`` method from the ``org.mockito.Mockito.mock`` library.
+The ``mock`` method is from the ``org.mockito.Mockito.mock`` library.
 
 ``SomeBatchCollector`` is an example of ``BatchCollector`` implementation. Method ``getBatchesToCollect`` returns all nonempty batches, ``afterEnvelopeReceive`` counts envelopes in batches, ``prepareForNextCollecting`` resets counters. Accumulation of batches is implemented in ``BatchCollector``::
 
