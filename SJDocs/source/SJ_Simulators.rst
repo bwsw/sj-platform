@@ -34,7 +34,7 @@ Constructor arguments
 
 The data record is a string that will be parsed by ``executor.parse()`` to some entity.
 
-The simulator provides the following methods:
+Simulator provides the following methods:
 
 * ``prepare(record: String)`` - writes one data record to a byte buffer.
 * ``prepare(records: Seq[String])`` - writes a collection of data records to a byte buffer.
