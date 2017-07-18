@@ -26,7 +26,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import scaldi.Injector
 
 /**
-  * API entity for [[EngineLiterals.outputStreamingType]] instance
+  * API entity for [[com.bwsw.sj.common.utils.EngineLiterals.outputStreamingType]] instance
   */
 class OutputInstanceApi(name: String,
                         coordinationService: String,

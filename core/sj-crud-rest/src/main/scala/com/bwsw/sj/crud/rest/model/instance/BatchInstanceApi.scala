@@ -25,7 +25,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import scaldi.Injector
 
 /**
-  * API entity for [[EngineLiterals.batchStreamingType]] instance
+  * API entity for [[com.bwsw.sj.common.utils.EngineLiterals.batchStreamingType]] instance
   */
 class BatchInstanceApi(name: String,
                        coordinationService: String,

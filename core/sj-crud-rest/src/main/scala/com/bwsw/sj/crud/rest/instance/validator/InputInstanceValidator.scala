@@ -29,7 +29,7 @@ import scaldi.Injector
 import scala.collection.mutable.ArrayBuffer
 
 /**
-  * Validator for [[InputInstance]]
+  * Validator for [[com.bwsw.sj.common.si.model.instance.InputInstance]]
   *
   * @author Kseniya Tomskikh
   */

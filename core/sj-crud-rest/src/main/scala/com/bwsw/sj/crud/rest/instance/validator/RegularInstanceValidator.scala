@@ -32,7 +32,7 @@ import scala.collection.mutable.ArrayBuffer
 import scala.util.{Failure, Success, Try}
 
 /**
-  * Validator for [[RegularInstance]]
+  * Validator for [[com.bwsw.sj.common.si.model.instance.RegularInstance]]
   *
   * @author Kseniya Tomskikh
   */
