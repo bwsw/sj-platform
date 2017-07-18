@@ -22,11 +22,8 @@ import java.io.File
 import java.net.URLClassLoader
 
 import com.bwsw.sj.common.dal.model.module.FileMetadataDomain
-import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.engine.StreamingValidator
 import com.bwsw.sj.common.si.model.FileMetadata
-import com.bwsw.sj.common.utils.FileClassLoader
-import scaldi.Injectable._
 import scaldi.Injector
 
 import scala.collection.mutable.ArrayBuffer
@@ -132,8 +129,6 @@ class ModuleMetadata(filename: String,
   }
 
   protected def createClassLoader(filename: String): ClassLoader = {
-//    new FileClassLoader(inject[ConnectionRepository].getFileStorage, filename)
-    println(file.get.getName)
     new URLClassLoader(Array(file.get.toURI.toURL), ClassLoader.getSystemClassLoader)
   }
 }
