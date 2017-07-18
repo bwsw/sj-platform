@@ -482,9 +482,10 @@ It is a mock for ``StatefulModuleEnvironmentManager``.
 It creates :ref:`PartitionedOutputMock` instead of ``PartitionedOutput`` and :ref:`RoundRobinOutputMock` instead of ``RoundRobinOutput``.
 
 Constructor arguments:
+
 .. csv-table:: 
  :header: "Argument", "Type", "Description"
- :widths: 25, 25, 50 
+ :widths: 15, 15, 30 
 
  "stateStorage", "StateStorage", "A storage of state"
  "options", "String", "User defined options from instance"
