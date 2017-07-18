@@ -375,11 +375,147 @@ Output Engine Simulator
 
 .. warning:: *The section is under development!*
 
+It is a class for testing an implementation of :ref:`output-modlue` (Executor). 
+
+Simulator imitates the behavior of the :ref:`Output_Streaming_Engine`: it sends transactions to the Executor, gets output envelopes from it and builds requests for loading data to an output service. The simulator uses :ref:`Output_Request_Builder` to build requests.
+
+Constructor arguments
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. csv-table:: 
+ :header: "Argument", "Type", "Description"
+ :widths: 25, 25, 50 
+
+ "executor", "OutputStreamingExecutor[IT]", "Implementation of :ref:`output-module` under testing"
+ "outputRequestBuilder", ":ref:`Output_Request_Builder`[OT]", "Builder of requests for output service"
+ "manager", "OutputEnvironmentManager", "Instance of the OutputEnvironmentManager used by Executor"
+
+.. important::* IT - the type of data received by Executor
+   * OT - the type of requests that ``outputRequestBuilder`` creates. The type depends on the type of output service (see "Request format" column of the table in :ref:`Output_Request_Builder`).
+
+
+Simulator provides the following methods:
+
+* ``prepare(entities: Seq[IT], stream: String = "default-input-stream", consumerName: String = "default-consumer-name"): Long`` - takes a collection of data (``entities`` argument), creates one transaction (TStreamEnvelope[IT] type) with stream name "stream", saves them in a local buffer and returns ID of the transaction. The ``consumerName`` argument has a default value ("default-consumer-name"). You should define it only if the executor uses ``consumerName`` from TStreamEnvelope. Default value of the ``stream`` argument is "default-input-stream".
+* ``process(clearBuffer: Boolean = true): Seq[OT]`` - sends all transactions from local buffer to Executor by calling the ``onMessage`` method for each transaction, gets output envelopes and builds requests for output services. The ``clearBuffer`` argument indicates that local buffer with transactions have to be cleared after processing. That argument has a default value "true".
+* ``clear()`` - clears local buffer that contains transactions.
+
+The simulator has a ``beforeFirstCheckpoint`` flag that indicates that the first checkpoint has not been performed. Before first checkpoint Simulator builds a delete request for each incoming transaction (in the ``process`` method). ``beforeFirstCheckpoint`` can be set automatically, when the Executor calls ``manager.initiateCheckpoint()``, or manually.
+
+.. _Output_Request_Builder:
+Output Request Builder
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+It provides the following methods for building requests for output service from output envelope:
+
+* ``buildInsert`` - builds a request to insert data
+* ``buildDelete`` - builds a request to delete data
+
+The are three implementations of the @OutputRequestBuilder@ for each type of output storage:
+
+
+.. csv-table:: 
+ :header: "Classname", "Request format", "Output storage type"
+ :widths: 25, 25, 50 
+
+ "EsRequestBuilder", "String", Elasticsearch"
+ "JdbcRequestBuilder", "PreparedStatementMock", "SQL database"
+ "RestRequestBuilder", "org.eclipse.jetty.client.api.Request', "RESTful service"
+
+.. note:: Constructors of the ``EsRequestBuilder`` and the ``JdbcRequestBuilder`` takes the ``outputEntity`` argument. It should be created using the ``executor.getOutputEntity`` method.
+
+Usage example
+~~~~~~~~~~~~~~~~~~~~
+
+E.g. you implement your own Executor, that takes pairs (Integer, String) and puts them in Elasticsearch::
+
+ class SomeExecutor(manager: OutputEnvironmentManager) 
+  extends OutputStreamingExecutor[(Integer, String)](manager) {
+  override def onMessage(envelope: TStreamEnvelope[(Integer, String)]): Seq[OutputEnvelope] = { ... }
+  override def getOutputEntity: Entity[String] = { ... }
+ }
+
+If you want to see what Executor returns after processing and what requests are used to save processed data, Output Engine Simulator can be used in the following way::
+
+ val manager: OutputEnvironmentManager
+ val executor = new SomeExecutor(manager)
+
+ val requestBuilder = new EsRequestBuilder(executor.getOutputEntity)
+ val simulator = new OutputEngineSimulator(executor, requestBuilder, manager)
+ simulator.prepare(Seq((1, "a"), (2, "b")))
+ simulator.prepare(Seq((3, "c")))
+ val requestsBeforeFirstCheckpoint = simulator.process()
+ println(requestsBeforeFirstCheckpoint)
+
+ // "perform" the first checkpoint
+ simulator.beforeFirstCheckpoint = false
+ simulator.prepare(Seq((4, "d"), (5, "e")))
+ val requestsAfterFirstCheckpoint = simulator.process()
+ println(requestsAfterFirstCheckpoint)
+
+
+``requestsBeforeFirstCheckpoint`` will contain delete and insert requests, ``requestsAfterFirstCheckpoint``  will contain insert requests only.
+
+For more complicated examples see: `sj-fping-output-test <https://github.com/bwsw/sj-fping-demo/blob/develop/ps-output/src/test/scala/com/bwsw/sj/examples/pingstation/module/output/ExecutorTests.scala>`_, `sj-sflow-output-test <https://github.com/bwsw/sj-sflow-demo/blob/develop/sflow-output/src-dst/src/test/scala/com/bwsw/sj/examples/sflow/module/output/srcdst/ExecutorTests.scala.>`_
+
 Object For Simulators With States
 -------------------------------------
 
 .. warning:: *The section is under development!*
 
-.. _Module-Environment-Manager-Mock::
-
 .. _Simulation-Result::
+Simulation Result
+~~~~~~~~~~~~~~~~~~~~
+
+``case class PartitionData(partition: Int, dataList: Seq[AnyRef])`` - contains data elements that has been sent in a partition of an output stream.
+
+``case class StreamData(stream: String, partitionDataList: Seq[PartitionData])`` - contains data elements that has been sent in an output stream.
+
+``case class SimulationResult(streamDataList: Seq[StreamData], state: Map[String, Any])`` - contains data elements for each output stream and a state at a certain time point.
+
+.. _Module-Environment-Manager-Mock::
+Module Environment Manager Mock
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+It is a mock for ``StatefulModuleEnvironmentManager``. 
+
+It creates :ref:`PartitionedOutputMock` instead of ``PartitionedOutput`` and :ref:`RoundRobinOutputMock` instead of ``RoundRobinOutput``.
+
+Constructor arguments:
+.. csv-table:: 
+ :header: "Argument", "Type", "Description"
+ :widths: 25, 25, 50 
+
+ "stateStorage", "StateStorage", "A storage of state"
+ "options", "String", "User defined options from instance"
+ "outputs", "Array[TStreamStreamDomain]", "The list of output streams from an instance"
+
+
+Module Output Mocks
+~~~~~~~~~~~~~~~~~~~~~~
+
+Module Output Mocks have a buffer that contains output elements (see :ref:`Simulation-Result`).
+
+Provided methods:
+
+* ``getOutputElements: mutable.Buffer[OutputElement]`` - returns a buffer with output elements.
+* ``clear()`` - removes all output elements from a buffer.
+
+.. _PartitionedOutputMock::
+Partitioned Output Mock
+""""""""""""""""""""""""""""""""
+
+The mock for ``PartitionedOutput`` provides an output stream that puts data into a specific partition.
+
+Provided methods:
+
+* ``put(data: AnyRef, partition: Int)`` - creates an output element with  `data` and `partition` and puts it in a buffer.
+
+.. _RoundRobinOutputMock::
+Round Robin Output Mock
+""""""""""""""""""""""""""""""
+
+The mock for ``RoundRobinOutput`` provides an output stream that puts data using the round-robin policy.
+
+Provided methods:
+
+* ``put(data: AnyRef)`` - creates an output element with `data` and next partition then puts it in a buffer.
