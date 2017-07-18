@@ -25,7 +25,7 @@ import com.bwsw.common.KafkaClient
 import com.bwsw.common.embedded.EmbeddedMongo
 import com.bwsw.sj.common.config.TempHelperForConfigSetup
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
-import com.bwsw.sj.common.utils.benchmark.SeparateProcess
+import com.bwsw.sj.common.utils.benchmark.ClassRunner
 import com.bwsw.sj.engine.core.testutils.{Server, TestStorageServer}
 import com.bwsw.sj.engine.regular.RegularTaskRunner
 import com.bwsw.sj.kafka.data_sender.DataSender
@@ -101,7 +101,7 @@ class PerformanceBenchmark(mongoPort: Int,
     */
   def startServices(): Unit = {
     val ttsEnv = Map("ZOOKEEPER_HOSTS" -> zkAddress)
-    maybeTtsProcess = Some(new SeparateProcess(classOf[Server], ttsEnv).start())
+    maybeTtsProcess = Some(new ClassRunner(classOf[Server], ttsEnv).start())
     Thread.sleep(1000)
     println("TTS server started")
 
@@ -144,7 +144,7 @@ class PerformanceBenchmark(mongoPort: Int,
     kafkaSender.send(messageSize, messagesCount)
     println("Data sent to the Kafka")
 
-    val process = new SeparateProcess(classOf[RegularTaskRunner], environment).start()
+    val process = new ClassRunner(classOf[RegularTaskRunner], environment).start()
 
     while (outputFile.lastModified() == lastModified)
       Thread.sleep(fileCheckTimeout)

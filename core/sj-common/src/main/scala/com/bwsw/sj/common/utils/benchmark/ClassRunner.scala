@@ -28,7 +28,7 @@ import scala.collection.JavaConverters._
   * @param arguments   command line arguments
   * @author Pavel Tomskikh
   */
-class SeparateProcess(clazz: Class[_], environment: Map[String, String] = Map.empty, arguments: Seq[String] = Seq.empty) {
+class ClassRunner(clazz: Class[_], environment: Map[String, String] = Map.empty, arguments: Seq[String] = Seq.empty) {
   private val command = Seq(
     System.getProperty("java.home") + "/bin/java",
     "-classpath",
