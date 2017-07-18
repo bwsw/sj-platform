@@ -19,7 +19,6 @@ HTTP Methods
 
   "GET", "Used for retrieving resources/resource instance."
   "POST", "Used for creating resources and performing resource actions."
-  "PUT", "Used for updating resource instance."
   "DELETE", "Used for deleting resource instance."
 
 
@@ -54,32 +53,31 @@ The data format in the body of the response is JSON.
 
 
 
-
-
 CRUD Rest-API for Providers
 -----------------------------------
 
-.. csv-table::  Provider fields
-  :header: "Field", "Format",  "Description"
-  :widths: 25, 25,  50
+The range of REST API methods described below allow to create or delete a provider, get the information on the provider, get the list of providers in the system, test connection to a provider.
 
-  "name*", "String", "Provider name. Must contains only letters, digits or hyphens."
-  "description", "String", "Provider description"
-  "hosts*", "Array[String]", "ist of provider hosts"
-  "login", "String", "Provider login"
-  "password", "String", "Provider password"
-  "type*", "String", "Provider type"
-  "driver*", "String", "Driver name (for JDBC type)"
+.. csv-table::  Provider fields
+  :header: "Field", "Format",  "Description", "Requirements"
+  :widths: 15, 15, 25, 25
+
+  "name*", "String", "Provider name.", "Name must be unique and contain only letters, digits or hyphens."
+  "description", "String", "Provider description.", ""
+  "hosts*", "Array[String]", "List of provider hosts.", ""
+  "login", "String", "Provider login.", ""
+  "password", "String", "Provider password.", ""
+  "type*", "String", "Provider type.", "One of the following values are possible: 'zookeeper', 'kafka', 'ES', 'JDBC', 'REST'."
+  "driver*", "String", "Driver name.", "For JDBC provider type only."
+
+.. important:: 
+   - Config settings must contain (<driver> is a value of the "driver" field):
+      
+     - driver.<driver> - name of file with JDBC driver (must exists in files) (e.g. "mysql-connector-java-5.1.6.jar")
+     - driver.<driver>.class - name of class of this driver (e.g. "com.mysql.jdbc.Driver")
+     - driver.<driver>.prefix - prefix of server url: (prefix)://(host:port)/(database), one of [jdbc:mysql, jdbc:postgresql, jdbc:oracle:thin]
 
 .. note:: `*` - a required field.
-
-Provider type must be one of the following values: "cassandra", "aerospike", "zookeeper", "kafka", "ES", "JDBC", "REST"
-
-Config settings must contain (<driver> is a value of the "driver" field):
-
-- driver.<driver> - name of file with JDBC driver (must exists in files) (e.g. "mysql-connector-java-5.1.6.jar")
-- driver.<driver>.class - name of class of this driver (e.g. "com.mysql.jdbc.Driver")
-- driver.<driver>.prefix - prefix of server url: (prefix)://(host:port)/(database), one of [jdbc:mysql, jdbc:postgresql, jdbc:oracle:thin]
 
 Create a new provider
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -94,15 +92,15 @@ Request format::
   :header: "Status code","Description"
   :widths: 25, 60
 
-  "201", "Provider 'kafka-example' has been created."
+  "201", "Provider <provider name> has been created."
   "400", "Cannot create provider. Errors: <list-of-errors>."
-  "500", "Internal server error"
+  "500", "Internal server error."
 
 Request json example::
 
  {
-     "name": "kafka-example",
-     "description": "example kafka provider",
+     "name": "kafka-provider",
+     "description": "example of kafka provider",
      "login": "my_login",
      "password": "my_pass",
      "type": "kafka",
@@ -118,7 +116,7 @@ Success response example::
  {
   "status-code": 201,
   "entity": {
-    "message": "Provider 'kafka-example' has been created."
+    "message": "Provider 'kafka-provider' has been created."
   }
  }
 
@@ -147,17 +145,17 @@ Request format::
   :header: "Status code","Description"
   :widths: 25, 60
 
-  "200", "Provider"
-  "404", "Provider 'foo' has not been found."
-  "500", "Internal server error"
+  "200", "Provider."
+  "404", "Provider <provider name> has not been found."
+  "500", "Internal server error."
 
-Response json example::
+Success response example::
 
  {
   "status-code": 200,
   "entity": {
     "provider": {
-      "name": "kafka-example",
+      "name": "kafka-provider",
      "description": "example kafka provider",
      "login": "my_login",
      "password": "my_pass",
@@ -171,12 +169,12 @@ Response json example::
  }
 
 
-Empty response example::
+Error response example::
 
  {
   "status-code": 404,
   "entity": {
-    "message": "Provider 'foo-prov' has not been found."
+    "message": "Provider 'foo-provider' has not been found."
   }
  }
 
@@ -194,8 +192,8 @@ Request format::
   :header: "Status code","Description"
   :widths: 25, 60
 
-  "200", "List of providers"
-  "500", "Internal server error"
+  "200", "List of providers."
+  "500", "Internal server error."
 
 Success response example::
 
@@ -204,7 +202,7 @@ Success response example::
   "entity": {
     "providers": [
       {
-        "name": "kafka-exmpl",
+        "name": "kafka-provider",
         "description": "example kafka provider",
         "login": "my_login",
         "password": "my_pass",
@@ -215,11 +213,11 @@ Success response example::
          ]
      },
      {
-       "name": "cass-prov",
-       "description": "cassandra provider example",
+       "name": "es-provider",
+       "description": "elasticsearch provider example",
        "login": "my_login",
        "password": "my_pass",
-       "type": "cassandra",
+       "type": "ES",
        "hosts": [
            "192.168.1.133"
        ]
@@ -242,16 +240,14 @@ Request format::
   :header: "Status code","Description"
   :widths: 25, 60
 
-  "200 ",  "List of types "
-  "500 ",  "Internal server error "
+  "200 ",  "List of types. "
+  "500 ",  "Internal server error. "
 
 Success response example::
 
  {
   "entity": {
     "types": [
-      "cassandra",
-      "aerospike",
       "zookeeper",
       "kafka",
       "ES",
@@ -277,16 +273,16 @@ Request format::
   :widths: 25, 60
 
   "200", "Provider"
-  "404",  "Provider 'foo' has not been found."
-  "422", "Cannot delete provider 'foo'. Provider is used in services."
+  "404", "Provider <provider name> has not been found."
+  "422", "Cannot delete provider <provider name>. Provider is used in services."
   "500", "Internal server error"
 
-Response example::
+Success response example::
 
  {
   "status-code": 200,
   "entity": {
-    "message": "Provider 'kafka-example' has been deleted."
+    "message": "Provider 'kafka-provider' has been deleted."
   }
  }
 
@@ -305,14 +301,12 @@ Request format::
   :header: "Status code","Description"
   :widths: 25, 60
 
-  "200", "Provider"
-  "404", "Provider 'foo' has not been found."
-  "409", "Can not establish connection to Kafka on '192.168.1.133:9092'; Can not establish connection to Kafka on '192.168.1.135:9092'"
-  "500", "Internal server error"
+  "200", "Provider."
+  "404", "Provider <provider name> has not been found."
+  "409", "Provider is not available."
+  "500", "Internal server error."
 
-Response example:
-
-Provider available::
+Success response example (provider is available)::
 
  {
   "status-code": 200,
@@ -321,12 +315,14 @@ Provider available::
   }
  }
 
-Provider not available::
+Error response example:
+
+Provider is not available::
 
  {
   "entity": {
     "connection": false,
-    "errors": "Can not establish connection to Kafka on '192.168.1.133:9092';Can not establish connection to Kafka on '192.168.1.135:9092'"
+    "errors": "Can not establish connection to Kafka on '192.168.1.133:9092'"
   },
   "statusCode": 409
  }
@@ -354,17 +350,17 @@ Request format::
   :header: "Status code","Description"
   :widths: 25, 60
 
-  "200", "List of services"
-  "404", "Provider 'foo' has not been found."
-  "500", "Internal server error"
+  "200", "List of services."
+  "404", "Provider <provider name> has not been found."
+  "500", "Internal server error."
 
-Response example::
+Success response example::
 
  {
   "entity": {
     "services": [
-      "boo",
-      "foo"
+      "abc",
+      "def"
     ]
   },
   "statusCode": 200
@@ -375,7 +371,7 @@ Response example::
 CRUD Rest-API for Services
 --------------------------------------
 
-.. note:: Method PUT is not available yet
+The range of REST API methods described below allow to create or delete a service, get the information on the service, get the list of services and service types in the system, get streams and instances related to a service.
 
 Service fields
 ~~~~~~~~~~~~~~~~~
@@ -394,106 +390,106 @@ Each particular service has its own set of fields.
   "SQL database", "JDBC"
   "RESTful service", "REST"
 
+.. note: `*` - required fields.
+
 Elasticsearch Index (ESInd)
 """"""""""""""""""""""""""""""""""""""
 
 .. csv-table::  
-   :header: "Field", "Format", "Description"
+   :header: "Field", "Format", "Description", "Requirements"
    :widths: 20, 20, 60
   
-   "type*", "String", "Service type"
-   "name*", "String", "Service name"
-   "description", "String", "Service description"
-   "index*", "String", "Elasticsearch index"
-   "provider*", "String", "provider name"
-   "login", "String", "User name"
-   "password", "String", "User password"
+   "type*", "String", "Service type.", ""
+   "name*", "String", "Service name.", "Must be unique and contain only letters, digits or hyphens."
+   "description", "String", "Service description.", ""
+   "index*", "String", "Elasticsearch index.", ""
+   "provider*", "String", "Provider name.", ""
+   "login", "String", "User name.", ""
+   "password", "String", "User password.", ""
 
-.. note:: Provider type can be 'ES' only
+.. important:: Provider type can be 'ES' only.
 
 Kafka queue (KfkQ)
 """"""""""""""""""""""""""""""
 
 .. csv-table::  
-  :header: "Field", "Format",  "Description"
-  :widths: 20, 20, 60  
+  :header: "Field", "Format",  "Description", "Requirements"
+  :widths: 15, 15, 20, 20   
 
-  "type*", "String", "Service type"
-  "name*", "String", "Service name"
-  "description", "String", "Service description"
-  "provider*", "String", "provider name"
-  "zkProvider*", "String", "zk provider name"
-  "zkNamespace*", "String", "namespace"
+  "type*", "String", "Service type", ""
+  "name*", "String", "Service name", "Must be unique and contain only letters, digits or hyphens."
+  "description", "String", "Service description", ""
+  "provider*", "String", "Provider name.", ""
+  "zkProvider*", "String", "zk provider name.", ""
+  "zkNamespace*", "String", "Namespace.", ""
 
-.. note:: provider type can be 'kafka' only
-
-.. note::  zkProvider type can be 'zookeeper' only
+.. important:: - Provider type can be 'kafka' only.
+    - zkProvider type can be 'zookeeper' only.
 
 T-streams queue (TstrQ)
 """"""""""""""""""""""""""""""
 
 .. csv-table::  
-  :header: "Field", "Format",  "Description"
-  :widths: 20, 20, 60  
+  :header: "Field", "Format",  "Description", "Requirements"
+  :widths: 15, 15, 20, 20  
 
-  "type*", "String", "Service type"
-  "name*", "String", "Service name. Must contain only letters, digits or hyphens."
-  "description", "String", "Service description"
-  "provider*", "String", "provider name"
-  "prefix*", "String", "Must be a valid znode path"
-  "token*", "String", "(no more than 32 symbols)"
+  "type*", "String", "Service type.", ""
+  "name*", "String", "Service name.", "Must be unique and contain only letters, digits or hyphens."
+  "description", "String", "Service description.", ""
+  "provider*", "String", "Provider name.", ""
+  "prefix*", "String", "A znode path", "Must be a valid znode path."
+  "token*", "String", "A token", "Should not contain more than 32 symbols."
 
-.. note:: provider type can be 'zookeeper' only
+.. important:: Provider type can be 'zookeeper' only.
 
 Zookeeper Coordination (ZKCoord)
 """"""""""""""""""""""""""""""""""""""
 
 .. csv-table::  
-  :header: "Field", "Format",  "Description"
-  :widths: 20, 20, 60 
+  :header: "Field", "Format",  "Description", "Requirements"
+  :widths: 15, 15, 20, 20 
 
-  "type*", "String", "Service type"
-  "name*", "String", "Service name"
-  "description", "String", "Service description"
-  "namespace*", "String", "Zookeeper namespace"
-  "provider*", "String", "provider name"
+  "type*", "String", "Service type.", ""
+  "name*", "String", "Service name.", "Must be unique and contain only letters, digits or hyphens."
+  "description", "String", "Service description.", ""
+  "namespace*", "String", "Zookeeper namespace.", ""
+  "provider*", "String", "Provider name.", ""
 
-.. note:: provider type can be 'zookeeper' only
+.. important:: Provider type can be 'zookeeper' only.
 
 SQL database (JDBC)
 """""""""""""""""""""""""
 
 .. csv-table::  
-  :header: "Field", "Format",  "Description"
-  :widths: 20, 20, 60 
+  :header: "Field", "Format",  "Description", "Requirements"
+  :widths: 15, 15, 20, 20 
 
-  "type*", "String", "Service type"
-  "name*", "String", "Service name"
-  "description", "String", "Service description"
-  "provider*", "String", "provider name"
-  "database*", "String", "Database name"
+  "type*", "String", "Service type.", ""
+  "name*", "String", "Service name.", "Must be unique and contain only letters, digits or hyphens."
+  "description", "String", "Service description.", ""
+  "provider*", "String", "Provider name.", ""
+  "database*", "String", "Database name.", ""
 
-.. note:: provider type can be 'JDBC' only
+.. important:: Provider type can be 'JDBC' only.
 
 
 RESTful service (REST)
 """""""""""""""""""""""""""""
 
 .. csv-table::  
-  :header: "Field", "Format",  "Description"
-  :widths: 20, 20, 60
+  :header: "Field", "Format",  "Description", "Requirements"
+  :widths: 15, 15, 20, 20
 
-  "type*", "String", "Service type"
-  "name*", "String", "Service name"
-  "description", "String", "Service description"
-  "provider*", "String", "provider name"
-  "basePath", "String", "Path to storage (/ by default)"
-  "httpVersion", "String", "Version og HTTP protocol, one of (1.0, 1.1, 2); (1.1 by default)"
-  "headers", "Object", "Extra HTTP headers. Values in object must be only String type. ({} by default)"
+  "type*", "String", "Service type.", ""
+  "name*", "String", "Service name.", "Must be unique and contain only letters, digits or hyphens."
+  "description", "String", "Service description.", ""
+  "provider*", "String", "Provider name.", ""
+  "basePath", "String", "Path to storage (/ by default)", ""
+  "httpVersion", "String", "Version og HTTP protocol", "One of (1.0, 1.1, 2); (1.1 by default)"
+  "headers", "Object", "Extra HTTP headers.", "Values in object must be only String type. ({} by default)"
 
-.. note:: provider type can be 'REST' only
+.. important:: Provider type can be 'REST' only.
 
-.. important::  Note: * - required field.
 
 Create a new service
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -509,11 +505,11 @@ Request format::
   :widths: 25, 60
 
 
-  "201", "Service 'test' has been created."
+  "201", "Service <service name> has been created."
   "400", "Cannot create service. Errors: <list-of-errors>."
-  "500", "Internal server error"
+  "500", "Internal server error."
 
-Request example::
+Request json example::
 
  {
     "name": "test-rest-zk-service",
@@ -556,11 +552,11 @@ Request format::
   :header: "Status code",  "Description"
   :widths: 25, 60
 
-  "200", "Service"
-  "404", "Service 'test' has not been found."
-  "500", "Internal server error"
+  "200", "Service."
+  "404", "Service <service name> has not been found."
+  "500", "Internal server error."
 
-Response example::
+Success response example::
 
  {
   "status-code": 200,
@@ -589,8 +585,8 @@ Request format::
   :header: "Status code",  "Description"
   :widths: 25, 60
 
-  "200", "List of services"
-  "500", "Internal server error"
+  "200", "List of services."
+  "500", "Internal server error."
 
 Success response example::
 
@@ -631,8 +627,8 @@ Request format::
   :header: "Status code",  "Description"
   :widths: 25, 60
 
-  "200", "List of types"
-  "500|Internal server error"
+  "200", "List of types."
+  "500", "Internal server error."
 
 Success response example::
 
@@ -664,19 +660,19 @@ Request format::
   :header: "Status code",  "Description"
   :widths: 25, 60
 
-  "200", "Service"
-  "404", "Service 'test' has not been found."
-  "422", "Cannot delete service 'test'. Service is used in streams."
-  "422", "Cannot delete service 'test'. Service is used in instances."
-  "500", "Internal server error"
+  "200", "Service."
+  "404", "Service <service name> has not been found."
+  "422", "Cannot delete service <service name>. Service is used in streams."
+  "422", "Cannot delete service <service name>. Service is used in instances."
+  "500", "Internal server error."
 
-Response example::
+Success response example::
 
 
  {
   "status-code": 200,
   "entity": {
-    "message": "Service 'foo' has been deleted."
+    "message": "Service 'abc' has been deleted."
   }
  }
 
@@ -694,11 +690,11 @@ Request format::
   :header: "Status code",  "Description"
   :widths: 25, 60
 
-  "200", "List of streams and instances"
-  "404", "Service 'test' has not been found."
-  "500", "Internal server error"
+  "200", "List of streams and instances."
+  "404", "Service <service name> has not been found."
+  "500", "Internal server error."
 
-Response example::
+Success response example::
 
  {
   "entity": {
