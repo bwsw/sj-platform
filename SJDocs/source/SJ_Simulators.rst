@@ -204,7 +204,7 @@ Constructor arguments
  :header: "Argument", "Type", "Description"
  :widths: 25, 25, 50 
 
- "executor", "BatchStreamingExecutor[T]", "Implementation of :ref:`Batch_Streaming_Executor` under test"
+ "executor", "BatchStreamingExecutor[T]", "Implementation of :ref:`batch-module` under test"
  "manager", "ModuleEnvironmentManagerMock", "Mock for StatefulModuleEnvironmentManager (see :ref:`Module-Environment-Manager-Mock`)"
  "batchCollector", "BatchCollector", "Implementation of :ref:`Batch-Collector`"
 
@@ -451,7 +451,7 @@ For more complicated examples see: `sj-fping-output-test <https://github.com/bws
 
 Objects For Simulators With States
 -------------------------------------
-Under this section the class of object used for Simulators with states is described. These Simulators are :ref:`Regular_Engine_Simulator` and :ref:`Batch_Engine_Simulator`.
+Under this section the class of objects used for Simulators with states is described. These Simulators are :ref:`Regular_Engine_Simulator` and :ref:`Batch_Engine_Simulator`.
 
 .. _Simulation-Result:
 Simulation Result
