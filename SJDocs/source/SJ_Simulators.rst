@@ -1,8 +1,6 @@
 Testing Modules on Simulators
 ================================
 
-.. warning:: *The section is under development!*
-
 Stream Juggler provides a user with a range of simulators for module testing purposes. A simulator is a ready-to-use environment that allows you to rapidly test modules during the development process.
 
 Four types of simulators is provided - one per each module type. Choose that you want to use in accordance with the type of a module you want to test. And follow the instructions below.
@@ -11,8 +9,6 @@ Four types of simulators is provided - one per each module type. Choose that you
 
 Input Engine Simulator
 -----------------------------
-
-.. warning:: *The section is under development!*
 
 It is a class for testing an implementation of an :ref:`input_module` (Executor).
 
@@ -93,9 +89,7 @@ For more complicated examples see: `sj-csv-input-test <https://github.com/bwsw/s
 Regular Engine Simulator
 ------------------------------
 
-.. warning:: *The section is under development!*
-
-It is a class for testing an implementation of :ref:`regular_module` (Executor).
+It is a class for testing implementation of :ref:`regular_module` (Executor).
 
 The simulator imitates the behavior of the :ref:`Regular_Streaming_Engine` (stateful mode): it sends envelopes to Executor, allows for invoking checkpoint's handlers, gets data from output streams and state.
 
@@ -200,9 +194,7 @@ For more complicated examples see `sj-fping-process-test <https://github.com/bws
 Batch Engine Simulator
 -------------------------------
 
-.. warning:: *The section is under development!*
-
-It is a class for testing an implementation of :ref:`batch-module` (Executor).
+It is a class for testing implementation of :ref:`batch-module` (Executor).
 
 Simulator imitates the behavior of the :ref:`Batch_Streaming_Engine` (stateful mode): it sends envelopes to the Executor, allows invoking checkpoint's handlers, gets data from output streams and state.
 
@@ -376,11 +368,9 @@ For more complicated examples see `sj-sflow-process-test <https://github.com/bws
 Output Engine Simulator
 ----------------------------
 
-.. warning:: *The section is under development!*
-
 It is a class for testing an implementation of :ref:`output-modlue` (Executor). 
 
-Simulator imitates the behavior of the :ref:`Output_Streaming_Engine`: it sends transactions to the Executor, gets output envelopes from it and builds requests for loading data to an output service. The simulator uses :ref:`Output_Request_Builder` to build requests.
+Simulator imitates the behavior of the :ref:`Output_Streaming_Engine`: it sends transactions to the Executor, gets output envelopes from it and builds requests for loading data to an output service. Simulator uses :ref:`Output_Request_Builder` to build requests.
 
 Constructor arguments
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -402,19 +392,18 @@ Simulator provides the following methods:
 * ``process(clearBuffer: Boolean = true): Seq[OT]`` - sends all transactions from local buffer to Executor by calling the ``onMessage`` method for each transaction, gets output envelopes and builds requests for output services. The ``clearBuffer`` argument indicates that local buffer with transactions have to be cleared after processing. That argument has a default value "true".
 * ``clear()`` - clears local buffer that contains transactions.
 
-The simulator has a ``beforeFirstCheckpoint`` flag that indicates that the first checkpoint has not been performed. Before first checkpoint Simulator builds a delete request for each incoming transaction (in the ``process`` method). ``beforeFirstCheckpoint`` can be set automatically, when the Executor calls ``manager.initiateCheckpoint()``, or manually.
+Simulator has a ``beforeFirstCheckpoint`` flag that indicates that the first checkpoint has not been performed. Before the first checkpoint Simulator builds a delete request for each incoming transaction (in the ``process`` method). ``beforeFirstCheckpoint`` can be changed automatically, when Executor calls ``manager.initiateCheckpoint()``, or manually.
 
 .. _Output_Request_Builder:
 Output Request Builder
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-It provides the following methods for building requests for output service from output envelope:
+Output Request Builder provides the following methods for building requests for output service from output envelope:
 
 * ``buildInsert`` - builds a request to insert data
 * ``buildDelete`` - builds a request to delete data
 
-The are three implementations of the @OutputRequestBuilder@ for each type of output storage:
-
+The are three implementations of the ``OutputRequestBuilder`` for each type of output storage:
 
 .. csv-table:: 
  :header: "Classname", "Request format", "Output storage type"
@@ -460,12 +449,11 @@ If you want to see what Executor returns after processing and what requests are 
 
 For more complicated examples see: `sj-fping-output-test <https://github.com/bwsw/sj-fping-demo/blob/develop/ps-output/src/test/scala/com/bwsw/sj/examples/pingstation/module/output/ExecutorTests.scala>`_, `sj-sflow-output-test <https://github.com/bwsw/sj-sflow-demo/blob/develop/sflow-output/src-dst/src/test/scala/com/bwsw/sj/examples/sflow/module/output/srcdst/ExecutorTests.scala.>`_
 
-Object For Simulators With States
+Objects For Simulators With States
 -------------------------------------
+Under this section the class of object used for Simulators with states is described. These Simulators are :ref:`Regular_Engine_Simulator` and :ref:`Batch_Engine_Simulator`.
 
-.. warning:: *The section is under development!*
-
-.. _Simulation-Result::
+.. _Simulation-Result:
 Simulation Result
 ~~~~~~~~~~~~~~~~~~~~
 
@@ -475,7 +463,7 @@ Simulation Result
 
 ``case class SimulationResult(streamDataList: Seq[StreamData], state: Map[String, Any])`` - contains data elements for each output stream and a state at a certain time point.
 
-.. _Module-Environment-Manager-Mock::
+.. _Module-Environment-Manager-Mock:
 Module Environment Manager Mock
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -504,7 +492,7 @@ Provided methods:
 * ``getOutputElements: mutable.Buffer[OutputElement]`` - returns a buffer with output elements.
 * ``clear()`` - removes all output elements from a buffer.
 
-.. _PartitionedOutputMock::
+.. _PartitionedOutputMock:
 Partitioned Output Mock
 """"""""""""""""""""""""""""""""
 
@@ -514,7 +502,7 @@ Provided methods:
 
 * ``put(data: AnyRef, partition: Int)`` - creates an output element with  `data` and `partition` and puts it in a buffer.
 
-.. _RoundRobinOutputMock::
+.. _RoundRobinOutputMock:
 Round Robin Output Mock
 """"""""""""""""""""""""""""""
 
