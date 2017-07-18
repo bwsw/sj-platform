@@ -42,7 +42,7 @@ import scaldi.Injector
   * @param mongoPort      port for [[EmbeddedMongo]]
   * @param zkHost         ZooKeeper server's host
   * @param zkPort         ZooKeeper server's port
-  * @param kafkaAddress   Kafka server's port
+  * @param kafkaAddress   Kafka server's address
   * @param messagesCount  count of messages
   * @param instanceName   instance's name
   * @param words          list of words that sends to the kafka server

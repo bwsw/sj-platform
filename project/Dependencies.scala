@@ -100,7 +100,12 @@ object Dependencies {
       .exclude("org.slf4j", "slf4j-log4j12")
       .exclude("org.slf4j", "slf4j-api")
       .exclude("log4j", "log4j")
-      .exclude("io.netty", "netty")
+      .exclude("io.netty", "netty"),
+    ("org.apache.samza" % "samza-kafka_2.12" % "0.13.0" % "test")
+      .exclude("org.apache.kafka", "kafka-clients")
+      .exclude("org.apache.kafka", "kafka_2.12")
+      .exclude("org.eclipse.jetty", "jetty-webapp"),
+    "org.eclipse.jetty" % "jetty-webapp" % "9.4.3.v20170317" % "test"
   ))
 
   lazy val sjBatchEngineDependencies = Def.setting(Seq(

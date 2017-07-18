@@ -226,4 +226,5 @@ object BenchmarkConfigNames {
   val mongoPortConfig = performanceBenchmarkConfig + ".mongo.port"
   val outputFileConfig = performanceBenchmarkConfig + ".output-file"
   val wordsConfig = performanceBenchmarkConfig + ".words"
+  val zooKeeperAddressConfig = performanceBenchmarkConfig + ".zk.address"
 }

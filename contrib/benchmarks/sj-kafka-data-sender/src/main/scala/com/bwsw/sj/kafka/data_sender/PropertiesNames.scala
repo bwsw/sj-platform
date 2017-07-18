@@ -29,4 +29,5 @@ object PropertiesNames {
   val separator = "separator"
   val messageSize = "size"
   val messageCount = "count"
+  val firstMessage = "firstMessage"
 }
