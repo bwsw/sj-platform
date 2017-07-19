@@ -146,8 +146,7 @@
             <div class="col-sm-10">
               <select required [(ngModel)]="newService.type" name="serviceType"
                       class="form-control">
-                <option *ngFor="let type of serviceTypes" value="{{type}}"
-                        [disabled]="type ==='ArspkDB' || type === 'CassDB'">{{type}}</option>
+                <option *ngFor="let type of serviceTypes" value="{{type.id}}">{{type.name}}</option>
               </select>
             </div>
           </fieldset>
