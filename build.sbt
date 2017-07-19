@@ -113,7 +113,6 @@ lazy val inputStreamingEngine = Project(id = "sj-input-streaming-engine",
   base = file("./core/sj-input-streaming-engine"))
   .settings(commonSettings: _*)
   .settings(
-    libraryDependencies ++= Dependencies.sjInputEngineDependencies.value,
     libraryDependencies ++= Dependencies.sjTestDependencies.value
   )
   .dependsOn(engineCore)
@@ -130,9 +129,6 @@ lazy val regularStreamingEngine = Project(id = "sj-regular-streaming-engine",
 lazy val batchStreamingEngine = Project(id = "sj-batch-streaming-engine",
   base = file("./core/sj-batch-streaming-engine"))
   .settings(commonSettings: _*)
-  .settings(
-    libraryDependencies ++= Dependencies.sjBatchEngineDependencies.value
-  )
   .dependsOn(engineCore)
 
 lazy val outputStreamingEngine = Project(id = "sj-output-streaming-engine",
