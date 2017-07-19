@@ -51,10 +51,9 @@ class RestOutputProcessor[T <: AnyRef](restOutputStream: RestStreamDomain,
   private val client = new RestClient(
     service.provider.hosts.toSet,
     service.basePath + "/" + restOutputStream.name,
+    service.httpScheme,
     service.httpVersion,
-    Map(service.headers.asScala.toList: _*),
-    Option(service.provider.name),
-    Option(service.provider.password)
+    Map(service.headers.asScala.toList: _*)
   )
 
   override def send(envelope: OutputEnvelope, inputEnvelope: TStreamEnvelope[T]): Unit = {

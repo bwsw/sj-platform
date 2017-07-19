@@ -55,9 +55,7 @@ protected class JdbcClient(override val jdbcCCD: JdbcClientConnectionData)
     logger.info(s"Create a jdbc driver.")
     java.util.Locale.setDefault(java.util.Locale.ENGLISH)
 
-    val driverFileName = jdbcCCD.driverFileName
-    val jarFile = inject[ConnectionRepository].getFileStorage.get(driverFileName, s"tmp/$driverFileName")
-    val classLoader = createClassLoader(jarFile.getName)
+    val classLoader = createClassLoader(jdbcCCD.driverFileName)
     val driver = classLoader.loadClass(jdbcCCD.driverClass).newInstance().asInstanceOf[Driver]
 
     driver

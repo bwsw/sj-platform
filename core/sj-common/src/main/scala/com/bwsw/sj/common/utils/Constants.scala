@@ -19,7 +19,7 @@
 package com.bwsw.sj.common.utils
 
 import com.bwsw.tstreams.env.{ConfigurationOptions, TStreamsFactory}
-import org.eclipse.jetty.http.HttpVersion
+import org.eclipse.jetty.http.{HttpScheme, HttpVersion}
 
 object EngineLiterals {
 
@@ -162,6 +162,16 @@ object RestLiterals {
     HttpVersion.HTTP_1_0 -> http_1_0,
     HttpVersion.HTTP_1_1 -> http_1_1,
     HttpVersion.HTTP_2 -> http_2
+  )
+
+  final val http: String = HttpScheme.HTTP.toString
+  final val https: String = HttpScheme.HTTPS.toString
+
+  final val httpSchemes: Seq[String] = Seq(http, https)
+
+  final val httpSchemeFromString: Map[String, HttpScheme] = Map(
+    http -> HttpScheme.HTTP,
+    https -> HttpScheme.HTTPS
   )
 
   final val defaultDescription = "No description"
