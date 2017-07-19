@@ -170,12 +170,12 @@ Success response example::
 
 
 Error response example::
-
+ 
  {
-  "status-code": 404,
-  "entity": {
-    "message": "Provider 'foo-provider' has not been found."
-  }
+    "entity": {
+        "message": "Provider 'kafka-provider' has not been found."
+    },
+    "status-code": 404
  }
 
 
@@ -286,6 +286,14 @@ Success response example::
   }
  }
 
+Error response example::
+ 
+ {
+    "entity": {
+        "message": "Provider 'kafka-provider' has not been found."
+    },
+    "status-code": 404
+}
 
 
 Test connection to provider
@@ -366,7 +374,14 @@ Success response example::
   "statusCode": 200
  }
 
+Error response example::
 
+ {
+    "entity": {
+        "message": "Provider 'kafka-example' has not been found."
+    },
+    "status-code": 404
+ }
 
 CRUD Rest-API for Services
 --------------------------------------
