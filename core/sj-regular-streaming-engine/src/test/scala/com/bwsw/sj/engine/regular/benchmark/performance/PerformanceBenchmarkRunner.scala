@@ -18,6 +18,7 @@
  */
 package com.bwsw.sj.engine.regular.benchmark.performance
 
+import java.io.{File, FileWriter}
 import java.util.Calendar
 
 import com.bwsw.sj.common.SjModule
@@ -61,7 +62,7 @@ object PerformanceBenchmarkRunner extends App {
   private val messagesCount = config.getLong(messagesCountConfig)
   private val instanceName = config.getString(EngineConfigNames.instanceName)
   private val words = config.getString(wordsConfig).split(",")
-  private val outputFileName = Try(config.getString(outputFileConfig)).getOrElse(sjDefaultOutputFile)
+  private val outputFileName = Try(config.getString(outputFileConfig)).getOrElse(s"$sjDefaultOutputFile-$messagesCount")
   private val messageSizes = config.getString(messageSizesConfig).split(",").map(_.toLong)
 
   private val performanceBenchmark = new PerformanceBenchmark(
@@ -69,20 +70,29 @@ object PerformanceBenchmarkRunner extends App {
     zkHost,
     zkPort,
     kafkaAddress,
-    messagesCount,
     instanceName,
-    words,
-    outputFileName)(SjModule.injector)
+    words)(SjModule.injector)
 
   performanceBenchmark.startServices()
-
   performanceBenchmark.prepare()
+  performanceBenchmark.warmUp()
 
-  messageSizes.foreach(performanceBenchmark.runTest)
+  private val results = messageSizes.map { messageSize =>
+    (messageSize, performanceBenchmark.runTest(messageSize, messagesCount))
+  }
 
   performanceBenchmark.stopServices()
 
+  private val resultsString = results.map { case (messageSize, time) => s"$messageSize,$time" }.mkString("\n")
+
   println("DONE")
+  println("Results:")
+  println(resultsString)
+
+  private val writer = new FileWriter(new File(outputFileName))
+  writer.write(resultsString)
+  writer.close()
+
   println(Calendar.getInstance().getTime)
 
   System.exit(0)

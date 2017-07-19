@@ -53,23 +53,25 @@ object SamzaBenchmarkRunner extends App {
   private val kafkaAddress = config.getString(kafkaAddressConfig)
   private val messagesCount = config.getLong(messagesCountConfig)
   private val words = config.getString(wordsConfig).split(",")
-  private val outputFileName = Try(config.getString(outputFileConfig)).getOrElse(samzaDefaultOutputFile)
+  private val outputFileName = Try(config.getString(outputFileConfig)).getOrElse(s"$samzaDefaultOutputFile-$messagesCount")
   private val messageSizes = config.getString(messageSizesConfig).split(",").map(_.toLong)
 
-  private val samzaBenchmark = new SamzaBenchmark(zooKeeperAddress, kafkaAddress, messagesCount, words)
+  private val samzaBenchmark = new SamzaBenchmark(zooKeeperAddress, kafkaAddress, words)
+  samzaBenchmark.warmUp()
 
   private val results = messageSizes.map { messageSize =>
-    (messageSize, samzaBenchmark.runTest(messageSize))
+    (messageSize, samzaBenchmark.runTest(messageSize, messagesCount))
   }
 
   samzaBenchmark.close()
+  private val resultsString = results.map { case (messageSize, time) => s"$messageSize,$time" }.mkString("\n")
 
   println("DONE")
-  println("Result:")
-  println(results.mkString("\n"))
+  println("Results:")
+  println(resultsString)
 
   private val writer = new FileWriter(new File(outputFileName))
-  writer.write(results.map { case (messageSize, time) => s"$messageSize,$time" }.mkString("\n"))
+  writer.write(resultsString)
   writer.close()
 
   println(Calendar.getInstance().getTime)

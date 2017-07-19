@@ -38,36 +38,37 @@ import scala.collection.JavaConverters._
   *
   * @param zooKeeperAddress ZooKeeper server's address. Must point to the ZooKeeper server that used by the Kafka server.
   * @param kafkaAddress     Kafka server's address
-  * @param messagesCount    count of messages
   * @param words            list of words that sends to the kafka server
   * @author Pavel Tomskikh
   */
 class SamzaBenchmark(zooKeeperAddress: String,
                      kafkaAddress: String,
-                     messagesCount: Long,
                      words: Array[String]) {
 
   private val kafkaTopic = "samza-benchmark-" + UUID.randomUUID().toString
-  private val outputKafkaTopic = "samza-benchmark-result"
-  //-" + UUID.randomUUID().toString
+  private val outputKafkaTopic = "samza-benchmark-result-" + UUID.randomUUID().toString
   private val propertiesFilename = s"samza-benchmark-${UUID.randomUUID().toString}.properties"
   private val propertiesFile = new File(propertiesFilename)
   private val kafkaClient = new KafkaClient(Array(zooKeeperAddress))
   private val kafkaSender = new DataSender(kafkaAddress, kafkaTopic, words, " ")
   private val lookupResultTimeout = 5000
-  private val taskParameters = s"$messagesCount,$outputKafkaTopic"
   private val kafkaConsumer = createKafkaConsumer()
 
   prepareProperties()
 
+  /**
+    * Performs first test because it's need more time than next
+    */
+  def warmUp(): Long = runTest(10, 10)
 
   /**
     * Sends data into the Kafka server and runs Samza's job
     *
-    * @param messageSize size of one message that sends to the Kafka server
+    * @param messageSize   size of one message that sends to the Kafka server
+    * @param messagesCount count of messages
     * @return time for which Samza reads messages from Kafka
     */
-  def runTest(messageSize: Long): Long = {
+  def runTest(messageSize: Long, messagesCount: Long): Long = {
     println(s"$messageSize bytes messages")
 
     kafkaClient.createTopic(kafkaTopic, 1, 1)
@@ -76,6 +77,7 @@ class SamzaBenchmark(zooKeeperAddress: String,
 
     println(s"Kafka topic $kafkaTopic created")
 
+    val taskParameters = s"$messagesCount,$outputKafkaTopic"
     kafkaSender.send(messageSize, messagesCount, Some(taskParameters))
     println("Data sent to the Kafka")
 
@@ -106,6 +108,7 @@ class SamzaBenchmark(zooKeeperAddress: String,
     */
   def close(): Unit = {
     kafkaConsumer.close()
+    kafkaClient.deleteTopic(outputKafkaTopic)
     kafkaClient.close()
     propertiesFile.delete()
   }

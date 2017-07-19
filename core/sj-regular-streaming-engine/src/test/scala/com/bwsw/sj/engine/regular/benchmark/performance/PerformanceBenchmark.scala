@@ -18,7 +18,7 @@
  */
 package com.bwsw.sj.engine.regular.benchmark.performance
 
-import java.io.{File, FileWriter}
+import java.io._
 import java.util.UUID
 
 import com.bwsw.common.KafkaClient
@@ -39,38 +39,37 @@ import scaldi.Injector
   *
   * Host and port must point to the ZooKeeper server that used by the Kafka server.
   *
-  * @param mongoPort      port for [[EmbeddedMongo]]
-  * @param zkHost         ZooKeeper server's host
-  * @param zkPort         ZooKeeper server's port
-  * @param kafkaAddress   Kafka server's address
-  * @param messagesCount  count of messages
-  * @param instanceName   instance's name
-  * @param words          list of words that sends to the kafka server
-  * @param outputFileName name of file for results
+  * @param mongoPort    port for [[EmbeddedMongo]]
+  * @param zkHost       ZooKeeper server's host
+  * @param zkPort       ZooKeeper server's port
+  * @param kafkaAddress Kafka server's address
+  * @param instanceName instance's name
+  * @param words        list of words that sends to the kafka server
   * @author Pavel Tomskikh
   */
 class PerformanceBenchmark(mongoPort: Int,
                            zkHost: String,
                            zkPort: Int,
                            kafkaAddress: String,
-                           messagesCount: Long,
                            instanceName: String,
-                           words: Array[String],
-                           outputFileName: String)
+                           words: Array[String])
                           (implicit injector: Injector) {
 
   private val kafkaTopic = "performance-benchmark-test-" + UUID.randomUUID().toString
-  private val outputFile = new File(outputFileName)
-  private val moduleFilename = "./contrib/benchmarks/sj-regular-performance-benchmark/target/scala-2.12/" +
+  private val moduleFilename = "../../contrib/benchmarks/sj-regular-performance-benchmark/target/scala-2.12/" +
     "sj-regular-performance-benchmark-1.0-SNAPSHOT.jar"
+  // for run from IDEA
+  //private val moduleFilename = "./contrib/benchmarks/sj-regular-performance-benchmark/target/scala-2.12/" +
+  //"sj-regular-performance-benchmark-1.0-SNAPSHOT.jar"
   private val module = new File(moduleFilename)
 
   private val zkAddress = s"$zkHost:$zkPort"
   private val mongoServer = new EmbeddedMongo(mongoPort)
   private val kafkaClient = new KafkaClient(Array(zkAddress))
   private val kafkaSender = new DataSender(kafkaAddress, kafkaTopic, words, " ")
-  private val fileCheckTimeout = 5000
+  private val lookupResultTimeout = 5000
   private val taskName = instanceName + "-task"
+  private val connectionRepository = inject[ConnectionRepository]
 
   private val benchmarkPreparation = new BenchmarkPreparation(
     mongoPort = mongoPort,
@@ -116,24 +115,31 @@ class PerformanceBenchmark(mongoPort: Int,
     TempHelperForConfigSetup.setupConfigs()
     println("Config settings loaded")
 
-    benchmarkPreparation.prepare(outputFile.getAbsolutePath, messagesCount, inject[ConnectionRepository])
+    benchmarkPreparation.prepare(connectionRepository)
     println("Entities loaded")
+  }
+
+  /**
+    * Performs first test because it's need more time than next
+    */
+  def warmUp(): Long = {
+    runTest(10, 10)
   }
 
   /**
     * Sends data into the Kafka server and runs module
     *
-    * @param messageSize size of one message that sends to the Kafka server
+    * @param messageSize   size of one message that sends to the Kafka server
+    * @param messagesCount count of messages
     */
-  def runTest(messageSize: Long): Unit = {
+  def runTest(messageSize: Long, messagesCount: Long): Long = {
     println(s"$messageSize bytes messages")
+    val outputFilename = "benchmark-output-" + UUID.randomUUID().toString
+    val outputFile = new File(outputFilename)
 
-    val writer = new FileWriter(outputFile, true)
-    writer.write(messageSize + ",")
-    writer.close()
+    benchmarkPreparation.loadInstance(outputFile.getAbsolutePath, messagesCount, connectionRepository.getInstanceRepository)
 
     val lastModified = outputFile.lastModified()
-
 
     kafkaClient.createTopic(kafkaTopic, 1, 1)
     while (!kafkaClient.topicExists(kafkaTopic))
@@ -147,7 +153,7 @@ class PerformanceBenchmark(mongoPort: Int,
     val process = new ClassRunner(classOf[RegularTaskRunner], environment).start()
 
     while (outputFile.lastModified() == lastModified)
-      Thread.sleep(fileCheckTimeout)
+      Thread.sleep(lookupResultTimeout)
 
     kafkaClient.deleteTopic(kafkaTopic)
     process.destroy()
@@ -156,6 +162,13 @@ class PerformanceBenchmark(mongoPort: Int,
       Thread.sleep(100)
 
     println(s"Kafka topic $kafkaTopic deleted")
+
+    val reader = new BufferedReader(new FileReader(outputFile))
+    val result = reader.readLine().toLong
+    reader.close()
+    outputFile.delete()
+
+    result
   }
 
   /**
