@@ -60,7 +60,7 @@ export class StreamsComponent implements OnInit {
   }
 
   public blur() {
-    if (this.currentTag !== '') {
+    if (this.currentTag && this.currentTag !== '') {
       this.newStream.tags.push(this.currentTag);
       this.currentTag = '';
     }
