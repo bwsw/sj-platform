@@ -88,7 +88,7 @@
             </li>
             <li *ngIf="currentProvider.login"><span class="title">Login:</span>{{currentProvider.login}}</li>
             <li *ngIf="currentProvider.password"><span class="title">Password:</span>{{currentProvider.password}}</li>
-            <li *ngIf="currentProvider.type === 'JDBC'"><span class="title">Driver:</span>{{currentProvider.driver}}</li>
+            <li *ngIf="currentProvider.type === 'provider.sql-database'"><span class="title">Driver:</span>{{currentProvider.driver}}</li>
           </ul>
         </div>
       </div>
@@ -186,7 +186,7 @@
           </fieldset>
 
           <!-- Driver -->
-          <fieldset class="form-group row" *ngIf="newProvider.type === 'JDBC'">
+          <fieldset class="form-group row" *ngIf="newProvider.type === 'provider.sql-database'">
             <label class="col-sm-2 col-form-label required">Driver</label>
             <div class="col-sm-10">
               <input required [(ngModel)]="newProvider.driver" name="providerDriver" type="text"

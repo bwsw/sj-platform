@@ -1,6 +1,6 @@
 <div class="right-inner-addon">
   <select #select class="form-control"
-          (input)="update.emit(select.value)"
+          (input)="valueChange(select.value)"
           name="providerType">
     <option value="">All</option>
     <option *ngFor="let type of filterList" value="{{type.id}}">{{type.name}}</option>
