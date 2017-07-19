@@ -2,6 +2,7 @@ import { Locator } from './locator.service';
 import { BaseModel } from '../model/base.model';
 import { Http, Response, Headers, RequestOptions } from '@angular/http';
 import { Observable } from 'rxjs/Rx';
+import { TypeModel } from '../model/type.model';
 
 interface Type<T> {
   new(...args: any[]): T;
@@ -10,7 +11,7 @@ interface Type<T> {
 export class IResponse<M extends BaseModel> {
   message: string;
   connection: boolean;
-  types: string[];
+  types: TypeModel[];
   providers: M[];
   services: M[];
   streams: M[];
@@ -24,7 +25,7 @@ export class IResponse<M extends BaseModel> {
   provider: M;
   service: M;
   stream: M;
-  domains: string[];
+  domains: TypeModel[];
   [key: string]: any;
 
   fillFromJSON(json: any) {

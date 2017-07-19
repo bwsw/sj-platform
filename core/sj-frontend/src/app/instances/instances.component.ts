@@ -13,6 +13,7 @@ import { StreamsService } from '../streams/streams.service';
 import { ServicesService } from '../services/services.service';
 import { AnonymousSubscription } from 'rxjs/Subscription';
 import { Observable } from 'rxjs/Observable';
+import { TypeModel } from '../shared/model/type.model';
 
 @Component({
   selector: 'sj-instances',
@@ -33,7 +34,7 @@ export class InstancesComponent implements OnInit, AfterViewChecked, OnDestroy {
   public instancesList: InstanceModel[];
   public cloneInstancesList: InstanceModel[] = [];
   public modulesList: ModuleModel[];
-  public moduleTypes: string[];
+  public moduleTypes: TypeModel[];
   public servicesList: ServiceModel[] = [];
   public streamsList: StreamModel[] = [];
   public streamTypesList: { [key: string]: string } = {};
