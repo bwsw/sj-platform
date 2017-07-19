@@ -69,7 +69,7 @@ class PerformanceBenchmark(mongoPort: Int,
   private val kafkaSender = new DataSender(kafkaAddress, kafkaTopic, words, " ")
   private val lookupResultTimeout = 5000
   private val taskName = instanceName + "-task"
-  private val connectionRepository = inject[ConnectionRepository]
+  private lazy val connectionRepository = inject[ConnectionRepository]
 
   private val benchmarkPreparation = new BenchmarkPreparation(
     mongoPort = mongoPort,

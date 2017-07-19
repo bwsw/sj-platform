@@ -155,7 +155,8 @@ class BenchmarkPreparation(mongoPort: Int,
       eventWaitIdleTime = 1,
       checkpointMode = EngineLiterals.everyNthMode,
       startFrom = EngineLiterals.oldestStartMode,
-      executionPlan = new ExecutionPlan(Map(taskName -> task).asJava))
+      executionPlan = new ExecutionPlan(Map(taskName -> task).asJava),
+      performanceReportingInterval = Long.MaxValue)
   }
 
   private def updateMessageCount(instance: RegularInstanceDomain, outputFile: String, messagesCount: Long): RegularInstanceDomain = {
