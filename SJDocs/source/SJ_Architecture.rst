@@ -25,7 +25,7 @@ The diagram below presents the structure of the SJ-Platform.
 
 Figuratively, it can be divided into two layers. 
 
-The *first layer* – data processing – is provided by Stream Juggler Platform. . At this layer the data processing itself is performed via custom modules. The ingested data is transformed into streams, processed and sent to an external storage. Data transformation and computation are the two major tasks of this layer.
+The *first layer* – data processing – is provided by the Stream Juggler Platform. At this layer the data processing itself is performed via custom modules. The ingested data is transformed into streams, processed and sent to an external storage. Data transformation and computation are the two major tasks of this layer.
 
 This layer is marked with green in the diagram. More information on module workflow you can find at the :ref:`Modules` page.
 
@@ -65,7 +65,7 @@ Every component deployed to the Stream Juggler Platform contributes to the main 
     The system is scalable and perfectly fits for large data processing
     
 - Velocity 
-    Stream Juggler Platform is the solution for real-time processing that means the system can handle events as soon as they are available inside the system without specific delay
+    The Stream Juggler Platform is the solution for real-time processing that means the system can handle events as soon as they are available inside the system without specific delay
     
 - Variety 
     The SJ-Platform components are ready-to-use and can be reorganized in various pipelines. Besides, the system  is compatible with different types of data sources, data storages, services and systems. 
