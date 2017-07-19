@@ -67,7 +67,7 @@ class RetrievableTStreamCheckpointTaskInput[T <: AnyRef](manager: CommonTaskMana
     val inputs = manager.inputs
     val offset = chooseOffset(instance.startFrom)
 
-    val consumers = inputs.filter(x => x._1.streamType == StreamLiterals.tstreamType)
+    val consumers = inputs.filter(x => x._1.streamType == StreamLiterals.tstreamsType)
       .map(x => (x._1.asInstanceOf[TStreamStreamDomain], x._2.toList))
       .map(x => manager.createConsumer(x._1, x._2, offset))
       .map(x => (x.name, x)).toMap

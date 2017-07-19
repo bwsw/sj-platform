@@ -182,8 +182,8 @@ class RegexInputExecutor(manager: InputEnvironmentManager) extends InputStreamin
     streamDomain match {
       case s: TStreamStreamDomain => s.partitions
       case s: KafkaStreamDomain => s.partitions
-      case _ => throw new IllegalArgumentException(s"stream type must be ${StreamLiterals.tstreamType} or " +
-        s"${StreamLiterals.kafkaStreamType}")
+      case _ => throw new IllegalArgumentException(s"stream type must be ${StreamLiterals.tstreamsType} or " +
+        s"${StreamLiterals.kafkaType}")
     }
   }
 

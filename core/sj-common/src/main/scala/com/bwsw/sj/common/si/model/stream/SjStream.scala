@@ -109,7 +109,7 @@ class SjStream(val streamType: String,
 class StreamCreator {
 
   def from(streamDomain: StreamDomain)(implicit injector: Injector): SjStream = streamDomain.streamType match {
-    case StreamLiterals.tstreamType =>
+    case StreamLiterals.`tstreamsType` =>
       val tStreamStream = streamDomain.asInstanceOf[TStreamStreamDomain]
 
       new TStreamStream(
@@ -122,7 +122,7 @@ class StreamCreator {
         tStreamStream.description
       )
 
-    case StreamLiterals.restOutputType =>
+    case StreamLiterals.`restType` =>
       val restStream = streamDomain.asInstanceOf[RestStreamDomain]
 
       new RestStream(
@@ -134,7 +134,7 @@ class StreamCreator {
         restStream.description
       )
 
-    case StreamLiterals.kafkaStreamType =>
+    case StreamLiterals.`kafkaType` =>
       val kafkaStream = streamDomain.asInstanceOf[KafkaStreamDomain]
 
       new KafkaStream(
@@ -148,7 +148,7 @@ class StreamCreator {
         kafkaStream.description
       )
 
-    case StreamLiterals.jdbcOutputType =>
+    case StreamLiterals.`jdbcType` =>
       val jdbcStream = streamDomain.asInstanceOf[JDBCStreamDomain]
 
       new JDBCStream(
@@ -161,7 +161,7 @@ class StreamCreator {
         jdbcStream.description
       )
 
-    case StreamLiterals.esOutputType =>
+    case StreamLiterals.`elasticsearchType` =>
       val esStream = streamDomain.asInstanceOf[ESStreamDomain]
 
       new ESStream(

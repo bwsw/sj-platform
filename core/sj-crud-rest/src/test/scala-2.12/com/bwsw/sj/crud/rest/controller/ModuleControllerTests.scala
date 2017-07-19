@@ -200,7 +200,7 @@ class ModuleControllerTests extends FlatSpec with Matchers with MockitoSugar wit
 
   // getAllTypes
   it should "give all module types" in {
-    val expectedResponse = OkRestResponse(TypesResponseEntity(moduleTypes))
+    val expectedResponse = OkRestResponse(TypesResponseEntity(beToFeModulesTypes.map(x => Type(x._1, x._2)).toSeq))
 
     controller.getAllTypes shouldBe expectedResponse
   }

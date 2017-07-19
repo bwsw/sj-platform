@@ -23,7 +23,7 @@ import com.bwsw.sj.common.rest._
 import com.bwsw.sj.common.si.ServiceSI
 import com.bwsw.sj.common.si.result.{Created, NotCreated}
 import com.bwsw.sj.common.utils.{MessageResourceUtils, ServiceLiterals}
-import com.bwsw.sj.crud.rest.model.service.{ServiceApiCreator, ServiceApi}
+import com.bwsw.sj.crud.rest.model.service.{ServiceApi, ServiceApiCreator}
 import com.bwsw.sj.crud.rest.{RelatedToServiceResponseEntity, ServiceResponseEntity, ServicesResponseEntity}
 import scaldi.Injectable.inject
 import scaldi.Injector
@@ -92,6 +92,6 @@ class ServiceController(implicit protected val injector: Injector) extends Contr
   }
 
   def getTypes(): RestResponse = {
-    OkRestResponse(TypesResponseEntity(ServiceLiterals.types))
+    OkRestResponse(TypesResponseEntity(ServiceLiterals.beToFeTypes.map(x => Type(x._1, x._2)).toSeq))
   }
 }

@@ -22,7 +22,7 @@ import com.bwsw.sj.common.dal.model.service.TStreamServiceDomain
 import com.bwsw.sj.common.si.model.instance.InputInstance
 import com.bwsw.sj.common.si.model.module.Specification
 import com.bwsw.sj.common.utils.EngineLiterals._
-import com.bwsw.sj.common.utils.StreamLiterals.tstreamType
+import com.bwsw.sj.common.utils.StreamLiterals.tstreamsType
 import org.slf4j.{Logger, LoggerFactory}
 import scaldi.Injector
 
@@ -130,7 +130,7 @@ class InputInstanceValidator(implicit injector: Injector) extends InstanceValida
     }
 
     val tStreamsServices = getStreamServices(outputStreams.filter { s =>
-      s.streamType.equals(tstreamType)
+      s.streamType.equals(tstreamsType)
     })
     if (tStreamsServices.nonEmpty) {
       if (tStreamsServices.size > 1) {

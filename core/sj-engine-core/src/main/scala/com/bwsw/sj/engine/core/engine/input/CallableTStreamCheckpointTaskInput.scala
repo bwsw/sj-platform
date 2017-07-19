@@ -64,7 +64,7 @@ class CallableTStreamCheckpointTaskInput[T <: AnyRef](manager: TaskManager,
     val offset = getOffset()
     val callback = new ConsumerCallback[T](envelopeDataSerializer, blockingQueue)
 
-    val consumers = inputs.filter(x => x._1.streamType == StreamLiterals.tstreamType)
+    val consumers = inputs.filter(x => x._1.streamType == StreamLiterals.tstreamsType)
       .map(x => (x._1.asInstanceOf[TStreamStreamDomain], x._2.toList))
       .map(x => {
         val consumer = manager.createSubscribingConsumer(x._1, x._2, offset, callback)
