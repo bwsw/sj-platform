@@ -156,7 +156,7 @@
             <label class="col-sm-2 col-form-label required">Name</label>
             <div class="col-sm-10">
               <input [(ngModel)]="newService.name" name="serviceName" type="text" class="form-control"
-                     required pattern="[a-zA-z][a-zA-Z0-9-]*">
+                     required pattern="[a-zA-z][a-zA-Z0-9-]*" placeholder="Enter service name">
             </div>
           </fieldset>
 
@@ -166,7 +166,7 @@
             <div class="col-sm-10">
               <textarea [(ngModel)]="newService.description"
                         name="serviceDescription"
-                        class="form-control"></textarea>
+                        class="form-control"placeholder="Enter service description" ></textarea>
             </div>
           </fieldset>
 
@@ -185,7 +185,8 @@
             <label class="col-sm-2 col-form-label required">Namespace</label>
             <div class="col-sm-10">
               <input [(ngModel)]="newService.namespace" name="serviceNamespace" type="text"
-                     class="form-control" required pattern="[a-zA-z][a-zA-Z0-9]*">
+                     class="form-control" required pattern="[a-zA-z][a-zA-Z0-9]*"
+                     placeholder="Enter service namespace">
             </div>
           </fieldset>
 
@@ -194,7 +195,7 @@
             <label class="col-sm-2 col-form-label required">Index</label>
             <div class="col-sm-10">
               <input [(ngModel)]="newService.index" name="serviceIndex" type="text" class="form-control"
-                     required>
+                     required placeholder="Enter service index">
             </div>
           </fieldset>
 
@@ -204,7 +205,7 @@
             <div class="col-sm-10">
               <select [(ngModel)]="newService.httpScheme" name="httpScheme" required
                       class="form-control">
-                <option>http</option>
+                <option selected>http</option>
                 <option>https</option>
               </select>
             </div>
@@ -227,7 +228,8 @@
             <label class="col-sm-2 col-form-label required">Prefix</label>
             <div class="col-sm-10">
               <input [(ngModel)]="newService.prefix" name="servicePrefix" type="text"
-                     class="form-control" required pattern="[\/][a-z0-9 \/]*[a-z0-9]+">
+                     class="form-control" required pattern="[\/][a-z0-9 \/]*[a-z0-9]+"
+                     placeholder="Enter service prefix">
             </div>
           </fieldset>
 
@@ -236,7 +238,7 @@
             <label class="col-sm-2 col-form-label required">Token</label>
             <div class="col-sm-10">
               <input [(ngModel)]="newService.token" name="serviceToken" type="text"  maxlength="32"
-                     class="form-control" required>
+                     class="form-control" required placeholder="Enter service token">
             </div>
           </fieldset>
 
@@ -245,7 +247,7 @@
             <label class="col-sm-2 col-form-label">Base path</label>
             <div class="col-sm-10">
               <input [(ngModel)]="newService.basePath" name="basePath" type="text"
-                     class="form-control">
+                     class="form-control" placeholder="Enter base path">
             </div>
           </fieldset>
 
@@ -289,7 +291,7 @@
             <label class="col-sm-2 col-form-label required">Database name</label>
             <div class="col-sm-10">
               <input [(ngModel)]="newService.database" name="serviceDatabase" type="text"
-                     class="form-control" required>
+                     class="form-control" required placeholder="Enter database name">
             </div>
           </fieldset>
 
@@ -341,7 +343,7 @@
             <label class="col-sm-2 col-form-label">Login</label>
             <div class="col-sm-10">
               <input [(ngModel)]="newService.login" name="serviceLogin" type="text" class="form-control"
-                     placeholder="Enter service login">
+                     placeholder="Enter service login" placeholder="Enter service login">
             </div>
           </fieldset>
 
@@ -372,7 +374,7 @@
             <div class="col-sm-10">
               <input [(ngModel)]="newService.zkNamespace" name="serviceZkNamespace" type="text"
                      class="form-control col-sm-10" required
-                     pattern="[a-zA-z][a-zA-Z0-9]*">
+                     pattern="[a-zA-z][a-zA-Z0-9]*" placeholder="Enter ZK namespace">
             </div>
           </fieldset>
         </form>
