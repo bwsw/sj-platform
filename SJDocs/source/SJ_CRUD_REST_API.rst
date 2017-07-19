@@ -463,7 +463,7 @@ Zookeeper Coordination (ZKCoord)
   "name*", "String", "Service name.", "Must be unique and contain only letters, digits or hyphens."
   "description", "String", "Service description.", ""
   "namespace*", "String", "Zookeeper namespace.", ""
-  "provider*", "String", "Provider name.", " Provider can be of 'zookeeper' type only."
+  "provider*", "String", "Provider name.", "Provider can be of 'zookeeper' type only."
 
 
 SQL database (JDBC)
