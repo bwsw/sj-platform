@@ -218,7 +218,7 @@ The configuration contains a three-tier structure that consists of the following
  "fallbackStream*", "String", "Name of an output stream for lines that are not matched to any regex (from the 'rules' field)", "fallback-output"
  "rules*", "List[Rule]", "List of rules that defines: regex, an output stream and avro record structure", "`-`"
 
-**Rule**
+**Rules**
 
 .. csv-table:: 
  :header: "Field Name", "Format", "Description", "Example"
@@ -230,7 +230,7 @@ The configuration contains a three-tier structure that consists of the following
  "distribution", "List[String]", "Set of fields that define in which partition of an output stream a record will be put. Partition computed as hash(fields) mod partitions_number. If this field is not defined, the module uses the Round Robin policy for partition distribution.", "['month','year']"
  "fields*", "List[Field]", "List of fields used for creation the avro record scheme", "`-`"
 
-**Field**
+**Fields**
 
 .. csv-table:: 
  :header: "Field Name", "Format", "Description", "Example"
