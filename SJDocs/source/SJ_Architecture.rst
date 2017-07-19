@@ -70,7 +70,7 @@ Every component deployed to the Stream Juggler Platform contributes to the main 
 - Variety 
     The SJ-Platform components are ready-to-use and can be reorganized in various pipelines. Besides, the system  is compatible with different types of data sources, data storages, services and systems. 
 
-Stream Juggler Platform provides UI and REST for a platform user to create a processing sequence of arbitrary complexity, watch it in action and manage it.
+Stream Juggler Platform provides `UI <http://streamjuggler.readthedocs.io/en/develop/SJ_UI_Guide.html>`_ and `REST <http://streamjuggler.readthedocs.io/en/develop/SJ_CRUD_REST_API.html>`_ for a platform user to create a processing sequence of arbitrary complexity, watch it in action and manage it.
 
 Stream Juggler Platform easily integrates with in-memory grid systems, for example, Hazelcast, Apache Ignite.
 
