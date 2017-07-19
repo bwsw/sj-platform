@@ -164,7 +164,10 @@ Possible error responses for **T-streams** service creation:
  ":ref:`Incorrect_Json_Api_Responses`", "Incorrect JSON"
  "'Name' attribute is required.", "The Name field is not completed."
  "Service with name '<service_name>' already exists.", "All fields are completed following the requirements buta service with the same name already exists in the system."
- "Service has incorrect name: '<service_name>'. Name of service must contain digits, lowercase letters or hyphens. First symbol must be a letter.", "All fields are completed following the requirements except the 'Name' field."
+ "Service has incorrect name: '<service_name>'. 
+ 
+  A name of service must contain digits, lowercase letters or hyphens. 
+  The first symbol must be a letter.", "All fields are completed following the requirements except the 'Name' field."
  "'Type' attribute is required.", "The Type field is not completed."
  "Unknown type '<service_type>' of service provided. Must be one of: [ESInd, KfkQ, TstrQ, ZKCoord, JDBC].", "All fields are completed following the requirements except the 'Type' field.  This error is not possible in UI as the Type field offers the dropdown list of types."
  "'Provider' attribute is required.", "The Provider field is not completed."
@@ -173,7 +176,7 @@ Possible error responses for **T-streams** service creation:
  "'Prefix' attribute is required.", "The Prefix field is not completed."
  "Service has incorrect 'prefix': '<service_prefix>'. Prefix must be a valid znode path.", "All fields are completed following the requirements except the 'Prefix' field."
  "'Token' attribute is required.", "The Token field is not completed."
- "Service has incorrect 'token': '<service_token>'. Token must contain no more than 32 symbols|All fields are completed following the requirements except the 'Token' field."
+ "Service has incorrect 'token': '<service_token>'. Token must contain no more than 32 symbols.", "All fields are completed following the requirements except the 'Token' field."
 
 
 Possible error responses for **ZooKeeper** service creation:
