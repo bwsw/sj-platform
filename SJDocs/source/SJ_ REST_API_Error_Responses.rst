@@ -121,7 +121,7 @@ Possible error responses for **Elasticsearch** service creation:
  "Service with name '<service_name>' already exists.", "All fields are completed following the requirements but a service with the same name already exists in the system."
  "Service has incorrect name: '<service_name>'. A name of service must contain digits, lowercase letters or hyphens. The first symbol must be a letter.", "All fields are completed following the requirements except the 'Name' field."
  "'Type' attribute is required.", "The Type field is not completed."
- " Unknown type '<service_type>' of service provided. Must be one of: [ESInd, KfkQ, TstrQ, ZKCoord, JDBC].", "All fields are completed following the requirements except the 'Type' field.  This error is not possible in UI as the Type field offers the dropdown list of types."
+ "Unknown type '<service_type>' of service provided. Must be one of: [ESInd, KfkQ, TstrQ, ZKCoord, JDBC].", "All fields are completed following the requirements except the 'Type' field.  This error is not possible in UI as the Type field offers the dropdown list of types."
  "'Provider' attribute is required.", "The Provider field is not completed."
  "Provider '<service_provider>' does not exist.", "All fields are completed following the requirements except the'Provider' field (the provider specified in the service does not exist)."
  "'Provider' must be of type: 'ES' ('<service_provider_type>' is given instead).", "All fields are completed following the requirements except the 'Provider' field (a provider of incorrect type is specified."
