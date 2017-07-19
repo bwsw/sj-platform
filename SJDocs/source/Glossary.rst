@@ -33,7 +33,7 @@ Glossary
 
 :Provider: The service provider for input data transformation into a stream. 
 
-:Shift: Windown sliding in a period of time (multiple of a batch). It can be less than a window size, and in this case the data will be duplicated.
+:Shift: Window sliding in a period of time (multiple of a batch). It can be less than a window size, and in this case the data will be duplicated.
 
 :Storage state service: A service storing data state in a stream; is performed together with the checkpoint.
 
