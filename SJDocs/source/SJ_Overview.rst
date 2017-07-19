@@ -60,7 +60,7 @@ In general, the main ideas of the Stream Juggler Platform are:
 
 To find more about the platform, please, visit the pages below:
 
-:ref:`Architecture` - here the architecture of the Stream Juggler is presented, its components,connections between them, necessary services and other prerequisits for the Platform operation are described.
+:ref:`Architecture` - here the architecture of the Stream Juggler Platform is presented, its components,connections between them, necessary services and other prerequisits for the Platform operation are described.
 
 :ref:`Modules` - here more information on modules is given: what module types are supported in the Stream Juggler Platform, how they work, etc.
 
