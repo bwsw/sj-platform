@@ -31,9 +31,9 @@ import org.mockito.Mockito.{mock, when}
 import scala.collection.{Map, mutable}
 
 /**
-  * Mock for [[StatefulModuleEnvironmentManager]]. Creates [[PartitionedOutputMock]] instead
-  * [[com.bwsw.sj.common.engine.core.environment.PartitionedOutput]] and [[RoundRobinOutputMock]] instead
-  * [[com.bwsw.sj.common.engine.core.environment.RoundRobinOutput]].
+  * Mock for [[com.bwsw.sj.common.engine.core.environment.StatefulModuleEnvironmentManager]].
+  * Creates [[PartitionedOutputMock]] instead [[com.bwsw.sj.common.engine.core.environment.PartitionedOutput]]
+  * and [[RoundRobinOutputMock]] instead [[com.bwsw.sj.common.engine.core.environment.RoundRobinOutput]].
   *
   * @param stateStorage storage of state
   * @param options      user defined options from instance
@@ -71,29 +71,29 @@ class ModuleEnvironmentManagerMock(stateStorage: StateStorage,
     fileStorage) {
 
   /**
-    * @inheritdoc
+    * Allows getting partitioned output for specific output stream
+    *
+    * @param streamName Name of output stream
+    * @return Partitioned output that wrapping output stream
     */
   override def getPartitionedOutput(streamName: String)
                                    (implicit serialize: (AnyRef) => Array[Byte]): PartitionedOutputMock =
     super.getPartitionedOutput(streamName).asInstanceOf[PartitionedOutputMock]
 
   /**
-    * @inheritdoc
+    * Allows getting round-robin output for specific output stream
+    *
+    * @param streamName Name of output stream
+    * @return Round-robin output that wrapping output stream
     */
   override def getRoundRobinOutput(streamName: String)
                                   (implicit serialize: (AnyRef) => Array[Byte]): RoundRobinOutputMock =
     super.getRoundRobinOutput(streamName).asInstanceOf[RoundRobinOutputMock]
 
-  /**
-    * @inheritdoc
-    */
   override protected def createPartitionedOutput(producer: Producer)
                                                 (implicit serialize: AnyRef => Array[Byte]): PartitionedOutputMock =
     new PartitionedOutputMock(producer, performanceMetrics)
 
-  /**
-    * @inheritdoc
-    */
   override protected def createRoundRobinOutput(producer: Producer)
                                                (implicit serialize: AnyRef => Array[Byte]): RoundRobinOutputMock =
     new RoundRobinOutputMock(producer, performanceMetrics)

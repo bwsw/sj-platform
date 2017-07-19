@@ -25,7 +25,6 @@ import com.bwsw.sj.common.engine.core.managment.CommonTaskManager
 import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
 import com.bwsw.sj.common.engine.{StateHandlers, StreamingExecutor, TimerHandlers}
 import com.bwsw.sj.common.si.model.instance.{BatchInstance, RegularInstance}
-import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.tstreams.agents.consumer.Consumer
 import com.bwsw.tstreams.agents.consumer.Offset.Oldest
 import com.bwsw.tstreams.agents.group.CheckpointGroup
@@ -34,14 +33,16 @@ import scaldi.Injectable.inject
 import scaldi.Injector
 
 /**
-  * Class is in charge of creating [[StatefulModuleEnvironmentManager]] (and executor [[StreamingExecutor]]
-  * with [[StateHandlers]]) and saving of state
+  * Class is in charge of creating [[com.bwsw.sj.common.engine.core.environment.StatefulModuleEnvironmentManager]]
+  * (and executor [[com.bwsw.sj.common.engine.StreamingExecutor]] with [[com.bwsw.sj.common.engine.StateHandlers]])
+  * and saving of state
   *
-  * @param manager            manager of environment of task of [[EngineLiterals.regularStreamingType]]
-  *                           or [[EngineLiterals.batchStreamingType]] module
+  * @param manager            manager of environment of task of [[com.bwsw.sj.common.utils.EngineLiterals.regularStreamingType]]
+  *                           or [[com.bwsw.sj.common.utils.EngineLiterals.batchStreamingType]] module
   * @param checkpointGroup    group of t-stream agents that have to make a checkpoint at the same time
-  * @param performanceMetrics set of metrics that characterize performance of [[EngineLiterals.regularStreamingType]]
-  *                           or [[EngineLiterals.batchStreamingType]] module
+  * @param performanceMetrics set of metrics that characterize performance
+  *                           of [[com.bwsw.sj.common.utils.EngineLiterals.regularStreamingType]]
+  *                           or [[com.bwsw.sj.common.utils.EngineLiterals.batchStreamingType]] module
   */
 class StatefulCommonModuleService(manager: CommonTaskManager,
                                   checkpointGroup: CheckpointGroup,

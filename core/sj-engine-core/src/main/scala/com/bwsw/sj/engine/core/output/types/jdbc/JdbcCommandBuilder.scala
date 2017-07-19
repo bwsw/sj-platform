@@ -25,7 +25,7 @@ import com.bwsw.sj.common.engine.core.output.Entity
 import com.bwsw.sj.engine.core.output.types.CommandBuilder
 
 /**
-  * Provides methods for building jdbc [[PreparedStatement]] to CRUD data
+  * Provides methods for building jdbc [[java.sql.PreparedStatement]] to CRUD data
   *
   * @param transactionFieldName name of transaction field to check data on duplicate
   * @param entity               data

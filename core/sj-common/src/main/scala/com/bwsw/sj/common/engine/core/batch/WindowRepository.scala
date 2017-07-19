@@ -26,7 +26,7 @@ import scala.collection.mutable
 
 /**
   * Provides methods to keep windows that consist of batches
-  * Use it in [[BatchStreamingExecutor.onWindow()]] to retrieve
+  * Use it in [[com.bwsw.sj.common.engine.core.batch.BatchStreamingExecutor.onWindow]]() to retrieve
   *
   * @param instance set of settings of a batch streaming module
   */

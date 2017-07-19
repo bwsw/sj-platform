@@ -34,7 +34,7 @@ import com.hazelcast.query.Predicate
 import scala.collection.mutable
 
 /**
-  * Mock for [[IMap]]
+  * Mock for [[com.hazelcast.core.IMap]]
   *
   * @param config configuration parameters for hazelcast cluster
   * @author Pavel Tomskikh
@@ -266,7 +266,7 @@ case class HazelcastMapValue(value: String, hits: Int, lastAccessTime: Long) {
 }
 
 /**
-  * Mock for [[IMap]] with "Least Recently Used" eviction policy
+  * Mock for [[com.hazelcast.core.IMap]] with "Least Recently Used" eviction policy
   */
 class LruEvictionHazelcastMapMock(config: HazelcastConfig) extends HazelcastMapMock(config) {
   override protected val evictionComparator: Option[(HazelcastMapValue, HazelcastMapValue) => Boolean] =
@@ -274,7 +274,7 @@ class LruEvictionHazelcastMapMock(config: HazelcastConfig) extends HazelcastMapM
 }
 
 /**
-  * Mock for [[IMap]] with "Least Frequently Used" eviction policy
+  * Mock for [[com.hazelcast.core.IMap]] with "Least Frequently Used" eviction policy
   */
 class LfuEvictionHazelcastMapMock(config: HazelcastConfig) extends HazelcastMapMock(config) {
   override protected val evictionComparator: Option[(HazelcastMapValue, HazelcastMapValue) => Boolean] =
@@ -282,7 +282,7 @@ class LfuEvictionHazelcastMapMock(config: HazelcastConfig) extends HazelcastMapM
 }
 
 /**
-  * Mock for [[IMap]] without eviction policy
+  * Mock for [[com.hazelcast.core.IMap]] without eviction policy
   */
 class NoneEvictionHazelcastMapMock(config: HazelcastConfig) extends HazelcastMapMock(config) {
   override protected val evictionComparator: Option[(HazelcastMapValue, HazelcastMapValue) => Boolean] = None

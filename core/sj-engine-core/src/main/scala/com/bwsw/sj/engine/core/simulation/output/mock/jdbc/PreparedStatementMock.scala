@@ -23,10 +23,8 @@ import java.net.URL
 import java.sql.{Blob, Clob, Connection, Date, NClob, ParameterMetaData, PreparedStatement, Ref, ResultSet, ResultSetMetaData, RowId, SQLWarning, SQLXML, Time, Timestamp}
 import java.util.Calendar
 
-import com.bwsw.sj.engine.core.simulation.output.JdbcRequestBuilder
-
 /**
-  * Mock of [[PreparedStatement]] for [[JdbcRequestBuilder]]
+  * Mock of [[java.sql.PreparedStatement]] for [[com.bwsw.sj.engine.core.simulation.output.JdbcRequestBuilder]]
   *
   * @param sql prepared SQL-query
   * @author Pavel Tomskikh

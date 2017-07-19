@@ -24,7 +24,7 @@ import java.util.ResourceBundle
 import scala.collection.mutable.ArrayBuffer
 
 /**
-  * Wrapper for [[ResourceBundle]] of rest messages
+  * Wrapper for [[java.util.ResourceBundle]] of rest messages
   */
 
 class MessageResourceUtils {

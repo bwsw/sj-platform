@@ -21,38 +21,33 @@ package com.bwsw.common.rest
 import java.net.URI
 import java.util.concurrent.TimeUnit
 
-import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
 import org.eclipse.jetty.client.HttpClient
 import org.eclipse.jetty.client.api.Request
-import org.eclipse.jetty.client.util.BasicAuthentication
-import org.eclipse.jetty.http.{HttpStatus, HttpVersion}
+import org.eclipse.jetty.http.{HttpScheme, HttpStatus, HttpVersion}
+import org.eclipse.jetty.util.ssl.SslContextFactory
 
 import scala.util.{Failure, Success, Try}
 
-
 /**
-  * Client for [[EngineLiterals.outputStreamingType]] that has got [[StreamLiterals.restOutputType]] output.
+  * Client for [[com.bwsw.sj.common.utils.EngineLiterals.outputStreamingType]] that has got
+  * [[com.bwsw.sj.common.utils.StreamLiterals.restOutputType]] output.
   *
   * @param hosts       set of services hosts
   * @param path        path to entities
   * @param httpVersion version of HTTP
   * @param headers     set of headers
   * @param timeout     the total timeout for the request/response conversation (in milliseconds)
-  * @param username    username to authenticate
-  * @param password    password to authenticate
   * @author Pavel Tomskikh
   */
 class RestClient(hosts: Set[String],
                  path: String,
+                 httpScheme: HttpScheme,
                  httpVersion: HttpVersion,
                  headers: Map[String, String],
-                 username: Option[String] = None,
-                 password: Option[String] = None,
                  timeout: Long = 5000) {
 
-  private val urls = hosts.map { host => new URI("http://" + host) }
-  private val client = new HttpClient
-  setAuthenticationParameters()
+  private val urls = hosts.map { host => new URI(s"${httpScheme.toString}://" + host) }
+  private val client = new HttpClient(new SslContextFactory(true))
   client.start()
 
 
@@ -76,15 +71,4 @@ class RestClient(hosts: Set[String],
   }
 
   def close(): Unit = client.stop()
-
-  private def setAuthenticationParameters() = {
-    if (username.getOrElse("").nonEmpty && password.getOrElse("").nonEmpty)
-      urls.foreach(addAuthentication)
-  }
-
-  private def addAuthentication(url: URI): Unit = {
-    val authenticationStore = client.getAuthenticationStore
-    authenticationStore.addAuthenticationResult(
-      new BasicAuthentication.BasicResult(url, username.get, password.get))
-  }
 }

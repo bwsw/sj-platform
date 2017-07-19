@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.sj.engine.regular.benchmark.performance
+package com.bwsw.sj.common.utils.benchmark
 
 import scala.collection.JavaConverters._
 

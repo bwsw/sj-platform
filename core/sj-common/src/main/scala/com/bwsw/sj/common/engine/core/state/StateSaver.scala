@@ -32,9 +32,6 @@ import scala.collection.mutable
   */
 class StateSaver(stateProducer: Producer) extends StateSaverInterface {
 
-  /**
-    * @inheritdoc
-    */
   override var lastFullStateID: Option[Long] = None
 
   private val logger = LoggerFactory.getLogger(this.getClass)

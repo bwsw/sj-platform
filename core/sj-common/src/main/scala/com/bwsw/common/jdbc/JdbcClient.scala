@@ -24,11 +24,10 @@ import java.util.Properties
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.{FileClassLoader, JdbcLiterals}
 import org.slf4j.LoggerFactory
-
-import scala.util.{Failure, Success, Try}
-import com.bwsw.sj.common.dal.model.provider.JDBCProviderDomain
 import scaldi.Injectable.inject
 import scaldi.Injector
+
+import scala.util.{Failure, Success, Try}
 
 // todo: Add multiple connection to databases.
 /**
@@ -38,7 +37,7 @@ import scaldi.Injector
   * 2) driver.<driver_name>.class - name of class of the driver (e.g. "com.mysql.jdbc.Driver")
   * 3) driver.<driver_name>.prefix - prefix of server url: (prefix)://(host:port)/(database), one of [jdbc:mysql, jdbc:postgresql, jdbc:oracle:thin]
   *
-  * driver_name is used in [[JDBCProviderDomain.driver]]
+  * driver_name is used in [[com.bwsw.sj.common.dal.model.provider.JDBCProviderDomain.driver]]
   *
   * Also allows manipulating with elements of the specific table (only one table)
   *
@@ -56,9 +55,7 @@ protected class JdbcClient(override val jdbcCCD: JdbcClientConnectionData)
     logger.info(s"Create a jdbc driver.")
     java.util.Locale.setDefault(java.util.Locale.ENGLISH)
 
-    val driverFileName = jdbcCCD.driverFileName
-    val jarFile = inject[ConnectionRepository].getFileStorage.get(driverFileName, s"tmp/$driverFileName")
-    val classLoader = createClassLoader(jarFile.getName)
+    val classLoader = createClassLoader(jdbcCCD.driverFileName)
     val driver = classLoader.loadClass(jdbcCCD.driverClass).newInstance().asInstanceOf[Driver]
 
     driver

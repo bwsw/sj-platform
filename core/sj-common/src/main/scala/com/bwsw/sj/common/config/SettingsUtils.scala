@@ -18,14 +18,12 @@
  */
 package com.bwsw.sj.common.config
 
-import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.config.ConfigLiterals._
+import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.si.model.config.ConfigurationSetting
 import com.bwsw.sj.common.utils.FrameworkLiterals
 import scaldi.Injectable.inject
 import scaldi.Injector
-
-import scala.util.{Failure, Success, Try}
 
 class SettingsUtils(implicit val injector: Injector) {
   private val configService = inject[ConnectionRepository].getConfigRepository
@@ -35,16 +33,14 @@ class SettingsUtils(implicit val injector: Injector) {
   }
 
   def getZkSessionTimeout(): Int = {
-    getIntConfigSetting(zkSessionTimeoutTag)
+    getIntConfigSetting(zkSessionTimeoutTag, Some(ConfigLiterals.zkSessionTimeoutDefault))
   }
 
   def getFrameworkJarName(): String = {
-    getStringConfigSetting(
-      ConfigurationSetting.createConfigurationSettingName(
-        ConfigLiterals.systemDomain,
-        getStringConfigSetting(frameworkTag)
-      )
-    )
+    val currentFrameworkName = getStringConfigSetting(frameworkTag)
+    val currentFramework = ConfigurationSetting.createConfigurationSettingName(ConfigLiterals.systemDomain, currentFrameworkName)
+
+    getStringConfigSetting(currentFramework)
   }
 
   def getCrudRestHost(): String = {
@@ -63,64 +59,57 @@ class SettingsUtils(implicit val injector: Injector) {
     getIntConfigSetting(marathonTimeoutTag)
   }
 
-  def getFrameworkBackoffSeconds(): Int = {
-    getIntConfigSetting(frameworkBackoffSeconds)
-  }
-
-  def getFrameworkBackoffFactor(): Double = {
-    getDoubleConfigSetting(frameworkBackoffFactor)
-  }
-
-  def getFrameworkMaxLaunchDelaySeconds(): Int = {
-    getIntConfigSetting(frameworkMaxLaunchDelaySeconds)
-  }
-
   def getLowWatermark(): Int = {
     getIntConfigSetting(lowWatermark)
   }
 
-  def getJdbcDriverFileName(driverName: String): String = getStringConfigSetting(s"$jdbcDriver.$driverName")
+  def getJdbcDriverFilename(driverName: String): String = {
+    val driverFilename = ConfigLiterals.getDriverFilename(driverName)
 
-  def getJdbcDriverClass(driverName: String): String = getStringConfigSetting(s"$jdbcDriver.$driverName.class")
+    getStringConfigSetting(driverFilename)
+  }
 
-  def getJdbcDriverPrefix(driverName: String): String = getStringConfigSetting(s"$jdbcDriver.$driverName.prefix")
+  def getJdbcDriverClass(driverName: String): String = {
+    val driverClass = ConfigLiterals.getDriverClass(driverName)
+
+    getStringConfigSetting(driverClass)
+  }
+
+  def getJdbcDriverPrefix(driverName: String): String = {
+    val driverPrefix = ConfigLiterals.getDriverPrefix(driverName)
+
+    getStringConfigSetting(driverPrefix)
+  }
 
   def getBackoffSettings(): (Int, Double, Int) = {
-    val backoffSeconds = Try(getFrameworkBackoffSeconds()) match {
-      case Success(x) => x
-      case Failure(_: NoSuchFieldException) => FrameworkLiterals.defaultBackoffSeconds
-      case Failure(e) => throw e
-    }
-    val backoffFactor = Try(getFrameworkBackoffFactor()) match {
-      case Success(x) => x
-      case Failure(_: NoSuchFieldException) => FrameworkLiterals.defaultBackoffFactor
-      case Failure(e) => throw e
-    }
-    val maxLaunchDelaySeconds = Try(getFrameworkMaxLaunchDelaySeconds()) match {
-      case Success(x) => x
-      case Failure(_: NoSuchFieldException) => FrameworkLiterals.defaultMaxLaunchDelaySeconds
-      case Failure(e) => throw e
-    }
-    (backoffSeconds, backoffFactor, maxLaunchDelaySeconds)
+    (getFrameworkBackoffSeconds(), getFrameworkBackoffFactor(), getFrameworkMaxLaunchDelaySeconds())
   }
 
-  private def getIntConfigSetting(name: String): Int = {
-    getConfigSettings(name).toInt
+  private def getFrameworkBackoffSeconds(): Int = {
+    getIntConfigSetting(frameworkBackoffSeconds, Some(FrameworkLiterals.defaultBackoffSeconds))
   }
 
-  private def getStringConfigSetting(name: String): String = {
-    getConfigSettings(name)
+  private def getFrameworkBackoffFactor(): Double = {
+    getDoubleConfigSetting(frameworkBackoffFactor, Some(FrameworkLiterals.defaultBackoffFactor))
   }
 
-  private def getDoubleConfigSetting(name: String): Double = {
-    getConfigSettings(name).toDouble
+  private def getFrameworkMaxLaunchDelaySeconds(): Int = {
+    getIntConfigSetting(frameworkMaxLaunchDelaySeconds, Some(FrameworkLiterals.defaultMaxLaunchDelaySeconds))
   }
 
-  private def getConfigSettings(name: String): String = {
-    val maybeSetting = configService.get(name)
-    if (maybeSetting.isEmpty)
-      throw new NoSuchFieldException(s"Config setting is named '$name' has not found")
-    else
-      maybeSetting.get.value
+  private def getIntConfigSetting(name: String, defaultValue: Option[Int] = None): Int = {
+    getConfigSettings(name).map(_.toInt).getOrElse(defaultValue.getOrElse(throw NoSuchConfigException(name)))
+  }
+
+  private def getStringConfigSetting(name: String, defaultValue: Option[String] = None): String = {
+    getConfigSettings(name).getOrElse(defaultValue.getOrElse(throw NoSuchConfigException(name)))
+  }
+
+  private def getDoubleConfigSetting(name: String, defaultValue: Option[Double] = None): Double = {
+    getConfigSettings(name).map(_.toDouble).getOrElse(defaultValue.getOrElse(throw NoSuchConfigException(name)))
+  }
+
+  private def getConfigSettings(name: String): Option[String] = {
+    configService.get(name).map(_.value)
   }
 }

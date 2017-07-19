@@ -30,7 +30,10 @@ import com.bwsw.sj.engine.output.task.reporting.OutputStreamingPerformanceMetric
 import scala.collection.JavaConverters._
 
 /**
-  * @inheritdoc
+  * This class used in [[com.bwsw.sj.engine.output.task.OutputTaskEngine]] for sending data to a RESTful storage
+  *
+  * @param restOutputStream   stream indicating the specific RESTful storage
+  * @param performanceMetrics set of metrics that characterize performance of an output streaming module
   * @author Pavel Tomskikh
   */
 class RestOutputProcessor[T <: AnyRef](restOutputStream: RestStreamDomain,
@@ -48,10 +51,9 @@ class RestOutputProcessor[T <: AnyRef](restOutputStream: RestStreamDomain,
   private val client = new RestClient(
     service.provider.hosts.toSet,
     service.basePath + "/" + restOutputStream.name,
+    service.httpScheme,
     service.httpVersion,
-    Map(service.headers.asScala.toList: _*),
-    Option(service.provider.name),
-    Option(service.provider.password)
+    Map(service.headers.asScala.toList: _*)
   )
 
   override def send(envelope: OutputEnvelope, inputEnvelope: TStreamEnvelope[T]): Unit = {

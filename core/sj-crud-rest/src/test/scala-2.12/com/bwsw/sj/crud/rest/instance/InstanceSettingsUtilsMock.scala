@@ -34,9 +34,6 @@ object InstanceSettingsUtilsMock {
 class InstanceSettingsUtilsMock extends MockitoSugar {
   val settingsUtils: SettingsUtils = mock[SettingsUtils]
 
-  when(settingsUtils.getFrameworkMaxLaunchDelaySeconds()).thenReturn(maxLaunchDelaySecondsStub)
-  when(settingsUtils.getFrameworkBackoffFactor()).thenReturn(backoffFactorStub)
-  when(settingsUtils.getFrameworkBackoffSeconds()).thenReturn(backoffSecondsStub)
   when(settingsUtils.getBackoffSettings()).thenReturn((backoffSecondsStub, backoffFactorStub, maxLaunchDelaySecondsStub))
 
   when(settingsUtils.getFrameworkJarName()).thenReturn(frameworkJarNameStub)

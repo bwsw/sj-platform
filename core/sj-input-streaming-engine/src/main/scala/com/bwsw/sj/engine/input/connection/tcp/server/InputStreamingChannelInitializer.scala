@@ -28,10 +28,12 @@ import io.netty.handler.codec.string.StringEncoder
 import scala.collection.concurrent
 
 /**
-  * A special ChannelInboundHandler which offers an easy way to initialize [[SocketChannel]] once.
+  * A special ChannelInboundHandler which offers an easy way to initialize [[io.netty.channel.socket.SocketChannel]] once.
   *
-  * @param channelContextQueue  queue for keeping a channel context [[ChannelHandlerContext]] to process messages ([[ByteBuf]]) in their turn
-  * @param bufferForEachContext map for keeping a buffer containing incoming bytes [[ByteBuf]] with the appropriate channel context [[ChannelHandlerContext]]
+  * @param channelContextQueue  queue for keeping a channel context [[io.netty.channel.ChannelHandlerContext]] to process
+  *                             messages ([[io.netty.buffer.ByteBuf]]) in their turn
+  * @param bufferForEachContext map for keeping a buffer containing incoming bytes [[io.netty.buffer.ByteBuf]]
+  *                             with the appropriate channel context [[io.netty.channel.ChannelHandlerContext]]
   */
 class InputStreamingChannelInitializer(channelContextQueue: ArrayBlockingQueue[ChannelHandlerContext],
                                        bufferForEachContext: concurrent.Map[ChannelHandlerContext, ByteBuf])

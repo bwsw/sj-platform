@@ -19,10 +19,9 @@
 package com.bwsw.sj.common.engine.core.entities
 
 import scala.collection.mutable.ArrayBuffer
-import com.bwsw.sj.common.utils._
 
 /**
-  * Used in [[EngineLiterals.batchStreamingType]] engine to collect envelopes [[Envelope]] for each stream
+  * Used in [[com.bwsw.sj.common.utils.EngineLiterals.batchStreamingType]] engine to collect envelopes [[Envelope]] for each stream
   *
   * @param stream provides envelopes
   * @param tags   for user convenience to realize what kind of data are in a stream

@@ -19,7 +19,6 @@ HTTP Methods
 
   "GET", "Used for retrieving resources/resource instance."
   "POST", "Used for creating resources and performing resource actions."
-  "PUT", "Used for updating resource instance."
   "DELETE", "Used for deleting resource instance."
 
 
@@ -54,32 +53,31 @@ The data format in the body of the response is JSON.
 
 
 
-
-
 CRUD Rest-API for Providers
 -----------------------------------
 
-.. csv-table::  Provider fields
-  :header: "Field", "Format",  "Description"
-  :widths: 25, 25,  50
+The range of REST API methods described below allows to create or delete a provider, get the information on the provider, get the list of providers in the system, test connection to a provider.
 
-  "name*", "String", "Provider name. Must contains only letters, digits or hyphens."
-  "description", "String", "Provider description"
-  "hosts*", "Array[String]", "ist of provider hosts"
-  "login", "String", "Provider login"
-  "password", "String", "Provider password"
-  "type*", "String", "Provider type"
-  "driver*", "String", "Driver name (for JDBC type)"
+.. csv-table::  Provider fields
+  :header: "Field", "Format",  "Description", "Requirements"
+  :widths: 15, 15, 25, 25
+
+  "name*", "String", "Provider name.", "Name must be unique and contain only letters, digits or hyphens."
+  "description", "String", "Provider description.", ""
+  "hosts*", "Array[String]", "List of provider hosts.", ""
+  "login", "String", "Provider login.", ""
+  "password", "String", "Provider password.", ""
+  "type*", "String", "Provider type.", "One of the following values are possible: 'zookeeper', 'kafka', 'ES', 'JDBC', 'REST'."
+  "driver*", "String", "Driver name.", "For JDBC provider type only."
+
+.. important:: 
+   - Config settings must contain (<driver> is a value of the "driver" field):
+      
+     - driver.<driver> - name of file with JDBC driver (must exists in files) (e.g. "mysql-connector-java-5.1.6.jar")
+     - driver.<driver>.class - name of class of this driver (e.g. "com.mysql.jdbc.Driver")
+     - driver.<driver>.prefix - prefix of server url: (prefix)://(host:port)/(database), one of [jdbc:mysql, jdbc:postgresql, jdbc:oracle:thin]
 
 .. note:: `*` - a required field.
-
-Provider type must be one of the following values: "cassandra", "aerospike", "zookeeper", "kafka", "ES", "JDBC", "REST"
-
-Config settings must contain (<driver> is a value of the "driver" field):
-
-- driver.<driver> - name of file with JDBC driver (must exists in files) (e.g. "mysql-connector-java-5.1.6.jar")
-- driver.<driver>.class - name of class of this driver (e.g. "com.mysql.jdbc.Driver")
-- driver.<driver>.prefix - prefix of server url: (prefix)://(host:port)/(database), one of [jdbc:mysql, jdbc:postgresql, jdbc:oracle:thin]
 
 Create a new provider
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -94,15 +92,15 @@ Request format::
   :header: "Status code","Description"
   :widths: 25, 60
 
-  "201", "Provider 'kafka-example' has been created."
+  "201", "Provider <provider name> has been created."
   "400", "Cannot create provider. Errors: <list-of-errors>."
-  "500", "Internal server error"
+  "500", "Internal server error."
 
 Request json example::
 
  {
-     "name": "kafka-example",
-     "description": "example kafka provider",
+     "name": "kafka-provider",
+     "description": "example of kafka provider",
      "login": "my_login",
      "password": "my_pass",
      "type": "kafka",
@@ -118,7 +116,7 @@ Success response example::
  {
   "status-code": 201,
   "entity": {
-    "message": "Provider 'kafka-example' has been created."
+    "message": "Provider 'kafka-provider' has been created."
   }
  }
 
@@ -147,17 +145,17 @@ Request format::
   :header: "Status code","Description"
   :widths: 25, 60
 
-  "200", "Provider"
-  "404", "Provider 'foo' has not been found."
-  "500", "Internal server error"
+  "200", "Provider."
+  "404", "Provider <provider name> has not been found."
+  "500", "Internal server error."
 
-Response json example::
+Success response example::
 
  {
   "status-code": 200,
   "entity": {
     "provider": {
-      "name": "kafka-example",
+      "name": "kafka-provider",
      "description": "example kafka provider",
      "login": "my_login",
      "password": "my_pass",
@@ -171,12 +169,12 @@ Response json example::
  }
 
 
-Empty response example::
+Error response example::
 
  {
   "status-code": 404,
   "entity": {
-    "message": "Provider 'foo-prov' has not been found."
+    "message": "Provider 'kafka-provider' has not been found."
   }
  }
 
@@ -194,8 +192,8 @@ Request format::
   :header: "Status code","Description"
   :widths: 25, 60
 
-  "200", "List of providers"
-  "500", "Internal server error"
+  "200", "List of providers."
+  "500", "Internal server error."
 
 Success response example::
 
@@ -204,7 +202,7 @@ Success response example::
   "entity": {
     "providers": [
       {
-        "name": "kafka-exmpl",
+        "name": "kafka-provider",
         "description": "example kafka provider",
         "login": "my_login",
         "password": "my_pass",
@@ -215,11 +213,11 @@ Success response example::
          ]
      },
      {
-       "name": "cass-prov",
-       "description": "cassandra provider example",
+       "name": "es-provider",
+       "description": "elasticsearch provider example",
        "login": "my_login",
        "password": "my_pass",
-       "type": "cassandra",
+       "type": "ES",
        "hosts": [
            "192.168.1.133"
        ]
@@ -242,16 +240,14 @@ Request format::
   :header: "Status code","Description"
   :widths: 25, 60
 
-  "200 ",  "List of types "
-  "500 ",  "Internal server error "
+  "200 ",  "List of types. "
+  "500 ",  "Internal server error. "
 
 Success response example::
 
  {
   "entity": {
     "types": [
-      "cassandra",
-      "aerospike",
       "zookeeper",
       "kafka",
       "ES",
@@ -277,20 +273,27 @@ Request format::
   :widths: 25, 60
 
   "200", "Provider"
-  "404",  "Provider 'foo' has not been found."
-  "422", "Cannot delete provider 'foo'. Provider is used in services."
+  "404", "Provider <provider name> has not been found."
+  "422", "Cannot delete provider <provider name>. Provider is used in services."
   "500", "Internal server error"
 
-Response example::
+Success response example::
 
  {
   "status-code": 200,
   "entity": {
-    "message": "Provider 'kafka-example' has been deleted."
+    "message": "Provider 'kafka-provider' has been deleted."
   }
  }
 
+Error response example::
 
+ {
+    "entity": {
+        "message": "Cannot delete provider 'provider-name'. Provider is used in services."
+    },
+    "status-code": 422
+ }
 
 Test connection to provider
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -305,14 +308,12 @@ Request format::
   :header: "Status code","Description"
   :widths: 25, 60
 
-  "200", "Provider"
-  "404", "Provider 'foo' has not been found."
-  "409", "Can not establish connection to Kafka on '192.168.1.133:9092'; Can not establish connection to Kafka on '192.168.1.135:9092'"
-  "500", "Internal server error"
+  "200", "Provider."
+  "404", "Provider <provider name> has not been found."
+  "409", "Provider is not available."
+  "500", "Internal server error."
 
-Response example:
-
-Provider available::
+Success response example (provider is available)::
 
  {
   "status-code": 200,
@@ -321,12 +322,14 @@ Provider available::
   }
  }
 
-Provider not available::
+Error response example:
+
+Provider is not available::
 
  {
   "entity": {
     "connection": false,
-    "errors": "Can not establish connection to Kafka on '192.168.1.133:9092';Can not establish connection to Kafka on '192.168.1.135:9092'"
+    "errors": "Can not establish connection to Kafka on '192.168.1.133:9092'"
   },
   "statusCode": 409
  }
@@ -354,28 +357,37 @@ Request format::
   :header: "Status code","Description"
   :widths: 25, 60
 
-  "200", "List of services"
-  "404", "Provider 'foo' has not been found."
-  "500", "Internal server error"
+  "200", "List of services."
+  "404", "Provider <provider name> has not been found."
+  "500", "Internal server error."
 
-Response example::
+Success response example::
 
  {
   "entity": {
     "services": [
-      "boo",
-      "foo"
+      "abc",
+      "def"
     ]
   },
   "statusCode": 200
  }
 
+Error response example::
 
+ {
+    "entity": {
+        "message": "Provider 'kafka-provider' has not been found."
+    },
+    "status-code": 404
+ }
+ 
+.. tip:: A full range of error responses can be found at :ref:`Provider_Errors`
 
 CRUD Rest-API for Services
 --------------------------------------
 
-.. note:: Method PUT is not available yet
+The range of REST API methods described below allows to create or delete a service, get the information on the service, get the list of services and service types in the system, get streams and instances related to a service.
 
 Service fields
 ~~~~~~~~~~~~~~~~~
@@ -398,102 +410,92 @@ Elasticsearch Index (ESInd)
 """"""""""""""""""""""""""""""""""""""
 
 .. csv-table::  
-   :header: "Field", "Format", "Description"
-   :widths: 20, 20, 60
+   :header: "Field", "Format", "Description", "Requirements"
+   :widths: 15, 15, 20, 20
   
-   "type*", "String", "Service type"
-   "name*", "String", "Service name"
-   "description", "String", "Service description"
-   "index*", "String", "Elasticsearch index"
-   "provider*", "String", "provider name"
-   "login", "String", "User name"
-   "password", "String", "User password"
+   "type*", "String", "Service type.", ""
+   "name*", "String", "Service name.", "Must be unique and contain only letters, digits or hyphens."
+   "description", "String", "Service description.", ""
+   "index*", "String", "Elasticsearch index.", ""
+   "provider*", "String", "Provider name.", "Provider can be of 'ES' type only."
+   "login", "String", "User name.", ""
+   "password", "String", "User password.", ""
 
-.. note:: Provider type can be 'ES' only
 
 Kafka queue (KfkQ)
 """"""""""""""""""""""""""""""
 
 .. csv-table::  
-  :header: "Field", "Format",  "Description"
-  :widths: 20, 20, 60  
+  :header: "Field", "Format",  "Description", "Requirements"
+  :widths: 15, 15, 20, 20   
 
-  "type*", "String", "Service type"
-  "name*", "String", "Service name"
-  "description", "String", "Service description"
-  "provider*", "String", "provider name"
-  "zkProvider*", "String", "zk provider name"
-  "zkNamespace*", "String", "namespace"
+  "type*", "String", "Service type", ""
+  "name*", "String", "Service name", "Must be unique and contain only letters, digits or hyphens."
+  "description", "String", "Service description", ""
+  "provider*", "String", "Provider name.", "Provider can be of 'kafka' type only."
+  "zkProvider*", "String", "zk provider name.", "zkProvider can be of 'zookeeper' type only."
+  "zkNamespace*", "String", "Namespace.", ""
 
-.. note:: provider type can be 'kafka' only
-
-.. note::  zkProvider type can be 'zookeeper' only
 
 T-streams queue (TstrQ)
 """"""""""""""""""""""""""""""
 
 .. csv-table::  
-  :header: "Field", "Format",  "Description"
-  :widths: 20, 20, 60  
+  :header: "Field", "Format",  "Description", "Requirements"
+  :widths: 15, 15, 20, 20  
 
-  "type*", "String", "Service type"
-  "name*", "String", "Service name. Must contain only letters, digits or hyphens."
-  "description", "String", "Service description"
-  "provider*", "String", "provider name"
-  "prefix*", "String", "Must be a valid znode path"
-  "token*", "String", "(no more than 32 symbols)"
+  "type*", "String", "Service type.", ""
+  "name*", "String", "Service name.", "Must be unique and contain only letters, digits or hyphens."
+  "description", "String", "Service description.", ""
+  "provider*", "String", "Provider name.", "Provider can be of 'zookeeper' type only."
+  "prefix*", "String", "A znode path", "Must be a valid znode path."
+  "token*", "String", "A token", "Should not contain more than 32 symbols."
 
-.. note:: provider type can be 'zookeeper' only
 
 Zookeeper Coordination (ZKCoord)
 """"""""""""""""""""""""""""""""""""""
 
 .. csv-table::  
-  :header: "Field", "Format",  "Description"
-  :widths: 20, 20, 60 
+  :header: "Field", "Format",  "Description", "Requirements"
+  :widths: 15, 15, 20, 20 
 
-  "type*", "String", "Service type"
-  "name*", "String", "Service name"
-  "description", "String", "Service description"
-  "namespace*", "String", "Zookeeper namespace"
-  "provider*", "String", "provider name"
+  "type*", "String", "Service type.", ""
+  "name*", "String", "Service name.", "Must be unique and contain only letters, digits or hyphens."
+  "description", "String", "Service description.", ""
+  "namespace*", "String", "Zookeeper namespace.", ""
+  "provider*", "String", "Provider name.", "Provider can be of 'zookeeper' type only."
 
-.. note:: provider type can be 'zookeeper' only
 
 SQL database (JDBC)
 """""""""""""""""""""""""
 
 .. csv-table::  
-  :header: "Field", "Format",  "Description"
-  :widths: 20, 20, 60 
+  :header: "Field", "Format",  "Description", "Requirements"
+  :widths: 15, 15, 20, 20 
 
-  "type*", "String", "Service type"
-  "name*", "String", "Service name"
-  "description", "String", "Service description"
-  "provider*", "String", "provider name"
-  "database*", "String", "Database name"
-
-.. note:: provider type can be 'JDBC' only
+  "type*", "String", "Service type.", ""
+  "name*", "String", "Service name.", "Must be unique and contain only letters, digits or hyphens."
+  "description", "String", "Service description.", ""
+  "provider*", "String", "Provider name.", "Provider can be of 'JDBC' type only."
+  "database*", "String", "Database name.", ""
 
 
 RESTful service (REST)
 """""""""""""""""""""""""""""
 
 .. csv-table::  
-  :header: "Field", "Format",  "Description"
-  :widths: 20, 20, 60
+  :header: "Field", "Format",  "Description", "Requirements"
+  :widths: 15, 15, 20, 20
 
-  "type*", "String", "Service type"
-  "name*", "String", "Service name"
-  "description", "String", "Service description"
-  "provider*", "String", "provider name"
-  "basePath", "String", "Path to storage (/ by default)"
-  "httpVersion", "String", "Version og HTTP protocol, one of (1.0, 1.1, 2); (1.1 by default)"
-  "headers", "Object", "Extra HTTP headers. Values in object must be only String type. ({} by default)"
+  "type*", "String", "Service type.", ""
+  "name*", "String", "Service name.", "Must be unique and contain only letters, digits or hyphens."
+  "description", "String", "Service description.", ""
+  "provider*", "String", "Provider name.", "Provider can be  of 'REST' type only."
+  "basePath", "String", "Path to storage (/ by default)", ""
+  "httpVersion", "String", "Version og HTTP protocol", "One of (1.0, 1.1, 2); (1.1 by default)"
+  "headers", "Object", "Extra HTTP headers.", "Values in object must be only String type. ({} by default)"
 
-.. note:: provider type can be 'REST' only
-
-.. important::  Note: * - required field.
+.. note: `*` - required fields.
 
 Create a new service
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -509,11 +511,11 @@ Request format::
   :widths: 25, 60
 
 
-  "201", "Service 'test' has been created."
+  "201", "Service <service name> has been created."
   "400", "Cannot create service. Errors: <list-of-errors>."
-  "500", "Internal server error"
+  "500", "Internal server error."
 
-Request example::
+Request json example::
 
  {
     "name": "test-rest-zk-service",
@@ -556,11 +558,11 @@ Request format::
   :header: "Status code",  "Description"
   :widths: 25, 60
 
-  "200", "Service"
-  "404", "Service 'test' has not been found."
-  "500", "Internal server error"
+  "200", "Service."
+  "404", "Service <service name> has not been found."
+  "500", "Internal server error."
 
-Response example::
+Success response example::
 
  {
   "status-code": 200,
@@ -573,6 +575,15 @@ Response example::
       "namespace": "namespace"
     }
   }
+ }
+
+Error response example::
+
+ {
+   "status-code": 404,
+   "entity": {
+     "message": "Service <service name> has not been found."
+   }
  }
 
 
@@ -589,8 +600,8 @@ Request format::
   :header: "Status code",  "Description"
   :widths: 25, 60
 
-  "200", "List of services"
-  "500", "Internal server error"
+  "200", "List of services."
+  "500", "Internal server error."
 
 Success response example::
 
@@ -631,8 +642,8 @@ Request format::
   :header: "Status code",  "Description"
   :widths: 25, 60
 
-  "200", "List of types"
-  "500|Internal server error"
+  "200", "List of types."
+  "500", "Internal server error."
 
 Success response example::
 
@@ -664,20 +675,30 @@ Request format::
   :header: "Status code",  "Description"
   :widths: 25, 60
 
-  "200", "Service"
-  "404", "Service 'test' has not been found."
-  "422", "Cannot delete service 'test'. Service is used in streams."
-  "422", "Cannot delete service 'test'. Service is used in instances."
-  "500", "Internal server error"
+  "200", "Service."
+  "404", "Service <service name> has not been found."
+  "422", "Cannot delete service <service name>. Service is used in streams."
+  "422", "Cannot delete service <service name>. Service is used in instances."
+  "500", "Internal server error."
 
-Response example::
+Success response example::
 
 
  {
   "status-code": 200,
   "entity": {
-    "message": "Service 'foo' has been deleted."
+    "message": "Service 'abc' has been deleted."
   }
+ }
+
+
+Error response example::
+
+ {
+   "status-code": 404,
+   "entity": {
+     "message": "Service <service name> has not been found."
+   }
  }
 
 
@@ -694,11 +715,11 @@ Request format::
   :header: "Status code",  "Description"
   :widths: 25, 60
 
-  "200", "List of streams and instances"
-  "404", "Service 'test' has not been found."
-  "500", "Internal server error"
+  "200", "List of streams and instances."
+  "404", "Service <service name> has not been found."
+  "500", "Internal server error."
 
-Response example::
+Success response example::
 
  {
   "entity": {
@@ -722,26 +743,37 @@ Response example::
   "statusCode": 200
  }
 
+Error response example::
+
+ {
+   "status-code": 404,
+   "entity": {
+     "message": "Service <service name> has not been found."
+   }
+ }
+
+.. tip:: A full range of error responses can be found at :ref:`Services_Errors`
+
 CRUD Rest-API for Streams
 --------------------------------------
 
-.. note::  Method PUT is not available yet
+The range of REST API methods described below allows to create or delete a stream, get the information on the stream, get the list of streams and stream types in the system, get instances related to a stream.
 
 Stream fields
 ~~~~~~~~~~~~~~~~~
 .. csv-table:: Response
-   :header: "Stream type", "Field", "Format", "Description"
-   :widths: 20, 20, 20, 40
-
-   "all", "name*", "String", "Stream name. Must contains only lowercase letters, digits or hyphens."
-   "all", "description", "String", "Stream description"
-   "all", "service*", "String", "Service id"
-   "all", "type*", "String", "Stream type [stream.t-stream, stream.kafka, jdbc-output, elasticsearch-output, rest-output]"
-   "all", "tags", "Array[String]", "Tags"
-   "stream.t-stream, stream.kafka", "partitions*", "Int", "partitions"
-   "stream.kafka", "replicationFactor*", "Int", "Replication factor (how many zookeeper nodes to utilize)"
-   "jdbc-output", "primary", "String", "Primary key field name used in sql database"
-   "all", "force", "Boolean", "Indicates if a stream should be removed and re-created by force (if it exists). False by default."
+   :header: "Field", "Format", "Description", "Requirements"
+   :widths: 10, 10, 20, 20
+ 
+   "name*", "String", "Stream name.", "Must be unique and contain only lowercase letters, digits or hyphens."
+   "description", "String", "Stream description", ""
+   "service*", "String", "Service id", ""
+   "type*", "String", "Stream type", "One of the following values : stream.t-stream, stream.kafka, jdbc-output, elasticsearch-output, rest-output."
+   "tags", "Array[String]", "Tags.", ""
+   "partitions*", "Int", "Partitions.", "For stream.t-stream, stream.kafka types"
+   "replicationFactor*", "Int", "Replication factor (how many zookeeper nodes to utilize).", "For stream.kafka stream type only."
+   "primary", "String", "Primary key field name used in sql database.", "For jdbc-output stream type only."
+   "force", "Boolean", "Indicates if a stream should be removed and re-created by force (if it exists). False by default.", ""
 
 
 .. important:: 
@@ -766,11 +798,11 @@ Request format::
   :header: "Status code",  "Description"
   :widths: 25, 60
 
-  "201", "Stream 'kafka' has been created."
+  "201", "Stream <stream name> has been created."
   "400", "Cannot create stream. Errors: <list-of-errors>."
-  "500", "Internal server error"
+  "500", "Internal server error."
 
-Request example::
+Request json example::
 
  {
       "name": "tstream-2",
@@ -813,10 +845,10 @@ Request format::
   :header: "Status code",  "Description"
   :widths: 25, 60
 
-  "200", "List of streams"
-  "500", "Internal server error"
+  "200", "List of streams."
+  "500", "Internal server error."
 
-Response example::
+Success response example::
 
  {
   "status-code": 200,
@@ -857,8 +889,8 @@ Request format::
   :header: "Status code",  "Description"
   :widths: 25, 60
 
-  "200", "List of types"
-  "500", "Internal server error"
+  "200", "List of types."
+  "500", "Internal server error."
 
 Success response example::
 
@@ -888,9 +920,9 @@ Request format::
   :header: "Status code",  "Description"
   :widths: 25, 60
 
-  "200", "Stream"
-  "404", "Stream 'kafka' has not been found."
-  "500", "Internal server error"
+  "200", "Stream."
+  "404", "Stream <stream name> has not been found."
+  "500", "Internal server error."
 
 Success response example::
 
@@ -934,12 +966,12 @@ Request format::
   :header: "Status code",  "Description"
   :widths: 25, 60
 
-  "200", "Stream 'kafka' has been deleted."
-  "404", "Stream 'kafka' has not been found."
-  "422", "Cannot delete stream 'kafka'. Stream is used in instances."
-  "500", "Internal server error"
+  "200", "Stream <stream name> has been deleted."
+  "404", "Stream <stream name> has not been found."
+  "422", "Cannot delete stream <stream name>. Stream is used in instances."
+  "500", "Internal server error."
 
-Response example::
+Success response example::
 
  {
   "status-code": 200,
@@ -948,6 +980,15 @@ Response example::
   }
  }
 
+
+Error response example::
+
+ {
+    "entity": {
+        "message": "Stream 'output-stream' has not been found."
+    },
+    "status-code": 404
+ } 
 
 Get instances related to a stream (by stream name)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -963,41 +1004,49 @@ Request format::
   :widths: 25, 60
 
   "200", "List of instances"
-  "404", "Stream 'kafka' has not been found."
+  "404", "Stream <stream name> has not been found."
   "500", "Internal server error"
 
-Response example::
+Success response example::
 
  {
   "entity": {
     "instances": [
       "pingstation-output",
-      "ivan"
+      "john"
     ]
   },
   "statusCode": 200
+ }
+
+Error response example::
+
+ {
+    "entity": {
+        "message": "Stream 'output-stream' has not been found."
+    },
+    "status-code": 404
  }
 
 
 CRUD Rest-API for Config Settings
 -----------------------------------
 
+The range of REST API methods described below allows to create or delete config settings, get the information on the config setting, get the list of config settings existing in the system, get list of domains.
+
 Config setting fields
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. csv-table::  
-  :header: "Field", "Format",  "Description"
-  :widths: 20, 20, 60
+  :header: "Field", "Format",  "Description", "Requirements"
+  :widths: 15, 15, 20, 20
 
-  "name*", "String", "Name of setting (key)"
-  "value*", "String", "Value of setting"
-  "domain*", "String", "Name of config-domain"
+  "name*", "String", "Name of the setting (key).", "Should be unique and contain digits, lowercase letters, hyphens or periods and start with a letter."
+  "value*", "String", "Value of setting.", ""
+  "domain*", "String", "Name of config-domain.", "Should be one of the following values: 'system', 't-streams', 'kafka', 'es', 'zk', 'jdbc'"
 
 .. note:: `*` - required field.
 
-Config setting name should contain digits, lowercase letters, hyphens or periods and start with a letter.
-
-{config-domain} should be one of the following values: 'system', 't-streams', 'kafka', 'es', 'zk', 'jdbc'
 
 Create a new config setting
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1012,9 +1061,9 @@ Request format::
   :header: "Status code",  "Description"
   :widths: 25, 60
 
-  "201", "{config-domain} config setting {name} has been created."
-  "400", "Cannot create {config-domain} config setting. Errors: {list-of-errors}."
-  "500", "Internal server error"
+  "201", "<config-domain> config setting <name> has been created."
+  "400", "Cannot create <config-domain> config setting. Errors: <list-of-errors>."
+  "500", "Internal server error."
 
 
 Request json example::
@@ -1026,7 +1075,7 @@ Request json example::
  }
 
 
-Response example::
+Error response example::
 
 
  {
@@ -1047,15 +1096,15 @@ Request format::
  /v1/config/settings/{config-domain}/{name}
 
 .. csv-table::  Response
-  :header: "Status code",  "Description"
+  :header: "Status code", "Description"
   :widths: 25, 60
 
-  "200", "Json with requested config setting for specific config domain"
-  "400",  "Cannot recognize config setting domain '{config-domain}'. Domain must be one of the following values: 'system, t-streams, kafka, es, zk, jdbc, rest'."
-  "404", "{config-domain} сonfig setting {name} has not been found."
-  "500", "Internal server error"
+  "200", "Json with requested config setting for specific config domain."
+  "400",  "Cannot recognize config setting domain <config-domain>. Domain must be one of the following values: 'system, t-streams, kafka, es, zk, jdbc, rest'."
+  "404", "<config-domain> сonfig setting <name> has not been found."
+  "500", "Internal server error."
 
-Response example::
+Success response example::
 
  {
   "status-code": 200,
@@ -1067,6 +1116,16 @@ Response example::
     }
   }
  }
+
+Error response example::
+
+ {
+    "entity": {
+        "message": "Cannot recognize config setting domain 'elasticsearch'. Domain must be one of the following values: 'system, t-streams, kafka, es, zk, jdbc, rest'."
+    },
+    "status-code": 400
+ }
+
 
 Get all config settings for specific config domain
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1081,11 +1140,11 @@ Request format::
   :header: "Status code",  "Description"
   :widths: 25, 60
 
-  "200", "Json of set of config settings for specific config domain"
-  "400", "Cannot recognize config setting domain '{config-domain}'. Domain must be one of the following values: 'system, t-streams, kafka, es, zk, jdbc, rest'."
-  "500", "Internal server error"
+  "200", "Json of set of config settings for specific config domain."
+  "400", "Cannot recognize config setting domain <config-domain>. Domain must be one of the following values: 'system, t-streams, kafka, es, zk, jdbc, rest'."
+  "500", "Internal server error."
 
-Response example::
+Success response example::
 
  {
   "status-code": 200,
@@ -1105,6 +1164,16 @@ Response example::
   }
  }
 
+Error response example::
+
+ {
+    "entity": {
+        "message": "Cannot recognize config setting domain 'elasticsearch'. Domain must be one of the following values: 'system, t-streams, kafka, es, zk, jdbc, rest'."
+    },
+    "status-code": 400
+ }
+
+
 Delete a config setting by name
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -1118,19 +1187,20 @@ Request format::
   :header: "Status code",  "Description"
   :widths: 25, 60
 
-  "200", "config-domain} config setting {name} has been deleted."
-  "400", "Cannot recognize config setting domain '{config-domain}'. Domain must be one of the following values: 'system, t-streams, kafka, es, zk, jdbc, rest'."
-  "404", "{config-domain} сonfig setting {name} has not been found."
-  "500", "Internal server error"
+  "200", "<config-domain> config setting <name> has been deleted."
+  "400", "Cannot recognize config setting domain <config-domain>. Domain must be one of the following values: 'system, t-streams, kafka, es, zk, jdbc, rest'."
+  "404", "<config-domain> сonfig setting <name> has not been found."
+  "500", "Internal server error."
 
-Response example::
+Success response example::
 
  {
-  "status-code" : 200,
-  "entity" : {
-     "message" : "System config setting 'crud-rest-host' has been deleted."
-  }
+    "entity": {
+        "message": "Config setting 'system.crud-rest-host' has been deleted."
+    },
+    "status-code": 200
  }
+
 
 
 Get all config settings
@@ -1149,7 +1219,7 @@ Request format::
   "200", "Json of set of config settings"
   "500", "Internal server error"
 
-Response example::
+Success response example::
 
  {
   "status-code": 200,
@@ -1188,10 +1258,10 @@ Request format::
   :header: "Status code",  "Description"
   :widths: 25, 60
 
-  "200", "Set of domains"
-  "500", "Internal server error"
+  "200", "Set of domains."
+  "500", "Internal server error."
 
-Response example::
+Success response example::
 
  {
   "entity": {
@@ -1209,6 +1279,8 @@ Response example::
 
 CRUD Rest-API for Custom Files
 ----------------------------------------
+
+The range of REST API methods described below allows to upload a custom jar or file, download it to your computer, get list of custom jars or files in the system and delete a custom jar or file.
 
 Custom jars
 ~~~~~~~~~~~~~~~~~~~~
@@ -1244,11 +1316,11 @@ Example of source message::
   :header: "Status code",  "Description"
   :widths: 25, 60
 
-  "200", "Custom jar '<file_name>' has been uploaded."
-  "400", "Cannot upload custom jar. Errors: {list-of-errors}. ('Specification.json is not found or invalid.'; 'Custom jar '<file_name>' already exists.'; 'Cannot upload custom jar '<file_name>'. Custom jar with name <name_from_specification> and version <version_from_specification> already exists.')"
-  "500", "Internal server error"
+  "200", "Custom jar <file_name> has been uploaded."
+  "400", "Cannot upload custom jar. Errors: <list-of-errors>. ('Specification.json is not found or invalid.'; 'Custom jar <file_name> already exists.'; 'Cannot upload custom jar <file_name>'. Custom jar with name <name_from_specification> and version <version_from_specification> already exists.')"
+  "500", "Internal server error."
 
-Response example::
+Success response example::
 
  {
   "status-code": 200,
@@ -1283,9 +1355,18 @@ Response headers example::
   :header: "Status code",  "Description"
   :widths: 25, 60
 
-  "200", "Jar-file for download"
-  "404", "Jar '<custom-jar-file-name>' has not been found."
-  "500", "Internal server error"
+  "200", "Jar-file for download."
+  "404", "Jar <custom-jar-file-name> has not been found."
+  "500", "Internal server error."
+
+Error response example::
+
+ {
+    "entity": {
+        "message": "Jar 'sj-transaction-generator-1.0-SNAPSHOT.jar' has not been found."
+    },
+    "status-code": 404
+ }
 
 Download a custom jar by name and version
 """"""""""""""""""""""""""""""""""""""""""""""""
@@ -1300,9 +1381,19 @@ Request format::
   :header: "Status code",  "Description"
   :widths: 25, 60
 
-  "200", "Jar-file for download"
-  "404", "Jar '<custom-jar-name>-<custom-jar-version>' has not been found."
-  "500", "Internal server error"
+  "200", "Jar-file for download."
+  "404", "Jar <custom-jar-name>-<custom-jar-version> has not been found."
+  "500", "Internal server error."
+
+Error response example::
+
+ {
+    "entity": {
+        "message": "Internal server error: Prematurely reached end of stream."
+    },
+    "status-code": 500
+ }
+
 
 Delete a custom jar by file name
 """""""""""""""""""""""""""""""""""
@@ -1317,11 +1408,11 @@ Request format::
   :header: "Status code",  "Description"
   :widths: 25, 60
 
-  "200", "Jar named '<custom-jar-file-name>' has been deleted."
-  "404", "Jar '<custom-jar-file-name>' has not been found."
+  "200", "Jar named <custom-jar-file-name> has been deleted."
+  "404", "Jar <custom-jar-file-name> has not been found."
   "500", "Internal server error"
 
-Response example::
+Success response example::
 
  {
   "status-code": 200,
@@ -1330,6 +1421,15 @@ Response example::
   }
  }
  
+Error response example::
+
+ {
+    "entity": {
+        "message": "Jar 'com.bwsw.batch.stream.engine' has not been found."
+    },
+    "status-code": 404
+ }
+
 Delete a custom jar by name and version (from specification)
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
@@ -1343,11 +1443,11 @@ Request format::
   :header: "Status code",  "Description"
   :widths: 25, 60
 
-  "200", "Jar named '<custom-jar-name>' of the version '<custom-jar-version>' has been deleted."
-  "404", "Jar '<custom-jar-name>-<custom-jar-version>' has not been found."
-  "500", "Internal server error"
+  "200", "Jar named <custom-jar-name> of the version <custom-jar-version> has been deleted."
+  "404", "Jar <custom-jar-name>-<custom-jar-version> has not been found."
+  "500", "Internal server error."
 
-Response example::
+Success response example::
 
  {
   "status-code": 200,
@@ -1356,6 +1456,14 @@ Response example::
   }
  }
 
+Error response example::
+
+ {
+    "entity": {
+        "message": "Jar 'com.bwsw.batch.streaming.engine-2.0' has not been found."
+    },
+    "status-code": 404
+ }
 
 Get list of all uploaded custom jars
 """""""""""""""""""""""""""""""""""""""""""""
@@ -1370,10 +1478,10 @@ Request format::
   :header: "Status code",  "Description"
   :widths: 25, 60
 
-  "200", "List of uploaded custom jars"
-  "500", "Internal server error"
+  "200", "List of uploaded custom jars."
+  "500", "Internal server error."
 
-Response example::
+Success response example::
 
  {
   "entity": {
@@ -1413,20 +1521,28 @@ Attachment: any file as field 'file', text field "description"
   :header: "Status code",  "Description"
   :widths: 25, 60
 
-  "200", "Custom file '<custom-jar-file-name>' has been uploaded."
+  "200", "Custom file <custom-jar-file-name> has been uploaded."
   "400", "Request is missing required form field 'file'."
-  "409", "Custom file '<custom-jar-file-name>' already exists."
-  "500", "Internal server error"
+  "409", "Custom file <custom-jar-file-name> already exists."
+  "500", "Internal server error."
 
-Response example::
+Success response example::
 
  {
   "status-code": 200,
   "entity": {
-    "message": "Custom file '<custom-jar-file-name>' has been uploaded."
+    "message": "Custom file <custom-jar-file-name> has been uploaded."
   }
  }
 
+Error response example::
+
+ {
+    "entity": {
+        "message": "Request is missing required form field 'file'."
+    },
+    "status-code": 400
+ }
 
 Download a custom file by file name
 """""""""""""""""""""""""""""""""""""""""""""""
@@ -1453,9 +1569,22 @@ Response format for file download::
   :header: "Status code",  "Description"
   :widths: 25, 60
 
-  "200", "File for download"
-  "404", "Custom file '<custom-jar-file-name>' has not been found."
-  "500", "Internal server error"
+  "200", "File for download."
+  "404", "Custom file <custom-jar-file-name> has not been found."
+  "500", "Internal server error."
+
+Success response format: 
+
+File for download is returned.
+
+Error response example::
+
+ {
+    "entity": {
+        "message": "Custom file 'Custom_jar.jar' has not been found."
+    },
+    "status-code": 404
+ }
 
 Delete a custom file
 """"""""""""""""""""""""""""""""""""
@@ -1470,11 +1599,11 @@ Request format::
   :header: "Status code",  "Description"
   :widths: 25, 60
 
-  "200", "Custom file '<custom-jar-file-name>' has been deleted."
-  "404", "Custom file '<custom-jar-file-name>' has not been found."
+  "200", "Custom file <custom-jar-file-name> has been deleted."
+  "404", "Custom file <custom-jar-file-name> has not been found."
   "500", "Internal server error"
 
-Response example::
+Success response example::
 
  {
   "status-code": 200,
@@ -1483,6 +1612,14 @@ Response example::
   }
  }
 
+Error response example::
+
+ {
+    "entity": {
+        "message": "Custom file 'customfile.txt' has not been found."
+    },
+    "status-code": 404
+ }
 
 Get list of all uploaded custom files
 """"""""""""""""""""""""""""""""""""""""
@@ -1497,10 +1634,10 @@ Request format::
   :header: "Status code",  "Description"
   :widths: 25, 60
 
-  "200", "List of uploaded custom files"
-  "500", "Internal server error"
+  "200", "List of uploaded custom files."
+  "500", "Internal server error."
 
-Response example::
+Success response example::
 
  {
   "entity": {
@@ -1526,9 +1663,6 @@ Response example::
 CRUD Rest-API for Modules 
 ------------------------------
 
-Introduction
-~~~~~~~~~~~~~~~~~~~
-
 This is the CRUD Rest-API for modules uploaded as jar files, instantiated and running modules as well as  for custom jar files.
 
 The following types of modules are supported in the system:
@@ -1537,25 +1671,25 @@ The following types of modules are supported in the system:
 * output-streaming
 * input-streaming
 
-
 .. csv-table::  **Specification fields**
   :header: "Field", "Format",  "Description"
   :widths: 20, 20, 60
 
-  "name*", "String", "The unique name for a module"
-  "description", "String", "The description for a module"
-  "version*", "String", "The module version"
-  "author", "String", "The module author"
-  "license", "String", "The software license type for a module"
-  "inputs*", "Iostream", "The specification for the inputs of a module"
-  "outputs*", "Iostream", "The specification for the outputs of a module"
+  "name*", "String", "The unique name for a module."
+  "description", "String", "The description for a module."
+  "version*", "String", "The module version."
+  "author", "String", "The module author."
+  "license", "String", "The software license type for a module."
+  "inputs*", "IOstream", "The specification for the inputs of a module."
+  "outputs*", "IOstream", "The specification for the outputs of a module."
   "module-type*", "String", "The type of a module. One of [input-streaming, output-streaming, batch-streaming, regular-streaming]."
-  "engine-name*", "String", "The name of the computing core of a module"
-  "engine-version*", "String", "The version of the computing core of a module"
-  "validator-class*", "String", "The absolute path to class that is responsible for a validation of launch options"
-  "executor-class*", "String", "The absolute path to class that is responsible for a running of module"
-  "batch-collector-class**", "String", "The absolute path to class that is responsible for a batch collecting of batch-streaming module"
+  "engine-name*", "String", "The name of the computing core of a module."
+  "engine-version*", "String", "The version of the computing core of a module."
+  "validator-class*", "String", "The absolute path to class that is responsible for a validation of launch options."
+  "executor-class*", "String", "The absolute path to class that is responsible for a running of module."
+  "batch-collector-class**", "String", "The absolute path to class that is responsible for a batch collecting of batch-streaming module."
 
+IOstream for inputs and outputs has the following structure:
 
 .. csv-table:: **IOstream fields**
   :header: "Field", "Format",  "Description"
@@ -1566,7 +1700,7 @@ The following types of modules are supported in the system:
 
 .. note:: `*` - required field, `**` - required for batch-streaming field
 
-Upload module
+Upload a module
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Request method: POST
@@ -1592,26 +1726,34 @@ Example of source message::
  ..... //file content
  ------WebKitFormBoundaryPaRdSyADUNG08o8p--
 
-.. csv-table:: **Response**
+.. csv-table:: Response
   :header: "Status code",  "Description"
   :widths: 10, 60
 
-  "200", "Jar file '<file_name>' of module has been uploaded."
-  "400", "1. Cannot upload jar file '<file_name>' of module. Errors: file '<file_name>' does not have the .jar extension. 
-  2. Cannot upload jar file '<file_name>' of module. Errors: module '<module-type>-<module-name>-<module-version>' already exists.
-  3. Cannot upload jar file '<file_name>' of module. Errors: file '<file_name>' already exists.
-  4. Other errors"
-  "500", "Internal server error"
+  "200", "Jar file <file_name> of module has been uploaded."
+  "400", "1. Cannot upload jar file <file_name> of module. Errors: file <file_name> does not have the .jar extension. 
+  2. Cannot upload jar file <file_name> of module. Errors: module <module-type>-<module-name>-<module-version> already exists.
+  3. Cannot upload jar file <file_name> of module. Errors: file <file_name> already exists.
+  4. Other errors."
+  "500", "Internal server error."
 
-Response example::
+Success response example::
 
  {
   "status-code": 200,
   "entity": {
-    "message": "Jar file '<file_name>' of module has been uploaded."
+    "message": "Jar file 'regular-module.jar' of module has been uploaded."
   }
  }
 
+Error response example::
+
+ {
+    "entity": {
+        "message": "Cannot upload jar file 'regular-module.jar' of module. Errors: file 'regular-module.jar' already exists."
+    },
+    "status-code": 400
+ }
 
 Download jar of uploaded module
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1634,7 +1776,7 @@ Response headers example::
  Content-Type: application/java-archive
 
 
-.. csv-table:: **Response**
+.. csv-table:: Response
   :header: "Status code",  "Description"
   :widths: 10, 60
 
@@ -1652,7 +1794,7 @@ Request format::
 
  /v1/modules/{module-type}/{module-name}/{module-version}/
 
-.. csv-table::  **Response**
+.. csv-table:: Response
   :header: "Status code",  "Description"
   :widths: 10, 60
 
@@ -1663,13 +1805,23 @@ Request format::
   2. Cannot delete file '<module-filename>'"
   "500", "Internal server error"
 
-Response example::
+Success response example::
 
  {
   "status-code": 200,
   "entity": {
     "message": "Module 'regular-streaming-com.bwsw.sj.stub-1.0' has been deleted."
   }
+ }
+
+
+Error response example::
+
+ {
+    "entity": {
+        "message": "Module 'regular-streaming-RegularModule-1.0' has not been found."
+    },
+    "status-code": 404
  }
 
 
@@ -1682,14 +1834,14 @@ Request format::
 
  /v1/modules
 
-.. csv-table::  **Response**
+.. csv-table:: Response
   :header: "Status code",  "Description"
   :widths: 15, 60
 
   "200", "List of uploaded modules"
   "500","Internal server error"
 
-Response example::
+Success response example::
 
  {
   "status-code": 200,
@@ -1721,14 +1873,14 @@ Request format::
 
  /v1/modules/_types
 
-.. csv-table::  **Response**
+.. csv-table::  Response
   :header: "Status code",  "Description"
   :widths: 15, 60
 
   "200", "List of types"
   "500", "Internal server error"
 
-Response example::
+Success response example::
 
  {
   "entity": {
@@ -1756,11 +1908,11 @@ Request format::
   :header: "Status code",  "Description"
   :widths: 15, 60
 
-  "200", "Uploaded modules for type {module-type} + {list-modules-for-type}"
-  "400", "Module type '{module-type}' does not exist."
-  "500", "Internal server error"
+  "200", "Uploaded modules for type <module-type> + <list-modules-for-type>."
+  "400", "Module type <module-type> does not exist."
+  "500", "Internal server error."
 
-Response example::
+Success response example::
 
  {
   "status-code": 200,
@@ -1776,6 +1928,14 @@ Response example::
   }
  }
 
+Error response example::
+
+ {
+    "entity": {
+        "message": "Module type 'output-stream' does not exist."
+    },
+    "status-code": 400
+ }
 
 Get specification for uploaded module
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1790,12 +1950,12 @@ Request format::
   :header: "Status code",  "Description"
   :widths: 15, 60
 
-  "200", "specification json (see [[Json_schema_for_specification_of_module]])"
+  "200", "Specification json (see :ref:`Json_schema`)."
   "404", "1. Module '<module_type>-<module_name>-<module_version>' has not been found.
   2. Jar of module '<module_type>-<module_name>-<module_version>' has not been found in the storage."
-  "500", "Internal server error (including erorrs related to incorrect module type or nonexistent module)"
+  "500", "Internal server error (including erorrs related to incorrect module type or nonexistent module)."
 
-Response example::
+Success response example::
 
  {
   "entity": {
@@ -1837,110 +1997,22 @@ Response example::
   "statusCode": 200
  }
 
+Error response example::
+
+ {
+    "entity": {
+        "message": "Module 'regular-streaming-RegularModule-1.0' has not been found."
+    },
+    "status-code": 400
+ }
+
 .. _REST_API_Instance:
 
 CRUD Rest-API for Instances
 -----------------------------------
 
-Get all instances
-~~~~~~~~~~~~~~~~~~~~~~~~
+The range of REST API methods described below allows to create an instance of a module, get the list of existing instances, get the settings of a specific instance, start and stop an instance and get the instance tasks information as well as delete an instance of a specific module. 
 
-Request method: GET
-
-Request format:: 
- 
- /v1/modules/instances
-
-.. csv-table:: **Response**
-  :header: "Status code",  "Description"
-  :widths: 25, 60
-
-  "200", "Json set of instances (in short format)"
-  "500", "Internal server error"
-
-Response entity: json example::
-
- {
-  "status-code" : 200,
-  "entity" : {[
-    {
-       "name": "instance-test"
-       "moduleType": "batch-streaming"
-       "moduleName": "com.bw.sw.sj.stub.win"
-       "moduleVersion": "0.1"
-       "description": ""
-       "status" : "started"
-       "restAddress" : "12.1.1.1:12:2900"
-     },
-     {
-       "name": "reg-instance-test"
-       "moduleType": "regular-streaming"
-       "moduleName": "com.bw.sw.sj.stub.reg"
-       "moduleVersion": "0.1"
-       "description": ""
-       "status" : "ready"
-       "restAddress" : ""
-     }
-  ]}
- }
-
-.. note:: Instance may have one of the following statuses:
-
- * ready - a newly created instance and not started yet;
- * starting - a recently launched instance but not started yet (right after the "Start" button is pushed);
- * started - the launched instance started to work;
- * stopping - a started instance in the process of stopping (right after the "Stop" button is pushed);
- * stopped - an instance that has been stopped;
- * deleting - an instance in the process of deleting (right after the "Delete" button is pressed);
- * failed - an instance that has been launched but in view of some errors is not started;
- * error - an error is detected at stopping or deleting an instance.
-
-.. figure:: _static/InstanceStatuses.png
-
-
-Stream Juggler Mesos Framework Rest
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Request method: GET
-
-Request format:: 
-
- http://{rest-address}
-
-.. csv-table:: **Response**
-  :header: "Status code",  "Description"
-  :widths: 25, 60
-
-  "200", "Json set of instances (in short format)"
-  "500", "Internal server error"
-
-Response entity: json example::
-
- {
-  "status-code": 200,
-  "entity": {
-    "tasks": [
-      {
-        "state": "TASK_RUNNING",
-        "directories": [
-          {
-            "name": "Mon Dec 05 11:33:47 NOVT 2016",
-            "path": "http://stream-juggler.z1.netpoint-dc.com:5050/#/slaves/3599865a-47b1-4a17-9381-b708d42eb0fc-S0/browse?path=/var/lib/mesos/slaves/3599865a-47b1-4a17-9381-b708d42eb0fc-S0/frameworks/c69ce526-c420-44f4-a401-                       6b566b1a0823-0003/executors/pingstation-process-task0/runs/d9748d7a-3d0e-4bb6-88eb-3a3340d133d8" 
-          },
-          {
-            "name": "Mon Dec 05 11:56:47 NOVT 2016",
-            "path": "http://stream-juggler.z1.netpoint-dc.com:5050/#/slaves/3599865a-47b1-4a17-9381-b708d42eb0fc-S0/browse?path=/var/lib/mesos/slaves/3599865a-47b1-4a17-9381-b708d42eb0fc-S0/frameworks/c69ce526-c420-44f4-a401-                       6b566b1a0823-0003/executors/pingstation-process-task0/runs/8a62f2a4-6f3c-412f-9d17-4f63e9052868" 
-          }
-        ],
-        "state-change": "Mon Dec 05 11:56:47 NOVT 2016",
-        "reason": "Executor terminated",
-        "id": "pingstation-process-task0",
-        "node": "3599865a-47b1-4a17-9381-b708d42eb0fc-S0",
-        "last-node": "3599865a-47b1-4a17-9381-b708d42eb0fc-S0" 
-      }
-    ]
-  }
- }
 
 .. _REST_API_Instance_Create:
 
@@ -1953,12 +2025,14 @@ Request format::
 
  /v1/modules/{module-type}/{module-name}/{module-version}/instance/
 
-.. note:: The name of an input stream should contain the  "/split" suffix (if stream's partitions should be distributed between the tasks) or "/full" (if each task should process all partitions of the stream). The stream has a 'split' mode as default. (see `SJ_CRUD_REST_API.rst#execution-plan <Execution plan>`_)
+.. note:: The name of an input stream should contain the  "/split" suffix (if stream's partitions should be distributed between the tasks) or "/full" (if each task should process all partitions of the stream). The stream has a 'split' mode as default. (see `Execution plan <Execution plan>`_)
 
 Instance fields
 """""""""""""""""""
 
-.. csv-table::  **General instance fields**
+**General instance fields**
+
+.. csv-table:: 
   :header: "Field name", "Format",  "Description", "Example"
   :widths: 15, 10, 60, 20
 
@@ -1974,7 +2048,9 @@ Instance fields
   "environmentVariables", "Jobject", "Using in framework", "{ 'LIBPROCESS_IP' : '176.1.0.17' }"
   "performanceReportingInterval", "Long", "Interval for creating report of performance metrics of module in ms (60000 by default)",  "5000696"
 
-.. csv-table::   **Input-streaming instance fields**
+**Input-streaming instance fields**
+
+.. csv-table:: 
   :header: "Field name", "Format",  "Description", "Example"
   :widths: 15, 10, 60, 20
 
@@ -1982,14 +2058,16 @@ Instance fields
   "checkpointInterval*", "Int ", "Interval for creating checkpoint",  "100 "
   "outputs*", "List[String] ", "Names of output streams (must be stream.t-stream only)", "[s3, s4] "
   "duplicateCheck",  "Boolean", "The flag points  if every envelope (an envelope key) has to be checked on duplication or not. (false by default) **Note**: You can indicate the 'duplicateCheck' field in the instance to set up a default policy for message checking on duplication. Use the 'InputEnvelope' flag in the :ref:`input-module`  for special cases* ", "true "
-  "lookupHistory*", "Int", "How long an unique key of envelope will stay in a queue for checking envelopes on duplication (in seconds). If it is not 0, entries that are older than this time and not updated for this time are evicted automatically accordingly to an eviction-policy. Valid values are integers between 0 and Integer.MAX VALUE. Default value is 0, which means infinite.", "1000"
+  "lookupHistory*", "Int", "How long an unique key of an envelope will stay in a queue for checking envelopes on duplication (in seconds). If it is not 0, entries that are older than this time and not updated for this time are evicted automatically accordingly to an eviction-policy. Valid values are integers between 0 and Integer.MAX VALUE. Default value is 0, which means infinite.", "1000"
   "queueMaxSize*", "Int", "Maximum size of the queue that contains the unique keys of envelopes. When maximum size is reached, the queue is evicted based on the policy defined at default-eviction-policy (should be greater than 271)", "500"
   "defaultEvictionPolicy", "String", "Must be only 'LRU' (Least Recently Used), 'LFU' (Least Frequently Used) or 'NONE' (NONE by default)", "LRU" 
-  "evictionPolicy", "String",  "An eviction policy of duplicates of incoming envelope. Must be only 'fix-time' or 'expanded-time'. The first means that a key of envelope will be contained only {lookup-history} seconds. The second means that if a duplicate of the envelope appears, the key presence time will be updated ('fix-time' by default)", "fix-time" 
+  "evictionPolicy", "String",  "An eviction policy of duplicates for an incoming envelope. Must be only 'fix-time' (default) or 'expanded-time'. If it is 'fix-time', a key of the envelope will be contained only {lookup-history} seconds. The 'expanded-time' option means, if a duplicate of the envelope appears, the key presence time will be updated", "fix-time" 
   "backupCount", "Int", "The number of backup copies you want to have (0 by default, maximum 6). Sync backup operations have a blocking cost which may lead to latency issues. You can skip this field if you do not want your entries to be backed up, e.g. if performance is more important than backing up.",  2 
   "asyncBackupCount", "Int", "Flag points an every envelope (an envelope key) has to be checked on duplication or not (0 by default). The backup operations are performed at some point in time (non-blocking operation). You can skip this field if you do not want your entries to be backed up, e.g. if performance is more important than backing up.", 3 
 
-.. csv-table::  **Regular-streaming instance fields**
+**Regular-streaming instance fields**
+
+.. csv-table::  
   :header: "Field name", "Format",  "Description", "Example"
   :widths: 15, 10, 60, 20
 
@@ -2002,18 +2080,9 @@ Instance fields
   "stateFullCheckpoint", "Int", "Interval for full checkpoint (100 by default)", "5"
   "eventWaitTime", "Long", "Idle timeout, when not messages (1000 by default)", 10000
 
+**Batch-streaming instance fields**
 
-.. csv-table:: **Output-streaming instance fields**
-  :header: "Field name", "Format",  "Description", "Example"
-  :widths: 15, 10, 60, 20
-
-  "checkpointMode*", "String",  "Value must be 'time-interval'", "time-interval" 
-  "checkpointInterval*", "Int", "Interval for creating checkpoint", 100 
-  "input*", "String", "Names of input stream. Must be only 't-stream' type. Stream for this type of module is 'split' only.  Stream must be exists in database.", "s1" 
-  "output*", "String", "Names of output stream (must be elasticsearch-output, jdbc-ouptut or rest-output)", "es1" 
-  "startFrom", "String or Datetime", "Value must be 'newest', 'oldest' or datetime (newest by default)", "newest" 
-
-.. csv-table:: **Batch-streaming instance fields**
+.. csv-table:: 
   :header: "Field name", "Format",  "Description", "Example"
   :widths: 15, 10, 60, 20
 
@@ -2027,8 +2096,45 @@ Instance fields
   "stateFullCheckpoint", "Int", "Interval for full checkpoint (100 by default)", 5 
   "eventWaitTime", "Long", "Idle timeout, when not messages (1000 by default)", 10000 
 
-.. note:: `*` - required field.
+**Output-streaming instance fields**
 
+.. csv-table:: 
+  :header: "Field name", "Format",  "Description", "Example"
+  :widths: 15, 10, 60, 20
+
+  "checkpointMode*", "String",  "Value must be 'time-interval'", "time-interval" 
+  "checkpointInterval*", "Int", "Interval for creating checkpoint", 100 
+  "input*", "String", "Names of input stream. Must be only 't-stream' type. Stream for this type of module is 'split' only.  Stream must be exists in database.", "s1" 
+  "output*", "String", "Names of output stream (must be elasticsearch-output, jdbc-ouptut or rest-output)", "es1" 
+  "startFrom", "String or Datetime", "Value must be 'newest', 'oldest' or datetime (newest by default)", "newest" 
+
+
+.. note:: `*` - required fields.
+
+Input-streaming module json format::
+
+ {
+  "name" : String,
+  "description" : String,
+  "outputs" : List[String],
+  "checkpointMode" : "time-interval" | "every-nth",
+  "checkpointInterval" : Int,
+  "parallelism" : Int,
+  "options" : {},
+  "perTaskCores" : Double,
+  "perTaskRam" : Int,
+  "jvmOptions" : {"-Xmx": "32m", "-XX:MaxDirectMemorySize=": "4m", "-XX:MaxMetaspaceSize=": "96m" },
+  "nodeAttributes" : {},
+  "coordinationService" : String,
+  "performanceReportingInterval" : Int,
+  "lookupHistory" : Int,
+  "queueMaxSize" : Int,
+  "defaultEvictionPolicy" : "LRU" | "LFU",
+  "evictionPolicy" : "fix-time" | "expanded-time",
+  "duplicateCheck" : true | false,
+  "backupCount" : Int,
+  "asyncBackupCount" : Int
+ }
 
 Regular-streaming module json format::
 
@@ -2096,33 +2202,8 @@ Output-streaming module json format::
  }
 
 
-Input-streaming module json format::
 
- {
-  "name" : String,
-  "description" : String,
-  "outputs" : List[String],
-  "checkpointMode" : "time-interval" | "every-nth",
-  "checkpointInterval" : Int,
-  "parallelism" : Int,
-  "options" : {},
-  "perTaskCores" : Double,
-  "perTaskRam" : Int,
-  "jvmOptions" : {"-Xmx": "32m", "-XX:MaxDirectMemorySize=": "4m", "-XX:MaxMetaspaceSize=": "96m" },
-  "nodeAttributes" : {},
-  "coordinationService" : String,
-  "performanceReportingInterval" : Int,
-  "lookupHistory" : Int,
-  "queueMaxSize" : Int,
-  "defaultEvictionPolicy" : "LRU" | "LFU",
-  "evictionPolicy" : "fix-time" | "expanded-time",
-  "duplicateCheck" : true | false,
-  "backupCount" : Int,
-  "asyncBackupCount" : Int
- }
-
-
-Request json example for creating batch-streaming instance::
+**Request** json example for creating a batch-streaming instance::
 
  {
   "name" : "stub-instance-win",
@@ -2152,19 +2233,21 @@ Request json example for creating batch-streaming instance::
  }
 
 
-.. csv-table:: **Response**
+**Response**
+
+.. csv-table:: 
   :header: "Status code",  "Description"
   :widths: 10, 60
   
-  "201", "Instance '<instance_name>' for module '<module_type>-<module_name>-<module_version>' has been created."
+  "201", "Instance <instance_name> for module <module_type>-<module_name>-<module_version> has been created."
   "400", "1. Cannot create instance of module. The instance parameter 'options' haven't passed validation, which is declared in a method, called 'validate'. This method is owned by a validator class that implements StreamingValidator interface. Errors: {list-of-errors}.
   2. Cannot create instance of module. Errors: {list-of-errors}."
-  "404", "1. Module '<module_type>-<module_name>-<module_version>' has not been found.
-  2. Jar of module '<module_type>-<module_name>-<module_version>' has not been found in the storage."
-  "500", "Internal server error (including erorrs related to incorrect module type or nonexistent module)"
+  "404", "1. Module <module_type>-<module_name>-<module_version> has not been found.
+  2. Jar of module <module_type>-<module_name>-<module_version> has not been found in the storage."
+  "500", "Internal server error (including erorrs related to incorrect module type or nonexistent module)."
 
 
-Json-example of a created instance::
+Success response json example of a created instance::
 
  "instance": {
   "stage": {
@@ -2224,11 +2307,26 @@ Json-example of a created instance::
  }
  }
 
+Instance statuses
+"""""""""""""""""""
+
+Instance may have one of the following statuses:
+
+ * ready - a newly created instance and not started yet;
+ * starting - a recently launched instance but not started yet (right after the "Start" button is pushed);
+ * started - the launched instance started to work;
+ * stopping - a started instance in the process of stopping (right after the "Stop" button is pushed);
+ * stopped - an instance that has been stopped;
+ * deleting - an instance in the process of deleting (right after the "Delete" button is pressed);
+ * failed - an instance that has been launched but in view of some errors is not started;
+ * error - an error is detected at stopping or deleting an instance.
+
+.. figure:: _static/InstanceStatuses.png
 
 Execution plan
 """""""""""""""""""
 
-A created instance contains an execution plan that you don't provide. 
+A created instance contains an execution plan that is provided by the system. 
 
 Execution plan consists of tasks. The number of tasks equals to a parallelism parameter.
 
@@ -2254,7 +2352,7 @@ Execution plan example::
 
 .. note:: The execution plan doesn't exist in instances of an input module. An instance of an input-module contains a 'tasks' field.
 
-Each task has a name, host and port. The host and port defines an address to which the data should be sent for the input module to process them.
+Each task has a name, host and port. A host and a port define an address to which the data should be sent for the input module to process them.
 
 Json format of 'tasks' field for instance of input module::
 
@@ -2277,7 +2375,7 @@ Json format of 'tasks' field for instance of input module::
 Stage
 """""""""""""""""
 
-A created instance contains a stage that you don't provide.
+A created instance contains a stage that is provided by the system.
 
 First of all it should be noted that a framework is responsible for launching instance.
 
@@ -2310,6 +2408,52 @@ Json example of this field::
  }
 
 
+
+Get all instances
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+Request method: GET
+
+Request format:: 
+ 
+ /v1/modules/instances
+
+.. csv-table:: Response
+  :header: "Status code",  "Description"
+  :widths: 25, 60
+
+  "200", "Json set of instances (in short format)."
+  "500", "Internal server error."
+
+Success response json example::
+
+ {
+  "status-code" : 200,
+  "entity" : {[
+    {
+       "name": "instance-test"
+       "moduleType": "batch-streaming"
+       "moduleName": "com.bw.sw.sj.stub.win"
+       "moduleVersion": "0.1"
+       "description": ""
+       "status" : "started"
+       "restAddress" : "12.1.1.1:12:2900"
+     },
+     {
+       "name": "reg-instance-test"
+       "moduleType": "regular-streaming"
+       "moduleName": "com.bw.sw.sj.stub.reg"
+       "moduleVersion": "0.1"
+       "description": ""
+       "status" : "ready"
+       "restAddress" : ""
+     }
+  ]}
+ }
+
+
+
+
 Get instances related to a specific module
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -2328,18 +2472,26 @@ Request format::
   2. Jar of module '<module_type>-<module_name>-<module_version>' has not been found in the storage."
   "500", "Internal server error (including erorrs related to incorrect module type or nonexistent module)"
 
-Response entity json example::
+Success response json example::
 
  {
   "status-code": 200,
   "entity": {
     "instances": [
       "test-instance",
-      "boo"
+      "abc"
     ]
   }
  }
 
+Error response example::
+
+ {
+    "entity": {
+        "message": "Module 'output-streaming-OutputModule-1.0' has not been found."
+    },
+    "status-code": 400
+ }
 
 Get all instances of a specific module
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -2359,7 +2511,7 @@ Request format::
   2. Jar of module '<module_type>-<module_name>-<module_version>' has not been found in the storage."
   "500", "Internal server error (including erorrs related to incorrect module type or nonexistent module)"
 
-Response entity: json example::
+Success response json example::
 
  {
   "status-code": 200,
@@ -2379,6 +2531,14 @@ Response entity: json example::
   }
  }
 
+Error response example::
+
+ {
+    "entity": {
+        "message": "Module 'output-streaming-OutputModule-1.0' has not been found."
+    },
+    "status-code": 400
+ }
 
 Get an instance of a specific module
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -2396,38 +2556,6 @@ Request format::
   "200", "Instance"
   "404", "Instance '<instance_name>' has not been found."
   "500", "Internal server error"
-
-Delete an instance of a specific module
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Request method: DELETE
-
-Request format:: 
-
- /v1/modules/{module-type}/{module-name}/{module-version}/instance/{instance-name}/
-
-.. csv-table:: **Response**
-  :header: "Status code",  "Description"
-  :widths: 10, 60
-
-  "200", "1. Instance '<instance_name>' is being deleted.
-  2. Instance '<instance_name>' has been deleted."
-  "404", "Instance '<instance_name>' has not been found."
-  "422", "Cannot delete of instance '<instance_name>'. Instance is not been stopped, failed or ready."
-  "500", "Internal server error"
-
-.. note:: This process includes a destruction of framework on mesos.
-
-Response example::
-
-
- {
-  "status-code" : 200,
-  "entity" : {
-     "message" : "Instance 'stub-instance-1' has been deleted."
-  }
- }
-
 
 Start an instance
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -2451,7 +2579,7 @@ Request format::
 
 When instance is starting, framework starts on Mesos.
 
-Response example::
+Success response example::
 
  {
   "status-code" : 200,
@@ -2460,6 +2588,15 @@ Response example::
   }
  }
 
+
+Error response example::
+
+ {
+    "entity": {
+        "message": "Cannot start of instance. Instance has already launched."
+    },
+    "status-code": 422
+ }
 
 Get the information about instance tasks
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -2479,7 +2616,7 @@ Request format::
   "422", "Cannot get instance framework tasks info. The instance framework has not been launched."
   "500", "Internal server error (including erorrs related to incorrect module type or nonexistent module and «Instance '<instance_name>' has not been found.»)"
 
-Response example::
+Success response example::
 
  {
   "status-code": 200,
@@ -2502,6 +2639,15 @@ Response example::
  }
 
 
+Error response example::
+
+ {
+    "entity": {
+        "message": "Cannot get instance framework tasks info. The instance framework has not been launched."
+    },
+    "status-code": 422
+ }
+
 Stop an instance
 ~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -2520,16 +2666,109 @@ Request format::
   "422", "Cannot stop instance. Instance has not been started."
   "500", "Internal server error (including erorrs related to incorrect module type or nonexistent module and «Instance '<instance_name>' has not been found.»)"
 
-.. note:: To stop an instance its status should be "started". 
+.. note:: An instance with the "started" status only can be stopped. 
 
-When instance stops, framework suspends on mesos.
+When the instance stops, the framework suspends on Mesos.
 
 
-Response example::
+Success response example::
 
  {
   "status-code" : 200,
   "entity" : {
      "message" : "Instance '<instance_name>' is being stopped."
+  }
+ }
+
+Error response example::
+
+ {
+    "entity": {
+        "message": "Cannot stop instance. Instance has not been started."
+    },
+    "status-code": 422
+ }
+
+Delete an instance of a specific module
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Request method: DELETE
+
+Request format:: 
+
+ /v1/modules/{module-type}/{module-name}/{module-version}/instance/{instance-name}/
+
+.. csv-table:: **Response**
+  :header: "Status code",  "Description"
+  :widths: 10, 60
+
+  "200", "1. Instance '<instance_name>' is being deleted.
+  2. Instance '<instance_name>' has been deleted."
+  "404", "Instance '<instance_name>' has not been found."
+  "422", "Cannot delete of instance '<instance_name>'. Instance is not been stopped, failed or ready."
+  "500", "Internal server error"
+
+.. note:: This process includes destruction of the framework on Mesos.
+
+Success response example::
+
+
+ {
+  "status-code" : 200,
+  "entity" : {
+     "message" : "Instance 'stub-instance-1' has been deleted."
+  }
+ }
+
+Error response example::
+
+ {
+    "entity": {
+        "message": "Instance 'output instance' has not been found."
+    },
+    "status-code": 404
+ }
+
+Stream Juggler Mesos Framework Rest
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Request method: GET
+
+Request format:: 
+
+ http://{rest-address}
+
+.. csv-table:: Response
+  :header: "Status code",  "Description"
+  :widths: 25, 60
+
+  "200", "Json set of instances (in short format)."
+  "500", "Internal server error"
+
+Success response json example::
+
+ {
+  "status-code": 200,
+  "entity": {
+    "tasks": [
+      {
+        "state": "TASK_RUNNING",
+        "directories": [
+          {
+            "name": "Mon Dec 05 11:33:47 NOVT 2016",
+            "path": "http://stream-juggler.z1.netpoint-dc.com:5050/#/slaves/3599865a-47b1-4a17-9381-b708d42eb0fc-S0/browse?path=/var/lib/mesos/slaves/3599865a-47b1-4a17-9381-b708d42eb0fc-S0/frameworks/c69ce526-c420-44f4-a401-                       6b566b1a0823-0003/executors/pingstation-process-task0/runs/d9748d7a-3d0e-4bb6-88eb-3a3340d133d8" 
+          },
+          {
+            "name": "Mon Dec 05 11:56:47 NOVT 2016",
+            "path": "http://stream-juggler.z1.netpoint-dc.com:5050/#/slaves/3599865a-47b1-4a17-9381-b708d42eb0fc-S0/browse?path=/var/lib/mesos/slaves/3599865a-47b1-4a17-9381-b708d42eb0fc-S0/frameworks/c69ce526-c420-44f4-a401-                       6b566b1a0823-0003/executors/pingstation-process-task0/runs/8a62f2a4-6f3c-412f-9d17-4f63e9052868" 
+          }
+        ],
+        "state-change": "Mon Dec 05 11:56:47 NOVT 2016",
+        "reason": "Executor terminated",
+        "id": "pingstation-process-task0",
+        "node": "3599865a-47b1-4a17-9381-b708d42eb0fc-S0",
+        "last-node": "3599865a-47b1-4a17-9381-b708d42eb0fc-S0" 
+      }
+    ]
   }
  }

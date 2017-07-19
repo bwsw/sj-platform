@@ -21,7 +21,7 @@ package com.bwsw.sj.engine.core.output.types.rest
 import com.bwsw.sj.common.engine.core.output.{EntityBuilder, NamedType}
 
 /**
-  * ref. [[EntityBuilder]]
+  * ref. [[com.bwsw.sj.common.engine.core.output.EntityBuilder]]
   *
   * @author Pavel Tomskikh
   */

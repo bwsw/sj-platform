@@ -27,7 +27,7 @@ import io.netty.buffer.{ByteBuf, Unpooled}
 
 /**
   * Imitates behavior of InputTaskEngine for testing an
-  * implementation of [[InputStreamingExecutor]].
+  * implementation of [[com.bwsw.sj.common.engine.core.input.InputStreamingExecutor]].
   *
   * Usage example:
   * {{{
@@ -44,7 +44,7 @@ import io.netty.buffer.{ByteBuf, Unpooled}
   * println(outputDataList)
   * }}}
   *
-  * @param executor       implementation of [[InputStreamingExecutor]] under test
+  * @param executor       implementation of [[com.bwsw.sj.common.engine.core.input.InputStreamingExecutor]] under test
   * @param evictionPolicy eviction policy of duplicate envelopes
   * @param separator      delimiter between data records
   * @param charset        encoding of incoming data
@@ -74,7 +74,7 @@ class InputEngineSimulator[T <: AnyRef](executor: InputStreamingExecutor[T],
     inputBuffer.writeCharSequence(record + separator, charset)
 
   /**
-    * Sends byte buffer to [[executor]] as long as it can tokenize the buffer. Method returns list of [[OutputData]].
+    * Sends byte buffer to executor as long as it can tokenize the buffer. Method returns list of [[OutputData]].
     *
     * @param duplicateCheck indicates that every envelope has to be checked on duplication
     * @param clearBuffer    indicates that byte buffer must be cleared
@@ -119,11 +119,10 @@ class InputEngineSimulator[T <: AnyRef](executor: InputStreamingExecutor[T],
 }
 
 /**
-  * Contains data from outputs of an [[InputStreamingExecutor]]
+  * Contains data from outputs of an [[com.bwsw.sj.common.engine.core.input.InputStreamingExecutor]]
   *
-  * @param inputEnvelope  result of [[InputStreamingExecutor.parse]]
-  * @param isNotDuplicate indicates that [[inputEnvelope]] is not duplicate if [[inputEnvelope.isDefined]] or None 
-  *                       otherwise
+  * @param inputEnvelope  result of [[com.bwsw.sj.common.engine.core.input.InputStreamingExecutor.parse]]
+  * @param isNotDuplicate indicates that [[inputEnvelope]] is not duplicate if inputEnvelope is defined or None otherwise
   * @param response       response that will be sent to a client after an [[inputEnvelope]] has been processed
   * @tparam T type of outgoing data
   */

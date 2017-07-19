@@ -17,11 +17,11 @@
  * under the License.
  */
 package com.bwsw.sj.common.dal.model.instance
-import com.bwsw.sj.common.utils.EngineLiterals
+
 /**
   * Entity for task of [[InputInstanceDomain.tasks]]
   * The host and port defines an address to which the data should be sent
-  * in order to [[EngineLiterals.inputStreamingType]] module process them.
+  * in order to [[com.bwsw.sj.common.utils.EngineLiterals.inputStreamingType]] module process them.
   *
   * @param host host on which a task has been launched
   * @param port port on which a task has been launched

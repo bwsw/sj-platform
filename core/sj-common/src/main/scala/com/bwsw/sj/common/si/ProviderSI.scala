@@ -18,11 +18,11 @@
  */
 package com.bwsw.sj.common.si
 
-import com.bwsw.sj.common.config.ConfigLiterals
+import com.bwsw.sj.common.config.SettingsUtils
 import com.bwsw.sj.common.dal.model.provider.ProviderDomain
 import com.bwsw.sj.common.dal.model.service._
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
-import com.bwsw.sj.common.si.model.provider.{ProviderCreator, Provider}
+import com.bwsw.sj.common.si.model.provider.{Provider, ProviderCreator}
 import com.bwsw.sj.common.si.result._
 import com.bwsw.sj.common.utils.MessageResourceUtils
 import scaldi.Injectable.inject
@@ -32,7 +32,8 @@ import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
 /**
-  * Provides methods to access [[Provider]]s in [[GenericMongoRepository]]
+  * Provides methods to access [[com.bwsw.sj.common.si.model.provider.Provider]]s
+  * in [[com.bwsw.sj.common.dal.repository.GenericMongoRepository]]
   */
 class ProviderSI(implicit injector: Injector) extends ServiceInterface[Provider, ProviderDomain] {
   private val messageResourceUtils = inject[MessageResourceUtils]
@@ -44,6 +45,8 @@ class ProviderSI(implicit injector: Injector) extends ServiceInterface[Provider,
 
   private val serviceRepository = connectionRepository.getServiceRepository
   private val createProvider = inject[ProviderCreator]
+  private val settingsUtils = new SettingsUtils()
+  private val zkSessionTimeout = settingsUtils.getZkSessionTimeout()
 
   override def create(entity: Provider): CreationResult = {
     val errors = entity.validate()
@@ -81,7 +84,7 @@ class ProviderSI(implicit injector: Injector) extends ServiceInterface[Provider,
   }
 
   /**
-    * Establishes connection to [[Provider.hosts]]
+    * Establishes connection to [[com.bwsw.sj.common.si.model.provider.Provider.hosts]]
     *
     * @param name name of provider
     * @return Right(true) if connection established, Right(false) if provider not found in [[entityRepository]],
@@ -89,10 +92,6 @@ class ProviderSI(implicit injector: Injector) extends ServiceInterface[Provider,
     */
   def checkConnection(name: String): Either[ArrayBuffer[String], Boolean] = {
     val provider = entityRepository.get(name)
-    val zkSessionTimeout = connectionRepository.getConfigRepository
-      .get(ConfigLiterals.zkSessionTimeoutTag)
-      .map(_.value.toInt)
-      .getOrElse(ConfigLiterals.zkSessionTimeoutDefault)
 
     provider match {
       case Some(x) =>
@@ -106,7 +105,7 @@ class ProviderSI(implicit injector: Injector) extends ServiceInterface[Provider,
   }
 
   /**
-    * Returns [[com.bwsw.sj.common.si.model.service.Service Service]]s related with [[Provider]]
+    * Returns [[com.bwsw.sj.common.si.model.service.Service]]s related with [[com.bwsw.sj.common.si.model.provider.Provider]]
     *
     * @param name name of provider
     * @return Right(services) if provider exists, Left(false) otherwise

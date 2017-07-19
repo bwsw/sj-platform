@@ -19,28 +19,31 @@
 package com.bwsw.sj.common.engine.core.environment
 
 import com.bwsw.common.file.utils.FileStorage
-import com.bwsw.sj.common.dal.model.instance.InstanceDomain
 import com.bwsw.sj.common.dal.model.stream.StreamDomain
 import com.bwsw.sj.common.engine.core.environment.EnvironmentLiterals.{partitionedOutput, roundRobinOutput}
 import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
 import com.bwsw.sj.common.engine.core.state.StateStorage
-import com.bwsw.sj.common.utils.{EngineLiterals, SjTimer}
+import com.bwsw.sj.common.utils.SjTimer
 import com.bwsw.tstreams.agents.producer.Producer
 
 import scala.collection._
 
 /**
-  * Provides for user methods that can be used in [[EngineLiterals.regularStreamingType]]
-  * or [[EngineLiterals.batchStreamingType]] module
+  * Provides for user methods that can be used in [[com.bwsw.sj.common.utils.EngineLiterals.regularStreamingType]]
+  * or [[com.bwsw.sj.common.utils.EngineLiterals.batchStreamingType]] module
   *
-  * @param producers              t-streams producers for each output stream from instance [[InstanceDomain.outputs]]
-  * @param options                user defined options from instance [[InstanceDomain.options]]
-  * @param outputs                set of output streams [[StreamDomain]] from instance [[InstanceDomain.outputs]]
+  * @param producers              t-streams producers for each output stream from instance
+  *                               [[com.bwsw.sj.common.dal.model.instance.InstanceDomain.outputs]]
+  * @param options                user defined options from instance
+  *                               [[com.bwsw.sj.common.dal.model.instance.InstanceDomain.options]]
+  * @param outputs                set of output streams [[com.bwsw.sj.common.dal.model.stream.StreamDomain]] from instance
+  *                               [[com.bwsw.sj.common.dal.model.instance.InstanceDomain.outputs]]
   * @param producerPolicyByOutput keeps a tag (partitioned or round-robin output) corresponding to the output for each
   *                               output stream
   * @param moduleTimer            provides a possibility to set a timer inside a module
-  * @param performanceMetrics     set of metrics that characterize performance of [[EngineLiterals.regularStreamingType]]
-  *                               or [[EngineLiterals.batchStreamingType]] module
+  * @param performanceMetrics     set of metrics that characterize performance of
+  *                               [[com.bwsw.sj.common.utils.EngineLiterals.regularStreamingType]] or
+  *                               [[com.bwsw.sj.common.utils.EngineLiterals.batchStreamingType]] module
   * @param fileStorage            file storage
   * @author Kseniya Mikhaleva
   */

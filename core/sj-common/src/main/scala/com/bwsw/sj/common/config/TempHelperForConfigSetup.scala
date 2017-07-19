@@ -75,7 +75,7 @@ object TempHelperForConfigSetup {
       driverFileName,
       Map("description" -> RestLiterals.defaultDescription),
       FileMetadataLiterals.customFileType)
-    configService.save(ConfigurationSettingDomain(driverNameConfig, driverFileName, ConfigLiterals.jdbcDomain))
+    configService.save(ConfigurationSettingDomain(driverFilenameConfig, driverFileName, ConfigLiterals.jdbcDomain))
     configService.save(ConfigurationSettingDomain(driverClassConfig, "com.mysql.jdbc.Driver", ConfigLiterals.jdbcDomain))
     configService.save(ConfigurationSettingDomain(driverPrefixConfig, "jdbc:mysql", ConfigLiterals.jdbcDomain))
 
@@ -109,7 +109,7 @@ object TempHelperForConfigDestroy {
 
   def deleteJdbcDriver(): Boolean = {
     connectionRepository.getConfigRepository.delete(
-      ConfigurationSetting.createConfigurationSettingName(ConfigLiterals.jdbcDomain, driverNameConfig))
+      ConfigurationSetting.createConfigurationSettingName(ConfigLiterals.jdbcDomain, driverFilenameConfig))
     connectionRepository.getConfigRepository.delete(
       ConfigurationSetting.createConfigurationSettingName(ConfigLiterals.jdbcDomain, driverClassConfig))
     connectionRepository.getConfigRepository.delete(
@@ -127,7 +127,7 @@ object TempHelperForConfigConstants {
 
   val driverName: String = "mysql"
   val driverFileName: String = s"$driverName.jar"
-  val driverNameConfig: String = s"${ConfigLiterals.jdbcDriver}.$driverName"
-  val driverClassConfig: String = s"${ConfigLiterals.jdbcDriver}.$driverName.class"
-  val driverPrefixConfig: String = s"${ConfigLiterals.jdbcDriver}.$driverName.prefix"
+  val driverFilenameConfig: String = ConfigLiterals.getDriverFilename(driverName)
+  val driverClassConfig: String = ConfigLiterals.getDriverClass(driverName)
+  val driverPrefixConfig: String = ConfigLiterals.getDriverPrefix(driverName)
 }

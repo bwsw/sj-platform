@@ -36,7 +36,7 @@ import org.elasticsearch.transport.client.PreBuiltTransportClient
 import org.slf4j.LoggerFactory
 
 /**
-  * Wrapper for [[TransportClient]]
+  * Wrapper for [[org.elasticsearch.client.transport.TransportClient]]
   *
   * @param hosts es address
   */

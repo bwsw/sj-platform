@@ -21,11 +21,10 @@ package com.bwsw.sj.engine.core.simulation.output.mock.jdbc
 import java.sql.Connection
 
 import com.bwsw.common.jdbc.{IJdbcClient, JdbcClientConnectionData}
-import com.bwsw.sj.engine.core.simulation.output.JdbcRequestBuilder
 import org.mockito.Mockito.{mock, when}
 
 /**
-  * Mock of [[IJdbcClient]] for for [[JdbcRequestBuilder]]
+  * Mock of [[com.bwsw.common.jdbc.IJdbcClient]] for for [[com.bwsw.sj.engine.core.simulation.output.JdbcRequestBuilder]]
   *
   * @param table name of SQL-table
   * @author Pavel Tomskikh

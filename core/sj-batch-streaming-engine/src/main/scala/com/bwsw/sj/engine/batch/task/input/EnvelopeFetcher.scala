@@ -20,8 +20,8 @@ package com.bwsw.sj.engine.batch.task.input
 
 import java.util.concurrent.{Executors, ScheduledExecutorService}
 
-import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.common.engine.core.entities.Envelope
+import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import com.google.common.util.concurrent.ThreadFactoryBuilder
 import org.slf4j.{Logger, LoggerFactory}
@@ -30,7 +30,7 @@ import scala.collection.mutable
 
 /**
   * It is a wrapper for task input service that is responsible for consuming incoming envelopes.
-  * Provides a queue of consumed envelopes for temporary storage. If only a queue is empty then envelopes are retrieved from [[taskInput]]
+  * Provides a queue of consumed envelopes for temporary storage. If only a queue is empty then envelopes are retrieved from taskInput
   *
   * @param taskInput handling an input streams of specific type(types)
   */

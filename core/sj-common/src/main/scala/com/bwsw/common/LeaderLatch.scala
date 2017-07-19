@@ -18,22 +18,21 @@
  */
 package com.bwsw.common
 
-import org.apache.curator.framework.{CuratorFramework, CuratorFrameworkFactory}
 import org.apache.curator.framework.recipes.leader
+import org.apache.curator.framework.{CuratorFramework, CuratorFrameworkFactory}
 import org.apache.curator.retry.ExponentialBackoffRetry
 import org.apache.zookeeper.KeeperException
 import org.slf4j.LoggerFactory
 
 import scala.annotation.tailrec
 import scala.util.{Failure, Success, Try}
-import com.bwsw.sj.common.dal.model.instance.InstanceDomain
-import com.bwsw.sj.common.utils.EngineLiterals
 
 /**
-  * Wrapper for [[leader.LeaderLatch]]
+  * Wrapper for [[org.apache.curator.framework.recipes.leader.LeaderLatch]]
   * Used to:
-  * 1) start only one module ([[InstanceDomain]]) at the time
-  * 2) in [[EngineLiterals.batchStreamingType]] engine to wait for all instance tasks until they finish (as a barrier)
+  * 1) start only one module ([[com.bwsw.sj.common.dal.model.instance.InstanceDomain]]) at the time
+  * 2) in [[com.bwsw.sj.common.utils.EngineLiterals.batchStreamingType]] engine to wait for all instance tasks
+  * until they finish (as a barrier)
   *
   * @param zkServers  zk address
   * @param masterNode zk math that will be latched

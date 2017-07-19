@@ -18,10 +18,8 @@
  */
 package com.bwsw.sj.common.engine.core.output
 
-import com.bwsw.sj.common.utils.EngineLiterals
-
 /**
-  * User defined class to keep processed data of [[EngineLiterals.outputStreamingType]] module
+  * User defined class to keep processed data of [[com.bwsw.sj.common.utils.EngineLiterals.outputStreamingType]] module
   *
   * @param m set of field names and their values
   * @tparam T type of data elements

@@ -27,7 +27,7 @@ import com.bwsw.sj.common.utils.{EngineLiterals, RestLiterals}
 import org.mongodb.morphia.annotations._
 
 /**
-  * Domain entity for [[EngineLiterals.regularStreamingType]] instance
+  * Domain entity for [[com.bwsw.sj.common.utils.EngineLiterals.regularStreamingType]] instance
   *
   * @author Kseniya Tomskikh
   */

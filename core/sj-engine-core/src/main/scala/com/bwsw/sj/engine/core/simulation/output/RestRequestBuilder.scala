@@ -27,7 +27,7 @@ import org.eclipse.jetty.client.HttpClient
 import org.eclipse.jetty.client.api.Request
 
 /**
-  * Provides method for building HTTP POST request from [[OutputEnvelope]].
+  * Provides method for building HTTP POST request from [[com.bwsw.sj.common.engine.core.entities.OutputEnvelope]].
   *
   * @param url destination URL
   * @author Pavel Tomskikh

@@ -171,6 +171,7 @@ class ServiceCreator {
         new RestService(
           name = restService.name,
           basePath = restService.basePath,
+          httpScheme = restService.httpScheme.toString,
           httpVersion = RestLiterals.httpVersionToString(restService.httpVersion),
           headers = Map(restService.headers.asScala.toList: _*),
           provider = restService.provider.name,

@@ -35,7 +35,7 @@ import scaldi.Injector
 import scala.collection.mutable.ArrayBuffer
 
 /**
-  * Trait provides common methods for [[Instance]] validation
+  * Trait provides common methods for [[com.bwsw.sj.common.si.model.instance.Instance]] validation
   *
   * @author Kseniya Tomskikh
   */

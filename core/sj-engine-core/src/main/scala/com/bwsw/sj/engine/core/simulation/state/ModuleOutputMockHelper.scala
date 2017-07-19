@@ -52,7 +52,7 @@ trait ModuleOutputMockHelper {
 }
 
 /**
-  * Mock for [[PartitionedOutput]]
+  * Mock for [[com.bwsw.sj.common.engine.core.environment.PartitionedOutput]]
   *
   * @param producer           producer of specific output
   * @param performanceMetrics set of metrics that characterize performance of
@@ -80,7 +80,7 @@ class PartitionedOutputMock(producer: Producer,
 }
 
 /**
-  * Mock for [[RoundRobinOutput]]
+  * Mock for [[com.bwsw.sj.common.engine.core.environment.RoundRobinOutput]]
   *
   * @param producer           producer of specific output
   * @param performanceMetrics set of metrics that characterize performance of

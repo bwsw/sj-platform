@@ -24,7 +24,7 @@ import com.bwsw.sj.engine.core.simulation.state._
 
 /**
   * Simulates behavior of [[com.bwsw.sj.common.engine.TaskEngine TaskEngine]] for testing an implementation of
-  * [[RegularStreamingExecutor]]
+  * [[com.bwsw.sj.common.engine.core.regular.RegularStreamingExecutor]]
   *
   * Usage example:
   * {{{
@@ -50,7 +50,7 @@ import com.bwsw.sj.engine.core.simulation.state._
   * println(results)
   * }}}
   *
-  * @param executor implementation of [[RegularStreamingExecutor]] under test
+  * @param executor implementation of [[com.bwsw.sj.common.engine.core.regular.RegularStreamingExecutor]] under test
   * @param manager  environment manager that used by executor
   * @tparam T type of incoming data
   * @author Pavel Tomskikh
@@ -60,10 +60,12 @@ class RegularEngineSimulator[T <: AnyRef](executor: RegularStreamingExecutor[T],
   extends CommonEngineSimulator[T](executor, manager) {
 
   /**
-    * Sends all incoming envelopes from local buffer to [[executor]] and returns output elements and state
+    * Sends all incoming envelopes from local buffer to executor and returns output elements and state
     *
-    * @param envelopesNumberBeforeIdle number of envelopes between invocations of [[executor.onIdle()]].
-    *                                  '0' means that [[executor.onIdle()]] will never be called.
+    * @param envelopesNumberBeforeIdle number of envelopes between invocations of
+    *                                  [[com.bwsw.sj.common.engine.core.regular.RegularStreamingExecutor.onIdle]]().
+    *                                  '0' means that [[com.bwsw.sj.common.engine.core.regular.RegularStreamingExecutor.onIdle]]()
+    *                                  will never be called.
     * @param clearBuffer               indicates that local buffer must be cleared
     * @return output elements and state
     */

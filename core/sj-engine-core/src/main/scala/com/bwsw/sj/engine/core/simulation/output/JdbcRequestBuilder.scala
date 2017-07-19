@@ -21,15 +21,15 @@ package com.bwsw.sj.engine.core.simulation.output
 import java.sql.PreparedStatement
 
 import com.bwsw.sj.common.engine.core.entities.{OutputEnvelope, TStreamEnvelope}
-import com.bwsw.sj.common.engine.core.output.{Entity, OutputStreamingExecutor}
+import com.bwsw.sj.common.engine.core.output.Entity
 import com.bwsw.sj.engine.core.output.types.jdbc.JdbcCommandBuilder
 import com.bwsw.sj.engine.core.simulation.output.mock.jdbc.{JdbcClientMock, PreparedStatementMock}
 
 /**
-  * Provides method for building SQL query from [[OutputEnvelope]].
+  * Provides method for building SQL query from [[com.bwsw.sj.common.engine.core.entities.OutputEnvelope]].
   *
   * @param outputEntity working entity gotten from
-  *                     [[OutputStreamingExecutor OutputStreamingExecutor]]
+  *                     [[com.bwsw.sj.common.engine.core.output.OutputStreamingExecutor OutputStreamingExecutor]]
   * @param table        name of SQL-table
   * @author Pavel Tomskikh
   */
