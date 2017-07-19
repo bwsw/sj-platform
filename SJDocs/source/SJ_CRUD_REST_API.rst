@@ -410,7 +410,7 @@ Elasticsearch Index (ESInd)
 
 .. csv-table::  
    :header: "Field", "Format", "Description", "Requirements"
-   :widths: 20, 20, 60
+   :widths: 15, 15, 20, 20
   
    "type*", "String", "Service type.", ""
    "name*", "String", "Service name.", "Must be unique and contain only letters, digits or hyphens."
