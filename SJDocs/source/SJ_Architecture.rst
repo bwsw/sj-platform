@@ -12,7 +12,7 @@ The Stream Juggler Platform is an integrated processing system. It means the sys
 
 At this section we will take a closer look into the system components, their functions within the data flow pipeline.
 
-Juggler's architecture is designed so that exactly-once processing is performed not only within a single processing block but throughout the entire sequence, starting from the moment stream events are fed to the system and up to the moment when the output data is stored to conventional data storage.
+SJ-Platform's architecture is designed so that exactly-once processing is performed not only within a single processing block but throughout the entire sequence, starting from the moment stream events are fed to the system and up to the moment when the output data is stored to conventional data storage.
 
 The approach based on loosely coupled blocks with exactly-once processing support throughout the entire sequence allows for decomposing data processing in order to provide better modularity, performance management and simplicity in development.
 
