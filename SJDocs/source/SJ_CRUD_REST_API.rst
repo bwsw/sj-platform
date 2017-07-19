@@ -2555,46 +2555,6 @@ Request format::
   "404", "Instance '<instance_name>' has not been found."
   "500", "Internal server error"
 
-Delete an instance of a specific module
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Request method: DELETE
-
-Request format:: 
-
- /v1/modules/{module-type}/{module-name}/{module-version}/instance/{instance-name}/
-
-.. csv-table:: **Response**
-  :header: "Status code",  "Description"
-  :widths: 10, 60
-
-  "200", "1. Instance '<instance_name>' is being deleted.
-  2. Instance '<instance_name>' has been deleted."
-  "404", "Instance '<instance_name>' has not been found."
-  "422", "Cannot delete of instance '<instance_name>'. Instance is not been stopped, failed or ready."
-  "500", "Internal server error"
-
-.. note:: This process includes destruction of the framework on Mesos.
-
-Success response example::
-
-
- {
-  "status-code" : 200,
-  "entity" : {
-     "message" : "Instance 'stub-instance-1' has been deleted."
-  }
- }
-
-Error response example::
-
- {
-    "entity": {
-        "message": "Instance 'output instance' has not been found."
-    },
-    "status-code": 404
- }
-
 Start an instance
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -2727,6 +2687,45 @@ Error response example::
     "status-code": 422
  }
 
+Delete an instance of a specific module
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Request method: DELETE
+
+Request format:: 
+
+ /v1/modules/{module-type}/{module-name}/{module-version}/instance/{instance-name}/
+
+.. csv-table:: **Response**
+  :header: "Status code",  "Description"
+  :widths: 10, 60
+
+  "200", "1. Instance '<instance_name>' is being deleted.
+  2. Instance '<instance_name>' has been deleted."
+  "404", "Instance '<instance_name>' has not been found."
+  "422", "Cannot delete of instance '<instance_name>'. Instance is not been stopped, failed or ready."
+  "500", "Internal server error"
+
+.. note:: This process includes destruction of the framework on Mesos.
+
+Success response example::
+
+
+ {
+  "status-code" : 200,
+  "entity" : {
+     "message" : "Instance 'stub-instance-1' has been deleted."
+  }
+ }
+
+Error response example::
+
+ {
+    "entity": {
+        "message": "Instance 'output instance' has not been found."
+    },
+    "status-code": 404
+ }
 
 Stream Juggler Mesos Framework Rest
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
