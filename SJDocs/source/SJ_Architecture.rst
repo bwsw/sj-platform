@@ -47,7 +47,7 @@ The *second layer* is composed of prerequisites for the platform. These are the 
 
 - The outcoming data is stored to Elasticsearch, JDBC or REST external storages.
 
-- We use `MongoDB <https://www.mongodb.com/>`_ as a document database that provides high performance and availability. All created platform instances (Providers, Services, Streams, Instances, etc.) as well as Config Settings are stored here. To start MongoDB in Mesos we use `MongoDB-Marathon Docker <https://hub.docker.com/r/tobilg/mongodb-marathon/>`_
+- We use `MongoDB <https://www.mongodb.com/>`_ as a document database that provides high performance and availability. All created platform entities (Providers, Services, Streams, Instances, etc.) as well as Config Settings are stored here. To start MongoDB in Mesos we use `MongoDB-Marathon Docker <https://hub.docker.com/r/tobilg/mongodb-marathon/>`_
 
 - For external access a custom-container on `NGINX <https://www.nginx.com>`_ is used. 
 
