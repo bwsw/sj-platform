@@ -31,7 +31,7 @@ Glossary
 
 :Partition: A part of a data stream allocated for convenience in operation.
 
-:Provider: The sevice provider for input data transformation into a stream. 
+:Provider: The service provider for input data transformation into a stream. 
 
 :Shift: Windown sliding in a period of time (multiple of a batch). It can be less than a window size, and in this case the data will be duplicated.
 
