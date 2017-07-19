@@ -63,7 +63,7 @@ In this document each module is described in detail.
 
 Input module
 ~~~~~~~~~~~~~~~~~~~
-An input type of modules handles external input streams, does data deduplication, transforms raw data to objects. In the SJ platform the TCP Input Stream processor is currently implemented in an Input module.
+An input type of modules handles external input streams, does data deduplication, transforms raw data to objects. In the SJ-Platform the TCP Input Stream processor is currently implemented in an Input module.
 
 .. figure:: _static/InputModuleStructure.png
 
@@ -137,7 +137,7 @@ There is a manager inside the module which allows to:
  
 To see a flow chart on how these methods intercommunicate, please, visit the :ref:`Input_Streaming_Engine` section.
 
-Stream Juggler offers two examples of Input Module implementation. These are ready-to-use input modules for two most general input data formats: CSV and Regex.
+The Stream Juggler Platform offers two examples of Input Module implementation. These are ready-to-use input modules for two most general input data formats: CSV and Regex.
 
 CSV Input Module
 """""""""""""""""""""""
@@ -543,7 +543,7 @@ A module requires the following elements to be created for its performance:
 
 The type of module requires a specific type of instance to create. An instance is a full range of settings to perform an exact executor type. These settings are specified via UI or REST API and determine the mode of the module operation: data stream type the module is going to work with, a checkpoint concept, the settings of state and parallelism, other options, etc.
 
-As stated above, modules process the data arranged in streams. The Stream Juggler supports *Kafka* and *T-stream* type of streams. And when the Kafka streams are a well-known type of streaming introduced by Apache Kafka, the T-streams are intentionally designed for the Stream Juggler platform as a complement for Apache Kafka. The T-streams have more features than Kafka and make exactly-once processing possible. Find more about T-streams at the `site <http://t-streams.com>`_ .
+As stated above, modules process the data arranged in streams. The Stream Juggler Platform supports *Kafka* and *T-stream* type of streams. And when the Kafka streams are a well-known type of streaming introduced by Apache Kafka, the T-streams are intentionally designed for the Stream Juggler platform as a complement for Apache Kafka. The T-streams have more features than Kafka and make exactly-once processing possible. Find more about T-streams at the `site <http://t-streams.com>`_ .
 
 To transform data into a stream of exact type you need to create a service and a provider for this service. The type of a service and a provider is determined by the type of a stream you need for the module.
 
