@@ -13,4 +13,8 @@ export class FilterComponent implements OnInit {
   public ngOnInit() {
     this.update.emit('');
   }
+
+  public valueChange(value: string) {
+    this.update.emit(value);
+  }
 }
