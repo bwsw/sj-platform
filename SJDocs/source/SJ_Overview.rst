@@ -4,7 +4,7 @@ Stream Juggler Platform Overview
 What is Stream Juggler?
 ----------------------------
 
-Stream Juggler (SJ) is an open source, scalable solution for real-time and batched stream processing. The system fits for building a Complex Event Processing systems (CEP) and allows a developer to construct pipelines for analyzing data streams.
+Stream Juggler Platform (SJ-Platform) is an open source, scalable solution for real-time and batched stream processing. The system fits for building a Complex Event Processing systems (CEP) and allows a developer to construct pipelines for analyzing data streams.
 
 **CEP** (Complex Event Processing) is a general concept describing software systems that are used for sophisticated processing of streams of events.
 
@@ -31,22 +31,21 @@ The Stream Juggler provides a developer with three generic event processor types
 
 3. **Pipeline Stream Processor** (PSP) – handles data processing inside the pipeline, two types of PSP exist: 
 
-- *Regular* – the most generic processor which receives event, does some data transformation and sends transformation to the next processing step. 
+  - *Regular* – the most generic processor which receives event, does some data transformation and sends transformation to the next processing step. 
 
-- *Windowed (Batch)* – the processor which organizes incoming data into batches and processing is done with a sliding window. Windowed PSP may be used to implement streaming joins and processing where algorithm must observe a range of input messages rather than current one. 
+  - *Windowed (Batch)* – the processor which organizes incoming data into batches and processing is done with a sliding window. Windowed PSP may be used to implement streaming joins and processing where algorithm must observe a range of input messages rather than current one. 
 
 A processor contains Module with an executor and a validator and Engine that uses module settings to handle data flow making it into streams. The data elements in a stream are assembled in partitions. A **partition** is a part of a data stream allocated for convenience in operation.  Upon creation, every stream gets a name and a certain amount of partitions. The streams with many partitions allow handling the idea of **parallelism** properly. In such case, an engine divides existing partitions fairly among executors and it enables to scale the data processing. Partitions are also helpful in distributing processing load between several workers.
 
- 
 The PSP modules perform **checkpoint** and, if the module has a **state**, stores the variables in a state. That fulfills the idea of Platform`s fault-tolerance. In case of the live datastream processing failure, the variables stored in the state are recovered and the module is restarted.
 
 The modules fulfill a **group** **checkpoint** conception. It means that all producers and consumers are bunched into a group and do a checkpoint automatically fixing the current state. This is the key idea of exactly-once processing.
 
-Thus, Stream Juggler is a platform that enables high-throughput, fault-tolerant stream processing of live data streams. Data can be ingested from different sources like Kafka, or TCP sockets, and can be processed using complex algorithms. Finally, processed data can be pushed out to filesystems, external databases.
+Thus, Stream Juggler Platform is a platform that enables high-throughput, fault-tolerant stream processing of live data streams. Data can be ingested from different sources like Kafka, or TCP sockets, and can be processed using complex algorithms. Finally, processed data can be pushed out to filesystems, external databases.
 
 .. figure:: _static/Overview.png
 
-In general, the main ideas of the Stream Juggler platform are:
+In general, the main ideas of the Stream Juggler Platform are:
 
 - Two ways of data processing: streaming and batch
 - Strict exactly-once processing on arbitrary processing graph
@@ -63,7 +62,7 @@ To find more about the platform, please, visit the pages below:
 
 :ref:`Architecture` - here the architecture of the Stream Juggler is presented, its components,connections between them, necessary services and other prerequisits for the Platform operation are described.
 
-:ref:`Modules` - here more information on modules is given: what module types are supported in the Platform, how they work, etc.
+:ref:`Modules` - here more information on modules is given: what module types are supported in the Stream Juggler Platform, how they work, etc.
 
 :ref:`REST_API` - the REST API service is described here to work with the platform without the UI.
 
