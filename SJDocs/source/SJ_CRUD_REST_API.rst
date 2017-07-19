@@ -381,7 +381,8 @@ Error response example::
     },
     "status-code": 404
  }
-
+ 
+.. tip:: A full range of error responses can be found at :ref:`Provider_Errors`
 
 CRUD Rest-API for Services
 --------------------------------------
@@ -751,6 +752,7 @@ Error response example::
    }
  }
 
+.. tip:: A full range of error responses can be found at :ref:`Services_Errors`
 
 CRUD Rest-API for Streams
 --------------------------------------
