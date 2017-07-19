@@ -17,7 +17,7 @@ Glossary
 
 :Handler: A programm module processing streams.
 
-:Instance:  A full range of settings to perfom an exact executor type.
+:Instance:  A full range of settings to perform an exact executor type.
  
 :Input: A stream that is fed to the system input.
 
