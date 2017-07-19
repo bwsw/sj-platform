@@ -55,23 +55,23 @@ export class InstancesComponent implements OnInit, AfterViewChecked, OnDestroy {
   @ViewChild('instanceForm') currentForm: NgForm;
 
   public formErrors: { [key: string]: string } = {
-    'instanceJvmOptions': '',
-    'instanceOptions': '',
-    'instanceNodeAttributes': '',
-    'instanceEnvironmentVariables': '',
+    instanceJvmOptions: '',
+    instanceOptions: '',
+    instanceNodeAttributes: '',
+    instanceEnvironmentVariables: '',
   };
 
   public validationMessages: { [key: string]: { [key: string]: string } } = {
-    'instanceOptions': {
+    instanceOptions: {
       'validJson': 'JVM options value is not a valid json'
     },
-    'instanceJvmOptions': {
+    instanceJvmOptions: {
       'validJson': 'JVM options value is not a valid json'
     },
-    'instanceNodeAttributes': {
+    instanceNodeAttributes: {
       'validJson': 'Node attributes value is not a valid json'
     },
-    'instanceEnvironmentVariables': {
+    instanceEnvironmentVariables: {
       'validJson': 'Environment variables value is not a valid json'
     }
   };
