@@ -33,11 +33,9 @@ class BenchmarkStreamTask extends StreamTask {
 
   override def process(envelope: IncomingMessageEnvelope, collector: MessageCollector, coordinator: TaskCoordinator): Unit = {
     if (gotInitEnvelope) {
-
       if (readMessages == 0)
         startTime = System.currentTimeMillis()
 
-      Thread.sleep(1000)
       readMessages += 1
 
       if (readMessages == messageCount) {

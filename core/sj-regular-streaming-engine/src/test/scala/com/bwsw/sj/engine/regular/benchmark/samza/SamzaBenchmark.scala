@@ -25,6 +25,7 @@ import com.bwsw.common.KafkaClient
 import com.bwsw.sj.common.utils.benchmark.ClassRunner
 import com.bwsw.sj.kafka.data_sender.DataSender
 import org.apache.kafka.clients.consumer.KafkaConsumer
+import org.apache.kafka.common.TopicPartition
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.samza.job.JobRunner
 
@@ -47,7 +48,8 @@ class SamzaBenchmark(zooKeeperAddress: String,
                      words: Array[String]) {
 
   private val kafkaTopic = "samza-benchmark-" + UUID.randomUUID().toString
-  private val outputKafkaTopic = "samza-benchmark-result-" + UUID.randomUUID().toString
+  private val outputKafkaTopic = "samza-benchmark-result"
+  //-" + UUID.randomUUID().toString
   private val propertiesFilename = s"samza-benchmark-${UUID.randomUUID().toString}.properties"
   private val propertiesFile = new File(propertiesFilename)
   private val kafkaClient = new KafkaClient(Array(zooKeeperAddress))
@@ -137,16 +139,13 @@ class SamzaBenchmark(zooKeeperAddress: String,
   }
 
   private def createKafkaConsumer(): KafkaConsumer[String, String] = {
-    if (kafkaClient.topicExists(outputKafkaTopic))
-      kafkaClient.deleteTopic(outputKafkaTopic)
-    while (kafkaClient.topicExists(outputKafkaTopic))
-      Thread.sleep(100)
-
     val configMap: Map[String, AnyRef] = Map[String, AnyRef](
       "bootstrap.servers" -> kafkaAddress,
       "group.id" -> "samza-benchmark")
     val consumer = new KafkaConsumer(configMap.asJava, new StringDeserializer, new StringDeserializer)
     consumer.subscribe(Seq(outputKafkaTopic).asJava)
+    consumer.seekToEnd(Seq.empty[TopicPartition].asJavaCollection)
+    consumer.poll(0)
 
     consumer
   }
