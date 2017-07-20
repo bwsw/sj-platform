@@ -1,0 +1,13 @@
+:host {
+  position: fixed;
+  right: auto;
+  top: 0;
+  left: -200px;
+  bottom: 0;
+  width: 200px;
+  z-index: 1;
+  ul {
+    padding-top: 50px;
+    list-style: none;
+  }
+}

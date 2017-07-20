@@ -1,7 +1,10 @@
-<sj-toolbar></sj-toolbar>
-<sj-navbar></sj-navbar>
+<sj-navbar [@slideSidebar]="menuState"></sj-navbar>
 
-<main class="main">
+<main [@slideContent]="menuState" class="main">
+  <header [@slideFooter]="menuState" class="navbar">
+    <button (click)="toggleMenu()" class="navbar-toggler" type="button">☰</button>
+    <a class="navbar-brand" href="/"></a>
+  </header>
   <!-- Breadcrumb -->
   <sj-breadcrumbs></sj-breadcrumbs>
 
@@ -10,4 +13,8 @@
   </div>
 </main>
 
-<sj-footer></sj-footer>
+<footer [@slideFooter]="menuState" class="footer">
+  <span class="text-center">
+    <a href="http://stream-juggler.com/" target="_blank">SJ-Platform</a> © 2016
+    <a href="http://bw-sw.com" target="_blank">Bitworks</a></span>
+</footer>
