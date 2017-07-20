@@ -30,8 +30,10 @@ class JDBCProviderApi(name: String,
                       hosts: Array[String],
                       val driver: String,
                       description: Option[String] = Some(RestLiterals.defaultDescription),
-                      @JsonProperty("type") providerType: Option[String] = Some(ProviderLiterals.jdbcType))
-  extends ProviderApi(name, login, password, providerType.getOrElse(ProviderLiterals.jdbcType), hosts, description) {
+                      @JsonProperty("type") providerType: Option[String] = Some(ProviderLiterals.jdbcType),
+                      creationDate: String)
+  extends ProviderApi(name, login, password, providerType.getOrElse(ProviderLiterals.jdbcType),
+    hosts, description, creationDate) {
 
   @JsonIgnore
   override def to()(implicit injector: Injector): JDBCProvider = {
@@ -43,7 +45,8 @@ class JDBCProviderApi(name: String,
         login = this.login,
         password = this.password,
         driver = this.driver,
-        providerType = this.providerType.getOrElse(ProviderLiterals.jdbcType)
+        providerType = this.providerType.getOrElse(ProviderLiterals.jdbcType),
+        creationDate = this.creationDate
       )
 
     provider

@@ -18,6 +18,8 @@
  */
 package com.bwsw.sj.crud.rest.controller
 
+import java.util.Date
+
 import com.bwsw.common.JsonSerializer
 import com.bwsw.common.exceptions.JsonDeserializationException
 import com.bwsw.sj.common.config.ConfigLiterals._
@@ -251,8 +253,8 @@ class ConfigSettingsControllerTests extends FlatSpec with Matchers with MockitoS
   def createConfigSetting(name: String, value: String, domain: String) = {
     val serialized = s"""{"domain":"$domain","name":"$name","value":"$value"}"""
     val domainName = domain + "." + name
-    val config = new ConfigurationSetting(name, value, domain)
-    val api = spy(new ConfigurationSettingApi(name, value, domain))
+    val config = new ConfigurationSetting(name, value, domain, new Date().toString)
+    val api = spy(new ConfigurationSettingApi(name, value, domain, new Date().toString))
     when(api.to()).thenReturn(config)
     when(serializer.deserialize[ConfigurationSettingApi](serialized)).thenReturn(api)
     when(createConfigurationSettingApi.from(config)).thenReturn(api)

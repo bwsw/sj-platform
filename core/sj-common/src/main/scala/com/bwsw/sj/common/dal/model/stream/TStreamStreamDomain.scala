@@ -18,6 +18,8 @@
  */
 package com.bwsw.sj.common.dal.model.stream
 
+import java.util.Date
+
 import com.bwsw.sj.common.dal.model.service.TStreamServiceDomain
 import com.bwsw.sj.common.utils.{RestLiterals, StreamLiterals}
 import com.bwsw.tstreams.env.{ConfigurationOptions, TStreamsFactory}
@@ -26,13 +28,14 @@ import com.bwsw.tstreams.storage.StorageClient
 /**
   * protected methods and variables need for testing purposes
   */
-class TStreamStreamDomain(override val name: String,
+class TStreamStreamDomain(name: String,
                           override val service: TStreamServiceDomain,
                           val partitions: Int,
-                          override val description: String = RestLiterals.defaultDescription,
-                          override val force: Boolean = false,
-                          override val tags: Array[String] = Array())
-  extends StreamDomain(name, description, service, force, tags, StreamLiterals.tstreamsType) {
+                          description: String = RestLiterals.defaultDescription,
+                          force: Boolean = false,
+                          tags: Array[String] = Array(),
+                          creationDate: Date)
+  extends StreamDomain(name, description, service, force, tags, StreamLiterals.tstreamsType, creationDate) {
 
   protected def createClient(): StorageClient = {
     val factory = new TStreamsFactory()

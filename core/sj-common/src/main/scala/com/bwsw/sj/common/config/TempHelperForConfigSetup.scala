@@ -20,6 +20,7 @@ package com.bwsw.sj.common.config
 
 import java.io.File
 import java.net.URL
+import java.util.Date
 
 import com.bwsw.sj.common.SjModule
 import com.bwsw.sj.common.dal.model.ConfigurationSettingDomain
@@ -39,30 +40,30 @@ object TempHelperForConfigSetup {
   val configService: GenericMongoRepository[ConfigurationSettingDomain] = connectionRepository.getConfigRepository
 
   def setupConfigs(): Unit = {
-    configService.save(ConfigurationSettingDomain(ConfigLiterals.frameworkTag, "com.bwsw.fw-1.0", ConfigLiterals.systemDomain))
+    configService.save(ConfigurationSettingDomain(ConfigLiterals.frameworkTag, "com.bwsw.fw-1.0", ConfigLiterals.systemDomain, new Date()))
 
   configService.save(ConfigurationSettingDomain(ConfigurationSetting.createConfigurationSettingName(ConfigLiterals.systemDomain, "regular-streaming-validator-class"),
-    "com.bwsw.sj.crud.rest.instance.validator.RegularInstanceValidator", ConfigLiterals.systemDomain))
+    "com.bwsw.sj.crud.rest.instance.validator.RegularInstanceValidator", ConfigLiterals.systemDomain, new Date()))
   configService.save(ConfigurationSettingDomain(ConfigurationSetting.createConfigurationSettingName(ConfigLiterals.systemDomain, "batch-streaming-validator-class"),
-    "com.bwsw.sj.crud.rest.instance.validator.BatchInstanceValidator", ConfigLiterals.systemDomain))
+    "com.bwsw.sj.crud.rest.instance.validator.BatchInstanceValidator", ConfigLiterals.systemDomain, new Date()))
   configService.save(ConfigurationSettingDomain(ConfigurationSetting.createConfigurationSettingName(ConfigLiterals.systemDomain, "output-streaming-validator-class"),
-    "com.bwsw.sj.crud.rest.instance.validator.OutputInstanceValidator", ConfigLiterals.systemDomain))
+    "com.bwsw.sj.crud.rest.instance.validator.OutputInstanceValidator", ConfigLiterals.systemDomain, new Date()))
   configService.save(ConfigurationSettingDomain(ConfigurationSetting.createConfigurationSettingName(ConfigLiterals.systemDomain, "input-streaming-validator-class"),
-    "com.bwsw.sj.crud.rest.instance.validator.InputInstanceValidator", ConfigLiterals.systemDomain))
+    "com.bwsw.sj.crud.rest.instance.validator.InputInstanceValidator", ConfigLiterals.systemDomain, new Date()))
 
     configService.save(ConfigurationSettingDomain(
       ConfigLiterals.marathonTag,
       "http://stream-juggler.z1.netpoint-dc.com:8080",
-      ConfigLiterals.systemDomain))
+      ConfigLiterals.systemDomain, new Date()))
 
-    configService.save(ConfigurationSettingDomain(ConfigLiterals.marathonTimeoutTag, "60000", ConfigLiterals.systemDomain))
+    configService.save(ConfigurationSettingDomain(ConfigLiterals.marathonTimeoutTag, "60000", ConfigLiterals.systemDomain, new Date()))
 
-    configService.save(ConfigurationSettingDomain(ConfigLiterals.zkSessionTimeoutTag, "7000", ConfigLiterals.zookeeperDomain))
+    configService.save(ConfigurationSettingDomain(ConfigLiterals.zkSessionTimeoutTag, "7000", ConfigLiterals.zookeeperDomain, new Date()))
 
     //configService.save(new ConfigurationSetting("session.timeout.ms", "30000", ConfigConstants.kafkaDomain))
 
-    configService.save(ConfigurationSettingDomain(ConfigLiterals.kafkaSubscriberTimeoutTag, "100", ConfigLiterals.systemDomain))
-    configService.save(ConfigurationSettingDomain(ConfigLiterals.lowWatermark, "100", ConfigLiterals.systemDomain))
+    configService.save(ConfigurationSettingDomain(ConfigLiterals.kafkaSubscriberTimeoutTag, "100", ConfigLiterals.systemDomain, new Date()))
+    configService.save(ConfigurationSettingDomain(ConfigLiterals.lowWatermark, "100", ConfigLiterals.systemDomain, new Date()))
   }
 
   def loadJdbcDriver(): Unit = {
@@ -75,9 +76,9 @@ object TempHelperForConfigSetup {
       driverFileName,
       Map("description" -> RestLiterals.defaultDescription),
       FileMetadataLiterals.customFileType)
-    configService.save(ConfigurationSettingDomain(driverFilenameConfig, driverFileName, ConfigLiterals.jdbcDomain))
-    configService.save(ConfigurationSettingDomain(driverClassConfig, "com.mysql.jdbc.Driver", ConfigLiterals.jdbcDomain))
-    configService.save(ConfigurationSettingDomain(driverPrefixConfig, "jdbc:mysql", ConfigLiterals.jdbcDomain))
+    configService.save(ConfigurationSettingDomain(driverFilenameConfig, driverFileName, ConfigLiterals.jdbcDomain, new Date()))
+    configService.save(ConfigurationSettingDomain(driverClassConfig, "com.mysql.jdbc.Driver", ConfigLiterals.jdbcDomain, new Date()))
+    configService.save(ConfigurationSettingDomain(driverPrefixConfig, "jdbc:mysql", ConfigLiterals.jdbcDomain, new Date()))
 
     driver.delete()
   }

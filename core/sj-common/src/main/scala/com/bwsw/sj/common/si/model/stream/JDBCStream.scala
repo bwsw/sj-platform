@@ -18,6 +18,8 @@
  */
 package com.bwsw.sj.common.si.model.stream
 
+import java.util.Date
+
 import com.bwsw.sj.common.dal.model.service.JDBCServiceDomain
 import com.bwsw.sj.common.dal.model.stream.JDBCStreamDomain
 import com.bwsw.sj.common.rest.utils.ValidationUtils.validateNamespace
@@ -32,9 +34,10 @@ class JDBCStream(name: String,
                  tags: Array[String],
                  force: Boolean,
                  streamType: String,
-                 description: String)
+                 description: String,
+                 creationDate: String)
                 (implicit injector: Injector)
-  extends SjStream(streamType, name, service, tags, force, description) {
+  extends SjStream(streamType, name, service, tags, force, description, creationDate) {
 
   import messageResourceUtils.createMessage
 
@@ -43,11 +46,12 @@ class JDBCStream(name: String,
 
     new JDBCStreamDomain(
       name,
-      serviceRepository.get(service).get.asInstanceOf[JDBCServiceDomain],
-      primary,
-      description,
-      force,
-      tags)
+      service = serviceRepository.get(service).get.asInstanceOf[JDBCServiceDomain],
+      primary = primary,
+      description = description,
+      force = force,
+      tags = tags,
+      creationDate = new Date())
   }
 
   override def validate(): ArrayBuffer[String] = {

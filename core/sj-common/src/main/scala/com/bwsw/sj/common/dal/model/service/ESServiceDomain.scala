@@ -18,13 +18,15 @@
  */
 package com.bwsw.sj.common.dal.model.service
 
+import java.util.Date
+
 import com.bwsw.sj.common.dal.model.provider.ProviderDomain
-import com.bwsw.sj.common.dal.morphia.MorphiaAnnotations.ReferenceField
 import com.bwsw.sj.common.utils.ServiceLiterals
 
-class ESServiceDomain(override val name: String,
-                      override val description: String,
-                      @ReferenceField override val provider: ProviderDomain,
-                      val index: String)
-  extends ServiceDomain(name, description, provider, ServiceLiterals.elasticsearchType) {
+class ESServiceDomain(name: String,
+                      description: String,
+                      provider: ProviderDomain,
+                      val index: String,
+                      creationDate: Date)
+  extends ServiceDomain(name, description, provider, ServiceLiterals.elasticsearchType, creationDate) {
 }

@@ -24,7 +24,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes.Type
 import com.fasterxml.jackson.annotation.{JsonIgnore, JsonProperty, JsonSubTypes, JsonTypeInfo}
 import scaldi.Injector
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type", defaultImpl = classOf[ProviderApi], visible = true)
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type", defaultImpl = classOf[ProviderApi], visible = true, include = JsonTypeInfo.As.EXISTING_PROPERTY)
 @JsonSubTypes(Array(
   new Type(value = classOf[JDBCProviderApi], name = ProviderLiterals.jdbcType)
 ))
@@ -33,7 +33,8 @@ class ProviderApi(val name: String,
                   val password: String,
                   @JsonProperty("type") val providerType: String,
                   val hosts: Array[String],
-                  val description: Option[String] = Some(RestLiterals.defaultDescription)) {
+                  val description: Option[String] = Some(RestLiterals.defaultDescription),
+                  val creationDate: String) {
   @JsonIgnore
   def to()(implicit injector: Injector): Provider = {
     val provider =
@@ -43,7 +44,8 @@ class ProviderApi(val name: String,
         hosts = this.hosts,
         login = this.login,
         password = this.password,
-        providerType = this.providerType
+        providerType = this.providerType,
+        creationDate = this.creationDate
       )
 
     provider
@@ -62,7 +64,8 @@ class ProviderApiCreator {
           password = jdbcProviderMid.password,
           hosts = jdbcProviderMid.hosts,
           driver = jdbcProviderMid.driver,
-          description = Some(jdbcProviderMid.description)
+          description = Some(jdbcProviderMid.description),
+          creationDate = jdbcProviderMid.creationDate
         )
 
       case _ =>
@@ -72,8 +75,10 @@ class ProviderApiCreator {
           password = provider.password,
           providerType = provider.providerType,
           hosts = provider.hosts,
-          description = Some(provider.description)
+          description = Some(provider.description),
+          creationDate = provider.creationDate
         )
     }
   }
 }
+

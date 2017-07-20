@@ -31,8 +31,9 @@ class KafkaStreamApi(name: String,
                      description: Option[String] = Some(RestLiterals.defaultDescription),
                      @JsonDeserialize(contentAs = classOf[Int]) val partitions: Option[Int] = Some(Int.MinValue),
                      @JsonDeserialize(contentAs = classOf[Int]) val replicationFactor: Option[Int] = Some(Int.MinValue),
-                     @JsonProperty("type") streamType: Option[String] = Some(StreamLiterals.kafkaType))
-  extends StreamApi(streamType.getOrElse(StreamLiterals.kafkaType), name, service, tags, force, description) {
+                     @JsonProperty("type") streamType: Option[String] = Some(StreamLiterals.kafkaType),
+                     creationDate: String)
+  extends StreamApi(streamType.getOrElse(StreamLiterals.kafkaType), name, service, tags, force, description, creationDate) {
 
   override def to(implicit injector: Injector): KafkaStream = new KafkaStream(
     name,
@@ -40,7 +41,8 @@ class KafkaStreamApi(name: String,
     partitions.getOrElse(Int.MinValue),
     replicationFactor.getOrElse(Int.MinValue),
     tags.getOrElse(Array()),
-    force.getOrElse(false),
-    streamType.getOrElse(StreamLiterals.kafkaType),
-    description.getOrElse(RestLiterals.defaultDescription))
+    force = force.getOrElse(false),
+    streamType = streamType.getOrElse(StreamLiterals.kafkaType),
+    description = description.getOrElse(RestLiterals.defaultDescription),
+    creationDate = creationDate)
 }

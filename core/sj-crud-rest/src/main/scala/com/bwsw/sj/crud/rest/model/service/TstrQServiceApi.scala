@@ -28,8 +28,9 @@ class TstrQServiceApi(name: String,
                       val prefix: String,
                       val token: String,
                       description: Option[String] = Some(RestLiterals.defaultDescription),
-                      @JsonProperty("type") serviceType: Option[String] = Some(ServiceLiterals.tstreamsType))
-  extends ServiceApi(serviceType.getOrElse(ServiceLiterals.tstreamsType), name, provider, description) {
+                      @JsonProperty("type") serviceType: Option[String] = Some(ServiceLiterals.tstreamsType),
+                      creationDate: String)
+  extends ServiceApi(serviceType.getOrElse(ServiceLiterals.tstreamsType), name, provider, description, creationDate) {
 
   override def to()(implicit injector: Injector): TStreamService = {
     val modelService =
@@ -39,7 +40,8 @@ class TstrQServiceApi(name: String,
         provider = this.provider,
         prefix = this.prefix,
         token = this.token,
-        serviceType = this.serviceType.getOrElse(ServiceLiterals.tstreamsType)
+        serviceType = this.serviceType.getOrElse(ServiceLiterals.tstreamsType),
+        creationDate = this.creationDate
       )
 
     modelService

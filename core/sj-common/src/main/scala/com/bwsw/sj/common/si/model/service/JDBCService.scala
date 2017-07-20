@@ -18,6 +18,8 @@
  */
 package com.bwsw.sj.common.si.model.service
 
+import java.util.Date
+
 import com.bwsw.common.jdbc.JdbcClientBuilder
 import com.bwsw.sj.common.dal.model.provider.JDBCProviderDomain
 import com.bwsw.sj.common.dal.model.service.JDBCServiceDomain
@@ -30,9 +32,10 @@ class JDBCService(name: String,
                   val database: String,
                   provider: String,
                   description: String,
-                  serviceType: String)
+                  serviceType: String,
+                  creationDate: String)
                  (implicit injector: Injector)
-  extends Service(serviceType, name, provider, description) {
+  extends Service(serviceType, name, provider, description, creationDate) {
 
   import messageResourceUtils.createMessage
 
@@ -45,7 +48,8 @@ class JDBCService(name: String,
         name = this.name,
         description = this.description,
         provider = provider,
-        database = this.database
+        database = this.database,
+        creationDate = new Date()
       )
 
     modelService
@@ -66,7 +70,8 @@ class JDBCService(name: String,
       case Some(dbName) =>
         if (dbName.isEmpty) {
           errors += createMessage("entity.error.attribute.required", "Database")
-        } else if (errors.isEmpty) { //provider should exist in the following test
+        } else if (errors.isEmpty) {
+          //provider should exist in the following test
           val providerRepository = connectionRepository.getProviderRepository
           var database_exists: Boolean = false
           val provider = providerRepository.get(this.provider).get.asInstanceOf[JDBCProviderDomain]

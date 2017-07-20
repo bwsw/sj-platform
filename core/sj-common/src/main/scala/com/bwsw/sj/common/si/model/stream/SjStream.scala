@@ -32,7 +32,8 @@ class SjStream(val streamType: String,
                val service: String,
                val tags: Array[String],
                val force: Boolean,
-               val description: String)
+               val description: String,
+               val creationDate: String)
               (implicit injector: Injector) {
 
   protected val messageResourceUtils = inject[MessageResourceUtils]
@@ -119,7 +120,8 @@ class StreamCreator {
         tStreamStream.tags,
         tStreamStream.force,
         tStreamStream.streamType,
-        tStreamStream.description
+        tStreamStream.description,
+        tStreamStream.creationDate.toString
       )
 
     case StreamLiterals.`restType` =>
@@ -131,7 +133,8 @@ class StreamCreator {
         restStream.tags,
         restStream.force,
         restStream.streamType,
-        restStream.description
+        restStream.description,
+        restStream.creationDate.toString
       )
 
     case StreamLiterals.`kafkaType` =>
@@ -145,7 +148,8 @@ class StreamCreator {
         kafkaStream.tags,
         kafkaStream.force,
         kafkaStream.streamType,
-        kafkaStream.description
+        kafkaStream.description,
+        kafkaStream.creationDate.toString
       )
 
     case StreamLiterals.`jdbcType` =>
@@ -158,7 +162,8 @@ class StreamCreator {
         jdbcStream.tags,
         jdbcStream.force,
         jdbcStream.streamType,
-        jdbcStream.description
+        jdbcStream.description,
+        jdbcStream.creationDate.toString
       )
 
     case StreamLiterals.`elasticsearchType` =>
@@ -170,7 +175,8 @@ class StreamCreator {
         esStream.tags,
         esStream.force,
         esStream.streamType,
-        esStream.description
+        esStream.description,
+        esStream.creationDate.toString
       )
   }
 }

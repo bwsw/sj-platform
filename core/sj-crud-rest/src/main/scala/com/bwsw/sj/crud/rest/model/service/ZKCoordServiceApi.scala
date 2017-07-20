@@ -27,8 +27,9 @@ class ZKCoordServiceApi(name: String,
                         provider: String,
                         val namespace: String,
                         description: Option[String] = Some(RestLiterals.defaultDescription),
-                        @JsonProperty("type") serviceType: Option[String] = Some(ServiceLiterals.zookeeperType))
-  extends ServiceApi(serviceType.getOrElse(ServiceLiterals.zookeeperType), name, provider, description) {
+                        @JsonProperty("type") serviceType: Option[String] = Some(ServiceLiterals.zookeeperType),
+                        creationDate: String)
+  extends ServiceApi(serviceType.getOrElse(ServiceLiterals.zookeeperType), name, provider, description, creationDate) {
 
   override def to()(implicit injector: Injector): ZKService = {
     val modelService =
@@ -37,7 +38,8 @@ class ZKCoordServiceApi(name: String,
         provider = this.provider,
         namespace = this.namespace,
         description = this.description.getOrElse(RestLiterals.defaultDescription),
-        serviceType = this.serviceType.getOrElse(ServiceLiterals.zookeeperType)
+        serviceType = this.serviceType.getOrElse(ServiceLiterals.zookeeperType),
+        creationDate = this.creationDate
       )
 
     modelService

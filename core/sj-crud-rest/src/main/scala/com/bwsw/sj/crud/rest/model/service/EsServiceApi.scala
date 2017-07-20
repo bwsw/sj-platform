@@ -27,8 +27,9 @@ class EsServiceApi(name: String,
                    val index: String,
                    provider: String,
                    description: Option[String] = Some(RestLiterals.defaultDescription),
-                   @JsonProperty("type") serviceType: Option[String] = Some(ServiceLiterals.elasticsearchType))
-  extends ServiceApi(serviceType.getOrElse(ServiceLiterals.elasticsearchType), name, provider, description) {
+                   @JsonProperty("type") serviceType: Option[String] = Some(ServiceLiterals.elasticsearchType),
+                   creationDate: String)
+  extends ServiceApi(serviceType.getOrElse(ServiceLiterals.elasticsearchType), name, provider, description, creationDate) {
 
   override def to()(implicit injector: Injector): ESService = {
     val modelService =
@@ -37,7 +38,8 @@ class EsServiceApi(name: String,
         description = this.description.getOrElse(RestLiterals.defaultDescription),
         provider = this.provider,
         index = this.index,
-        serviceType = this.serviceType.getOrElse(ServiceLiterals.elasticsearchType)
+        serviceType = this.serviceType.getOrElse(ServiceLiterals.elasticsearchType),
+        creationDate = this.creationDate
       )
 
     modelService

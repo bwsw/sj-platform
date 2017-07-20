@@ -18,15 +18,18 @@
  */
 package com.bwsw.sj.common.dal.model.service
 
+import java.util.Date
+
 import com.bwsw.sj.common.dal.model.provider.ProviderDomain
 import com.bwsw.sj.common.dal.morphia.MorphiaAnnotations.{PropertyField, ReferenceField}
 import com.bwsw.sj.common.utils.ServiceLiterals
 
-class KafkaServiceDomain(override val name: String,
-                         override val description: String,
-                         @ReferenceField override val provider: ProviderDomain,
+class KafkaServiceDomain(name: String,
+                         description: String,
+                         provider: ProviderDomain,
                          @ReferenceField(value = "zk-provider") val zkProvider: ProviderDomain,
-                         @PropertyField("zk-namespace") val zkNamespace: String)
-  extends ServiceDomain(name, description, provider, ServiceLiterals.kafkaType) {
+                         @PropertyField("zk-namespace") val zkNamespace: String,
+                         creationDate: Date)
+  extends ServiceDomain(name, description, provider, ServiceLiterals.kafkaType, creationDate) {
 
 }

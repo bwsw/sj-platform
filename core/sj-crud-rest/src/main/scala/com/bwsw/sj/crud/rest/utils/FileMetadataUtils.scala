@@ -35,6 +35,7 @@ class FileMetadataUtils {
     CustomJarInfo(
       fileMetadata.name.get,
       fileMetadata.version.get,
+      fileMetadata.uploadDate.get,
       fileMetadata.length.get)
   }
 
@@ -54,6 +55,7 @@ class FileMetadataUtils {
       moduleMetadata.specification.moduleType,
       moduleMetadata.specification.name,
       moduleMetadata.specification.version,
+      moduleMetadata.uploadDate.get,
       moduleMetadata.length.get)
   }
 }

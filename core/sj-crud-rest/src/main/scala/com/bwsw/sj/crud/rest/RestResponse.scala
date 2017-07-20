@@ -61,7 +61,7 @@ case class ConfigSettingResponseEntity(configSetting: ConfigurationSettingApi) e
 
 case class ModuleJar(filename: String, source: Source[akka.util.ByteString, scala.Any]) extends RestResponse
 
-case class ModuleInfo(moduleType: String, moduleName: String, moduleVersion: String, size: Long)
+case class ModuleInfo(moduleType: String, moduleName: String, moduleVersion: String, uploadDate: String, size: Long)
 
 case class ModulesResponseEntity(modules: Seq[ModuleInfo] = Seq()) extends ResponseEntity
 
@@ -85,7 +85,7 @@ case class ShortInstance(name: String,
 
 case class CustomJar(filename: String, source: Source[akka.util.ByteString, scala.Any]) extends RestResponse
 
-case class CustomJarInfo(name: String, version: String, size: Long)
+case class CustomJarInfo(name: String, version: String, uploadDate: String, size: Long)
 
 case class CustomJarsResponseEntity(customJars: Seq[CustomJarInfo] = Seq()) extends ResponseEntity
 

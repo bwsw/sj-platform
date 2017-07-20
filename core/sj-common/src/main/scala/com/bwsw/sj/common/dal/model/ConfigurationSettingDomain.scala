@@ -18,6 +18,8 @@
  */
 package com.bwsw.sj.common.dal.model
 
+import java.util.Date
+
 import com.bwsw.sj.common.dal.morphia.MorphiaAnnotations.IdField
 import org.mongodb.morphia.annotations.Entity
 
@@ -27,4 +29,4 @@ import org.mongodb.morphia.annotations.Entity
   */
 
 @Entity("config")
-case class ConfigurationSettingDomain(@IdField name: String, value: String, domain: String)
+case class ConfigurationSettingDomain(@IdField name: String, value: String, domain: String, creationDate: Date)

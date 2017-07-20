@@ -20,6 +20,7 @@ package com.bwsw.sj.crud.rest.controller
 
 import java.io.{ByteArrayInputStream, File}
 import java.net.URI
+import java.util.Date
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.common.exceptions.JsonDeserializationException
@@ -30,7 +31,7 @@ import com.bwsw.sj.common.dal.model.module.FileMetadataDomain
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
 import com.bwsw.sj.common.rest._
 import com.bwsw.sj.common.si.model.instance._
-import com.bwsw.sj.common.si.model.module.{ModuleMetadataCreator, ModuleMetadata, Specification}
+import com.bwsw.sj.common.si.model.module.{ModuleMetadata, ModuleMetadataCreator, Specification}
 import com.bwsw.sj.common.si.result._
 import com.bwsw.sj.common.si.{InstanceSI, ModuleSI}
 import com.bwsw.sj.common.utils.EngineLiterals._
@@ -38,7 +39,7 @@ import com.bwsw.sj.common.utils.MessageResourceUtils
 import com.bwsw.sj.crud.rest._
 import com.bwsw.sj.crud.rest.instance._
 import com.bwsw.sj.crud.rest.instance.validator.InstanceValidator
-import com.bwsw.sj.crud.rest.model.instance.response.{InstanceApiResponseCreator, InstanceApiResponse}
+import com.bwsw.sj.crud.rest.model.instance.response.{InstanceApiResponse, InstanceApiResponseCreator}
 import com.bwsw.sj.crud.rest.model.instance.{BatchInstanceApi, InputInstanceApi, OutputInstanceApi, RegularInstanceApi}
 import com.bwsw.sj.crud.rest.utils.JsonDeserializationErrorMessageCreator
 import org.apache.http._
@@ -564,8 +565,8 @@ class InstanceControllerTests extends FlatSpec with Matchers with MockitoSugar w
       case (moduleType, _, instance, validatorClass) =>
         val validatorClassConfigName = s"${ConfigLiterals.systemDomain}.$moduleType-validator-class"
         val validatorClassName = validatorClass.getName
-        val validatorClassConfig = ConfigurationSettingDomain(
-          validatorClassConfigName, validatorClassName, ConfigLiterals.systemDomain)
+        val validatorClassConfig = ConfigurationSettingDomain(validatorClassConfigName, validatorClassName,
+          ConfigLiterals.systemDomain, new Date())
 
         when(configRepository.get(validatorClassConfigName)).thenReturn(Some(validatorClassConfig))
         when(instance.moduleType).thenReturn(moduleType)

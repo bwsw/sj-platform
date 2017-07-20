@@ -29,15 +29,17 @@ class ESStreamApi(name: String,
                   tags: Option[Array[String]] = Some(Array()),
                   @JsonDeserialize(contentAs = classOf[Boolean]) force: Option[Boolean] = Some(false),
                   description: Option[String] = Some(RestLiterals.defaultDescription),
-                  @JsonProperty("type") streamType: Option[String] = Some(StreamLiterals.elasticsearchType))
-  extends StreamApi(streamType.getOrElse(StreamLiterals.elasticsearchType), name, service, tags, force, description) {
+                  @JsonProperty("type") streamType: Option[String] = Some(StreamLiterals.elasticsearchType),
+                  creationDate: String)
+  extends StreamApi(streamType.getOrElse(StreamLiterals.elasticsearchType), name, service, tags, force, description, creationDate) {
 
   override def to(implicit injector: Injector): ESStream =
     new ESStream(
-      name,
-      service,
-      tags.getOrElse(Array()),
-      force.getOrElse(false),
-      streamType.getOrElse(StreamLiterals.elasticsearchType),
-      description.getOrElse(RestLiterals.defaultDescription))
+      name = name,
+      service = service,
+      tags = tags.getOrElse(Array()),
+      force = force.getOrElse(false),
+      streamType = streamType.getOrElse(StreamLiterals.elasticsearchType),
+      description = description.getOrElse(RestLiterals.defaultDescription),
+      creationDate = creationDate)
 }

@@ -31,11 +31,11 @@ import com.bwsw.sj.common.utils.MessageResourceUtils
 import com.bwsw.sj.crud.rest._
 import com.bwsw.sj.crud.rest.model.FileMetadataApi
 import com.bwsw.sj.crud.rest.utils.{FileMetadataUtils, JsonDeserializationErrorMessageCreator}
-import org.mockito.ArgumentMatchers.{any, anyString}
+import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FlatSpec, Matchers}
-import scaldi.{Injector, Module}
+import scaldi.Module
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -130,7 +130,7 @@ class CustomJarsControllerTests extends FlatSpec with Matchers with MockitoSugar
   it should "give all custom jars" in {
     val customFileInfoes = allJars.map {
       case JarInfo(_, metadata, name, version, _) =>
-        val customJarInfo = CustomJarInfo(name, version, jarSize)
+        val customJarInfo = CustomJarInfo(name, version, metadata.uploadDate.get, jarSize)
         when(fileMetadataUtils.toCustomJarInfo(metadata)).thenReturn(customJarInfo)
         customJarInfo
     }

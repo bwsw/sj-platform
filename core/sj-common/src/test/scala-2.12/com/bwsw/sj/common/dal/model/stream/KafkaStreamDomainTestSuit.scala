@@ -18,6 +18,8 @@
  */
 package com.bwsw.sj.common.dal.model.stream
 
+import java.util.Date
+
 import com.bwsw.common.KafkaClient
 import com.bwsw.sj.common.dal.model.provider.ProviderDomain
 import com.bwsw.sj.common.dal.model.service.KafkaServiceDomain
@@ -76,7 +78,7 @@ trait KafkaStreamDomainMocks extends MockitoSugar {
   when(service.zkProvider).thenReturn(provider)
 
   def streamDomain(kafkaClient: KafkaClient) =
-    new KafkaStreamDomain(name, service, partitions, replicationFactor) {
+    new KafkaStreamDomain(name, service, partitions, replicationFactor, creationDate = new Date()) {
       override def createClient(): KafkaClient = {
         kafkaClient
       }

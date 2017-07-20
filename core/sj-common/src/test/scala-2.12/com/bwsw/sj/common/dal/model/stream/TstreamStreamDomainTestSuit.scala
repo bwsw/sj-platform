@@ -18,6 +18,8 @@
  */
 package com.bwsw.sj.common.dal.model.stream
 
+import java.util.Date
+
 import com.bwsw.sj.common.dal.model.provider.ProviderDomain
 import com.bwsw.sj.common.dal.model.service.TStreamServiceDomain
 import com.bwsw.sj.common.utils.{RestLiterals, StreamLiterals}
@@ -77,7 +79,7 @@ trait TstreamStreamDomainMocks extends MockitoSugar {
   when(service.provider).thenReturn(provider)
 
   def streamDomain(storageClient: StorageClient) =
-    new TStreamStreamDomain(name, service, partitions, description) {
+    new TStreamStreamDomain(name, service, partitions, description, creationDate = new Date()) {
       override def createClient(): StorageClient = {
         storageClient
       }

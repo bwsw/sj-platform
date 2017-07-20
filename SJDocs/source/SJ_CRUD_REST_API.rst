@@ -1028,6 +1028,7 @@ Error response example::
     "status-code": 404
  }
 
+.. tip:: A full range of error responses can be found at :ref:`Streams_Errors`
 
 CRUD Rest-API for Config Settings
 -----------------------------------
@@ -1276,6 +1277,8 @@ Success response example::
   },
   "statusCode": 200
  }
+
+.. tip:: A full range of error responses can be found at :ref:`Config_Setting_Errors`
 
 CRUD Rest-API for Custom Files
 ----------------------------------------
@@ -2005,6 +2008,8 @@ Error response example::
     },
     "status-code": 400
  }
+
+.. tip:: A full range of error responses can be found at :ref:`Modules_Errors`
 
 .. _REST_API_Instance:
 
@@ -2772,3 +2777,5 @@ Success response json example::
     ]
   }
  }
+
+.. tip:: A full range of error responses can be found at :ref:`Instances_Errors`

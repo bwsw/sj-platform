@@ -18,6 +18,8 @@
  */
 package com.bwsw.sj.common.si.model.service
 
+import java.util.Date
+
 import com.bwsw.sj.common.dal.model.service.RestServiceDomain
 import com.bwsw.sj.common.utils.RestLiterals
 import scaldi.Injector
@@ -35,9 +37,10 @@ class RestService(name: String,
                   val httpVersion: String,
                   val headers: Map[String, String],
                   description: String,
-                  serviceType: String)
+                  serviceType: String,
+                  creationDate: String)
                  (implicit injector: Injector)
-  extends Service(serviceType, name, provider, description) {
+  extends Service(serviceType, name, provider, description, creationDate) {
 
   import messageResourceUtils.createMessage
 
@@ -52,7 +55,8 @@ class RestService(name: String,
         basePath = this.basePath,
         httpScheme = RestLiterals.httpSchemeFromString(this.httpScheme),
         httpVersion = RestLiterals.httpVersionFromString(this.httpVersion),
-        headers = this.headers.asJava
+        headers = this.headers.asJava,
+        creationDate = new Date()
       )
 
     modelService

@@ -24,7 +24,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes.Type
 import com.fasterxml.jackson.annotation.{JsonIgnore, JsonProperty, JsonSubTypes, JsonTypeInfo}
 import scaldi.Injector
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type", defaultImpl = classOf[ServiceApi], visible = true)
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type", defaultImpl = classOf[ServiceApi], visible = true, include = JsonTypeInfo.As.EXISTING_PROPERTY)
 @JsonSubTypes(Array(
   new Type(value = classOf[EsServiceApi], name = ServiceLiterals.elasticsearchType),
   new Type(value = classOf[KfkQServiceApi], name = ServiceLiterals.kafkaType),
@@ -36,7 +36,8 @@ import scaldi.Injector
 class ServiceApi(@JsonProperty("type") val serviceType: String,
                  val name: String,
                  val provider: String,
-                 val description: Option[String] = Some(RestLiterals.defaultDescription)) {
+                 val description: Option[String] = Some(RestLiterals.defaultDescription),
+                 val creationDate: String) {
 
   @JsonIgnore
   def to()(implicit injector: Injector): Service =
@@ -44,7 +45,8 @@ class ServiceApi(@JsonProperty("type") val serviceType: String,
       serviceType = this.serviceType,
       name = this.name,
       provider = this.provider,
-      description = this.description.getOrElse(RestLiterals.defaultDescription)
+      description = this.description.getOrElse(RestLiterals.defaultDescription),
+      creationDate = this.creationDate
     )
 }
 
@@ -59,7 +61,8 @@ class ServiceApiCreator {
           name = esService.name,
           index = esService.index,
           provider = esService.provider,
-          description = Option(esService.description)
+          description = Option(esService.description),
+          creationDate = esService.creationDate
         )
 
       case ServiceLiterals.jdbcType =>
@@ -69,7 +72,8 @@ class ServiceApiCreator {
           name = jdbcService.name,
           database = jdbcService.database,
           provider = jdbcService.provider,
-          description = Option(jdbcService.description)
+          description = Option(jdbcService.description),
+          creationDate = jdbcService.creationDate
         )
 
       case ServiceLiterals.kafkaType =>
@@ -80,7 +84,8 @@ class ServiceApiCreator {
           zkProvider = kafkaService.zkProvider,
           zkNamespace = kafkaService.zkNamespace,
           provider = kafkaService.provider,
-          description = Option(kafkaService.description)
+          description = Option(kafkaService.description),
+          creationDate = kafkaService.creationDate
         )
 
       case ServiceLiterals.restType =>
@@ -92,7 +97,8 @@ class ServiceApiCreator {
           httpVersion = Option(restService.httpVersion),
           headers = Option(restService.headers),
           provider = restService.provider,
-          description = Option(restService.description)
+          description = Option(restService.description),
+          creationDate = restService.creationDate
         )
 
       case ServiceLiterals.tstreamsType =>
@@ -103,7 +109,8 @@ class ServiceApiCreator {
           prefix = tStreamService.prefix,
           token = tStreamService.token,
           provider = tStreamService.provider,
-          description = Option(tStreamService.description)
+          description = Option(tStreamService.description),
+          creationDate = tStreamService.creationDate
         )
 
       case ServiceLiterals.zookeeperType =>
@@ -113,7 +120,8 @@ class ServiceApiCreator {
           name = zkService.name,
           namespace = zkService.namespace,
           provider = zkService.provider,
-          description = Option(zkService.description)
+          description = Option(zkService.description),
+          creationDate = zkService.creationDate
         )
     }
   }
