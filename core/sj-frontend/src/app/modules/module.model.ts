@@ -23,6 +23,7 @@ export class ModuleModel extends BaseModel {
     cardinality: number[];
     types: string[];
   };
+  uploadDate: Date;
 
   public get engine(): string {
     return this.engineName + ' ' + this.engineVersion;
