@@ -7,8 +7,7 @@ import { StreamsService } from './streams.service';
 import { ServicesService } from '../services/services.service';
 import { ProvidersService } from '../providers/providers.service';
 import { NgForm } from '@angular/forms';
-
-
+import { TypeModel } from '../shared/model/type.model';
 
 @Component({
   selector: 'sj-streams',
@@ -24,7 +23,7 @@ export class StreamsComponent implements OnInit {
   public alerts: NotificationModel[] = [];
   public formAlerts: NotificationModel[] = [];
   public streamList: StreamModel[];
-  public streamTypes: string[];
+  public streamTypes: TypeModel[];
   public serviceList: ServiceModel[] = [];
   public currentStream: StreamModel;
   public blockingInstances: string[] = [];
@@ -61,7 +60,7 @@ export class StreamsComponent implements OnInit {
   }
 
   public blur() {
-    if (this.currentTag !== '') {
+    if (this.currentTag && this.currentTag !== '') {
       this.newStream.tags.push(this.currentTag);
       this.currentTag = '';
     }

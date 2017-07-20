@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 
 import { ModalDirective } from 'ngx-bootstrap';
-import {ModuleModel} from './module.model';
-import {NotificationModel} from '../shared/model/notification.model';
-import {ModulesService} from './modules.service';
+import { ModuleModel } from './module.model';
+import { NotificationModel } from '../shared/model/notification.model';
+import { ModulesService } from './modules.service';
+import { TypeModel } from '../shared/model/type.model';
 
 @Component({
   selector: 'sj-modules',
@@ -15,7 +16,7 @@ import {ModulesService} from './modules.service';
 export class ModulesComponent implements OnInit {
   public errorMessage: string;
   public moduleList: ModuleModel[];
-  public moduleTypes: string[];
+  public moduleTypes: TypeModel[];
   public blockingInstances: string[] = [];
   public alerts: NotificationModel[] = [];
   public currentModule: ModuleModel;

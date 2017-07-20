@@ -5,6 +5,7 @@ import { ModalDirective } from 'ngx-bootstrap';
 import { ProviderModel } from './provider.model';
 import { NotificationModel } from '../shared/model/notification.model';
 import { ProvidersService } from './providers.service';
+import { TypeModel } from '../shared/model/type.model';
 
 @Component({
   selector: 'sj-providers',
@@ -19,7 +20,7 @@ export class ProvidersComponent implements OnInit {
   public alerts: NotificationModel[] = [];
   public formAlerts: NotificationModel[] = [];
   public providerList: ProviderModel[];
-  public providerTypes: string[];
+  public providerTypes: TypeModel[];
   public blockingServices: string[] = [];
   public currentProvider: ProviderModel;
   public newProvider: ProviderModel;

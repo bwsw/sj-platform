@@ -48,14 +48,18 @@ The processing flow for Regular Engine is presented below.
 
 .. figure:: _static/Regular_Engine.jpg
 
-The processing differs for stateless (the left schema) and statefull (the right schema) mode of processing.
+The diagram represents two types of processing:
+
+- for a stateless mode of processing (the left schema). The module does not have a state that means it does not aggregate the incoming data via state mechanism. On each checkpoint the data is sent to Output module.
+
+- for a statefull mode of processing (the right schema). For stateful processing the state is saved at the same moment the checkpoint is performed. Regular module gets data from Input module element by element and aggregate it via state mechanism. On each checkpoint all aggregated data will be sent to Output module and the state will be cleared.
 
 Once a module is launched the ‘onInit’ method performs some preparations for the module, for example initializes some auxiliary variables, or checks the state variables on existence.
 Then a new message is received. The incoming data is ingested via T-streams or Kafka. The messages are processed by two methods appropriate for T-streams or Kafka messages.
 
 A checkpoint is performed after a set period of time or after a set number of messages is received.
 
-If the module has a state the data is stored at the moment of checkpoint. In case of a falure the stored data from the state will be recovered and the module will be restarted.
+If the module has a state the data is stored at the moment of checkpoint. In case of a failure the stored data from the state will be recovered and the module will be restarted.
 
 If there is no state the checkpoint is performed and the cycle starts again from receiving a new message.
 
@@ -71,7 +75,11 @@ The processing flow for Batch engine is presented below.
 
 .. figure:: _static/BatchEngine.jpg
 
-The processing differs for stateless (the left schema) and statefull (the right schema) mode of processing.
+The diagram represents two types of processing:
+
+- for a stateless mode of processing (the left schema): The module does not have a state that means it does not aggregate the incoming data via state mechanism. On each checkpoint the data is sent to Output module.
+
+- for a statefull mode of processing (the right schema). For stateful processing the state is saved at the same moment the checkpoint is performed. Batch module gets data from Input module batch by batch and aggregate it via state mechanism. On each checkpoint all aggregated data will be sent to Output module and the state will be cleared.
 
 Once a module is launched the ‘onInit’ method performs some preparations for the module, for example, initializes some auxiliary variables, or checks the state variables on existence.
 

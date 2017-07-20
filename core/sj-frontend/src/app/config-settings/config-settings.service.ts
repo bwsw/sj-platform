@@ -5,6 +5,7 @@ import { ConfigSettingModel } from './config-setting.model';
 import { BService, IResponse } from '../shared/service/base.service';
 import { CrudService } from '../shared/service/crud.service';
 import { BaseModel } from '../shared/model/base.model';
+import { TypeModel } from '../shared/model/type.model';
 
 
 @Injectable()
@@ -14,7 +15,7 @@ import { BaseModel } from '../shared/model/base.model';
 })
 export class ConfigSettingsService extends CrudService<ConfigSettingModel> {
 
-  public getConfigSettingsDomains(): Observable<string[]> {
+  public getConfigSettingsDomains(): Observable<TypeModel[]> {
     return this.http.get(this.requestUrl + '/domains')
       .map(response => {
         const data = this.extractData(response);

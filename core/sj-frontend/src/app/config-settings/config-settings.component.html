@@ -34,6 +34,7 @@
             <th>Name</th>
             <th>Value</th>
             <th>Config domain</th>
+            <th>Date</th>
             <th class="actions-column">Actions</th>
           </tr>
           </thead>
@@ -48,6 +49,7 @@
             <td>{{ setting.name }}</td>
             <td>{{ setting.value }}</td>
             <td>{{ setting.domain }}</td>
+            <td>{{ setting.creationDate }}</td>
             <td class="actions-column">
               <button type="button"
                       class="btn btn-sm btn-secondary"
@@ -84,7 +86,7 @@
             <label class="col-sm-2 col-form-label required">Name</label>
             <div class="col-sm-10">
               <input [(ngModel)]="newSetting.name" name="settingName" type="text" class="form-control"
-                     required pattern="[a-z\-\.]+">
+                     required pattern="[a-z\-\.]+" placeholder="Enter setting name">
             </div>
           </fieldset>
 
@@ -93,7 +95,7 @@
             <label class="col-sm-2 col-form-label required">Value</label>
             <div class="col-sm-10">
               <input [(ngModel)]="newSetting.value" name="settingValue" type="text" class="form-control"
-                     required>
+                     required placeholder="Enter setting value">
             </div>
           </fieldset>
 
@@ -103,7 +105,7 @@
             <div class="col-sm-10">
               <select required [(ngModel)]="newSetting.domain" name="settingDomain"
                       class="form-control">
-                <option *ngFor="let domain of settingsDomains" value="{{domain}}">{{domain}}</option>
+                <option *ngFor="let domain of settingsDomains" value="{{domain.id}}">{{domain.name}}</option>
               </select>
             </div>
           </fieldset>
