@@ -19,6 +19,7 @@
 package com.bwsw.sj.module.input.csv
 
 import java.nio.charset.Charset
+import java.util.Date
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.common.file.utils.FileStorage
@@ -44,8 +45,8 @@ import org.scalatest.{FlatSpec, Matchers}
   * @author Pavel Tomskikh
   */
 class CSVInputExecutorTests extends FlatSpec with Matchers with MockitoSugar {
-  val outputStream = new TStreamStreamDomain("output-stream", mock[TStreamServiceDomain], 4)
-  val fallbackStream = new TStreamStreamDomain("fallback-stream", mock[TStreamServiceDomain], 3)
+  val outputStream = new TStreamStreamDomain("output-stream", mock[TStreamServiceDomain], 4, creationDate = new Date())
+  val fallbackStream = new TStreamStreamDomain("fallback-stream", mock[TStreamServiceDomain], 3, creationDate = new Date())
 
   val key1Field = "key1"
   val key2Field = "key2"

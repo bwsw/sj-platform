@@ -20,7 +20,7 @@ package com.bwsw.sj.common.dal.model.provider
 
 import java.net.{Socket, URI}
 import java.nio.channels.ClosedChannelException
-import java.util.Collections
+import java.util.{Collections, Date}
 
 import com.bwsw.common.es.ElasticsearchClient
 import com.bwsw.sj.common.dal.morphia.MorphiaAnnotations.{IdField, PropertyField}
@@ -44,7 +44,8 @@ class ProviderDomain(@IdField val name: String,
                      val hosts: Array[String],
                      val login: String,
                      val password: String,
-                     @PropertyField("provider-type") val providerType: String) {
+                     @PropertyField("provider-type") val providerType: String,
+                     val creationDate: Date) {
 
   def getConcatenatedHosts(separator: String = ","): String = {
     hosts.mkString(separator)

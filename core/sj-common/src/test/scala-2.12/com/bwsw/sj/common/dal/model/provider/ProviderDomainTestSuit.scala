@@ -150,10 +150,10 @@ class ProviderDomainTestSuit extends FlatSpec with Matchers with PrivateMethodTe
 
 trait ProviderDomainMocks extends MockitoSugar {
   def providerDomain(setOfHosts: Array[String] = Array()) =
-    new ProviderDomain(null, null, setOfHosts, null, null, null)
+    new ProviderDomain(null, null, setOfHosts, null, null, null, null)
 }
 
-class ProviderDomainMock extends ProviderDomain(null, null, Array("host"), null, null, null) {
+class ProviderDomainMock extends ProviderDomain(null, null, Array("host"), null, null, null, null) {
   override def checkESConnection(address: String): ArrayBuffer[String] = ArrayBuffer()
 
   override def checkRestConnection(address: String): ArrayBuffer[String] = ArrayBuffer()

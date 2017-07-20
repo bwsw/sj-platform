@@ -19,6 +19,7 @@
 package com.bwsw.sj.engine.input
 
 import java.io.{BufferedReader, File, InputStreamReader}
+import java.util.Date
 import java.util.jar.JarFile
 
 import com.bwsw.common.JsonSerializer
@@ -59,8 +60,10 @@ object DataFactory {
   tasks.put(s"$instanceName-task0", new InputTask(SjInputServices.host, SjInputServices.port))
   private val partitions = 1
   private val serializer = new JsonSerializer()
-  private val zookeeperProvider = new ProviderDomain(zookeeperProviderName, zookeeperProviderName, zookeeperHosts.split(","), "", "", ProviderLiterals.zookeeperType)
-  private val tstrqService = new TStreamServiceDomain(tstreamServiceName, tstreamServiceName, zookeeperProvider, TestStorageServer.defaultPrefix, TestStorageServer.defaultToken)
+  private val zookeeperProvider = new ProviderDomain(zookeeperProviderName, zookeeperProviderName, zookeeperHosts.split(","),
+    "", "", ProviderLiterals.zookeeperType, new Date())
+  private val tstrqService = new TStreamServiceDomain(tstreamServiceName, tstreamServiceName, zookeeperProvider,
+    TestStorageServer.defaultPrefix, TestStorageServer.defaultToken, creationDate = new Date())
   private val tstreamFactory = new TStreamsFactory()
   setTStreamFactoryProperties()
   val storageClient = tstreamFactory.getStorageClient()
@@ -90,7 +93,8 @@ object DataFactory {
   }
 
   def createServices(serviceManager: GenericMongoRepository[ServiceDomain], providerService: GenericMongoRepository[ProviderDomain]) = {
-    val zkService = new ZKServiceDomain(zookeeperServiceName, zookeeperServiceName, zookeeperProvider, testNamespace)
+    val zkService = new ZKServiceDomain(zookeeperServiceName, zookeeperServiceName, zookeeperProvider,
+      testNamespace, creationDate = new Date())
     serviceManager.save(zkService)
 
     serviceManager.save(tstrqService)
@@ -119,7 +123,8 @@ object DataFactory {
       partitions,
       tstreamOutputNamePrefix + suffix,
       false,
-      Array("output", "some tags")
+      Array("output", "some tags"),
+      creationDate = new Date()
     )
 
     sjStreamService.save(s2)

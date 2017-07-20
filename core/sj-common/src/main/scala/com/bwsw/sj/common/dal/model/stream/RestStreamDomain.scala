@@ -18,6 +18,8 @@
  */
 package com.bwsw.sj.common.dal.model.stream
 
+import java.util.Date
+
 import com.bwsw.sj.common.dal.model.service.RestServiceDomain
 import com.bwsw.sj.common.utils.{RestLiterals, StreamLiterals}
 
@@ -26,9 +28,10 @@ import com.bwsw.sj.common.utils.{RestLiterals, StreamLiterals}
   *
   * @author Pavel Tomskikh
   */
-class RestStreamDomain(override val name: String,
+class RestStreamDomain(name: String,
                        override val service: RestServiceDomain,
-                       override val description: String = RestLiterals.defaultDescription,
-                       override val force: Boolean = false,
-                       override val tags: Array[String] = Array())
-  extends StreamDomain(name, description, service, force, tags, StreamLiterals.restType)
+                       description: String = RestLiterals.defaultDescription,
+                       force: Boolean = false,
+                       tags: Array[String] = Array(),
+                       creationDate: Date)
+  extends StreamDomain(name, description, service, force, tags, StreamLiterals.restType, creationDate)

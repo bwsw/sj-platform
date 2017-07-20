@@ -19,6 +19,7 @@
 package com.bwsw.sj.module.input.regex
 
 import java.nio.charset.Charset
+import java.util.Date
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.common.file.utils.FileStorage
@@ -46,9 +47,9 @@ import org.scalatest.{FlatSpec, Matchers}
   */
 class RegexInputExecutorTests extends FlatSpec with Matchers with MockitoSugar {
 
-  val fallbackStream = new TStreamStreamDomain("fallback-stream", mock[TStreamServiceDomain], 3)
-  val outputStream1 = new TStreamStreamDomain("output-stream-1", mock[TStreamServiceDomain], 3)
-  val outputStream2 = new TStreamStreamDomain("output-stream-2", mock[TStreamServiceDomain], 3)
+  val fallbackStream = new TStreamStreamDomain("fallback-stream", mock[TStreamServiceDomain], 3, creationDate = new Date())
+  val outputStream1 = new TStreamStreamDomain("output-stream-1", mock[TStreamServiceDomain], 3, creationDate = new Date())
+  val outputStream2 = new TStreamStreamDomain("output-stream-2", mock[TStreamServiceDomain], 3, creationDate = new Date())
 
   val field1Name = "field1"
   val field2Name = "field2"

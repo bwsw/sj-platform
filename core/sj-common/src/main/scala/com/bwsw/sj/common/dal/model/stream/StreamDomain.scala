@@ -18,6 +18,8 @@
  */
 package com.bwsw.sj.common.dal.model.stream
 
+import java.util.Date
+
 import com.bwsw.sj.common.dal.model.service.ServiceDomain
 import com.bwsw.sj.common.dal.morphia.MorphiaAnnotations.{IdField, PropertyField, ReferenceField}
 import org.mongodb.morphia.annotations._
@@ -28,7 +30,8 @@ class StreamDomain(@IdField val name: String,
                    @ReferenceField val service: ServiceDomain,
                    val force: Boolean,
                    val tags: Array[String],
-                   @PropertyField("stream-type") val streamType: String) {
+                   @PropertyField("stream-type") val streamType: String,
+                   val creationDate: Date) {
 
   def create(): Unit = {}
 }

@@ -28,8 +28,9 @@ class KfkQServiceApi(name: String,
                      val zkProvider: String,
                      val zkNamespace: String,
                      description: Option[String] = Some(RestLiterals.defaultDescription),
-                     @JsonProperty("type") serviceType: Option[String] = Some(ServiceLiterals.kafkaType))
-  extends ServiceApi(serviceType.getOrElse(ServiceLiterals.kafkaType), name, provider, description) {
+                     @JsonProperty("type") serviceType: Option[String] = Some(ServiceLiterals.kafkaType),
+                     creationDate: String)
+  extends ServiceApi(serviceType.getOrElse(ServiceLiterals.kafkaType), name, provider, description, creationDate) {
 
   override def to()(implicit injector: Injector): KafkaService = {
     val modelService =
@@ -39,7 +40,8 @@ class KfkQServiceApi(name: String,
         provider = this.provider,
         zkProvider = this.zkProvider,
         zkNamespace = this.zkNamespace,
-        serviceType = this.serviceType.getOrElse(ServiceLiterals.kafkaType)
+        serviceType = this.serviceType.getOrElse(ServiceLiterals.kafkaType),
+        creationDate =  this.creationDate
       )
 
     modelService

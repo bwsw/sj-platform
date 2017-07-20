@@ -19,7 +19,7 @@
 package com.bwsw.sj.engine.regular.module
 
 import java.io.{BufferedReader, File, InputStreamReader}
-import java.util.Properties
+import java.util.{Date, Properties}
 import java.util.jar.JarFile
 
 import com.bwsw.common.file.utils.FileStorage
@@ -74,9 +74,10 @@ object DataFactory {
   private val task: Task = new Task()
   private val serializer = new JsonSerializer()
   private val objectSerializer = new ObjectSerializer()
-  private val zookeeperProvider = new ProviderDomain(zookeeperProviderName, zookeeperProviderName, zookeeperHosts, "", "", ProviderLiterals.zookeeperType)
+  private val zookeeperProvider = new ProviderDomain(zookeeperProviderName, zookeeperProviderName, zookeeperHosts,
+    "", "", ProviderLiterals.zookeeperType, new Date())
   private val tstrqService = new TStreamServiceDomain(tstreamServiceName, tstreamServiceName, zookeeperProvider,
-    TestStorageServer.defaultPrefix, TestStorageServer.defaultToken)
+    TestStorageServer.defaultPrefix, TestStorageServer.defaultToken, creationDate = new Date())
   private val tstreamFactory = new TStreamsFactory()
   setTStreamFactoryProperties()
   private val storageClient = tstreamFactory.getStorageClient()
@@ -105,7 +106,8 @@ object DataFactory {
   }
 
   def createProviders(providerService: GenericMongoRepository[ProviderDomain]) = {
-    val kafkaProvider = new ProviderDomain(kafkaProviderName, kafkaProviderName, kafkaHosts.split(","), "", "", ProviderLiterals.kafkaType)
+    val kafkaProvider = new ProviderDomain(kafkaProviderName, kafkaProviderName, kafkaHosts.split(","),
+      "", "", ProviderLiterals.kafkaType, new Date())
     providerService.save(kafkaProvider)
 
     providerService.save(zookeeperProvider)
@@ -117,11 +119,13 @@ object DataFactory {
   }
 
   def createServices(serviceManager: GenericMongoRepository[ServiceDomain], providerService: GenericMongoRepository[ProviderDomain]) = {
-    val zkService = new ZKServiceDomain(zookeeperServiceName, zookeeperServiceName, zookeeperProvider, testNamespace)
+    val zkService = new ZKServiceDomain(zookeeperServiceName, zookeeperServiceName, zookeeperProvider,
+      testNamespace, creationDate = new Date())
     serviceManager.save(zkService)
 
     val kafkaProv = providerService.get(kafkaProviderName).get
-    val kafkaService = new KafkaServiceDomain(kafkaServiceName, kafkaServiceName, kafkaProv, zookeeperProvider, testNamespace)
+    val kafkaService = new KafkaServiceDomain(kafkaServiceName, kafkaServiceName, kafkaProv, zookeeperProvider,
+      testNamespace, creationDate = new Date())
     serviceManager.save(kafkaService)
 
     serviceManager.save(tstrqService)
@@ -202,7 +206,8 @@ object DataFactory {
       partitions,
       tstreamInputNamePrefix + suffix,
       false,
-      Array("input")
+      Array("input"),
+      new Date()
     )
 
     streamService.save(s1)
@@ -221,7 +226,8 @@ object DataFactory {
       partitions,
       tstreamOutputNamePrefix + suffix,
       false,
-      Array("output", "some tags")
+      Array("output", "some tags"),
+      new Date()
     )
 
     streamRepository.save(s2)
@@ -256,7 +262,8 @@ object DataFactory {
       replicationFactor,
       kafkaInputNamePrefix + suffix,
       false,
-      Array(kafkaInputNamePrefix)
+      Array(kafkaInputNamePrefix),
+      new Date()
     )
 
     repository.save(kafkaStreamDomain)

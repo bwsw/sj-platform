@@ -19,12 +19,13 @@
 package com.bwsw.sj.common.si.model.provider
 
 import java.net.{URI, URISyntaxException}
+import java.util.Date
 
 import com.bwsw.sj.common.dal.model.provider.{JDBCProviderDomain, ProviderDomain}
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.rest.utils.ValidationUtils.{normalizeName, validateName}
-import com.bwsw.sj.common.utils.{MessageResourceUtils, ProviderLiterals}
 import com.bwsw.sj.common.utils.ProviderLiterals.types
+import com.bwsw.sj.common.utils.{MessageResourceUtils, ProviderLiterals}
 import scaldi.Injectable.inject
 import scaldi.Injector
 
@@ -36,7 +37,8 @@ class Provider(val name: String,
                val password: String,
                val providerType: String,
                val hosts: Array[String],
-               val description: String)
+               val description: String,
+               val creationDate: String)
               (implicit injector: Injector) {
 
   protected val messageResourceUtils = inject[MessageResourceUtils]
@@ -53,7 +55,8 @@ class Provider(val name: String,
       hosts = this.hosts,
       login = this.login,
       password = this.password,
-      providerType = this.providerType
+      providerType = this.providerType,
+      creationDate = new Date()
     )
   }
 
@@ -161,7 +164,8 @@ class ProviderCreator {
           hosts = jdbcProvider.hosts,
           driver = jdbcProvider.driver,
           description = jdbcProvider.description,
-          providerType = jdbcProvider.providerType
+          providerType = jdbcProvider.providerType,
+          creationDate = jdbcProvider.creationDate.toString
         )
       case _ =>
         new Provider(
@@ -170,7 +174,8 @@ class ProviderCreator {
           password = providerDomain.password,
           providerType = providerDomain.providerType,
           hosts = providerDomain.hosts,
-          description = providerDomain.description
+          description = providerDomain.description,
+          creationDate = providerDomain.creationDate.toString
         )
     }
   }

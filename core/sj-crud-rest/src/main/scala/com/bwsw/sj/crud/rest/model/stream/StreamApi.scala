@@ -38,17 +38,19 @@ class StreamApi(@JsonProperty("type") val streamType: String,
                 val service: String,
                 val tags: Option[Array[String]] = Some(Array()),
                 @JsonDeserialize(contentAs = classOf[Boolean]) val force: Option[Boolean] = Some(false),
-                val description: Option[String] = Some(RestLiterals.defaultDescription)) {
+                val description: Option[String] = Some(RestLiterals.defaultDescription),
+                val creationDate: String) {
 
   @JsonIgnore
   def to(implicit injector: Injector): SjStream =
     new SjStream(
-      streamType,
-      name,
-      service,
-      tags.getOrElse(Array()),
-      force.getOrElse(false),
-      description.getOrElse(RestLiterals.defaultDescription))
+      streamType = streamType,
+      name = name,
+      service = service,
+      tags = tags.getOrElse(Array()),
+      force = force.getOrElse(false),
+      description = description.getOrElse(RestLiterals.defaultDescription),
+      creationDate = creationDate)
 }
 
 class StreamApiCreator {
@@ -58,59 +60,64 @@ class StreamApiCreator {
       val tStreamStream = stream.asInstanceOf[TStreamStream]
 
       new TStreamStreamApi(
-        tStreamStream.name,
-        tStreamStream.service,
-        Option(tStreamStream.tags),
-        Option(tStreamStream.force),
-        Option(tStreamStream.description),
-        Option(tStreamStream.partitions)
+        name = tStreamStream.name,
+        service = tStreamStream.service,
+        tags = Option(tStreamStream.tags),
+        force = Option(tStreamStream.force),
+        description = Option(tStreamStream.description),
+        partitions = Option(tStreamStream.partitions),
+        creationDate = tStreamStream.creationDate
       )
 
     case StreamLiterals.`kafkaType` =>
       val kafkaStream = stream.asInstanceOf[KafkaStream]
 
       new KafkaStreamApi(
-        kafkaStream.name,
-        kafkaStream.service,
-        Option(kafkaStream.tags),
-        Option(kafkaStream.force),
-        Option(kafkaStream.description),
-        Option(kafkaStream.partitions),
-        Option(kafkaStream.replicationFactor)
+        name = kafkaStream.name,
+        service = kafkaStream.service,
+        tags = Option(kafkaStream.tags),
+        force = Option(kafkaStream.force),
+        description = Option(kafkaStream.description),
+        partitions = Option(kafkaStream.partitions),
+        replicationFactor = Option(kafkaStream.replicationFactor),
+        creationDate = kafkaStream.creationDate
       )
 
     case StreamLiterals.`elasticsearchType` =>
       val esStream = stream.asInstanceOf[ESStream]
 
       new ESStreamApi(
-        esStream.name,
-        esStream.service,
-        Option(esStream.tags),
-        Option(esStream.force),
-        Option(esStream.description)
+        name = esStream.name,
+        service = esStream.service,
+        tags = Option(esStream.tags),
+        force = Option(esStream.force),
+        description = Option(esStream.description),
+        creationDate = esStream.creationDate
       )
 
     case StreamLiterals.`restType` =>
       val restStream = stream.asInstanceOf[RestStream]
 
       new RestStreamApi(
-        restStream.name,
-        restStream.service,
-        Option(restStream.tags),
-        Option(restStream.force),
-        Option(restStream.description)
+        name = restStream.name,
+        service = restStream.service,
+        tags = Option(restStream.tags),
+        force = Option(restStream.force),
+        description = Option(restStream.description),
+        creationDate = restStream.creationDate
       )
 
     case StreamLiterals.`jdbcType` =>
       val jdbcStream = stream.asInstanceOf[JDBCStream]
 
       new JDBCStreamApi(
-        jdbcStream.primary,
-        jdbcStream.name,
-        jdbcStream.service,
-        Option(jdbcStream.tags),
-        Option(jdbcStream.force),
-        Option(jdbcStream.description)
+        primary = jdbcStream.primary,
+        name = jdbcStream.name,
+        service = jdbcStream.service,
+        tags = Option(jdbcStream.tags),
+        force = Option(jdbcStream.force),
+        description = Option(jdbcStream.description),
+        creationDate = jdbcStream.creationDate
       )
   }
 }

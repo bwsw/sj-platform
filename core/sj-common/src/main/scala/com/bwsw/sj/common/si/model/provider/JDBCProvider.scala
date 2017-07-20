@@ -18,6 +18,8 @@
  */
 package com.bwsw.sj.common.si.model.provider
 
+import java.util.Date
+
 import com.bwsw.sj.common.config.{ConfigLiterals, NoSuchConfigException, SettingsUtils}
 import com.bwsw.sj.common.dal.model.provider.JDBCProviderDomain
 import com.bwsw.sj.common.utils.JdbcLiterals
@@ -33,9 +35,10 @@ class JDBCProvider(name: String,
                    hosts: Array[String],
                    val driver: String,
                    description: String,
-                   providerType: String)
+                   providerType: String,
+                   creationDate: String)
                   (implicit injector: Injector)
-  extends Provider(name, login, password, providerType, hosts, description) {
+  extends Provider(name, login, password, providerType, hosts, description, creationDate) {
 
   import messageResourceUtils.createMessage
 
@@ -49,7 +52,8 @@ class JDBCProvider(name: String,
         hosts = this.hosts,
         login = this.login,
         password = this.password,
-        driver = this.driver
+        driver = this.driver,
+        creationDate = new Date()
       )
 
     provider

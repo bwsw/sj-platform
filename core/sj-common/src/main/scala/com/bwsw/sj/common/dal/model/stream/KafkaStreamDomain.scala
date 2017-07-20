@@ -18,23 +18,24 @@
  */
 package com.bwsw.sj.common.dal.model.stream
 
+import java.util.Date
+
 import com.bwsw.common.KafkaClient
-import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.common.dal.model.service.KafkaServiceDomain
 import com.bwsw.sj.common.utils.{RestLiterals, StreamLiterals}
 import kafka.common.TopicAlreadyMarkedForDeletionException
 
 import scala.util.{Failure, Success, Try}
 
-class KafkaStreamDomain(override val name: String,
+class KafkaStreamDomain(name: String,
                         override val service: KafkaServiceDomain,
                         val partitions: Int,
                         val replicationFactor: Int,
-                        override val description: String = RestLiterals.defaultDescription,
-                        override val force: Boolean = false,
-                        override val tags: Array[String] = Array(),
-                        private val zkSessionTimeout: Int = ConfigLiterals.zkSessionTimeoutDefault)
-  extends StreamDomain(name, description, service, force, tags, StreamLiterals.kafkaType) {
+                        description: String = RestLiterals.defaultDescription,
+                        force: Boolean = false,
+                        tags: Array[String] = Array(),
+                        creationDate: Date)
+  extends StreamDomain(name, description, service, force, tags, StreamLiterals.kafkaType, creationDate) {
 
   protected def createClient(): KafkaClient = new KafkaClient(this.service.zkProvider.hosts)
 

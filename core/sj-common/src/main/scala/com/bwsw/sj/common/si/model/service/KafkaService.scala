@@ -18,6 +18,8 @@
  */
 package com.bwsw.sj.common.si.model.service
 
+import java.util.Date
+
 import com.bwsw.sj.common.dal.model.service.KafkaServiceDomain
 import com.bwsw.sj.common.rest.utils.ValidationUtils.validateNamespace
 import com.bwsw.sj.common.utils.ProviderLiterals
@@ -30,9 +32,10 @@ class KafkaService(name: String,
                    val zkProvider: String,
                    val zkNamespace: String,
                    description: String,
-                   serviceType: String)
+                   serviceType: String,
+                   creationDate: String)
                   (implicit injector: Injector)
-  extends Service(serviceType, name, provider, description) {
+  extends Service(serviceType, name, provider, description, creationDate) {
 
   import messageResourceUtils.createMessage
 
@@ -45,7 +48,8 @@ class KafkaService(name: String,
         description = this.description,
         provider = providerRepository.get(this.provider).get,
         zkProvider = providerRepository.get(this.zkProvider).get,
-        zkNamespace = this.zkNamespace
+        zkNamespace = this.zkNamespace,
+        creationDate = new Date()
       )
 
     modelService

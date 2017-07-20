@@ -18,6 +18,8 @@
  */
 package com.bwsw.sj.common.engine.core.managment
 
+import java.util.Date
+
 import com.bwsw.common.file.utils.ClosableClassLoader
 import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.common.dal.model.instance.ExecutionPlan
@@ -208,7 +210,7 @@ abstract class TaskManager(implicit injector: Injector) {
   }
 
   def getStream(name: String, description: String, tags: Array[String], partitions: Int): TStreamStreamDomain = {
-    new TStreamStreamDomain(name, auxiliaryTStreamService, partitions)
+    new TStreamStreamDomain(name, auxiliaryTStreamService, partitions, creationDate = new Date())
   }
 
   /**
