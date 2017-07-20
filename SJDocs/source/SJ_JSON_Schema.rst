@@ -29,11 +29,11 @@ Below you will find a Json schema for specification file of a module::
           "items": {
             "type": "string",
             "enum": [
-              "stream.t-stream",
-              "stream.kafka",
-              "elasticsearch-output",
-              "jdbc-output",
-              "rest-output",
+              "stream.t-streams",
+              "stream.apache-kafka",
+              "stream.elasticsearch",
+              "stream.sql-database",
+              "stream.restful",
               "input"
             ]
           }
@@ -117,14 +117,14 @@ Below you will find a Json schema for specification file of a module::
     "executor-class"
   ]
  }
-
+ 
 An example of valid specification for a **regular** module::
 
  {
   "name": "com.bw-sw.sj.demux",
   "description": "Universal demux module by BW",
   "version": "0.1",
-  "author": "John Smith",
+  "author": "Ksenia Mikhaleva",
   "license": "Apache 2.0",
   "inputs": {
     "cardinality": [
@@ -132,8 +132,8 @@ An example of valid specification for a **regular** module::
       5
     ],
     "types": [
-      "stream.kafka",
-      "stream.t-stream"
+      "stream.apache-kafka",
+      "stream.t-streams"
     ]
   },
   "outputs": {
@@ -142,8 +142,8 @@ An example of valid specification for a **regular** module::
       10
     ],
     "types": [
-      "stream.kafka",
-      "stream.t-stream"
+      "stream.apache-kafka",
+      "stream.t-streams"
     ]
   },
   "module-type": "regular-streaming",
@@ -160,7 +160,7 @@ An example of valid specification for a **batch** module::
   "name": "BatchModule",
   "description": "Universal demux module by BW",
   "version": "1.1",
-  "author": "John Smith",
+  "author": "Ksenia Mikhaleva",
   "license": "Apache 2.0",
   "inputs": {
     "cardinality": [
@@ -168,8 +168,8 @@ An example of valid specification for a **batch** module::
       1
     ],
     "types": [
-      "stream.kafka",
-      "stream.t-stream"
+      "stream.apache-kafka",
+      "stream.t-streams"
     ]
   },
   "outputs": {
@@ -178,7 +178,7 @@ An example of valid specification for a **batch** module::
       1
     ],
     "types": [
-      "stream.t-stream"
+      "stream.t-streams"
     ]
   },
   "module-type": "batch-streaming",
@@ -197,7 +197,7 @@ An example of valid specification for an **input** module::
   "name": "InputModule",
   "description": "Universal demux module by BW",
   "version": "1.0",
-  "author": "John Smith",
+  "author": "Ksenia Mikhaleva",
   "license": "Apache 1.0",
   "inputs": {
     "cardinality": [
@@ -214,7 +214,7 @@ An example of valid specification for an **input** module::
       1
     ],
     "types": [
-      "stream.t-stream"
+      "stream.t-streams"
     ]
   },
   "module-type": "input-streaming",
@@ -233,7 +233,7 @@ An example of valid specification for an **output** module::
   "name": "OutputModule",
   "description": "Universal demux module by BW",
   "version": "1.0",
-  "author": "John Smith",
+  "author": "Ksenia Mikhaleva",
   "license": "Apache 2.0",
   "inputs": {
     "cardinality": [
@@ -241,7 +241,7 @@ An example of valid specification for an **output** module::
       1
     ],
     "types": [
-      "stream.t-stream"
+      "stream.t-streams"
     ]
   },
   "outputs": {
@@ -250,7 +250,7 @@ An example of valid specification for an **output** module::
       1
     ],
     "types": [
-      "elasticsearch-output"
+      "stream.elasticsearch-"
     ]
   },
   "module-type": "output-streaming",
@@ -258,6 +258,5 @@ An example of valid specification for an **output** module::
   "engine-version": "1.0",
   
   "validator-class": "com.bwsw.sj.stubs.module.output.StubOutputValidator",
-  "executor-class": "com.bwsw.sj.stubs.module.output.StubOutputExecutor",
-  "entity-class" : "com.bwsw.sj.stubs.module.output.data.StubEsData"
+  "executor-class": "com.bwsw.sj.stubs.module.output.StubOutputExecutor"
  }
