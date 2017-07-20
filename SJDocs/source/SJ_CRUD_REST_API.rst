@@ -1895,7 +1895,7 @@ Success response example::
  }
 
 
-Get list of all uploaded module for such type
+Get list of all uploaded modules for such type
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Request method: GET
