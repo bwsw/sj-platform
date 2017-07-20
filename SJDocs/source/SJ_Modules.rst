@@ -55,7 +55,7 @@ The platform supports 4 types of modules:
 
 The modules can be strung in a pipeline as illustrated below:
 
-.. figure:: _static/ModulePipeline.png
+.. figure:: _static/ModulePipeline1.png
 
 In this document each module is described in detail.
 
