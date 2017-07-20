@@ -25,7 +25,7 @@ import com.fasterxml.jackson.annotation.{JsonIgnore, JsonProperty, JsonSubTypes,
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import scaldi.Injector
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type", defaultImpl = classOf[StreamApi], visible = true)
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type", defaultImpl = classOf[StreamApi], visible = true, include = JsonTypeInfo.As.EXISTING_PROPERTY)
 @JsonSubTypes(Array(
   new Type(value = classOf[TStreamStreamApi], name = StreamLiterals.tstreamsType),
   new Type(value = classOf[KafkaStreamApi], name = StreamLiterals.kafkaType),
