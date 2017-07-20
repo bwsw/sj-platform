@@ -58,7 +58,7 @@ class OutputInstanceValidatorTestSuit extends FlatSpec with Matchers with Instan
     val stream = mock[TStreamStreamDomain]
     when(stream.name).thenReturn(streamName)
     when(stream.partitions).thenReturn(1)
-    when(stream.streamType).thenReturn(StreamLiterals.tstreamType)
+    when(stream.streamType).thenReturn(StreamLiterals.tstreamsType)
     when(stream.service).thenReturn(tstrService)
     getStreamStorage.save(stream)
 

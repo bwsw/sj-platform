@@ -64,7 +64,7 @@ class RestStream(name: String,
             if (someService.serviceType != ServiceLiterals.restType) {
               errors += createMessage(
                 "entity.error.must.one.type.other.given",
-                s"Service for '${StreamLiterals.restOutputType}' stream",
+                s"Service for '${StreamLiterals.restType}' stream",
                 ServiceLiterals.restType,
                 someService.serviceType)
             }

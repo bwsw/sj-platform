@@ -29,8 +29,8 @@ class RestStreamApi(name: String,
                     tags: Option[Array[String]] = Some(Array()),
                     @JsonDeserialize(contentAs = classOf[Boolean]) force: Option[Boolean] = Some(false),
                     description: Option[String] = Some(RestLiterals.defaultDescription),
-                    @JsonProperty("type") streamType: Option[String] = Some(StreamLiterals.restOutputType))
-  extends StreamApi(streamType.getOrElse(StreamLiterals.restOutputType), name, service, tags, force, description) {
+                    @JsonProperty("type") streamType: Option[String] = Some(StreamLiterals.restType))
+  extends StreamApi(streamType.getOrElse(StreamLiterals.restType), name, service, tags, force, description) {
 
   override def to(implicit injector: Injector): RestStream =
     new RestStream(
@@ -38,6 +38,6 @@ class RestStreamApi(name: String,
       service,
       tags.getOrElse(Array()),
       force.getOrElse(false),
-      streamType.getOrElse(StreamLiterals.restOutputType),
+      streamType.getOrElse(StreamLiterals.restType),
       description.getOrElse(RestLiterals.defaultDescription))
 }

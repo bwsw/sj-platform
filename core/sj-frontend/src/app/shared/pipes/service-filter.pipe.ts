@@ -6,11 +6,11 @@ import { ServiceModel } from '../../services/service.model';
 })
 export class ServiceFilterPipe implements PipeTransform {
   public transform(value: [ServiceModel], term: string) {
-    const stream_types = ['stream.kafka', 'stream.t-stream', 'elasticsearch-output', 'jdbc-output', 'rest-output'];
-    const service_types = ['KfkQ', 'TstrQ', 'ESInd', 'JDBC', 'REST'];
+    const stream_types = ['stream.apache-kafka', 'stream.t-streams', 'stream.elasticsearch', 'stream.sql-database', 'stream.restful'];
+    const service_types = ['service.apache-kafka', 'service.t-streams', 'service.elasticsearch', 'service.sql-database', 'service.restful'];
     if (term !== undefined) {
-      if (term === 'zookeeper') {
-        return value.filter((entity) => entity.type.indexOf('ZKCoord') > -1);
+      if (term === 'service.apache-zookeeper') {
+        return value.filter((entity) => entity.type.indexOf('service.apache-zookeeper') > -1);
       } else {
         const index = stream_types.indexOf(term);
         const term_type = service_types[index];

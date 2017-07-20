@@ -33,6 +33,7 @@
                 <th>Name</th>
                 <th>Description</th>
                 <th>Provider</th>
+                <th>Date</th>
                 <th class="actions-column">Actions</th>
               </tr>
             </thead>
@@ -47,12 +48,13 @@
                 <td>{{ service.name }}</td>
                 <td>{{ service.description }}</td>
                 <td>
-                <span *ngIf="service.type != 'TstrQ'">
+                <span *ngIf="service.type != 'service.t-streams'">
                   <span>Provider:</span>
                   <span class="btn-lookup action-link"
                         (click)="getProviderInfo(ProviderInfo, service.provider)">{{ service.provider }}</span>
                 </span>
                 </td>
+                <td>{{ service.creationDate }}</td>
                 <td class="actions-column">
                   <button type="button"
                           class="btn btn-sm btn-secondary"
@@ -72,7 +74,7 @@
   <!-- Detailed info -->
   <div class="col col-xs-4">
     <div class="card">
-      <div class="card-header">Detailed information about node</div>
+      <div class="card-header">Service details</div>
       <div class="card-block">
         <div class="overflow-x-scroll">
           <ul *ngIf="currentService">
@@ -85,24 +87,37 @@
             <li *ngIf="currentService.description">
               <span class="title">Description:</span>{{currentService.description}}
             </li>
-            <li *ngIf="currentService.type === 'ESInd' && currentService.index">
+            <li *ngIf="currentService.type === 'service.elasticsearch' && currentService.index">
               <span class="title">Index:</span>{{currentService.index}}
             </li>
-            <li *ngIf="(currentService.type == 'TstrQ' || currentService.type === 'ZKCoord'
+            <li *ngIf="(currentService.type == 'service.t-streams' || currentService.type === 'service.apache-zookeeper'
                         || currentService.type === 'RdsCoord') && currentService.namespace">
               <span class="title">Namespace:</span>{{currentService.namespace}}
             </li>
-            <li *ngIf="currentService.type !== 'TstrQ' && currentService.provider">
+            <li *ngIf="currentService.httpScheme">
+              <span class="title">Http scheme:</span>{{currentService.httpScheme}}
+            </li>
+            <li *ngIf="currentService.type !== 'service.t-streams' && currentService.provider">
               <span class="title">Provider:</span>
               <span class="btn-lookup action-link" (click)="getProviderInfo(ProviderInfo, currentService.provider)">
                 {{ currentService.provider }}
               </span>
             </li>
-            <li *ngIf="currentService.type === 'KfkQ' && currentService.zkProvider">
+            <li *ngIf="currentService.type === 'service.apache-kafka' && currentService.zkProvider">
               <span class="title">ZK provider:</span>{{currentService.zkProvider}}
             </li>
-            <li *ngIf="currentService.type === 'KfkQ' && currentService.zkNamespace">
+            <li *ngIf="currentService.type === 'service.apache-kafka' && currentService.zkNamespace">
               <span class="title">ZK namespace:</span>{{currentService.zkNamespace}}
+            </li>
+            <li *ngIf="currentService.type === 'service.restful' && currentService.httpVersion">
+              <span class="title">Http version:</span>{{currentService.httpVersion}}
+            </li>
+            <li *ngIf="currentService.type === 'service.restful' && currentService.headers && (currentService.headers | json) != '{}'">
+              <sj-extended-element [title]="'Headers'"
+                                   [content]="currentService.headers | jsonPrint"></sj-extended-element>
+            </li>
+            <li *ngIf="currentService.type === 'service.restful' && currentService.basePath">
+              <span class="title">Base path:</span>{{currentService.basePath}}
             </li>
           </ul>
         </div>
@@ -127,12 +142,11 @@
         <form #serviceForm="ngForm" (ngSubmit)="createService(CreateService)" class="form-create-entity">
           <!-- Type -->
           <fieldset class="form-group row">
-            <label class="col-sm-2 col-form-label required">Choose type</label>
+            <label class="col-sm-2 col-form-label required">Type</label>
             <div class="col-sm-10">
               <select required [(ngModel)]="newService.type" name="serviceType"
                       class="form-control">
-                <option *ngFor="let type of serviceTypes" value="{{type}}"
-                        [disabled]="type ==='ArspkDB' || type === 'CassDB'">{{type}}</option>
+                <option *ngFor="let type of serviceTypes" value="{{type.id}}">{{type.name}}</option>
               </select>
             </div>
           </fieldset>
@@ -142,7 +156,7 @@
             <label class="col-sm-2 col-form-label required">Name</label>
             <div class="col-sm-10">
               <input [(ngModel)]="newService.name" name="serviceName" type="text" class="form-control"
-                     required pattern="[a-zA-z][a-zA-Z0-9-]*">
+                     required pattern="[a-zA-z][a-zA-Z0-9-]*" placeholder="Enter service name">
             </div>
           </fieldset>
 
@@ -152,7 +166,7 @@
             <div class="col-sm-10">
               <textarea [(ngModel)]="newService.description"
                         name="serviceDescription"
-                        class="form-control"></textarea>
+                        class="form-control"placeholder="Enter service description" ></textarea>
             </div>
           </fieldset>
 
@@ -166,21 +180,34 @@
           </fieldset-->
 
           <!-- Namespace -->
-          <fieldset *ngIf="newService.type === 'ZKCoord' ||
+          <fieldset *ngIf="newService.type === 'service.apache-zookeeper' ||
                       newService.type === 'RdsCoord' ||  newService.type == 'ArspkDB' " class="form-group row">
             <label class="col-sm-2 col-form-label required">Namespace</label>
             <div class="col-sm-10">
               <input [(ngModel)]="newService.namespace" name="serviceNamespace" type="text"
-                     class="form-control" required pattern="[a-zA-z][a-zA-Z0-9]*">
+                     class="form-control" required pattern="[a-zA-z][a-zA-Z0-9]*"
+                     placeholder="Enter service namespace">
             </div>
           </fieldset>
 
           <!-- Index -->
-          <fieldset *ngIf="newService.type === 'ESInd'" class="form-group row">
+          <fieldset *ngIf="newService.type === 'service.elasticsearch'" class="form-group row">
             <label class="col-sm-2 col-form-label required">Index</label>
             <div class="col-sm-10">
               <input [(ngModel)]="newService.index" name="serviceIndex" type="text" class="form-control"
-                     required>
+                     required placeholder="Enter service index">
+            </div>
+          </fieldset>
+
+          <!-- http Scheme -->
+          <fieldset *ngIf="newService.type" class="form-group row">
+            <label class="col-sm-2 col-form-label required">Http scheme</label>
+            <div class="col-sm-10">
+              <select [(ngModel)]="newService.httpScheme" name="httpScheme" required
+                      class="form-control">
+                <option selected>http</option>
+                <option>https</option>
+              </select>
             </div>
           </fieldset>
 
@@ -197,125 +224,76 @@
           </fieldset>
 
           <!-- Prefix -->
-          <fieldset *ngIf="newService.type === 'TstrQ'" class="form-group row">
+          <fieldset *ngIf="newService.type === 'service.t-streams'" class="form-group row">
             <label class="col-sm-2 col-form-label required">Prefix</label>
             <div class="col-sm-10">
               <input [(ngModel)]="newService.prefix" name="servicePrefix" type="text"
-                     class="form-control" required pattern="[\/][a-z0-9 \/]*[a-z0-9]+">
+                     class="form-control" required pattern="[\/][a-z0-9 \/]*[a-z0-9]+"
+                     placeholder="Enter service prefix">
             </div>
           </fieldset>
 
           <!-- Token -->
-          <fieldset *ngIf="newService.type === 'TstrQ'" class="form-group row">
+          <fieldset *ngIf="newService.type === 'service.t-streams'" class="form-group row">
             <label class="col-sm-2 col-form-label required">Token</label>
             <div class="col-sm-10">
               <input [(ngModel)]="newService.token" name="serviceToken" type="text"  maxlength="32"
-                     class="form-control" required>
+                     class="form-control" required placeholder="Enter service token">
             </div>
           </fieldset>
 
           <!-- basePath -->
-          <fieldset *ngIf="newService.type === 'REST'" class="form-group row">
+          <fieldset *ngIf="newService.type === 'service.restful'" class="form-group row">
             <label class="col-sm-2 col-form-label">Base path</label>
             <div class="col-sm-10">
-              <input [(ngModel)]="newService.basePath" name="serviceToken" type="text"
-                     class="form-control">
+              <input [(ngModel)]="newService.basePath" name="basePath" type="text"
+                     class="form-control" placeholder="Enter base path">
             </div>
           </fieldset>
 
           <!-- httpVersion -->
-          <fieldset *ngIf="newService.type === 'REST'" class="form-group row">
+          <fieldset *ngIf="newService.type === 'service.restful'" class="form-group row">
             <label class="col-sm-2 col-form-label">Http version</label>
             <div class="col-sm-10">
-              <input [(ngModel)]="newService.httpVersion" name="serviceToken" type="text"
-                     class="form-control">
+              <select [(ngModel)]="newService.httpVersion" name="httpVersion"
+                      class="form-control">
+                <option>1.0</option>
+                <option selected>1.1</option>
+                <option>2</option>
+              </select>
             </div>
           </fieldset>
 
           <!-- headers -->
-          <fieldset *ngIf="newService.type === 'REST'" class="form-group row">
+          <fieldset *ngIf="newService.type === 'service.restful'" class="form-group row">
             <label class="col-sm-2 col-form-label">Headers</label>
             <div class="col-sm-10">
-              <input [(ngModel)]="newService.headers" validJson name="serviceToken" type="text"
-                     class="form-control">
+              <textarea [(ngModel)]="newService.headers" validJson name="headers"
+                        placeholder="use JSON notation"
+                        class="form-control"></textarea>
             </div>
           </fieldset>
 
-          <!-- Data providers
-          <fieldset *ngIf="newService.type === 'TstrQ'" class="form-group row">
-            <label class="col-sm-2 col-form-label required">Data providers</label>
-            <div class="col-sm-10">
-              <select [(ngModel)]="newService.dataProvider" name="serviceDataProvider"
-                      required class="form-control">
-                <option *ngFor="let providers of providerList | providerFilter : 'DataProvider' " value="{{providers.name}}">{{providers.name}}
-                </option>
-              </select>
-            </div>
-          </fieldset>-->
-
           <!-- Database -->
-          <fieldset *ngIf="newService.type === 'JDBC'" class="form-group row">
+          <fieldset *ngIf="newService.type === 'service.sql-database'" class="form-group row">
             <label class="col-sm-2 col-form-label required">Database name</label>
             <div class="col-sm-10">
               <input [(ngModel)]="newService.database" name="serviceDatabase" type="text"
-                     class="form-control" required>
+                     class="form-control" required placeholder="Enter database name">
             </div>
           </fieldset>
 
-          <!-- Data namespace -->
-          <!--fieldset *ngIf="newService.type === 'TstrQ'" class="form-group row">
-            <label class="col-sm-2 col-form-label required">Data namespace</label>
-            <div class="col-sm-10">
-              <input [(ngModel)]="newService.dataNamespace" name="serviceDatabase" type="text"
-                     class="form-control" required>
-            </div>
-          </fieldset>-->
-
-          <!--Driver>
-          <fieldset *ngIf="newService.type === 'JDBC'" class="form-group row">
-            <label class="col-sm-2 col-form-label required">Driver</label>
-            <div class="col-sm-10">
-              <select [(ngModel)]="newService.driver" name="serviceDriver"
-                      required class="form-control">
-                <option>postgresql</option>
-                <option>oracle</option>
-                <option>mysql</option>
-              </select>
-            </div>
-          </fieldset -->
-
-          <!-- Lock providers
-          <fieldset *ngIf="newService.type === 'TstrQ'" class="form-group row">
-            <label class="col-sm-2 col-form-label required">Lock-providers</label>
-            <div class="col-sm-10">
-              <select [(ngModel)]="newService.lockProvider" name="serviceLockProvider"
-                      required class="form-control">
-                <option *ngFor="let providers of providerList | providerFilter : 'LockProvider' " value="{{providers.name}}">{{providers.name}}
-                </option>
-              </select>
-            </div>
-          </fieldset>-->
-
-          <!-- Lock namespace
-          <fieldset *ngIf="newService.type === 'TstrQ'" class="form-group row">
-            <label class="col-sm-2 col-form-label required">Lock-namespace</label>
-            <div class="col-sm-10">
-              <input [(ngModel)]="newService.lockNamespace" name="serviceLockNamespace" type="text"
-                     class="form-control" required>
-            </div>
-          </fieldset>-->
-
           <!-- Login -->
-          <fieldset *ngIf="newService.type === 'ESInd'" class="form-group row">
+          <fieldset *ngIf="newService.type === 'service.elasticsearch'" class="form-group row">
             <label class="col-sm-2 col-form-label">Login</label>
             <div class="col-sm-10">
               <input [(ngModel)]="newService.login" name="serviceLogin" type="text" class="form-control"
-                     placeholder="Enter service login">
+                     placeholder="Enter service login" placeholder="Enter service login">
             </div>
           </fieldset>
 
           <!-- Password -->
-          <fieldset *ngIf="newService.type === 'ESInd'" class="form-group row">
+          <fieldset *ngIf="newService.type === 'service.elasticsearch'" class="form-group row">
             <label class="col-sm-2 col-form-label">Password</label>
             <div class="col-sm-10">
               <input [(ngModel)]="newService.password" name="servicePassword" type="text"
@@ -324,24 +302,24 @@
           </fieldset>
 
           <!-- ZK Provider -->
-          <fieldset *ngIf="newService.type === 'KfkQ'" class="form-group row">
+          <fieldset *ngIf="newService.type === 'service.apache-kafka'" class="form-group row">
             <label class="col-sm-2 col-form-label required">ZK provider</label>
             <div class="col-sm-10">
               <select [(ngModel)]="newService.zkProvider" name="serviceZkProvider"
                       required class="form-control">
-                <option *ngFor="let provider of providerList | providerFilter : 'ZKCoord' " value="{{provider.name}}">{{provider.name}}
+                <option *ngFor="let provider of providerList | providerFilter : 'service.apache-zookeeper' " value="{{provider.name}}">{{provider.name}}
                 </option>
               </select>
             </div>
           </fieldset>
 
           <!-- ZK namespace -->
-          <fieldset *ngIf="newService.type === 'KfkQ'" class="form-group row">
+          <fieldset *ngIf="newService.type === 'service.apache-kafka'" class="form-group row">
             <label class="col-sm-2 col-form-label required">ZK namespace</label>
             <div class="col-sm-10">
               <input [(ngModel)]="newService.zkNamespace" name="serviceZkNamespace" type="text"
                      class="form-control col-sm-10" required
-                     pattern="[a-zA-z][a-zA-Z0-9]*">
+                     pattern="[a-zA-z][a-zA-Z0-9]*" placeholder="Enter ZK namespace">
             </div>
           </fieldset>
         </form>

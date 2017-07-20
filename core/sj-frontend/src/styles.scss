@@ -13,6 +13,10 @@ header.navbar {
   }
 }
 
+/* Extended card */
+.card-extended {
+  margin: 4px 0px !important;
+}
 
 /* Table action buttons */
 .actions-column {
@@ -24,6 +28,9 @@ header.navbar {
     border: none;
     background: none;
   }
+}
+tbody tr {
+  cursor: pointer;
 }
 
 /* Form styles */

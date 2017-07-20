@@ -23,7 +23,7 @@ import com.bwsw.sj.common.rest._
 import com.bwsw.sj.common.si.StreamSI
 import com.bwsw.sj.common.si.result.{Created, NotCreated}
 import com.bwsw.sj.common.utils.{MessageResourceUtils, StreamLiterals}
-import com.bwsw.sj.crud.rest.model.stream.{StreamApiCreator, StreamApi}
+import com.bwsw.sj.crud.rest.model.stream.{StreamApi, StreamApiCreator}
 import com.bwsw.sj.crud.rest.{RelatedToStreamResponseEntity, StreamResponseEntity, StreamsResponseEntity}
 import scaldi.Injectable.inject
 import scaldi.Injector
@@ -82,8 +82,9 @@ class StreamController(implicit protected val injector: Injector) extends Contro
     OkRestResponse(responseEntity)
   }
 
-  def getTypes =
-    OkRestResponse(TypesResponseEntity(StreamLiterals.types))
+  def getTypes = {
+    OkRestResponse(TypesResponseEntity(StreamLiterals.beToFeTypes.map(x => Type(x._1, x._2)).toSeq))
+  }
 
   def getRelated(name: String): RestResponse = {
     serviceInterface.getRelated(name) match {

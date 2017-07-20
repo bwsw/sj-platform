@@ -13,7 +13,7 @@ export class AlertsComponent {
   }
 
   public getTimeOut(alert: NotificationModel) {
-    return alert.timeout != 0 ? alert.timeout : '';
+    return alert.timeout !== 0 ? alert.timeout : '';
   }
 
 }

@@ -7,6 +7,7 @@ import { ProviderModel } from '../providers/provider.model';
 import { ServicesService } from './services.service';
 import { ProvidersService } from '../providers/providers.service';
 import { NgForm } from '@angular/forms';
+import { TypeModel } from '../shared/model/type.model';
 
 @Component({
   selector: 'sj-services',
@@ -21,7 +22,7 @@ export class ServicesComponent implements OnInit {
   public alerts: NotificationModel[] = [];
   public formAlerts: NotificationModel[] = [];
   public serviceList: ServiceModel[];
-  public serviceTypes: string[];
+  public serviceTypes: TypeModel[];
   public providerList: ProviderModel[];
   public blockingStreams: string[] = [];
   public blockingInstances: string[] = [];

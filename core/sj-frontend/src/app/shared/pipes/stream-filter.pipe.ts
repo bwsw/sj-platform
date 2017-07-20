@@ -9,7 +9,7 @@ export class StreamFilterPipe implements PipeTransform {
     let result: any[] = [];
     const terms_array = terms.split(',');
     for (const term of terms_array) {
-      const stream_types = ['stream.kafka', 'stream.t-stream', 'elasticsearch-output', 'jdbc-output'];
+      const stream_types = ['stream.apache-kafka', 'stream.t-streams', 'stream.elasticsearch', 'stream.sql-database', 'stream.restful'];
       if (term !== undefined) {
         const index = stream_types.indexOf(term);
         const term_type = stream_types[index];

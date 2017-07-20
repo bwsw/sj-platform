@@ -69,7 +69,7 @@ class ESStream(name: String,
           case Some(someService) =>
             if (someService.serviceType != ServiceLiterals.elasticsearchType) {
               errors += createMessage("entity.error.must.one.type.other.given",
-                s"Service for '${StreamLiterals.esOutputType}' stream",
+                s"Service for '${StreamLiterals.elasticsearchType}' stream",
                 ServiceLiterals.elasticsearchType,
                 someService.serviceType)
             }

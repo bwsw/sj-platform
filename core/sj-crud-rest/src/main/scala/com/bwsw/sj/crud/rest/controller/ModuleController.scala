@@ -24,7 +24,7 @@ import com.bwsw.sj.common.si._
 import com.bwsw.sj.common.si.model.module.ModuleMetadata
 import com.bwsw.sj.common.si.result.{Created, Deleted, DeletionError, NotCreated}
 import com.bwsw.sj.common.utils.{EngineLiterals, MessageResourceUtils}
-import com.bwsw.sj.crud.rest.model.module.{SpecificationApiCreator, ModuleMetadataApi}
+import com.bwsw.sj.crud.rest.model.module.{ModuleMetadataApi, SpecificationApiCreator}
 import com.bwsw.sj.crud.rest.utils.{FileMetadataUtils, JsonDeserializationErrorMessageCreator}
 import com.bwsw.sj.crud.rest.{ModuleJar, ModulesResponseEntity, RelatedToModuleResponseEntity, SpecificationResponseEntity}
 import scaldi.Injectable.inject
@@ -102,7 +102,7 @@ class ModuleController(implicit injector: Injector) {
   }
 
   def getAllTypes: RestResponse =
-    OkRestResponse(TypesResponseEntity(EngineLiterals.moduleTypes))
+    OkRestResponse(TypesResponseEntity(EngineLiterals.beToFeModulesTypes.map(x => Type(x._1, x._2)).toSeq))
 
   def getSpecification(moduleType: String, moduleName: String, moduleVersion: String): RestResponse = {
     processModuleWithoutFile(moduleType, moduleName, moduleVersion) { moduleMetadata =>

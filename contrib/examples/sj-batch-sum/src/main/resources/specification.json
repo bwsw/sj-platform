@@ -10,7 +10,7 @@
       10
     ],
     "types": [
-      "stream.kafka"
+      "stream.apache-kafka"
     ]
   },
   "outputs": {
@@ -19,7 +19,7 @@
       10
     ],
     "types": [
-      "stream.t-stream"
+      "stream.t-streams"
     ]
   },
   "module-type": "batch-streaming",

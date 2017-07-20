@@ -10,7 +10,7 @@
       1
     ],
     "types": [
-      "stream.t-stream"
+      "stream.t-streams"
     ]
   },
   "outputs": {
@@ -19,7 +19,7 @@
       1
     ],
     "types": [
-      "rest-output"
+      "stream.restful"
     ]
   },
   "module-type": "output-streaming",

@@ -27,11 +27,11 @@ import scaldi.Injector
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type", defaultImpl = classOf[StreamApi], visible = true)
 @JsonSubTypes(Array(
-  new Type(value = classOf[TStreamStreamApi], name = StreamLiterals.tstreamType),
-  new Type(value = classOf[KafkaStreamApi], name = StreamLiterals.kafkaStreamType),
-  new Type(value = classOf[ESStreamApi], name = StreamLiterals.esOutputType),
-  new Type(value = classOf[JDBCStreamApi], name = StreamLiterals.jdbcOutputType),
-  new Type(value = classOf[RestStreamApi], name = StreamLiterals.restOutputType)
+  new Type(value = classOf[TStreamStreamApi], name = StreamLiterals.tstreamsType),
+  new Type(value = classOf[KafkaStreamApi], name = StreamLiterals.kafkaType),
+  new Type(value = classOf[ESStreamApi], name = StreamLiterals.elasticsearchType),
+  new Type(value = classOf[JDBCStreamApi], name = StreamLiterals.jdbcType),
+  new Type(value = classOf[RestStreamApi], name = StreamLiterals.restType)
 ))
 class StreamApi(@JsonProperty("type") val streamType: String,
                 val name: String,
@@ -54,7 +54,7 @@ class StreamApi(@JsonProperty("type") val streamType: String,
 class StreamApiCreator {
 
   def from(stream: SjStream): StreamApi = stream.streamType match {
-    case StreamLiterals.tstreamType =>
+    case StreamLiterals.`tstreamsType` =>
       val tStreamStream = stream.asInstanceOf[TStreamStream]
 
       new TStreamStreamApi(
@@ -66,7 +66,7 @@ class StreamApiCreator {
         Option(tStreamStream.partitions)
       )
 
-    case StreamLiterals.kafkaStreamType =>
+    case StreamLiterals.`kafkaType` =>
       val kafkaStream = stream.asInstanceOf[KafkaStream]
 
       new KafkaStreamApi(
@@ -79,7 +79,7 @@ class StreamApiCreator {
         Option(kafkaStream.replicationFactor)
       )
 
-    case StreamLiterals.esOutputType =>
+    case StreamLiterals.`elasticsearchType` =>
       val esStream = stream.asInstanceOf[ESStream]
 
       new ESStreamApi(
@@ -90,7 +90,7 @@ class StreamApiCreator {
         Option(esStream.description)
       )
 
-    case StreamLiterals.restOutputType =>
+    case StreamLiterals.`restType` =>
       val restStream = stream.asInstanceOf[RestStream]
 
       new RestStreamApi(
@@ -101,7 +101,7 @@ class StreamApiCreator {
         Option(restStream.description)
       )
 
-    case StreamLiterals.jdbcOutputType =>
+    case StreamLiterals.`jdbcType` =>
       val jdbcStream = stream.asInstanceOf[JDBCStream]
 
       new JDBCStreamApi(

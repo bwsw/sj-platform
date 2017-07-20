@@ -29,7 +29,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore
   */
 
 class KafkaEnvelope[T <: AnyRef](var data: T) extends Envelope {
-  streamType = StreamLiterals.kafkaStreamType
+  streamType = StreamLiterals.kafkaType
 
   @JsonIgnore
   override def equals(obj: Any): Boolean = obj match {

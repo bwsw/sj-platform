@@ -66,7 +66,7 @@ class JDBCStream(name: String,
           case Some(someService) =>
             if (someService.serviceType != ServiceLiterals.jdbcType) {
               errors += createMessage("entity.error.must.one.type.other.given",
-                s"Service for '${StreamLiterals.jdbcOutputType}' stream",
+                s"Service for '${StreamLiterals.jdbcType}' stream",
                 ServiceLiterals.jdbcType,
                 someService.serviceType)
             }

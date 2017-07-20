@@ -33,6 +33,7 @@
             <tr>
               <th>Name</th>
               <th>Description</th>
+              <th>Date</th>
               <th class="actions-column">Actions</th>
             </tr>
             </thead>
@@ -46,6 +47,7 @@
                 (click)="selectProvider(provider)">
               <td>{{ provider.name }}</td>
               <td>{{ provider.description }}</td>
+              <td>{{ provider.creationDate }}</td>
               <td class="actions-column">
                 <button type="button"
                         class="btn btn-sm btn-secondary"
@@ -72,7 +74,7 @@
   <!-- Detailed info -->
   <div class="col col-xs-4">
     <div class="card">
-      <div class="card-header">Detailed information about node</div>
+      <div class="card-header">Provider details</div>
       <div class="card-block">
         <div class="overflow-x-scroll">
           <ul *ngIf="currentProvider">
@@ -86,7 +88,7 @@
             </li>
             <li *ngIf="currentProvider.login"><span class="title">Login:</span>{{currentProvider.login}}</li>
             <li *ngIf="currentProvider.password"><span class="title">Password:</span>{{currentProvider.password}}</li>
-            <li *ngIf="currentProvider.type === 'JDBC'"><span class="title">Driver:</span>{{currentProvider.driver}}</li>
+            <li *ngIf="currentProvider.type === 'provider.sql-database'"><span class="title">Driver:</span>{{currentProvider.driver}}</li>
           </ul>
         </div>
       </div>
@@ -113,13 +115,13 @@
 
           <!-- Type -->
           <fieldset class="form-group row">
-            <label class="col-form-label col-sm-2 required">Choose type</label>
+            <label class="col-form-label col-sm-2 required">Type</label>
             <div class="col-sm-10">
               <select class="form-control"
                       [(ngModel)]="newProvider.type"
                       name="providerType"
                       required>
-                <option *ngFor="let type of providerTypes" value="{{type}}">{{type}}</option>
+                <option *ngFor="let type of providerTypes" value="{{type.id}}">{{type.name}}</option>
               </select>
             </div>
           </fieldset>
@@ -150,9 +152,9 @@
               <div *ngFor="let host of newProvider.hosts; let i = index; trackBy:customTrackBy"
                    class="input-group mb-1">
                 <input required
-                       pattern="^0*([1-9]?\d|1\d\d|2[0-4]\d|25[0-5])\.0*([1-9]?\d|1\d\d|2[0-4]\d|25[0-5])\.0*([1-9]?\d|1\d\d|2[0-4]\d|25[0-5])\.0*([1-9]?\d|1\d\d|2[0-4]\d|25[0-5]):(\d+)$"
+                       pattern="^((0*([1-9]?\d|1\d\d|2[0-4]\d|25[0-5])\.){3}0*([1-9]?\d|1\d\d|2[0-4]\d|25[0-5]):(\d+)|([\da-z\.-]+)\.([a-z\.]{2,6}):(\d+))([\/\w \.-]*)*\/?$"
                        [(ngModel)]="newProvider.hosts[i]"  name="providerHosts{{i}}"
-                       type="text" class="form-control " placeholder="IPv4:port">
+                       type="text" class="form-control " placeholder="IPv4:port or domain:port">
                 <span class="input-group-btn" *ngIf="i!==0">
                   <button type="button"
                           class="btn btn-secondary"
@@ -184,7 +186,7 @@
           </fieldset>
 
           <!-- Driver -->
-          <fieldset class="form-group row" *ngIf="newProvider.type === 'JDBC'">
+          <fieldset class="form-group row" *ngIf="newProvider.type === 'provider.sql-database'">
             <label class="col-sm-2 col-form-label required">Driver</label>
             <div class="col-sm-10">
               <input required [(ngModel)]="newProvider.driver" name="providerDriver" type="text"
