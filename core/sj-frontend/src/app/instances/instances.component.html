@@ -329,7 +329,7 @@
                     <select [(ngModel)]="newInstance.inputs[i]"
                             (change)="checkTimestampAcceptable()"
                             name="instanceInputs{{i}}" required class="form-control">
-                      <option *ngFor="let stream of streamsList | streamFilter: 'stream.t-stream,stream.kafka'">{{stream.name}}</option>
+                      <option *ngFor="let stream of streamsList | streamFilter: 'stream.t-streams, stream.apache-kafka'">{{stream.name}}</option>
                     </select>
                   </div>
                   <div class="col-sm-6">
@@ -360,7 +360,7 @@
               <div class="col col-sm-10">
                 <select [(ngModel)]="newInstance.input" name="instanceInput" required
                         class="form-control">
-                  <option *ngFor="let stream of streamsList | streamFilter: 'stream.t-stream'" value="{{stream.name}}">{{stream.name}}</option>
+                  <option *ngFor="let stream of streamsList | streamFilter: 'stream.t-streams'" value="{{stream.name}}">{{stream.name}}</option>
                 </select>
               </div>
             </fieldset>
@@ -371,7 +371,7 @@
               <div class="col col-sm-10">
                 <select [(ngModel)]="newInstance.output" name="instanceOutput" required
                         class="form-control">
-                  <option *ngFor="let stream of streamsList | streamFilter: 'jdbc-output,elasticsearch-output'" value="{{stream.name}}">{{stream.name}}</option>
+                  <option *ngFor="let stream of streamsList | streamFilter: 'stream.sql-database,stream.elasticsearch'" value="{{stream.name}}">{{stream.name}}</option>
                 </select>
               </div>
             </fieldset>
@@ -387,7 +387,7 @@
                      class="input-group mb-1">
                   <select [(ngModel)]="newInstance.outputs[i]"
                           name="instanceOutputs{{i}}" required class="form-control">
-                    <option *ngFor="let stream of streamsList | streamFilter: 'stream.t-stream'" value="{{stream.name}}">{{stream.name}}</option>
+                    <option *ngFor="let stream of streamsList | streamFilter: 'stream.t-streams'" value="{{stream.name}}">{{stream.name}}</option>
                   </select>
                   <span class="input-group-btn" *ngIf="i!==0">
                     <button type="button"
@@ -419,89 +419,6 @@
                        pattern="[1-9][0-9]*" class="form-control" placeholder="Enter sliding interval">
               </div>
             </fieldset>
-
-            <!-- Main-stream -->
-            <!--fieldset *ngIf="newInstance.module.moduleType === 'batch-streaming'" class="form-group row">
-              <label class="col-form-label col-sm-2 required">Main stream</label>
-              <div class="col col-sm-10">
-                <div class="mb-1 row">
-                  <div class="col-sm-6">
-                    <select [value]="newInstance.mainStream" (input)="newInstance.mainStream = $event.target.value"
-                            name="instanceMainStream" required class="form-control">
-                      <option *ngFor="let stream of streamsList | streamFilter: 'stream.t-stream,stream.kafka'" value="{{stream.name}}">{{stream.name}}</option>
-                    </select>
-                  </div>
-                  <div class="col-sm-6">
-                    <div class="input-group">
-                      <select [value]="newInstance.mainStreamType" (input)="newInstance.mainStreamType = $event.target.value"
-                              name="instanceMainStreamType" required class="form-control">
-                        <option>full</option>
-                        <option>split</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </fieldset-->
-
-            <!-- Related-streams -->
-            <!--fieldset *ngIf="newInstance.module.moduleType === 'batch-streaming'"
-                      class="form-group row">
-              <label class="col-form-label col-sm-2">Related streams</label>
-
-              <div class="col col-sm-10">
-                <div *ngFor="let relatedStream of newInstance.relatedStreams; let i = index;  trackBy:customTrackBy"
-                     class="input-group mb-1">
-                  <div class="col-sm-6">
-                    <select [value]="newInstance.relatedStreams[i]" (input)="newInstance.relatedStreams[i] = $event.target.value"
-                            name="instanceRelatedStream" class="form-control">
-                      <option *ngFor="let stream of streamsList | streamFilter: 'stream.t-stream,stream.kafka'" value="{{stream.name}}">{{stream.name}}</option>
-                    </select>
-                  </div>
-                  <div class="col-sm-6">
-                    <div class="input-group">
-                      <select [value]="newInstance.relatedStreamsType[i]" (input)="newInstance.relatedStreamsType[i] = $event.target.value"
-                              name="instanceRelatedStreaInputType" class="form-control">
-                        <option>full</option>
-                        <option>split</option>
-                      </select>
-                    </div>
-                  </div>
-                  <span class="input-group-btn">
-                    <button type="button"
-                            class="btn btn-secondary"
-                            (click)="removeRelatedStream(i)">
-                      <i class="fa fa-remove"></i>
-                    </button>
-                  </span>
-                </div>
-
-                <button type="button" (click)="addRelatedStream()" class="btn btn-sm btn-secondary">+ Add related stream</button>
-              </div>
-            </fieldset-->
-
-            <!-- Batch-fill-type -->
-            <!--fieldset *ngIf="newInstance.module.moduleType === 'batch-streaming'" class="form-group row">
-              <label class="col-form-label col-sm-2 required">Batch-fill-type</label>
-              <div class="col col-sm-10">
-                <div class="mb-1 row">
-                  <div class="col-sm-6">
-                    <select [value]="newInstance.batchFillType.typeName" (input)="newInstance.batchFillType.typeName = $event.target.value"
-                            name="instanceBatchFillTypeName" required class="form-control">
-                      <option>every-nth</option>
-                      <option>time-interval</option>
-                      <option>transaction-interval</option>
-                    </select>
-                  </div>
-                  <div class="col-sm-6">
-                    <div class="input-group">
-                      <input [(ngModel)]="newInstance.batchFillType.value" name="instanceBatchFillTypeValue" type="number"
-                             required class="form-control" min="1">
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </fieldset-->
 
             <!-- Checkpoint mode -->
             <fieldset *ngIf="newInstance.module.moduleType!== 'batch-streaming'" class="form-group row">
@@ -645,7 +562,7 @@
               <div class="col col-sm-10">
                 <select [(ngModel)]="newInstance.coordinationService" name="instanceCoordinationService"
                         required class="form-control">
-                  <option *ngFor="let service of servicesList | serviceFilter : 'zookeeper' " value={{service.name}}>
+                  <option *ngFor="let service of servicesList | serviceFilter : 'service.apache-zookeeper' " value={{service.name}}>
                     {{service.name}}
                   </option>
                 </select>
