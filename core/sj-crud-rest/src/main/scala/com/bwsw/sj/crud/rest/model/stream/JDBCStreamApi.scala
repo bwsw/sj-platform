@@ -30,16 +30,18 @@ class JDBCStreamApi(val primary: String,
                     tags: Option[Array[String]] = Some(Array()),
                     @JsonDeserialize(contentAs = classOf[Boolean]) force: Option[Boolean] = Some(false),
                     description: Option[String] = Some(RestLiterals.defaultDescription),
-                    @JsonProperty("type") streamType: Option[String] = Some(StreamLiterals.jdbcType))
-  extends StreamApi(streamType.getOrElse(StreamLiterals.jdbcType), name, service, tags, force, description) {
+                    @JsonProperty("type") streamType: Option[String] = Some(StreamLiterals.jdbcType),
+                    creationDate: String)
+  extends StreamApi(streamType.getOrElse(StreamLiterals.jdbcType), name, service, tags, force, description, creationDate) {
 
   override def to(implicit injector: Injector): JDBCStream =
     new JDBCStream(
       name,
       service,
-      primary,
-      tags.getOrElse(Array()),
-      force.getOrElse(false),
-      streamType.getOrElse(StreamLiterals.jdbcType),
-      description.getOrElse(RestLiterals.defaultDescription))
+      primary = primary,
+      tags = tags.getOrElse(Array()),
+      force = force.getOrElse(false),
+      streamType = streamType.getOrElse(StreamLiterals.jdbcType),
+      description = description.getOrElse(RestLiterals.defaultDescription),
+      creationDate = creationDate)
 }

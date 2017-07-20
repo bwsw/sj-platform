@@ -31,7 +31,8 @@ import scala.collection.mutable.ArrayBuffer
 class Service(val serviceType: String,
               val name: String,
               val provider: String,
-              val description: String)
+              val description: String,
+              val creationDate: String)
              (implicit injector: Injector) {
 
   protected val messageResourceUtils = inject[MessageResourceUtils]
@@ -139,7 +140,8 @@ class ServiceCreator {
           index = esService.index,
           provider = esService.provider.name,
           description = esService.description,
-          serviceType = esService.serviceType
+          serviceType = esService.serviceType,
+          creationDate = esService.creationDate.toString
         )
 
       case ServiceLiterals.jdbcType =>
@@ -150,7 +152,8 @@ class ServiceCreator {
           database = jdbcService.database,
           provider = jdbcService.provider.name,
           description = jdbcService.description,
-          serviceType = jdbcService.serviceType
+          serviceType = jdbcService.serviceType,
+          creationDate = jdbcService.creationDate.toString
         )
 
       case ServiceLiterals.kafkaType =>
@@ -162,7 +165,8 @@ class ServiceCreator {
           zkNamespace = kafkaService.zkNamespace,
           provider = kafkaService.provider.name,
           description = kafkaService.description,
-          serviceType = kafkaService.serviceType
+          serviceType = kafkaService.serviceType,
+          creationDate = kafkaService.creationDate.toString
         )
 
       case ServiceLiterals.restType =>
@@ -176,7 +180,8 @@ class ServiceCreator {
           headers = Map(restService.headers.asScala.toList: _*),
           provider = restService.provider.name,
           description = restService.description,
-          serviceType = restService.serviceType
+          serviceType = restService.serviceType,
+          creationDate = restService.creationDate.toString
         )
 
       case ServiceLiterals.tstreamsType =>
@@ -188,7 +193,8 @@ class ServiceCreator {
           token = tStreamService.token,
           provider = tStreamService.provider.name,
           description = tStreamService.description,
-          serviceType = tStreamService.serviceType
+          serviceType = tStreamService.serviceType,
+          creationDate = tStreamService.creationDate.toString
         )
 
       case ServiceLiterals.zookeeperType =>
@@ -199,7 +205,8 @@ class ServiceCreator {
           namespace = zkService.namespace,
           provider = zkService.provider.name,
           description = zkService.description,
-          serviceType = zkService.serviceType
+          serviceType = zkService.serviceType,
+          creationDate = zkService.creationDate.toString
         )
     }
   }

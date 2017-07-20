@@ -19,6 +19,7 @@
 package com.bwsw.sj.common.dal.model.provider
 
 import java.sql.SQLException
+import java.util.Date
 
 import com.bwsw.common.jdbc.JdbcClientBuilder
 import com.bwsw.sj.common.utils.ProviderLiterals
@@ -31,8 +32,9 @@ class JDBCProviderDomain(override val name: String,
                          override val hosts: Array[String],
                          override val login: String,
                          override val password: String,
-                         val driver: String)
-  extends ProviderDomain(name, description, hosts, login, password, ProviderLiterals.jdbcType) {
+                         val driver: String,
+                         override val creationDate: Date)
+  extends ProviderDomain(name, description, hosts, login, password, ProviderLiterals.jdbcType, creationDate) {
 
   override def checkJdbcConnection(address: String): ArrayBuffer[String] = {
     val errors = ArrayBuffer[String]()

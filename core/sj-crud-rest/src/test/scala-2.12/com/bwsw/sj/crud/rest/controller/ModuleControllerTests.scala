@@ -20,6 +20,7 @@ package com.bwsw.sj.crud.rest.controller
 
 import java.io.File
 import java.nio.file.Paths
+import java.util.Date
 
 import akka.stream.scaladsl.FileIO
 import com.bwsw.common.exceptions.JsonDeserializationException
@@ -29,7 +30,7 @@ import com.bwsw.sj.common.si.model.module.{ModuleMetadata, Specification}
 import com.bwsw.sj.common.si.result.{Created, Deleted, DeletionError, NotCreated}
 import com.bwsw.sj.common.utils.EngineLiterals._
 import com.bwsw.sj.common.utils.MessageResourceUtils
-import com.bwsw.sj.crud.rest.model.module.{SpecificationApiCreator, ModuleMetadataApi, SpecificationApi}
+import com.bwsw.sj.crud.rest.model.module.{ModuleMetadataApi, SpecificationApi, SpecificationApiCreator}
 import com.bwsw.sj.crud.rest.utils.{FileMetadataUtils, JsonDeserializationErrorMessageCreator}
 import com.bwsw.sj.crud.rest._
 import org.mockito.Mockito.{reset, when}
@@ -278,7 +279,7 @@ class ModuleControllerTests extends FlatSpec with Matchers with MockitoSugar wit
     val module = mock[ModuleMetadata]
     val version = "version"
     val moduleSize = 1000l
-    val moduleInfo = ModuleInfo(moduleType, name, version, moduleSize)
+    val moduleInfo = ModuleInfo(moduleType, name, version, uploadDate = new Date().toString, moduleSize)
 
     when(fileMetadataUtils.toModuleInfo(module)).thenReturn(moduleInfo)
 

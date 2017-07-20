@@ -27,8 +27,9 @@ class JDBCServiceApi(name: String,
                      val database: String,
                      provider: String,
                      description: Option[String] = Some(RestLiterals.defaultDescription),
-                     @JsonProperty("type") serviceType: Option[String] = Some(ServiceLiterals.jdbcType))
-  extends ServiceApi(serviceType.getOrElse(ServiceLiterals.jdbcType), name, provider, description) {
+                     @JsonProperty("type") serviceType: Option[String] = Some(ServiceLiterals.jdbcType),
+                     creationDate: String)
+  extends ServiceApi(serviceType.getOrElse(ServiceLiterals.jdbcType), name, provider, description, creationDate) {
 
   override def to()(implicit injector: Injector): JDBCService = {
     val modelService =
@@ -37,7 +38,8 @@ class JDBCServiceApi(name: String,
         description = this.description.getOrElse(RestLiterals.defaultDescription),
         provider = this.provider,
         database = this.database,
-        serviceType = this.serviceType.getOrElse(ServiceLiterals.jdbcType)
+        serviceType = this.serviceType.getOrElse(ServiceLiterals.jdbcType),
+        creationDate = this.creationDate
       )
 
     modelService

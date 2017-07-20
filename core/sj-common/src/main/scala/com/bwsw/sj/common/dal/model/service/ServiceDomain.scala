@@ -18,6 +18,8 @@
  */
 package com.bwsw.sj.common.dal.model.service
 
+import java.util.Date
+
 import com.bwsw.sj.common.dal.model.provider.ProviderDomain
 import com.bwsw.sj.common.dal.morphia.MorphiaAnnotations.{IdField, PropertyField, ReferenceField}
 import org.mongodb.morphia.annotations.Entity
@@ -26,6 +28,7 @@ import org.mongodb.morphia.annotations.Entity
 class ServiceDomain(@IdField val name: String,
                     val description: String,
                     @ReferenceField val provider: ProviderDomain,
-                    @PropertyField("type") val serviceType: String)  {
+                    @PropertyField("type") val serviceType: String,
+                    val creationDate: Date)  {
 
 }

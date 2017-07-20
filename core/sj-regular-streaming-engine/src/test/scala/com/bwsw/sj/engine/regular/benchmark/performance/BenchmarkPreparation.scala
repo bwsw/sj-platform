@@ -19,6 +19,7 @@
 package com.bwsw.sj.engine.regular.benchmark.performance
 
 import java.io.File
+import java.util.Date
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.benchmark.RegularExecutorOptions
@@ -55,7 +56,8 @@ class BenchmarkPreparation(mongoPort: Int,
     hosts = Array(kafkaAddress),
     login = null,
     password = null,
-    providerType = ProviderLiterals.kafkaType)
+    providerType = ProviderLiterals.kafkaType,
+    creationDate = new Date())
 
   val zooKeeperProvider: ProviderDomain = new ProviderDomain(
     name = "benchmark-zk-provider",
@@ -63,38 +65,44 @@ class BenchmarkPreparation(mongoPort: Int,
     hosts = Array(zooKeeperHost + ":" + zooKeeperPort),
     login = null,
     password = null,
-    providerType = ProviderLiterals.zookeeperType)
+    providerType = ProviderLiterals.zookeeperType,
+    creationDate = new Date())
 
   val kafkaService: KafkaServiceDomain = new KafkaServiceDomain(
     name = "benchmark-kafka-service",
     description = "Kafka service for benchmark",
     provider = kafkaProvider,
     zkProvider = zooKeeperProvider,
-    zkNamespace = zkNamespace)
+    zkNamespace = zkNamespace,
+    creationDate = new Date())
 
   val zooKeeperService: ZKServiceDomain = new ZKServiceDomain(
     name = "benchmark-zk-service",
     description = "ZooKeeper service for benchmark",
     provider = zooKeeperProvider,
-    namespace = zkNamespace)
+    namespace = zkNamespace,
+    creationDate = new Date())
 
   val tStreamService: TStreamServiceDomain = new TStreamServiceDomain(
     name = "benchmark-tstream-service",
     description = "TStream service for benchmark",
     provider = zooKeeperProvider,
     prefix = tStreamPrefix,
-    token = tStreamToken)
+    token = tStreamToken,
+    creationDate = new Date())
 
   val kafkaStream: KafkaStreamDomain = new KafkaStreamDomain(
     name = kafkaTopic,
     service = kafkaService,
     partitions = 1,
-    replicationFactor = 1)
+    replicationFactor = 1,
+    creationDate = new Date())
 
   val tStreamStream = new TStreamStreamDomain(
     name = "benchmark-tstream-stream",
     service = tStreamService,
-    partitions = 1)
+    partitions = 1,
+    creationDate = new Date())
 
 
   def prepare(outputFile: String, messagesCount: Long, connectionRepository: ConnectionRepository) = {

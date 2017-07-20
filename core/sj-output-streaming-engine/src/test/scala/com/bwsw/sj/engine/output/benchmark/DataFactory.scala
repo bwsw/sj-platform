@@ -19,6 +19,7 @@
 package com.bwsw.sj.engine.output.benchmark
 
 import java.io.{BufferedReader, File, InputStreamReader}
+import java.util.Date
 import java.util.jar.JarFile
 
 import com.bwsw.common._
@@ -124,8 +125,9 @@ object DataFactory {
   private val restHosts = config.getString(OutputBenchmarkConfigNames.restHosts).split(",").map(host => host.trim)
   private val zookeeperHosts = config.getString(BenchmarkConfigNames.zkHosts).split(",").map(host => host.trim)
   private val zookeeperProvider = new ProviderDomain(zookeeperProviderName, zookeeperProviderName,
-    zookeeperHosts, "", "", ProviderLiterals.zookeeperType)
-  private val tstrqService = new TStreamServiceDomain(tstreamServiceName, tstreamServiceName, zookeeperProvider, TestStorageServer.defaultPrefix, TestStorageServer.defaultToken)
+    zookeeperHosts, "", "", ProviderLiterals.zookeeperType, new Date())
+  private val tstrqService = new TStreamServiceDomain(tstreamServiceName, tstreamServiceName, zookeeperProvider,
+    TestStorageServer.defaultPrefix, TestStorageServer.defaultToken, creationDate = new Date())
   private val tstreamFactory = new TStreamsFactory()
 
   setTStreamFactoryProperties()
@@ -155,7 +157,8 @@ object DataFactory {
     val tStream: TStreamStreamDomain = new TStreamStreamDomain(
       tstreamInputName,
       tstrqService,
-      tstreamPartitions)
+      tstreamPartitions,
+      creationDate = new Date())
 
     val producer = createProducer(tStream)
     val s = System.currentTimeMillis()
@@ -268,34 +271,38 @@ object DataFactory {
 
 
   def createProviders() = {
-    val esProvider = new ProviderDomain(esProviderName, "", esProviderHosts, "", "", ProviderLiterals.elasticsearchType)
+    val esProvider = new ProviderDomain(esProviderName, "", esProviderHosts, "", "", ProviderLiterals.elasticsearchType, new Date())
     providerService.save(esProvider)
 
     providerService.save(zookeeperProvider)
 
-    val jdbcProvider = new JDBCProviderDomain(jdbcProviderName, "", jdbcHosts, "admin", "admin", jdbcDriver)
+    val jdbcProvider = new JDBCProviderDomain(jdbcProviderName, "", jdbcHosts, "admin", "admin", jdbcDriver, new Date())
     providerService.save(jdbcProvider)
 
-    val restProvider = new ProviderDomain(restProviderName, "", restHosts, "", "", ProviderLiterals.restType)
+    val restProvider = new ProviderDomain(restProviderName, "", restHosts, "", "", ProviderLiterals.restType, new Date())
     providerService.save(restProvider)
   }
 
   def createServices() = {
     val esProv: ProviderDomain = providerService.get(esProviderName).get
-    val esService: ESServiceDomain = new ESServiceDomain(esServiceName, esServiceName, esProv, esIndex)
+    val esService: ESServiceDomain = new ESServiceDomain(esServiceName, esServiceName, esProv,
+      esIndex, creationDate = new Date())
     serviceManager.save(esService)
 
     serviceManager.save(tstrqService)
 
-    val zkService = new ZKServiceDomain(zookeeperServiceName, zookeeperServiceName, zookeeperProvider, testNamespace)
+    val zkService = new ZKServiceDomain(zookeeperServiceName, zookeeperServiceName, zookeeperProvider,
+      testNamespace, creationDate = new Date())
     serviceManager.save(zkService)
 
     val jdbcProvider = providerService.get(jdbcProviderName).get.asInstanceOf[JDBCProviderDomain]
-    val jdbcService = new JDBCServiceDomain(jdbcServiceName, jdbcServiceName, jdbcProvider, databaseName)
+    val jdbcService = new JDBCServiceDomain(jdbcServiceName, jdbcServiceName, jdbcProvider,
+      databaseName, creationDate = new Date())
     serviceManager.save(jdbcService)
 
     val restProvider = providerService.get(restProviderName).get
-    val restService = new RestServiceDomain(restServiceName, restServiceName, restProvider, restBasePath, restHttpScheme, restHttpVersion, restHeaders)
+    val restService = new RestServiceDomain(restServiceName, restServiceName, restProvider, restBasePath,
+      restHttpScheme, restHttpVersion, restHeaders, creationDate = new Date())
     serviceManager.save(restService)
   }
 
@@ -331,19 +338,19 @@ object DataFactory {
 
   def createStreams(partitions: Int) = {
     val esService = serviceManager.get(esServiceName).get.asInstanceOf[ESServiceDomain]
-    val esStream: ESStreamDomain = new ESStreamDomain(esStreamName, esService)
+    val esStream: ESStreamDomain = new ESStreamDomain(esStreamName, esService, creationDate = new Date())
     streamService.save(esStream)
 
     val tService: TStreamServiceDomain = serviceManager.get(tstreamServiceName).get.asInstanceOf[TStreamServiceDomain]
-    val tStream: TStreamStreamDomain = new TStreamStreamDomain(tstreamInputName, tService, partitions)
+    val tStream: TStreamStreamDomain = new TStreamStreamDomain(tstreamInputName, tService, partitions, creationDate = new Date())
     streamService.save(tStream)
 
     val jdbcService: JDBCServiceDomain = serviceManager.get(jdbcServiceName).get.asInstanceOf[JDBCServiceDomain]
-    val jdbcStream: JDBCStreamDomain = new JDBCStreamDomain(jdbcStreamName, jdbcService, "test")
+    val jdbcStream: JDBCStreamDomain = new JDBCStreamDomain(jdbcStreamName, jdbcService, "test", creationDate = new Date())
     streamService.save(jdbcStream)
 
     val restService = serviceManager.get(restServiceName).get.asInstanceOf[RestServiceDomain]
-    val restStream = new RestStreamDomain(restStreamName, restService)
+    val restStream = new RestStreamDomain(restStreamName, restService, creationDate = new Date())
     streamService.save(restStream)
 
     storageClient.createStream(

@@ -18,6 +18,8 @@
  */
 package com.bwsw.sj.common.dal.model.service
 
+import java.util.Date
+
 import com.bwsw.sj.common.dal.model.provider.JDBCProviderDomain
 import com.bwsw.sj.common.dal.morphia.MorphiaAnnotations.ReferenceField
 import com.bwsw.sj.common.utils.ServiceLiterals
@@ -26,10 +28,11 @@ import com.bwsw.sj.common.utils.ServiceLiterals
   *
   * @author Kseniya Tomskikh
   */
-class JDBCServiceDomain(override val name: String,
-                        override val description: String,
+class JDBCServiceDomain(name: String,
+                        description: String,
                         @ReferenceField override val provider: JDBCProviderDomain,
-                        val database: String)
-  extends ServiceDomain(name, description, provider, ServiceLiterals.jdbcType) {
+                        val database: String,
+                        creationDate: Date)
+  extends ServiceDomain(name, description, provider, ServiceLiterals.jdbcType, creationDate) {
 
 }

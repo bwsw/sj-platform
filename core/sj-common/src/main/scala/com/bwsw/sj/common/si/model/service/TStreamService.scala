@@ -18,6 +18,8 @@
  */
 package com.bwsw.sj.common.si.model.service
 
+import java.util.Date
+
 import com.bwsw.sj.common.dal.model.service.TStreamServiceDomain
 import com.bwsw.sj.common.rest.utils.ValidationUtils.{validatePrefix, validateToken}
 import scaldi.Injector
@@ -29,9 +31,10 @@ class TStreamService(name: String,
                      val prefix: String,
                      val token: String,
                      description: String,
-                     serviceType: String)
+                     serviceType: String,
+                creationDate: String)
                     (implicit injector: Injector)
-  extends Service(serviceType, name, provider, description) {
+  extends Service(serviceType, name, provider, description, creationDate) {
 
   import messageResourceUtils.createMessage
 
@@ -44,7 +47,8 @@ class TStreamService(name: String,
         description = this.description,
         provider = providerRepository.get(this.provider).get,
         prefix = this.prefix,
-        token = this.token
+        token = this.token,
+        creationDate = new Date()
       )
 
     modelService

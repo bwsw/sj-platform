@@ -18,6 +18,8 @@
  */
 package com.bwsw.sj.common.si.model.stream
 
+import java.util.Date
+
 import com.bwsw.sj.common.dal.model.service.TStreamServiceDomain
 import com.bwsw.sj.common.dal.model.stream.TStreamStreamDomain
 import com.bwsw.sj.common.utils.{ServiceLiterals, StreamLiterals}
@@ -34,9 +36,10 @@ class TStreamStream(name: String,
                     tags: Array[String],
                     force: Boolean,
                     streamType: String,
-                    description: String)
+                    description: String,
+                    creationDate: String)
                    (implicit injector: Injector)
-  extends SjStream(streamType, name, service, tags, force, description) {
+  extends SjStream(streamType, name, service, tags, force, description, creationDate) {
 
   import messageResourceUtils.createMessage
 
@@ -46,10 +49,11 @@ class TStreamStream(name: String,
     new TStreamStreamDomain(
       name,
       serviceRepository.get(service).get.asInstanceOf[TStreamServiceDomain],
-      partitions,
-      description,
-      force,
-      tags)
+      partitions = partitions,
+      description = description,
+      force = force,
+      tags = tags,
+      creationDate = new Date())
   }
 
   override def create(): Unit = {

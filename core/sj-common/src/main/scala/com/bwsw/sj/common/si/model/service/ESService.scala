@@ -18,6 +18,8 @@
  */
 package com.bwsw.sj.common.si.model.service
 
+import java.util.Date
+
 import com.bwsw.sj.common.dal.model.service.ESServiceDomain
 import com.bwsw.sj.common.rest.utils.ValidationUtils.validateNamespace
 import scaldi.Injector
@@ -28,9 +30,10 @@ class ESService(name: String,
                 val index: String,
                 provider: String,
                 description: String,
-                serviceType: String)
+                serviceType: String,
+                creationDate: String)
                (implicit injector: Injector)
-  extends Service(serviceType, name, provider, description) {
+  extends Service(serviceType, name, provider, description, creationDate) {
 
   import messageResourceUtils.createMessage
 
@@ -42,7 +45,8 @@ class ESService(name: String,
         name = this.name,
         description = this.description,
         provider = providerRepository.get(this.provider).get,
-        index = this.index
+        index = this.index,
+        creationDate = new Date()
       )
 
     modelService

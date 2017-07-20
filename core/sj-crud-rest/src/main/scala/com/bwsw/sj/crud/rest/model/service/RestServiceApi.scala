@@ -33,8 +33,9 @@ class RestServiceApi(name: String,
                      val httpVersion: Option[String] = Some(RestLiterals.http_1_1),
                      val headers: Option[Map[String, String]] = Some(Map()),
                      description: Option[String] = Some(RestLiterals.defaultDescription),
-                     @JsonProperty("type") serviceType: Option[String] = Some(ServiceLiterals.restType))
-  extends ServiceApi(serviceType.getOrElse(ServiceLiterals.restType), name, provider, description) {
+                     @JsonProperty("type") serviceType: Option[String] = Some(ServiceLiterals.restType),
+                     creationDate: String)
+  extends ServiceApi(serviceType.getOrElse(ServiceLiterals.restType), name, provider, description, creationDate) {
 
   override def to()(implicit injector: Injector): RestService = {
     val modelService =
@@ -46,7 +47,8 @@ class RestServiceApi(name: String,
         httpScheme = this.httpScheme.getOrElse(RestLiterals.http),
         httpVersion = this.httpVersion.getOrElse(RestLiterals.http_1_1),
         headers = this.headers.getOrElse(Map()),
-        serviceType = this.serviceType.getOrElse(ServiceLiterals.restType)
+        serviceType = this.serviceType.getOrElse(ServiceLiterals.restType),
+        creationDate = this.creationDate
       )
 
     modelService

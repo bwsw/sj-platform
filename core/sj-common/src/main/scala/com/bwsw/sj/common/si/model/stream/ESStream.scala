@@ -18,6 +18,8 @@
  */
 package com.bwsw.sj.common.si.model.stream
 
+import java.util.Date
+
 import com.bwsw.common.es.ElasticsearchClient
 import com.bwsw.sj.common.dal.model.service.ESServiceDomain
 import com.bwsw.sj.common.dal.model.stream.ESStreamDomain
@@ -31,9 +33,10 @@ class ESStream(name: String,
                tags: Array[String],
                force: Boolean,
                streamType: String,
-               description: String)
+               description: String,
+               creationDate: String)
               (implicit injector: Injector)
-  extends SjStream(streamType, name, service, tags, force, description) {
+  extends SjStream(streamType, name, service, tags, force, description, creationDate) {
 
   import messageResourceUtils.createMessage
 
@@ -44,8 +47,9 @@ class ESStream(name: String,
       name,
       serviceRepository.get(service).get.asInstanceOf[ESServiceDomain],
       description,
-      force,
-      tags)
+      force = force,
+      tags = tags,
+      creationDate = new Date())
   }
 
   override def create(): Unit =

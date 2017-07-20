@@ -18,13 +18,16 @@
  */
 package com.bwsw.sj.common.dal.model.stream
 
+import java.util.Date
+
 import com.bwsw.sj.common.dal.model.service.JDBCServiceDomain
 import com.bwsw.sj.common.utils.{RestLiterals, StreamLiterals}
 
-class JDBCStreamDomain(override val name: String,
+class JDBCStreamDomain(name: String,
                        override val service: JDBCServiceDomain,
                        val primary: String,
-                       override val description: String = RestLiterals.defaultDescription,
-                       override val force: Boolean = false,
-                       override val tags: Array[String] = Array())
-  extends StreamDomain(name, description, service, force, tags, StreamLiterals.jdbcType)
+                       description: String = RestLiterals.defaultDescription,
+                       force: Boolean = false,
+                       tags: Array[String] = Array(),
+                       creationDate: Date)
+  extends StreamDomain(name, description, service, force, tags, StreamLiterals.jdbcType, creationDate)
