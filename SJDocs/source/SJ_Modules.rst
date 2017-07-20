@@ -34,7 +34,7 @@ The engine is getting started via a Mesos framework. The framework then renders 
 
 A general structure of a module can be rendered as at the scheme below:
 
-.. figure:: _static/ModuleGeneralStructure.png
+.. figure:: _static/ModuleGeneralStructure1.png
 
 A module handles data flow making it into streams. Raw data are transformed to objects referred to as an envelope. 
 
