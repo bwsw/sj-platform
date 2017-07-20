@@ -33,7 +33,7 @@ import scaldi.Injector
 import scala.collection.JavaConverters._
 import scala.util.Try
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "module-type", defaultImpl = classOf[SpecificationApi], visible = true)
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "module-type", defaultImpl = classOf[SpecificationApi], visible = true, include = JsonTypeInfo.As.EXISTING_PROPERTY)
 @JsonSubTypes(Array(
   new Type(value = classOf[BatchSpecificationApi], name = EngineLiterals.batchStreamingType)))
 class SpecificationApi(val name: String,

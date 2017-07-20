@@ -18,6 +18,8 @@
  */
 package com.bwsw.sj.common.si
 
+import java.util.Date
+
 import com.bwsw.sj.common.config.ConfigLiterals.{domains, systemDomain}
 import com.bwsw.sj.common.dal.model.ConfigurationSettingDomain
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
@@ -41,7 +43,7 @@ class ConfigSettingsSiTests extends FlatSpec with Matchers with MockitoSugar wit
       val configName = "name-" + index
       val configValue = "value-" + index
       val configNameWithDomain = domain + "." + configName
-      val configurationSettingDomain = ConfigurationSettingDomain(configNameWithDomain, configValue, domain)
+      val configurationSettingDomain = ConfigurationSettingDomain(configNameWithDomain, configValue, domain, new Date())
       val configurationSetting = mock[ConfigurationSetting]
       when(configurationSetting.domain).thenReturn(domain)
       when(configurationSetting.name).thenReturn(configName)
@@ -66,7 +68,8 @@ class ConfigSettingsSiTests extends FlatSpec with Matchers with MockitoSugar wit
   val configNotInStorageDomain = ConfigurationSettingDomain(
     configNotInStorageNameWithDomain,
     configNotInStorageValue,
-    configNotInStorageConfigDomain)
+    configNotInStorageConfigDomain,
+    new Date())
   val configNotInStorage = mock[ConfigurationSetting]
   when(configNotInStorage.domain).thenReturn(configNotInStorageConfigDomain)
   when(configNotInStorage.name).thenReturn(configNotInStorageName)

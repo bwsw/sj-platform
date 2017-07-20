@@ -18,6 +18,8 @@
  */
 package com.bwsw.sj.common.si.model.config
 
+import java.util.Date
+
 import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.common.dal.model.ConfigurationSettingDomain
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
@@ -32,7 +34,8 @@ import scala.collection.mutable.ArrayBuffer
 // TODO ConfigurationSetting, Provider, Service must have one interface
 class ConfigurationSetting(val name: String,
                            val value: String,
-                           val domain: String) {
+                           val domain: String,
+                           val creationDate: String) {
 
   /**
     * Validates configuration setting
@@ -102,7 +105,7 @@ class ConfigurationSetting(val name: String,
   }
 
   def to(): ConfigurationSettingDomain = {
-    ConfigurationSettingDomain(ConfigurationSetting.createConfigurationSettingName(domain, name), value, domain)
+    ConfigurationSettingDomain(ConfigurationSetting.createConfigurationSettingName(domain, name), value, domain, new Date())
   }
 }
 
@@ -111,7 +114,8 @@ class ConfigurationSettingCreator {
     new ConfigurationSetting(
       ConfigurationSetting.clearConfigurationSettingName(configSettingDomain.domain, configSettingDomain.name),
       configSettingDomain.value,
-      configSettingDomain.domain
+      configSettingDomain.domain,
+      configSettingDomain.creationDate.toString
     )
   }
 }

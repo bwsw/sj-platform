@@ -93,7 +93,8 @@ class CustomJarsSiTests extends FlatSpec with Matchers with MockitoSugar {
   val jarNotInStorageConfig = ConfigurationSettingDomain(
     s"${ConfigLiterals.systemDomain}.$jarNotInStorageName-$jarNotInStorageVersion",
     jarNotInStorageFilename,
-    ConfigLiterals.systemDomain)
+    ConfigLiterals.systemDomain,
+    new Date())
   val jarNotInStorageSpecification = jarNotInStorageMetadataDomain.specification
   val jarNotInStorageSpecificationString =
     s"""{

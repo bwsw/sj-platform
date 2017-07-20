@@ -24,7 +24,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes.Type
 import com.fasterxml.jackson.annotation.{JsonIgnore, JsonProperty, JsonSubTypes, JsonTypeInfo}
 import scaldi.Injector
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type", defaultImpl = classOf[ServiceApi], visible = true)
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type", defaultImpl = classOf[ServiceApi], visible = true, include = JsonTypeInfo.As.EXISTING_PROPERTY)
 @JsonSubTypes(Array(
   new Type(value = classOf[EsServiceApi], name = ServiceLiterals.elasticsearchType),
   new Type(value = classOf[KfkQServiceApi], name = ServiceLiterals.kafkaType),

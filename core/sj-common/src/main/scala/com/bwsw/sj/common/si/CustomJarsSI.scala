@@ -19,6 +19,7 @@
 package com.bwsw.sj.common.si
 
 import java.io._
+import java.util.Date
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.config.ConfigLiterals
@@ -60,7 +61,8 @@ class CustomJarsSI(implicit injector: Injector) extends ServiceInterface[FileMet
       val customJarConfig = ConfigurationSettingDomain(
         ConfigurationSetting.createConfigurationSettingName(ConfigLiterals.systemDomain, name),
         entity.filename,
-        ConfigLiterals.systemDomain
+        ConfigLiterals.systemDomain,
+        new Date()
       )
       configRepository.save(customJarConfig)
       uploadingFile.delete()
