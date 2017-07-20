@@ -1,16 +1,35 @@
 /* You can add global styles to this file, and also import other style files */
 /* Logo styles */
 header.navbar {
+  border: none !important;
   a.navbar-brand {
-    background-image: none;
+    background-image: url("./assets/images/logo.png");
     text-align: center;
     font-size: 0;
     line-height: 38px;
-    img {
-      max-width: 100%;
-      max-height: 90%;
-    }
+    border: none !important;
   }
+  button {
+    outline: none;
+    float: left;
+  }
+}
+
+/*button {
+  border-radius: 0px !important;
+}
+label.btn {
+  border-radius: 0px !important;
+}*/
+
+.breadcrumb {
+  padding: 8px !important;
+  border-top: 1px solid #cfd8dc;
+  box-shadow: 0px 2px 15px 0px #b3b3b3;
+}
+
+.card {
+  box-shadow: 0px 4px 15px 0px #b3b3b3;
 }
 
 /* Extended card */

@@ -5,7 +5,6 @@ import { RouterModule } from '@angular/router';
 import { AlertModule } from 'ngx-bootstrap';
 import { CollapseModule } from 'ngx-bootstrap';
 
-import { ToolbarComponent } from './components/toolbar/toolbar.component';
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { SearchBoxComponent } from './components/searchBox/search-box.component';
 import { FilterComponent } from './components/filter/filter.component';
@@ -18,7 +17,6 @@ import { FileSizePipe } from './pipes/file-size.pipe';
 import { JsonPrintPipe } from './pipes/json-print.pipe';
 import { SpinnerComponent } from './components/spinner/spinner.component';
 import { BreadcrumbsComponent } from './components/breadcrumbs/breadcrumbs.component';
-import { FooterComponent } from './components/footer/footer.component';
 import { AlertsComponent } from './components/alerts/alerts.component';
 import { CollapseDirective } from './directives/collapse.directive';
 import { ExtendedElementComponent } from './components/extended-element/extended-element.component';
@@ -32,12 +30,10 @@ import { ExtendedElementComponent } from './components/extended-element/extended
   ],
   declarations: [
     // Components
-    ToolbarComponent,
     NavbarComponent,
     SearchBoxComponent,
     SpinnerComponent,
     BreadcrumbsComponent,
-    FooterComponent,
     FilterComponent,
     AlertsComponent,
     ExtendedElementComponent,
@@ -53,12 +49,10 @@ import { ExtendedElementComponent } from './components/extended-element/extended
   ],
   exports: [
     // Components
-    ToolbarComponent,
     NavbarComponent,
     SearchBoxComponent,
     SpinnerComponent,
     BreadcrumbsComponent,
-    FooterComponent,
     FilterComponent,
     AlertsComponent,
     ExtendedElementComponent,
