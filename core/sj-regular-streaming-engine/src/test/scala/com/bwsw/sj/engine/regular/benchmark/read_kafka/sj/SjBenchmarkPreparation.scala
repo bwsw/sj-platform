@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.sj.engine.regular.benchmark.performance
+package com.bwsw.sj.engine.regular.benchmark.read_kafka.sj
 
 import java.io.File
 
@@ -36,17 +36,17 @@ import scala.util.Try
 /**
   * @author Pavel Tomskikh
   */
-class BenchmarkPreparation(mongoPort: Int,
-                           zooKeeperHost: String,
-                           zooKeeperPort: Int,
-                           module: File,
-                           kafkaAddress: String,
-                           kafkaTopic: String,
-                           zkNamespace: String,
-                           tStreamPrefix: String,
-                           tStreamToken: String,
-                           instanceName: String,
-                           taskName: String) {
+class SjBenchmarkPreparation(mongoPort: Int,
+                             zooKeeperHost: String,
+                             zooKeeperPort: Int,
+                             module: File,
+                             kafkaAddress: String,
+                             kafkaTopic: String,
+                             zkNamespace: String,
+                             tStreamPrefix: String,
+                             tStreamToken: String,
+                             instanceName: String,
+                             taskName: String) {
 
   private val jsonSerializer = new JsonSerializer(ignoreUnknown = true)
 

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.sj.engine.regular.benchmark.samza
+package com.bwsw.sj.engine.regular.benchmark.read_kafka.samza
 
 import org.apache.samza.system.{IncomingMessageEnvelope, OutgoingMessageEnvelope, SystemStream}
 import org.apache.samza.task.{MessageCollector, StreamTask, TaskCoordinator}
@@ -24,7 +24,7 @@ import org.apache.samza.task.{MessageCollector, StreamTask, TaskCoordinator}
 /**
   * @author Pavel Tomskikh
   */
-class BenchmarkStreamTask extends StreamTask {
+class SamzaBenchmarkStreamTask extends StreamTask {
   private var readMessages: Int = 0
   private var messageCount: Long = 10
   private var outputStreamName: String = "samza-benchmark-result"

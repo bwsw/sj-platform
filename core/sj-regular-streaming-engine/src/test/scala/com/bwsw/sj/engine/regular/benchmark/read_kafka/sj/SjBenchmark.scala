@@ -16,24 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.sj.engine.regular.benchmark.performance
+package com.bwsw.sj.engine.regular.benchmark.read_kafka.sj
 
 import java.io._
 import java.util.UUID
 
-import com.bwsw.common.KafkaClient
 import com.bwsw.common.embedded.EmbeddedMongo
 import com.bwsw.sj.common.config.TempHelperForConfigSetup
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.benchmark.ClassRunner
 import com.bwsw.sj.engine.core.testutils.{Server, TestStorageServer}
 import com.bwsw.sj.engine.regular.RegularTaskRunner
-import com.bwsw.sj.kafka.data_sender.DataSender
+import com.bwsw.sj.engine.regular.benchmark.read_kafka.ReadFromKafkaBenchmark
+import com.bwsw.sj.engine.regular.benchmark.utils.BenchmarkUtils.retrieveResultFromFile
 import scaldi.Injectable.inject
 import scaldi.Injector
 
 /**
-  * Provides methods for testing speed of reading data from Kafka.
+  * Provides methods for testing speed of reading data from Kafka by Stream Juggler.
   *
   * Topic deletion must be enabled on the Kafka server.
   *
@@ -47,15 +47,16 @@ import scaldi.Injector
   * @param words        list of words that sends to the kafka server
   * @author Pavel Tomskikh
   */
-class PerformanceBenchmark(mongoPort: Int,
-                           zkHost: String,
-                           zkPort: Int,
-                           kafkaAddress: String,
-                           instanceName: String,
-                           words: Array[String])
-                          (implicit injector: Injector) {
+class SjBenchmark(mongoPort: Int,
+                  zkHost: String,
+                  zkPort: Int,
+                  kafkaAddress: String,
+                  instanceName: String,
+                  words: Array[String])
+                 (implicit injector: Injector) extends {
+  private val zooKeeperAddress = zkHost + ":" + zkPort
+} with ReadFromKafkaBenchmark(zooKeeperAddress, kafkaAddress, words) {
 
-  private val kafkaTopic = "performance-benchmark-test-" + UUID.randomUUID().toString
   private val moduleFilename = "../../contrib/benchmarks/sj-regular-performance-benchmark/target/scala-2.12/" +
     "sj-regular-performance-benchmark-1.0-SNAPSHOT.jar"
   // for run from IDEA
@@ -63,15 +64,15 @@ class PerformanceBenchmark(mongoPort: Int,
   //"sj-regular-performance-benchmark-1.0-SNAPSHOT.jar"
   private val module = new File(moduleFilename)
 
-  private val zkAddress = s"$zkHost:$zkPort"
   private val mongoServer = new EmbeddedMongo(mongoPort)
-  private val kafkaClient = new KafkaClient(Array(zkAddress))
-  private val kafkaSender = new DataSender(kafkaAddress, kafkaTopic, words, " ")
-  private val lookupResultTimeout = 5000
   private val taskName = instanceName + "-task"
+  private val outputFilename = "benchmark-output-" + UUID.randomUUID().toString
+  private val outputFile = new File(outputFilename)
+  private var outputFileLastModified: Long = 0
+
   private lazy val connectionRepository = inject[ConnectionRepository]
 
-  private val benchmarkPreparation = new BenchmarkPreparation(
+  private val benchmarkPreparation = new SjBenchmarkPreparation(
     mongoPort = mongoPort,
     zooKeeperHost = zkHost,
     zooKeeperPort = zkPort,
@@ -99,7 +100,7 @@ class PerformanceBenchmark(mongoPort: Int,
     * Starts tts and mongo servers
     */
   def startServices(): Unit = {
-    val ttsEnv = Map("ZOOKEEPER_HOSTS" -> zkAddress)
+    val ttsEnv = Map("ZOOKEEPER_HOSTS" -> zooKeeperAddress)
     maybeTtsProcess = Some(new ClassRunner(classOf[Server], ttsEnv).start())
     Thread.sleep(1000)
     println("TTS server started")
@@ -119,67 +120,23 @@ class PerformanceBenchmark(mongoPort: Int,
     println("Entities loaded")
   }
 
-  /**
-    * Performs first test because it's need more time than next
-    */
-  def warmUp(): Long = {
-    runTest(10, 10)
-  }
-
-  /**
-    * Sends data into the Kafka server and runs module
-    *
-    * @param messageSize   size of one message that sends to the Kafka server
-    * @param messagesCount count of messages
-    */
-  def runTest(messageSize: Long, messagesCount: Long): Long = {
-    println(s"$messageSize bytes messages")
-    val outputFilename = "benchmark-output-" + UUID.randomUUID().toString
-    val outputFile = new File(outputFilename)
-
-    benchmarkPreparation.loadInstance(outputFile.getAbsolutePath, messagesCount, connectionRepository.getInstanceRepository)
-
-    val lastModified = outputFile.lastModified()
-
-    kafkaClient.createTopic(kafkaTopic, 1, 1)
-    while (!kafkaClient.topicExists(kafkaTopic))
-      Thread.sleep(100)
-
-    println(s"Kafka topic $kafkaTopic created")
-
-    kafkaSender.send(messageSize, messagesCount)
-    println("Data sent to the Kafka")
-
-    val process = new ClassRunner(classOf[RegularTaskRunner], environment).start()
-
-    while (outputFile.lastModified() == lastModified)
-      Thread.sleep(lookupResultTimeout)
-
-    kafkaClient.deleteTopic(kafkaTopic)
-    process.destroy()
-
-    while (kafkaClient.topicExists(kafkaTopic))
-      Thread.sleep(100)
-
-    println(s"Kafka topic $kafkaTopic deleted")
-
-    val reader = new BufferedReader(new FileReader(outputFile))
-    val result = reader.readLine().toLong
-    reader.close()
-    outputFile.delete()
-
-    result
-  }
-
-  /**
-    * Stops tts and mongo servers
-    */
-  def stopServices() = {
-    kafkaClient.close()
+  override def close(): Unit = {
     maybeTtsProcess.foreach(_.destroy())
     println("TTS server stopped")
 
     mongoServer.stop()
     println("Mongo server stopped")
+
+    super.close()
   }
+
+
+  override protected def runProcess(messageSize: Long, messagesCount: Long): Process = {
+    benchmarkPreparation.loadInstance(outputFile.getAbsolutePath, messagesCount, connectionRepository.getInstanceRepository)
+
+    new ClassRunner(classOf[RegularTaskRunner], environment).start()
+  }
+
+  override protected def retrieveResult(messageSize: Long, messagesCount: Long): Option[Long] =
+    retrieveResultFromFile(outputFile).map(_.toLong)
 }
