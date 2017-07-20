@@ -24,8 +24,7 @@
         "core-ui.theme.css"
       ],
       "scripts": [
-        "../node_modules/pace-progress/pace.min.js",
-        "../node_modules/jquery/dist/jquery.min.js"
+        "../node_modules/pace-progress/pace.min.js"
       ],
       "environments": {
         "source": "environments/environment.ts",
