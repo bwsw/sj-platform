@@ -187,7 +187,7 @@ Possible error responses for **T-streams** service creation:
  "'Prefix' attribute is required.", "The Prefix field is not completed."
  "Service has incorrect 'prefix': '<service_prefix>'. Prefix must be a valid znode path.", "All fields are completed following the requirements except the 'Prefix' field."
  "'Token' attribute is required.", "The Token field is not completed."
- "Service has incorrect 'token': '<service_token>'. Token must contain no more than 32 symbols|All fields are completed following the requirements except the 'Token' field."
+ "Service has incorrect 'token': '<service_token>'. Token must contain no more than 32 symbols", "All fields are completed following the requirements except the 'Token' field."
 
 
 Possible error responses for **ZooKeeper** service creation:
