@@ -124,7 +124,7 @@ An example of valid specification for a **regular** module::
   "name": "com.bw-sw.sj.demux",
   "description": "Universal demux module by BW",
   "version": "0.1",
-  "author": "Ksenia Mikhaleva",
+  "author": "John Smith",
   "license": "Apache 2.0",
   "inputs": {
     "cardinality": [
@@ -160,7 +160,7 @@ An example of valid specification for a **batch** module::
   "name": "BatchModule",
   "description": "Universal demux module by BW",
   "version": "1.1",
-  "author": "Ksenia Mikhaleva",
+  "author": "John Smith",
   "license": "Apache 2.0",
   "inputs": {
     "cardinality": [
@@ -197,7 +197,7 @@ An example of valid specification for an **input** module::
   "name": "InputModule",
   "description": "Universal demux module by BW",
   "version": "1.0",
-  "author": "Ksenia Mikhaleva",
+  "author": "John Smith",
   "license": "Apache 1.0",
   "inputs": {
     "cardinality": [
@@ -233,7 +233,7 @@ An example of valid specification for an **output** module::
   "name": "OutputModule",
   "description": "Universal demux module by BW",
   "version": "1.0",
-  "author": "Ksenia Mikhaleva",
+  "author": "John Smith",
   "license": "Apache 2.0",
   "inputs": {
     "cardinality": [
