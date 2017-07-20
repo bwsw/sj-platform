@@ -40,8 +40,8 @@ object CallableCheckpointTaskInput {
                          checkpointGroup: CheckpointGroup,
                          envelopeDataSerializer: SerializerInterface)
                         (implicit injector: Injector): CallableCheckpointTaskInput[_ <: Envelope] = {
-    val isKafkaInputExist = manager.inputs.exists(x => x._1.streamType == StreamLiterals.kafkaStreamType)
-    val isTstreamInputExist = manager.inputs.exists(x => x._1.streamType == StreamLiterals.tstreamType)
+    val isKafkaInputExist = manager.inputs.exists(x => x._1.streamType == StreamLiterals.kafkaType)
+    val isTstreamInputExist = manager.inputs.exists(x => x._1.streamType == StreamLiterals.tstreamsType)
 
     (isKafkaInputExist, isTstreamInputExist) match {
       case (true, true) => new CallableCompleteCheckpointTaskInput[T](

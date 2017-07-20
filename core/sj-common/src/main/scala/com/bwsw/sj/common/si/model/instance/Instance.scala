@@ -108,9 +108,9 @@ class Instance(val name: String,
 
   private def getPartitions(stream: StreamDomain): Int = {
     stream.streamType match {
-      case StreamLiterals.`tstreamType` =>
+      case StreamLiterals.`tstreamsType` =>
         stream.asInstanceOf[TStreamStreamDomain].partitions
-      case StreamLiterals.`kafkaStreamType` =>
+      case StreamLiterals.`kafkaType` =>
         stream.asInstanceOf[KafkaStreamDomain].partitions
       case _ => 1
     }
@@ -141,9 +141,9 @@ class Instance(val name: String,
   private def getPartitions(streamName: String): Int = {
     val stream = streamRepository.get(streamName).get
     val partitions = stream.streamType match {
-      case StreamLiterals.`tstreamType` =>
+      case StreamLiterals.`tstreamsType` =>
         stream.asInstanceOf[TStreamStreamDomain].partitions
-      case StreamLiterals.`kafkaStreamType` =>
+      case StreamLiterals.`kafkaType` =>
         stream.asInstanceOf[KafkaStreamDomain].partitions
     }
 

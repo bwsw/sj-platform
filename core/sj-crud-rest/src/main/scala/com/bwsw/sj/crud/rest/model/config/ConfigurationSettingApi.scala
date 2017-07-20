@@ -19,16 +19,11 @@
 package com.bwsw.sj.crud.rest.model.config
 
 import com.bwsw.sj.common.si.model.config.ConfigurationSetting
-import com.fasterxml.jackson.annotation.{JsonIgnore, JsonSubTypes, JsonTypeInfo}
+import com.fasterxml.jackson.annotation.JsonIgnore
 
 /**
-  * Created by diryavkin_dn on 11.05.17.
+  * @author diryavkin_dn
   */
-
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type", defaultImpl = classOf[ConfigurationSettingApi], visible = true)
-@JsonSubTypes(Array(
-
-))
 class ConfigurationSettingApi(val name: String,
                               val value: String,
                               val domain: String) {

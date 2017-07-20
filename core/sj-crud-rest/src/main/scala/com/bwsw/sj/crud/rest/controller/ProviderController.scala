@@ -108,7 +108,7 @@ class ProviderController(implicit protected val injector: Injector) extends Cont
   }
 
   def getTypes(): RestResponse = {
-    OkRestResponse(TypesResponseEntity(ProviderLiterals.types))
+    OkRestResponse(TypesResponseEntity(ProviderLiterals.beToFeTypes.map(x => Type(x._1, x._2)).toSeq))
   }
 }
 

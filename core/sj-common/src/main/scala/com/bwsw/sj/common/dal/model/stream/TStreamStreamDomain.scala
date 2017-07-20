@@ -32,7 +32,7 @@ class TStreamStreamDomain(override val name: String,
                           override val description: String = RestLiterals.defaultDescription,
                           override val force: Boolean = false,
                           override val tags: Array[String] = Array())
-  extends StreamDomain(name, description, service, force, tags, StreamLiterals.tstreamType) {
+  extends StreamDomain(name, description, service, force, tags, StreamLiterals.tstreamsType) {
 
   protected def createClient(): StorageClient = {
     val factory = new TStreamsFactory()

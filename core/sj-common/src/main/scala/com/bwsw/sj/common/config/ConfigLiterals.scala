@@ -18,15 +18,26 @@
  */
 package com.bwsw.sj.common.config
 
+import com.bwsw.sj.common.rest.Type
+
 object ConfigLiterals {
-  final val systemDomain = "system"
-  final val tstreamsDomain = "t-streams"
-  final val kafkaDomain = "kafka"
-  final val elasticsearchDomain = "es"
-  final val zookeeperDomain = "zk"
-  final val jdbcDomain = "jdbc"
-  final val restDomain = "rest"
-  val domains = Seq(systemDomain, tstreamsDomain, kafkaDomain, elasticsearchDomain, zookeeperDomain, jdbcDomain, restDomain)
+  final val systemDomain = "configuration.system"
+  final val tstreamsDomain = "configuration.t-streams"
+  final val kafkaDomain = "configuration.apache-kafka"
+  final val elasticsearchDomain = "configuration.elasticsearch"
+  final val zookeeperDomain = "configuration.apache-zookeeper"
+  final val jdbcDomain = "configuration.sql-database"
+  val domains = Seq(systemDomain, tstreamsDomain, kafkaDomain, elasticsearchDomain, zookeeperDomain, jdbcDomain)
+
+  val domainTypes: Seq[Type] = Map(
+    systemDomain -> "System",
+    tstreamsDomain -> "T-streams",
+    kafkaDomain -> "Apache Kafka",
+    jdbcDomain -> "SQL database",
+    elasticsearchDomain -> "Elasticsearch",
+    zookeeperDomain -> "Apache Zookeeper"
+  ).map(x => Type(x._1, x._2)).toSeq
+
   val hostOfCrudRestTag = s"$systemDomain.crud-rest-host"
   val portOfCrudRestTag = s"$systemDomain.crud-rest-port"
   val marathonTag = s"$systemDomain.marathon-connect"

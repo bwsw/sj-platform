@@ -60,8 +60,10 @@ case class MessageResponseEntity(message: String) extends ResponseEntity
 case class KeyedMessageResponseEntity(message: String, key: String) extends ResponseEntity
 
 
-case class TypesResponseEntity(types: Seq[String]) extends ResponseEntity
+case class TypesResponseEntity(types: Seq[Type]) extends ResponseEntity
 
 case class RelatedToStreamResponseEntity(instances: mutable.Buffer[String] = mutable.Buffer()) extends ResponseEntity
 
-case class DomainsResponseEntity(domains: Seq[String] = ConfigLiterals.domains) extends ResponseEntity
+case class DomainsResponseEntity(domains: Seq[Type] = ConfigLiterals.domainTypes) extends ResponseEntity
+
+case class Type(id: String, name: String)

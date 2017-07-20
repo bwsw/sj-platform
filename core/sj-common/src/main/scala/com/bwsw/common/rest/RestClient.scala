@@ -30,7 +30,7 @@ import scala.util.{Failure, Success, Try}
 
 /**
   * Client for [[com.bwsw.sj.common.utils.EngineLiterals.outputStreamingType]] that has got
-  * [[com.bwsw.sj.common.utils.StreamLiterals.restOutputType]] output.
+  * [[com.bwsw.sj.common.utils.StreamLiterals.restType]] output.
   *
   * @param hosts       set of services hosts
   * @param path        path to entities

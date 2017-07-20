@@ -27,7 +27,7 @@ import com.bwsw.sj.common.si.result._
 import com.bwsw.sj.common.utils.MessageResourceUtils
 import com.bwsw.sj.common.utils.StreamLiterals._
 import com.bwsw.sj.crud.rest.{RelatedToStreamResponseEntity, _}
-import com.bwsw.sj.crud.rest.model.stream.{StreamApiCreator, StreamApi}
+import com.bwsw.sj.crud.rest.model.stream.{StreamApi, StreamApiCreator}
 import com.bwsw.sj.crud.rest.utils.JsonDeserializationErrorMessageCreator
 import org.mockito.ArgumentMatchers.{any, anyString}
 import org.mockito.Mockito._
@@ -197,13 +197,13 @@ class StreamControllerTests extends FlatSpec with Matchers with MockitoSugar {
 
   // getTypes
   it should "get all stream types" in {
-    val expected = OkRestResponse(TypesResponseEntity(types))
+    val expected = OkRestResponse(TypesResponseEntity(beToFeTypes.map(x => Type(x._1, x._2)).toSeq))
     controller.getTypes shouldBe expected
   }
 
 
   def createStream(name: String) = {
-    val streamType = tstreamType
+    val streamType = tstreamsType
     val serialized = s"""{"name":"$name","type":"$streamType"}"""
 
     val stream = mock[SjStream]

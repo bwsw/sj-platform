@@ -125,7 +125,7 @@ class KafkaStream(name: String,
           case Some(someService) =>
             if (someService.serviceType != ServiceLiterals.kafkaType) {
               errors += createMessage("entity.error.must.one.type.other.given",
-                s"Service for '${StreamLiterals.kafkaStreamType}' stream",
+                s"Service for '${StreamLiterals.kafkaType}' stream",
                 ServiceLiterals.kafkaType,
                 someService.serviceType)
             } else {

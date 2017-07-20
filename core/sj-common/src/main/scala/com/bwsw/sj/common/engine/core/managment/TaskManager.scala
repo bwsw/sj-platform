@@ -109,7 +109,7 @@ abstract class TaskManager(implicit injector: Injector) {
   }
 
   private def getAuxiliaryTStream(): StreamDomain =
-    instance.streams.flatMap(streamRepository.get).filter(_.streamType == tstreamType).head
+    instance.streams.flatMap(streamRepository.get).filter(_.streamType == tstreamsType).head
 
   private def getAuxiliaryTStreamService(): TStreamServiceDomain = {
     auxiliarySJTStream.service.asInstanceOf[TStreamServiceDomain]

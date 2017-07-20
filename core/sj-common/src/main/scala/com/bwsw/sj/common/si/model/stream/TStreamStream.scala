@@ -107,7 +107,7 @@ class TStreamStream(name: String,
           case Some(someService) =>
             if (someService.serviceType != ServiceLiterals.tstreamsType) {
               errors += createMessage("entity.error.must.one.type.other.given",
-                s"Service for '${StreamLiterals.tstreamType}' stream",
+                s"Service for '${StreamLiterals.tstreamsType}' stream",
                 ServiceLiterals.tstreamsType,
                 someService.serviceType)
             } else {

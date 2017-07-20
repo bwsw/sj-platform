@@ -65,7 +65,7 @@ trait KafkaTaskInput[T <: AnyRef] extends SjInjector {
   )
 
   protected def getKafkaInputs(): mutable.Map[StreamDomain, Array[Int]] = {
-    manager.inputs.filter(x => x._1.streamType == StreamLiterals.kafkaStreamType)
+    manager.inputs.filter(x => x._1.streamType == StreamLiterals.kafkaType)
   }
 
   /**

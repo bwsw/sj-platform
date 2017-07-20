@@ -10,8 +10,8 @@
       10
     ],
     "types": [
-      "stream.kafka",
-      "stream.t-stream"
+      "stream.apache-kafka",
+      "stream.t-streams"
     ]
   },
   "outputs": {
@@ -20,7 +20,7 @@
       10
     ],
     "types": [
-      "stream.t-stream"
+      "stream.t-streams"
     ]
   },
   "module-type": "regular-streaming",

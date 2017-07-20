@@ -34,7 +34,7 @@ class KafkaStreamDomain(override val name: String,
                         override val force: Boolean = false,
                         override val tags: Array[String] = Array(),
                         private val zkSessionTimeout: Int = ConfigLiterals.zkSessionTimeoutDefault)
-  extends StreamDomain(name, description, service, force, tags, StreamLiterals.kafkaStreamType) {
+  extends StreamDomain(name, description, service, force, tags, StreamLiterals.kafkaType) {
 
   protected def createClient(): KafkaClient = new KafkaClient(this.service.zkProvider.hosts)
 

@@ -131,7 +131,7 @@ class RegularInstanceValidator(implicit injector: Injector) extends InstanceVali
       errors += createMessage("rest.validator.source_stream.must.one.of", "Input", inputTypes.mkString("[", ", ", "]"))
     }
 
-    val kafkaStreams = inputStreams.filter(_.streamType == kafkaStreamType).map(_.asInstanceOf[KafkaStreamDomain])
+    val kafkaStreams = inputStreams.filter(_.streamType == kafkaType).map(_.asInstanceOf[KafkaStreamDomain])
     if (kafkaStreams.nonEmpty) {
       if (kafkaStreams.exists(s => !s.service.isInstanceOf[KafkaServiceDomain])) {
         errors += createMessage("rest.validator.service.must", "kafka streams", "KfkQ")
@@ -140,7 +140,7 @@ class RegularInstanceValidator(implicit injector: Injector) extends InstanceVali
 
     // 'start-from' field
     val startFrom = instance.startFrom
-    if (inputStreams.exists(_.streamType == kafkaStreamType)) {
+    if (inputStreams.exists(_.streamType == kafkaType)) {
       if (!startFromModes.contains(startFrom)) {
         errors += createMessage(
           "rest.validator.attribute.must.if.instance.have",
@@ -190,7 +190,7 @@ class RegularInstanceValidator(implicit injector: Injector) extends InstanceVali
 
     val allStreams = inputStreams.union(outputStreams)
     val tStreamsServices = getStreamServices(allStreams.filter { s =>
-      s.streamType.equals(tstreamType)
+      s.streamType.equals(tstreamsType)
     })
     if (tStreamsServices.nonEmpty) {
       if (tStreamsServices.size > 1) {

@@ -155,9 +155,9 @@ abstract class InstanceValidator(implicit val injector: Injector) extends Comple
   protected def getStreamsPartitions(streams: Seq[StreamDomain]): Seq[Int] = {
     streams.map { stream =>
       stream.streamType match {
-        case StreamLiterals.`tstreamType` =>
+        case StreamLiterals.`tstreamsType` =>
           stream.asInstanceOf[TStreamStreamDomain].partitions
-        case StreamLiterals.`kafkaStreamType` =>
+        case StreamLiterals.`kafkaType` =>
           stream.asInstanceOf[KafkaStreamDomain].partitions
         case _ => 0
       }

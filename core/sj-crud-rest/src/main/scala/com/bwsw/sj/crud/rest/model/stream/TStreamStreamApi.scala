@@ -30,8 +30,8 @@ class TStreamStreamApi(name: String,
                        @JsonDeserialize(contentAs = classOf[Boolean]) force: Option[Boolean] = Some(false),
                        description: Option[String] = Some(RestLiterals.defaultDescription),
                        @JsonDeserialize(contentAs = classOf[Int]) val partitions: Option[Int] = Some(Int.MinValue),
-                       @JsonProperty("type") streamType: Option[String] = Some(StreamLiterals.tstreamType))
-  extends StreamApi(streamType.getOrElse(StreamLiterals.tstreamType), name, service, tags, force, description) {
+                       @JsonProperty("type") streamType: Option[String] = Some(StreamLiterals.tstreamsType))
+  extends StreamApi(streamType.getOrElse(StreamLiterals.tstreamsType), name, service, tags, force, description) {
 
   override def to(implicit injector: Injector): TStreamStream =
     new TStreamStream(
@@ -40,6 +40,6 @@ class TStreamStreamApi(name: String,
       partitions.getOrElse(Int.MinValue),
       tags.getOrElse(Array()),
       force.getOrElse(false),
-      streamType.getOrElse(StreamLiterals.tstreamType),
+      streamType.getOrElse(StreamLiterals.tstreamsType),
       description.getOrElse(RestLiterals.defaultDescription))
 }

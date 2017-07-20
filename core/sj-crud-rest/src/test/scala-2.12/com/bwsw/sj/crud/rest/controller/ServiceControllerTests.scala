@@ -199,7 +199,7 @@ class ServiceControllerTests extends FlatSpec with Matchers with MockitoSugar {
 
   // getTypes
   it should "get all service types" in {
-    val expected = OkRestResponse(TypesResponseEntity(types))
+    val expected = OkRestResponse(TypesResponseEntity(beToFeTypes.map(x => Type(x._1, x._2)).toSeq))
     controller.getTypes() shouldBe expected
   }
 

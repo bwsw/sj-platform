@@ -119,7 +119,7 @@ class BatchInstanceValidator(implicit injector: Injector) extends InstanceValida
       errors += createMessage("rest.validator.source_stream.must.one.of", "Input", inputTypes.mkString("[", ", ", "]"))
     }
 
-    val kafkaStreams = inputStreams.filter(s => s.streamType.equals(kafkaStreamType))
+    val kafkaStreams = inputStreams.filter(s => s.streamType.equals(kafkaType))
       .map(_.asInstanceOf[KafkaStreamDomain])
     if (kafkaStreams.nonEmpty) {
       if (kafkaStreams.exists(s => !s.service.isInstanceOf[KafkaServiceDomain])) {
@@ -129,7 +129,7 @@ class BatchInstanceValidator(implicit injector: Injector) extends InstanceValida
 
     // 'start-from' field
     val startFrom = instance.startFrom
-    if (inputStreams.exists(s => s.streamType.equals(kafkaStreamType))) {
+    if (inputStreams.exists(s => s.streamType.equals(kafkaType))) {
       if (!startFromModes.contains(startFrom)) {
         errors += createMessage(
           "rest.validator.attribute.must.if.instance.have",
@@ -179,7 +179,7 @@ class BatchInstanceValidator(implicit injector: Injector) extends InstanceValida
 
     val allStreams = inputStreams.union(outputStreams)
     val tStreamsServices = getStreamServices(allStreams.filter { s =>
-      s.streamType.equals(tstreamType)
+      s.streamType.equals(tstreamsType)
     })
     if (tStreamsServices.nonEmpty) {
       if (tStreamsServices.size > 1) {

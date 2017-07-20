@@ -34,7 +34,14 @@ object EngineLiterals {
   final val outputStreamingType = "output-streaming"
   final val batchStreamingType = "batch-streaming"
   final val regularStreamingType = "regular-streaming"
-  val moduleTypes: Seq[String] = Seq(batchStreamingType, regularStreamingType, outputStreamingType, inputStreamingType)
+  val moduleTypes: Seq[String] = Seq(inputStreamingType, regularStreamingType, batchStreamingType, outputStreamingType)
+
+  val beToFeModulesTypes = Map(
+    inputStreamingType -> "Input streaming",
+    regularStreamingType -> "Regular streaming",
+    batchStreamingType -> "Batch streaming",
+    outputStreamingType -> "Output streaming"
+  )
 
   final val everyNthMode = "every-nth"
   final val timeIntervalMode = "time-interval"
@@ -89,26 +96,35 @@ object EngineLiterals {
 
 object StreamLiterals {
   final val inputDummy = "input"
-  final val tstreamType = "stream.t-stream"
-  final val kafkaStreamType = "stream.kafka"
-  final val esOutputType = "elasticsearch-output"
-  final val jdbcOutputType = "jdbc-output"
-  final val restOutputType = "rest-output"
-  val types: Seq[String] = Seq(tstreamType, kafkaStreamType, jdbcOutputType, esOutputType, restOutputType)
-  val outputTypes: Seq[String] = Seq(jdbcOutputType, esOutputType, restOutputType)
-  val internalTypes: Seq[String] = Seq(tstreamType, kafkaStreamType)
+  final val tstreamsType = "stream.t-streams"
+  final val kafkaType = "stream.apache-kafka"
+  final val elasticsearchType = "stream.elasticsearch"
+  final val jdbcType = "stream.sql-database"
+  final val restType = "stream.restful"
+  val types: Seq[String] = Seq(tstreamsType, kafkaType, jdbcType, elasticsearchType, restType)
+
+  val beToFeTypes = Map(
+    tstreamsType -> "T-streams",
+    kafkaType -> "Apache Kafka",
+    jdbcType -> "SQL database",
+    elasticsearchType -> "Elasticsearch",
+    restType -> "RESTful"
+  )
+
+  val outputTypes: Seq[String] = Seq(jdbcType, elasticsearchType, restType)
+  val internalTypes: Seq[String] = Seq(tstreamsType, kafkaType)
 
   private val tstreamFactory = new TStreamsFactory()
   final val ttl: Int = tstreamFactory.getProperty(ConfigurationOptions.Stream.ttlSec).asInstanceOf[Int]
 }
 
 object ServiceLiterals {
-  final val elasticsearchType = "ESInd"
-  final val kafkaType = "KfkQ"
-  final val tstreamsType = "TstrQ"
-  final val zookeeperType = "ZKCoord"
-  final val jdbcType = "JDBC"
-  final val restType = "REST"
+  final val elasticsearchType = "service.elasticsearch"
+  final val kafkaType = "service.apache-kafka"
+  final val tstreamsType = "service.t-streams"
+  final val zookeeperType = "service.apache-zookeeper"
+  final val jdbcType = "service.sql-database"
+  final val restType = "service.restful"
 
   val types: Seq[String] = Seq(
     elasticsearchType,
@@ -117,6 +133,15 @@ object ServiceLiterals {
     zookeeperType,
     jdbcType,
     restType
+  )
+
+  val beToFeTypes = Map(
+    elasticsearchType -> "Elasticsearch",
+    kafkaType -> "Apache Kafka",
+    tstreamsType -> "T-streams",
+    zookeeperType -> "Apache Zookeeper",
+    jdbcType -> "SQL database",
+    restType -> "RESTful"
   )
 
   val typeToProviderType: Map[String, String] = Map(
@@ -130,11 +155,11 @@ object ServiceLiterals {
 }
 
 object ProviderLiterals {
-  final val zookeeperType = "zookeeper"
-  final val kafkaType = "kafka"
-  final val elasticsearchType = "ES"
-  final val jdbcType = "JDBC"
-  final val restType = "REST"
+  final val zookeeperType = "provider.apache-zookeeper"
+  final val kafkaType = "provider.apache-kafka"
+  final val elasticsearchType = "provider.elasticsearch"
+  final val jdbcType = "provider.sql-database"
+  final val restType = "provider.restful"
 
   val types: Seq[String] = Seq(
     zookeeperType,
@@ -142,6 +167,14 @@ object ProviderLiterals {
     elasticsearchType,
     jdbcType,
     restType
+  )
+
+  val beToFeTypes = Map(
+    zookeeperType -> "Apache Zookeeper",
+    kafkaType -> "Apache Kafka",
+    elasticsearchType -> "Elasticsearch",
+    jdbcType -> "SQL database",
+    restType -> "RESTful"
   )
 }
 

@@ -29,8 +29,8 @@ class ESStreamApi(name: String,
                   tags: Option[Array[String]] = Some(Array()),
                   @JsonDeserialize(contentAs = classOf[Boolean]) force: Option[Boolean] = Some(false),
                   description: Option[String] = Some(RestLiterals.defaultDescription),
-                  @JsonProperty("type") streamType: Option[String] = Some(StreamLiterals.esOutputType))
-  extends StreamApi(streamType.getOrElse(StreamLiterals.esOutputType), name, service, tags, force, description) {
+                  @JsonProperty("type") streamType: Option[String] = Some(StreamLiterals.elasticsearchType))
+  extends StreamApi(streamType.getOrElse(StreamLiterals.elasticsearchType), name, service, tags, force, description) {
 
   override def to(implicit injector: Injector): ESStream =
     new ESStream(
@@ -38,6 +38,6 @@ class ESStreamApi(name: String,
       service,
       tags.getOrElse(Array()),
       force.getOrElse(false),
-      streamType.getOrElse(StreamLiterals.esOutputType),
+      streamType.getOrElse(StreamLiterals.elasticsearchType),
       description.getOrElse(RestLiterals.defaultDescription))
 }
