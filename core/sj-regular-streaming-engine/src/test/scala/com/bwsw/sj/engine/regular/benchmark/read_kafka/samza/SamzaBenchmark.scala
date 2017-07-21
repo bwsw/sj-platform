@@ -16,14 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.sj.engine.regular.benchmark.samza
+package com.bwsw.sj.engine.regular.benchmark.read_kafka.samza
 
 import java.io.{File, FileWriter}
 import java.util.UUID
 
-import com.bwsw.common.KafkaClient
 import com.bwsw.sj.common.utils.benchmark.ClassRunner
-import com.bwsw.sj.kafka.data_sender.DataSender
+import com.bwsw.sj.engine.regular.benchmark.read_kafka.ReadFromKafkaBenchmark
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.common.TopicPartition
 import org.apache.kafka.common.serialization.StringDeserializer
@@ -43,44 +42,34 @@ import scala.collection.JavaConverters._
   */
 class SamzaBenchmark(zooKeeperAddress: String,
                      kafkaAddress: String,
-                     words: Array[String]) {
+                     words: Array[String])
+  extends ReadFromKafkaBenchmark(zooKeeperAddress, kafkaAddress, words) {
 
-  private val kafkaTopic = "samza-benchmark-" + UUID.randomUUID().toString
   private val outputKafkaTopic = "samza-benchmark-result-" + UUID.randomUUID().toString
+  kafkaClient.createTopic(outputKafkaTopic, 1, 1)
+
   private val propertiesFilename = s"samza-benchmark-${UUID.randomUUID().toString}.properties"
   private val propertiesFile = new File(propertiesFilename)
-  private val kafkaClient = new KafkaClient(Array(zooKeeperAddress))
-  private val kafkaSender = new DataSender(kafkaAddress, kafkaTopic, words, " ")
-  private val lookupResultTimeout = 5000
   private val kafkaConsumer = createKafkaConsumer()
 
   prepareProperties()
 
   /**
-    * Performs first test because it's need more time than next
+    * Closes opened connections, deletes temporary files
     */
-  def warmUp(): Long = runTest(10, 10)
+  override def close(): Unit = {
+    kafkaConsumer.close()
+    kafkaClient.deleteTopic(outputKafkaTopic)
+    propertiesFile.delete()
 
-  /**
-    * Sends data into the Kafka server and runs Samza's job
-    *
-    * @param messageSize   size of one message that sends to the Kafka server
-    * @param messagesCount count of messages
-    * @return time for which Samza reads messages from Kafka
-    */
-  def runTest(messageSize: Long, messagesCount: Long): Long = {
-    println(s"$messageSize bytes messages")
+    super.close()
+  }
 
-    kafkaClient.createTopic(kafkaTopic, 1, 1)
-    while (!kafkaClient.topicExists(kafkaTopic))
-      Thread.sleep(100)
 
-    println(s"Kafka topic $kafkaTopic created")
+  override protected def firstMessage(messageSize: Long, messagesCount: Long): Option[String] =
+    Some(s"$messagesCount,$outputKafkaTopic")
 
-    val taskParameters = s"$messagesCount,$outputKafkaTopic"
-    kafkaSender.send(messageSize, messagesCount, Some(taskParameters))
-    println("Data sent to the Kafka")
-
+  override protected def runProcess(messageSize: Long, messagesCount: Long): Process = {
     val arguments = Seq(
       "--config-factory=org.apache.samza.config.factories.PropertiesConfigFactory",
       s"--config-path=${propertiesFile.getAbsolutePath}")
@@ -88,29 +77,16 @@ class SamzaBenchmark(zooKeeperAddress: String,
     val jobRunner = new ClassRunner(classOf[JobRunner], arguments = arguments).start()
     println("JobRunner started")
 
-    var consumerRecords = kafkaConsumer.poll(lookupResultTimeout)
-    while (consumerRecords.isEmpty)
-      consumerRecords = kafkaConsumer.poll(lookupResultTimeout)
-
-    jobRunner.destroy()
-
-    kafkaClient.deleteTopic(kafkaTopic)
-    while (kafkaClient.topicExists(kafkaTopic))
-      Thread.sleep(100)
-
-    println(s"Kafka topic $kafkaTopic deleted")
-
-    consumerRecords.records(outputKafkaTopic).iterator().next().value().toLong
+    jobRunner
   }
 
-  /**
-    * Closes opened connections, deletes temporary files
-    */
-  def close(): Unit = {
-    kafkaConsumer.close()
-    kafkaClient.deleteTopic(outputKafkaTopic)
-    kafkaClient.close()
-    propertiesFile.delete()
+  override protected def retrieveResult(messageSize: Long, messagesCount: Long): Option[Long] = {
+    val consumerRecords = kafkaConsumer.poll(0)
+
+    if (consumerRecords.isEmpty)
+      None
+    else
+      Some(consumerRecords.records(outputKafkaTopic).iterator().next().value().toLong)
   }
 
 
@@ -120,7 +96,7 @@ class SamzaBenchmark(zooKeeperAddress: String,
       "job.name=samza-benchmark",
       "job.default.system=kafka",
 
-      s"task.class=${classOf[BenchmarkStreamTask].getName}",
+      s"task.class=${classOf[SamzaBenchmarkStreamTask].getName}",
       s"task.inputs=kafka.$kafkaTopic",
 
       "serializers.registry.string.class=org.apache.samza.serializers.StringSerdeFactory",
@@ -144,11 +120,9 @@ class SamzaBenchmark(zooKeeperAddress: String,
   private def createKafkaConsumer(): KafkaConsumer[String, String] = {
     val configMap: Map[String, AnyRef] = Map[String, AnyRef](
       "bootstrap.servers" -> kafkaAddress,
-      "group.id" -> "samza-benchmark")
+      "group.id" -> UUID.randomUUID().toString)
     val consumer = new KafkaConsumer(configMap.asJava, new StringDeserializer, new StringDeserializer)
     consumer.subscribe(Seq(outputKafkaTopic).asJava)
-    consumer.seekToEnd(Seq.empty[TopicPartition].asJavaCollection)
-    consumer.poll(0)
 
     consumer
   }

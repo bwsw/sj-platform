@@ -215,3 +215,11 @@ lazy val regularPerformanceBenchmark = Project(id = "sj-regular-performance-benc
   base = file("./contrib/benchmarks/sj-regular-performance-benchmark"))
   .settings(commonSettings: _*)
   .dependsOn(engineCore % "provided")
+
+lazy val flinkBenchmarkTask = Project(id = "flink-benchmark-task",
+  base = file("./contrib/benchmarks/flink-benchmark-task"))
+  .settings(commonSettings: _*)
+  .settings(
+    scalaVersion := "2.11.8",
+    libraryDependencies ++= Dependencies.flinkDependencies.value
+  )

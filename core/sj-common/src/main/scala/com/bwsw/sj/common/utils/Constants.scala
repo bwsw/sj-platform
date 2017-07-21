@@ -275,4 +275,5 @@ object BenchmarkConfigNames {
 object BenchmarkLiterals {
   val sjDefaultOutputFile = "sj-benchmark-output"
   val samzaDefaultOutputFile = "samza-benchmark-output"
+  val flinkDefaultOutputFile = "flink-benchmark-output"
 }
