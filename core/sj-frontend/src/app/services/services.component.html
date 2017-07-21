@@ -90,8 +90,8 @@
             <li *ngIf="currentService.type === 'service.elasticsearch' && currentService.index">
               <span class="title">Index:</span>{{currentService.index}}
             </li>
-            <li *ngIf="(currentService.type == 'service.t-streams' || currentService.type === 'service.apache-zookeeper'
-                        || currentService.type === 'RdsCoord') && currentService.namespace">
+            <li *ngIf="(currentService.type == 'service.t-streams' || currentService.type === 'service.apache-zookeeper')
+                          && currentService.namespace">
               <span class="title">Namespace:</span>{{currentService.namespace}}
             </li>
             <li *ngIf="currentService.httpScheme">

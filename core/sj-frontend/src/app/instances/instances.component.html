@@ -251,26 +251,8 @@
 
       <div class="modal-body">
 
-        <!-- Clone from existing component -->
-        <!--fieldset class="form-check">
-          <label class="form-check-label"><input class="form-check-input" [(ngModel)]="cloneInstance" (click)="clearInstance()" type="checkbox">&nbsp;Clone from
-            existing instance</label>
-        </fieldset-->
-
         <!-- Create instance form -->
         <form #instanceForm="ngForm" *ngIf="isFormReady" (ngSubmit)="createInstance(CreateInstance)">
-
-          <!-- Choose instnce -->
-          <!--fieldset *ngIf="isInstanceClone" class="form-group row">
-            <label class="col-form-label col-sm-2 required">Choose instance</label>
-            <div class="col col-sm-10">
-              <select [(ngModel)]="cloningInstance" name="instanceToClone"
-                      (change)="createByClone($event.target.selectedIndex)" required
-                      class="form-control">
-                <option *ngFor="let instance of cloneInstancesList" [ngValue]="instance">{{instance.name}}</option>
-              </select>
-            </div>
-          </fieldset-->
 
           <!-- Choose module -->
           <fieldset *ngIf="!isInstanceClone" class="form-group row">
@@ -325,14 +307,16 @@
               <div class="col-sm-10">
                 <div *ngFor='let input of newInstance.inputs; let i = index; trackBy:customTrackBy'
                      class="mb-1 row">
-                  <div class="col-sm-6">
+                  <div class="col-sm-8">
                     <select [(ngModel)]="newInstance.inputs[i]"
                             (change)="checkTimestampAcceptable()"
                             name="instanceInputs{{i}}" required class="form-control">
-                      <option *ngFor="let stream of streamsList | streamFilter: 'stream.t-streams, stream.apache-kafka'">{{stream.name}}</option>
+                      <option *ngFor="let stream of streamsList | streamFilter: 'stream.t-streams, stream.apache-kafka'">
+                        {{stream.name}} ({{stream.service}}, {{providerList[stream.service]}})
+                      </option>
                     </select>
                   </div>
-                  <div class="col-sm-6">
+                  <div class="col-sm-4">
                     <div class="input-group">
                       <select [(ngModel)]="newInstance.inputsTypes[i]"
                               name="instanceInputType{{i}}" required class="form-control">
@@ -360,7 +344,9 @@
               <div class="col col-sm-10">
                 <select [(ngModel)]="newInstance.input" name="instanceInput" required
                         class="form-control">
-                  <option *ngFor="let stream of streamsList | streamFilter: 'stream.t-streams'" value="{{stream.name}}">{{stream.name}}</option>
+                  <option *ngFor="let stream of streamsList | streamFilter: 'stream.t-streams'" value="{{stream.name}}">
+                    {{stream.name}} ({{stream.service}}, {{providerList[stream.service]}})
+                  </option>
                 </select>
               </div>
             </fieldset>
@@ -371,7 +357,9 @@
               <div class="col col-sm-10">
                 <select [(ngModel)]="newInstance.output" name="instanceOutput" required
                         class="form-control">
-                  <option *ngFor="let stream of streamsList | streamFilter: 'stream.sql-database,stream.elasticsearch'" value="{{stream.name}}">{{stream.name}}</option>
+                  <option *ngFor="let stream of streamsList | streamFilter: 'stream.sql-database,stream.elasticsearch'" value="{{stream.name}}">
+                    {{stream.name}} ({{stream.service}}, {{providerList[stream.service]}})
+                  </option>
                 </select>
               </div>
             </fieldset>
@@ -387,7 +375,8 @@
                      class="input-group mb-1">
                   <select [(ngModel)]="newInstance.outputs[i]"
                           name="instanceOutputs{{i}}" required class="form-control">
-                    <option *ngFor="let stream of streamsList | streamFilter: 'stream.t-streams'" value="{{stream.name}}">{{stream.name}}</option>
+                    <option *ngFor="let stream of streamsList | streamFilter: 'stream.t-streams'" value="{{stream.name}}">
+                      {{stream.name}} ({{stream.service}}, {{providerList[stream.service]}}) </option>
                   </select>
                   <span class="input-group-btn" *ngIf="i!==0">
                     <button type="button"

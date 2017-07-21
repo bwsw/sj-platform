@@ -37,6 +37,7 @@ export class InstancesComponent implements OnInit, AfterViewChecked, OnDestroy {
   public moduleTypes: TypeModel[];
   public servicesList: ServiceModel[] = [];
   public streamsList: StreamModel[] = [];
+  public providerList: { [key: string]: string } = {};
   public streamTypesList: { [key: string]: string } = {};
   public currentInstance: InstanceModel;
   public currentInstanceTasks: {};
@@ -144,10 +145,17 @@ export class InstancesComponent implements OnInit, AfterViewChecked, OnDestroy {
       .subscribe(
         response => {
           this.servicesList = response.services;
+          this.getProviderList();
           this.isFormReady = true;
         },
 
         error => this.errorMessage = <any>error);
+  }
+
+  public getProviderList() {
+    this.servicesList.forEach(service => {
+      this.providerList[service.name] = service.provider;
+    });
   }
 
   public getInstanceInfo(currentInstance: InstanceModel) {
@@ -350,7 +358,7 @@ export class InstancesComponent implements OnInit, AfterViewChecked, OnDestroy {
         if (this.newInstance.inputs &&  this.newInstance.inputs.length > 0 && this.newInstance.inputs[0]) {
           this.startFromDateTimeAcceptable = true;
           for (const inputName of this.newInstance.inputs) {
-            if (this.streamTypesList[inputName] !== 'stream.kafka') {
+            if (this.streamTypesList[inputName] !== 'stream.apache-kafka') {
               this.startFromDateTimeAcceptable = false;
               break;
             }
