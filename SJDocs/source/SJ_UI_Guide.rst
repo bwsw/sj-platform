@@ -810,7 +810,7 @@ In the list of instances the following actions can be performed:
 2. **Stop** the instance that has been started i.e. has the «Started» status. Click at the «Stop» button and wait for a while till the status changes to «Stopping» and then to «Stopped».
 3. **Clone** an instance. This fuction enables instance creation by copying the settings of an existing instance. Just tick the "Clone instance" icon in the Actions block near the name of the instance you want to clone.
 
-.. figure:: _static/CreateInstance_Clone2.png
+.. _static/CreateInstance_Clone2.png
 
 The form will show the settings of the selected instance. They can be edited and saved by clicking at the "Create" button. The new instance will appear in the list of instances.
 
@@ -851,7 +851,7 @@ If all described above is correct, but the "failed" or the "error" status still 
 
 The *statistics* on the task execution is also available from the list of instances. Click at the "Information" icon next to the Instance name you want to get the statistics for. 
 
-.. figure:: _static/FrameworkStatsIcon1.png
+ .. figure:: _static/FrameworkStatsIcon1.png
 
 A window will pop-up to show the stats. It includes the following information for each task in the list:
 
