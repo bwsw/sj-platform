@@ -1028,6 +1028,7 @@ Error response example::
     "status-code": 404
  }
 
+.. tip:: A full range of error responses can be found at :ref:`Streams_Errors`
 
 CRUD Rest-API for Config Settings
 -----------------------------------
@@ -1276,6 +1277,8 @@ Success response example::
   },
   "statusCode": 200
  }
+
+.. tip:: A full range of error responses can be found at :ref:`Config_Setting_Errors`
 
 CRUD Rest-API for Custom Files
 ----------------------------------------
@@ -1696,7 +1699,7 @@ IOstream for inputs and outputs has the following structure:
   :widths: 20, 20, 60
 
   "cardinality*", "Array[Int]", "The boundary of interval in that a number of inputs can change. Must contain 2 items."
-  "types*", "Array[String]", "The enumeration of types of inputs. Can contain only [stream.t-stream, stream.kafka, elasticsearch-output, jdbc-output, rest-output, input]"
+  "types*", "Array[String]", "The enumeration of types of inputs. Can contain only [stream.t-streams, stream.apache-kafka, stream.elasticsearch, stream.sql-database, stream.restful, input]"
 
 .. note:: `*` - required field, `**` - required for batch-streaming field
 
@@ -2005,6 +2008,8 @@ Error response example::
     },
     "status-code": 400
  }
+
+.. tip:: A full range of error responses can be found at :ref:`Modules_Errors`
 
 .. _REST_API_Instance:
 
@@ -2772,3 +2777,5 @@ Success response json example::
     ]
   }
  }
+
+.. tip:: A full range of error responses can be found at :ref:`Instances_Errors`

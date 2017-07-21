@@ -5161,7 +5161,9 @@ body {
     padding-left: 7.5px; }
 
 .main .container-fluid {
-  padding: 0 30px; }
+  padding: 0 30px;
+  margin-top: 15px;
+}
 
 html.sidebar-opened {
   max-width: 100% !important;
@@ -5216,7 +5218,7 @@ body:not(.top-nav) header.navbar {
 
 body:not(.top-nav) .sidebar {
   display: inline;
-  padding-top: 55px !important; }
+  /*padding-top: 55px !important;*/ }
 
 body:not(.top-nav).sidebar-nav.compact-nav .main {
   padding-left: 50px; }
@@ -5283,8 +5285,8 @@ body.sidebar-nav .sidebar {
 body.sidebar-nav .main {
   padding-left: 200px; }
 
-body.sidebar-nav .footer {
-  left: 200px; }
+/*body.sidebar-nav .footer {
+  left: 200px; }*/
 
 body.top-nav .layout-toggler {
   display: none !important; }
@@ -7637,7 +7639,7 @@ base-chart.chart {
 .label-pill {
   border-radius: 1rem !important; }
 
-@media (max-width: 991px) {
+/*@media (max-width: 991px) {
   body {
     padding: 0 !important;
     margin: 0 !important; }
@@ -7685,4 +7687,4 @@ base-chart.chart {
     body.mobile-open .sidebar {
       left: 0 !important; }
     body.mobile-open .main {
-      margin-left: 200px !important; } }
+      margin-left: 200px !important; } }*/

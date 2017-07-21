@@ -52,7 +52,7 @@ Input Streaming Custom Module
 7) Create an instance of the module (via UI or REST)
 8) Launch the instance. 
 
-.. note:: You can use a module simulator for preliminary testing of executor work (:ref:`Input_Engine_Simulator`).
+.. tip:: You can use a module simulator for preliminary testing of executor work (:ref:`Input_Engine_Simulator`).
 
 Regular Streaming Custom Module
 ---------------------------------
@@ -65,7 +65,7 @@ Regular Streaming Custom Module
 7) Create an instance of the module (via REST or UI)
 8) Launch the instance. 
 
-.. note:: You can use a module simulator for preliminary testing of executor work (:ref:`Regular_Engine_Simulator`).
+.. tip:: You can use a module simulator for preliminary testing of executor work (:ref:`Regular_Engine_Simulator`).
 
 Batch Streaming Custom Module
 ------------------------------------
@@ -79,7 +79,7 @@ Batch Streaming Custom Module
 8) Create an instance of the module (via REST or UI)
 9) Launch the instance. 
 
-.. note:: You can use a module simulator for preliminary testing of executor work (:ref:`Batch_Engine_Simulator`).
+.. tip:: You can use a module simulator for preliminary testing of executor work (:ref:`Batch_Engine_Simulator`).
 
 Output Streaming Custom Module
 -----------------------------------------------
@@ -102,7 +102,7 @@ Output Streaming Custom Module
 9) Create an instance of the module  (via Rest API or UI)
 10) Launch the instance. 
 
-.. note:: You can use a module simulator for preliminary testing of executor work (:ref:`Output_Engine_Simulator`).
+.. tip:: You can use a module simulator for preliminary testing of executor work (:ref:`Output_Engine_Simulator`).
 
 .. _hello-world-module:
 
@@ -177,7 +177,7 @@ Everything we receive from 'fping + awk' pipe is going to our configured stream-
  
 for all IPs it has received data about at that particular minute.
 
-All output data we are going to send into ElasticSearch to store them and have an ability to show on plot (via Kibana).
+All output data we are going to send into Elasticsearch to store them and have an ability to show on plot (via Kibana).
 
 Basic classes description 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -297,7 +297,7 @@ An `InputEnvelope` instance then goes to `InputTaskEngine` which serializes it t
 
 `RegularTaskEngine` serializes all the received data to the flow of bytes and puts it back to T-Streams. 
 
-Then `OutputTaskEngine` deserializes the stream of bytes from T-Streams to TStreamsEnvelope[String] and sends it to `OutputStreamingExecutor`. `OutputStreamingExecutor` returns Entities back to `OutputTaskEngine`. They are then put to ElasticSearch.
+Then `OutputTaskEngine` deserializes the stream of bytes from T-Streams to TStreamsEnvelope[String] and sends it to `OutputStreamingExecutor`. `OutputStreamingExecutor` returns Entities back to `OutputTaskEngine`. They are then put to Elasticsearch.
 
 Input module 
 """"""""""""""""""
@@ -605,9 +605,9 @@ Signature of the method looks like::
 
 It returns instances of Entity[String] - that class contains metadata on ``OutputEnvelope`` structure: map (field name -> field type) (Map[String, NamedType[T]]).
 
-In file 'es-echo-response-1m.json' we use `elasticsearch-output` string as a value of the ``type`` field. It means that we will use ElasticSearch as output of our sj-module. Other possible variants are REST and JDBC.
+In file 'es-echo-response-1m.json' we use `elasticsearch-output` string as a value of the ``type`` field. It means that we will use Elasticsearch as output of our sj-module. Other possible variants are REST and JDBC.
 
-So, for ElasticSearch destination type we shall use appropriate builder in 'getOutputEntity' (there are three of them - one for each type) and just describe all fields we have::
+So, for Elasticsearch destination type we shall use appropriate builder in 'getOutputEntity' (there are three of them - one for each type) and just describe all fields we have::
 
  override def getOutputEntity: Entity[String] = {
 	val entityBuilder = new ElasticsearchEntityBuilder()
