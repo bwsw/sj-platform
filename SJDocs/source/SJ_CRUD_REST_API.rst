@@ -1699,7 +1699,7 @@ IOstream for inputs and outputs has the following structure:
   :widths: 20, 20, 60
 
   "cardinality*", "Array[Int]", "The boundary of interval in that a number of inputs can change. Must contain 2 items."
-  "types*", "Array[String]", "The enumeration of types of inputs. Can contain only [stream.t-stream, stream.kafka, elasticsearch-output, jdbc-output, rest-output, input]"
+  "types*", "Array[String]", "The enumeration of types of inputs. Can contain only [stream.t-streams, stream.apache-kafka, stream.elasticsearch, stream.sql-database, stream.restful, input]"
 
 .. note:: `*` - required field, `**` - required for batch-streaming field
 
