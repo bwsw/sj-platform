@@ -682,7 +682,7 @@ Please, review the tables with general and specific fields description below.
        Interval for performing the checkpoint. If Checkpoint Mode is  'time-interval' the value is set in ms.  If Checkpoint Mode is 'every-nth' the value is the number of events after which the checkpoint is done.
        
 - Outputs*
-       Names of output streams (must be stream.t-stream only).
+       Names of output streams (must be stream.t-streams only).
        
 - Duplicate Check
        The flag points if an envelope (an envelope key) has to be checked for duplication or not. False by default.
@@ -714,7 +714,7 @@ Please, review the tables with general and specific fields description below.
      Interval for performing the checkpoint. If Checkpoint Mode is  'time-interval' the value is set in ms.  If Checkpoint Mode is 'every-nth' the value is the number of events after which the checkpoint is done.
      
 - Inputs*
-     Names of input streams. Requires an input mode: 'full' (if you want each task to process all partitions of the stream) or 'split' (if you want to divide stream's partitions among the tasks; it is a default value). The stream should exist in the database (it should be of stream.t-stream or stream.kafka type).
+     Names of input streams. Requires an input mode: 'full' (if you want each task to process all partitions of the stream) or 'split' (if you want to divide stream's partitions among the tasks; it is a default value). The stream should exist in the database (it should be of stream.t-streams or stream.apache-kafka type).
      
 - Outputs*
      Names of output streams (should be stream.t-stream only).
@@ -746,7 +746,7 @@ Please, review the tables with general and specific fields description below.
       Names of input stream. Must be only 't-stream' type. Stream for this type of module is 'split' only. Stream must exist in database.
       
 - Outputs* 
-     Names of output stream (must be elasticsearch-output, jdbc-ouptut or rest-output).
+     Names of output stream (must be streams.sql-database, streams.elasticsearch or streams.restful).
      
 - Start From
      Value must be 'newest' (the system reads nothing, waits for new events), 'oldest' (the system reads all input stream events) or datetime (that requires specifying a timestamp and means the system reads events from the stream starting from the specified moment).
@@ -765,7 +765,7 @@ Please, review the tables with general and specific fields description below.
     The interval at which a window will be shifted (count of batches that will be removed from the window after its processing). Must be greater than zero and less than or equal to the window (1 by default)
    
 - Inputs*
-    Names of input streams. Requires input mode: 'full' or 'split' ('split' is default). The stream must exist in database (must be stream.t-stream or stream.kafka)
+    Names of input streams. Requires input mode: 'full' or 'split' ('split' is default). The stream must exist in database (must be stream.t-streams or stream.apache-kafka)
     
 - Start From 
     Value must be 'newest' (the system reads nothing, waits for new events), 'oldest' (the system reads all input stream events) or datetime (that requires specifying a timestamp and means the system reads events from the stream starting from the specified moment). If an instance have kafka input streams, then 'Start from' must be 'oldest' or 'newest' ('newest' is default). If instance have kafka input streams, then the value here can be 'oldest' or 'newest' (newest is default).
@@ -785,11 +785,6 @@ Click «Create» at the bottom and see the instance is in the list of instances 
 
 Click "Cancel" to drop all the specified settings. The instance will not be created then.
 
-An instance can be created by copying the settings of an existing instance. Just tick the "Clone from existing instance" option in the upper-left corner of the Create Instance form and select an instance you want to clone in the drop-down.
-
-.. figure:: _static/CreateInstance_Clone.png
-
-The form will show the settings of the selected instance. They can be edited and saved by clicking at the "Create" button. The new instance will appear in the list of instances.
 
 Details of the node are displayed to the right when clicking the instance in the list. 
 
@@ -813,7 +808,13 @@ In the list of instances the following actions can be performed:
 
 1. **Start** an instance by clicking the «Start» button in the Actions section. The instance status will first change to «Starting» and in a few seconds to «Started». That means the instance is launched and is working now.
 2. **Stop** the instance that has been started i.e. has the «Started» status. Click at the «Stop» button and wait for a while till the status changes to «Stopping» and then to «Stopped».
-3. **Delete** a stream clicking at the corresponding icon in the Action block near the name of the stream you want to delete.
+3. **Clone** an instance. This fuction enables instance creation by copying the settings of an existing instance. Just tick the "Clone instance" icon in the Actions block near the name of the instance you want to clone.
+
+.. figure:: _static/CreateInstance_Clone2.png
+
+The form will show the settings of the selected instance. They can be edited and saved by clicking at the "Create" button. The new instance will appear in the list of instances.
+
+4. **Delete** a stream clicking at the corresponding icon in the Actions block near the name of the stream you want to delete.
 
 .. note:: An instance with statuses «Starting», «Started», «Stopping», «Deleting» can not be deleted.
 
@@ -835,7 +836,7 @@ In the list of instances the following actions can be performed:
 
 If an instance stuck in 'failed' or 'error' status, you should use the following instruction:
 
-1) Check that all of the following settings exist (see the table_ for more information on Config Settings):
+1) Check that all of the following settings exist (see the table_ for more information on Configuration):
 
 - crud-rest-host (domain: system)
 - crud-rest-port (domain: system)
@@ -850,7 +851,7 @@ If all described above is correct, but the "failed" or the "error" status still 
 
 The *statistics* on the task execution is also available from the list of instances. Click at the "Information" icon next to the Instance name you want to get the statistics for. 
 
-.. figure:: _static/FrameworkStatsIcon.png
+.. figure:: _static/FrameworkStatsIcon1.png
 
 A window will pop-up to show the stats. It includes the following information for each task in the list:
 
