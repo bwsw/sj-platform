@@ -54,7 +54,7 @@
 			"description": "",
 			"collectionId": "b3587a8a-abe6-73ba-34f8-b77c390c5f82",
 			"responses": [],
-			"rawModeData": "{\r\n     \"type\": \"TstrQ\",\r\n     \"name\": \"input-tstream\",\r\n     \"description\": \"tstream\",\r\n     \"provider\": \"zookeeper-tstr-input\",\r\n     \"prefix\": \"/path\",\r\n     \"token\": \"12345678910111213141516171819202\"\r\n}"
+			"rawModeData": "{\r\n     \"type\": \"service.t-streams\",\r\n     \"name\": \"input-tstream\",\r\n     \"description\": \"tstream\",\r\n     \"provider\": \"zookeeper-tstr-input\",\r\n     \"prefix\": \"/path\",\r\n     \"token\": \"12345678910111213141516171819202\"\r\n}"
 		},
 		{
 			"id": "05c32828-2df7-7849-821e-e0fb38bb42a1",
@@ -240,7 +240,7 @@
 			"description": "",
 			"collectionId": "b3587a8a-abe6-73ba-34f8-b77c390c5f82",
 			"responses": [],
-			"rawModeData": "{\r\n     \"type\": \"ZKCoord\",\r\n     \"name\": \"zookeper-coord-serv\",\r\n     \"description\": \"zoo\",\r\n     \"provider\": \"zookeeper-coord-serv\",\r\n     \"namespace\": \"a1\"\r\n}"
+			"rawModeData": "{\r\n     \"type\": \"service.apache-zookeeper\",\r\n     \"name\": \"zookeper-coord-serv\",\r\n     \"description\": \"zoo\",\r\n     \"provider\": \"zookeeper-coord-serv\",\r\n     \"namespace\": \"a1\"\r\n}"
 		},
 		{
 			"id": "54b3cadc-598a-0eda-f7d6-3693612dce24",

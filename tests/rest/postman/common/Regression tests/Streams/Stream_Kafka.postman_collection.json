@@ -227,7 +227,7 @@
 			"data": [],
 			"dataMode": "raw",
 			"version": 2,
-			"tests": "tests[\"Status code is 400\"] = responseCode.code === 400;\n\ntests[\"Body matches string\"] = responseBody.has(\"Service for 'stream.kafka' stream' must be of type: 'KfkQ' ('TstrQ' is given instead).\");",
+			"tests": "tests[\"Status code is 400\"] = responseCode.code === 400;\n\ntests[\"Body matches string\"] = responseBody.has(\"Service for 'stream.kafka' stream' must be of type: 'service.apache-kafka' ('service.t-streams' is given instead).\");",
 			"currentHelper": "normal",
 			"helperAttributes": {},
 			"time": 1493268998737,
@@ -339,7 +339,7 @@
 			"description": "",
 			"collectionId": "bf0d2deb-f963-06d5-e6b5-0fb2d8667930",
 			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"rest-kafka\",\r\n     \"description\": \"example kafka provider\",\r\n     \"provider\": \"kafka-example\",\r\n     \"zkProvider\": \"rest-zookeeper\",\r\n     \"type\": \"KfkQ\",\r\n     \"zkNamespace\": \"a1\"\r\n}",
+			"rawModeData": "{\r\n     \"name\": \"rest-kafka\",\r\n     \"description\": \"example kafka provider\",\r\n     \"provider\": \"kafka-example\",\r\n     \"zkProvider\": \"rest-zookeeper\",\r\n     \"type\": \"service.apache-kafka\",\r\n     \"zkNamespace\": \"a1\"\r\n}",
 			"isFromCollection": true
 		},
 		{
@@ -361,7 +361,7 @@
 			"tests": "tests[\"Status code is 201\"] = responseCode.code === 201;\n\ntests[\"Body matches string\"] = responseBody.has(\"Service 'tstr-for-output-stream' has been created.\");",
 			"currentHelper": "normal",
 			"helperAttributes": {},
-			"rawModeData": "{\r\n     \"type\": \"TstrQ\",\r\n     \"name\": \"tstr-for-output-stream\",\r\n     \"description\": \"tstream\",\r\n     \"provider\": \"zookeeper-for-tstr-serv\",\r\n     \"prefix\": \"/path\",\r\n     \"token\": \"12345678910111213141516171819202\"\r\n}"
+			"rawModeData": "{\r\n     \"type\": \"service.t-streams\",\r\n     \"name\": \"tstr-for-output-stream\",\r\n     \"description\": \"tstream\",\r\n     \"provider\": \"zookeeper-for-tstr-serv\",\r\n     \"prefix\": \"/path\",\r\n     \"token\": \"12345678910111213141516171819202\"\r\n}"
 		},
 		{
 			"id": "44a98729-d847-d205-5255-c81d62d65f6d",

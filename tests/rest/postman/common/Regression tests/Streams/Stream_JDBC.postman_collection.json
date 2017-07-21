@@ -70,7 +70,7 @@
 			"data": [],
 			"dataMode": "raw",
 			"version": 2,
-			"tests": "tests[\"Status code is 400\"] = responseCode.code === 400;\n\ntests[\"Body matches string\"] = responseBody.has(\"'Service for 'jdbc-output' stream' must be of type: 'JDBC' ('ESInd' is given instead).\");",
+			"tests": "tests[\"Status code is 400\"] = responseCode.code === 400;\n\ntests[\"Body matches string\"] = responseBody.has(\"'Service for 'jdbc-output' stream' must be of type: 'JDBC' ('service.elasticsearch' is given instead).\");",
 			"currentHelper": "normal",
 			"helperAttributes": {},
 			"time": 1493264349372,
@@ -453,7 +453,7 @@
 			"tests": "tests[\"Status code is 201\"] = responseCode.code === 201;\n\ntests[\"Body matches string\"] = responseBody.has(\"Service 'rest-elasticsearch' has been created.\");",
 			"currentHelper": "normal",
 			"helperAttributes": {},
-			"rawModeData": "{\r\n     \"type\": \"ESInd\",\r\n     \"name\": \"rest-elasticsearch\",\r\n     \"description\": \"elas\",\r\n     \"index\": \"a1\",\r\n     \"provider\": \"rest-elasticsearch\",\r\n     \"login\": \"1\",\r\n     \"password\":\"1\"\r\n}"
+			"rawModeData": "{\r\n     \"type\": \"service.elasticsearch\",\r\n     \"name\": \"rest-elasticsearch\",\r\n     \"description\": \"elas\",\r\n     \"index\": \"a1\",\r\n     \"provider\": \"rest-elasticsearch\",\r\n     \"login\": \"1\",\r\n     \"password\":\"1\"\r\n}"
 		},
 		{
 			"id": "aceb05f7-5ce3-5a9b-bc77-a8769cb028d3",
@@ -473,7 +473,7 @@
 			"description": "",
 			"collectionId": "c82770b9-1b6e-c79d-b38a-d8b72c3fea86",
 			"responses": [],
-			"rawModeData": "{\r\n     \"type\": \"ESInd\",\r\n     \"name\": \"rest-elasticsearch\",\r\n     \"description\": \"elas\",\r\n     \"index\": \"a1\",\r\n     \"provider\": \"es_test_provider\",\r\n     \"login\": \"1\",\r\n     \"password\":\"1\"\r\n}"
+			"rawModeData": "{\r\n     \"type\": \"service.elasticsearch\",\r\n     \"name\": \"rest-elasticsearch\",\r\n     \"description\": \"elas\",\r\n     \"index\": \"a1\",\r\n     \"provider\": \"es_test_provider\",\r\n     \"login\": \"1\",\r\n     \"password\":\"1\"\r\n}"
 		},
 		{
 			"id": "ae1b8d36-e382-6925-b2b2-fa94864d164e",

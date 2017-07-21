@@ -140,7 +140,7 @@
 			"description": "",
 			"collectionId": "9cb17009-d436-86e3-7fc7-44db9de0ac58",
 			"responses": [],
-			"rawModeData": "{\r\n     \"type\": \"TstrQ\",\r\n     \"name\": \"tstr-for-output-stream\",\r\n     \"description\": \"tstream\",\r\n     \"provider\": \"zookeeper-for-tstr-serv\",\r\n     \"prefix\": \"/tts/master\",\r\n     \"token\": \"12345678910111213141516171819202\"\r\n}"
+			"rawModeData": "{\r\n     \"type\": \"service.t-streams\",\r\n     \"name\": \"tstr-for-output-stream\",\r\n     \"description\": \"tstream\",\r\n     \"provider\": \"zookeeper-for-tstr-serv\",\r\n     \"prefix\": \"/tts/master\",\r\n     \"token\": \"12345678910111213141516171819202\"\r\n}"
 		},
 		{
 			"id": "3197b3be-b9c1-dc25-2c48-78cbcf502ae9",
@@ -341,7 +341,7 @@
 			"description": "",
 			"collectionId": "9cb17009-d436-86e3-7fc7-44db9de0ac58",
 			"responses": [],
-			"rawModeData": "{\r\n     \"type\": \"ZKCoord\",\r\n     \"name\": \"zookeper-coord-serv\",\r\n     \"description\": \"zoo\",\r\n     \"provider\": \"zookeeper-for-coord-serv\",\r\n     \"namespace\": \"a1\"\r\n}"
+			"rawModeData": "{\r\n     \"type\": \"service.apache-zookeeper\",\r\n     \"name\": \"zookeper-coord-serv\",\r\n     \"description\": \"zoo\",\r\n     \"provider\": \"zookeeper-for-coord-serv\",\r\n     \"namespace\": \"a1\"\r\n}"
 		},
 		{
 			"id": "7f5944a6-ecf1-d5e1-51be-1b9c1d038367",
@@ -501,7 +501,7 @@
 			"description": "",
 			"collectionId": "9cb17009-d436-86e3-7fc7-44db9de0ac58",
 			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"kafka-for-input-stream\",\r\n     \"description\": \"example kafka provider\",\r\n     \"provider\": \"kafka-for-serv\",\r\n     \"zkProvider\": \"zookeeper-zkprovider-for-kafka\",\r\n     \"type\": \"KfkQ\",\r\n     \"zkNamespace\": \"a1\"\r\n}"
+			"rawModeData": "{\r\n     \"name\": \"kafka-for-input-stream\",\r\n     \"description\": \"example kafka provider\",\r\n     \"provider\": \"kafka-for-serv\",\r\n     \"zkProvider\": \"zookeeper-zkprovider-for-kafka\",\r\n     \"type\": \"service.apache-kafka\",\r\n     \"zkNamespace\": \"a1\"\r\n}"
 		},
 		{
 			"id": "c3603c8b-bef4-a1f3-938f-dabb60edc028",

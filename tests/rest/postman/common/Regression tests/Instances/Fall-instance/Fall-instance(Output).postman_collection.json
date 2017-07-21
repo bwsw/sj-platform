@@ -137,7 +137,7 @@
 			"description": "",
 			"collectionId": "b4ce2f08-ec11-4624-d6f0-f66da7985d2f",
 			"responses": [],
-			"rawModeData": "{\r\n     \"type\": \"TstrQ\",\r\n     \"name\": \"tstream-for-stream-inp\",\r\n     \"description\": \"tstream\",\r\n     \"provider\": \"zookeeper-for-tstr-service\",\r\n     \"prefix\": \"/tts/master\",\r\n     \"token\": \"12345678910111213141516171819202\"\r\n}"
+			"rawModeData": "{\r\n     \"type\": \"service.t-streams\",\r\n     \"name\": \"tstream-for-stream-inp\",\r\n     \"description\": \"tstream\",\r\n     \"provider\": \"zookeeper-for-tstr-service\",\r\n     \"prefix\": \"/tts/master\",\r\n     \"token\": \"12345678910111213141516171819202\"\r\n}"
 		},
 		{
 			"id": "13d618c5-d05a-bf47-26d0-3029f7113cb7",
@@ -197,7 +197,7 @@
 			"description": "",
 			"collectionId": "b4ce2f08-ec11-4624-d6f0-f66da7985d2f",
 			"responses": [],
-			"rawModeData": "{\r\n     \"type\": \"ZKCoord\",\r\n     \"name\": \"zookeper-for-coord-service\",\r\n     \"description\": \"zoo\",\r\n     \"provider\": \"zookeeper-for-coordination-service\",\r\n     \"namespace\": \"a1\"\r\n}"
+			"rawModeData": "{\r\n     \"type\": \"service.apache-zookeeper\",\r\n     \"name\": \"zookeper-for-coord-service\",\r\n     \"description\": \"zoo\",\r\n     \"provider\": \"zookeeper-for-coordination-service\",\r\n     \"namespace\": \"a1\"\r\n}"
 		},
 		{
 			"id": "2f44c1c7-28cb-fff8-a5c9-ed065d835a9a",
@@ -304,7 +304,7 @@
 			"description": "",
 			"collectionId": "b4ce2f08-ec11-4624-d6f0-f66da7985d2f",
 			"responses": [],
-			"rawModeData": "{\r\n     \"type\": \"ESInd\",\r\n     \"name\": \"elasticsearch-for-es-stream\",\r\n     \"description\": \"elas\",\r\n     \"index\": \"a1\",\r\n     \"provider\": \"elasticsearch-for-es-service\",\r\n     \"login\": \"1\",\r\n     \"password\":\"1\"\r\n}"
+			"rawModeData": "{\r\n     \"type\": \"service.elasticsearch\",\r\n     \"name\": \"elasticsearch-for-es-stream\",\r\n     \"description\": \"elas\",\r\n     \"index\": \"a1\",\r\n     \"provider\": \"elasticsearch-for-es-service\",\r\n     \"login\": \"1\",\r\n     \"password\":\"1\"\r\n}"
 		},
 		{
 			"id": "7f850ef6-cb69-79cc-262f-a10404ee204f",

@@ -262,7 +262,7 @@
 			"tests": "tests[\"Status code is 201\"] = responseCode.code === 201;\n\ntests[\"Body matches string\"] = responseBody.has(\"Service 'rest-zookeper' has been created.\");",
 			"currentHelper": "normal",
 			"helperAttributes": {},
-			"rawModeData": "{\r\n     \"type\": \"ZKCoord\",\r\n     \"name\": \"rest-zookeper\",\r\n     \"description\": \"zoo\",\r\n     \"provider\": \"zookeeper-for-zk\",\r\n     \"namespace\": \"a1\"\r\n}"
+			"rawModeData": "{\r\n     \"type\": \"service.apache-zookeeper\",\r\n     \"name\": \"rest-zookeper\",\r\n     \"description\": \"zoo\",\r\n     \"provider\": \"zookeeper-for-zk\",\r\n     \"namespace\": \"a1\"\r\n}"
 		},
 		{
 			"id": "7522d59e-a581-2f20-667b-318065179e05",
@@ -342,7 +342,7 @@
 			"description": "",
 			"collectionId": "3c25ce6e-0bb7-7390-e22f-a40adfaab8c6",
 			"responses": [],
-			"rawModeData": "{\r\n     \"type\": \"TstrQ\",\r\n     \"name\": \"rest-tstream\",\r\n     \"description\": \"tstream\",\r\n     \"provider\": \"zookeeper-for-tstr\",\r\n     \"prefix\": \"/path\",\r\n     \"token\": \"12345678910111213141516171819202\"\r\n}"
+			"rawModeData": "{\r\n     \"type\": \"service.t-streams\",\r\n     \"name\": \"rest-tstream\",\r\n     \"description\": \"tstream\",\r\n     \"provider\": \"zookeeper-for-tstr\",\r\n     \"prefix\": \"/path\",\r\n     \"token\": \"12345678910111213141516171819202\"\r\n}"
 		},
 		{
 			"id": "9757ddfa-baee-e7b2-5deb-ea7910ba6982",
