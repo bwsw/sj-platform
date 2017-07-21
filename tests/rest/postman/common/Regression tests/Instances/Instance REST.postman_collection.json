@@ -309,7 +309,7 @@
 			"description": "",
 			"collectionId": "e2806752-f0bd-ecbe-cb33-bfe953151f21",
 			"responses": [],
-			"rawModeData": "{\r\n      \"type\": \"rest-output\",\r\n      \"name\": \"output-rest\",\r\n      \"description\": \"REST example\",\r\n      \"service\": \"rest-ful\",\r\n      \"Primary\": \"1111\"\r\n}\r\n"
+			"rawModeData": "{\r\n      \"type\": \"stream.restful\",\r\n      \"name\": \"output-rest\",\r\n      \"description\": \"REST example\",\r\n      \"service\": \"rest-ful\",\r\n      \"Primary\": \"1111\"\r\n}\r\n"
 		},
 		{
 			"id": "65873564-88d2-dd0e-b621-ec40cf3d8c14",
@@ -341,7 +341,7 @@
 			"data": [],
 			"dataMode": "raw",
 			"version": 2,
-			"tests": "tests[\"Body matches string\"] = responseBody.has(\"Output stream' must be one of: [rest-output].\");\n\ntests[\"Status code is 400\"] = responseCode.code === 400;",
+			"tests": "tests[\"Body matches string\"] = responseBody.has(\"Output stream' must be one of: [stream.restful].\");\n\ntests[\"Status code is 400\"] = responseCode.code === 400;",
 			"currentHelper": "normal",
 			"helperAttributes": {},
 			"time": 1496046531080,
