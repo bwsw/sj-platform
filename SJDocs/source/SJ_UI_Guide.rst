@@ -6,7 +6,7 @@ UI Guide
 Overview
 --------
 
-Stream Juggler (Platform) is a real time stream processing platform designed for building both simple and complex event processing (CEP). 
+The Stream Juggler Platform is a real time stream processing platform designed for building both simple and complex event processing (CEP). 
 
 Stream Juggler uses Apache Mesos, Kafka and T-streams to construct scalable and flexible processing algorithms. Stream Juggler functions on the same principle as Apache Samza, but enables exactly-once processing and provides an integrated solution with a RESTful interface, JavaScript UI and an ad hoc repository for modules, services, streams and other data processing pipeline components.
 
@@ -15,7 +15,7 @@ Stream Juggler uses Apache Mesos, Kafka and T-streams to construct scalable and 
 Get Started
 -----------
 
-Stream Juggler has a user-friendly UI to create a processing sequence of arbitrary complexity, watch it in action and manage it using pre-created modules with flexible functionality. 
+The Stream Juggler Platform has a user-friendly UI to create a processing sequence of arbitrary complexity, watch it in action and manage it using pre-created modules with flexible functionality. 
 
 If you are a developer and are willing to use the platform you need to know of some prerequisites for the platform. These are required settings and engines for launching a module. Find more information about that in the `Configuration`_ and the `Custom Files`_ sections of this document. And make sure the following services are preliminarily deployed:
 
@@ -23,7 +23,7 @@ If you are a developer and are willing to use the platform you need to know of s
 - Marathon 
 - ZooKeeper
 - MongoDB
-- an external storage (ElasticSearch, JDBC, etc.)
+- an external storage (Elasticsearch, JDBC, etc.)
 - Kafka (if you are going to work with Kafka input data).
 
 .. tip:: Find more about SJ-Platform architecture at :ref:`Architecture`.
@@ -83,7 +83,7 @@ Please, find the required config settings in the table below and make sure they 
 
 .. _table:
 
-.. csv-table:: Required config settings
+.. csv-table:: Required configurations
   :header: "Config Domain","Name", "Description", "Example"
   :widths: 15, 20, 50, 15
 
