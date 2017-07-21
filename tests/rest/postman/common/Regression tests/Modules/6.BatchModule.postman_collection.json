@@ -800,16 +800,16 @@
 					"type": "file",
 					"enabled": true,
 					"warning": "",
-					"value": "/home/bardina_md/sj-platform/tests/rest/postman/common/Integration tests/Modules/Batch/ModuleBatch_6.1.17.Input_types_not_stream.t-stream_or_stream.kafka.jar"
+					"value": "/home/bardina_md/sj-platform/tests/rest/postman/common/Integration tests/Modules/Batch/ModuleBatch_6.1.17.Input_types_not_stream.t-streams_or_stream.apache-kafka.jar"
 				}
 			],
 			"dataMode": "params",
 			"version": 2,
-			"tests": "tests[\"Body matches string\"] = responseBody.has(\"Cannot upload jar file 'ModuleBatch_6.1.17.Input_types_not_stream.t-stream_or_stream.kafka.jar' of module. Errors: 'inputs' attribute in the specification.json must have the streams of t-stream and kafka type\");\n\ntests[\"Status code is 400\"] = responseCode.code === 400;",
+			"tests": "tests[\"Body matches string\"] = responseBody.has(\"Cannot upload jar file 'ModuleBatch_6.1.17.Input_types_not_stream.t-streams_or_stream.apache-kafka.jar' of module. Errors: 'inputs' attribute in the specification.json must have the streams of t-stream and kafka type\");\n\ntests[\"Status code is 400\"] = responseCode.code === 400;",
 			"currentHelper": "normal",
 			"helperAttributes": {},
 			"time": 1493349949517,
-			"name": "ModuleBatch_6.1.17.Input_types_not_stream.t-stream_or_stream.kafka",
+			"name": "ModuleBatch_6.1.17.Input_types_not_stream.t-streams_or_stream.apache-kafka",
 			"description": "",
 			"collectionId": "2e2631be-2fb6-6a31-4c5c-7a2279b154a8",
 			"responses": []

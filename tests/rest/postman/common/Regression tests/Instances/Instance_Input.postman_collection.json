@@ -1089,7 +1089,7 @@
 			"method": "POST",
 			"data": [],
 			"dataMode": "raw",
-			"tests": "tests[\"Body matches string\"] = responseBody.has(\"Output streams must be one of the following type: [stream.t-stream]\");\n\ntests[\"Status code is 400\"] = responseCode.code === 400;",
+			"tests": "tests[\"Body matches string\"] = responseBody.has(\"Output streams must be one of the following type: [stream.t-streams]\");\n\ntests[\"Status code is 400\"] = responseCode.code === 400;",
 			"currentHelper": "normal",
 			"helperAttributes": {},
 			"time": 1494901669815,
@@ -1180,7 +1180,7 @@
 			"description": "",
 			"collectionId": "86397350-4560-d828-ec20-65665cf6b982",
 			"responses": [],
-			"rawModeData": "{\r\n      \"type\": \"stream.t-stream\",\r\n      \"name\": \"rest-tstream\",\r\n      \"description\": \"Tstream example\",\r\n      \"partitions\": 1,\r\n      \"service\": \"rest-tstream\",\r\n      \"force\": false\r\n}"
+			"rawModeData": "{\r\n      \"type\": \"stream.t-streams\",\r\n      \"name\": \"rest-tstream\",\r\n      \"description\": \"Tstream example\",\r\n      \"partitions\": 1,\r\n      \"service\": \"rest-tstream\",\r\n      \"force\": false\r\n}"
 		},
 		{
 			"id": "8cb6b06d-d520-0ac4-caad-5a8dec8c2a39",
@@ -1406,7 +1406,7 @@
 			"description": "",
 			"collectionId": "86397350-4560-d828-ec20-65665cf6b982",
 			"responses": [],
-			"rawModeData": "{\r\n      \"type\": \"stream.t-stream\",\r\n      \"name\": \"rest-tstream1\",\r\n      \"description\": \"Tstream example\",\r\n      \"partitions\": 1,\r\n      \"service\": \"rest-tstream1\",\r\n      \"force\": false\r\n}"
+			"rawModeData": "{\r\n      \"type\": \"stream.t-streams\",\r\n      \"name\": \"rest-tstream1\",\r\n      \"description\": \"Tstream example\",\r\n      \"partitions\": 1,\r\n      \"service\": \"rest-tstream1\",\r\n      \"force\": false\r\n}"
 		},
 		{
 			"id": "aaad394b-3230-36ff-1623-a57657cbaa89",
@@ -1549,7 +1549,7 @@
 			"tests": "tests[\"Status code is 201\"] = responseCode.code === 201;\n\ntests[\"Body matches string\"] = responseBody.has(\"Stream 'rest-elasticsearch' has been  created\");",
 			"currentHelper": "normal",
 			"helperAttributes": "{}",
-			"rawModeData": "\r\n{\r\n      \"type\":\"elasticsearch-output\",\r\n      \"name\": \"rest-elasticsearch\",\r\n      \"description\": \"\",\r\n      \"service\": \"rest-elasticsearch\",\r\n      \"tags\": []\r\n}\r\n",
+			"rawModeData": "\r\n{\r\n      \"type\":\"stream.elasticsearch\",\r\n      \"name\": \"rest-elasticsearch\",\r\n      \"description\": \"\",\r\n      \"service\": \"rest-elasticsearch\",\r\n      \"tags\": []\r\n}\r\n",
 			"isFromCollection": true
 		},
 		{

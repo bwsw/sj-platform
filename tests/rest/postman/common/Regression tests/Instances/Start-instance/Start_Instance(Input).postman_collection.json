@@ -322,7 +322,7 @@
 			"description": "",
 			"collectionId": "3c25ce6e-0bb7-7390-e22f-a40adfaab8c6",
 			"responses": [],
-			"rawModeData": "{\r\n      \"type\": \"stream.t-stream\",\r\n      \"name\": \"rest-tstream\",\r\n      \"description\": \"Tstream example\",\r\n      \"partitions\": 1,\r\n      \"service\": \"rest-tstream\",\r\n      \"force\": false\r\n}"
+			"rawModeData": "{\r\n      \"type\": \"stream.t-streams\",\r\n      \"name\": \"rest-tstream\",\r\n      \"description\": \"Tstream example\",\r\n      \"partitions\": 1,\r\n      \"service\": \"rest-tstream\",\r\n      \"force\": false\r\n}"
 		},
 		{
 			"id": "9467a020-9e5b-bbd6-901f-01cddc7874a5",

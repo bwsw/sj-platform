@@ -111,7 +111,7 @@
 			"description": "",
 			"collectionId": "487c455d-5b79-e9dc-7001-2604872b7849",
 			"responses": [],
-			"rawModeData": "{\r\n      \"type\": \"stream.t-stream\",\r\n      \"name\": \"rest-tstream\",\r\n      \"description\": \"Tstream example\",\r\n      \"partitions\": 1,\r\n      \"service\": \"rest-tstream\",\r\n      \"force\": false\r\n}"
+			"rawModeData": "{\r\n      \"type\": \"stream.t-streams\",\r\n      \"name\": \"rest-tstream\",\r\n      \"description\": \"Tstream example\",\r\n      \"partitions\": 1,\r\n      \"service\": \"rest-tstream\",\r\n      \"force\": false\r\n}"
 		},
 		{
 			"id": "2cfa66a3-3bc1-dcfb-36e2-dcc4c37617e6",

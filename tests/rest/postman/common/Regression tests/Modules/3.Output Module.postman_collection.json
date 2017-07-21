@@ -117,7 +117,7 @@
 			"helperAttributes": {},
 			"time": 1493280328328,
 			"name": "ModuleOutput_3.1.9.Output.types_not_elasticsearch",
-			"description": "там stream.t-stream",
+			"description": "там stream.t-streams",
 			"collectionId": "f97f5bfd-55b8-5480-291f-20edf3521122",
 			"responses": []
 		},
@@ -497,7 +497,7 @@
 			"data": null,
 			"dataMode": "params",
 			"version": 2,
-			"tests": "tests[\"Status code is 200\"] = responseCode.code === 200;\n\n\n\ntests[\"Body matches string\"] = responseBody.has(\"Masha-Output\");\n\ntests[\"Body matches string\"] = responseBody.has(\"1.0\");\n\ntests[\"Body matches string\"] = responseBody.has(\"stream.t-stream\");\n\ntests[\"Body matches string\"] = responseBody.has(\"elasticsearch-output\");\n\ntests[\"Body matches string\"] = responseBody.has(\"specification\");",
+			"tests": "tests[\"Status code is 200\"] = responseCode.code === 200;\n\n\n\ntests[\"Body matches string\"] = responseBody.has(\"Masha-Output\");\n\ntests[\"Body matches string\"] = responseBody.has(\"1.0\");\n\ntests[\"Body matches string\"] = responseBody.has(\"stream.t-streams\");\n\ntests[\"Body matches string\"] = responseBody.has(\"stream.elasticsearch\");\n\ntests[\"Body matches string\"] = responseBody.has(\"specification\");",
 			"currentHelper": "normal",
 			"helperAttributes": {},
 			"time": 1493276250780,
@@ -756,7 +756,7 @@
 			"helperAttributes": {},
 			"time": 1493280287663,
 			"name": "ModuleOutput_3.1.7.Input.types_not_t-stream",
-			"description": "elasticsearch-output",
+			"description": "stream.elasticsearch",
 			"collectionId": "f97f5bfd-55b8-5480-291f-20edf3521122",
 			"responses": []
 		},
@@ -783,7 +783,7 @@
 			"helperAttributes": {},
 			"time": 1493280287663,
 			"name": "ModuleOutput_3.1.7.Input.types_not_t-stream",
-			"description": "elasticsearch-output",
+			"description": "stream.elasticsearch",
 			"collectionId": "f97f5bfd-55b8-5480-291f-20edf3521122",
 			"responses": []
 		},

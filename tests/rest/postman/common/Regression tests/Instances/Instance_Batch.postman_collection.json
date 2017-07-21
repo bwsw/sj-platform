@@ -943,7 +943,7 @@
 			"data": [],
 			"dataMode": "raw",
 			"version": 2,
-			"tests": "tests[\"Body matches string\"] = responseBody.has(\"Output streams must be one of the following type: [stream.t-stream]\");\n\ntests[\"Status code is 400\"] = responseCode.code === 400;\n\n",
+			"tests": "tests[\"Body matches string\"] = responseBody.has(\"Output streams must be one of the following type: [stream.t-streams]\");\n\ntests[\"Status code is 400\"] = responseCode.code === 400;\n\n",
 			"currentHelper": "normal",
 			"helperAttributes": {},
 			"time": 1493710013747,
@@ -1039,7 +1039,7 @@
 			"description": "",
 			"collectionId": "dfb56a63-0810-6ade-eff3-bb451b3e80e1",
 			"responses": [],
-			"rawModeData": "{\r\n      \"type\": \"stream.kafka\",\r\n      \"name\": \"input-kafka\",\r\n      \"description\": \"Tstream example\",\r\n      \"partitions\": 1,\r\n      \"service\": \"kafka-for-input-stream\",\r\n      \"force\": false,\r\n      \"replicationFactor\": 1\r\n}\r\n\r\n"
+			"rawModeData": "{\r\n      \"type\": \"stream.apache-kafka\",\r\n      \"name\": \"input-kafka\",\r\n      \"description\": \"Tstream example\",\r\n      \"partitions\": 1,\r\n      \"service\": \"kafka-for-input-stream\",\r\n      \"force\": false,\r\n      \"replicationFactor\": 1\r\n}\r\n\r\n"
 		},
 		{
 			"id": "7ed13e84-6a71-e3ce-5b97-afddf2d40c7c",
@@ -1370,7 +1370,7 @@
 			"tests": "tests[\"Status code is 201\"] = responseCode.code === 201;\n\ntests[\"Body matches string\"] = responseBody.has(\"Stream 'rest-elasticsearch' has been  created\");",
 			"currentHelper": "normal",
 			"helperAttributes": {},
-			"rawModeData": "\r\n{\r\n      \"type\":\"elasticsearch-output\",\r\n      \"name\": \"rest-elasticsearch\",\r\n      \"description\": \"\",\r\n      \"service\": \"rest-elasticsearch\",\r\n      \"tags\": []\r\n}\r\n"
+			"rawModeData": "\r\n{\r\n      \"type\":\"stream.elasticsearch\",\r\n      \"name\": \"rest-elasticsearch\",\r\n      \"description\": \"\",\r\n      \"service\": \"rest-elasticsearch\",\r\n      \"tags\": []\r\n}\r\n"
 		},
 		{
 			"id": "b1bfe024-2829-d660-2081-1cdef578face",
@@ -1411,7 +1411,7 @@
 			"description": "",
 			"collectionId": "dfb56a63-0810-6ade-eff3-bb451b3e80e1",
 			"responses": [],
-			"rawModeData": "{\r\n      \"type\": \"stream.t-stream\",\r\n      \"name\": \"output-tstream\",\r\n      \"description\": \"Tstream example\",\r\n      \"partitions\": 1,\r\n      \"service\": \"tstr-for-output-stream\",\r\n      \"force\": false\r\n}"
+			"rawModeData": "{\r\n      \"type\": \"stream.t-streams\",\r\n      \"name\": \"output-tstream\",\r\n      \"description\": \"Tstream example\",\r\n      \"partitions\": 1,\r\n      \"service\": \"tstr-for-output-stream\",\r\n      \"force\": false\r\n}"
 		},
 		{
 			"id": "b3d34b7a-2f6b-e41c-5b91-1dc6880280f4",
@@ -1877,7 +1877,7 @@
 			"data": [],
 			"dataMode": "raw",
 			"version": 2,
-			"tests": "tests[\"Body matches string\"] = responseBody.has(\"Input streams must be one of the following type: [stream.kafka]\");\n\ntests[\"Status code is 400\"] = responseCode.code === 400;\n\n",
+			"tests": "tests[\"Body matches string\"] = responseBody.has(\"Input streams must be one of the following type: [stream.apache-kafka]\");\n\ntests[\"Status code is 400\"] = responseCode.code === 400;\n\n",
 			"currentHelper": "normal",
 			"helperAttributes": {},
 			"time": 1488872908493,

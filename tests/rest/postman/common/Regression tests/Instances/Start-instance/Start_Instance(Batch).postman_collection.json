@@ -325,7 +325,7 @@
 			"description": "",
 			"collectionId": "82826b09-52f6-9fb3-84eb-68bd9d5fb6f1",
 			"responses": [],
-			"rawModeData": "{\r\n      \"type\": \"stream.t-stream\",\r\n      \"name\": \"output-tstream\",\r\n      \"description\": \"Tstream example\",\r\n      \"partitions\": 1,\r\n      \"service\": \"tstr-for-output-stream\",\r\n      \"force\": false\r\n}"
+			"rawModeData": "{\r\n      \"type\": \"stream.t-streams\",\r\n      \"name\": \"output-tstream\",\r\n      \"description\": \"Tstream example\",\r\n      \"partitions\": 1,\r\n      \"service\": \"tstr-for-output-stream\",\r\n      \"force\": false\r\n}"
 		},
 		{
 			"id": "6ee29ba4-6bc6-2bbb-6dca-855596fd886a",
@@ -587,7 +587,7 @@
 			"description": "",
 			"collectionId": "82826b09-52f6-9fb3-84eb-68bd9d5fb6f1",
 			"responses": [],
-			"rawModeData": "{\r\n      \"type\": \"stream.kafka\",\r\n      \"name\": \"input-kafka\",\r\n      \"description\": \"Tstream example\",\r\n      \"partitions\": 1,\r\n      \"service\": \"kafka-for-input-stream\",\r\n      \"force\": false,\r\n      \"replicationFactor\": 1\r\n}\r\n\r\n"
+			"rawModeData": "{\r\n      \"type\": \"stream.apache-kafka\",\r\n      \"name\": \"input-kafka\",\r\n      \"description\": \"Tstream example\",\r\n      \"partitions\": 1,\r\n      \"service\": \"kafka-for-input-stream\",\r\n      \"force\": false,\r\n      \"replicationFactor\": 1\r\n}\r\n\r\n"
 		},
 		{
 			"id": "dc9f1455-cf37-febf-d35f-97a49d2aa1e3",
