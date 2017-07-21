@@ -417,8 +417,8 @@ Service fields
 Each particular service has its own set of fields.
 
 .. csv-table::  Available types and its aliases name for request.
-  :header: "Type on BE", "Type on FE"
-  :widths: 25, 60  
+ :header: "Type on BE", "Type on FE"
+ :widths: 25, 60  
   
  "service.elasticsearch", "Elasticsearch"
  "service.apache-kafka", "Apache Kafka"
@@ -807,8 +807,8 @@ Stream fields
 ~~~~~~~~~~~~~~~~~
 
 .. csv-table::  Stream types
-  :header: "Type on BE", "Type on FE"
-  :widths: 25, 60  
+ :header: "Type on BE", "Type on FE"
+ :widths: 25, 60  
   
  "stream.elasticsearch", "Elasticsearch"
  "stream.apache-kafka", "Apache Kafka"
@@ -1780,8 +1780,8 @@ CRUD Rest-API for Modules
 This is the CRUD Rest-API for modules uploaded as jar files, instantiated and running modules as well as for custom jar files.
 
 .. csv-table::  Stream types
-  :header: "Type on BE", "Type on FE"
-  :widths: 25, 60  
+ :header: "Type on BE", "Type on FE"
+ :widths: 25, 60  
   
  "input-streaming", "Input streaming"
  "regular-streaming", "Regular streaming"
