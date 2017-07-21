@@ -46,6 +46,8 @@ class SamzaBenchmark(zooKeeperAddress: String,
   extends ReadFromKafkaBenchmark(zooKeeperAddress, kafkaAddress, words) {
 
   private val outputKafkaTopic = "samza-benchmark-result-" + UUID.randomUUID().toString
+  kafkaClient.createTopic(outputKafkaTopic, 1, 1)
+
   private val propertiesFilename = s"samza-benchmark-${UUID.randomUUID().toString}.properties"
   private val propertiesFile = new File(propertiesFilename)
   private val kafkaConsumer = createKafkaConsumer()
@@ -79,7 +81,7 @@ class SamzaBenchmark(zooKeeperAddress: String,
   }
 
   override protected def retrieveResult(messageSize: Long, messagesCount: Long): Option[Long] = {
-    val consumerRecords = kafkaConsumer.poll(lookupResultTimeout)
+    val consumerRecords = kafkaConsumer.poll(0)
 
     if (consumerRecords.isEmpty)
       None
@@ -118,11 +120,9 @@ class SamzaBenchmark(zooKeeperAddress: String,
   private def createKafkaConsumer(): KafkaConsumer[String, String] = {
     val configMap: Map[String, AnyRef] = Map[String, AnyRef](
       "bootstrap.servers" -> kafkaAddress,
-      "group.id" -> "samza-benchmark")
+      "group.id" -> UUID.randomUUID().toString)
     val consumer = new KafkaConsumer(configMap.asJava, new StringDeserializer, new StringDeserializer)
     consumer.subscribe(Seq(outputKafkaTopic).asJava)
-    consumer.seekToEnd(Seq.empty[TopicPartition].asJavaCollection)
-    consumer.poll(0)
 
     consumer
   }
