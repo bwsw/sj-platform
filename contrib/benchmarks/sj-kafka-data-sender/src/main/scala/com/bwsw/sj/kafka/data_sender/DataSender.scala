@@ -45,11 +45,16 @@ class DataSender(address: String, topic: String, words: Seq[String], separator: 
   /**
     * Generates data and send it to a kafka server
     *
-    * @param messageSize size of one message
-    * @param messages    count of messages
+    * @param messageSize  size of one message
+    * @param messages     count of messages
+    * @param firstMessage message that will be sent first
     */
-  def send(messageSize: Long, messages: Long): Unit = {
+  def send(messageSize: Long, messages: Long, firstMessage: Option[String] = None): Unit = {
     val producer = new KafkaProducer[String, String](producerProps)
+
+    firstMessage.foreach { message =>
+      producer.send(new ProducerRecord[String, String](topic, message))
+    }
 
     (0l until messages).foreach { _ =>
       var message = words(Random.nextInt(words.length))

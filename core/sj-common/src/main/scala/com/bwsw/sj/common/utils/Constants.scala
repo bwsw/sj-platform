@@ -269,4 +269,10 @@ object BenchmarkConfigNames {
   val mongoPortConfig = performanceBenchmarkConfig + ".mongo.port"
   val outputFileConfig = performanceBenchmarkConfig + ".output-file"
   val wordsConfig = performanceBenchmarkConfig + ".words"
+  val zooKeeperAddressConfig = performanceBenchmarkConfig + ".zookeeper.address"
+}
+
+object BenchmarkLiterals {
+  val sjDefaultOutputFile = "sj-benchmark-output"
+  val samzaDefaultOutputFile = "samza-benchmark-output"
 }

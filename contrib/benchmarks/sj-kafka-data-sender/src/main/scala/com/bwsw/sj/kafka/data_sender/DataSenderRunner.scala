@@ -37,6 +37,7 @@ import scala.io.Source
   * * wordsFile - path to file with available words
   * * topic - name of kafka topic ("test" by default)
   * * separator - separator between words (' ' by default)
+  * * firstMessage - message that will be sent first if that option defined
   *
   * Required: address, size, count; one of words or wordsFile.
   *
@@ -51,9 +52,10 @@ object DataSenderRunner extends App {
   private val separator = Option(System.getProperty(PropertiesNames.separator)).getOrElse(defaultSeparator)
   private val messageSize = Option(System.getProperty(PropertiesNames.messageSize)).get.toLong
   private val messageCount = Option(System.getProperty(PropertiesNames.messageCount)).get.toLong
+  private val firstMessage = Option(System.getProperty(PropertiesNames.firstMessage))
 
   private val dataLoader = new DataSender(address, topic, getWords, separator)
-  dataLoader.send(messageSize, messageCount)
+  dataLoader.send(messageSize, messageCount, firstMessage)
 
   private def getWords: Seq[String] = {
     Option(System.getProperty(PropertiesNames.words)) match {

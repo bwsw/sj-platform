@@ -21,18 +21,19 @@ package com.bwsw.sj.common.utils.benchmark
 import scala.collection.JavaConverters._
 
 /**
-  * Executes class in a separate process
+  * Executes class in a separate process. Class must contain static method main() (or main() in companion object).
   *
   * @param clazz       class to execute, must contain method main
   * @param environment environment variables
+  * @param arguments   command line arguments
   * @author Pavel Tomskikh
   */
-class SeparateProcess(clazz: Class[_], environment: Map[String, String] = Map.empty) {
+class ClassRunner(clazz: Class[_], environment: Map[String, String] = Map.empty, arguments: Seq[String] = Seq.empty) {
   private val command = Seq(
     System.getProperty("java.home") + "/bin/java",
     "-classpath",
     System.getProperty("java.class.path"),
-    clazz.getName)
+    clazz.getName) ++ arguments
 
   private val processBuilder = new ProcessBuilder(command.asJava).inheritIO()
   processBuilder.environment().putAll(environment.asJava)
