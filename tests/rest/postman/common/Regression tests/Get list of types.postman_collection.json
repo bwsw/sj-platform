@@ -89,7 +89,7 @@
 			"time": 1495514218411,
 			"version": 2,
 			"responses": [],
-			"tests": "tests[\"Body matches string\"] = responseBody.has(\"ESInd\");\n\ntests[\"Body matches string\"] = responseBody.has(\"KfkQ\");\n\ntests[\"Body matches string\"] = responseBody.has(\"TstrQ\");\n\ntests[\"Body matches string\"] = responseBody.has(\"ZKCoord\");\n\ntests[\"Body matches string\"] = responseBody.has(\"JDBC\");\n\ntests[\"Body matches string\"] = responseBody.has(\"REST\");\n\ntests[\"Status code is 200\"] = responseCode.code === 200;",
+			"tests": "tests[\"Body matches string\"] = responseBody.has(\"service.elasticsearch\");\n\ntests[\"Body matches string\"] = responseBody.has(\"service.apache-kafka\");\n\ntests[\"Body matches string\"] = responseBody.has(\"service.t-streams\");\n\ntests[\"Body matches string\"] = responseBody.has(\"service.apache-zookeeper\");\n\ntests[\"Body matches string\"] = responseBody.has(\"JDBC\");\n\ntests[\"Body matches string\"] = responseBody.has(\"REST\");\n\ntests[\"Status code is 200\"] = responseCode.code === 200;",
 			"currentHelper": "normal",
 			"helperAttributes": {}
 		}

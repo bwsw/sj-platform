@@ -259,7 +259,7 @@
 			"description": "",
 			"collectionId": "638f4f7c-d310-eeba-ac3b-0fe867982a0b",
 			"responses": [],
-			"rawModeData": "{\r\n     \"type\": \"ZKCoord\",\r\n     \"name\": \"zookeper-for-coord-service\",\r\n     \"description\": \"zoo\",\r\n     \"provider\": \"zookeeper-for-coordination-service\",\r\n     \"namespace\": \"a1\"\r\n}"
+			"rawModeData": "{\r\n     \"type\": \"service.apache-zookeeper\",\r\n     \"name\": \"zookeper-for-coord-service\",\r\n     \"description\": \"zoo\",\r\n     \"provider\": \"zookeeper-for-coordination-service\",\r\n     \"namespace\": \"a1\"\r\n}"
 		},
 		{
 			"id": "4387f679-648d-f09f-7f03-02b2c15a617a",
@@ -300,7 +300,7 @@
 			"description": "",
 			"collectionId": "638f4f7c-d310-eeba-ac3b-0fe867982a0b",
 			"responses": [],
-			"rawModeData": "{\r\n     \"type\": \"ESInd\",\r\n     \"name\": \"elasticsearch-for-es-stream\",\r\n     \"description\": \"elas\",\r\n     \"index\": \"a1\",\r\n     \"provider\": \"elasticsearch-for-es-service\",\r\n     \"login\": \"1\",\r\n     \"password\":\"1\"\r\n}"
+			"rawModeData": "{\r\n     \"type\": \"service.elasticsearch\",\r\n     \"name\": \"elasticsearch-for-es-stream\",\r\n     \"description\": \"elas\",\r\n     \"index\": \"a1\",\r\n     \"provider\": \"elasticsearch-for-es-service\",\r\n     \"login\": \"1\",\r\n     \"password\":\"1\"\r\n}"
 		},
 		{
 			"id": "466ad124-834e-eb19-5023-7f8fa4481f93",
@@ -419,7 +419,7 @@
 			"description": "",
 			"collectionId": "638f4f7c-d310-eeba-ac3b-0fe867982a0b",
 			"responses": [],
-			"rawModeData": "{\r\n     \"type\": \"TstrQ\",\r\n     \"name\": \"tstream-for-stream-inp\",\r\n     \"description\": \"tstream\",\r\n     \"provider\": \"zookeeper-for-tstr-service\",\r\n     \"prefix\": \"/path\",\r\n     \"token\": \"12345678910111213141516171819202\"\r\n}"
+			"rawModeData": "{\r\n     \"type\": \"service.t-streams\",\r\n     \"name\": \"tstream-for-stream-inp\",\r\n     \"description\": \"tstream\",\r\n     \"provider\": \"zookeeper-for-tstr-service\",\r\n     \"prefix\": \"/path\",\r\n     \"token\": \"12345678910111213141516171819202\"\r\n}"
 		},
 		{
 			"id": "748b88e8-6b63-9625-37a4-331863b9fbcd",

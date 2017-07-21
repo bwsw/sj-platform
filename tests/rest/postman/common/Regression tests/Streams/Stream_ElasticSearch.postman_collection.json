@@ -192,7 +192,7 @@
 			"data": [],
 			"dataMode": "raw",
 			"version": 2,
-			"tests": "tests[\"Status code is 400\"] = responseCode.code === 400;\n\ntests[\"Body matches string\"] = responseBody.has(\"'Service for 'elasticsearch-output' stream' must be of type: 'ESInd' ('JDBC' is given instead).\");",
+			"tests": "tests[\"Status code is 400\"] = responseCode.code === 400;\n\ntests[\"Body matches string\"] = responseBody.has(\"'Service for 'elasticsearch-output' stream' must be of type: 'service.elasticsearch' ('JDBC' is given instead).\");",
 			"currentHelper": "normal",
 			"helperAttributes": {},
 			"time": 1493258637601,
@@ -545,7 +545,7 @@
 			"tests": "tests[\"Status code is 201\"] = responseCode.code === 201;\n\ntests[\"Body matches string\"] = responseBody.has(\"Service 'rest-elasticsearch' has been created.\");",
 			"currentHelper": "normal",
 			"helperAttributes": "{}",
-			"rawModeData": "{\r\n     \"type\": \"ESInd\",\r\n     \"name\": \"rest-elasticsearch\",\r\n     \"description\": \"elas\",\r\n     \"index\": \"a1\",\r\n     \"provider\": \"rest-elasticsearch\",\r\n     \"login\": \"1\",\r\n     \"password\":\"1\"\r\n}"
+			"rawModeData": "{\r\n     \"type\": \"service.elasticsearch\",\r\n     \"name\": \"rest-elasticsearch\",\r\n     \"description\": \"elas\",\r\n     \"index\": \"a1\",\r\n     \"provider\": \"rest-elasticsearch\",\r\n     \"login\": \"1\",\r\n     \"password\":\"1\"\r\n}"
 		},
 		{
 			"id": "cefa5054-dbcc-3ad0-057b-07b1d238bac5",

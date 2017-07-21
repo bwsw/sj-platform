@@ -118,7 +118,7 @@
 			"description": "",
 			"collectionId": "319dc981-563e-40bd-23dc-f7169d47e383",
 			"responses": [],
-			"rawModeData": "{\r\n     \"type\": \"ZKCoord\",\r\n     \"name\": \"zookeper-for-coord-service\",\r\n     \"description\": \"zoo\",\r\n     \"provider\": \"zookeeper-for-coordination-service\",\r\n     \"namespace\": \"a1\"\r\n}"
+			"rawModeData": "{\r\n     \"type\": \"service.apache-zookeeper\",\r\n     \"name\": \"zookeper-for-coord-service\",\r\n     \"description\": \"zoo\",\r\n     \"provider\": \"zookeeper-for-coordination-service\",\r\n     \"namespace\": \"a1\"\r\n}"
 		},
 		{
 			"id": "02480008-6330-7fd8-771d-1ec684d2dec9",
@@ -1050,7 +1050,7 @@
 			"description": "",
 			"collectionId": "319dc981-563e-40bd-23dc-f7169d47e383",
 			"responses": [],
-			"rawModeData": "{\r\n     \"type\": \"TstrQ\",\r\n     \"name\": \"tstream-for-stream-inp\",\r\n     \"description\": \"tstream\",\r\n     \"provider\": \"zookeeper-for-tstr-service\",\r\n     \"prefix\": \"/tts/master\",\r\n     \"token\": \"12345678910111213141516171819202\"\r\n}"
+			"rawModeData": "{\r\n     \"type\": \"service.t-streams\",\r\n     \"name\": \"tstream-for-stream-inp\",\r\n     \"description\": \"tstream\",\r\n     \"provider\": \"zookeeper-for-tstr-service\",\r\n     \"prefix\": \"/tts/master\",\r\n     \"token\": \"12345678910111213141516171819202\"\r\n}"
 		},
 		{
 			"id": "8eb25a48-cdd1-7625-ce6f-eff89e03e886",
@@ -1311,7 +1311,7 @@
 			"description": "",
 			"collectionId": "319dc981-563e-40bd-23dc-f7169d47e383",
 			"responses": [],
-			"rawModeData": "{\r\n     \"type\": \"ESInd\",\r\n     \"name\": \"elasticsearch-for-es-stream\",\r\n     \"description\": \"elas\",\r\n     \"index\": \"a1\",\r\n     \"provider\": \"elasticsearch-for-es-service\",\r\n     \"login\": \"1\",\r\n     \"password\":\"1\"\r\n}"
+			"rawModeData": "{\r\n     \"type\": \"service.elasticsearch\",\r\n     \"name\": \"elasticsearch-for-es-stream\",\r\n     \"description\": \"elas\",\r\n     \"index\": \"a1\",\r\n     \"provider\": \"elasticsearch-for-es-service\",\r\n     \"login\": \"1\",\r\n     \"password\":\"1\"\r\n}"
 		},
 		{
 			"id": "a6a8b028-0db4-6885-3910-609cb121b508",
@@ -1612,7 +1612,7 @@
 			"data": [],
 			"dataMode": "raw",
 			"version": 2,
-			"tests": "tests[\"Body matches string\"] = responseBody.has(\" 'coordinationService' attribute is not 'ZKCoord'\");\n\ntests[\"Status code is 400\"] = responseCode.code === 400;\n\n",
+			"tests": "tests[\"Body matches string\"] = responseBody.has(\" 'coordinationService' attribute is not 'service.apache-zookeeper'\");\n\ntests[\"Status code is 400\"] = responseCode.code === 400;\n\n",
 			"currentHelper": "normal",
 			"helperAttributes": {},
 			"time": 1493871808450,
@@ -1722,7 +1722,7 @@
 			"tests": "tests[\"Status code is 200\"] = responseCode.code === 200;\n\ntests[\"Body matches string\"] = responseBody.has(\"Service 'restjdbc' has been deleted\");",
 			"currentHelper": "normal",
 			"helperAttributes": {},
-			"rawModeData": "{\r\n     \"type\": \"ESInd\",\r\n     \"name\": \"rest-elasticsearch\",\r\n     \"description\": \"elas\",\r\n     \"index\": \"a1\",\r\n     \"provider\": \"es_test_provider\",\r\n     \"login\": \"1\",\r\n     \"password\":\"1\"\r\n}"
+			"rawModeData": "{\r\n     \"type\": \"service.elasticsearch\",\r\n     \"name\": \"rest-elasticsearch\",\r\n     \"description\": \"elas\",\r\n     \"index\": \"a1\",\r\n     \"provider\": \"es_test_provider\",\r\n     \"login\": \"1\",\r\n     \"password\":\"1\"\r\n}"
 		},
 		{
 			"id": "f283c2ac-741d-0872-cdca-dcbdca06658e",

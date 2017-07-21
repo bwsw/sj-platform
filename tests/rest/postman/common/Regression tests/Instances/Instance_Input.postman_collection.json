@@ -266,7 +266,7 @@
 			"tests": "tests[\"Status code is 201\"] = responseCode.code === 201;\n\ntests[\"Body matches string\"] = responseBody.has(\"Service 'rest-zookeper' has been created.\");",
 			"currentHelper": "normal",
 			"helperAttributes": "{}",
-			"rawModeData": "{\r\n     \"type\": \"ZKCoord\",\r\n     \"name\": \"rest-zookeper\",\r\n     \"description\": \"zoo\",\r\n     \"provider\": \"zookeeper-for-zk\",\r\n     \"namespace\": \"a1\"\r\n}"
+			"rawModeData": "{\r\n     \"type\": \"service.apache-zookeeper\",\r\n     \"name\": \"rest-zookeper\",\r\n     \"description\": \"zoo\",\r\n     \"provider\": \"zookeeper-for-zk\",\r\n     \"namespace\": \"a1\"\r\n}"
 		},
 		{
 			"id": "1699e8a3-898a-1e20-a556-c0949988c646",
@@ -382,7 +382,7 @@
 			"method": "POST",
 			"data": [],
 			"dataMode": "raw",
-			"tests": "tests[\"Body matches string\"] = responseBody.has(\"'coordinationService' attribute is not 'ZKCoord'\");\n\ntests[\"Status code is 400\"] = responseCode.code === 400;",
+			"tests": "tests[\"Body matches string\"] = responseBody.has(\"'coordinationService' attribute is not 'service.apache-zookeeper'\");\n\ntests[\"Status code is 400\"] = responseCode.code === 400;",
 			"currentHelper": "normal",
 			"helperAttributes": {},
 			"time": 1494901631568,
@@ -471,7 +471,7 @@
 			"description": "",
 			"collectionId": "86397350-4560-d828-ec20-65665cf6b982",
 			"responses": [],
-			"rawModeData": "{\r\n     \"type\": \"TstrQ\",\r\n     \"name\": \"rest-tstream1\",\r\n     \"description\": \"tstream\",\r\n     \"provider\": \"zookeeper-for-tstr\",\r\n     \"prefix\": \"/tts/master\",\r\n     \"token\": \"12345678910111213141516171819202\"\r\n}"
+			"rawModeData": "{\r\n     \"type\": \"service.t-streams\",\r\n     \"name\": \"rest-tstream1\",\r\n     \"description\": \"tstream\",\r\n     \"provider\": \"zookeeper-for-tstr\",\r\n     \"prefix\": \"/tts/master\",\r\n     \"token\": \"12345678910111213141516171819202\"\r\n}"
 		},
 		{
 			"id": "2e76c126-db6e-744a-30bb-b20137b596aa",
@@ -1266,7 +1266,7 @@
 			"description": "",
 			"collectionId": "86397350-4560-d828-ec20-65665cf6b982",
 			"responses": [],
-			"rawModeData": "{\r\n     \"type\": \"TstrQ\",\r\n     \"name\": \"rest-tstream\",\r\n     \"description\": \"tstream\",\r\n     \"provider\": \"zookeeper-for-tstr\",\r\n     \"prefix\": \"/tts/master\",\r\n     \"token\": \"12345678910111213141516171819202\"\r\n}"
+			"rawModeData": "{\r\n     \"type\": \"service.t-streams\",\r\n     \"name\": \"rest-tstream\",\r\n     \"description\": \"tstream\",\r\n     \"provider\": \"zookeeper-for-tstr\",\r\n     \"prefix\": \"/tts/master\",\r\n     \"token\": \"12345678910111213141516171819202\"\r\n}"
 		},
 		{
 			"id": "9ce34c83-74fc-1e9b-cd61-2d7a40293bab",
@@ -1954,7 +1954,7 @@
 			"tests": "tests[\"Status code is 201\"] = responseCode.code === 201;\n\ntests[\"Body matches string\"] = responseBody.has(\"Service 'rest-elasticsearch' has been created.\");",
 			"currentHelper": "normal",
 			"helperAttributes": "{}",
-			"rawModeData": "{\r\n     \"type\": \"ESInd\",\r\n     \"name\": \"rest-elasticsearch\",\r\n     \"description\": \"elas\",\r\n     \"index\": \"a1\",\r\n     \"provider\": \"rest-elasticsearch\",\r\n     \"login\": \"1\",\r\n     \"password\":\"1\"\r\n}",
+			"rawModeData": "{\r\n     \"type\": \"service.elasticsearch\",\r\n     \"name\": \"rest-elasticsearch\",\r\n     \"description\": \"elas\",\r\n     \"index\": \"a1\",\r\n     \"provider\": \"rest-elasticsearch\",\r\n     \"login\": \"1\",\r\n     \"password\":\"1\"\r\n}",
 			"isFromCollection": true
 		},
 		{

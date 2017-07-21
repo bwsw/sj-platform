@@ -501,7 +501,7 @@
 			"data": [],
 			"dataMode": "raw",
 			"version": 2,
-			"tests": "tests[\"Status code is 400\"] = responseCode.code === 400;\n\ntests[\"Body matches string\"] = responseBody.has(\"'Service for 'stream.t-stream' stream' must be of type: 'TstrQ' ('ZKCoord' is given instead).\");",
+			"tests": "tests[\"Status code is 400\"] = responseCode.code === 400;\n\ntests[\"Body matches string\"] = responseBody.has(\"'Service for 'stream.t-stream' stream' must be of type: 'service.t-streams' ('service.apache-zookeeper' is given instead).\");",
 			"currentHelper": "normal",
 			"helperAttributes": {},
 			"time": 1493273029083,
@@ -590,7 +590,7 @@
 			"tests": "tests[\"Status code is 201\"] = responseCode.code === 201;\n\ntests[\"Body matches string\"] = responseBody.has(\"Service 'zookeper-coord-serv' has been created.\");",
 			"currentHelper": "normal",
 			"helperAttributes": {},
-			"rawModeData": "{\r\n     \"type\": \"ZKCoord\",\r\n     \"name\": \"zookeper-coord-serv\",\r\n     \"description\": \"zoo\",\r\n     \"provider\": \"zookeeper-for-coord-serv\",\r\n     \"namespace\": \"a1\"\r\n}"
+			"rawModeData": "{\r\n     \"type\": \"service.apache-zookeeper\",\r\n     \"name\": \"zookeper-coord-serv\",\r\n     \"description\": \"zoo\",\r\n     \"provider\": \"zookeeper-for-coord-serv\",\r\n     \"namespace\": \"a1\"\r\n}"
 		},
 		{
 			"id": "cc2c9734-4e53-201f-96b9-d406e840d426",
@@ -752,7 +752,7 @@
 			"tests": "tests[\"Status code is 201\"] = responseCode.code === 201;\n\ntests[\"Body matches string\"] = responseBody.has(\"Service 'rest-tstream' has been created.\");",
 			"currentHelper": "normal",
 			"helperAttributes": "{}",
-			"rawModeData": "{\r\n     \"type\": \"TstrQ\",\r\n     \"name\": \"rest-tstream\",\r\n     \"description\": \"tstream\",\r\n     \"provider\": \"rest-zookeeper\",\r\n     \"prefix\": \"/path\",\r\n     \"token\": \"12345678910111213141516171819202\"\r\n}"
+			"rawModeData": "{\r\n     \"type\": \"service.t-streams\",\r\n     \"name\": \"rest-tstream\",\r\n     \"description\": \"tstream\",\r\n     \"provider\": \"rest-zookeeper\",\r\n     \"prefix\": \"/path\",\r\n     \"token\": \"12345678910111213141516171819202\"\r\n}"
 		}
 	]
 }
