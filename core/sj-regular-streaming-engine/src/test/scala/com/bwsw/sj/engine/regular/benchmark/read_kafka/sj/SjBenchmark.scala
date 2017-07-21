@@ -98,7 +98,7 @@ class SjBenchmark(mongoPort: Int,
     */
   def startServices(): Unit = {
     val ttsEnv = Map("ZOOKEEPER_HOSTS" -> zooKeeperAddress)
-    maybeTtsProcess = Some(new ClassRunner(classOf[Server], ttsEnv).start())
+    maybeTtsProcess = Some(new ClassRunner(classOf[Server], environment = ttsEnv).start())
     Thread.sleep(1000)
     println("TTS server started")
 
@@ -131,7 +131,7 @@ class SjBenchmark(mongoPort: Int,
   override protected def runProcess(messageSize: Long, messagesCount: Long): Process = {
     benchmarkPreparation.loadInstance(outputFile.getAbsolutePath, messagesCount, connectionRepository.getInstanceRepository)
 
-    new ClassRunner(classOf[RegularTaskRunner], environment).start()
+    new ClassRunner(classOf[RegularTaskRunner], environment = environment).start()
   }
 
   override protected def retrieveResult(messageSize: Long, messagesCount: Long): Option[Long] =

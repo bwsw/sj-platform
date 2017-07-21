@@ -28,12 +28,14 @@ import scala.collection.JavaConverters._
   * @param arguments   command line arguments
   * @author Pavel Tomskikh
   */
-class ClassRunner(clazz: Class[_], environment: Map[String, String] = Map.empty, arguments: Seq[String] = Seq.empty) {
-  private val command = Seq(
-    System.getProperty("java.home") + "/bin/java",
-    "-classpath",
-    System.getProperty("java.class.path"),
-    clazz.getName) ++ arguments
+class ClassRunner(clazz: Class[_],
+                  environment: Map[String, String] = Map.empty,
+                  arguments: Seq[String] = Seq.empty,
+                  properties: Map[String, String] = Map.empty) {
+  private val javaLauncher = System.getProperty("java.home") + "/bin/java"
+  private val transformedProperties = properties.map { case (property, value) => s"-D$property=$value" }
+  private val classPath = Seq("-classpath", System.getProperty("java.class.path"))
+  private val command = Seq(javaLauncher) ++ transformedProperties ++ classPath ++ Seq(clazz.getName) ++ arguments
 
   private val processBuilder = new ProcessBuilder(command.asJava).inheritIO()
   processBuilder.environment().putAll(environment.asJava)

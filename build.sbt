@@ -121,6 +121,7 @@ lazy val regularStreamingEngine = Project(id = "sj-regular-streaming-engine",
   base = file("./core/sj-regular-streaming-engine"))
   .settings(commonSettings: _*)
   .settings(
+    resolvers += "Clojars Repository" at "http://clojars.org/repo/",
     libraryDependencies ++= Dependencies.sjRegularEngineDependencies.value
   )
   .dependsOn(engineCore)
