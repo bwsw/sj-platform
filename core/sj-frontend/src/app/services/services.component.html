@@ -48,7 +48,7 @@
                 <td>{{ service.name }}</td>
                 <td>{{ service.description }}</td>
                 <td>
-                <span *ngIf="service.type != 'service.t-streams'">
+                <span>
                   <span>Provider:</span>
                   <span class="btn-lookup action-link"
                         (click)="getProviderInfo(ProviderInfo, service.provider)">{{ service.provider }}</span>
@@ -97,7 +97,7 @@
             <li *ngIf="currentService.httpScheme">
               <span class="title">Http scheme:</span>{{currentService.httpScheme}}
             </li>
-            <li *ngIf="currentService.type !== 'service.t-streams' && currentService.provider">
+            <li *ngIf="currentService.provider">
               <span class="title">Provider:</span>
               <span class="btn-lookup action-link" (click)="getProviderInfo(ProviderInfo, currentService.provider)">
                 {{ currentService.provider }}
