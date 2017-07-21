@@ -175,7 +175,7 @@
 			"description": "",
 			"collectionId": "16934c24-c886-f06f-2c63-01ad870c8dd7",
 			"responses": [],
-			"rawModeData": "{\r\n      \"type\": \"jdbc-output\",\r\n      \"name\": \"output-jdbc\",\r\n      \"description\": \"jdbc example\",\r\n      \"service\": \"jdbcforoutput\",\r\n      \"Primary\": \"1111\"\r\n}\r\n"
+			"rawModeData": "{\r\n      \"type\": \"stream.sql-database\",\r\n      \"name\": \"output-jdbc\",\r\n      \"description\": \"jdbc example\",\r\n      \"service\": \"jdbcforoutput\",\r\n      \"Primary\": \"1111\"\r\n}\r\n"
 		},
 		{
 			"id": "1eb97c75-1ca3-8fff-feac-c687509cffee",
@@ -520,7 +520,7 @@
 			"description": "",
 			"collectionId": "16934c24-c886-f06f-2c63-01ad870c8dd7",
 			"responses": [],
-			"rawModeData": "{\r\n      \"type\": \"stream.t-stream\",\r\n      \"name\": \"input-tstream\",\r\n      \"description\": \"Tstream example\",\r\n      \"partitions\": 1,\r\n      \"service\": \"tstr-for-input\",\r\n      \"force\": false\r\n}"
+			"rawModeData": "{\r\n      \"type\": \"stream.t-streams\",\r\n      \"name\": \"input-tstream\",\r\n      \"description\": \"Tstream example\",\r\n      \"partitions\": 1,\r\n      \"service\": \"tstr-for-input\",\r\n      \"force\": false\r\n}"
 		},
 		{
 			"id": "cd53d4ff-ff49-3711-38e3-41f870949487",

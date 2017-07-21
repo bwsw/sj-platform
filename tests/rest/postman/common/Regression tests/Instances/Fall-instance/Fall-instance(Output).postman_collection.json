@@ -217,7 +217,7 @@
 			"description": "",
 			"collectionId": "b4ce2f08-ec11-4624-d6f0-f66da7985d2f",
 			"responses": [],
-			"rawModeData": "{\r\n      \"type\": \"stream.t-stream\",\r\n      \"name\": \"rest-tstream\",\r\n      \"description\": \"Tstream example\",\r\n      \"partitions\": 1,\r\n      \"service\": \"tstream-for-stream-inp\",\r\n      \"force\": false\r\n}"
+			"rawModeData": "{\r\n      \"type\": \"stream.t-streams\",\r\n      \"name\": \"rest-tstream\",\r\n      \"description\": \"Tstream example\",\r\n      \"partitions\": 1,\r\n      \"service\": \"tstream-for-stream-inp\",\r\n      \"force\": false\r\n}"
 		},
 		{
 			"id": "2f51769a-83c1-35a9-cc20-81c48d0f3ce3",
@@ -565,7 +565,7 @@
 			"description": "",
 			"collectionId": "b4ce2f08-ec11-4624-d6f0-f66da7985d2f",
 			"responses": [],
-			"rawModeData": "\r\n{\r\n      \"type\":\"elasticsearch-output\",\r\n      \"name\": \"rest-elasticsearch\",\r\n      \"description\": \"\",\r\n      \"service\": \"elasticsearch-for-es-stream\",\r\n      \"tags\": []\r\n}\r\n"
+			"rawModeData": "\r\n{\r\n      \"type\":\"stream.elasticsearch\",\r\n      \"name\": \"rest-elasticsearch\",\r\n      \"description\": \"\",\r\n      \"service\": \"elasticsearch-for-es-stream\",\r\n      \"tags\": []\r\n}\r\n"
 		},
 		{
 			"id": "d894402a-921a-734c-6c85-cdc88d4d4676",

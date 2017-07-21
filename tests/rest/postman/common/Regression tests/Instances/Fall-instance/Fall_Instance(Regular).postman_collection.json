@@ -73,7 +73,7 @@
 			"description": "",
 			"collectionId": "07da683d-b62e-7e6d-1fd4-2badd1912e10",
 			"responses": [],
-			"rawModeData": "{\r\n      \"type\": \"stream.t-stream\",\r\n      \"name\": \"input-stream-tstream\",\r\n      \"description\": \"Tstream example\",\r\n      \"partitions\": 1,\r\n      \"service\": \"input-tstream\",\r\n      \"force\": false\r\n}"
+			"rawModeData": "{\r\n      \"type\": \"stream.t-streams\",\r\n      \"name\": \"input-stream-tstream\",\r\n      \"description\": \"Tstream example\",\r\n      \"partitions\": 1,\r\n      \"service\": \"input-tstream\",\r\n      \"force\": false\r\n}"
 		},
 		{
 			"id": "1d65818c-709a-d485-8668-ec6d848193ca",
@@ -152,7 +152,7 @@
 			"description": "",
 			"collectionId": "07da683d-b62e-7e6d-1fd4-2badd1912e10",
 			"responses": [],
-			"rawModeData": "{\r\n      \"type\": \"stream.t-stream\",\r\n      \"name\": \"output-stream-tstream\",\r\n      \"description\": \"Tstream example\",\r\n      \"partitions\": 1,\r\n      \"service\": \"input-tstream\",\r\n      \"force\": false\r\n}"
+			"rawModeData": "{\r\n      \"type\": \"stream.t-streams\",\r\n      \"name\": \"output-stream-tstream\",\r\n      \"description\": \"Tstream example\",\r\n      \"partitions\": 1,\r\n      \"service\": \"input-tstream\",\r\n      \"force\": false\r\n}"
 		},
 		{
 			"id": "4d3ee8ce-f3b0-a171-5279-ccce37551697",

@@ -125,7 +125,7 @@
 			"description": "",
 			"collectionId": "a539db9f-fc91-33ef-885b-09c8453b0646",
 			"responses": [],
-			"rawModeData": "\r\n{\r\n      \"type\":\"elasticsearch-output\",\r\n      \"name\": \"rest-elasticsearch\",\r\n      \"description\": \"\",\r\n      \"service\": \"elasticsearch-for-es-stream\",\r\n      \"tags\": []\r\n}\r\n"
+			"rawModeData": "\r\n{\r\n      \"type\":\"stream.elasticsearch\",\r\n      \"name\": \"rest-elasticsearch\",\r\n      \"description\": \"\",\r\n      \"service\": \"elasticsearch-for-es-stream\",\r\n      \"tags\": []\r\n}\r\n"
 		},
 		{
 			"id": "379a964d-1200-519f-1939-09bca6fae258",
@@ -286,7 +286,7 @@
 			"description": "",
 			"collectionId": "a539db9f-fc91-33ef-885b-09c8453b0646",
 			"responses": [],
-			"rawModeData": "{\r\n      \"type\": \"stream.t-stream\",\r\n      \"name\": \"rest-tstream\",\r\n      \"description\": \"Tstream example\",\r\n      \"partitions\": 1,\r\n      \"service\": \"tstream-for-stream-inp\",\r\n      \"force\": false\r\n}"
+			"rawModeData": "{\r\n      \"type\": \"stream.t-streams\",\r\n      \"name\": \"rest-tstream\",\r\n      \"description\": \"Tstream example\",\r\n      \"partitions\": 1,\r\n      \"service\": \"tstream-for-stream-inp\",\r\n      \"force\": false\r\n}"
 		},
 		{
 			"id": "82731902-dba7-85f4-365f-0060b19dd81f",

@@ -473,7 +473,7 @@
 			"data": [],
 			"dataMode": "raw",
 			"version": 2,
-			"tests": "tests[\"Body matches string\"] = responseBody.has(\"'Output stream' must be one of: [elasticsearch-output]\");\n\ntests[\"Status code is 400\"] = responseCode.code === 400;\n\n",
+			"tests": "tests[\"Body matches string\"] = responseBody.has(\"'Output stream' must be one of: [stream.elasticsearch]\");\n\ntests[\"Status code is 400\"] = responseCode.code === 400;\n\n",
 			"currentHelper": "normal",
 			"helperAttributes": {},
 			"time": 1493873105788,
@@ -704,7 +704,7 @@
 			"tests": "tests[\"Status code is 201\"] = responseCode.code === 201;\n\ntests[\"Body matches string\"] = responseBody.has(\"Stream 'restjdbc' has been  created.\");",
 			"currentHelper": "normal",
 			"helperAttributes": {},
-			"rawModeData": "{\r\n      \"type\": \"jdbc-output\",\r\n      \"name\": \"restjdbc\",\r\n      \"description\": \"jdbc example\",\r\n      \"service\": \"restjdbc\",\r\n      \"Primary\": \"1111\"\r\n}\r\n"
+			"rawModeData": "{\r\n      \"type\": \"stream.sql-database\",\r\n      \"name\": \"restjdbc\",\r\n      \"description\": \"jdbc example\",\r\n      \"service\": \"restjdbc\",\r\n      \"Primary\": \"1111\"\r\n}\r\n"
 		},
 		{
 			"id": "5f1ac85b-d927-24c5-ebb2-f19bb994c4af",
@@ -1263,7 +1263,7 @@
 			"data": [],
 			"dataMode": "raw",
 			"version": 2,
-			"tests": "tests[\"Body matches string\"] = responseBody.has(\"'Input stream' must be one of: [stream.t-stream]\");\n\ntests[\"Status code is 400\"] = responseCode.code === 400;\n\n",
+			"tests": "tests[\"Body matches string\"] = responseBody.has(\"'Input stream' must be one of: [stream.t-streams]\");\n\ntests[\"Status code is 400\"] = responseCode.code === 400;\n\n",
 			"currentHelper": "normal",
 			"helperAttributes": {},
 			"time": 1493872832144,
@@ -1513,7 +1513,7 @@
 			"description": "",
 			"collectionId": "319dc981-563e-40bd-23dc-f7169d47e383",
 			"responses": [],
-			"rawModeData": "{\r\n      \"type\": \"stream.t-stream\",\r\n      \"name\": \"rest-tstream\",\r\n      \"description\": \"Tstream example\",\r\n      \"partitions\": 1,\r\n      \"service\": \"tstream-for-stream-inp\",\r\n      \"force\": false\r\n}"
+			"rawModeData": "{\r\n      \"type\": \"stream.t-streams\",\r\n      \"name\": \"rest-tstream\",\r\n      \"description\": \"Tstream example\",\r\n      \"partitions\": 1,\r\n      \"service\": \"tstream-for-stream-inp\",\r\n      \"force\": false\r\n}"
 		},
 		{
 			"id": "cb16a9f1-5619-547c-31ef-162908cab949",
@@ -1883,7 +1883,7 @@
 			"description": "",
 			"collectionId": "319dc981-563e-40bd-23dc-f7169d47e383",
 			"responses": [],
-			"rawModeData": "\r\n{\r\n      \"type\":\"elasticsearch-output\",\r\n      \"name\": \"rest-elasticsearch\",\r\n      \"description\": \"\",\r\n      \"service\": \"elasticsearch-for-es-stream\",\r\n      \"tags\": []\r\n}\r\n"
+			"rawModeData": "\r\n{\r\n      \"type\":\"stream.elasticsearch\",\r\n      \"name\": \"rest-elasticsearch\",\r\n      \"description\": \"\",\r\n      \"service\": \"elasticsearch-for-es-stream\",\r\n      \"tags\": []\r\n}\r\n"
 		}
 	]
 }

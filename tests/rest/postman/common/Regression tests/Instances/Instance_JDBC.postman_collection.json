@@ -267,7 +267,7 @@
 			"description": "",
 			"collectionId": "bf485660-0deb-47e6-8727-0242ba94f94d",
 			"responses": [],
-			"rawModeData": "{\r\n      \"type\": \"stream.t-stream\",\r\n      \"name\": \"input-tstream\",\r\n      \"description\": \"Tstream example\",\r\n      \"partitions\": 1,\r\n      \"service\": \"tstr-for-input\",\r\n      \"force\": false\r\n}"
+			"rawModeData": "{\r\n      \"type\": \"stream.t-streams\",\r\n      \"name\": \"input-tstream\",\r\n      \"description\": \"Tstream example\",\r\n      \"partitions\": 1,\r\n      \"service\": \"tstr-for-input\",\r\n      \"force\": false\r\n}"
 		},
 		{
 			"id": "5c5c4366-4e69-52f9-25b4-284fd47c6927",
@@ -511,7 +511,7 @@
 			"description": "",
 			"collectionId": "bf485660-0deb-47e6-8727-0242ba94f94d",
 			"responses": [],
-			"rawModeData": "{\r\n      \"type\": \"jdbc-output\",\r\n      \"name\": \"output-jdbc\",\r\n      \"description\": \"jdbc example\",\r\n      \"service\": \"jdbcforoutput\",\r\n      \"Primary\": \"1111\"\r\n}\r\n"
+			"rawModeData": "{\r\n      \"type\": \"stream.sql-database\",\r\n      \"name\": \"output-jdbc\",\r\n      \"description\": \"jdbc example\",\r\n      \"service\": \"jdbcforoutput\",\r\n      \"Primary\": \"1111\"\r\n}\r\n"
 		},
 		{
 			"id": "e03fc3bb-5127-2792-29d7-00b06cf244eb",
@@ -626,7 +626,7 @@
 			"data": [],
 			"dataMode": "raw",
 			"version": 2,
-			"tests": "tests[\"Body matches string\"] = responseBody.has(\"Output stream' must be one of: [jdbc-output].\");\n\ntests[\"Status code is 400\"] = responseCode.code === 400;",
+			"tests": "tests[\"Body matches string\"] = responseBody.has(\"Output stream' must be one of: [stream.sql-database].\");\n\ntests[\"Status code is 400\"] = responseCode.code === 400;",
 			"currentHelper": "normal",
 			"helperAttributes": {},
 			"time": 1493875512765,

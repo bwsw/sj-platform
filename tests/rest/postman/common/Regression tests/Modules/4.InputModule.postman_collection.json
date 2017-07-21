@@ -657,7 +657,7 @@
 			"helperAttributes": {},
 			"time": 1493277083926,
 			"name": "ModuleInput_4.1.7.Input_types_not_input",
-			"description": "stream.t-stream",
+			"description": "stream.t-streams",
 			"collectionId": "411f39e7-e42f-07f8-798a-780ad1b745a9",
 			"responses": []
 		},
@@ -845,7 +845,7 @@
 			"data": null,
 			"dataMode": "params",
 			"version": 2,
-			"tests": "tests[\"Status code is 200\"] = responseCode.code === 200;\n\n\n\ntests[\"Body matches string\"] = responseBody.has(\"Masha-Input\");\n\ntests[\"Body matches string\"] = responseBody.has(\"1.0\");\n\ntests[\"Body matches string\"] = responseBody.has(\"input\");\n\ntests[\"Body matches string\"] = responseBody.has(\"stream.t-stream\");\n\ntests[\"Body matches string\"] = responseBody.has(\"specification\");",
+			"tests": "tests[\"Status code is 200\"] = responseCode.code === 200;\n\n\n\ntests[\"Body matches string\"] = responseBody.has(\"Masha-Input\");\n\ntests[\"Body matches string\"] = responseBody.has(\"1.0\");\n\ntests[\"Body matches string\"] = responseBody.has(\"input\");\n\ntests[\"Body matches string\"] = responseBody.has(\"stream.t-streams\");\n\ntests[\"Body matches string\"] = responseBody.has(\"specification\");",
 			"currentHelper": "normal",
 			"helperAttributes": {},
 			"time": 1493279220833,

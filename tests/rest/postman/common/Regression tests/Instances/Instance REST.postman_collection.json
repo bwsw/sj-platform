@@ -139,7 +139,7 @@
 			"description": "",
 			"collectionId": "e2806752-f0bd-ecbe-cb33-bfe953151f21",
 			"responses": [],
-			"rawModeData": "{\r\n      \"type\": \"stream.t-stream\",\r\n      \"name\": \"input-tstream\",\r\n      \"description\": \"Tstream example\",\r\n      \"partitions\": 1,\r\n      \"service\": \"tstr-for-input\",\r\n      \"force\": false\r\n}"
+			"rawModeData": "{\r\n      \"type\": \"stream.t-streams\",\r\n      \"name\": \"input-tstream\",\r\n      \"description\": \"Tstream example\",\r\n      \"partitions\": 1,\r\n      \"service\": \"tstr-for-input\",\r\n      \"force\": false\r\n}"
 		},
 		{
 			"id": "1c312183-a86a-e56b-4d0f-72c066c68ec5",
