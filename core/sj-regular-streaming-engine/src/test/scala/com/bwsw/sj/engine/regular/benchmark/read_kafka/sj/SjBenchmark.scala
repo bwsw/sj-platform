@@ -59,9 +59,6 @@ class SjBenchmark(mongoPort: Int,
 
   private val moduleFilename = "../../contrib/benchmarks/sj-regular-performance-benchmark/target/scala-2.12/" +
     "sj-regular-performance-benchmark-1.0-SNAPSHOT.jar"
-  // for run from IDEA
-  //private val moduleFilename = "./contrib/benchmarks/sj-regular-performance-benchmark/target/scala-2.12/" +
-  //"sj-regular-performance-benchmark-1.0-SNAPSHOT.jar"
   private val module = new File(moduleFilename)
 
   private val mongoServer = new EmbeddedMongo(mongoPort)
