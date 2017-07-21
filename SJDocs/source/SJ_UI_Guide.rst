@@ -340,7 +340,7 @@ In the list of services the following actions can be performed:
 
 2. **View** a provider for the services and get the provider`s information in a pop-up window by clicking at the active provider`s name in the «Providers» column.
 
-.. figure:: _static/ServicesList_ProviderInfo.png
+.. figure:: _static/ServicesList_ProviderInfo1.png
 
 3. **Delete** a service clicking at the corresponding icon in the Action block near the name of the services you want to delete.
 
@@ -482,7 +482,7 @@ In the list of streams the following actions can be performed:
 
 2. **View** a service for the stream and get the service`s information in a pop-up window by clicking at the active service`s name in the «Service» column.
 
-.. figure:: _static/StreamsList_ServiceInfo.png
+.. figure:: _static/StreamsList_ServiceInfo1.png
 
 3. **Delete** a stream clicking at the corresponding icon in the Actions block near the name of the stream you want to delete.
 
