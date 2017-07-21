@@ -788,7 +788,7 @@ Click "Cancel" to drop all the specified settings. The instance will not be crea
 
 Details of the node are displayed to the right when clicking the instance in the list. 
 
-.. figure:: _static/InstancesList.png
+.. _static/InstancesList.png
 
 Please, note, the details of an Instance show not only the instance settings but also:
 
