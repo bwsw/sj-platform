@@ -83,7 +83,9 @@ Please, find the required config settings in the table below and make sure they 
 
 .. _table:
 
-.. csv-table:: Required configurations
+**Required** configurations:
+
+.. csv-table:: 
   :header: "Config Domain","Name", "Description", "Example"
   :widths: 15, 20, 50, 15
 
@@ -103,7 +105,9 @@ Please, find the required config settings in the table below and make sure they 
 
 The range of optional settings is presented below. They have default values in the system but can be overriden by a user.
 
-.. csv-table:: Optional config settings
+**Optional** configurations:
+
+.. csv-table:: 
   :header: "Config Domain","Name", "Description", "Default value"
   :widths: 15, 20, 50, 15
   
