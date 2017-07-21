@@ -723,7 +723,7 @@
 			"data": [],
 			"dataMode": "raw",
 			"version": 2,
-			"tests": "tests[\"Status code is 400\"] = responseCode.code === 400;\n\ntests[\"Body matches string\"] = responseBody.has(\"Unknown type '11stream.t-stream' of stream provided. Must be one of: [stream.t-stream, stream.kafka, jdbc-output, elasticsearch-output, rest-output]\");",
+			"tests": "tests[\"Status code is 400\"] = responseCode.code === 400;\n\ntests[\"Body matches string\"] = responseBody.has(\"Unknown type '11stream.t-stream' of stream provided. Must be one of: [stream.t-stream, stream.kafka, jdbc-output, elasticsearch-output, stream.restful]\");",
 			"currentHelper": "normal",
 			"helperAttributes": {},
 			"time": 1493273043075,

@@ -57,7 +57,7 @@
 			"description": "",
 			"collectionId": "4c64a364-9534-6f45-44de-f82d0f63c682",
 			"responses": [],
-			"rawModeData": "{\r\n      \"type\":\"rest-output\",\r\n      \"name\": \"11rest-ful\",\r\n      \"description\": \"\",\r\n      \"service\": \"rest-ful\",\r\n      \"tags\": []\r\n}\r\n"
+			"rawModeData": "{\r\n      \"type\":\"stream.restful\",\r\n      \"name\": \"11rest-ful\",\r\n      \"description\": \"\",\r\n      \"service\": \"rest-ful\",\r\n      \"tags\": []\r\n}\r\n"
 		},
 		{
 			"id": "0c44b4a8-0200-708c-db6d-ca154f85c21b",
@@ -138,7 +138,7 @@
 			"description": "",
 			"collectionId": "4c64a364-9534-6f45-44de-f82d0f63c682",
 			"responses": [],
-			"rawModeData": "{\r\n      \"type\":\"rest-output\",\r\n      \"name\": \"\",\r\n      \"description\": \"\",\r\n      \"service\": \"rest-ful\",\r\n      \"tags\": []\r\n}\r\n"
+			"rawModeData": "{\r\n      \"type\":\"stream.restful\",\r\n      \"name\": \"\",\r\n      \"description\": \"\",\r\n      \"service\": \"rest-ful\",\r\n      \"tags\": []\r\n}\r\n"
 		},
 		{
 			"id": "32f4478f-9248-840d-b586-a04a87a9985a",
@@ -319,7 +319,7 @@
 			"description": "",
 			"collectionId": "4c64a364-9534-6f45-44de-f82d0f63c682",
 			"responses": [],
-			"rawModeData": "\r\n{\r\n      \"type\":\"rest-output\",\r\n      \"name\": \"rest-ful\",\r\n      \"description\": \"\",\r\n      \"service\": \"rest-ful\",\r\n      \"tags\": []\r\n}\r\n"
+			"rawModeData": "\r\n{\r\n      \"type\":\"stream.restful\",\r\n      \"name\": \"rest-ful\",\r\n      \"description\": \"\",\r\n      \"service\": \"rest-ful\",\r\n      \"tags\": []\r\n}\r\n"
 		},
 		{
 			"id": "6d705f90-4530-7180-8c4b-fb736906d5fa",
@@ -339,7 +339,7 @@
 			"description": "",
 			"collectionId": "4c64a364-9534-6f45-44de-f82d0f63c682",
 			"responses": [],
-			"rawModeData": "{\r\n      \"type\":\"rest-output\",\r\n      \"name\": \"rest-ful1\",\r\n      \"description\": \"\",\r\n\r\n      \"tags\": []\r\n}\r\n"
+			"rawModeData": "{\r\n      \"type\":\"stream.restful\",\r\n      \"name\": \"rest-ful1\",\r\n      \"description\": \"\",\r\n\r\n      \"tags\": []\r\n}\r\n"
 		},
 		{
 			"id": "7c856807-03e7-245a-c07d-aeb6fbe4a114",
@@ -399,7 +399,7 @@
 			"description": "",
 			"collectionId": "4c64a364-9534-6f45-44de-f82d0f63c682",
 			"responses": [],
-			"rawModeData": "\r\n{\r\n      \"type\":\"rest-output\",\r\n      \"name\": \"rest-ful\",\r\n      \"description\": \"\",\r\n      \"service\": \"rest-ful\"\r\n      \"tags\": []\r\n}\r\n"
+			"rawModeData": "\r\n{\r\n      \"type\":\"stream.restful\",\r\n      \"name\": \"rest-ful\",\r\n      \"description\": \"\",\r\n      \"service\": \"rest-ful\"\r\n      \"tags\": []\r\n}\r\n"
 		},
 		{
 			"id": "862dd585-d364-7290-a426-1e98be957411",
@@ -498,7 +498,7 @@
 			"description": "",
 			"collectionId": "4c64a364-9534-6f45-44de-f82d0f63c682",
 			"responses": [],
-			"rawModeData": "{\r\n      \"type\":\"rest-output\",\r\n      \"name\": \"rest-ful1\",\r\n      \"description\": \"\",\r\n      \"service\": \"aelas1111\",\r\n      \"tags\": []\r\n}\r\n"
+			"rawModeData": "{\r\n      \"type\":\"stream.restful\",\r\n      \"name\": \"rest-ful1\",\r\n      \"description\": \"\",\r\n      \"service\": \"aelas1111\",\r\n      \"tags\": []\r\n}\r\n"
 		},
 		{
 			"id": "c2e561ab-107d-d3e9-e923-9b7ea03954a1",
@@ -510,7 +510,7 @@
 			"data": [],
 			"dataMode": "raw",
 			"version": 2,
-			"tests": "tests[\"Status code is 400\"] = responseCode.code === 400;\n\ntests[\"Body matches string\"] = responseBody.has(\"Unknown type 'rest-output11' of stream provided. Must be one of: [stream.t-stream, stream.kafka, jdbc-output, elasticsearch-output, rest-output]\");",
+			"tests": "tests[\"Status code is 400\"] = responseCode.code === 400;\n\ntests[\"Body matches string\"] = responseBody.has(\"Unknown type 'stream.restful11' of stream provided. Must be one of: [stream.t-stream, stream.kafka, jdbc-output, elasticsearch-output, stream.restful]\");",
 			"currentHelper": "normal",
 			"helperAttributes": {},
 			"time": 1495601973114,
@@ -518,7 +518,7 @@
 			"description": "",
 			"collectionId": "4c64a364-9534-6f45-44de-f82d0f63c682",
 			"responses": [],
-			"rawModeData": "{\r\n      \"type\":\"rest-output11\",\r\n      \"name\": \"rest-ful\",\r\n      \"description\": \"\",\r\n      \"service\": \"rest-ful\",\r\n      \"tags\": []\r\n}\r\n"
+			"rawModeData": "{\r\n      \"type\":\"stream.restful11\",\r\n      \"name\": \"rest-ful\",\r\n      \"description\": \"\",\r\n      \"service\": \"rest-ful\",\r\n      \"tags\": []\r\n}\r\n"
 		},
 		{
 			"id": "c9b55e5b-31e1-5b4e-cd18-1c7149563b38",
@@ -538,7 +538,7 @@
 			"description": "",
 			"collectionId": "4c64a364-9534-6f45-44de-f82d0f63c682",
 			"responses": [],
-			"rawModeData": "{\r\n      \"type\":\"rest-output\",\r\n      \"name\": \"rest-ful\",\r\n      \"description\": \"\",\r\n      \"service\": \"rest-ful\",\r\n      \"tags\": []\r\n}\r\n"
+			"rawModeData": "{\r\n      \"type\":\"stream.restful\",\r\n      \"name\": \"rest-ful\",\r\n      \"description\": \"\",\r\n      \"service\": \"rest-ful\",\r\n      \"tags\": []\r\n}\r\n"
 		},
 		{
 			"id": "cb91ea3f-6cb5-69f2-3b0a-d1cbda4502f9",
@@ -579,7 +579,7 @@
 			"description": "",
 			"collectionId": "4c64a364-9534-6f45-44de-f82d0f63c682",
 			"responses": [],
-			"rawModeData": "{\r\n      \"type\":\"rest-output\",\r\n      \"name\": \"rest-ful1\",\r\n      \"description\": \"\",\r\n      \"service\": \"\",\r\n      \"tags\": []\r\n}\r\n"
+			"rawModeData": "{\r\n      \"type\":\"stream.restful\",\r\n      \"name\": \"rest-ful1\",\r\n      \"description\": \"\",\r\n      \"service\": \"\",\r\n      \"tags\": []\r\n}\r\n"
 		},
 		{
 			"id": "ef7f5569-b136-00dd-6efa-6999fa62a367",
@@ -638,7 +638,7 @@
 			"description": "",
 			"collectionId": "4c64a364-9534-6f45-44de-f82d0f63c682",
 			"responses": [],
-			"rawModeData": "{\r\n      \"type\":\"rest-output\",\r\n\r\n      \"description\": \"\",\r\n      \"service\": \"rest-ful\",\r\n      \"tags\": []\r\n}\r\n"
+			"rawModeData": "{\r\n      \"type\":\"stream.restful\",\r\n\r\n      \"description\": \"\",\r\n      \"service\": \"rest-ful\",\r\n      \"tags\": []\r\n}\r\n"
 		}
 	]
 }
