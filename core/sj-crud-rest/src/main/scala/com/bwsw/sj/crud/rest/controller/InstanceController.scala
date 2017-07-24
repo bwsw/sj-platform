@@ -57,7 +57,7 @@ class InstanceController(implicit injector: Injector) {
   private val logger = LoggerFactory.getLogger(getClass)
   private val (zkHost, zkPort) = getZkProperties()
   private val serializer = inject[JsonSerializer]
-  serializer.disableNullForPrimitives(true)
+  serializer.enableNullForPrimitives(false)
   private val jsonDeserializationErrorMessageCreator = inject[JsonDeserializationErrorMessageCreator]
   private val serviceInterface = inject[InstanceSI]
   private val moduleSI = inject[ModuleSI]
