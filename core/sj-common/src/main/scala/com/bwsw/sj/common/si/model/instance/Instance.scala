@@ -132,7 +132,7 @@ class Instance(val name: String,
   private def splitStreamsAndModes(streamsWithModes: Array[String]): Array[StreamWithMode] = {
     streamsWithModes.map(x => {
       val name = clearStreamFromMode(x)
-      val mode = StreamUtils.getStreamMode(name)
+      val mode = StreamUtils.getCorrectStreamMode(name)
 
       StreamWithMode(name, mode)
     })
