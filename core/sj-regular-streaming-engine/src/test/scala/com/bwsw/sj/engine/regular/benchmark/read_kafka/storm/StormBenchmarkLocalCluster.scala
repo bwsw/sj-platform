@@ -18,16 +18,15 @@
  */
 package com.bwsw.sj.engine.regular.benchmark.read_kafka.storm
 
-import java.lang
 import java.util.UUID
 
 import com.bwsw.sj.common.utils.BenchmarkConfigNames.zooKeeperAddressConfig
 import com.bwsw.sj.engine.regular.benchmark.read_kafka.storm.StormBenchmarkLiterals._
 import com.typesafe.config.ConfigFactory
-import org.apache.storm.{Config, LocalCluster}
 import org.apache.storm.kafka.{KafkaSpout, SpoutConfig, StringScheme, ZkHosts}
 import org.apache.storm.spout.SchemeAsMultiScheme
 import org.apache.storm.topology.TopologyBuilder
+import org.apache.storm.{Config, LocalCluster}
 
 /**
   * @author Pavel Tomskikh
@@ -59,7 +58,6 @@ object StormBenchmarkLocalCluster extends App {
 
   private val topologyName = "benchmark-topology"
 
-  // TODO: suppress or redirect logs
   private val cluster = new LocalCluster()
   cluster.submitTopology(topologyName, stormConfig, topology)
 
