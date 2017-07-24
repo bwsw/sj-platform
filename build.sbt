@@ -32,6 +32,7 @@ val commonSettings = Seq(
   resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
   resolvers += "Twitter Repository" at "http://maven.twttr.com",
   resolvers += "Oracle Maven2 Repo" at "http://download.oracle.com/maven",
+  resolvers += "Elasticsearch Releases" at "https://artifacts.elastic.co/maven",
 
   assemblyMergeStrategy in assembly := {
     case PathList("org", "apache", "commons", "logging", xs@_*) => MergeStrategy.first

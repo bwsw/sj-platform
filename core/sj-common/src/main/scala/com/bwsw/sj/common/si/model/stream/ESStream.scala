@@ -90,7 +90,10 @@ class ESStream(name: String,
       val parts = host.split(":")
       (parts(0), parts(1).toInt)
     }.toSet
-    val client = new ElasticsearchClient(hosts)
+    val maybeUsername = Option(service.provider.login)
+    val maybePassword = Option(service.provider.password)
+
+    val client = new ElasticsearchClient(hosts, maybeUsername, maybePassword)
     client.deleteDocuments(service.index, this.name)
 
     client.close()

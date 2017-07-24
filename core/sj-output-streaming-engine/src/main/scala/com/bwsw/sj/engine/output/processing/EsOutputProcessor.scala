@@ -43,7 +43,10 @@ class EsOutputProcessor[T <: AnyRef](esStream: ESStreamDomain,
   private def openConnection(): ElasticsearchClient = {
     logger.info(s"Open a connection to elasticsearch at address: '${esService.provider.hosts}'.")
     val hosts = esService.provider.hosts.map(splitHost).toSet
-    new ElasticsearchClient(hosts)
+    val maybeUsername = Option(esService.provider.login)
+    val maybePassword = Option(esService.provider.password)
+
+    new ElasticsearchClient(hosts, maybeUsername, maybePassword)
   }
 
   private def splitHost(host: String): (String, Int) = {

@@ -32,18 +32,28 @@ import org.elasticsearch.common.xcontent.XContentBuilder
 import org.elasticsearch.index.query.{BoolQueryBuilder, QueryBuilder, QueryBuilders}
 import org.elasticsearch.index.reindex.{BulkIndexByScrollResponse, DeleteByQueryAction}
 import org.elasticsearch.search.SearchHits
-import org.elasticsearch.transport.client.PreBuiltTransportClient
+import org.elasticsearch.xpack.client.PreBuiltXPackTransportClient
 import org.slf4j.LoggerFactory
 
 /**
   * Wrapper for [[org.elasticsearch.client.transport.TransportClient]]
   *
-  * @param hosts es address
+  * @param hosts    es address
+  * @param username es username
+  * @param password es password
   */
-class ElasticsearchClient(hosts: Set[(String, Int)]) {
+class ElasticsearchClient(hosts: Set[(String, Int)],
+                          username: Option[String] = None,
+                          password: Option[String] = None) {
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val typeName = "_type"
-  private val client = new PreBuiltTransportClient(Settings.EMPTY)
+
+  private val settingsBuilder = Settings.builder()
+  username.zip(password).foreach {
+    case (u, p) => settingsBuilder.put("xpack.security.user", s"$u:$p")
+  }
+
+  private val client = new PreBuiltXPackTransportClient(settingsBuilder.build())
   hosts.foreach(x => setTransportAddressToClient(x._1, x._2))
   private val deleteByQueryAction = DeleteByQueryAction.INSTANCE.newRequestBuilder(client)
 

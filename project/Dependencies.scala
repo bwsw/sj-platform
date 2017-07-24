@@ -50,6 +50,7 @@ object Dependencies {
       .exclude("io.netty", "netty"),
     ("org.elasticsearch.client" % "transport" % "5.1.1")
       .exclude("com.fasterxml.jackson.core", "jackson-core"),
+    "org.elasticsearch.client" % "x-pack-transport" % "5.1.1",
     "org.apache.logging.log4j" % "log4j-core" % "2.7",
     "org.apache.logging.log4j" % "log4j-api" % "2.7",
     "com.maxmind.geoip" % "geoip-api" % "1.3.1",
