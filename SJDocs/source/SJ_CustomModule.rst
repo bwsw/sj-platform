@@ -626,3 +626,8 @@ specification.json
 +++++++++++++++++++++
 
 This file describes the module. Examples of description can be found at :ref:`Json_schema`.
+
+More Code
+------------------------
+
+`Here <https://github.com/bwsw/sj-sflow-demo/tree/develop>`_ you can find another example of module workflow. This is a demo that performs the processing workflow for collecting of sflow information. 
