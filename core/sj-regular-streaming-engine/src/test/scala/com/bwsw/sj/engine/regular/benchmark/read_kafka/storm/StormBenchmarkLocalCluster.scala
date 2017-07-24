@@ -60,13 +60,6 @@ object StormBenchmarkLocalCluster extends App {
 
   private val cluster = new LocalCluster()
   cluster.submitTopology(topologyName, stormConfig, topology)
-
-  Runtime.getRuntime.addShutdownHook(new Thread() {
-    override def run(): Unit = {
-      cluster.killTopology(topologyName)
-      cluster.shutdown()
-    }
-  })
 }
 
 class StormBenchmarkLocalCluster
