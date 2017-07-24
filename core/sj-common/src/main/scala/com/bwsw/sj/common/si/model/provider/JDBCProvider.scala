@@ -38,7 +38,7 @@ class JDBCProvider(name: String,
                    providerType: String,
                    creationDate: String)
                   (implicit injector: Injector)
-  extends Provider(name, login, password, providerType, hosts, description, creationDate) {
+  extends ProviderWithAuth(name, login, password, providerType, hosts, description, creationDate) {
 
   import messageResourceUtils.createMessage
 

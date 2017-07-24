@@ -32,7 +32,7 @@ class JDBCProviderApi(name: String,
                       description: Option[String] = Some(RestLiterals.defaultDescription),
                       @JsonProperty("type") providerType: Option[String] = Some(ProviderLiterals.jdbcType),
                       creationDate: String)
-  extends ProviderApi(name, login, password, providerType.getOrElse(ProviderLiterals.jdbcType),
+  extends ProviderWithAuthApi(name, login, password, providerType.getOrElse(ProviderLiterals.jdbcType),
     hosts, description, creationDate) {
 
   @JsonIgnore

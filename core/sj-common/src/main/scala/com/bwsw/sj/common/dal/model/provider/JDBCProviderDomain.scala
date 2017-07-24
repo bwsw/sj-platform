@@ -34,7 +34,7 @@ class JDBCProviderDomain(override val name: String,
                          override val password: String,
                          val driver: String,
                          override val creationDate: Date)
-  extends ProviderDomain(name, description, hosts, login, password, ProviderLiterals.jdbcType, creationDate) {
+  extends ProviderWithAuthDomain(name, description, hosts, login, password, ProviderLiterals.jdbcType, creationDate) {
 
   override def checkJdbcConnection(address: String): ArrayBuffer[String] = {
     val errors = ArrayBuffer[String]()

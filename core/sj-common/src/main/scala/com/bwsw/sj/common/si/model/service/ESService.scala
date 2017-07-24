@@ -20,6 +20,7 @@ package com.bwsw.sj.common.si.model.service
 
 import java.util.Date
 
+import com.bwsw.sj.common.dal.model.provider.ProviderWithAuthDomain
 import com.bwsw.sj.common.dal.model.service.ESServiceDomain
 import com.bwsw.sj.common.rest.utils.ValidationUtils.validateNamespace
 import scaldi.Injector
@@ -44,7 +45,7 @@ class ESService(name: String,
       new ESServiceDomain(
         name = this.name,
         description = this.description,
-        provider = providerRepository.get(this.provider).get,
+        provider = providerRepository.get(this.provider).get.asInstanceOf[ProviderWithAuthDomain],
         index = this.index,
         creationDate = new Date()
       )

@@ -161,6 +161,8 @@ object ProviderLiterals {
   final val jdbcType = "provider.sql-database"
   final val restType = "provider.restful"
 
+  val withAuth = Seq(elasticsearchType)
+
   val types: Seq[String] = Seq(
     zookeeperType,
     kafkaType,

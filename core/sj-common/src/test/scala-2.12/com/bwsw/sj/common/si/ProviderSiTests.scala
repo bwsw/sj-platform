@@ -21,10 +21,10 @@ package com.bwsw.sj.common.si
 import java.util.UUID
 
 import com.bwsw.sj.common.dal.model.ConfigurationSettingDomain
-import com.bwsw.sj.common.dal.model.provider.{JDBCProviderDomain, ProviderDomain}
+import com.bwsw.sj.common.dal.model.provider.{JDBCProviderDomain, ProviderDomain, ProviderWithAuthDomain}
 import com.bwsw.sj.common.dal.model.service._
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
-import com.bwsw.sj.common.si.model.provider.{ProviderCreator, Provider}
+import com.bwsw.sj.common.si.model.provider.{Provider, ProviderCreator}
 import com.bwsw.sj.common.si.result._
 import com.bwsw.sj.common.utils.MessageResourceUtils
 import com.bwsw.sj.common.utils.MessageResourceUtilsMock.messageResourceUtils
@@ -215,6 +215,10 @@ class ProviderSiTests extends FlatSpec with Matchers {
     val providerWithServicesDomain = mock[ProviderDomain]
     when(providerWithServicesDomain.name).thenReturn(providerWithServicesName)
 
+    val esProviderName = "es-provider"
+    val esProviderDomain = mock[ProviderWithAuthDomain]
+    when(esProviderDomain.name).thenReturn(esProviderName)
+
     val otherProviderName = "other-provider"
     val otherProviderDomain = mock[ProviderDomain]
     when(otherProviderDomain.name).thenReturn(otherProviderName)
@@ -232,7 +236,7 @@ class ProviderSiTests extends FlatSpec with Matchers {
     val esServiceRelatedName = "esServiceRelated"
     val esServiceRelated = mock[ESServiceDomain]
     when(esServiceRelated.name).thenReturn(esServiceRelatedName)
-    when(esServiceRelated.provider).thenReturn(providerWithServicesDomain)
+    when(esServiceRelated.provider).thenReturn(esProviderDomain)
     val zkServiceRelatedName = "zkServiceRelated"
     val zkServiceRelated = mock[ZKServiceDomain]
     when(zkServiceRelated.name).thenReturn(zkServiceRelatedName)

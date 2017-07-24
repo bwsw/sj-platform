@@ -54,8 +54,6 @@ class BenchmarkPreparation(mongoPort: Int,
     name = "benchmark-kafka-provider",
     description = "Kafka provider for benchmark",
     hosts = Array(kafkaAddress),
-    login = null,
-    password = null,
     providerType = ProviderLiterals.kafkaType,
     creationDate = new Date())
 
@@ -63,8 +61,6 @@ class BenchmarkPreparation(mongoPort: Int,
     name = "benchmark-zk-provider",
     description = "ZooKeeper provider for benchmark",
     hosts = Array(zooKeeperHost + ":" + zooKeeperPort),
-    login = null,
-    password = null,
     providerType = ProviderLiterals.zookeeperType,
     creationDate = new Date())
 
