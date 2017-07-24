@@ -3,13 +3,13 @@ Custom Module Development Guide
 
 .. Contents::
 
-Under this section how to write your own module for Stream Juggler will be described.
+Under this section how to write your own module for the Stream Juggler Platform will be described.
 
-Stream Juggler is a platform for your custom module implementation. It allows to adjust the system to your custom aims. Creation of a custom module will not become a challenge for a practicing developer or a programmer as no special tools or services are necessary.
+The Stream Juggler Platform is a platform for your custom module implementation. It allows to adjust the system to your custom aims. Creation of a custom module will not become a challenge for a practicing developer or a programmer as no special tools or services are necessary.
 
 Prior to the module development, please, take a look at the platform :ref:`Architecture` and :ref:`Modules`.
 
-As a simple refresher, processing modules in Stream Juggler can be of the following types:
+As a simple refresher, processing modules in the Stream Juggler Platform can be of the following types:
 
 1. Input module - It handles external inputs, does data deduplication, transforms raw data to objects.
 2. Processing module:
@@ -19,7 +19,7 @@ As a simple refresher, processing modules in Stream Juggler can be of the follow
 
 3. Output module - It handles the data outcoming from event processing pipeline to external data destinations (Elasticsearch, JDBC, etc.).
 
-The workflow of the platform implies the structure:
+The workflow of the SJ-Platform implies the structure:
 
 1. As incoming information can be fed to a processing module in T-streams or Kafka, the input module is necessary at the first step of ingesting data to transform it from TCP into T-streams. If you want to process the data from Kafka, the input module is not required.
 2. A processing module performs the main transformation and calculation of data. It accepts data via T-streams and Kafka. The processed data is put into T-streams only. So an output module is required in the next step.
