@@ -30,3 +30,7 @@ class JsonUnrecognizedPropertyException(msg: String) extends JsonDeserialization
 class JsonNotParsedException(msg: String) extends JsonDeserializationException(msg)
 
 class JsonMissedPropertyException(msg: String) extends JsonDeserializationException(msg)
+
+class JsonIsNullException extends JsonDeserializationException(msg = "JSON is null")
+
+class JsonIsEmptyException extends JsonDeserializationException(msg = "Empty JSON")
