@@ -124,20 +124,17 @@ Possible error responses for **Elasticsearch** service creation:
  ":ref:`Incorrect_Json_Api_Responses`", "Incorrect JSON"
  "'Name' attribute is required.", "The Name field is not completed."
  "Service with name '<service_name>' already exists.", "All fields are completed following the requirements but a service with the same name already exists in the system."
- "Service has incorrect name: '<service_name>'. 
-  
-  A name of service must contain digits, lowercase letters or hyphens. 
-  The first symbol must be a letter.", "All fields are completed following the requirements except the 'Name' field."
+ "Service has incorrect name: '<service_name>'. A name of service must contain digits, lowercase letters or hyphens. The first symbol must be a letter.", "All fields are completed following the requirements except the 'Name' field."
  "'Type' attribute is required.", "The Type field is not completed."
- "Unknown type '<service_type>' of service provided. Must be one of: [ESInd, KfkQ, TstrQ, ZKCoord, JDBC].", "All fields are completed following the requirements except the 'Type' field.  This error is not possible in UI as the Type field offers the dropdown list of types."
+ "Unknown type '<service_type>' of service provided. Must be one of: [service.t-streams, service.apache-kafka, service.elasticsearch, service.apache-zookeeper, service.sql-database].", "All fields are completed following the requirements except the 'Type' field.  This error is not possible in UI as the Type field offers the dropdown list of types."
  "'Provider' attribute is required.", "The Provider field is not completed."
- "Provider '<service_provider>' does not exist.", "All fields are completed following the requirements except the'Provider' field (the provider specified in the service does not exist)."
+ "Provider '<service_provider>' does not exist.", "All fields are completed following the requirements except the 'Provider' field (the provider specified in the service does not exist)."
  "'Provider' must be of type: 'ES' ('<service_provider_type>' is given instead).", "All fields are completed following the requirements except the 'Provider' field (a provider of incorrect type is specified."
  "'Index' attribute is required.", "The Keyspace field is not completed."
  "Service has incorrect 'index': '<service_index>'. Name must contain digits, lowercase letters or underscore. First symbol must be a letter.", "All fields are completed following the requirements except the 'Index' field."
 
 
-Possible error responses for **Kafka** service creation:
+Possible error responses for **Apache Kafka** service creation:
 
 *'Cannot create service' Errors:*
 
@@ -148,12 +145,9 @@ Possible error responses for **Kafka** service creation:
  ":ref:`Incorrect_Json_Api_Responses`", "Incorrect JSON"
  "'Name' attribute is required.", "The Name field is not completed."
  "Service with name '<service_name>' already exists.", "All fields are completed following the requirements buta service with the same name already exists in the system."
- "Service has incorrect name: '<service_name>'. 
-  
-  A name of service must contain digits, lowercase letters or hyphens. 
-  The first symbol must be a letter.", "All fields are completed following the requirements except the 'Name' field."
+ "Service has incorrect name: '<service_name>'. A name of service must contain digits, lowercase letters or hyphens. The first symbol must be a letter.", "All fields are completed following the requirements except the 'Name' field."
  "'Type' attribute is required.", "The Type field is not completed."
- "Unknown type '<service_type>' of service provided. Must be one of: [ESInd, KfkQ, TstrQ, ZKCoord, JDBC].", "All fields are completed following the requirements except the 'Type' field.  This error is not possible in UI as the Type field offers the dropdown list of types."
+ "Unknown type '<service_type>' of service provided. Must be one of: [service.t-streams, service.apache-kafka, service.elasticsearch, service.apache-zookeeper, service.sql-database].", "All fields are completed following the requirements except the 'Type' field.  This error is not possible in UI as the Type field offers the dropdown list of types."
  "'Provider' attribute is required.", "The Provider field is not completed."
  "Provider '<service_provider>' does not exist.", "All fields are completed following the requirements except the 'Provider' field (the provider specified in the service does not exist)."
  "'Provider' must be of type: 'kafka' ('<service_provider_type>' is given instead).", "All fields are completed following the requirements except the 'Provider' field (a provider of incorrect type is specified."
@@ -175,12 +169,9 @@ Possible error responses for **T-streams** service creation:
  ":ref:`Incorrect_Json_Api_Responses`", "Incorrect JSON"
  "'Name' attribute is required.", "The Name field is not completed."
  "Service with name '<service_name>' already exists.", "All fields are completed following the requirements buta service with the same name already exists in the system."
- "Service has incorrect name: '<service_name>'.
-  
-  A name of service must contain digits, lowercase letters or hyphens. 
-  The first symbol must be a letter.", "All fields are completed following the requirements except the 'Name' field."
+ "Service has incorrect name: '<service_name>'. A name of service must contain digits, lowercase letters or hyphens. The first symbol must be a letter.", "All fields are completed following the requirements except the 'Name' field."
  "'Type' attribute is required.", "The Type field is not completed."
- "Unknown type '<service_type>' of service provided. Must be one of: [ESInd, KfkQ, TstrQ, ZKCoord, JDBC].", "All fields are completed following the requirements except the 'Type' field.  This error is not possible in UI as the Type field offers the dropdown list of types."
+ "Unknown type '<service_type>' of service provided. Must be one of: [service.t-streams, service.apache-kafka, service.elasticsearch, service.apache-zookeeper, service.sql-database].", "All fields are completed following the requirements except the 'Type' field.  This error is not possible in UI as the Type field offers the dropdown list of types."
  "'Provider' attribute is required.", "The Provider field is not completed."
  "Provider '<service_provider>' does not exist.", "All fields are completed following the requirements except the 'Provider' field (the provider specified in the service does not exist)."
  "'Provider' must be of type: 'zookeeper' ('<service_provider_type>' is given instead).", "All fields are completed following the requirements except the 'Provider' field (the specified provider is not of a zookeeper type)."
@@ -190,7 +181,7 @@ Possible error responses for **T-streams** service creation:
  "Service has incorrect 'token': '<service_token>'. Token must contain no more than 32 symbols", "All fields are completed following the requirements except the 'Token' field."
 
 
-Possible error responses for **ZooKeeper** service creation:
+Possible error responses for **Apache Zookeeper** service creation:
 
 *'Cannot create service' Errors:*
 
@@ -206,14 +197,10 @@ Possible error responses for **ZooKeeper** service creation:
   A name of service must contain digits, lowercase letters or hyphens. 
   The first symbol must be a letter.", "All fields are completed following the requirements except the 'Name' field."
  "'Type' attribute is required.", "The Type is not completed."
- "Unknown type '<service_type>' of service  provided. 
-  
-  Must be one of: [ESInd, KfkQ, TstrQ, ZKCoord, JDBC].", "All fields are completed following the requirements except the 'Type' field.  This error is not possible in UI as the Type field offers the dropdown list of types."
+ "Unknown type '<service_type>' of service  provided. Must be one of: [service.t-streams, service.apache-kafka, service.elasticsearch, service.apache-zookeeper, service.sql-database].", "All fields are completed following the requirements except the 'Type' field.  This error is not possible in UI as the Type field offers the dropdown list of types."
  "'Provider' attribute is required.", "The Provider field is not completed."
  "Provider '<service_provider>' does not exist.", "All fields are completed following the requirements except the 'Provider' field (the provider specified in the service does not exist)."
- "'Provider' must be of type: 
-  
-  'zookeeper' ('<service_provider_type>' is given instead).", "All fields are completed following the requirements except the 'Provider' field (the specified provider is of a wrong type)."
+ "'Provider' must be of type: 'provider.apache-zookeeper' ('<service_provider_type>' is given instead).", "All fields are completed following the requirements except the 'Provider' field (the specified provider is of a wrong type)."
  "'Namespace' attribute is required.", "The Namespace field is not completed."
  "Service has incorrect 'namespace': '<service_namespace>'. 
   
@@ -221,7 +208,7 @@ Possible error responses for **ZooKeeper** service creation:
   The first symbol must be a letter.", "All fields are completed following the requirements except the 'Namespace' field."
 
 
-Possible error responses for **SQL** service creation:
+Possible error responses for **SQL database** service creation:
 
 *'Cannot create service' Errors:*
 
@@ -232,19 +219,12 @@ Possible error responses for **SQL** service creation:
  ":ref:`Incorrect_Json_Api_Responses`", "Incorrect JSON"
  "'Name' attribute is required.", "The Name field is not completed."
  "Service with name '<service_name>' already exists.", "All fields are completed following the requirements buta service with the same name already exists in the system."
- "Service has incorrect name: '<service_name>'. 
-  
-  A name of service must contain digits, lowercase letters or hyphens. 
-  The first symbol must be a letter.", "All fields are completed following the requirements except the 'Name' field."
+ "Service has incorrect name: '<service_name>'. A name of service must contain digits, lowercase letters or hyphens. The first symbol must be a letter.", "All fields are completed following the requirements except the 'Name' field."
  "'Type' attribute is required.", "The Type is not completed."
- "Unknown type '<service_type>' of service provided. 
-  
-  Must be one of: [ESInd, KfkQ, TstrQ, ZKCoord, JDBC].", "All fields are completed following the requirements except the 'Type' field.  This error is not possible in UI as the Type field offers the dropdown list of types."
+ "Unknown type '<service_type>' of service provided. Must be one of: [service.t-streams, service.apache-kafka, service.elasticsearch, service.apache-zookeeper, service.sql-database].", "All fields are completed following the requirements except the 'Type' field.  This error is not possible in UI as the Type field offers the dropdown list of types."
  "'Provider' attribute is required.", "The Provider field is not completed."
  "Provider '<service_provider>' does not exist.", "All fields are completed following the requirements except the 'Provider' field (the provider specified in the service does not exist)."
- "'Provider' must be of type: 
-  
-  'JDBC' ('<service_provider_type>' is given instead).", "All fields are completed following the requirements except the 'Provider' field (the specified provider is of a wrong type)."
+ "'Provider' must be of type: 'provider.sql-database' ('<service_provider_type>' is given instead).", "All fields are completed following the requirements except the 'Provider' field (the specified provider is of a wrong type)."
  "'Database' attribute is required.", "The Database field is not completed."
  "'Driver' attribute is required.", "The Driver field is not completed."
  "Custom file '<driver-file>' is required. ", "There is no JDBC-driver file <driver-file>."
@@ -263,12 +243,9 @@ Possible error responses for **RESTful** service creation:
  ":ref:`Incorrect_Json_Api_Responses`", "Incorrect JSON"
  "'Name' attribute is required.", "The Name field is not completed."
  "Service with name '<service_name>' already exists.", "All fields are completed following the requirements buta service with the same name already exists in the system."
- "Service has incorrect name: '<service_name>'. 
-  
-  A name of service must contain digits, lowercase letters or hyphens. 
-  The first symbol must be a letter.", "All fields are completed following the requirements except the 'Name' field."
+ "Service has incorrect name: '<service_name>'. A name of service must contain digits, lowercase letters or hyphens. The first symbol must be a letter.", "All fields are completed following the requirements except the 'Name' field."
  "'Type' attribute is required.", "The Type field is not completed."
- "Unknown type '<service_type>' of service provided. Must be one of: [ESInd, KfkQ, TstrQ, ZKCoord, JDBC].", "All fields are completed following the requirements except the 'Type' field.  This error is not possible in UI as the Type field offers the dropdown list of types."
+ "Unknown type '<service_type>' of service provided. Must be one of: [service.t-streams, service.apache-kafka, service.elasticsearch, service.apache-zookeeper, service.sql-database].", "All fields are completed following the requirements except the 'Type' field.  This error is not possible in UI as the Type field offers the dropdown list of types."
  "'Provider' attribute is required.", "The Provider field is not completed."
  "Provider '<service_provider>' does not exist.", "All fields are completed following the requirements except the 'Provider' field (the provider specified in the service does not exist)."
  "'Provider' must be of type: 'REST' ('<service_provider_type>' is given instead).", "All fields are completed following the requirements except the 'Provider' field (the specified provider is of a wrong type)."
@@ -311,7 +288,7 @@ The responses description for CRUD REST-API for Streams methods are presented be
 
 Create Stream
 ~~~~~~~~~~~~~~~~~~~~~~~
-Possible error responses for **T-stream** streams creation:
+Possible error responses for **T-streams** streams creation:
 
 *'Cannot create service' Errors:*
 
@@ -323,22 +300,17 @@ Possible error responses for **T-stream** streams creation:
  ":ref:`Incorrect_Json_Api_Responses`", "Incorrect JSON"
  "'Name' attribute is required.", "The Name field is not completed."
  "Stream with name '<stream_name>' already exists", "All fields are completed following the requirements buta service with the same name already exists in the system."
- "Stream has incorrect name: '<stream_name>'. 
-  
-  A name of stream must contain digits, lowercase letters or hyphens. 
-  The first symbol must be a letter.", "All fields are completed following the requirements except the 'Name' field."
+ "Stream has incorrect name: '<stream_name>'. A name of stream must contain digits, lowercase letters or hyphens. The first symbol must be a letter.", "All fields are completed following the requirements except the 'Name' field."
  "'Type' attribute is required.", "The Type field is not completed."
- "Unknown type '<stream_type>' of stream provided. 
-  
-  Must be one of: [stream.t-stream, stream.kafka, jdbc-output, elasticsearch-output, rest-output].", "All fields are completed following the requirements except the 'Type' field.  This error is not possible in UI as the Type field offers the dropdown list of types."
+ "Unknown type '<stream_type>' of stream provided. Must be one of: [stream.t-streams, stream.apache-kafka, streams.sql-database, streams.elasticsearch, streams.restful].", "All fields are completed following the requirements except the 'Type' field.  This error is not possible in UI as the Type field offers the dropdown list of types."
  "'Service' attribute is required.", "The Service field is not completed."
  "Service '<stream_service>' does not exist.", "All fields are completed following the requirements except the 'Service' field (the specified service does not exist)."
- "Service for '<stream_type>' stream must be of type: 'TstrQ' ('<stream_service_type>' is given instead).", "All fields are completed following the requirements except the 'Service' field (the specified service is of an incorrect type)."
+ "Service for '<stream_type>' stream must be of type: 'service.t-streams' ('<stream_service_type>' is given instead).", "All fields are completed following the requirements except the 'Service' field (the specified service is of an incorrect type)."
  "'Partitions' attribute is required. 'Partitions' must be a positive integer.", "All fields are completed following the requirements except the 'Partitions' field."
  "'Partitions' attribute is required.", "The Partitions field is not completed."
 
 
-Possible error responses for **Kafka** streams creation:
+Possible error responses for **Apache Kafka** streams creation:
 
 *'Cannot create service' Errors:*
 
@@ -350,23 +322,18 @@ Possible error responses for **Kafka** streams creation:
  ":ref:`Incorrect_Json_Api_Responses`", "Incorrect JSON"
  "'Name' attribute is required.", "The Name field is not completed."
  "Stream with name '<stream_name>' already exists", "All fields are completed following the requirements buta service with the same name already exists in the system."
- "Stream has incorrect name: '<stream_name>'. 
-  
-  A name of stream must contain digits, lowercase letters or hyphens. 
-  The first symbol must be a letter.", "All fields are completed following the requirements except the 'Name' field."
+ "Stream has incorrect name: '<stream_name>'. A name of stream must contain digits, lowercase letters or hyphens. The first symbol must be a letter.", "All fields are completed following the requirements except the 'Name' field."
  "'Type' attribute is required.", "The Type field is not completed."
- "Unknown type '<stream_type>' of stream provided. 
-  
-  Must be one of: [stream.t-stream, stream.kafka, jdbc-output, elasticsearch-output, rest-output].", "All fields are completed following the requirements except the 'Type' field.  This error is not possible in UI as the Type field offers the dropdown list of types."
+ "Unknown type '<stream_type>' of stream provided. Must be one of: [stream.t-streams, stream.apache-kafka, streams.sql-database, streams.elasticsearch, streams.restful].", "All fields are completed following the requirements except the 'Type' field.  This error is not possible in UI as the Type field offers the dropdown list of types."
  "'Service' attribute is required.", "The Service field is not completed."
  "Service '<stream_service>' does not exist.", "All fields are completed following the requirements except the 'Service' field (the specified service does not exist)."
- "Service for '<stream_type>' stream must be of type: 'KfkQ' ('<stream_service_type>' is given instead).", "All fields are completed following the requirements except the 'Service' field (the specified service is of an incorrect type)."
+ "Service for '<stream_type>' stream must be of type: 'service.apache-kafka' ('<stream_service_type>' is given instead).", "All fields are completed following the requirements except the 'Service' field (the specified service is of an incorrect type)."
  "'Partitions' must be a positive integer.", "All fields are completed following the requirements except the 'Partitions' field."
  "'replicationFactor' must be a positive integer.", "All fields are completed following the requirements except the 'replicationFactor' field."
  "'Partitions' attribute is required.'Partitions' must be a positive integer.", "The Partitions field is not completed."
  "'replicationFactor' attribute is required. 'replicationFactor' must be a positive integer.", "The replicationFactor field is not completed."
 
-Possible error responses for **Elasticsearch output** streams creation:
+Possible error responses for **Elasticsearch** streams creation:
 
 *'Cannot create service' Errors:*
 
@@ -383,14 +350,12 @@ Possible error responses for **Elasticsearch output** streams creation:
   A name of stream must contain digits, lowercase letters or hyphens. 
   The first symbol must be a letter.", "All fields are completed following the requirements except the 'Name' field."
  "'Type' attribute is required.", "The Type field is not completed."
- "Unknown type '<stream_type>' of stream provided. 
-  
-  Must be one of: [stream.t-stream, stream.kafka, jdbc-output, elasticsearch-output, rest-output].", "All fields are completed following the requirements except the 'Type' field.  This error is not possible in UI as the Type field offers the dropdown list of types."
+ "Unknown type '<stream_type>' of stream provided. Must be one of: [stream.t-streams, stream.apache-kafka, streams.sql-database, streams.elasticsearch, streams.restful].", "All fields are completed following the requirements except the 'Type' field.  This error is not possible in UI as the Type field offers the dropdown list of types."
  "'Service' attribute is required.", "The Service field is not completed."
  "Service '<stream_service>' does not exist.", "All fields are completed following the requirements except the 'Service' field (the specified service does not exist)."
- "Service for '<stream_type>' stream must be of type: 'ESInd' ('<stream_service_type>' is given instead).", "All fields are completed following the requirements except the 'Service' field (the specified service is of an incorrect type)."
+ "Service for '<stream_type>' stream must be of type: 'service.elasticsearch' ('<stream_service_type>' is given instead).", "All fields are completed following the requirements except the 'Service' field (the specified service is of an incorrect type)."
 
-Possible error responses for **JDBC output** streams creation:
+Possible error responses for **SQL-database** streams creation:
 
 *'Cannot create service' Errors:*
 
@@ -402,19 +367,14 @@ Possible error responses for **JDBC output** streams creation:
  ":ref:`Incorrect_Json_Api_Responses`", "Incorrect JSON"
  "'Name' attribute is required.", "The Name field is not completed."
  "Stream with name '<stream_name>' already exists", "All fields are completed following the requirements buta service with the same name already exists in the system."
- "Stream has incorrect name: '<stream_name>'. 
-  
-  A name of stream must contain digits, lowercase letters or hyphens. 
-  The first symbol must be a letter.", "All fields are completed following the requirements except the 'Name' field."
+ "Stream has incorrect name: '<stream_name>'. A name of stream must contain digits, lowercase letters or hyphens. The first symbol must be a letter.", "All fields are completed following the requirements except the 'Name' field."
  "'Type' attribute is required.", "The Type field is not completed."
- "Unknown type '<stream_type>' of stream provided. 
-  
-  Must be one of: [stream.t-stream, stream.kafka, jdbc-output, elasticsearch-output, rest-output].", "All fields are completed following the requirements except the 'Type' field.  This error is not possible in UI as the Type field offers the dropdown list of types."
+ "Unknown type '<stream_type>' of stream provided. Must be one of: [stream.t-streams, stream.apache-kafka, streams.sql-database, streams.elasticsearch, streams.restful].", "All fields are completed following the requirements except the 'Type' field.  This error is not possible in UI as the Type field offers the dropdown list of types."
  "'Service' attribute is required.", "The Service field is not completed."
  "Service '<stream_service>' does not exist.", "All fields are completed following the requirements except the 'Service' field (the specified service does not exist)."
- "Service for '<stream_type>' stream must be of type: 'JDBC' ('<stream_service_type>' is given instead).", "All fields are completed following the requirements except the 'Service' field (the specified service is of an incorrect type)."
+ "Service for '<stream_type>' stream must be of type: 'service.sql-database' ('<stream_service_type>' is given instead).", "All fields are completed following the requirements except the 'Service' field (the specified service is of an incorrect type)."
 
-Possible error responses for **REST output** streams creation:
+Possible error responses for **RESTful** streams creation:
 
 *'Cannot create service' Errors:*
 
@@ -426,17 +386,12 @@ Possible error responses for **REST output** streams creation:
  ":ref:`Incorrect_Json_Api_Responses`", "Incorrect JSON"
  "'Name' attribute is required.", "The Name field is not completed."
  "Stream with name '<stream_name>' already exists", "All fields are completed following the requirements buta service with the same name already exists in the system."
- "Stream has incorrect name: '<stream_name>'. 
-  
-  A name of stream must contain digits, lowercase letters or hyphens. 
-  The first symbol must be a letter.", "All fields are completed following the requirements except the 'Name' field."
+ "Stream has incorrect name: '<stream_name>'. A name of stream must contain digits, lowercase letters or hyphens. The first symbol must be a letter.", "All fields are completed following the requirements except the 'Name' field."
  "'Type' attribute is required.", "The Type field is not completed."
- "Unknown type '<stream_type>' of stream provided. 
-  
-  Must be one of: [stream.t-stream, stream.kafka, jdbc-output, elasticsearch-output, rest-output].", "All fields are completed following the requirements except the 'Type' field.  This error is not possible in UI as the Type field offers the dropdown list of types."
+ "Unknown type '<stream_type>' of stream provided. Must be one of: [stream.t-streams, stream.apache-kafka, streams.sql-database, streams.elasticsearch, streams.restful].", "All fields are completed following the requirements except the 'Type' field.  This error is not possible in UI as the Type field offers the dropdown list of types."
  "'Service' attribute is required.", "The Service field is not completed."
  "Service '<stream_service>' does not exist.", "All fields are completed following the requirements except the 'Service' field (the specified service does not exist)."
- "Service for '<stream_type>' stream must be of type: 'REST' ('<stream_service_type>' is given instead).", "All fields are completed following the requirements except the 'Service' field (the specified service is of an incorrect type)."
+ "Service for '<stream_type>' stream must be of type: 'service.restful' ('<stream_service_type>' is given instead).", "All fields are completed following the requirements except the 'Service' field (the specified service is of an incorrect type)."
 
 Delete Stream
 ~~~~~~~~~~~~~~~~~
@@ -502,7 +457,7 @@ Possible error responces at **module uploading**:
  "Both of cardinality of 'inputs' in the specification.json must to be equal 0.", "The file being uploaded has correct extention, the specification corresponds to the json schema, but both values of the 'input.cardinality' field in the specification should be equal to 0."
  "'inputs' attribute in specification.json must contain only one string: 'input'.", "The file being uploaded has correct extention, the specification corresponds to the json schema, but the 'input.types' field value in the specificaation should be equal to 'input'."
  "Cardinality of 'outputs' in the specification.json has to be an interval with the left bound that is greater than zero. ", "The file being uploaded has correct extention, the specification corresponds to the json schema, but the 'output.cardinality' field is completed incorrectly in the specification. Either the first value is less than 1, or the second value is less than the first one."
- "'outputs' attribute in the specification.json must have the streams of t-stream and kafka type.", "The file being uploaded has correct extention, the specification corresponds to the json schema, but the 'output.types' field in the specification should contain the only value equal to 'stream.t-stream'."
+ "'outputs' attribute in the specification.json must have the streams of t-stream and kafka type.", "The file being uploaded has correct extention, the specification corresponds to the json schema, but the 'output.types' field in the specification should contain the only value equal to 'stream.t-streams'."
 
 *Regular-streaming specification* and *batch-streaming specification*
 
@@ -511,9 +466,9 @@ Possible error responces at **module uploading**:
  :widths: 25, 60
  
  "Cardinality of 'inputs' in the specification.json has to be an interval with the left bound that is greater than zero.", "The file being uploaded has correct extention, the specification corresponds to the json schema, but the 'input.cardinality' field in the specification is incorrect. Either the first value is less than 1, or the second value is less than the first one."
- "'inputs' attribute in the specification.json must have the streams of t-stream and kafka type.", "The file being uploaded has correct extention, the specification corresponds to the json schema, but in the 'input.types' field of the specification the following values are allowed: 'stream.t-stream', 'stream.kafka'."
+ "'inputs' attribute in the specification.json must have the streams of t-stream and kafka type.", "The file being uploaded has correct extention, the specification corresponds to the json schema, but in the 'input.types' field of the specification the following values are allowed: 'stream.t-streams', 'stream.apache-kafka'."
  "Cardinality of 'outputs' in the specification.json has to be an interval with the left bound that is greater than zero.", "The file being uploaded has correct extention, the specification corresponds to the json schema, but the 'output.cardinality' field of the specification is incorrect. Either the first value is less than 1, or the second value is less than the first one."
- "'outputs' attribute in the specification.json must have the streams of t-stream and kafka type.", "The file being uploaded has correct extention, the specification corresponds to the json schema, but in the 'output.types' field of the specification the following values are allowed: 'stream.t-stream', 'stream.kafka'."
+ "'outputs' attribute in the specification.json must have the streams of t-stream and kafka type.", "The file being uploaded has correct extention, the specification corresponds to the json schema, but in the 'output.types' field of the specification the following values are allowed: 'stream.t-streams', 'stream.apache-kafka'."
 
 *Output-streaming specification*
 
@@ -522,9 +477,9 @@ Possible error responces at **module uploading**:
  :widths: 25, 60
  
  "Both of cardinality of 'inputs' in the specification.json must to be equal to 1.", "The file being uploaded has correct extention, the specification corresponds to the json schema, but in the 'input.cardinality' field of the specification both values should be grater than 1."
- "'inputs' attribute in the specification.json must have the streams of t-stream and kafka type.", "The file being uploaded has correct extention, the specification corresponds to the json schema, but in the 'input.types' field of the specification the following values are allowed: 'stream.t-stream', 'stream.kafka'."
+ "'inputs' attribute in the specification.json must have the streams of t-stream and kafka type.", "The file being uploaded has correct extention, the specification corresponds to the json schema, but in the 'input.types' field of the specification the following values are allowed: 'stream.t-streams', 'stream.apache-kafka'."
  "Both of cardinality of 'outputs' in the specification.json must to be equal 1.", "The file being uploaded has correct extention, the specification corresponds to the json schema, but in the 'output.cardinality' field of the specification both values should be equal to 1."
- "'outputs' attribute in the specification.json must have the streams of elasticsearch, jdbc or rest type.", "The file being uploaded has correct extention, the specification corresponds to the json schema, but in the 'output.types' field of the specification the following values are allowed: 'elasticsearch-output', 'jdbc-output', 'rest-output'."
+ "'outputs' attribute in the specification.json must have the streams of Elasticsearch, SQL-daatbase or RESTful type.", "The file being uploaded has correct extention, the specification corresponds to the json schema, but in the 'output.types' field of the specification the following values are allowed: 'stream.elasticsearch', 'stream.sql-database', 'stream.restful'."
  "Class '<class_name>' indicated in '<param_class_name>' attribute of the specification.json isn't found.", " In jar file no <class_name> class specified in the <param_class_name> field is found. It is required for validator-class, executor-class, batch-collector-class fields only."
  "'validator-class' attribute in specification.json is invalid - a '<class_name>' should implement 'com.bwsw.sj.common.engine.StreamingValidator'", "The <class_name> class specified in the validator-class field should carry out the com.bwsw.sj.common.engine.StreamingValidator class."
 
@@ -613,7 +568,7 @@ Possible error responces at **creating an instance** for Input Streaming Module:
  "'perTaskRam' attribute must be greater than zero.", "All fields are completed correctly according to the requirements except the 'perTaskRam' field."
  "'performanceReportingInterval' attribute must be greater than zero.", "All fields are completed correctly according to the requirements except the 'performanceReportingInterval' field."
  "'coordinationService' attribute is required.", "The coordinationService field is not completed."
- "'coordinationService' attribute is not 'ZKCoord'.", "All fields are completed correctly according to the requirements except the 'coordinationService' field (for service types other than Zookeeper)."
+ "'coordinationService' attribute is not 'service.apache-zookeeper'.", "All fields are completed correctly according to the requirements except the 'coordinationService' field (service type is not Apache Zookeeper)."
  "'coordinationService' <instance_coordination-service> does not exist.", "All fields are completed correctly according to the requirements except the 'coordinationService' field (the service with the specified name does not exist.)"
  "'checkpointMode' attribute is required.", "The checkpointMode field is not completed."
  "Unknown value of 'checkpointMode' attribute: '<instance_checpoint-mode>'. 'checkpointMode' must be one of: [every-nth, time-interval].", "All fields are completed correctly according to the requirements except the 'checkpointMode' field."
@@ -628,7 +583,7 @@ Possible error responces at **creating an instance** for Input Streaming Module:
  "Output stream '<output_stream_name>' does not exist.", "All fields are completed correctly according to the requirements except the 'Outputs' field (one or several specified outputs do not exist)."
  "Output streams must be one of the following type: <list_of_valid_types>.", "All fields are completed correctly according to the requirements except the 'Outputs' field (one or several  specified outputs have a type that is not specified for the module)."
  "All t-streams should have the same service.", "All fields are completed correctly according to the requirements except the 'Outputs' field (one or several outputs have a service different from the others."
- "Service for t-streams must be 'TstrQ'.", "All fields are completed correctly according to the requirements except the 'Outputs' field (specified outputs have one and the same service, but this service is not of the T-streams type)."
+ "Service for t-streams must be 'service.t-streams'.", "All fields are completed correctly according to the requirements except the 'Outputs' field (specified outputs have one and the same service, but this service is not of the T-streams type)."
  "'Parallelism' attribute must be greater than zero.", "All fields are completed correctly according to the requirements except the  'Parallelism' field."
  'Parallelism' must be greater than the total number of backups.", "All fields are completed correctly according to the requirements except the 'Parallelism' field."
  "Unknown type of 'parallelism' parameter. Must be a digit.", "All fields are completed correctly according to the requirements except the 'Parallelism' field. In this case it can be a numeric value only."
@@ -646,11 +601,7 @@ Possible error responces at **creating an instance** for Regular Streaming Modul
  "Module type '<module_type>' does not exist.", "The module of the specified type does not exist. The following options are allowed: 'input-streaming', 'regular-streaming', 'output-streaming', 'batch-streaming'."
  "Module '<module_type>-<module_name>-<module_version>' has not been found.", "No information that the specified module exists is found. That does not precisely mean that the file does not exist. Just a methadata record can be missed for some reasons." 
  "Jar of module '<module_type>-<module_name>-<module_version>' has not been found in the storage.", "The specified module does not exist."
- "Cannot create an instance of a module. 
-
- The instance parameters haven't passed validation, which are declared in the methods called 'validate' (with different arguments). 
- 
- These methods are owned by a validator class that implements StreamingValidator interface. Errors: <list_of_errors>.", "All fields are completed correctly according to the requirements, but the 'options' field or other instance fields did not pass validation with the special function (that by default always returns the response the validation is successfully passed, so no such error should occur for now)."
+ "Cannot create an instance of a module. The instance parameters haven't passed validation, which are declared in the methods called 'validate' (with different arguments). These methods are owned by a validator class that implements StreamingValidator interface. Errors: <list_of_errors>.", "All fields are completed correctly according to the requirements, but the 'options' field or other instance fields did not pass validation with the special function (that by default always returns the response the validation is successfully passed, so no such error should occur for now)."
 
 *'Cannot create instance of module' Errors:*
 
@@ -668,7 +619,7 @@ Possible error responces at **creating an instance** for Regular Streaming Modul
  "'perTaskRam' attribute must be greater than zero.", "All fields are completed correctly according to the requirements except the 'perTaskRam' field."
  "'performanceReportingInterval' attribute must be greater than zero.", "All fields are completed correctly according to the requirements except the 'performanceReportingInterval' field."
  "'coordinationService' attribute is required.", "The coordinationService field is not completed."
- "'coordinationService' attribute is not 'ZKCoord'.", "All fields are completed correctly according to the requirements except the 'coordinationService' field (the service type is other than Zookeeper)."
+ "'coordinationService' attribute is not 'service.apache-zookeeper'.", "All fields are completed correctly according to the requirements except the 'coordinationService' field (the service type is not Apache Zookeeper)."
  "'coordinationService' <instance_coordination-service> does not exist.", "All fields are completed correctly according to the requirements except the 'coordinationService' (a service with the specified name does not exist)."
  "'checkpointMode' attribute is required.", "The checkpointMode is not completed."
  "Unknown value of 'checkpointMode' attribute: '<instance_checpoint-mode>'. 'checkpointMode' must be one of: [every-nth, time-interval].", "All fields are completed correctly according to the requirements except the 'checkpointMode' field."
@@ -689,8 +640,8 @@ Possible error responces at **creating an instance** for Regular Streaming Modul
  "Output stream '<output_stream_name>' does not exist.", "All fields are completed correctly according to the requirements except the 'Outputs' field (one or several specified outputs do not exist)."
  "Output streams must be one of the following type: <list_of_valid_types>.", "All fields are completed correctly according to the requirements except the 'Outputs' field (one or several specified outputs have a type that is not specified for the module)."
  "All t-streams should have the same service.", "All fields are completed correctly according to the requirements except the 'Outputs' and/or 'Inputs' field(-s) (if inputs contain T-streams). One or several specified inputs/outputs of T-streams type have a service different from other T-streams." 
- "Service for t-streams must be 'TstrQ'.", "All fields are completed correctly according to the requirements except the 'Outputs' and/or 'Inputs' fields (if inputs contain T-streams). The specified inputs/outputs have the same service, but it is not a service of a T-streams type."
- "Service for kafka streams must be 'KfkQ'.", "All fields are completed correctly according to the requirements except the 'Inputs' field (if inputs have streams of the Kafka type). One or several inputs have a service other than Kafka)."
+ "Service for t-streams must be 'service.t-streams'.", "All fields are completed correctly according to the requirements except the 'Outputs' and/or 'Inputs' fields (if inputs contain T-streams). The specified inputs/outputs have the same service, but it is not a service of a T-streams type."
+ "Service for kafka streams must be 'service-apache-kafka'.", "All fields are completed correctly according to the requirements except the 'Inputs' field (if inputs have streams of the Apache Kafka type). One or several inputs have a service other than Kafka)."
  "'Parallelism' attribute must be greater than zero.", "All fields are completed correctly according to the requirements except the 'Parallelism' field."
  "'Parallelism' (<instance_parallelism>) is greater than minimum of partitions count (<minimum_count_of_partitions>) of input streams.", "All fields are completed correctly according to the requirements except the 'Parallelism' field, that exceeds a minimum number of input stream partitions (in this case the module performance can not be paralleled)."
  "Unknown type of 'parallelism' parameter. Must be a digit or 'max'.", "All fields are completed correctly according to the requirements except the 'Parallelism' field. In ths case it can be a numeric value or a 'max' word."
@@ -718,15 +669,12 @@ Possible error responces at **creating an instance** for Batch Streaming Module:
  ":ref:`Incorrect_Json_Api_Responses`", "Incorrect JSON"
  "The 'Name' attribute is required.", "The Name field is not completed."
  "Instance '<instance_name>' already exists.", "All fields are completed correctly according to the requirements, but an instance with the same name already exists in the system.  In this case it does not matter that all other fields differ from the fields of the existing instance. "
- "Instance has incorrect name: '<instance_name>'. 
- 
-  A name of instance must contain digits, lowercase letters or hyphens. 
-  The first symbol must be a letter.", "All fields are completed correctly according to the requirements except the 'Name' field."
+ "Instance has incorrect name: '<instance_name>'. A name of instance must contain digits, lowercase letters or hyphens. The first symbol must be a letter.", "All fields are completed correctly according to the requirements except the 'Name' field."
  "'perTaskCores' attribute must be greater than zero.", "All fields are completed correctly according to the requirements except the 'perTaskCores' field."
  "'perTaskRam' attribute must be greater than zero.", "All fields are completed correctly according to the requirements except the 'perTaskRam' field."
  "'performanceReportingInterval' attribute must be greater than zero.", "All fields are completed correctly according to the requirements except the 'performanceReportingInterval' field."
  "'coordinationService' attribute is required.", "The coordinationService field is not completed."
- "'coordinationService' attribute is not 'ZKCoord'.", "All fields are completed correctly according to the requirements except the 'coordinationService' field (the service type is other than Zookeeper)."
+ "'coordinationService' attribute is not 'service.apache-zookeeper'.", "All fields are completed correctly according to the requirements except the 'coordinationService' field (the service type is not Apache Zookeeper)."
  "'coordinationService' <instance_coordination-service> does not exist.", "All fields are completed correctly according to the requirements except the 'coordinationService' (a service with the specified name does not exist)."
  "Unknown value of 'checkpointMode' attribute: '<instance_checpoint-mode>'. 'checkpointMode' must be one of: [every-nth, time-interval].", "All fields are completed correctly according to the requirements except the 'checkpointMode' field."
  "'eventWaitTime' attribute must be greater than zero.", "All fields are completed correctly according to the requirements except the 'eventWaitTime' field."
@@ -749,8 +697,8 @@ Possible error responces at **creating an instance** for Batch Streaming Module:
  "Output stream '<output_stream_name>' does not exist.", "All fields are completed correctly according to the requirements except the 'Outputs' field (one or several specified outputs do not exist)."
  "Output streams must be one of the following type: <list_of_valid_types>.", "All fields are completed correctly according to the requirements except the 'Outputs' field (one or several specified outputs have a type that is not specified for the module)."
  "All t-streams should have the same service.", "All fields are completed correctly according to the requirements except the 'Outputs' and/or 'Inputs' field(-s) (if inputs contain T-streams). One or several specified inputs/outputs of T-streams type have a service different from other T-streams." 
- "Service for t-streams must be 'TstrQ'.", "All fields are completed correctly according to the requirements except the 'Outputs' and/or 'Inputs' fields (if inputs contain T-streams). The specified inputs/outputs have the same service, but it is not a service of a T-streams type."
- "Service for kafka streams must be 'KfkQ'.", "All fields are completed correctly according to the requirements except the 'Inputs' field (if inputs have streams of the Kafka type). One or several inputs have a service other than Kafka)."
+ "Service for t-streams must be 'service.t-streams'.", "All fields are completed correctly according to the requirements except the 'Outputs' and/or 'Inputs' fields (if inputs contain T-streams). The specified inputs/outputs have the same service, but it is not a service of a T-streams type."
+ "Service for kafka streams must be 'service.apache-kafka'.", "All fields are completed correctly according to the requirements except the 'Inputs' field (if inputs have streams of the Apache Kafka type). One or several inputs have a service other than Kafka)."
  "'Parallelism' attribute must be greater than zero.", "All fields are completed correctly according to the requirements except the 'Parallelism' field."
  "'Parallelism' (<instance_parallelism>) is greater than minimum of partitions count (<minimum_count_of_partitions>) of input streams.", "All fields are completed correctly according to the requirements except the 'Parallelism' field, that exceeds a minimum number of input stream partitions (in this case the module performance can not be paralleled)."
  "Unknown type of 'parallelism' parameter. Must be a digit or 'max'.", "All fields are completed correctly according to the requirements except the 'Parallelism' field. In ths case it can be a numeric value or a 'max' word."
@@ -784,7 +732,7 @@ Possible error responces at **creating an instance** for Output Streaming Module
  "'perTaskRam' attribute must be greater than zero.", "All fields are completed correctly according to the requirements except the 'perTaskRam' field."
  "'performanceReportingInterval' attribute must be greater than zero.", "All fields are completed correctly according to the requirements except the 'performanceReportingInterval' field."
  "'coordinationService' attribute is required.", "The coordinationService field is not completed."
- "'coordinationService' attribute is not 'ZKCoord'.", "All fields are completed correctly according to the requirements except the 'coordinationService' field (for service types other than Zookeeper)."
+ "'coordinationService' attribute is not 'service.apache-zookeeper'.", "All fields are completed correctly according to the requirements except the 'coordinationService' field (service types is not Apache Zookeeper)."
  "'coordinationService' <instance_coordination-service> does not exist.", "All fields are completed correctly according to the requirements except the 'coordinationService' field (the service with the specified name does not exist.)"
  "'checkpointMode' attribute is required.", "The checkpointMode field is not completed."
  "Unknown value of 'checkpointMode' attribute: '<instance_checpoint-mode>'. 'checkpointMode' must be one of: [every-nth, time-interval].", "All fields are completed correctly according to the requirements except the 'checkpointMode' field."
@@ -796,7 +744,7 @@ Possible error responces at **creating an instance** for Output Streaming Module
  "Output stream '<instance_output>' does not exist.", "All fields are completed correctly according to the requirements except the 'Output' field (the output does not exist)."
  "Output streams must be one of: <list_of_valid_types>.", "All fields are completed correctly according to the requirements except the 'Outputs' field (one or several  specified outputs have a type that is not specified for the module)."
  "'startFrom' must be one of: [oldest, newest] or timestamp.", "All fields are completed correctly according to the requirements except the 'startFrom' field (the mode for reading messages from inputs can be of three types: oldest (read all input messages), newest (read nothing and wait till new messages come), timestamp (read messages from the stream since the specified time moment))."
- "Service for t-streams must be 'TstrQ'.", "All fields are completed correctly according to the requirements except the 'Input' field (specified inputs have one and the same service, but this service is not of the T-streams type)."
+ "Service for t-streams must be 'service.t-streams'.", "All fields are completed correctly according to the requirements except the 'Input' field (specified inputs have one and the same service, but this service is not of the T-streams type)."
  "'Parallelism' attribute must be greater than zero.", "All fields are completed correctly according to the requirements except the 'Parallelism' field."
  "'Parallelism' (<instance_parallelism>) is greater than minimum of partitions count (<minimum_count_of_partitions>) of input streams.", "All fields are completed correctly according to the requirements except the 'Parallelism' field that exceeds the number of minimum input partitions (in this case the module performance can not be paralleled)."
  "Unknown type of 'parallelism' parameter. Must be a digit or 'max'.", "All fields are completed correctly according to the requirements except the 'Parallelism' field. In this case it can be a numeric value or a 'max' word."
@@ -895,7 +843,7 @@ Config Settings API Error Responses
 
 The responses description for CRUD REST-API for Config Settings methods are presented below.
 
-A config setting can relate to one of the domens: system, t-streams, kafka, jdbc, es, zk.
+A config setting can relate to one of the domains: configuration.system, configuration.t-streams, configuration.apache-kafka, configuration.sql-database, configuration.elasticsearch, configuration.apache-zookeeper.
 
 Create a new config setting
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -911,11 +859,11 @@ Possible error responses for **config settings creation**:
  ":ref:`Incorrect_Json_Api_Responses`", "Incorrect JSON"
  "Config setting with name '<confg-setting_name>' already exists.", "All fields are completed correctly according to the requirements but a config setting with the same name already exists."
  "Сonfig setting has incorrect name: '<confg-setting_name>'. Name of config setting can contain digits, lowercase letters, hyphens or periods. First symbol must be a letter.", "All fields are completed correctly according to the requirements except the 'Name' field."
- "Сonfig setting has incorrect name: '<confg-setting_name>'. T-streams domain configuration setting must be only for consumer or producer.", "All fields are completed correctly according to the requirements except the 'Name' field. For T-streams the config settings can be set only for consumer/producer. The list of valid settings is at the T-streams site for `producers <http://t-streams.com/docs/a2-api/tstreams-factory-api/#TSF_DictionaryProducer_keyset>'_ and `consumers <http://t-streams.com/docs/a2-api/tstreams-factory-api/#TSF_DictionaryConsumer_keyset>'_ (the 'Textual constant' column)."
+ "Сonfig setting has incorrect name: '<confg-setting_name>'. T-streams domain configuration setting must be only for consumer or producer.", "All fields are completed correctly according to the requirements except the 'Name' field. For T-streams the config settings can be set only for a consumer/producer. The list of valid settings is at the T-streams site for `producers <http://t-streams.com/docs/a2-api/tstreams-factory-api/#TSF_DictionaryProducer_keyset>`_ and `consumers <http://t-streams.com/docs/a2-api/tstreams-factory-api/#TSF_DictionaryConsumer_keyset>`_ (the 'Textual constant' column)."
  "'Name' attribute is required.", "The Name field is not completed or is an empty string."
  "'Value' attribute is required.", "The Value field is not completed or is an empty string."
  "'Domain' attribute is required.", "The Domain field is not completed or is an empty string."
- "Unknown value of 'domain' attribute: '<confg-setting_domain>'. 'Domain' must be one of: [system, t-streams, kafka, es, zk, jdbc].", "All fields are completed correctly according to the requirements except the 'Domain' field."
+ "Unknown value of 'domain' attribute: '<confg-setting_domain>'. 'Domain' must be one of: [configuration.system, configuration.t-streams, configuration.apache-kafka, configuration.elasticsearch, configuration.apache-zookeeper, configuration.sql-database].", "All fields are completed correctly according to the requirements except the 'Domain' field."
 
 Delete a config setting
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -925,7 +873,7 @@ Delete a config setting
  :widths: 25, 60
  
  "'<domain>' сonfig setting '<confg-setting_name>' has not been found.", "The config setting does not exist." 
- "Cannot recognize config setting domain '<domain>'. Domain must be one of the following values: 'system, t-streams, kafka, es, zk, jdbc, rest'.", "The domen for the config setting does not exist."
+ "Cannot recognize config setting domain '<domain>'. Domain must be one of the following values: 'configuration.system, configuration.t-streams, configuration.apache-kafka, configuration.elasticsearch, configuration.apache-zookeeper, configuration.sql-database'.", "The domen for the config setting does not exist."
 
 
 Get all config settings for specific config domain
@@ -935,7 +883,7 @@ Get all config settings for specific config domain
  :header: "Response", "Description"
  :widths: 25, 60
  
- "Cannot recognize config setting domain '<domain>'. Domain must be one of the following values: 'system, t-streams, kafka, es, zk, jdbc, rest'.", "The domen for the config setting does not exist."
+ "Cannot recognize config setting domain '<domain>'. Domain must be one of the following values: 'configuration.system, configuration.t-streams, configuration.apache-kafka, configuration.elasticsearch, configuration.apache-zookeeper, configuration.sql-database'.", "The domen for the config setting does not exist."
 
 Get a config setting
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -945,5 +893,5 @@ Get a config setting
  :widths: 25, 60
 
  "'<domain>' сonfig setting '<confg-setting_name>' has not been found.", "The config setting does not exist." 
- "Cannot recognize config setting domain '<domain>'. Domain must be one of the following values: 'system, t-streams, kafka, es, zk, jdbc, rest'.", "The domen for the config setting does not exist."
+ "Cannot recognize config setting domain '<domain>'. Domain must be one of the following values: 'configuration.system, configuration.t-streams, configuration.apache-kafka, configuration.elasticsearch, configuration.apache-zookeeper, configuration.sql-database'.", "The domen for the config setting does not exist."
 
