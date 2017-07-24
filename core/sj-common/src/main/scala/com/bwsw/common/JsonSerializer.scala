@@ -20,7 +20,7 @@ package com.bwsw.common
 
 import java.lang.reflect.{ParameterizedType, Type}
 
-import com.bwsw.common.exceptions._
+import com.bwsw.common.exceptions.{JsonNotParsedException, _}
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.core.JsonParseException
 import com.fasterxml.jackson.core.`type`.TypeReference
@@ -71,7 +71,7 @@ class JsonSerializer(ignoreUnknown: Boolean = false, enableNullForPrimitives: Bo
 
       case Failure(e: JsonMappingException) =>
         if (e.getMessage.startsWith("No content"))
-          throw new JsonDeserializationException("Empty JSON")
+          throw new JsonIsEmptyException
         else if (e.getMessage.startsWith("Missing required creator property"))
           throw new JsonMissedPropertyException(getMissedProperty(e))
         else
@@ -84,7 +84,7 @@ class JsonSerializer(ignoreUnknown: Boolean = false, enableNullForPrimitives: Bo
         throw new JsonNotParsedException(value.substring(leftBound, rightBound))
 
       case Failure(_: NullPointerException) =>
-        throw new JsonDeserializationException("JSON is null")
+        throw new JsonIsNullException
 
       case Failure(e) => throw e
     }
