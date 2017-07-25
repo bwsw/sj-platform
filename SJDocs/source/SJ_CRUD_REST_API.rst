@@ -2428,6 +2428,15 @@ Success response json example of a created instance::
   "restAddress" : ""
  }
  }
+ 
+Error response example::
+
+ {
+    "entity": {
+        "message": "Module 'input-streaming-Instance1-2.0' has not been found."
+    },
+    "status-code": 404
+ }
 
 Instance statuses
 """""""""""""""""""
@@ -2678,6 +2687,16 @@ Request format::
   "200", "Instance"
   "404", "Instance '<instance_name>' has not been found."
   "500", "Internal server error"
+
+
+Error response example::
+
+ {
+    "entity": {
+        "message": "Instance 'batch-streaming' has not been found."
+    },
+    "status-code": 404
+ }
 
 Start an instance
 ~~~~~~~~~~~~~~~~~~~~~~~~~
