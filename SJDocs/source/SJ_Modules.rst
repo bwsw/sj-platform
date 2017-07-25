@@ -306,6 +306,7 @@ The diagram below represents the dataflow in the regular module.
 
 
 .. figure:: _static/RegularModuleDataflow1.png
+   :scale: 60 %
 
 The TaskEngine of a regular module receives data from T-streams. It deserializes the flow of bytes to TStreamsEnvelope[AvroRecord] which is then put to the StreamingExecutor.
 
