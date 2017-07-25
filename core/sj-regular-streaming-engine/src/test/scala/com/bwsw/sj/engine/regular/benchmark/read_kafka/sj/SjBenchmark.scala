@@ -19,6 +19,7 @@
 package com.bwsw.sj.engine.regular.benchmark.read_kafka.sj
 
 import java.io._
+import java.net.ServerSocket
 import java.util.UUID
 
 import com.bwsw.common.embedded.EmbeddedMongo
@@ -81,7 +82,7 @@ class SjBenchmark(mongoPort: Int,
     instanceName,
     taskName)
 
-  private var maybeTtsProcess: Option[Process] = None
+  private var maybeTssProcess: Option[Process] = None
 
   private val environment: Map[String, String] = Map(
     "ZOOKEEPER_HOST" -> zkHost,
@@ -93,13 +94,15 @@ class SjBenchmark(mongoPort: Int,
 
 
   /**
-    * Starts tts and mongo servers
+    * Starts [[com.bwsw.sj.engine.core.testutils.TestStorageServer]] and mongo servers
     */
   def startServices(): Unit = {
-    val ttsEnv = Map("ZOOKEEPER_HOSTS" -> zooKeeperAddress)
-    maybeTtsProcess = Some(new ClassRunner(classOf[Server], environment = ttsEnv).start())
+    val randomSocket = new ServerSocket(0)
+    val tssEnv = Map("ZOOKEEPER_HOSTS" -> zooKeeperAddress, "TSS_PORT" -> randomSocket.getLocalPort.toString)
+
+    maybeTssProcess = Some(new ClassRunner(classOf[Server], environment = tssEnv).start())
     Thread.sleep(1000)
-    println("TTS server started")
+    println("TSS server started")
 
     mongoServer.start()
     println("Mongo server started")
@@ -117,8 +120,8 @@ class SjBenchmark(mongoPort: Int,
   }
 
   override def close(): Unit = {
-    maybeTtsProcess.foreach(_.destroy())
-    println("TTS server stopped")
+    maybeTssProcess.foreach(_.destroy())
+    println("TSS server stopped")
 
     mongoServer.stop()
     println("Mongo server stopped")
