@@ -18,14 +18,11 @@
  */
 package com.bwsw.sj.engine.regular.benchmark.read_kafka.flink
 
-import java.io.{File, FileWriter}
 import java.util.Calendar
 
-import com.bwsw.sj.common.utils.BenchmarkConfigNames._
 import com.bwsw.sj.common.utils.BenchmarkLiterals.flinkDefaultOutputFile
+import com.bwsw.sj.engine.regular.benchmark.read_kafka.{ReadFromKafkaBenchmarkConfig, ReadFromKafkaBenchmarkRunner}
 import com.typesafe.config.ConfigFactory
-
-import scala.util.Try
 
 /**
   * Performs [[FlinkBenchmark]]
@@ -34,45 +31,35 @@ import scala.util.Try
   *
   * sj-benchmark.performance.message.sizes - list of messages' sizes that separated by a comma (',').
   * Environment variable MESSAGE_SIZES.
-  * sj-benchmark.performance.message.count - count of messages per test (10000000 by default). Environment variable MESSAGES_COUNT.
+  * sj-benchmark.performance.message.counts - list of counts of messages per test (1000000 by default).
+  * Counts separated by a comma (','). Environment variable MESSAGES_COUNTS.
   * sj-benchmark.performance.kafka.address - Kafka server's address. Environment variable KAFKA_ADDRESS.
   * sj-benchmark.performance.zookeeper.address - ZooKeeper server's address. Must point to the ZooKeeper server that used
   * by the Kafka server. Environment variable ZOOKEEPER_ADDRESS.
   * sj-benchmark.performance.output-file - file to output results in csv format (message size, milliseconds)
-  * (flink-benchmark-output by default). Environment variable OUTPUT_FILE.
-  * sj-benchmark.performance.words = List of words that sends to the Kafka server ("lorem,ipsum,dolor,sit,amet" by default).
+  * (flink-benchmark-output-`<`date-time`>` by default). Environment variable OUTPUT_FILE.
+  * sj-benchmark.performance.words - list of words that sends to the Kafka server ("lorem,ipsum,dolor,sit,amet" by default).
   * Environment variable WORDS.
+  * sj-benchmark.performance.repetitions - count of repetitions of same test configuration (messages count and message size)
+  * (1 by default). Environment variable REPETITIONS.
   *
   * @author Pavel Tomskikh
   */
 object FlinkBenchmarkRunner extends App {
   println(Calendar.getInstance().getTime)
 
-  private val config = ConfigFactory.load()
-  private val zooKeeperAddress = config.getString(zooKeeperAddressConfig)
-  private val kafkaAddress = config.getString(kafkaAddressConfig)
-  private val messagesCount = config.getLong(messagesCountConfig)
-  private val words = config.getString(wordsConfig).split(",")
-  private val outputFileName = Try(config.getString(outputFileConfig)).getOrElse(s"$flinkDefaultOutputFile-$messagesCount")
-  private val messageSizes = config.getString(messageSizesConfig).split(",").map(_.toLong)
+  private val benchmarkConfig = new ReadFromKafkaBenchmarkConfig(ConfigFactory.load(), flinkDefaultOutputFile)
+  private val benchmark = new FlinkBenchmark(benchmarkConfig.zooKeeperAddress, benchmarkConfig.kafkaAddress, benchmarkConfig.words)
+  private val benchmarkRunner = new ReadFromKafkaBenchmarkRunner(benchmark, benchmarkConfig)
 
-  private val flinkBenchmark = new FlinkBenchmark(zooKeeperAddress, kafkaAddress, words)
-  flinkBenchmark.warmUp()
+  private val results = benchmarkRunner.run()
+  benchmarkRunner.writeResults(results)
 
-  private val results = messageSizes.map { messageSize =>
-    (messageSize, flinkBenchmark.runTest(messageSize, messagesCount))
-  }
-
-  flinkBenchmark.close()
-  private val resultsString = results.map { case (messageSize, time) => s"$messageSize,$time" }.mkString("\n")
+  private val resultsString = results.mkString("\n")
 
   println("DONE")
   println("Results:")
   println(resultsString)
-
-  private val writer = new FileWriter(new File(outputFileName))
-  writer.write(resultsString)
-  writer.close()
 
   println(Calendar.getInstance().getTime)
 }

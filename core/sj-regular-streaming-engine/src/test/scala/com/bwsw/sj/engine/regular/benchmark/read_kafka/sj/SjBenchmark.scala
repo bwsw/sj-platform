@@ -65,7 +65,6 @@ class SjBenchmark(mongoPort: Int,
   private val taskName = instanceName + "-task"
   private val outputFilename = "benchmark-output-" + UUID.randomUUID().toString
   private val outputFile = new File(outputFilename)
-  private var outputFileLastModified: Long = 0
 
   private lazy val connectionRepository = inject[ConnectionRepository]
 

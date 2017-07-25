@@ -263,13 +263,15 @@ object BenchmarkConfigNames {
 
   val messageConfig = performanceBenchmarkConfig + ".message"
   val messageSizesConfig = messageConfig + ".sizes"
-  val messagesCountConfig = messageConfig + ".count"
+  val messagesCountsConfig = messageConfig + ".counts"
 
   val kafkaAddressConfig = performanceBenchmarkConfig + ".kafka.address"
   val mongoPortConfig = performanceBenchmarkConfig + ".mongo.port"
   val outputFileConfig = performanceBenchmarkConfig + ".output-file"
   val wordsConfig = performanceBenchmarkConfig + ".words"
   val zooKeeperAddressConfig = performanceBenchmarkConfig + ".zookeeper.address"
+
+  val repetitionsConfig = performanceBenchmarkConfig + ".repetitions"
 }
 
 object BenchmarkLiterals {

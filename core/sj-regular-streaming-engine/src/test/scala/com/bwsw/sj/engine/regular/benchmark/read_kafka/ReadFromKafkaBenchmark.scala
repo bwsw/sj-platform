@@ -56,7 +56,7 @@ abstract class ReadFromKafkaBenchmark(zooKeeperAddress: String,
     * @return time in milliseconds for which application under test reads messages from Kafka
     */
   def runTest(messageSize: Long, messagesCount: Long): Long = {
-    println(s"$messageSize bytes messages")
+    println(s"$messagesCount messages of $messageSize bytes")
 
     kafkaClient.createTopic(kafkaTopic, 1, 1)
     while (!kafkaClient.topicExists(kafkaTopic))
