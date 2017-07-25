@@ -212,12 +212,8 @@ class ProviderSiTests extends FlatSpec with Matchers {
     when(providerWithoutServicesDomain.name).thenReturn(providerWithoutServicesName)
 
     val providerWithServicesName = "provider-with-services"
-    val providerWithServicesDomain = mock[ProviderDomain]
+    val providerWithServicesDomain = mock[ProviderWithAuthDomain]
     when(providerWithServicesDomain.name).thenReturn(providerWithServicesName)
-
-    val esProviderName = "es-provider"
-    val esProviderDomain = mock[ProviderWithAuthDomain]
-    when(esProviderDomain.name).thenReturn(esProviderName)
 
     val otherProviderName = "other-provider"
     val otherProviderDomain = mock[ProviderDomain]
@@ -236,7 +232,7 @@ class ProviderSiTests extends FlatSpec with Matchers {
     val esServiceRelatedName = "esServiceRelated"
     val esServiceRelated = mock[ESServiceDomain]
     when(esServiceRelated.name).thenReturn(esServiceRelatedName)
-    when(esServiceRelated.provider).thenReturn(esProviderDomain)
+    when(esServiceRelated.provider).thenReturn(providerWithServicesDomain)
     val zkServiceRelatedName = "zkServiceRelated"
     val zkServiceRelated = mock[ZKServiceDomain]
     when(zkServiceRelated.name).thenReturn(zkServiceRelatedName)
