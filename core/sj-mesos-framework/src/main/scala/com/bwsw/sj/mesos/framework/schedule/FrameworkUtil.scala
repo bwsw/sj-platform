@@ -54,7 +54,6 @@ object FrameworkUtil {
   val connectionRepository: ConnectionRepository = inject[ConnectionRepository]
   val configRepository: GenericMongoRepository[ConfigurationSettingDomain] = connectionRepository.getConfigRepository
   private val logger = Logger.getLogger(this.getClass)
-  var params: Map[String, String] = immutable.Map[String, String]()
 
   /**
     * Count how much ports must be for current task.
@@ -83,15 +82,6 @@ object FrameworkUtil {
     System.exit(1)
   }
 
-  def getEnvParams: Map[String, String] = {
-    val config = ConfigFactory.load()
-
-    Map(
-      "instanceId" ->
-        Try(config.getString(FrameworkLiterals.instanceId)).getOrElse("00000000-0000-0000-0000-000000000000"),
-      "mongodbHosts" -> Try(config.getString(CommonAppConfigNames.mongoHosts)).getOrElse("127.0.0.1:27017")
-    )
-  }
 
   /**
     * Get jar URI for framework
@@ -139,7 +129,7 @@ object FrameworkUtil {
 
 
   def updateInstance(): Any = {
-    val optionInstance = connectionRepository.getInstanceRepository.get(FrameworkUtil.params("instanceId"))
+    val optionInstance = connectionRepository.getInstanceRepository.get(FrameworkParameters(FrameworkParameters.instanceId))
       .map(inject[InstanceCreator].from)
 
     if (optionInstance.isEmpty) {

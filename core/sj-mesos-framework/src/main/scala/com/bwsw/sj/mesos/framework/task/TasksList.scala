@@ -23,7 +23,7 @@ import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.rest.FrameworkRestEntity
 import com.bwsw.sj.common.si.model.instance._
 import com.bwsw.sj.common.utils.EngineLiterals
-import com.bwsw.sj.mesos.framework.schedule.{FrameworkUtil, OffersHandler}
+import com.bwsw.sj.mesos.framework.schedule.{FrameworkParameters, FrameworkUtil, OffersHandler}
 import org.apache.log4j.Logger
 import org.apache.mesos.Protos.{TaskID, TaskInfo, _}
 import scaldi.Injectable.inject
@@ -206,12 +206,14 @@ object TasksList {
 
     def getEnvironments: Environment = {
      Environment.newBuilder
-        .addVariables(Environment.Variable.newBuilder.setName("INSTANCE_NAME").setValue(FrameworkUtil.params {"instanceId"}))
+        .addVariables(Environment.Variable.newBuilder.setName("INSTANCE_NAME").setValue(FrameworkParameters(FrameworkParameters.instanceId)))
         .addVariables(Environment.Variable.newBuilder.setName("TASK_NAME").setValue(task))
         .addVariables(Environment.Variable.newBuilder.setName("AGENTS_HOST").setValue(OffersHandler.getOfferIp(offer)))
         .addVariables(Environment.Variable.newBuilder.setName("AGENTS_PORTS").setValue(getAgentPorts))
         .addVariables(Environment.Variable.newBuilder.setName("INSTANCE_HOSTS").setValue(getInstanceHosts))
-        .addVariables(Environment.Variable.newBuilder.setName("MONGO_HOSTS").setValue(FrameworkUtil.params {"mongodbHosts"}))
+        .addVariables(Environment.Variable.newBuilder.setName("MONGO_HOSTS").setValue(FrameworkParameters(FrameworkParameters.mongoHosts)))
+        .addVariables(Environment.Variable.newBuilder.setName("MONGO_USER").setValue(FrameworkParameters(FrameworkParameters.mognoUser)))
+        .addVariables(Environment.Variable.newBuilder.setName("MONGO_PASSWORD").setValue(FrameworkParameters(FrameworkParameters.mongoPassword)))
 //        .addVariables(Environment.Variable.newBuilder.setName("ENTRY_PORT").setValue("8888"))
         .build()
     }

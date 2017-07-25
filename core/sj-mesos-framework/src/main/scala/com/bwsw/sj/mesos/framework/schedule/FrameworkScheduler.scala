@@ -168,8 +168,8 @@ class FrameworkScheduler(implicit injector: Injector) extends Scheduler {
     FrameworkUtil.frameworkId = Option(frameworkId.getValue)
     FrameworkUtil.master = Option(masterInfo)
 
-    FrameworkUtil.params = FrameworkUtil.getEnvParams
-    logger.debug(s"Got environment variable: ${FrameworkUtil.params}.")
+    FrameworkParameters.prepareEnvParams()
+    logger.debug(s"Got environment variable: ${FrameworkParameters()}.")
 
     FrameworkUtil.updateInstance()
     logger.debug(s"Got instance ${FrameworkUtil.instance.get.name}.")
