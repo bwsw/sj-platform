@@ -28,9 +28,9 @@ If you are a developer and are willing to use the platform you need to know of s
 
 .. tip:: Find more about SJ-Platform architecture at :ref:`Architecture`.
 
-Once everything is ready you can move to the Stream Juggler platform.
+Once everything is ready you can move to the Stream Juggler Platform.
 
-The platform allows to upload your custom module for data stream processing with prerequisite engines and configuration settings. 
+The SJ-Platform allows to upload your custom module for data stream processing with prerequisite engines and configuration settings. 
 
 For correct performance a module requires creating a stream/streams with its service(-s) and service providers.
 

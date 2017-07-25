@@ -40,14 +40,11 @@ Create Provider
  :widths: 25, 60  
 
  ":ref:`Incorrect_Json_Api_Responses`", "Incorrect JSON"
- "Provider with name '<provider_name>' already exists.", "All fields are filled following the requirements, but the provider with this name already exists in the system. 
+ "Provider with name '<provider_name>' already exists.", "All fields are filled in following the requirements, but the provider with this name already exists in the system. 
  
  In this case it does not matter that all other fields differ from the fields of the existing provider. "
- "Provider has incorrect name: '<provider_name>'. 
-  
-  A name of the provider must contain digits, lowercase letters or hyphens. 
-  The first symbol must be a letter.", "All fields are filled following the requirements except the 'Name' field."
- "Unknown type '<provider_type>' provided. Must be one of: [ES, Kafka, zookeeper, JDBC, REST].", "All fields are filled following the requirements except the 'Type' field. This error is not possible in UI as the Type field offers the dropdown list of types."
+ "Provider has incorrect name: '<provider_name>'. A name of the provider must contain digits, lowercase letters or hyphens. The first symbol must be a letter.", "All fields are filled following the requirements except the 'Name' field."
+ "Unknown type '<provider_type>' provided. Must be one of: [provider.elasticsearch, provider.apache-kafka, provider.apache-zookeeper, provider.sql-database, provider.restful].", "All fields are filled following the requirements except the 'Type' field. This error is not possible in UI as the Type field offers the dropdown list of types."
  "Wrong host provided: '<provider_host>'.", "All fields are filled following the requirements except the 'Hosts' field."
  "Host cannot contain any URI path ('<uri_path>').", "All fields are completed following the requirements except the 'Host' field that contains the id of some resource (defining the file location, e.g. an image is stored at the desk: /home/smith_j/desk/imgpsh_fullsize.jpg)."
  "Host '<provider_host>' must contain port", "All fields are filled following the requirements except the 'Hosts' field where no port is defined in one or several elements."
@@ -55,10 +52,10 @@ Create Provider
  "'Type' attribute is required.", "The Type field is not completed."
  "'Hosts' attribute is required.", "The Hosts field is not completed."
  "'Hosts' must contain at least one host.", "The Hosts field is empty."
- "Config setting 'jdbc.driver.<driver-name>' is required.", "Config setting jdbc.driver.<driver-name> is not completed (required for JDBC type only)."
- "Config setting 'jdbc.driver.<driver-name>.class' is required.", "Config setting jdbc.driver.<driver-name>.class  is not completed (required for JDBC type only)."
- "Config setting 'jdbc.driver.<driver-name>.prefix' is required.", "Config setting jdbc.driver.<driver-name>.prefix  is not completed (required for JDBC type only)."
- "Prefix '<prefix>' in config setting 'jdbc.driver.<driver-name>.prefix' is incorrect.", "Incorrect jdbc.driver.<driver-name>.prefix value. The following options are allowed: jdbc:mysql, jdbc:postgresql, jdbc:oracle:thin (required for JDBC type only)."
+ "Configuration 'jdbc.driver.<driver-name>' is required.", "Configuration jdbc.driver.<driver-name> is not completed (required for sql-database type only)."
+ "Configuration 'jdbc.driver.<driver-name>.class' is required.", "Configuration jdbc.driver.<driver-name>.class  is not completed (required for sql-database type only)."
+ "Configuration 'jdbc.driver.<driver-name>.prefix' is required.", "Configuration jdbc.driver.<driver-name>.prefix  is not completed (required for sql-database type only)."
+ "Prefix '<prefix>' in configuration 'jdbc.driver.<driver-name>.prefix' is incorrect.", "Incorrect jdbc.driver.<driver-name>.prefix value. The following options are allowed: jdbc:mysql, jdbc:postgresql, jdbc:oracle:thin (required for sql-database type only)."
 
 Test Connection To Provider
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -129,7 +126,7 @@ Possible error responses for **Elasticsearch** service creation:
  "Unknown type '<service_type>' of service provided. Must be one of: [service.t-streams, service.apache-kafka, service.elasticsearch, service.apache-zookeeper, service.sql-database].", "All fields are completed following the requirements except the 'Type' field.  This error is not possible in UI as the Type field offers the dropdown list of types."
  "'Provider' attribute is required.", "The Provider field is not completed."
  "Provider '<service_provider>' does not exist.", "All fields are completed following the requirements except the 'Provider' field (the provider specified in the service does not exist)."
- "'Provider' must be of type: 'ES' ('<service_provider_type>' is given instead).", "All fields are completed following the requirements except the 'Provider' field (a provider of incorrect type is specified."
+ "'Provider' must be of type: 'ES' ('<service_provider_type>' is given instead).", "All fields are completed following the requirements except the 'Provider' field (a provider of incorrect type is specified)."
  "'Index' attribute is required.", "The Keyspace field is not completed."
  "Service has incorrect 'index': '<service_index>'. Name must contain digits, lowercase letters or underscore. First symbol must be a letter.", "All fields are completed following the requirements except the 'Index' field."
 
@@ -168,7 +165,7 @@ Possible error responses for **T-streams** service creation:
 
  ":ref:`Incorrect_Json_Api_Responses`", "Incorrect JSON"
  "'Name' attribute is required.", "The Name field is not completed."
- "Service with name '<service_name>' already exists.", "All fields are completed following the requirements buta service with the same name already exists in the system."
+ "Service with name '<service_name>' already exists.", "All fields are completed following the requirements but a service with the same name already exists in the system."
  "Service has incorrect name: '<service_name>'. A name of service must contain digits, lowercase letters or hyphens. The first symbol must be a letter.", "All fields are completed following the requirements except the 'Name' field."
  "'Type' attribute is required.", "The Type field is not completed."
  "Unknown type '<service_type>' of service provided. Must be one of: [service.t-streams, service.apache-kafka, service.elasticsearch, service.apache-zookeeper, service.sql-database].", "All fields are completed following the requirements except the 'Type' field.  This error is not possible in UI as the Type field offers the dropdown list of types."
@@ -191,21 +188,15 @@ Possible error responses for **Apache Zookeeper** service creation:
  
  ":ref:`Incorrect_Json_Api_Responses`", "Incorrect JSON"
  "'Name' attribute is required.", "The Name is not completed."
- "Service with name '<service_name>' already exists.", "All fields are completed following the requirements buta service with the same name already exists in the system."
- "Service has incorrect name: '<service_name>'. 
-  
-  A name of service must contain digits, lowercase letters or hyphens. 
-  The first symbol must be a letter.", "All fields are completed following the requirements except the 'Name' field."
+ "Service with name '<service_name>' already exists.", "All fields are completed following the requirements but a service with the same name already exists in the system."
+ "Service has incorrect name: '<service_name>'. A name of service must contain digits, lowercase letters or hyphens. The first symbol must be a letter.", "All fields are completed following the requirements except the 'Name' field."
  "'Type' attribute is required.", "The Type is not completed."
  "Unknown type '<service_type>' of service  provided. Must be one of: [service.t-streams, service.apache-kafka, service.elasticsearch, service.apache-zookeeper, service.sql-database].", "All fields are completed following the requirements except the 'Type' field.  This error is not possible in UI as the Type field offers the dropdown list of types."
  "'Provider' attribute is required.", "The Provider field is not completed."
  "Provider '<service_provider>' does not exist.", "All fields are completed following the requirements except the 'Provider' field (the provider specified in the service does not exist)."
  "'Provider' must be of type: 'provider.apache-zookeeper' ('<service_provider_type>' is given instead).", "All fields are completed following the requirements except the 'Provider' field (the specified provider is of a wrong type)."
  "'Namespace' attribute is required.", "The Namespace field is not completed."
- "Service has incorrect 'namespace': '<service_namespace>'. 
-  
-  A name must contain digits, lowercase letters or underscore. 
-  The first symbol must be a letter.", "All fields are completed following the requirements except the 'Namespace' field."
+ "Service has incorrect 'namespace': '<service_namespace>'. A name must contain digits, lowercase letters or underscore. The first symbol must be a letter.", "All fields are completed following the requirements except the 'Namespace' field."
 
 
 Possible error responses for **SQL database** service creation:
@@ -218,7 +209,7 @@ Possible error responses for **SQL database** service creation:
  
  ":ref:`Incorrect_Json_Api_Responses`", "Incorrect JSON"
  "'Name' attribute is required.", "The Name field is not completed."
- "Service with name '<service_name>' already exists.", "All fields are completed following the requirements buta service with the same name already exists in the system."
+ "Service with name '<service_name>' already exists.", "All fields are completed following the requirements but a service with the same name already exists in the system."
  "Service has incorrect name: '<service_name>'. A name of service must contain digits, lowercase letters or hyphens. The first symbol must be a letter.", "All fields are completed following the requirements except the 'Name' field."
  "'Type' attribute is required.", "The Type is not completed."
  "Unknown type '<service_type>' of service provided. Must be one of: [service.t-streams, service.apache-kafka, service.elasticsearch, service.apache-zookeeper, service.sql-database].", "All fields are completed following the requirements except the 'Type' field.  This error is not possible in UI as the Type field offers the dropdown list of types."
@@ -242,7 +233,7 @@ Possible error responses for **RESTful** service creation:
  
  ":ref:`Incorrect_Json_Api_Responses`", "Incorrect JSON"
  "'Name' attribute is required.", "The Name field is not completed."
- "Service with name '<service_name>' already exists.", "All fields are completed following the requirements buta service with the same name already exists in the system."
+ "Service with name '<service_name>' already exists.", "All fields are completed following the requirements but a service with the same name already exists in the system."
  "Service has incorrect name: '<service_name>'. A name of service must contain digits, lowercase letters or hyphens. The first symbol must be a letter.", "All fields are completed following the requirements except the 'Name' field."
  "'Type' attribute is required.", "The Type field is not completed."
  "Unknown type '<service_type>' of service provided. Must be one of: [service.t-streams, service.apache-kafka, service.elasticsearch, service.apache-zookeeper, service.sql-database].", "All fields are completed following the requirements except the 'Type' field.  This error is not possible in UI as the Type field offers the dropdown list of types."
@@ -299,7 +290,7 @@ Possible error responses for **T-streams** streams creation:
 
  ":ref:`Incorrect_Json_Api_Responses`", "Incorrect JSON"
  "'Name' attribute is required.", "The Name field is not completed."
- "Stream with name '<stream_name>' already exists", "All fields are completed following the requirements buta service with the same name already exists in the system."
+ "Stream with name '<stream_name>' already exists", "All fields are completed following the requirements but a service with the same name already exists in the system."
  "Stream has incorrect name: '<stream_name>'. A name of stream must contain digits, lowercase letters or hyphens. The first symbol must be a letter.", "All fields are completed following the requirements except the 'Name' field."
  "'Type' attribute is required.", "The Type field is not completed."
  "Unknown type '<stream_type>' of stream provided. Must be one of: [stream.t-streams, stream.apache-kafka, streams.sql-database, streams.elasticsearch, streams.restful].", "All fields are completed following the requirements except the 'Type' field.  This error is not possible in UI as the Type field offers the dropdown list of types."
@@ -321,7 +312,7 @@ Possible error responses for **Apache Kafka** streams creation:
 
  ":ref:`Incorrect_Json_Api_Responses`", "Incorrect JSON"
  "'Name' attribute is required.", "The Name field is not completed."
- "Stream with name '<stream_name>' already exists", "All fields are completed following the requirements buta service with the same name already exists in the system."
+ "Stream with name '<stream_name>' already exists", "All fields are completed following the requirements but a service with the same name already exists in the system."
  "Stream has incorrect name: '<stream_name>'. A name of stream must contain digits, lowercase letters or hyphens. The first symbol must be a letter.", "All fields are completed following the requirements except the 'Name' field."
  "'Type' attribute is required.", "The Type field is not completed."
  "Unknown type '<stream_type>' of stream provided. Must be one of: [stream.t-streams, stream.apache-kafka, streams.sql-database, streams.elasticsearch, streams.restful].", "All fields are completed following the requirements except the 'Type' field.  This error is not possible in UI as the Type field offers the dropdown list of types."
@@ -344,11 +335,8 @@ Possible error responses for **Elasticsearch** streams creation:
 
  ":ref:`Incorrect_Json_Api_Responses`", "Incorrect JSON"
  "'Name' attribute is required.", "The Name field is not completed."
- "Stream with name '<stream_name>' already exists", "All fields are completed following the requirements buta service with the same name already exists in the system."
- "Stream has incorrect name: '<stream_name>'. 
-  
-  A name of stream must contain digits, lowercase letters or hyphens. 
-  The first symbol must be a letter.", "All fields are completed following the requirements except the 'Name' field."
+ "Stream with name '<stream_name>' already exists", "All fields are completed following the requirements but a service with the same name already exists in the system."
+ "Stream has incorrect name: '<stream_name>'. A name of stream must contain digits, lowercase letters or hyphens. The first symbol must be a letter.", "All fields are completed following the requirements except the 'Name' field."
  "'Type' attribute is required.", "The Type field is not completed."
  "Unknown type '<stream_type>' of stream provided. Must be one of: [stream.t-streams, stream.apache-kafka, streams.sql-database, streams.elasticsearch, streams.restful].", "All fields are completed following the requirements except the 'Type' field.  This error is not possible in UI as the Type field offers the dropdown list of types."
  "'Service' attribute is required.", "The Service field is not completed."
@@ -366,7 +354,7 @@ Possible error responses for **SQL-database** streams creation:
 
  ":ref:`Incorrect_Json_Api_Responses`", "Incorrect JSON"
  "'Name' attribute is required.", "The Name field is not completed."
- "Stream with name '<stream_name>' already exists", "All fields are completed following the requirements buta service with the same name already exists in the system."
+ "Stream with name '<stream_name>' already exists", "All fields are completed following the requirements but a service with the same name already exists in the system."
  "Stream has incorrect name: '<stream_name>'. A name of stream must contain digits, lowercase letters or hyphens. The first symbol must be a letter.", "All fields are completed following the requirements except the 'Name' field."
  "'Type' attribute is required.", "The Type field is not completed."
  "Unknown type '<stream_type>' of stream provided. Must be one of: [stream.t-streams, stream.apache-kafka, streams.sql-database, streams.elasticsearch, streams.restful].", "All fields are completed following the requirements except the 'Type' field.  This error is not possible in UI as the Type field offers the dropdown list of types."
@@ -385,7 +373,7 @@ Possible error responses for **RESTful** streams creation:
 
  ":ref:`Incorrect_Json_Api_Responses`", "Incorrect JSON"
  "'Name' attribute is required.", "The Name field is not completed."
- "Stream with name '<stream_name>' already exists", "All fields are completed following the requirements buta service with the same name already exists in the system."
+ "Stream with name '<stream_name>' already exists", "All fields are completed following the requirements but a service with the same name already exists in the system."
  "Stream has incorrect name: '<stream_name>'. A name of stream must contain digits, lowercase letters or hyphens. The first symbol must be a letter.", "All fields are completed following the requirements except the 'Name' field."
  "'Type' attribute is required.", "The Type field is not completed."
  "Unknown type '<stream_type>' of stream provided. Must be one of: [stream.t-streams, stream.apache-kafka, streams.sql-database, streams.elasticsearch, streams.restful].", "All fields are completed following the requirements except the 'Type' field.  This error is not possible in UI as the Type field offers the dropdown list of types."
@@ -841,14 +829,14 @@ Stop an instance
 Config Settings API Error Responses
 --------------------------------------------
 
-The responses description for CRUD REST-API for Config Settings methods are presented below.
+The responses description for CRUD REST-API for Configurations methods are presented below.
 
-A config setting can relate to one of the domains: configuration.system, configuration.t-streams, configuration.apache-kafka, configuration.sql-database, configuration.elasticsearch, configuration.apache-zookeeper.
+A configuraition can relate to one of the domains: configuration.system, configuration.t-streams, configuration.apache-kafka, configuration.sql-database, configuration.elasticsearch, configuration.apache-zookeeper.
 
-Create a new config setting
+Create a new configuration
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Possible error responses for **config settings creation**:
+Possible error responses for **configuration creation**:
 
 *Cannot create сonfig setting. Errors:* 
 
@@ -857,9 +845,9 @@ Possible error responses for **config settings creation**:
  :widths: 25, 60
   
  ":ref:`Incorrect_Json_Api_Responses`", "Incorrect JSON"
- "Config setting with name '<confg-setting_name>' already exists.", "All fields are completed correctly according to the requirements but a config setting with the same name already exists."
- "Сonfig setting has incorrect name: '<confg-setting_name>'. Name of config setting can contain digits, lowercase letters, hyphens or periods. First symbol must be a letter.", "All fields are completed correctly according to the requirements except the 'Name' field."
- "Сonfig setting has incorrect name: '<confg-setting_name>'. T-streams domain configuration setting must be only for consumer or producer.", "All fields are completed correctly according to the requirements except the 'Name' field. For T-streams the config settings can be set only for a consumer/producer. The list of valid settings is at the T-streams site for `producers <http://t-streams.com/docs/a2-api/tstreams-factory-api/#TSF_DictionaryProducer_keyset>`_ and `consumers <http://t-streams.com/docs/a2-api/tstreams-factory-api/#TSF_DictionaryConsumer_keyset>`_ (the 'Textual constant' column)."
+ "Configuration with name '<confguration_name>' already exists.", "All fields are completed correctly according to the requirements but a config setting with the same name already exists."
+ "Сonfiguration has incorrect name: '<confguration_name>'. Name of configuration can contain digits, lowercase letters, hyphens or periods. First symbol must be a letter.", "All fields are completed correctly according to the requirements except the 'Name' field."
+ "Сonfiguration has incorrect name: '<confguration_name>'. T-streams domain configuration must be only for consumer or producer.", "All fields are completed correctly according to the requirements except the 'Name' field. For T-streams the configuration can be set only for a consumer/producer. The list of valid settings is at the T-streams site for `producers <http://t-streams.com/docs/a2-api/tstreams-factory-api/#TSF_DictionaryProducer_keyset>`_ and `consumers <http://t-streams.com/docs/a2-api/tstreams-factory-api/#TSF_DictionaryConsumer_keyset>`_ (the 'Textual constant' column)."
  "'Name' attribute is required.", "The Name field is not completed or is an empty string."
  "'Value' attribute is required.", "The Value field is not completed or is an empty string."
  "'Domain' attribute is required.", "The Domain field is not completed or is an empty string."
@@ -872,8 +860,8 @@ Delete a config setting
  :header: "Response", "Description"
  :widths: 25, 60
  
- "'<domain>' сonfig setting '<confg-setting_name>' has not been found.", "The config setting does not exist." 
- "Cannot recognize config setting domain '<domain>'. Domain must be one of the following values: 'configuration.system, configuration.t-streams, configuration.apache-kafka, configuration.elasticsearch, configuration.apache-zookeeper, configuration.sql-database'.", "The domen for the config setting does not exist."
+ "'<domain>' сonfiguration '<confg-setting_name>' has not been found.", "The configuration does not exist." 
+ "Cannot recognize configuration domain '<domain>'. Domain must be one of the following values: 'configuration.system, configuration.t-streams, configuration.apache-kafka, configuration.elasticsearch, configuration.apache-zookeeper, configuration.sql-database'.", "The domen for the configuration does not exist."
 
 
 Get all config settings for specific config domain
@@ -883,7 +871,7 @@ Get all config settings for specific config domain
  :header: "Response", "Description"
  :widths: 25, 60
  
- "Cannot recognize config setting domain '<domain>'. Domain must be one of the following values: 'configuration.system, configuration.t-streams, configuration.apache-kafka, configuration.elasticsearch, configuration.apache-zookeeper, configuration.sql-database'.", "The domen for the config setting does not exist."
+ "Cannot recognize configuration domain '<domain>'. Domain must be one of the following values: 'configuration.system, configuration.t-streams, configuration.apache-kafka, configuration.elasticsearch, configuration.apache-zookeeper, configuration.sql-database'.", "The domen for the config setting does not exist."
 
 Get a config setting
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -892,6 +880,6 @@ Get a config setting
  :header: "Response", "Description"
  :widths: 25, 60
 
- "'<domain>' сonfig setting '<confg-setting_name>' has not been found.", "The config setting does not exist." 
- "Cannot recognize config setting domain '<domain>'. Domain must be one of the following values: 'configuration.system, configuration.t-streams, configuration.apache-kafka, configuration.elasticsearch, configuration.apache-zookeeper, configuration.sql-database'.", "The domen for the config setting does not exist."
+ "'<domain>' сonfiguration '<confguration_name>' has not been found.", "The configuration does not exist." 
+ "Cannot recognize configuration domain '<domain>'. Domain must be one of the following values: 'configuration.system, configuration.t-streams, configuration.apache-kafka, configuration.elasticsearch, configuration.apache-zookeeper, configuration.sql-database'.", "The domen for the configuration does not exist."
 

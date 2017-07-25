@@ -46,31 +46,31 @@ class StreamUtilsTestSuit extends FlatSpec with Matchers {
     streamName shouldBe expectedStreamName
   }
 
-  it should s"getStreamMode() method returns an actual mode if the stream name has got '${EngineLiterals.fullStreamMode}' mode" in {
+  it should s"getCorrectStreamMode() method returns an actual mode if the stream name has got '${EngineLiterals.fullStreamMode}' mode" in {
     //arrange
     val expectedStreamName = "name"
     val streamNameWithMode = expectedStreamName + "/" + EngineLiterals.fullStreamMode
 
     //act
-    val mode = StreamUtils.getStreamMode(streamNameWithMode)
+    val mode = StreamUtils.getCorrectStreamMode(streamNameWithMode)
 
     //assert
     mode shouldBe EngineLiterals.fullStreamMode
   }
 
-  it should s"getStreamMode() method returns an actual mode if the stream name has got '${EngineLiterals.splitStreamMode}' mode" in {
+  it should s"getCorrectStreamMode() method returns an actual mode if the stream name has got '${EngineLiterals.splitStreamMode}' mode" in {
     //arrange
     val expectedStreamName = "name"
     val streamNameWithMode = expectedStreamName + "/" + EngineLiterals.splitStreamMode
 
     //act
-    val mode = StreamUtils.getStreamMode(streamNameWithMode)
+    val mode = StreamUtils.getCorrectStreamMode(streamNameWithMode)
 
     //assert
     mode shouldBe EngineLiterals.splitStreamMode
   }
 
-  it should s"getStreamMode() method returns '${EngineLiterals.splitStreamMode}' mode " +
+  it should s"getCorrectStreamMode() method returns '${EngineLiterals.splitStreamMode}' mode " +
     s"if the stream name has got a different mode from '${EngineLiterals.fullStreamMode}' or '${EngineLiterals.splitStreamMode}'" in {
     //arrange
     val expectedStreamName = "name"
@@ -78,7 +78,32 @@ class StreamUtilsTestSuit extends FlatSpec with Matchers {
     val streamNameWithMode = expectedStreamName + "/" + someMode
 
     //act
+    val mode = StreamUtils.getCorrectStreamMode(streamNameWithMode)
+
+    //assert
+    mode shouldBe EngineLiterals.splitStreamMode
+  }
+
+  it should s"getStreamMode() method returns an actual mode" in {
+    //arrange
+    val expectedStreamName = "name"
+    val someMode = "mode"
+    val streamNameWithMode = expectedStreamName + "/" + someMode
+
+    //act
     val mode = StreamUtils.getStreamMode(streamNameWithMode)
+
+    //assert
+    mode shouldBe someMode
+  }
+
+  it should s"getStreamMode() method returns '${EngineLiterals.splitStreamMode}' mode " +
+    s"if the stream name hasn't got a mode" in {
+    //arrange
+    val streamNameWithoutMode = "name"
+
+    //act
+    val mode = StreamUtils.getStreamMode(streamNameWithoutMode)
 
     //assert
     mode shouldBe EngineLiterals.splitStreamMode

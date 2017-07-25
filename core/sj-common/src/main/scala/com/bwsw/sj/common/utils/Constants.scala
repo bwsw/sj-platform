@@ -222,12 +222,14 @@ object FrameworkLiterals {
   val instanceIdLabel = "INSTANCE_ID"
   val frameworkIdLabel = "FRAMEWORK_ID"
   val mesosMasterLabel = "MESOS_MASTER"
+  val zookeeperLabel = "ZOOKEEPER_ADDRESS"
 
   val framework = "mesos-framework"
   val frameworkId = framework + ".id"
   val instance = framework + ".instance"
   val instanceId = instance + ".id"
   val mesosMaster = framework + ".mesos.master"
+  val zookeeperAddress = framework + ".zookeeper.address"
 
   val defaultBackoffSeconds = 7
   val defaultBackoffFactor = 7.0

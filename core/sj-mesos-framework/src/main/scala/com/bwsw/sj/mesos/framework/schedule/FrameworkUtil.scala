@@ -34,8 +34,6 @@ import org.apache.mesos.SchedulerDriver
 import scaldi.Injectable.inject
 
 import scala.collection.immutable
-import scala.util.Properties
-import scala.collection.JavaConverters._
 import scala.util.Try
 
 
@@ -102,7 +100,7 @@ object FrameworkUtil {
     * @return String
     */
   def getModuleUrl(instance: Instance): String = {
-    jarName = configRepository.get("system." + instance.engine).map(_.value)
+    jarName = configRepository.get(ConfigLiterals.systemDomain + "." + instance.engine).map(_.value)
     val restHost = configRepository.get(ConfigLiterals.hostOfCrudRestTag).get.value
     val restPort = configRepository.get(ConfigLiterals.portOfCrudRestTag).get.value.toInt
     val restAddress = new URI(s"http://$restHost:$restPort/v1/custom/jars/${jarName.get}").toString
