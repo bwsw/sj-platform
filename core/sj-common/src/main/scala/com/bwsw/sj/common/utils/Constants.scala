@@ -235,8 +235,12 @@ object FrameworkLiterals {
   val defaultBackoffFactor = 7.0
   val defaultMaxLaunchDelaySeconds = 600
 
-  def createCommandToLaunch(frameworkJarName: String) = {
+  def createCommandToLaunch(frameworkJarName: String): String = {
     "java -jar " + frameworkJarName + " $PORT"
+  }
+
+  def createZookepeerAddress(zookeeperServer: String): String = {
+    s"zk://$zookeeperServer/"
   }
 
   val initialStageDuration = 0
