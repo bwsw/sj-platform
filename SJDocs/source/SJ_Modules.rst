@@ -72,7 +72,7 @@ It performs the transformation of the streams incoming from TCP to T-streams. T-
 In the diagram below you can see the illustrated dataflow for an input module.
 
 .. figure:: _static/InputModuleDataflow.png
-   :scale: 70 %
+  :scale: 60 %
 
 All input data elements are going as a flow of bytes to particular interface provided by TaskEngine. That flow is going straight to StreamingExecutor and is converted to an InputEnvelope instance which stores all data as AvroRecord inside.
 
@@ -305,6 +305,7 @@ A simplified definition of a Regular module is a handler that performs data tran
 The diagram below represents the dataflow in the regular module.
 
 .. figure:: _static/RegularModuleDataflow.png
+   :scale: 60 %
 
 The TaskEngine of a regular module receives data from T-streams. It deserializes the flow of bytes to TStreamsEnvelope[AvroRecord] which is then put to the StreamingExecutor.
 
@@ -437,6 +438,7 @@ A window is a period of time that is multiple of a batch and during which the ba
 The diagram below is a simple illustration of how a sliding widow operation looks like.
 
 .. figure:: _static/BatchModule1.png
+   :scale: 120 %
 
 As shown in the figure, every time the window slides over an input stream, the batches of events that fall within the window are combined and operated upon to produce the transformed data of the windowed stream. It is important that any window operation needs to specify the parameters:
 
@@ -531,6 +533,7 @@ It transforms the processing data results received from T-streams and pass them 
 The diagram below illustrates the dataflow in an output module.
 
 .. figure:: _static/OutputModuleDataflow.png
+   :scale: 50 %
 
 The TaskEngine deserializes the stream of bytes from T-Streams to TStreamsEnvelope[String] and sends it to the StreamingExecutor. The StreamingExecutor returns Entities back to the TaskEngine. 
 
