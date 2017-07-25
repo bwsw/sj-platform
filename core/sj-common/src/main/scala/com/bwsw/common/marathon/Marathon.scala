@@ -41,6 +41,8 @@ case class MarathonRequest(id: String,
                            uris: List[String],
                            backoffSeconds: Int = FrameworkLiterals.defaultBackoffSeconds,
                            backoffFactor: Double = FrameworkLiterals.defaultBackoffFactor,
-                           maxLaunchDelaySeconds: Int = FrameworkLiterals.defaultMaxLaunchDelaySeconds)
+                           maxLaunchDelaySeconds: Int = FrameworkLiterals.defaultMaxLaunchDelaySeconds,
+                           cpus: Double = 0.2,
+                           mem: Double = 128)
 
 case class MarathonApplicationInstances(instances: Int)
