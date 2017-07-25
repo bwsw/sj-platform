@@ -21,7 +21,7 @@ Platform Components
 
 The diagram below presents the structure of the SJ-Platform. 
 
-.. figure:: _static/SJ_General.png
+.. figure:: _static/SJ_General1.png
 
 Figuratively, it can be divided into two layers. 
 
