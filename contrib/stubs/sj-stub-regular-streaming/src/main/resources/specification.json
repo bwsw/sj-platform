@@ -26,9 +26,6 @@
   "module-type": "regular-streaming",
   "engine-name": "com.bwsw.regular.streaming.engine",
   "engine-version": "1.0",
-  "options": {
-    "opt": 1
-  },
   "validator-class": "com.bwsw.sj.stubs.module.regular_streaming.Validator",
   "executor-class": "com.bwsw.sj.stubs.module.regular_streaming.Executor"
 }

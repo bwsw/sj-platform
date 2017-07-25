@@ -26,9 +26,6 @@
   "module-type": "batch-streaming",
   "engine-name": "com.bwsw.batch.streaming.engine",
   "engine-version": "1.0",
-  "options": {
-    "opt": 1
-  },
   "validator-class": "com.bwsw.sj.stubs.module.batch_streaming.Validator",
   "executor-class": "com.bwsw.sj.stubs.module.batch_streaming.Executor",
   "batch-collector-class": "com.bwsw.sj.stubs.module.batch_streaming.NumericalBatchCollector"
