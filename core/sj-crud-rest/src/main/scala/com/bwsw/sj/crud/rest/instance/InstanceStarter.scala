@@ -180,7 +180,8 @@ class InstanceStarter(instance: Instance,
     var environmentVariables = Map(
       instanceIdLabel -> instance.name,
       mesosMasterLabel -> marathonMaster,
-      frameworkIdLabel -> frameworkName
+      frameworkIdLabel -> frameworkName,
+      zookeeperLabel -> s"zk://$zookeeperHost:$zookeeperPort/"
     )
     environmentVariables = environmentVariables ++ inject[ConnectionRepository].mongoEnvironment
     environmentVariables = environmentVariables ++ instance.environmentVariables
