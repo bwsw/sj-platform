@@ -631,6 +631,6 @@ This file describes the module. Examples of description can be found at :ref:`Js
 More Code
 ------------------------
 
-The custom module example above represents one of custom application of a `demo module <https://github.com/bwsw/sj-fping-demo>`_ available at out repository. 
+The custom module example above represents one of custom implication of a `demo module <https://github.com/bwsw/sj-fping-demo>`_ available at out repository. 
 
 `Here <https://github.com/bwsw/sj-sflow-demo/tree/develop>`_ you can find another example of module workflow. This is a demo that performs the processing workflow for collecting of sflow information. 
