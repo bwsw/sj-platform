@@ -1219,7 +1219,7 @@ Get all configurations for specific config domain
 
 Request method: GET
 
-Request format:: http://streamjuggler.readthedocs.io/en/develop/SJ_CRUD_REST_API.html#stream-juggler-mesos-framework-rest
+Request format:: 
 
  /v1/config/settings/{config-domain}
 
@@ -1290,7 +1290,14 @@ Success response example::
     "status-code": 200
  }
 
-
+Error response example::
+ 
+ {
+    "entity": {
+        "message": "Cannot recognize config setting domain 'system'. Domain must be one of the following values: 'configuration.system, configuration.t-streams, configuration.apache-kafka, configuration.elasticsearch, configuration.apache-zookeeper, configuration.sql-database'."
+    },
+    "status-code": 400
+ }
 
 Get all configurations
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1437,10 +1444,18 @@ Success response example::
  {
   "status-code": 200,
   "entity": {
-    "message": "Custom jar is uploaded."
+    "message": "Custom jar 'Custom_jar.jar' has been uploaded."
   }
  }
 
+Error response example::
+
+ {
+    "entity": {
+        "message": "Cannot upload custom jar. Errors: Custom jar 'Upload_custom_jar.jar' already exists."
+    },
+    "status-code": 400
+ }
 
 Download a custom jar by file name
 """"""""""""""""""""""""""""""""""""""""""
@@ -1471,6 +1486,10 @@ Response headers example::
   "404", "Jar <custom-jar-file-name> has not been found."
   "500", "Internal server error."
 
+Success response:
+
+A jar file is downloaded.
+
 Error response example::
 
  {
@@ -1496,6 +1515,10 @@ Request format::
   "200", "Jar-file for download."
   "404", "Jar <custom-jar-name>-<custom-jar-version> has not been found."
   "500", "Internal server error."
+
+Success response:
+
+A jar file is downloaded.
 
 Error response example::
 
@@ -1901,6 +1924,19 @@ Response headers example::
   "404", "1. Module '<module_type>-<module_name>-<module_version>' has not been found.
   2. Jar of module '<module_type>-<module_name>-<module_version>' has not been found in the storage."
   "500", "Internal server error"
+  
+Success response:
+
+A jar file is downloaded.
+
+Error response example::
+
+ {
+    "entity": {
+        "message": "Module 'regular-streaming-process-1.0' has not been found."
+    },
+    "status-code": 404
+ }
 
 Delete uploaded module
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -2688,7 +2724,55 @@ Request format::
   "404", "Instance '<instance_name>' has not been found."
   "500", "Internal server error"
 
+Success response example::
 
+ {
+    "entity": {
+        "instance": {
+            "moduleName": "pingstation-output",
+            "moduleVersion": "1.0",
+            "moduleType": "output-streaming",
+            "stage": {
+                "state": "stopped",
+                "datetime": 1500966502569,
+                "duration": 0
+            },
+            "status": "stopped",
+            "name": "output-streaming-imstance",
+            "description": "No description",
+            "parallelism": 1,
+            "options": {},
+            "perTaskCores": 1,
+            "perTaskRam": 1024,
+            "jvmOptions": {},
+            "nodeAttributes": {},
+            "coordinationService": "zk-service",
+            "environmentVariables": {},
+            "performanceReportingInterval": 60000,
+            "engine": "com.bwsw.output.streaming.engine-1.0",
+            "restAddress": "",
+            "checkpointMode": "every-nth",
+            "checkpointInterval": 3,
+            "executionPlan": {
+                "tasks": {
+                    "output-streaming-imstance-task0": {
+                        "inputs": {
+                            "output-tstream": [
+                                0,
+                                0
+                            ]
+                        }
+                    }
+                }
+            },
+            "startFrom": "newest",
+            "input": "output-tstreamk",
+            "output": "stream-es"
+        }
+    },
+    "status-code": 200
+ }
+ 
 Error response example::
 
  {
