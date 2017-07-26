@@ -2230,8 +2230,8 @@ Instance fields
 **Batch-streaming instance fields**
 
 .. csv-table:: 
-  :header: "Field name", "Format",  "Description", "Example"
-  :widths: 15, 10, 60, 20
+ :header: "Field name", "Format",  "Description", "Example"
+ :widths: 15, 10, 60, 20
 
   "outputs*", "List[String]", "Names of output streams (must be stream.t-stream only)", "[s3, s4]"
   "window", "Int", "Count of batches that will be contained into a window (1 by default). Must be greater than zero",  3 
