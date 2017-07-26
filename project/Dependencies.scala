@@ -64,7 +64,8 @@ object Dependencies {
     "org.scaldi" %% "scaldi" % "0.5.8",
     "org.mock-server" % "mockserver-netty" % "3.10.8" % "test",
     "com.carrotsearch" % "java-sizeof" % "0.0.5",
-    "de.flapdoodle.embed" % "de.flapdoodle.embed.mongo" % "2.0.0"
+    "de.flapdoodle.embed" % "de.flapdoodle.embed.mongo" % "2.0.0",
+    "ru.yandex.qatools.embed" % "postgresql-embedded" % "2.2" %"test"
   ))
 
   lazy val sjEngineCoreDependencies = Def.setting(Seq(
