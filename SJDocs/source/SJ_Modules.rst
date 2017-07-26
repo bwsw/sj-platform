@@ -534,7 +534,7 @@ It transforms the processing data results received from T-streams and pass them 
 The diagram below illustrates the dataflow in an output module.
 
 .. figure:: _static/OutputModuleDataflow.png
-   :scale: 50 %
+   :scale: 80 %
 
 The TaskEngine deserializes the stream of bytes from T-Streams to TStreamsEnvelope[String] and sends it to the StreamingExecutor. The StreamingExecutor returns Entities back to the TaskEngine. 
 
