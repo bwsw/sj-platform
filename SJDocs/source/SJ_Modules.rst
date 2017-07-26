@@ -72,7 +72,6 @@ It performs the transformation of the streams incoming from TCP to T-streams. T-
 In the diagram below you can see the illustrated dataflow for an input module.
 
 .. figure:: _static/InputModuleDataflow1.png
-  :scale: 60 %
 
 All input data elements are going as a flow of bytes to particular interface provided by TaskEngine. That flow is going straight to StreamingExecutor and is converted to an InputEnvelope instance.
 
@@ -305,7 +304,6 @@ A simplified definition of a Regular module is a handler that performs data tran
 The diagram below represents the dataflow in the regular module.
 
 .. figure:: _static/RegularModuleDataflow2.png
-   :scale: 60 %
 
 The TaskEngine of a regular module receives data from T-streams. It deserializes the flow of bytes to TStreamsEnvelope[T] (where [T] is a type of messages in the envelope) which is then put to the StreamingExecutor.
 
