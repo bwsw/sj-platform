@@ -34,7 +34,7 @@ import scala.util.Try
 /**
   * Used for testing purposes only. Single node es cluster
   */
-class EmbeddedElasticsearch {
+class EmbeddedElasticsearch(val port: Int) {
   private val clusterName = "elasticsearch"
   private val dataDir = Files.createTempDirectory("elasticsearch_data_").toFile
   private val settings = Settings.builder()
@@ -43,6 +43,7 @@ class EmbeddedElasticsearch {
     .put("cluster.name", clusterName)
     .put("transport.type", "netty4")
     .put("http.enabled", false)
+    .put("transport.tcp.port", port)
     .build
 
   private lazy val node = new PluginNode(settings)

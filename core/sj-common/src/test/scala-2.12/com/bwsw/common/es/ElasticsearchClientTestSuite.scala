@@ -23,15 +23,17 @@ import org.elasticsearch.ResourceAlreadyExistsException
 import org.elasticsearch.index.IndexNotFoundException
 import org.elasticsearch.index.query.QueryBuilders
 import org.scalatest.{BeforeAndAfterEach, FlatSpec, Matchers}
+import ru.yandex.qatools.embed.postgresql.util.SocketUtil
 
 import scala.util.Random
 
 class ElasticsearchClientTestSuite extends FlatSpec with Matchers with BeforeAndAfterEach {
-  val hosts = Set(("localhost", 9300))
+  val port = SocketUtil.findFreePort()
+  val hosts = Set(("localhost", port))
   var embeddedElasticsearch: Option[EmbeddedElasticsearch] = None
 
   override protected def beforeEach(): Unit = {
-    embeddedElasticsearch = Option(new EmbeddedElasticsearch())
+    embeddedElasticsearch = Option(new EmbeddedElasticsearch(port))
     embeddedElasticsearch.foreach(_.start())
   }
 
