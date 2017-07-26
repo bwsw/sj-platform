@@ -417,7 +417,7 @@ Service fields
 Each particular service has its own set of fields.
 
 .. csv-table::  Service type names for request.
- :header: "Service Types",
+ :header: "Service Types"
  :widths: 25
   
  "service.elasticsearch"
@@ -1779,7 +1779,7 @@ CRUD Rest-API for Modules
 
 This is the CRUD Rest-API for modules uploaded as jar files, instantiated and running modules as well as for custom jar files.
 
-.. csv-table::  Stream types
+.. csv-table::  Module types
  :header: "Types"
  :widths: 25 
   
