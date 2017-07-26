@@ -22,9 +22,6 @@ import java.net.URI
 
 import com.bwsw.sj.common.config.SettingsUtils
 import com.bwsw.sj.common.utils.JdbcLiterals._
-import com.bwsw.sj.common.dal.model.provider.JDBCProviderDomain
-import scaldi.Injectable.inject
-import scaldi.Injector
 
 /**
   * This class provide data for connection to database, required for initialize [[JdbcClient]]
@@ -35,10 +32,8 @@ class JdbcClientConnectionData(val hosts: Array[String],
                                val username: String,
                                val password: String,
                                val database: Option[String],
-                               val table: Option[String])
-                              (implicit val injector: Injector) {
-  private val settingsUtils = inject[SettingsUtils]
-
+                               val table: Option[String],
+                               settingsUtils: SettingsUtils) {
   /**
     * This method returns a driver class name related to driver name provided in
     * [[com.bwsw.sj.common.dal.model.provider.JDBCProviderDomain.driver]]
