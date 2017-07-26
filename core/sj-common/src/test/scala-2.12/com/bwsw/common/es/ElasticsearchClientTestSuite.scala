@@ -27,11 +27,12 @@ import org.scalatest.{BeforeAndAfterEach, FlatSpec, Matchers}
 import scala.util.Random
 
 class ElasticsearchClientTestSuite extends FlatSpec with Matchers with BeforeAndAfterEach {
-  val hosts = Set(("127.0.0.1", 9300))
+  val port = 9300
+  val hosts = Set(("127.0.0.1", port))
   var embeddedElasticsearch: Option[EmbeddedElasticsearch] = None
 
   override protected def beforeEach(): Unit = {
-    embeddedElasticsearch = Option(new EmbeddedElasticsearch())
+    embeddedElasticsearch = Option(new EmbeddedElasticsearch(port))
     embeddedElasticsearch.foreach(_.start())
   }
 
