@@ -20,10 +20,11 @@ package com.bwsw.sj.common.dal.model.provider
 
 import java.util.Date
 
+import com.bwsw.common.embedded.EmbeddedKafka
 import com.bwsw.sj.common.utils.ProviderLiterals
 import org.apache.curator.test.TestingServer
 import org.mockserver.integration.ClientAndServer
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -32,38 +33,40 @@ import scala.collection.mutable.ArrayBuffer
   *
   * @author Pavel Tomskikh
   */
-class ProviderDomainIntegrationTests extends FlatSpec with Matchers {
+class ProviderDomainIntegrationTests extends FlatSpec with Matchers with BeforeAndAfterAll {
 
   val zkTimeout = 1000
+  val zkServer1 = new TestingServer(false)
+  val zkServer2 = new TestingServer(false)
 
-  "ProviderDomain" should "check connection to zookeeper server properly" in {
-    val server1 = new TestingServer(true)
-    val server2 = new TestingServer(true)
+  "ProviderDomain" should "check connection to the ZooKeeper server properly" in {
+    zkServer1.restart()
+    zkServer2.restart()
 
     val provider = new ProviderDomain(
       "zk-provider",
       "description",
-      Array(server1.getConnectString, server2.getConnectString),
+      Array(zkServer1.getConnectString, zkServer2.getConnectString),
       null,
       null,
       ProviderLiterals.zookeeperType,
       new Date())
 
-    val error1 = createZkConnectionError(server1.getConnectString)
-    val error2 = createZkConnectionError(server2.getConnectString)
+    val error1 = createZkConnectionError(zkServer1.getConnectString)
+    val error2 = createZkConnectionError(zkServer2.getConnectString)
 
     provider.checkConnection(zkTimeout) shouldBe empty
 
-    server1.close()
+    zkServer1.stop()
 
     provider.checkConnection(zkTimeout) shouldBe ArrayBuffer(error1)
 
-    server2.close()
+    zkServer2.stop()
 
     provider.checkConnection(zkTimeout) shouldBe ArrayBuffer(error1, error2)
   }
 
-  it should "check connection to RESTful server properly" in {
+  it should "check connection to the RESTful server properly" in {
     val server1 = new ClientAndServer()
     val server2 = new ClientAndServer()
     val address1 = "localhost:" + server1.getPort
@@ -92,10 +95,54 @@ class ProviderDomainIntegrationTests extends FlatSpec with Matchers {
     provider.checkConnection(zkTimeout) shouldBe ArrayBuffer(error1, error2)
   }
 
+  it should "check connection to the Kafka server properly" in {
+    zkServer1.restart()
+    zkServer2.restart()
+
+    val server1 = new EmbeddedKafka(Some(zkServer1.getConnectString))
+    val server2 = new EmbeddedKafka(Some(zkServer2.getConnectString))
+    val address1 = "localhost:" + server1.port
+    val address2 = "localhost:" + server2.port
+
+    server1.start()
+    server2.start()
+
+    val provider = new ProviderDomain(
+      "kafka-provider",
+      "description",
+      Array(address1, address2),
+      null,
+      null,
+      ProviderLiterals.kafkaType,
+      new Date())
+
+    val error1 = createKafkaConnectionError(address1)
+    val error2 = createKafkaConnectionError(address2)
+
+    provider.checkConnection(zkTimeout) shouldBe empty
+
+    server1.stop()
+
+    provider.checkConnection(zkTimeout) shouldBe ArrayBuffer(error1)
+
+    server2.stop()
+
+    provider.checkConnection(zkTimeout) shouldBe ArrayBuffer(error1, error2)
+  }
+
+
+  override def afterAll(): Unit = {
+    zkServer1.close()
+    zkServer2.close()
+  }
+
 
   private def createZkConnectionError(address: String): String =
     s"Can gain an access to Zookeeper on '$address'"
 
   private def createRestConnectionError(address: String): String =
     s"Can not establish connection to Rest on '$address'"
+
+  private def createKafkaConnectionError(address: String): String =
+    s"Can not establish connection to Kafka on '$address'"
 }
