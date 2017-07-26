@@ -74,7 +74,7 @@ In the diagram below you can see the illustrated dataflow for an input module.
 .. figure:: _static/InputModuleDataflow.png
   :scale: 60 %
 
-All input data elements are going as a flow of bytes to particular interface provided by TaskEngine. That flow is going straight to StreamingExecutor and is converted to an InputEnvelope instance which stores all data as AvroRecord inside.
+All input data elements are going as a flow of bytes to particular interface provided by TaskEngine. That flow is going straight to StreamingExecutor and is converted to an InputEnvelope instance.
 
 The InputEnvelope instance then goes to TaskEngine which serializes it to a stream of bytes and then sends to T-Streams. 
 
@@ -304,13 +304,12 @@ A simplified definition of a Regular module is a handler that performs data tran
 
 The diagram below represents the dataflow in the regular module.
 
-
-.. figure:: _static/RegularModuleDataflow1.png
+.. figure:: _static/RegularModuleDataflow2.png
    :scale: 60 %
 
-The TaskEngine of a regular module receives data from T-streams. It deserializes the flow of bytes to TStreamsEnvelope[AvroRecord] which is then put to the StreamingExecutor.
+The TaskEngine of a regular module receives data from T-streams. It deserializes the flow of bytes to TStreamsEnvelope[T] (where [T] is a type of messages in the envelope) which is then put to the StreamingExecutor.
 
-The StreamingExecutor processes the received data and returns them as a result stream of strings.
+The StreamingExecutor processes the received data and sends them to the TaskEngine as a result data.
 
 The TaskEngine serializes all the received data to the flow of bytes and puts it back to T-Streams to send further.
 
@@ -533,10 +532,9 @@ It transforms the processing data results received from T-streams and pass them 
 
 The diagram below illustrates the dataflow in an output module.
 
-.. figure:: _static/OutputModuleDataflow.png
-   :scale: 80 %
+.. figure:: _static/OutputModuleDataflow1.png
 
-The TaskEngine deserializes the stream of bytes from T-Streams to TStreamsEnvelope[String] and sends it to the StreamingExecutor. The StreamingExecutor returns Entities back to the TaskEngine. 
+The TaskEngine deserializes the stream of bytes from T-Streams to TStreamsEnvelope[T] (where [T] is a type of messages in the envelope) and sends it to the StreamingExecutor. The StreamingExecutor returns Entities back to the TaskEngine. 
 
 They are then put to an external datastorage.
 
