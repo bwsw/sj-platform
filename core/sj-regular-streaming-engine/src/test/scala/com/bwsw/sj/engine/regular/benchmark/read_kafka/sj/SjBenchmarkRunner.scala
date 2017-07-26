@@ -25,7 +25,7 @@ import com.bwsw.sj.common.engine.core.config.EngineConfigNames
 import com.bwsw.sj.common.utils.BenchmarkConfigNames._
 import com.bwsw.sj.common.utils.BenchmarkLiterals.sjDefaultOutputFile
 import com.bwsw.sj.common.utils.CommonAppConfigNames.{zooKeeperHost, zooKeeperPort}
-import com.bwsw.sj.engine.regular.benchmark.read_kafka.{ReadFromKafkaBenchmarkConfig, ReadFromKafkaBenchmarkRunner}
+import com.bwsw.sj.engine.regular.benchmark.read_kafka.{KafkaReaderBenchmarkConfig, KafkaReaderBenchmarkRunner}
 import com.typesafe.config.{Config, ConfigFactory, ConfigValueFactory}
 
 /**
@@ -61,7 +61,7 @@ object SjBenchmarkRunner extends App {
   private val zkHost = config.getString(zooKeeperHost)
   private val instanceName = config.getString(EngineConfigNames.instanceName)
 
-  private val benchmarkConfig = new ReadFromKafkaBenchmarkConfig(
+  private val benchmarkConfig = new KafkaReaderBenchmarkConfig(
     config = config.withValue(zooKeeperAddressConfig, ConfigValueFactory.fromAnyRef(s"$zkHost:$zkPort")),
     sjDefaultOutputFile)
 
@@ -76,7 +76,7 @@ object SjBenchmarkRunner extends App {
   benchmark.startServices()
   benchmark.prepare()
 
-  private val benchmarkRunner = new ReadFromKafkaBenchmarkRunner(benchmark, benchmarkConfig)
+  private val benchmarkRunner = new KafkaReaderBenchmarkRunner(benchmark, benchmarkConfig)
   private val results = benchmarkRunner.run()
   benchmarkRunner.writeResults(results)
 

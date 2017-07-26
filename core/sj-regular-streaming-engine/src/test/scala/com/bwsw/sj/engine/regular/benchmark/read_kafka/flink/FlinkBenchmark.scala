@@ -21,7 +21,7 @@ package com.bwsw.sj.engine.regular.benchmark.read_kafka.flink
 import java.io.File
 import java.util.UUID
 
-import com.bwsw.sj.engine.regular.benchmark.read_kafka.ReadFromKafkaBenchmark
+import com.bwsw.sj.engine.regular.benchmark.read_kafka.KafkaReaderBenchmark
 import com.bwsw.sj.engine.regular.benchmark.utils.BenchmarkUtils.retrieveResultFromFile
 
 import scala.collection.JavaConverters._
@@ -39,7 +39,7 @@ import scala.collection.JavaConverters._
 class FlinkBenchmark(zooKeeperAddress: String,
                      kafkaAddress: String,
                      words: Array[String])
-  extends ReadFromKafkaBenchmark(zooKeeperAddress, kafkaAddress, words) {
+  extends KafkaReaderBenchmark(zooKeeperAddress, kafkaAddress, words) {
 
   private val outputFilename = "benchmark-output-" + UUID.randomUUID().toString
   private val outputFile = new File(outputFilename)

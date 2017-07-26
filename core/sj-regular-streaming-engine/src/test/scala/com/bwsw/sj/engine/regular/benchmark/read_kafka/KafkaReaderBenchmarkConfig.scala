@@ -26,13 +26,13 @@ import com.typesafe.config.Config
 import scala.util.Try
 
 /**
-  * Loads configs parameters from typesafe config for [[ReadFromKafkaBenchmark]]
+  * Loads configs parameters from typesafe config for [[KafkaReaderBenchmark]]
   *
   * @param config               typesafe config
   * @param outputFilenamePrefix prefix for default name of output file
   * @author Pavel Tomskikh
   */
-class ReadFromKafkaBenchmarkConfig(config: Config, outputFilenamePrefix: String) {
+class KafkaReaderBenchmarkConfig(config: Config, outputFilenamePrefix: String) {
   val zooKeeperAddress = config.getString(zooKeeperAddressConfig)
   val kafkaAddress = config.getString(kafkaAddressConfig)
   val messagesCounts = config.getString(messagesCountsConfig).split(",").map(_.toLong)

@@ -33,9 +33,9 @@ import com.bwsw.sj.kafka.data_sender.DataSender
   * @param words            list of words that sends to the kafka server
   * @author Pavel Tomskikh
   */
-abstract class ReadFromKafkaBenchmark(zooKeeperAddress: String,
-                                      kafkaAddress: String,
-                                      words: Array[String]) {
+abstract class KafkaReaderBenchmark(zooKeeperAddress: String,
+                                    kafkaAddress: String,
+                                    words: Array[String]) {
   protected val kafkaTopic: String = "performance-benchmark-" + UUID.randomUUID().toString
   protected val kafkaClient: KafkaClient = new KafkaClient(Array(zooKeeperAddress))
   protected val kafkaSender: DataSender = new DataSender(kafkaAddress, kafkaTopic, words, " ")

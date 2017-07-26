@@ -22,9 +22,8 @@ import java.io.{File, FileWriter}
 import java.util.UUID
 
 import com.bwsw.sj.common.utils.benchmark.ClassRunner
-import com.bwsw.sj.engine.regular.benchmark.read_kafka.ReadFromKafkaBenchmark
+import com.bwsw.sj.engine.regular.benchmark.read_kafka.KafkaReaderBenchmark
 import org.apache.kafka.clients.consumer.KafkaConsumer
-import org.apache.kafka.common.TopicPartition
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.samza.job.JobRunner
 
@@ -43,7 +42,7 @@ import scala.collection.JavaConverters._
 class SamzaBenchmark(zooKeeperAddress: String,
                      kafkaAddress: String,
                      words: Array[String])
-  extends ReadFromKafkaBenchmark(zooKeeperAddress, kafkaAddress, words) {
+  extends KafkaReaderBenchmark(zooKeeperAddress, kafkaAddress, words) {
 
   private val outputKafkaTopic = "samza-benchmark-result-" + UUID.randomUUID().toString
   kafkaClient.createTopic(outputKafkaTopic, 1, 1)

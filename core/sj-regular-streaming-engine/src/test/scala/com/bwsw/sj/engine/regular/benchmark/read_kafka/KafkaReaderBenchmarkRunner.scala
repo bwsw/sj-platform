@@ -21,14 +21,14 @@ package com.bwsw.sj.engine.regular.benchmark.read_kafka
 import java.io.{File, FileWriter}
 
 /**
-  * Provides methods for running [[ReadFromKafkaBenchmark]] and writing result into a file
+  * Provides methods for running [[KafkaReaderBenchmark]] and writing result into a file
   *
   * @param benchmark benchmark
   * @param config    config for benchmark
   * @author Pavel Tomskikh
   */
-class ReadFromKafkaBenchmarkRunner(benchmark: ReadFromKafkaBenchmark,
-                                   config: ReadFromKafkaBenchmarkConfig) {
+class KafkaReaderBenchmarkRunner(benchmark: KafkaReaderBenchmark,
+                                 config: KafkaReaderBenchmarkConfig) {
 
   def run(): Array[ReadFromKafkaBenchmarkResult] = {
     benchmark.warmUp()

@@ -21,7 +21,7 @@ package com.bwsw.sj.engine.regular.benchmark.read_kafka.samza
 import java.util.Calendar
 
 import com.bwsw.sj.common.utils.BenchmarkLiterals.samzaDefaultOutputFile
-import com.bwsw.sj.engine.regular.benchmark.read_kafka.{ReadFromKafkaBenchmarkConfig, ReadFromKafkaBenchmarkRunner}
+import com.bwsw.sj.engine.regular.benchmark.read_kafka.{KafkaReaderBenchmarkConfig, KafkaReaderBenchmarkRunner}
 import com.typesafe.config.ConfigFactory
 
 /**
@@ -41,7 +41,7 @@ import com.typesafe.config.ConfigFactory
   * (samza-benchmark-output-`<`date-time`>` by default). Environment variable OUTPUT_FILE.
   * sj-benchmark.performance.words - list of words that sends to the Kafka server ("lorem,ipsum,dolor,sit,amet" by default).
   * Environment variable WORDS.
-  * sj-benchmark.performance.repetitions - count of repetitions of same test configuration (messages count and message size)
+  * sj-benchmark.performance.repetitions - count of repetitions of the same test configuration (messages count and message size)
   * (1 by default). Environment variable REPETITIONS.
   *
   * @author Pavel Tomskikh
@@ -49,9 +49,9 @@ import com.typesafe.config.ConfigFactory
 object SamzaBenchmarkRunner extends App {
   println(Calendar.getInstance().getTime)
 
-  private val benchmarkConfig = new ReadFromKafkaBenchmarkConfig(ConfigFactory.load(), samzaDefaultOutputFile)
+  private val benchmarkConfig = new KafkaReaderBenchmarkConfig(ConfigFactory.load(), samzaDefaultOutputFile)
   private val benchmark = new SamzaBenchmark(benchmarkConfig.zooKeeperAddress, benchmarkConfig.kafkaAddress, benchmarkConfig.words)
-  private val benchmarkRunner = new ReadFromKafkaBenchmarkRunner(benchmark, benchmarkConfig)
+  private val benchmarkRunner = new KafkaReaderBenchmarkRunner(benchmark, benchmarkConfig)
 
   private val results = benchmarkRunner.run()
   benchmarkRunner.writeResults(results)

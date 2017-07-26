@@ -28,7 +28,7 @@ import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.benchmark.ClassRunner
 import com.bwsw.sj.engine.core.testutils.{Server, TestStorageServer}
 import com.bwsw.sj.engine.regular.RegularTaskRunner
-import com.bwsw.sj.engine.regular.benchmark.read_kafka.ReadFromKafkaBenchmark
+import com.bwsw.sj.engine.regular.benchmark.read_kafka.KafkaReaderBenchmark
 import com.bwsw.sj.engine.regular.benchmark.utils.BenchmarkUtils.retrieveResultFromFile
 import scaldi.Injectable.inject
 import scaldi.Injector
@@ -56,7 +56,7 @@ class SjBenchmark(mongoPort: Int,
                   words: Array[String])
                  (implicit injector: Injector) extends {
   private val zooKeeperAddress = zkHost + ":" + zkPort
-} with ReadFromKafkaBenchmark(zooKeeperAddress, kafkaAddress, words) {
+} with KafkaReaderBenchmark(zooKeeperAddress, kafkaAddress, words) {
 
   private val moduleFilename = "../../contrib/benchmarks/sj-regular-performance-benchmark/target/scala-2.12/" +
     "sj-regular-performance-benchmark-1.0-SNAPSHOT.jar"

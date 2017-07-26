@@ -22,7 +22,7 @@ import java.io.File
 import java.util.UUID
 
 import com.bwsw.sj.common.utils.benchmark.ClassRunner
-import com.bwsw.sj.engine.regular.benchmark.read_kafka.ReadFromKafkaBenchmark
+import com.bwsw.sj.engine.regular.benchmark.read_kafka.KafkaReaderBenchmark
 import com.bwsw.sj.engine.regular.benchmark.read_kafka.storm.StormBenchmarkLiterals._
 import com.bwsw.sj.engine.regular.benchmark.utils.BenchmarkUtils.retrieveResultFromFile
 
@@ -39,7 +39,7 @@ import com.bwsw.sj.engine.regular.benchmark.utils.BenchmarkUtils.retrieveResultF
 class StormBenchmark(zooKeeperAddress: String,
                      kafkaAddress: String,
                      words: Array[String])
-  extends ReadFromKafkaBenchmark(zooKeeperAddress, kafkaAddress, words) {
+  extends KafkaReaderBenchmark(zooKeeperAddress, kafkaAddress, words) {
 
   private val outputFilename = "benchmark-output-" + UUID.randomUUID().toString
   private val outputFile = new File(outputFilename)

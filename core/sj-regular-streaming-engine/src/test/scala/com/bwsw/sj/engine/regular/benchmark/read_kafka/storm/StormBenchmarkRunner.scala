@@ -21,7 +21,7 @@ package com.bwsw.sj.engine.regular.benchmark.read_kafka.storm
 import java.util.Calendar
 
 import com.bwsw.sj.common.utils.BenchmarkLiterals.stormDefaultOutputFile
-import com.bwsw.sj.engine.regular.benchmark.read_kafka.{ReadFromKafkaBenchmarkConfig, ReadFromKafkaBenchmarkRunner}
+import com.bwsw.sj.engine.regular.benchmark.read_kafka.{KafkaReaderBenchmarkConfig, KafkaReaderBenchmarkRunner}
 import com.typesafe.config.ConfigFactory
 
 /**
@@ -48,9 +48,9 @@ import com.typesafe.config.ConfigFactory
 object StormBenchmarkRunner extends App {
   println(Calendar.getInstance().getTime)
 
-  private val benchmarkConfig = new ReadFromKafkaBenchmarkConfig(ConfigFactory.load(), stormDefaultOutputFile)
+  private val benchmarkConfig = new KafkaReaderBenchmarkConfig(ConfigFactory.load(), stormDefaultOutputFile)
   private val benchmark = new StormBenchmark(benchmarkConfig.zooKeeperAddress, benchmarkConfig.kafkaAddress, benchmarkConfig.words)
-  private val benchmarkRunner = new ReadFromKafkaBenchmarkRunner(benchmark, benchmarkConfig)
+  private val benchmarkRunner = new KafkaReaderBenchmarkRunner(benchmark, benchmarkConfig)
 
   private val results = benchmarkRunner.run()
   benchmarkRunner.writeResults(results)
