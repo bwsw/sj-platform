@@ -22,7 +22,7 @@ import java.io.File
 import java.net.URL
 import java.util.{Date, UUID}
 
-import com.bwsw.common.embedded.{EmbeddedKafka, EmbeddedMongo}
+import com.bwsw.common.embedded.{EmbeddedElasticsearch, EmbeddedKafka, EmbeddedMongo}
 import com.bwsw.sj.common.MongoAuthChecker
 import com.bwsw.sj.common.config.{ConfigLiterals, SettingsUtils}
 import com.bwsw.sj.common.dal.model.ConfigurationSettingDomain
@@ -204,6 +204,38 @@ class ProviderDomainIntegrationTests extends FlatSpec with Matchers with BeforeA
   it should "check connection to the SQL database properly" in withSqlDatabase(testProviderConnection)
 
 
+  def withElasticsearch(testCode: (ProviderDomain, ServerWrapper, ServerWrapper) => Assertion): Assertion = {
+    val server1 = new EmbeddedElasticsearch(SocketUtil.findFreePort())
+    server1.start()
+    val server2 = new EmbeddedElasticsearch(SocketUtil.findFreePort())
+    server2.start()
+
+    val address1 = "localhost:" + server1.port
+    val address2 = "localhost:" + server2.port
+
+    val provider = new ProviderDomain(
+      "es-provider",
+      "description",
+      Array(address1, address2),
+      null,
+      null,
+      ProviderLiterals.elasticsearchType,
+      new Date())
+
+    val wrappedServer1 = new ServerWrapper(createEsConnectionError(address1), () => server1.stop())
+    val wrappedServer2 = new ServerWrapper(createEsConnectionError(address2), () => server2.stop())
+
+    val result = Try(testCode(provider, wrappedServer1, wrappedServer2))
+
+    wrappedServer1.stop()
+    wrappedServer2.stop()
+
+    result.get
+  }
+
+  it should "check connection to the Elasticsearch database properly" in withElasticsearch(testProviderConnection)
+
+
   override def afterAll(): Unit = {
     zkServer1.close()
     zkServer2.close()
@@ -233,6 +265,10 @@ class ProviderDomainIntegrationTests extends FlatSpec with Matchers with BeforeA
 
   private def createJdbcConnectionError(address: String): String =
     s"Cannot gain an access to JDBC on '$address'"
+
+  private def createEsConnectionError(address: String): String =
+    s"Can not establish connection to ElasticSearch on '$address'"
+
 
   private def createConnectionRepository(mongoPort: Int): ConnectionRepository = {
     val mongoAddress = "localhost:" + mongoPort
@@ -268,12 +304,12 @@ class ProviderDomainIntegrationTests extends FlatSpec with Matchers with BeforeA
 }
 
 class ServerWrapper(val connectionError: String, stoppingMethod: () => Unit) {
-  private var serverRunned = true
+  private var serverRun = true
 
   def stop(): Unit = {
-    if (serverRunned) {
+    if (serverRun) {
       stoppingMethod()
-      serverRunned = false
+      serverRun = false
     }
   }
 }
