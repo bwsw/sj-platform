@@ -26,7 +26,7 @@ import scala.collection.immutable
 import scala.util.Try
 
 /**
-  * Created by diryavkin_dn on 25.07.17.
+  * Environment variables store
   */
 object FrameworkParameters {
   val instanceId = "instanceId"

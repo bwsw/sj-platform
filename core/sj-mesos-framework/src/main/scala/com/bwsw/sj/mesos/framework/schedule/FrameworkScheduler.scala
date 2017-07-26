@@ -174,7 +174,7 @@ class FrameworkScheduler(implicit injector: Injector) extends Scheduler {
     FrameworkUtil.updateInstance()
     logger.debug(s"Got instance ${FrameworkUtil.instance.get.name}.")
 
-    TasksList.prepare(FrameworkUtil.instance.get)
+    TasksList.prepareTasks(FrameworkUtil.instance.get)
     logger.debug(s"Got tasks: $TasksList.")
 
     val config = ConfigFactory.load()

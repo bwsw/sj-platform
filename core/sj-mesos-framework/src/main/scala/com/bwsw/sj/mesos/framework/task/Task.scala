@@ -28,6 +28,10 @@ import org.apache.mesos.Protos.Resource
 import scala.util.Try
 import scala.collection.mutable
 
+/**
+  * Task data model
+  * @param taskId
+  */
 class Task(taskId: String) {
   private val config = ConfigFactory.load()
 
@@ -43,7 +47,17 @@ class Task(taskId: String) {
   var host: Option[String] = None
   var ports: Resource = _
 
-
+  /**
+    * Update task with concrete parameter
+    * @param state Current task state
+    * @param stateChanged Time when state changed
+    * @param reason Reason why state changed
+    * @param node Current slave
+    * @param lastNode Previous slave
+    * @param directory Links to sandbox
+    * @param host Slave host
+    * @param ports Occupied ports
+    */
   def update(state: String = state,
              stateChanged: Long = stateChanged,
              reason: String = reason,
@@ -65,6 +79,10 @@ class Task(taskId: String) {
     if (directories.toList.length > maxDirectories) directories = directories.dropRight(1)
   }
 
+  /**
+    * Transform to FrameworkTask
+    * @return
+    */
   def toFrameworkTask: FrameworkTask = {
     FrameworkTask(id, state, new Date(stateChanged).toString, reason, node, lastNode, directories)
   }

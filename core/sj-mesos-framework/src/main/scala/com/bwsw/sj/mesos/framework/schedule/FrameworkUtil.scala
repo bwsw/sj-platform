@@ -36,7 +36,9 @@ import scaldi.Injectable.inject
 import scala.collection.immutable
 import scala.util.Try
 
-
+/**
+  * Contains several common functions to control framework
+  */
 object FrameworkUtil {
 
   import com.bwsw.sj.common.SjModule._
@@ -98,11 +100,18 @@ object FrameworkUtil {
     restAddress
   }
 
-  def isInstanceStarted: Boolean = {
+  /**
+    * Check if instance started
+    * @return Boolean
+    */
+  private def isInstanceStarted: Boolean = {
     updateInstance()
     instance.exists(_.status == "started")
   }
 
+  /**
+    * Killing all launched tasks when it needed
+    */
   def killAllLaunchedTasks(): Unit = {
     TasksList.getLaunchedTasks.foreach(taskId => {
       TasksList.killTask(taskId)
@@ -127,7 +136,10 @@ object FrameworkUtil {
     logger.info(s"Selecting tasks to launch: ${TasksList.toLaunch}")
   }
 
-
+  /**
+    * Fetch instance info from database
+    * @return
+    */
   def updateInstance(): Any = {
     val optionInstance = connectionRepository.getInstanceRepository.get(FrameworkParameters(FrameworkParameters.instanceId))
       .map(inject[InstanceCreator].from)
@@ -145,6 +157,9 @@ object FrameworkUtil {
     instance.get.jvmOptions.foldLeft("")((acc, option) => s"$acc ${option._1}${option._2}")
   }
 
+  /**
+    * Launch tasks if instance started, else teardown
+    */
   def checkInstanceStarted(): Unit = {
     logger.info(s"Check is instance status 'started': $isInstanceStarted")
     if (isInstanceStarted) prepareTasksToLaunch()
