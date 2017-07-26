@@ -81,8 +81,10 @@ class JdbcClientConnectionData(val hosts: Array[String],
     * Server url without database name to check a connection
     */
   def urlWithoutDatabase: String = driverPrefix match {
-    case `mysqlDriverPrefix` | `postgresqlDriverPrefix` =>
+    case `mysqlDriverPrefix` =>
       s"$driverPrefix://${hosts.mkString(",")}"
+    case `postgresqlDriverPrefix` =>
+      s"$driverPrefix://${hosts.mkString(",")}/postgres"
     case `oracleDriverPrefix` =>
       var url = s"$driverPrefix:@(DESCRIPTION = (ADDRESS_LIST = "
       hosts.foreach { address =>

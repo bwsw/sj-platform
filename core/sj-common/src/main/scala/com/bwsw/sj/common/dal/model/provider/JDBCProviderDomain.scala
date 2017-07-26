@@ -42,7 +42,7 @@ class JDBCProviderDomain(override val name: String,
     val errors = ArrayBuffer[String]()
     Try {
       val client = JdbcClientBuilder.
-        setHosts(hosts).
+        setHosts(Array(address)).
         setDriver(driver).
         setUsername(login).
         setPassword(password).
