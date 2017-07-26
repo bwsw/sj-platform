@@ -19,7 +19,7 @@
 package com.bwsw.sj.common.dal.repository
 
 import com.bwsw.common.file.utils.MongoFileStorage
-import com.bwsw.sj.common.{ConnectionConstants, MongoAuthChecker}
+import com.bwsw.sj.common.MongoAuthChecker
 import com.bwsw.sj.common.dal.model._
 import com.bwsw.sj.common.dal.model.instance.InstanceDomain
 import com.bwsw.sj.common.dal.model.module.FileMetadataDomain
@@ -30,16 +30,17 @@ import com.bwsw.sj.common.dal.morphia.CustomMorphiaObjectFactory
 import org.mongodb.morphia.Morphia
 import org.mongodb.morphia.dao.BasicDAO
 import org.slf4j.LoggerFactory
-import scaldi.Injector
 
 import scala.reflect.ClassTag
 
 /**
   * Repository for connection to MongoDB and file storage [[com.mongodb.casbah.gridfs.GridFS]]
   */
-class ConnectionRepository(mongoAuthChecker: MongoAuthChecker)(implicit injector: Injector) {
-
-  import ConnectionConstants._
+class ConnectionRepository(mongoAuthChecker: MongoAuthChecker,
+                           mongoHosts: String,
+                           mongoDatabase: String,
+                           mongoUser: Option[String],
+                           mongoPassword: Option[String]) {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val authEnable: Boolean = mongoAuthChecker.isAuthRequired()
@@ -50,21 +51,21 @@ class ConnectionRepository(mongoAuthChecker: MongoAuthChecker)(implicit injector
   private lazy val morphia = new Morphia()
   setMapperOptions(morphia)
 
-  private lazy val datastore = morphia.createDatastore(mongoClient, databaseName)
+  private lazy val datastore = morphia.createDatastore(mongoClient, mongoDatabase)
 
-  private lazy val fileStorage: MongoFileStorage = new MongoFileStorage(mongoConnection(databaseName))
+  private lazy val fileStorage: MongoFileStorage = new MongoFileStorage(mongoConnection(mongoDatabase))
 
-  private lazy val fileMetadataRepository = new GenericMongoRepository[FileMetadataDomain]()
+  private lazy val fileMetadataRepository = new GenericMongoRepository[FileMetadataDomain](this)
 
-  private lazy val instanceRepository = new GenericMongoRepository[InstanceDomain]()
+  private lazy val instanceRepository = new GenericMongoRepository[InstanceDomain](this)
 
-  private lazy val streamRepository = new GenericMongoRepository[StreamDomain]()
+  private lazy val streamRepository = new GenericMongoRepository[StreamDomain](this)
 
-  private lazy val serviceRepository = new GenericMongoRepository[ServiceDomain]()
+  private lazy val serviceRepository = new GenericMongoRepository[ServiceDomain](this)
 
-  private lazy val providerRepository = new GenericMongoRepository[ProviderDomain]()
+  private lazy val providerRepository = new GenericMongoRepository[ProviderDomain](this)
 
-  private lazy val configRepository = new GenericMongoRepository[ConfigurationSettingDomain]()
+  private lazy val configRepository = new GenericMongoRepository[ConfigurationSettingDomain](this)
 
   var mongoEnvironment: Map[String, String] = Map[String, String]("MONGO_HOSTS" -> mongoHosts)
   if (authEnable) {

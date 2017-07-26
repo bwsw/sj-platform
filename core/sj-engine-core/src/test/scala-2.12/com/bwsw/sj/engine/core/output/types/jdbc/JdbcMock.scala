@@ -26,7 +26,6 @@ import com.mockrunner.jdbc.BasicJDBCTestCaseAdapter
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito.when
 import org.scalatest.mockito.MockitoSugar
-import scaldi.{Injector, Module}
 
 class JdbcMock extends BasicJDBCTestCaseAdapter with IJdbcClient {
   private val settingsUtilsMock = new JdbcSettingsUtilsMock()
@@ -38,21 +37,16 @@ class JdbcMock extends BasicJDBCTestCaseAdapter with IJdbcClient {
     "login",
     "password",
     Option("database"),
-    Option("table")
-  )(settingsUtilsMock.injector)
+    Option("table"),
+    settingsUtilsMock.settingsUtils
+  )
 }
 
 class JdbcSettingsUtilsMock extends MockitoSugar {
-  private val settingsUtils = mock[SettingsUtils]
+  val settingsUtils = mock[SettingsUtils]
   private val driverName = "driver-name"
 
   when(settingsUtils.getJdbcDriverFilename(anyString())).thenReturn("mysql-connector-java-5.1.6.jar")
   when(settingsUtils.getJdbcDriverClass(anyString())).thenReturn("com.mysql.jdbc.Driver")
   when(settingsUtils.getJdbcDriverPrefix(anyString())).thenReturn("jdbc:mysql")
-
-  private val module = new Module {
-    bind[SettingsUtils] to settingsUtils
-  }
-
-  val injector: Injector = module.injector
 }

@@ -39,7 +39,12 @@ class SjModule extends Module {
   bind[SettingsUtils] to new SettingsUtils
 
   val mongoAuthChecker = new MongoAuthChecker(ConnectionConstants.mongoHosts, ConnectionConstants.databaseName)
-  bind[ConnectionRepository] to new ConnectionRepository(mongoAuthChecker)
+  bind[ConnectionRepository] to new ConnectionRepository(
+    mongoAuthChecker,
+    ConnectionConstants.mongoHosts,
+    ConnectionConstants.databaseName,
+    ConnectionConstants.mongoUser,
+    ConnectionConstants.mongoPassword)
 
   bind[ProviderCreator] to new ProviderCreator
   bind[ServiceCreator] to new ServiceCreator

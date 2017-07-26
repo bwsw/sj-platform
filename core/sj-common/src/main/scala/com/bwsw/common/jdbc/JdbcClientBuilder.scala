@@ -18,8 +18,11 @@
  */
 package com.bwsw.common.jdbc
 
-import com.bwsw.sj.common.SjModule
+import com.bwsw.sj.common.config.SettingsUtils
+import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import org.slf4j.LoggerFactory
+import scaldi.Injectable.inject
+import scaldi.Injector
 
 /**
   * Build [[JdbcClient]]. You can not create [[JdbcClient]] directly
@@ -62,7 +65,7 @@ object JdbcClientBuilder {
     }
   }
 
-  def build(): JdbcClient = {
+  def build()(implicit injector: Injector): JdbcClient = {
     buildCheck()
     val jdbcClientConnectionData = new JdbcClientConnectionData(
       hosts.get,
@@ -70,8 +73,10 @@ object JdbcClientBuilder {
       username.get,
       password.get,
       database,
-      table)(SjModule.injector)
-    new JdbcClient(jdbcClientConnectionData)(SjModule.injector)
+      table,
+      inject[SettingsUtils])
+
+    new JdbcClient(jdbcClientConnectionData, inject[ConnectionRepository].getFileStorage)
   }
 
   def setHosts(hosts: Array[String]): JdbcClientBuilder.type = {
