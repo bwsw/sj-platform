@@ -66,12 +66,13 @@ Input module
 An input type of modules handles external input streams, does data deduplication, transforms raw data to objects. In the SJ-Platform the TCP Input Stream processor is currently implemented in an Input module.
 
 .. figure:: _static/InputModuleStructure1.png
-
+  :scale: 80 %
 It performs the transformation of the streams incoming from TCP to T-streams. T-streams are persistent streams designed for exactly-once processing (so it includes transactional producer, consumer and subscriber). Find more information about T-streams at `the site: <http://t-streams.com>`_ 
 
 In the diagram below you can see the illustrated dataflow for an input module.
 
 .. figure:: _static/InputModuleDataflow1.png
+  :scale: 80 %
 
 All input data elements are going as a flow of bytes to particular interface provided by TaskEngine. That flow is going straight to StreamingExecutor and is converted to an InputEnvelope instance.
 
@@ -300,10 +301,12 @@ Regular module
 A simplified definition of a Regular module is a handler that performs data transformation and put the processed data into a T-stream.
 
 .. figure:: _static/RegularModule3.png
+  :scale: 80 %
 
 The diagram below represents the dataflow in the regular module.
 
 .. figure:: _static/RegularModuleDataflow2.png
+  :scale: 80 %
 
 The TaskEngine of a regular module receives data from T-streams. It deserializes the flow of bytes to TStreamsEnvelope[T] (where [T] is a type of messages in the envelope) which is then put to the StreamingExecutor.
 
@@ -525,12 +528,14 @@ Output module
 An output module handles external output from event processing pipeline to external data destinations (Elasticsearch, JDBC, etc.)
 
 .. figure:: _static/OutputModule1.png
-
+  :scale: 80 %
+  
 It transforms the processing data results received from T-streams and pass them to an external data storage. It allows to transform one data item from incoming streaming into one and more data output items.
 
 The diagram below illustrates the dataflow in an output module.
 
 .. figure:: _static/OutputModuleDataflow1.png
+  :scale: 80 %
 
 The TaskEngine deserializes the stream of bytes from T-Streams to TStreamsEnvelope[T] (where [T] is a type of messages in the envelope) and sends it to the StreamingExecutor. The StreamingExecutor returns Entities back to the TaskEngine. 
 
