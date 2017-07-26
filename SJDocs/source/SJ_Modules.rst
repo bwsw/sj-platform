@@ -71,7 +71,7 @@ It performs the transformation of the streams incoming from TCP to T-streams. T-
 
 In the diagram below you can see the illustrated dataflow for an input module.
 
-.. figure:: _static/InputModuleDataflow.png
+.. figure:: _static/InputModuleDataflow1.png
   :scale: 60 %
 
 All input data elements are going as a flow of bytes to particular interface provided by TaskEngine. That flow is going straight to StreamingExecutor and is converted to an InputEnvelope instance.
