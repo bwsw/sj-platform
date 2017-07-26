@@ -344,9 +344,7 @@ Success response example (provider is available)::
   }
  }
 
-Error response example:
-
-Provider is not available::
+Error response example (provider is not available)::
 
  {
   "entity": {
@@ -356,15 +354,6 @@ Provider is not available::
   "statusCode": 409
  }
 
-
-Unknown provider::
-
- {
-  "status-code": 404,
-  "entity": {
-    "message": "Provider 'kafka' has not been found."
-  }
- }
 
 Get services related to a provider (by provider name)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -416,16 +405,16 @@ Service fields
 
 Each particular service has its own set of fields.
 
-.. csv-table::  Available types and its aliases name for request.
- :header: "Type on BE", "Type on FE"
- :widths: 25, 60  
+.. csv-table::  Service type names for request.
+ :header: "Service Types"
+ :widths: 25
   
- "service.elasticsearch", "Elasticsearch"
- "service.apache-kafka", "Apache Kafka"
- "service.t-streams", "T-streams"
- "service.apache-zookeeper", "Apache Zookeeper"
- "service.sql-database", "SQL database"
- "service.restful", "RESTful"
+ "service.elasticsearch"
+ "service.apache-kafka"
+ "service.t-streams"
+ "service.apache-zookeeper"
+ "service.sql-database"
+ "service.restful"
 
 Elasticsearch 
 """"""""""""""""""""""""""""""""""""""
@@ -806,15 +795,15 @@ The range of REST API methods described below allows to create or delete a strea
 Stream fields
 ~~~~~~~~~~~~~~~~~
 
-.. csv-table::  Stream types
- :header: "Type on BE", "Type on FE"
- :widths: 25, 60  
+.. csv-table::  Stream types for requests
+ :header: "Types"
+ :widths: 25
   
- "stream.elasticsearch", "Elasticsearch"
- "stream.apache-kafka", "Apache Kafka"
- "stream.t-streams", "T-streams"
- "stream.sql-database", "SQL database"
- "stream.restful", "RESTful"
+ "stream.elasticsearch"
+ "stream.apache-kafka"
+ "stream.t-streams"
+ "stream.sql-database"
+ "stream.restful"
 
 .. csv-table:: Response
    :header: "Field", "Format", "Description", "Requirements"
@@ -1103,20 +1092,20 @@ Error response example::
 
 .. tip:: A full range of error responses can be found at :ref:`Streams_Errors`
 
-CRUD Rest-API for Config Settings
+CRUD Rest-API for Configurations
 -----------------------------------
 
-The range of REST API methods described below allows to create or delete config settings, get the information on the config setting, get the list of config settings existing in the system, get list of domains.
+The range of REST API methods described below allows to create or delete configuration, get the information on the configuration, get the list of configurations existing in the system, get list of domains.
 
-Config setting fields
+Configuration fields
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. csv-table::  
   :header: "Field", "Format",  "Description", "Requirements"
   :widths: 15, 15, 20, 20
 
-  "name*", "String", "Name of the setting (key).", "Should be unique and contain digits, lowercase letters, hyphens or periods and start with a letter."
-  "value*", "String", "Value of setting.", ""
+  "name*", "String", "Name of the configuration (key).", "Should be unique and contain digits, lowercase letters, hyphens or periods and start with a letter."
+  "value*", "String", "Value of configuration.", ""
   "domain*", "String", "Name of config-domain.", "(see the table below)"
 
 .. note:: `*` - required field.
@@ -1124,17 +1113,17 @@ Config setting fields
 {config-domain} must be one of the following values:
 
 .. csv-table::  
-  :header: "Type on BE", "Type on FE"
-  :widths: 25, 60  
+  :header: "Types"
+  :widths: 25 
   
-  "configuration.system", "System"
-  "configuration.t-streams", "T-streams"
-  "configuration.apache-kafka", "Apache Kafka"
-  "configuration.elasticsearch", "Elasticsearch"
-  "configuration.apache-zookeeper", "Apache Zookeeper"
-  "configuration.sql-database", "SQL database"
+  "configuration.system"
+  "configuration.t-streams"
+  "configuration.apache-kafka"
+  "configuration.elasticsearch"
+  "configuration.apache-zookeeper"
+  "configuration.sql-database"
 
-Create a new config setting
+Create a new configuration
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Request method: POST
@@ -1147,8 +1136,8 @@ Request format::
   :header: "Status code",  "Description"
   :widths: 25, 60
 
-  "201", "<config-domain> config setting <name> has been created."
-  "400", "Cannot create <config-domain> config setting. Errors: <list-of-errors>."
+  "201", "<config-domain> configuration <name> has been created."
+  "400", "Cannot create <config-domain> configuration. Errors: <list-of-errors>."
   "500", "Internal server error."
 
 
@@ -1172,7 +1161,7 @@ Error response example::
  }
 
 
-Get a config setting by name
+Get a configuration by name
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Request method: GET
@@ -1185,9 +1174,9 @@ Request format::
   :header: "Status code", "Description"
   :widths: 25, 60
 
-  "200", "Json with requested config setting for specific config domain."
-  "400",  "Cannot recognize config setting domain <config-domain>. Domain must be one of the following values: 'configuration.system, configuration.t-streams, configuration.apache-kafka, configuration.elasticsearch, configuration.apache-zookeeper, configuration.sql-database'."
-  "404", "<config-domain> сonfig setting <name> has not been found."
+  "200", "Json with requested configuration for specific config domain."
+  "400",  "Cannot recognize configuration domain <config-domain>. Domain must be one of the following values: 'configuration.system, configuration.t-streams, configuration.apache-kafka, configuration.elasticsearch, configuration.apache-zookeeper, configuration.sql-database'."
+  "404", "<config-domain> сonfiguration <name> has not been found."
   "500", "Internal server error."
 
 Success response example::
@@ -1208,13 +1197,13 @@ Error response example::
 
  {
     "entity": {
-        "message": "Cannot recognize config setting domain 'elasticsearch'. Domain must be one of the following values: 'configuration.system, configuration.t-streams, configuration.apache-kafka, configuration.elasticsearch, configuration.apache-zookeeper, configuration.sql-database'."
+        "message": "Cannot recognize configuration domain 'elasticsearch'. Domain must be one of the following values: 'configuration.system, configuration.t-streams, configuration.apache-kafka, configuration.elasticsearch, configuration.apache-zookeeper, configuration.sql-database'."
     },
     "status-code": 400
  }
 
 
-Get all config settings for specific config domain
+Get all configurations for specific config domain
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Request method: GET
@@ -1227,8 +1216,8 @@ Request format::
   :header: "Status code",  "Description"
   :widths: 25, 60
 
-  "200", "Json of set of config settings for specific config domain."
-  "400", "Cannot recognize config setting domain <config-domain>. Domain must be one of the following values: 'configuration.system, configuration.t-streams, configuration.apache-kafka, configuration.elasticsearch, configuration.apache-zookeeper, configuration.sql-database'."
+  "200", "Json of set of configurations for specific config domain."
+  "400", "Cannot recognize configuration domain <config-domain>. Domain must be one of the following values: 'configuration.system, configuration.t-streams, configuration.apache-kafka, configuration.elasticsearch, configuration.apache-zookeeper, configuration.sql-database'."
   "500", "Internal server error."
 
 Success response example::
@@ -1257,13 +1246,13 @@ Error response example::
 
  {
     "entity": {
-        "message": "Cannot recognize config setting domain 'elasticsearch'. Domain must be one of the following values: 'configuration.system, configuration.t-streams, configuration.apache-kafka, configuration.elasticsearch, configuration.apache-zookeeper, configuration.sql-database'."
+        "message": "Cannot recognize configuration domain 'elasticsearch'. Domain must be one of the following values: 'configuration.system, configuration.t-streams, configuration.apache-kafka, configuration.elasticsearch, configuration.apache-zookeeper, configuration.sql-database'."
     },
     "status-code": 400
  }
 
 
-Delete a config setting by name
+Delete a configuration by name
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Request method: DELETE
@@ -1276,23 +1265,30 @@ Request format::
   :header: "Status code",  "Description"
   :widths: 25, 60
 
-  "200", "<config-domain> config setting <name> has been deleted."
-  "400", "Cannot recognize config setting domain <config-domain>. Domain must be one of the following values: 'configuration.system, configuration.t-streams, configuration.apache-kafka, configuration.elasticsearch, configuration.apache-zookeeper, configuration.sql-database'."
-  "404", "<config-domain> сonfig setting <name> has not been found."
+  "200", "<config-domain> configuration <name> has been deleted."
+  "400", "Cannot recognize configuration domain <config-domain>. Domain must be one of the following values: 'configuration.system, configuration.t-streams, configuration.apache-kafka, configuration.elasticsearch, configuration.apache-zookeeper, configuration.sql-database'."
+  "404", "<config-domain> configuration <name> has not been found."
   "500", "Internal server error."
 
 Success response example::
 
  {
     "entity": {
-        "message": "Config setting 'system.crud-rest-host' has been deleted."
+        "message": "Configuration 'system.crud-rest-host' has been deleted."
     },
     "status-code": 200
  }
 
+Error response example::
+ 
+ {
+    "entity": {
+        "message": "Cannot recognize config setting domain 'system'. Domain must be one of the following values: 'configuration.system, configuration.t-streams, configuration.apache-kafka, configuration.elasticsearch, configuration.apache-zookeeper, configuration.sql-database'."
+    },
+    "status-code": 400
+ }
 
-
-Get all config settings
+Get all configurations
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Request method: GET
@@ -1305,7 +1301,7 @@ Request format::
   :header: "Status code",  "Description"
   :widths: 25, 60
 
-  "200", "Json of set of config settings"
+  "200", "Json of set of configurations"
   "500", "Internal server error"
 
 Success response example::
@@ -1437,10 +1433,18 @@ Success response example::
  {
   "status-code": 200,
   "entity": {
-    "message": "Custom jar is uploaded."
+    "message": "Custom jar 'Custom_jar.jar' has been uploaded."
   }
  }
 
+Error response example::
+
+ {
+    "entity": {
+        "message": "Cannot upload custom jar. Errors: Custom jar 'Upload_custom_jar.jar' already exists."
+    },
+    "status-code": 400
+ }
 
 Download a custom jar by file name
 """"""""""""""""""""""""""""""""""""""""""
@@ -1471,6 +1475,10 @@ Response headers example::
   "404", "Jar <custom-jar-file-name> has not been found."
   "500", "Internal server error."
 
+Success response:
+
+A jar file is downloaded.
+
 Error response example::
 
  {
@@ -1496,6 +1504,10 @@ Request format::
   "200", "Jar-file for download."
   "404", "Jar <custom-jar-name>-<custom-jar-version> has not been found."
   "500", "Internal server error."
+
+Success response:
+
+A jar file is downloaded.
 
 Error response example::
 
@@ -1779,14 +1791,14 @@ CRUD Rest-API for Modules
 
 This is the CRUD Rest-API for modules uploaded as jar files, instantiated and running modules as well as for custom jar files.
 
-.. csv-table::  Stream types
- :header: "Type on BE", "Type on FE"
- :widths: 25, 60  
+.. csv-table::  Module types
+ :header: "Types"
+ :widths: 25 
   
- "input-streaming", "Input streaming"
- "regular-streaming", "Regular streaming"
- "batch-streaming", "Batch streaming"
- "output-streaming", "Output streaming"
+ "input-streaming"
+ "regular-streaming"
+ "batch-streaming"
+ "output-streaming"
 
 .. csv-table::  **Specification fields**
   :header: "Field", "Format",  "Description"
@@ -1901,6 +1913,19 @@ Response headers example::
   "404", "1. Module '<module_type>-<module_name>-<module_version>' has not been found.
   2. Jar of module '<module_type>-<module_name>-<module_version>' has not been found in the storage."
   "500", "Internal server error"
+  
+Success response:
+
+A jar file is downloaded.
+
+Error response example::
+
+ {
+    "entity": {
+        "message": "Module 'regular-streaming-process-1.0' has not been found."
+    },
+    "status-code": 404
+ }
 
 Delete uploaded module
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -2205,8 +2230,8 @@ Instance fields
 **Batch-streaming instance fields**
 
 .. csv-table:: 
-  :header: "Field name", "Format",  "Description", "Example"
-  :widths: 15, 10, 60, 20
+ :header: "Field name", "Format",  "Description", "Example"
+ :widths: 15, 10, 60, 20
 
   "outputs*", "List[String]", "Names of output streams (must be stream.t-stream only)", "[s3, s4]"
   "window", "Int", "Count of batches that will be contained into a window (1 by default). Must be greater than zero",  3 
@@ -2427,6 +2452,15 @@ Success response json example of a created instance::
   "eventWaitTime": 10000,
   "restAddress" : ""
  }
+ }
+ 
+Error response example::
+
+ {
+    "entity": {
+        "message": "Module 'input-streaming-Instance1-2.0' has not been found."
+    },
+    "status-code": 404
  }
 
 Instance statuses
@@ -2678,6 +2712,64 @@ Request format::
   "200", "Instance"
   "404", "Instance '<instance_name>' has not been found."
   "500", "Internal server error"
+
+Success response example::
+
+ {
+    "entity": {
+        "instance": {
+            "moduleName": "pingstation-output",
+            "moduleVersion": "1.0",
+            "moduleType": "output-streaming",
+            "stage": {
+                "state": "stopped",
+                "datetime": 1500966502569,
+                "duration": 0
+            },
+            "status": "stopped",
+            "name": "output-streaming-imstance",
+            "description": "No description",
+            "parallelism": 1,
+            "options": {},
+            "perTaskCores": 1,
+            "perTaskRam": 1024,
+            "jvmOptions": {},
+            "nodeAttributes": {},
+            "coordinationService": "zk-service",
+            "environmentVariables": {},
+            "performanceReportingInterval": 60000,
+            "engine": "com.bwsw.output.streaming.engine-1.0",
+            "restAddress": "",
+            "checkpointMode": "every-nth",
+            "checkpointInterval": 3,
+            "executionPlan": {
+                "tasks": {
+                    "output-streaming-imstance-task0": {
+                        "inputs": {
+                            "output-tstream": [
+                                0,
+                                0
+                            ]
+                        }
+                    }
+                }
+            },
+            "startFrom": "newest",
+            "input": "output-tstreamk",
+            "output": "stream-es"
+        }
+    },
+    "status-code": 200
+ }
+ 
+Error response example::
+
+ {
+    "entity": {
+        "message": "Instance 'batch-streaming' has not been found."
+    },
+    "status-code": 404
+ }
 
 Start an instance
 ~~~~~~~~~~~~~~~~~~~~~~~~~

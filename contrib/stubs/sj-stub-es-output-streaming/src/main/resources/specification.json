@@ -25,9 +25,6 @@
   "module-type": "output-streaming",
   "engine-name": "com.bwsw.output.streaming.engine",
   "engine-version": "1.0",
-  "options": {
-    "opt": 1
-  },
   "validator-class": "com.bwsw.sj.stubs.module.output.StubOutputValidator",
   "executor-class": "com.bwsw.sj.stubs.module.output.StubOutputExecutor",
   "entity-class" : "com.bwsw.sj.stubs.module.output.data.StubEsData"
