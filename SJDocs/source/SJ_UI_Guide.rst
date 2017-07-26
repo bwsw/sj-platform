@@ -21,10 +21,10 @@ If you are a developer and are willing to use the platform you need to know of s
 
 - Mesos
 - Marathon 
-- ZooKeeper
+- Zookeeper
 - MongoDB
-- an external storage (Elasticsearch, JDBC, etc.)
-- Kafka (if you are going to work with Kafka input data).
+- Kafka (if you are going to work with Kafka input data)
+- an external storage (Elasticsearch, JDBC, etc.).
 
 .. tip:: Find more about SJ-Platform architecture at :ref:`Architecture`.
 
