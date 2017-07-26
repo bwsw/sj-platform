@@ -344,9 +344,7 @@ Success response example (provider is available)::
   }
  }
 
-Error response example:
-
-Provider is not available::
+Error response example (provider is not available)::
 
  {
   "entity": {
@@ -356,15 +354,6 @@ Provider is not available::
   "statusCode": 409
  }
 
-
-Unknown provider::
-
- {
-  "status-code": 404,
-  "entity": {
-    "message": "Provider 'kafka' has not been found."
-  }
- }
 
 Get services related to a provider (by provider name)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
