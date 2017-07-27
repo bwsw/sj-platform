@@ -26,11 +26,13 @@ import com.bwsw.common.embedded.EmbeddedMongo
 import com.bwsw.sj.common.MongoAuthChecker
 import com.bwsw.sj.common.config.TempHelperForConfigSetup
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
+import com.bwsw.sj.common.utils.CommonAppConfigNames
 import com.bwsw.sj.common.utils.benchmark.ClassRunner
 import com.bwsw.sj.engine.core.testutils.{Server, TestStorageServer}
 import com.bwsw.sj.engine.regular.RegularTaskRunner
 import com.bwsw.sj.engine.regular.benchmark.read_kafka.KafkaReaderBenchmark
 import com.bwsw.sj.engine.regular.benchmark.utils.BenchmarkUtils.retrieveResultFromFile
+import com.typesafe.config.ConfigFactory
 
 /**
   * Provides methods for testing speed of reading data from Kafka by Stream Juggler.
@@ -64,7 +66,8 @@ class SjBenchmark(zkHost: String,
   private val outputFile = new File(outputFilename)
 
   private val mongoAddress = "localhost:" + mongoPort
-  private val mongoDatabase = "sj-benchmark"
+  private val config = ConfigFactory.load()
+  private val mongoDatabase = config.getString(CommonAppConfigNames.mongoDbName)
   private val mongoAuthChecker = new MongoAuthChecker(mongoAddress, mongoDatabase)
   private lazy val connectionRepository = new ConnectionRepository(mongoAuthChecker, mongoAddress, mongoDatabase, None, None)
 
@@ -110,7 +113,8 @@ class SjBenchmark(zkHost: String,
     * Upload data in a mongo storage
     */
   def prepare(): Unit = {
-    TempHelperForConfigSetup.setupConfigs()
+    val tempHelperForConfigSetup = new TempHelperForConfigSetup(connectionRepository)
+    tempHelperForConfigSetup.setupConfigs()
     println("Config settings loaded")
 
     benchmarkPreparation.prepare(connectionRepository)
