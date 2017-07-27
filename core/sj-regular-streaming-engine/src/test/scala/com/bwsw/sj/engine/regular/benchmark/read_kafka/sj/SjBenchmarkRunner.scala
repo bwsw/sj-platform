@@ -20,7 +20,6 @@ package com.bwsw.sj.engine.regular.benchmark.read_kafka.sj
 
 import java.util.Calendar
 
-import com.bwsw.sj.common.SjModule
 import com.bwsw.sj.common.engine.core.config.EngineConfigNames
 import com.bwsw.sj.common.utils.BenchmarkConfigNames._
 import com.bwsw.sj.common.utils.BenchmarkLiterals.sjDefaultOutputFile
@@ -38,7 +37,6 @@ import com.typesafe.config.{Config, ConfigFactory, ConfigValueFactory}
   * sj-benchmark.performance.message.counts - list of counts of messages per test (1000000 by default).
   * Counts separated by a comma (','). Environment variable MESSAGES_COUNTS.
   * sj-benchmark.performance.kafka.address - Kafka server's address. Environment variable KAFKA_ADDRESS.
-  * sj-benchmark.performance.mongo.port - port for embedded mongo server. Environment variable MONGO_PORT.
   * sj-benchmark.performance.output-file - file to output results in csv format (message size, milliseconds)
   * (sj-benchmark-output-`<`date-time`>` by default). Environment variable OUTPUT_FILE.
   * sj-benchmark.performance.words - list of words that sends to the Kafka server ("lorem,ipsum,dolor,sit,amet" by default).
@@ -56,22 +54,18 @@ object SjBenchmarkRunner extends App {
   println(Calendar.getInstance().getTime)
 
   private val config: Config = ConfigFactory.load()
-  private val mongoPort = config.getInt(mongoPortConfig)
   private val zkPort = config.getInt(zooKeeperPort)
   private val zkHost = config.getString(zooKeeperHost)
-  private val instanceName = config.getString(EngineConfigNames.instanceName)
 
   private val benchmarkConfig = new KafkaReaderBenchmarkConfig(
     config = config.withValue(zooKeeperAddressConfig, ConfigValueFactory.fromAnyRef(s"$zkHost:$zkPort")),
     sjDefaultOutputFile)
 
   private val benchmark = new SjBenchmark(
-    mongoPort,
     zkHost,
     zkPort,
     benchmarkConfig.kafkaAddress,
-    instanceName,
-    benchmarkConfig.words)(SjModule.injector)
+    benchmarkConfig.words)
 
   benchmark.startServices()
   benchmark.prepare()

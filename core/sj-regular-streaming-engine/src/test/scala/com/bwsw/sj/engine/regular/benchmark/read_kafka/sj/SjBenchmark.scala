@@ -23,6 +23,7 @@ import java.net.ServerSocket
 import java.util.UUID
 
 import com.bwsw.common.embedded.EmbeddedMongo
+import com.bwsw.sj.common.MongoAuthChecker
 import com.bwsw.sj.common.config.TempHelperForConfigSetup
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.benchmark.ClassRunner
@@ -30,8 +31,6 @@ import com.bwsw.sj.engine.core.testutils.{Server, TestStorageServer}
 import com.bwsw.sj.engine.regular.RegularTaskRunner
 import com.bwsw.sj.engine.regular.benchmark.read_kafka.KafkaReaderBenchmark
 import com.bwsw.sj.engine.regular.benchmark.utils.BenchmarkUtils.retrieveResultFromFile
-import scaldi.Injectable.inject
-import scaldi.Injector
 
 /**
   * Provides methods for testing speed of reading data from Kafka by Stream Juggler.
@@ -40,21 +39,16 @@ import scaldi.Injector
   *
   * Host and port must point to the ZooKeeper server that used by the Kafka server.
   *
-  * @param mongoPort    port for [[EmbeddedMongo]]
   * @param zkHost       ZooKeeper server's host
   * @param zkPort       ZooKeeper server's port
   * @param kafkaAddress Kafka server's address
-  * @param instanceName instance's name
   * @param words        list of words that sends to the kafka server
   * @author Pavel Tomskikh
   */
-class SjBenchmark(mongoPort: Int,
-                  zkHost: String,
+class SjBenchmark(zkHost: String,
                   zkPort: Int,
                   kafkaAddress: String,
-                  instanceName: String,
-                  words: Array[String])
-                 (implicit injector: Injector) extends {
+                  words: Array[String]) extends {
   private val zooKeeperAddress = zkHost + ":" + zkPort
 } with KafkaReaderBenchmark(zooKeeperAddress, kafkaAddress, words) {
 
@@ -62,12 +56,17 @@ class SjBenchmark(mongoPort: Int,
     "sj-regular-performance-benchmark-1.0-SNAPSHOT.jar"
   private val module = new File(moduleFilename)
 
+  private val mongoPort = findFreePort()
   private val mongoServer = new EmbeddedMongo(mongoPort)
+  private val instanceName = "sj-benchmark-instance"
   private val taskName = instanceName + "-task"
   private val outputFilename = "benchmark-output-" + UUID.randomUUID().toString
   private val outputFile = new File(outputFilename)
 
-  private lazy val connectionRepository = inject[ConnectionRepository]
+  private val mongoAddress = "localhost:" + mongoPort
+  private val mongoDatabase = "sj-benchmark"
+  private val mongoAuthChecker = new MongoAuthChecker(mongoAddress, mongoDatabase)
+  private lazy val connectionRepository = new ConnectionRepository(mongoAuthChecker, mongoAddress, mongoDatabase, None, None)
 
   private val benchmarkPreparation = new SjBenchmarkPreparation(
     mongoPort = mongoPort,
@@ -87,7 +86,7 @@ class SjBenchmark(mongoPort: Int,
   private val environment: Map[String, String] = Map(
     "ZOOKEEPER_HOST" -> zkHost,
     "ZOOKEEPER_PORT" -> zkPort.toString,
-    "MONGO_HOSTS" -> s"localhost:$mongoPort",
+    "MONGO_HOSTS" -> mongoAddress,
     "INSTANCE_NAME" -> instanceName,
     "TASK_NAME" -> taskName,
     "AGENTS_HOST" -> "localhost")
@@ -97,8 +96,7 @@ class SjBenchmark(mongoPort: Int,
     * Starts [[com.bwsw.sj.engine.core.testutils.TestStorageServer]] and mongo servers
     */
   def startServices(): Unit = {
-    val randomSocket = new ServerSocket(0)
-    val tssEnv = Map("ZOOKEEPER_HOSTS" -> zooKeeperAddress, "TSS_PORT" -> randomSocket.getLocalPort.toString)
+    val tssEnv = Map("ZOOKEEPER_HOSTS" -> zooKeeperAddress, "TSS_PORT" -> findFreePort().toString)
 
     maybeTssProcess = Some(new ClassRunner(classOf[Server], environment = tssEnv).start())
     Thread.sleep(1000)
@@ -138,4 +136,12 @@ class SjBenchmark(mongoPort: Int,
 
   override protected def retrieveResult(messageSize: Long, messagesCount: Long): Option[Long] =
     retrieveResultFromFile(outputFile).map(_.toLong)
+
+  private def findFreePort(): Int = {
+    val randomSocket = new ServerSocket(0)
+    val port = randomSocket.getLocalPort
+    randomSocket.close()
+
+    port
+  }
 }
