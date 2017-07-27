@@ -36,7 +36,9 @@ import scaldi.Injectable.inject
 import scala.collection.immutable
 import scala.util.Try
 
-
+/**
+  * Contains several common functions to control framework
+  */
 object FrameworkUtil {
 
   import com.bwsw.sj.common.SjModule._
@@ -54,7 +56,6 @@ object FrameworkUtil {
   val connectionRepository: ConnectionRepository = inject[ConnectionRepository]
   val configRepository: GenericMongoRepository[ConfigurationSettingDomain] = connectionRepository.getConfigRepository
   private val logger = Logger.getLogger(this.getClass)
-  var params: Map[String, String] = immutable.Map[String, String]()
 
   /**
     * Count how much ports must be for current task.
@@ -83,15 +84,6 @@ object FrameworkUtil {
     System.exit(1)
   }
 
-  def getEnvParams: Map[String, String] = {
-    val config = ConfigFactory.load()
-
-    Map(
-      "instanceId" ->
-        Try(config.getString(FrameworkLiterals.instanceId)).getOrElse("00000000-0000-0000-0000-000000000000"),
-      "mongodbHosts" -> Try(config.getString(CommonAppConfigNames.mongoHosts)).getOrElse("127.0.0.1:27017")
-    )
-  }
 
   /**
     * Get jar URI for framework
@@ -108,11 +100,18 @@ object FrameworkUtil {
     restAddress
   }
 
-  def isInstanceStarted: Boolean = {
+  /**
+    * Check if instance started
+    * @return Boolean
+    */
+  private def isInstanceStarted: Boolean = {
     updateInstance()
     instance.exists(_.status == "started")
   }
 
+  /**
+    * Killing all launched tasks when it needed
+    */
   def killAllLaunchedTasks(): Unit = {
     TasksList.getLaunchedTasks.foreach(taskId => {
       TasksList.killTask(taskId)
@@ -137,9 +136,12 @@ object FrameworkUtil {
     logger.info(s"Selecting tasks to launch: ${TasksList.toLaunch}")
   }
 
-
+  /**
+    * Fetch instance info from database
+    * @return
+    */
   def updateInstance(): Any = {
-    val optionInstance = connectionRepository.getInstanceRepository.get(FrameworkUtil.params("instanceId"))
+    val optionInstance = connectionRepository.getInstanceRepository.get(FrameworkParameters(FrameworkParameters.instanceId))
       .map(inject[InstanceCreator].from)
 
     if (optionInstance.isEmpty) {
@@ -155,6 +157,9 @@ object FrameworkUtil {
     instance.get.jvmOptions.foldLeft("")((acc, option) => s"$acc ${option._1}${option._2}")
   }
 
+  /**
+    * Launch tasks if instance started, else teardown
+    */
   def checkInstanceStarted(): Unit = {
     logger.info(s"Check is instance status 'started': $isInstanceStarted")
     if (isInstanceStarted) prepareTasksToLaunch()

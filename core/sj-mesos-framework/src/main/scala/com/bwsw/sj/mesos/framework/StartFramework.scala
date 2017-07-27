@@ -103,9 +103,13 @@ object StartFramework {
     System.exit(0)
   }
 
-
-  private def getZooKeeperServers(mesosMaster: String): String = {
-    val mesosMasterUrl = new URI(mesosMaster)
+  /**
+    * Return zookeeper address
+    * @param zookeeperURI
+    * @return
+    */
+  private def getZooKeeperServers(zookeeperURI: String): String = {
+    val mesosMasterUrl = new URI(zookeeperURI)
     mesosMasterUrl.getHost + ":" + mesosMasterUrl.getPort
   }
 }

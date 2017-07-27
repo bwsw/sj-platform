@@ -147,6 +147,11 @@ object OffersHandler {
     offer
   }
 
+  /**
+    * Update number of available offers
+    * @param tasksOnSlaves How much tasks can be launched on each slaves
+    * @return New list of offers, without empty
+    */
   def updateOfferNumber(tasksOnSlaves: mutable.ListBuffer[(Offer, Int)]): mutable.ListBuffer[(Offer, Int)] = {
     var result: mutable.ListBuffer[(Offer, Int)] = tasksOnSlaves
     while (result.length > 1 && tasksOnSlaves(offerNumber)._2 == 0) {
@@ -199,6 +204,10 @@ object OffersHandler {
       .build
   }
 
+  /**
+    * Distribution of tasks by nodes, where each task must be launched
+    * @param injector
+    */
   def distributeTasksOnSlaves()(implicit injector: Injector): Unit = {
     logger.info(s"Distribute tasks to resource offers")
     OffersHandler.offerNumber = 0
@@ -209,7 +218,7 @@ object OffersHandler {
   }
 
   /**
-    * Create task to launch.
+    * Create task to launch, update tasks count on slaves
     *
     * @param taskName
     * @param tasksCountOnSlaves

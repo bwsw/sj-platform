@@ -21,15 +21,15 @@ Platform Components
 
 The diagram below presents the structure of the SJ-Platform. 
 
-.. figure:: _static/SJ_General.png
+.. figure:: _static/SJ_General1.png
 
 Figuratively, it can be divided into two layers. 
 
-The *first layer* – data processing – is provided by the Stream Juggler Platform. At this layer the data processing itself is performed via custom modules. The ingested data is transformed into streams, processed and sent to an external storage. Data transformation and computation are the two major tasks of this layer.
+The *first layer* – data processing – is provided by the Stream Juggler Platform. At this layer the data processing itself is performed via custom modules. The ingested data is transformed into streams, processed and sent to an external storage.  Data transformation and computation are the two major tasks of this layer.
 
-This layer is marked with green in the diagram. More information on module workflow you can find at the :ref:`Modules` page.
+In the diagram this layer is placed within the Stream Juggler Platform area. More information on module workflow you can find at the :ref:`Modules` page.
 
-The *second layer* is composed of prerequisites for the platform. These are the services and settings that should be deployed prior to exploring the Stream Juggler Platform features. The services at this layer are responsible for input data ingestion, platform management, data storage. In the diagram they are placed in the blue sector.
+The *second layer* is composed of prerequisites for the platform. These are the services and settings that should be deployed prior to exploring the Stream Juggler Platform features. The services at this layer are responsible for input data ingestion, platform management, data storage. In the diagram they are placed beyond the Stream Juggler Platform area.
 
 - Resource management is fulfilled via `Apache Mesos <http://mesos.apache.org/>`_ that allows to run the system at scale and to support different types of workloads.
 

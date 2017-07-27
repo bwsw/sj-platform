@@ -21,10 +21,10 @@ If you are a developer and are willing to use the platform you need to know of s
 
 - Mesos
 - Marathon 
-- ZooKeeper
+- Zookeeper
 - MongoDB
-- an external storage (Elasticsearch, JDBC, etc.)
-- Kafka (if you are going to work with Kafka input data).
+- Kafka (if you are going to work with Kafka input data)
+- an external storage (Elasticsearch, JDBC, etc.).
 
 .. tip:: Find more about SJ-Platform architecture at :ref:`Architecture`.
 
@@ -36,7 +36,7 @@ For correct performance a module requires creating a stream/streams with its ser
 
 The diagram below may help you to understand the dependency of instances in the platform.
 
-.. figure:: _static/InstanceCorrelation.png
+.. figure:: _static/InstanceCorrelation1.png
 
 For example, if you want to create a regular module that will process Kafka input data streams you have to create a Kafka service with a Kafka and a ZooKeeper providers for it.
 

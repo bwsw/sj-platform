@@ -142,7 +142,7 @@ class Specification(val name: String,
             errors += createMessage("rest.validator.specification.both.cardinality", "inputs", "0")
           if (inputs.types.length != 1 || !inputs.types.contains(StreamLiterals.inputDummy))
             errors += createMessage("rest.validator.specification.input.type", StreamLiterals.inputDummy)
-          if (outputs.types.isEmpty || !StreamLiterals.internalTypes.containsSlice(outputs.types))
+          if (outputs.types.isEmpty || !outputs.types.forall(StreamLiterals.internalTypes.contains))
             errors += createMessage("rest.validator.specification.sources.types", "outputs", StreamLiterals.tstreamsType)
           if (outputs.cardinality(0) <= 0 || outputs.cardinality(1) < outputs.cardinality(0))
             errors += createMessage("rest.validator.specification.cardinality.left.bound.greater.zero", "outputs")
@@ -150,21 +150,21 @@ class Specification(val name: String,
         case EngineLiterals.outputStreamingType =>
           if (inputs.cardinality.exists(_ != 1))
             errors += createMessage("rest.validator.specification.both.cardinality", "inputs", "1")
-          if (inputs.types.isEmpty || !StreamLiterals.internalTypes.containsSlice(inputs.types))
+          if (inputs.types.isEmpty || !inputs.types.forall(StreamLiterals.internalTypes.contains))
             errors += createMessage("rest.validator.specification.sources.types", "inputs", StreamLiterals.tstreamsType)
           if (outputs.cardinality.exists(_ != 1))
             errors += createMessage("rest.validator.specification.both.cardinality", "outputs", "1")
-          if (outputs.types.isEmpty || !StreamLiterals.outputTypes.containsSlice(outputs.types))
+          if (outputs.types.isEmpty || !outputs.types.forall(StreamLiterals.outputTypes.contains))
             errors += createMessage("rest.validator.specification.sources.types", "outputs",
               StreamLiterals.elasticsearchType + ", " + StreamLiterals.restType + ", " + StreamLiterals.jdbcType)
 
         case _ =>
           if (inputs.cardinality(0) <= 0 || inputs.cardinality(1) < inputs.cardinality(0))
             errors += createMessage("rest.validator.specification.cardinality.left.bound.greater.zero", "inputs")
-          if (inputs.types.isEmpty || !StreamLiterals.internalTypes.containsSlice(inputs.types))
+          if (inputs.types.isEmpty || !inputs.types.forall(StreamLiterals.internalTypes.contains))
             errors += createMessage("rest.validator.specification.sources.types", "inputs",
               StreamLiterals.tstreamsType + ", " + StreamLiterals.kafkaType)
-          if (outputs.types.isEmpty || !StreamLiterals.internalTypes.containsSlice(outputs.types))
+          if (outputs.types.isEmpty || !outputs.types.forall(StreamLiterals.internalTypes.contains))
             errors += createMessage("rest.validator.specification.sources.types", "outputs", StreamLiterals.tstreamsType)
           if (outputs.cardinality(0) <= 0 || outputs.cardinality(1) < outputs.cardinality(0))
             errors += createMessage("rest.validator.specification.cardinality.left.bound.greater.zero", "outputs")
