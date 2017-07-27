@@ -344,7 +344,8 @@ trait MarathonApiMocks extends MockitoSugar {
   val emptyMarathonApplication = MarathonApplication(emptyMarathonApplicationInfo)
 
   val marathonConfigStub = MarathonConfig("zk://localhost:2181/mesos")
-  val marathonInfoStub = MarathonInfo(marathonConfigStub)
+  val zooKeeperConfigStub = ZooKeeperConfig("zk://localhost:2181/marathon")
+  val marathonInfoStub = MarathonInfo(marathonConfigStub, zooKeeperConfigStub)
 
   val marathonRequestStub = MarathonRequest("id", "sleep 100", 1, Map(), List())
 }

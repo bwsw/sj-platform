@@ -91,11 +91,11 @@ class InstanceStarterTestSuit extends FlatSpec with Matchers with PrivateMethodT
     //arrange
     val expectedZkHost = "host"
     val expectedZkPort = "2181"
-    val marathonMaster = s"zk://$expectedZkHost:$expectedZkPort/mesos"
+    val zooKeeperNode = s"zk://$expectedZkHost:$expectedZkPort/marathon"
     val getZooKeeperServers = PrivateMethod[String]('getZooKeeperServers)
 
     //act
-    val zkServers = instanceStarter invokePrivate getZooKeeperServers(marathonMaster)
+    val zkServers = instanceStarter invokePrivate getZooKeeperServers(zooKeeperNode)
 
     //assert
     zkServers shouldBe (expectedZkHost + ":" + expectedZkPort)
@@ -142,6 +142,7 @@ class InstanceStarterTestSuit extends FlatSpec with Matchers with PrivateMethodT
     when(marathonManager.getApplicationEntity(any())).thenReturn(marathonApplicationStub)
     when(marathonManager.scaleMarathonApplication(any(), any())).thenReturn(okStatus)
     when(marathonManager.getLeaderTask(any())).thenReturn(Some(marathonTasksStub))
+    when(marathonManager.getZooKeeperAddress(okMarathonResponse)).thenReturn(marathonInfoStub.zooKeeperConfig.zk)
 
     val instanceManager = mock[InstanceDomainRenewer]
 
@@ -419,6 +420,7 @@ class InstanceStarterTestSuit extends FlatSpec with Matchers with PrivateMethodT
     when(marathonManager.getApplicationEntity(any())).thenReturn(marathonApplicationStub)
     when(marathonManager.scaleMarathonApplication(any(), any())).thenReturn(okStatus)
     when(marathonManager.getLeaderTask(any())).thenReturn(Some(marathonTasksStub))
+    when(marathonManager.getZooKeeperAddress(okMarathonResponse)).thenReturn(marathonInfoStub.zooKeeperConfig.zk)
 
     val instanceManager = mock[InstanceDomainRenewer]
 

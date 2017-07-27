@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory
   *
   * @author Kseniya Tomskikh
   */
-class MarathonApi(private val client: HttpClient, marathonAddress: String){
+class MarathonApi(private val client: HttpClient, marathonAddress: String) {
   private val logger = LoggerFactory.getLogger(getClass.getName)
   private val marathonEntitySerializer = new JsonSerializer(true)
 
@@ -52,6 +52,14 @@ class MarathonApi(private val client: HttpClient, marathonAddress: String){
     val master = entity.marathonConfig.master
 
     master
+  }
+
+  def getZooKeeperAddress(marathonInfo: CloseableHttpResponse): String = {
+    logger.debug(s"Get a zookeeper node for marathon.")
+    val entity = marathonEntitySerializer.deserialize[MarathonInfo](EntityUtils.toString(marathonInfo.getEntity, "UTF-8"))
+    val zk = entity.zooKeeperConfig.zk
+
+    zk
   }
 
   def getLeaderTask(marathonTasks: CloseableHttpResponse): Option[MarathonTask] = {

@@ -30,7 +30,8 @@ case class MarathonTask(id: String, host: String, ports: List[Int])
 
 case class MarathonTaskFailure(host: String, message: String, state: String, timestamp: String)
 
-case class MarathonInfo(@JsonProperty("marathon_config") marathonConfig: MarathonConfig)
+case class MarathonInfo(@JsonProperty("marathon_config") marathonConfig: MarathonConfig,
+                        @JsonProperty("zookeeper_config") zooKeeperConfig: ZooKeeperConfig)
 
 case class MarathonConfig(master: String)
 
@@ -46,3 +47,5 @@ case class MarathonRequest(id: String,
                            mem: Double = 128)
 
 case class MarathonApplicationInstances(instances: Int)
+
+case class ZooKeeperConfig(zk: String)
