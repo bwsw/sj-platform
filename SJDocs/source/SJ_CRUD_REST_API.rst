@@ -1156,7 +1156,7 @@ Error response example::
  {
   "status-code": 400,
   "entity": {
-    "message": "Cannot create system config setting. Errors: <creation_errors_string>."
+    "message": "Cannot create system configuration. Errors: <creation_errors_string>."
   }
  }
 
@@ -1283,7 +1283,7 @@ Error response example::
  
  {
     "entity": {
-        "message": "Cannot recognize config setting domain 'system'. Domain must be one of the following values: 'configuration.system, configuration.t-streams, configuration.apache-kafka, configuration.elasticsearch, configuration.apache-zookeeper, configuration.sql-database'."
+        "message": "Cannot recognize configuration domain 'system'. Domain must be one of the following values: 'configuration.system, configuration.t-streams, configuration.apache-kafka, configuration.elasticsearch, configuration.apache-zookeeper, configuration.sql-database'."
     },
     "status-code": 400
  }
