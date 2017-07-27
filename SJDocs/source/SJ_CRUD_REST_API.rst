@@ -1383,7 +1383,7 @@ Success response example::
   status-code: 200
  }
 
-.. tip:: A full range of error responses can be found at :ref:`Config_Setting_Errors`
+.. tip:: A full range of error responses can be found at :ref:`Config_Settings_Errors`
 
 CRUD Rest-API for Custom Files
 ----------------------------------------
