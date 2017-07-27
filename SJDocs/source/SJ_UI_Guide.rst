@@ -868,7 +868,7 @@ It includes the following information for each task in the list:
 
 - Task name
 - State - Task status
-- Directories - Directories of tasks of the instance. They are active references to the 
+- Directories - Directories of tasks of the instance. They are live references to the task change logs on Mesos.
 - State change - The date of the last status change
 - Reason - The reason of the status change
 - Last node - Name of node that was used by a task before the status change (task failure)
