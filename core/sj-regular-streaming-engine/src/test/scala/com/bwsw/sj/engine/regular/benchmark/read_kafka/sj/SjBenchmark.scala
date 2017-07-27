@@ -110,7 +110,8 @@ class SjBenchmark(zkHost: String,
     * Upload data in a mongo storage
     */
   def prepare(): Unit = {
-    TempHelperForConfigSetup.setupConfigs()
+    val tempHelperForConfigSetup = new TempHelperForConfigSetup(connectionRepository)
+    tempHelperForConfigSetup.setupConfigs()
     println("Config settings loaded")
 
     benchmarkPreparation.prepare(connectionRepository)

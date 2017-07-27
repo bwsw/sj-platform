@@ -41,7 +41,8 @@ object SjBatchModuleDestroy extends App {
   deleteInstance(instanceService)
   deleteModule(fileStorage, module.getName)
 
-  TempHelperForConfigDestroy.deleteConfigs()
+  val tempHelperForConfigDestroy = new TempHelperForConfigDestroy(connectionRepository)
+  tempHelperForConfigDestroy.deleteConfigs()
   connectionRepository.close()
 
   println("DONE")
