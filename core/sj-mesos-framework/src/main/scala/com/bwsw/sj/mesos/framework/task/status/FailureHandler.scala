@@ -25,7 +25,6 @@ object FailureHandler {
 
   def process(status: TaskStatus): Unit = {
     TasksList(status.getTaskId.getValue).foreach(task => task.update(node = "", reason = status.getMessage))
-    TasksList(status.getTaskId.getValue).foreach(task => task.update(node = "", reason = status.getMessage))
     StatusHandler.logger.error(s"Error: ${status.getMessage}")
 
     TasksList.stopped(status.getTaskId.getValue)

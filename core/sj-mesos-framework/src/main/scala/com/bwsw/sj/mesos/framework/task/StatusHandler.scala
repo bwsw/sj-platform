@@ -31,7 +31,7 @@ object StatusHandler {
   val serializer = new JsonSerializer()
 
   /**
-    * Determine type of status and restart task, if status "failed" or "error"
+    * Determines type of status and restarts task, if status "failed" or "error"
  *
     * @param status: mesos task status
     */

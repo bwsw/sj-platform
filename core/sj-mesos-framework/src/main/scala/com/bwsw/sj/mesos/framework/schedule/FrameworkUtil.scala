@@ -58,10 +58,10 @@ object FrameworkUtil {
   private val logger = Logger.getLogger(this.getClass)
 
   /**
-    * Count how much ports must be for current task.
+    * Returns count of ports needed for current task.
     *
     * @param instance current launched task
-    * @return ports count for current task
+    * @return count of ports for current task
     */
   def getCountPorts(instance: Instance): Int = {
     instance match {
@@ -73,7 +73,7 @@ object FrameworkUtil {
   }
 
   /**
-    * Handler for Scheduler Exception
+    * Handles Scheduler Exception
     */
   def handleSchedulerException(e: Exception, logger: Logger): Unit = {
     val sw = new StringWriter
@@ -86,7 +86,7 @@ object FrameworkUtil {
 
 
   /**
-    * Get jar URI for framework
+    * Returns jar URI for framework
     *
     * @param instance :Instance
     * @return String
@@ -119,7 +119,7 @@ object FrameworkUtil {
   }
 
   /**
-    * Teardown framework, do it if instance not started.
+    * Teardowns framework, needed to be executed if instance did not started.
     */
   def teardown(): Unit = {
     logger.info(s"Kill all launched tasks: ${TasksList.getLaunchedTasks}")
@@ -127,7 +127,7 @@ object FrameworkUtil {
   }
 
   /**
-    * Selecting which tasks would be launched
+    * Selecting which tasks would be launched.
     */
   def prepareTasksToLaunch(): Unit = {
     TasksList.getList.foreach(task => {
