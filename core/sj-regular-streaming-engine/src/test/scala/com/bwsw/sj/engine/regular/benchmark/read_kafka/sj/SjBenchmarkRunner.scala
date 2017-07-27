@@ -20,7 +20,6 @@ package com.bwsw.sj.engine.regular.benchmark.read_kafka.sj
 
 import java.util.Calendar
 
-import com.bwsw.sj.common.engine.core.config.EngineConfigNames
 import com.bwsw.sj.common.utils.BenchmarkConfigNames._
 import com.bwsw.sj.common.utils.BenchmarkLiterals.sjDefaultOutputFile
 import com.bwsw.sj.common.utils.CommonAppConfigNames.{zooKeeperHost, zooKeeperPort}
@@ -33,9 +32,9 @@ import com.typesafe.config.{Config, ConfigFactory, ConfigValueFactory}
   * Configuration:
   *
   * sj-benchmark.performance.message.sizes - list of messages' sizes that separated by a comma (',').
-  * Environment variable MESSAGE_SIZES.
+  * Environment variable MESSAGES_SIZE_PER_TEST.
   * sj-benchmark.performance.message.counts - list of counts of messages per test (1000000 by default).
-  * Counts separated by a comma (','). Environment variable MESSAGES_COUNTS.
+  * Counts separated by a comma (','). Environment variable MESSAGES_COUNT_PER_TEST.
   * sj-benchmark.performance.kafka.address - Kafka server's address. Environment variable KAFKA_ADDRESS.
   * sj-benchmark.performance.output-file - file to output results in csv format (message size, milliseconds)
   * (sj-benchmark-output-`<`date-time`>` by default). Environment variable OUTPUT_FILE.

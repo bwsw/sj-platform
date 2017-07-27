@@ -30,9 +30,9 @@ import com.typesafe.config.ConfigFactory
   * Configuration:
   *
   * sj-benchmark.performance.message.sizes - list of messages' sizes that separated by a comma (',').
-  * Environment variable MESSAGE_SIZES.
+  * Environment variable MESSAGES_SIZE_PER_TEST.
   * sj-benchmark.performance.message.counts - list of counts of messages per test (1000000 by default).
-  * Counts separated by a comma (','). Environment variable MESSAGES_COUNTS.
+  * Counts separated by a comma (','). Environment variable MESSAGES_COUNT_PER_TEST.
   * sj-benchmark.performance.kafka.address - Kafka server's address. Environment variable KAFKA_ADDRESS.
   * sj-benchmark.performance.zookeeper.address - ZooKeeper server's address. Must point to the ZooKeeper server that used
   * by the Kafka server. Environment variable ZOOKEEPER_ADDRESS.
