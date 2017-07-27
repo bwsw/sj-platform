@@ -194,7 +194,7 @@ class ModuleControllerTests extends FlatSpec with Matchers with MockitoSugar wit
     val unknownTypeError = "unknown type"
     when(serviceInterface.getByType(wrongType)).thenReturn(Left(unknownTypeError))
 
-    val expectedResponse = BadRequestRestResponse(MessageResponseEntity(unknownTypeError))
+    val expectedResponse = NotFoundRestResponse(MessageResponseEntity(unknownTypeError))
 
     controller.getByType(wrongType) shouldBe expectedResponse
   }
