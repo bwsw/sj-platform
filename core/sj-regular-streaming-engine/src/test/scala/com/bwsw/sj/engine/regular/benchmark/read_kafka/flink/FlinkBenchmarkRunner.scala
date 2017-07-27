@@ -53,7 +53,7 @@ object FlinkBenchmarkRunner extends App {
   private val benchmarkRunner = new KafkaReaderBenchmarkRunner(benchmark, benchmarkConfig)
 
   private val results = benchmarkRunner.run()
-  benchmarkRunner.writeResults(results)
+  benchmarkRunner.writeResult(results)
 
   private val resultsString = results.mkString("\n")
 

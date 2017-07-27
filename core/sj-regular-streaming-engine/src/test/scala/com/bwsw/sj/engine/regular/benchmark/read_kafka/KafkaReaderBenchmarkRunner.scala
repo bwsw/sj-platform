@@ -30,14 +30,14 @@ import java.io.{File, FileWriter}
 class KafkaReaderBenchmarkRunner(benchmark: KafkaReaderBenchmark,
                                  config: KafkaReaderBenchmarkConfig) {
 
-  def run(): Array[ReadFromKafkaBenchmarkResult] = {
+  def run(): Array[KafkaReaderBenchmarkResult] = {
     benchmark.warmUp()
 
     val benchmarkResults = config.messagesCounts.flatMap { messagesCount =>
       config.messageSizes.map { messageSize =>
         val result = (0 until config.repetitions).map(_ => benchmark.runTest(messageSize, messagesCount))
 
-        ReadFromKafkaBenchmarkResult(messageSize, messagesCount, result)
+        KafkaReaderBenchmarkResult(messageSize, messagesCount, result)
       }
     }
 
@@ -46,14 +46,14 @@ class KafkaReaderBenchmarkRunner(benchmark: KafkaReaderBenchmark,
     benchmarkResults
   }
 
-  def writeResults(benchmarkResults: Seq[ReadFromKafkaBenchmarkResult]) = {
+  def writeResult(benchmarkResults: Seq[KafkaReaderBenchmarkResult]) = {
     val writer = new FileWriter(new File(config.outputFileName))
     writer.write(benchmarkResults.mkString("\n"))
     writer.close()
   }
 }
 
-case class ReadFromKafkaBenchmarkResult(messageSize: Long, messagesCount: Long, results: Seq[Long]) {
+case class KafkaReaderBenchmarkResult(messageSize: Long, messagesCount: Long, results: Seq[Long]) {
   def averageResult: Long =
     results.sum / results.length
 

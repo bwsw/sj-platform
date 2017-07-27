@@ -94,7 +94,7 @@ abstract class KafkaReaderBenchmark(zooKeeperAddress: String,
 
 
   /**
-    * Used to run application under test in separate process
+    * Used to run application under test in a separate process
     *
     * @param messageSize   size of one message that sends to the Kafka server
     * @param messagesCount count of messages
