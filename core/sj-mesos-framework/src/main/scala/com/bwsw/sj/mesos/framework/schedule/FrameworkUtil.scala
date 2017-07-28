@@ -160,7 +160,7 @@ object FrameworkUtil {
     */
   def checkInstanceStarted(): Unit = {
     logger.info(s"Check is instance status 'started': $isInstanceStarted")
-    if (isInstanceStarted) prepareTasksToLaunch()
+    if (isInstanceStarted) selectingNotLaunchedTasks()
     else teardown()
   }
 }
