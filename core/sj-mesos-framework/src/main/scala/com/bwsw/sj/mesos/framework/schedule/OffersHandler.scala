@@ -28,7 +28,7 @@ import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
 /**
- * Object for filter offers.
+ * Object to filter offers.
  */
 object OffersHandler {
   private val logger = Logger.getLogger(this.getClass)
@@ -41,7 +41,7 @@ object OffersHandler {
   def getOffers = offers
 
   /**
-   * Filter offered slaves
+   * Filters offered slaves
    *
    * @param filters:util.Map[String, String]
    * @return util.List[Offer]
@@ -76,7 +76,7 @@ object OffersHandler {
   }
 
   /**
-   * This method give how much resource of type <name> we have on <offer>
+   * Returns amount of <name> resource in <offer>
    *
    * @param offer:Offer
    * @param name:String
@@ -87,7 +87,7 @@ object OffersHandler {
   }
 
   /**
-   * Getting list of offers and count tasks for launch on each slave
+   * Returns list of offers and counts tasks to launch on each slave.
    *
    * @return mutable.ListBuffer[(Offer, Int)]
    */
@@ -162,7 +162,7 @@ object OffersHandler {
   }
 
   /**
-    * Get random free ports
+    * Returns random free ports.
  *
     * @param offer:Offer
     * @return Resource
@@ -219,19 +219,20 @@ object OffersHandler {
 
   /**
     * Create task to launch, update tasks count on slaves
+    * Launches tasks and returns their names
     *
-    * @param taskName
-    * @param tasksCountOnSlaves
-    * @return
+    * @param taskId
+    * @param tasksCountOnSlaves How much tasks on slave
+    * @return Launched tasks list
     */
-  private def createTaskToLaunch(taskName: String, tasksCountOnSlaves: mutable.ListBuffer[(Offer, Int)])(implicit injector: Injector): ListBuffer[String] = {
+  private def createTaskToLaunch(taskId: String, tasksCountOnSlaves: mutable.ListBuffer[(Offer, Int)])(implicit injector: Injector): ListBuffer[String] = {
     val currentOffer = OffersHandler.getNextOffer(tasksCountOnSlaves)
-    val task = TasksList.createTaskToLaunch(taskName, currentOffer._1)
+    val task = TasksList.createTaskToLaunch(taskId, currentOffer._1)
 
     TasksList.addTaskToSlave(task, currentOffer)
 
     // update how much tasks we can run on slave when launch current task
     tasksCountOnSlaves.update(tasksCountOnSlaves.indexOf(currentOffer), Tuple2(currentOffer._1, currentOffer._2 - 1))
-    TasksList.launched(taskName)
+    TasksList.launched(taskId)
   }
 }

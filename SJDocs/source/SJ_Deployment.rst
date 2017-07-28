@@ -22,8 +22,3 @@ Minimesos Deployment
 
 .. warning:: The section is under development!
 
-Docker Stack Mesos
---------------------------
-
-.. warning:: The section is under development!
-

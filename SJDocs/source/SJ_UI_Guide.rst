@@ -853,21 +853,28 @@ If an instance stuck in 'failed' or 'error' status, you should use the following
 
 If all described above is correct, but the "failed" or the "error" status still takes place, please contact the support team.
 
-The *statistics* on the task execution is also available from the list of instances. Click at the "Information" icon next to the Instance name you want to get the statistics for. 
+The *statistics* on the task execution is also available from the list of instances. 
 
- .. _static/FrameworkStatsIcon1.png
+Click at the "Information" icon next to the Instance name you want to get the statistics for. 
 
-A window will pop-up to show the stats. It includes the following information for each task in the list:
+.. figure:: _static/FrameworkStatsIcon1.png
+
+A window will pop-up to show the stats. 
+
+.. figure:: _static/FrameworkStats.png
+
+
+It includes the following information for each task in the list:
 
 - Task name
 - State - Task status
-- Directories - Directories of tasks of the instance
+- Directories - Directories of tasks of the instance. They are live references to the task change logs on Mesos.
 - State change - The date of the last status change
 - Reason - The reason of the status change
 - Last node - Name of node that was used by a task before the status change (task failure)
 - Node - Name of node used by the task
 
-This is the statistic data from a Mesos framework that starts a module. The statistics is aggregated for started instances. 
+This is the statistic data from a Mesos framework that starts a module. The statistics is aggregated for started instances. ()
 
 The list of instances can be filtered by its type and/or a name using the search tool above the list.
 
