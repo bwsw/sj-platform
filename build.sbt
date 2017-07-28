@@ -79,8 +79,7 @@ lazy val sj = (project in file(".")).settings(publish := {})
     framework,
     stubInput, stubRegular, stubBatch, stubESOutput, stubJDBCOutput, stubRestOutput,
     pmOutput, csvInput, regexInput,
-    sumBatch,
-    kafkaDataSender, regularPerformanceBenchmark
+    sumBatch
   )
 
 lazy val common = Project(id = "sj-common",
@@ -125,7 +124,6 @@ lazy val regularStreamingEngine = Project(id = "sj-regular-streaming-engine",
     libraryDependencies ++= Dependencies.sjRegularEngineDependencies.value
   )
   .dependsOn(engineCore)
-  .dependsOn(kafkaDataSender % "test")
 
 lazy val batchStreamingEngine = Project(id = "sj-batch-streaming-engine",
   base = file("./core/sj-batch-streaming-engine"))
@@ -203,14 +201,6 @@ lazy val regexInput = Project(id = "sj-regex-input",
     libraryDependencies ++= Dependencies.sjTestDependencies.value
   )
   .dependsOn(engineCore)
-
-lazy val kafkaDataSender = Project(id = "sj-kafka-data-sender",
-  base = file("./contrib/benchmarks/sj-kafka-data-sender"))
-  .settings(commonSettings: _*)
-  .settings(
-    libraryDependencies ++= Dependencies.sjKafkaDataLoader.value,
-    mainClass in assembly := Some("com.bwsw.sj.kafka.data_sender.DataSenderRunner")
-  )
 
 lazy val regularPerformanceBenchmark = Project(id = "sj-regular-performance-benchmark",
   base = file("./contrib/benchmarks/sj-regular-performance-benchmark"))

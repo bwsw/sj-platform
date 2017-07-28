@@ -114,10 +114,6 @@ object Dependencies {
     "org.mockito" % "mockito-core" % "2.8.9" % "test"
   ))
 
-  lazy val sjKafkaDataLoader = Def.setting(Seq(
-    "org.apache.kafka" % "kafka-clients" % "0.10.1.1"
-  ))
-
   lazy val flinkDependencies = Def.setting(Seq(
     "org.apache.flink" % "flink-streaming-scala_2.11" % "1.3.1",
     "org.apache.flink" % "flink-connector-kafka-0.10_2.11" % "1.3.1"
