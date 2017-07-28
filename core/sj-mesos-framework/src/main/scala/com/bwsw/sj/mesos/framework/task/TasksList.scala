@@ -287,7 +287,7 @@ object TasksList {
       * @return
       */
     def getAgentPorts: String = {
-      var taskPort: String = ""
+      var taskPort = ""
       val ports = TasksList.getTaskPorts(taskId)
 
       var availablePorts = ports.getRanges.getRangeList.asScala.map(_.getBegin.toString)
