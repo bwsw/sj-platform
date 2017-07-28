@@ -18,7 +18,9 @@
  */
 package com.bwsw.sj.engine.regular.benchmark.read_kafka.samza
 
-import org.apache.samza.system.{IncomingMessageEnvelope, OutgoingMessageEnvelope, SystemStream}
+import java.io.{File, FileWriter}
+
+import org.apache.samza.system.IncomingMessageEnvelope
 import org.apache.samza.task.{MessageCollector, StreamTask, TaskCoordinator}
 
 /**
@@ -27,27 +29,29 @@ import org.apache.samza.task.{MessageCollector, StreamTask, TaskCoordinator}
 class SamzaBenchmarkStreamTask extends StreamTask {
   private var readMessages: Int = 0
   private var messageCount: Long = 10
-  private var outputStreamName: String = "samza-benchmark-result"
+  private var outputFilename: String = "samza-benchmark-result"
   private var gotInitEnvelope: Boolean = false
-  private var startTime: Long = 0
+  private var firstMessageTimestamp: Long = 0
 
   override def process(envelope: IncomingMessageEnvelope, collector: MessageCollector, coordinator: TaskCoordinator): Unit = {
     if (gotInitEnvelope) {
       if (readMessages == 0)
-        startTime = System.currentTimeMillis()
+        firstMessageTimestamp = System.currentTimeMillis()
 
       readMessages += 1
 
       if (readMessages == messageCount) {
-        val result = System.currentTimeMillis() - startTime
+        val lastMessageTimestamp = System.currentTimeMillis()
 
-        val outputStream = new SystemStream("kafka", outputStreamName)
-        collector.send(new OutgoingMessageEnvelope(outputStream, result.toString))
+        val outputFile = new File(outputFilename)
+        val writer = new FileWriter(outputFile, true)
+        writer.write(s"${lastMessageTimestamp - firstMessageTimestamp}\n")
+        writer.close()
       }
     } else {
       val options = envelope.getMessage.asInstanceOf[String].split(",", 2)
       messageCount = options(0).toLong
-      outputStreamName = options(1)
+      outputFilename = options(1)
       gotInitEnvelope = true
     }
   }

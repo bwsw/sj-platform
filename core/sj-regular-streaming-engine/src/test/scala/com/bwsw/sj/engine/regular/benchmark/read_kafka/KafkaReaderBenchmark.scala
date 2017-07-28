@@ -21,7 +21,7 @@ package com.bwsw.sj.engine.regular.benchmark.read_kafka
 import java.util.UUID
 
 import com.bwsw.common.KafkaClient
-import com.bwsw.sj.kafka.data_sender.DataSender
+import com.bwsw.sj.common.utils.benchmark.KafkaDataSender
 
 /**
   * Provides methods for testing the speed of reading data from Kafka by some application.
@@ -38,7 +38,7 @@ abstract class KafkaReaderBenchmark(zooKeeperAddress: String,
                                     words: Array[String]) {
   protected val kafkaTopic: String = "performance-benchmark-" + UUID.randomUUID().toString
   protected val kafkaClient: KafkaClient = new KafkaClient(Array(zooKeeperAddress))
-  protected val kafkaSender: DataSender = new DataSender(kafkaAddress, kafkaTopic, words, " ")
+  protected val kafkaSender: KafkaDataSender = new KafkaDataSender(kafkaAddress, kafkaTopic, words, " ")
   protected val warmingUpMessageSize: Long = 10
   protected val warmingUpMessagesCount: Long = 10
   protected val lookupResultTimeout: Long = 5000
