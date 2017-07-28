@@ -799,11 +799,11 @@ Please, note, the details of an Instance show not only the instance settings but
 - Stages
    Stages display information about current status of the framework that starts Instance. It allows you to follow the start or stop processes of Instance.
    
-The stages include:
+   The stages include:
 
-- state - Instance status
-- datetime - The time when a state has been changed 
-- duration  -  How long a stage has got a current state. This field makes sense if a state field is 'starting', 'stopping' or 'deleting'.
+    - state - Instance status
+    - datetime - The time when a state has been changed 
+    - duration  -  How long a stage has got a current state. This field makes sense if a state field is 'starting', 'stopping' or 'deleting'.
   
 - Execution plan
     Execution plan consists of tasks. The number of tasks equals to a 'Parallelism' parameter. Each task has a unique name within the execution plan. Also the task has a set of Input stream names and their intervals of partitions. In general, it provides the information of the sources from which the data will be consumed.
