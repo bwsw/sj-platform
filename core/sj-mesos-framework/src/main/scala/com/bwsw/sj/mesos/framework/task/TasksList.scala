@@ -32,7 +32,6 @@ import scaldi.Injector
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
-import scala.util.{Failure, Success, Try}
 
 
 /**
@@ -332,7 +331,7 @@ object TasksList {
         .addVariables(Environment.Variable.newBuilder.setName("AGENTS_PORTS").setValue(getAgentPorts))
         .addVariables(Environment.Variable.newBuilder.setName("INSTANCE_HOSTS").setValue(getInstanceHosts))
         .addVariables(Environment.Variable.newBuilder.setName("MONGO_HOSTS").setValue(FrameworkParameters(FrameworkParameters.mongoHosts)))
-        .addVariables(Environment.Variable.newBuilder.setName("MONGO_USER").setValue(FrameworkParameters(FrameworkParameters.mognoUser)))
+        .addVariables(Environment.Variable.newBuilder.setName("MONGO_USER").setValue(FrameworkParameters(FrameworkParameters.mongoUser)))
         .addVariables(Environment.Variable.newBuilder.setName("MONGO_PASSWORD").setValue(FrameworkParameters(FrameworkParameters.mongoPassword)))
 //        .addVariables(Environment.Variable.newBuilder.setName("ENTRY_PORT").setValue("8888"))
         .build()
