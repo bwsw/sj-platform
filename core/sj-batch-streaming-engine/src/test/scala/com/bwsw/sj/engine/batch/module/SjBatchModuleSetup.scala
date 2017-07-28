@@ -27,7 +27,8 @@ import com.bwsw.sj.engine.batch.module.DataFactory._
 
 object SjBatchModuleSetup extends App {
   LogManager.getLogManager.reset()
-  TempHelperForConfigSetup.setupConfigs()
+  val tempHelperForConfigSetup = new TempHelperForConfigSetup(connectionRepository)
+  tempHelperForConfigSetup.setupConfigs()
   val streamService = connectionRepository.getStreamRepository
   val serviceManager = connectionRepository.getServiceRepository
   val providerService = connectionRepository.getProviderRepository

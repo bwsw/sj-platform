@@ -21,11 +21,9 @@ package com.bwsw.common.jdbc
 import java.sql.{Connection, Driver, PreparedStatement, SQLException}
 import java.util.Properties
 
-import com.bwsw.sj.common.dal.repository.ConnectionRepository
+import com.bwsw.common.file.utils.FileStorage
 import com.bwsw.sj.common.utils.{FileClassLoader, JdbcLiterals}
 import org.slf4j.LoggerFactory
-import scaldi.Injectable.inject
-import scaldi.Injector
 
 import scala.util.{Failure, Success, Try}
 
@@ -44,8 +42,7 @@ import scala.util.{Failure, Success, Try}
   * @param jdbcCCD connection data
   */
 
-protected class JdbcClient(override val jdbcCCD: JdbcClientConnectionData)
-                          (implicit injector: Injector) extends IJdbcClient {
+protected class JdbcClient(override val jdbcCCD: JdbcClientConnectionData, fileStorage: FileStorage) extends IJdbcClient {
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val driver = createDriver()
   private val credential = createCredential()
@@ -91,7 +88,7 @@ protected class JdbcClient(override val jdbcCCD: JdbcClientConnectionData)
     credential
   }
 
-  protected def createClassLoader(filename: String) = new FileClassLoader(inject[ConnectionRepository].getFileStorage, filename)
+  protected def createClassLoader(filename: String) = new FileClassLoader(fileStorage, filename)
 }
 
 trait IJdbcClient {

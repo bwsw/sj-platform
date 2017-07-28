@@ -27,7 +27,7 @@ import com.typesafe.config.ConfigFactory
 /**
   * TTS server to launch benchmarks
   */
-class TestStorageServer(token: String, prefix: String, streamPath: String, zkHosts: String, host: String) {
+class TestStorageServer(token: String, prefix: String, streamPath: String, zkHosts: String, host: String, port: Int) {
 
   private val serverBuilder = new ServerBuilder()
 
@@ -35,7 +35,7 @@ class TestStorageServer(token: String, prefix: String, streamPath: String, zkHos
 
   def start(): Unit = {
     val transactionServer = serverBuilder.withZookeeperOptions(ZookeeperOptions(endpoints = zkHosts, prefix))
-      .withBootstrapOptions(BootstrapOptions(host))
+      .withBootstrapOptions(BootstrapOptions(host, port))
       .withAuthOptions(AuthOptions(token))
       .withServerStorageOptions(StorageOptions(path = getTmpDir(), streamPath))
       .withCommitLogOptions(CommitLogOptions(commitLogCloseDelayMs = 100))
@@ -59,17 +59,20 @@ object Server extends App {
   val rootConfig = "test-storage-server"
   val zkHostsConfig = rootConfig + ".zookeeper.hosts"
   val hostConfig = rootConfig + ".host"
+  val portConfig = rootConfig + ".port"
 
   val config = ConfigFactory.load()
   val zkHosts = config.getString(zkHostsConfig)
   val host = config.getString(hostConfig)
+  val port = config.getInt(portConfig)
 
   new TestStorageServer(
     defaultToken,
     defaultPrefix,
     defaultStreamPath,
     zkHosts,
-    host).start()
+    host,
+    port).start()
 }
 
 class Server
