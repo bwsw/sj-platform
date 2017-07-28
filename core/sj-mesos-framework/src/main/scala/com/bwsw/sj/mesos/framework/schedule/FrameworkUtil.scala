@@ -126,10 +126,8 @@ object FrameworkUtil {
     killAllLaunchedTasks()
   }
 
-  /**
-    * Selecting which tasks would be launched.
-    */
-  def prepareTasksToLaunch(): Unit = {
+
+  def selectingNotLaunchedTasks(): Unit = {
     TasksList.getList.foreach(task => {
       if (!TasksList.getLaunchedTasks.contains(task.id)) TasksList.addToLaunch(task.id)
     })

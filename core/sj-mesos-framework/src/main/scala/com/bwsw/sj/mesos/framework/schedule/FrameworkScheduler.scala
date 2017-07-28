@@ -69,7 +69,7 @@ class FrameworkScheduler(implicit injector: Injector) extends Scheduler {
 
 
   /**
-    * Executed when task change status.
+    * Handles update of task status.
     *
     * @param driver scheduler driver
     * @param status received status from master
