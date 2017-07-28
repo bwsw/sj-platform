@@ -32,7 +32,7 @@ import com.bwsw.sj.common.si.model.{FileMetadata, FileMetadataCreator}
 import com.bwsw.sj.common.si.result._
 import com.bwsw.sj.common.utils.{MessageResourceUtils, SpecificationUtils}
 import org.bson.types.ObjectId
-import org.mockito.ArgumentMatchers.{any, anyString, eq => mockitoEq}
+import org.mockito.ArgumentMatchers.{any, anyString, argThat, eq => mockitoEq}
 import org.mockito.Mockito.{never, verify, when}
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FlatSpec, Matchers}
@@ -140,18 +140,21 @@ class CustomJarsSiTests extends FlatSpec with Matchers with MockitoSugar {
       .thenReturn(Seq(domain))
   }
 
-//TODO rewrite this test, after adding Date to config, this test failing
   "CustomFilesSI" should "create correct custom jar" in new Mocks {
-//    when(jarNotInStorageMetadata.validate()).thenReturn(ArrayBuffer[String]())
-//
-//    customJarsSI.create(jarNotInStorageMetadata) shouldBe Created
-//    verify(fileStorage)
-//      .put(
-//        new File(jarNotInStorageFilename),
-//        jarNotInStorageFilename,
-//        jarNotInStorageSpecificationMap,
-//        customJarType)
-//    verify(configRepository).save(jarNotInStorageConfig)
+    when(jarNotInStorageMetadata.validate()).thenReturn(ArrayBuffer[String]())
+
+    customJarsSI.create(jarNotInStorageMetadata) shouldBe Created
+    verify(fileStorage)
+      .put(
+        new File(jarNotInStorageFilename),
+        jarNotInStorageFilename,
+        jarNotInStorageSpecificationMap,
+        customJarType)
+    verify(configRepository).save(argThat[ConfigurationSettingDomain] { configurationSetting =>
+      val configurationSettingWithStubbedDate = configurationSetting.copy(creationDate = jarNotInStorageConfig.creationDate)
+
+      configurationSettingWithStubbedDate == jarNotInStorageConfig
+    })
   }
 
   it should "not create incorrect custom jar" in new Mocks {

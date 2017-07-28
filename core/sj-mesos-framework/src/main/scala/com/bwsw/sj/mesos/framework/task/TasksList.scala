@@ -32,7 +32,6 @@ import scaldi.Injector
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
-import scala.util.{Failure, Success, Try}
 
 
 /**
