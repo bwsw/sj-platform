@@ -2985,4 +2985,25 @@ Success response json example::
  "message": "Tasks launched" 
  }
 
+The following information on tasks is returned:
+
+- ``state`` - the status of task performance. The following options are possible: 
+  
+ - "TASK_STAGING" - the task is created but is not started executing, 
+ - "TASK_RUNNING" - the task is launched and is being executed now, 
+ - "TASK_FAILED" - the task is failed, 
+ - "TASK_ERROR" - an error is detected in the task execution. 
+
+- ``directories`` - directories of tasks of the instance. 
+
+- ``state-change`` - the date of the last status change.
+
+- ``reason`` - the reason for the task status change.
+
+- ``id`` - the task id.
+
+- ``node`` - name of node used by the task.
+
+- ``last node`` - name of node that was used by a task before the status change.
+
 .. tip:: A full range of error responses can be found at :ref:`Instances_Errors`
