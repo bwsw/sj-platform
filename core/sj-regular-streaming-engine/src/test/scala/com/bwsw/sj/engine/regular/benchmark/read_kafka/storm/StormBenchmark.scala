@@ -27,13 +27,13 @@ import com.bwsw.sj.engine.regular.benchmark.read_kafka.storm.StormBenchmarkLiter
 import com.bwsw.sj.engine.regular.benchmark.utils.BenchmarkUtils.retrieveResultFromFile
 
 /**
-  * Provides methods for testing speed of reading data by [[http://storm.apache.org Apache Storm]] from Kafka.
+  * Provides methods for testing the speed of reading data by [[http://storm.apache.org Apache Storm]] from Kafka.
   *
   * Topic deletion must be enabled on the Kafka server.
   *
   * @param zooKeeperAddress ZooKeeper server's address. Must point to the ZooKeeper server that used by the Kafka server.
   * @param kafkaAddress     Kafka server's address
-  * @param words            list of words that sends to the kafka server
+  * @param words            list of words that are sent to the Kafka server
   * @author Pavel Tomskikh
   */
 class StormBenchmark(zooKeeperAddress: String,

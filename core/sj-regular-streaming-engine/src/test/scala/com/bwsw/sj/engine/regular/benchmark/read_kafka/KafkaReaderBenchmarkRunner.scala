@@ -21,7 +21,7 @@ package com.bwsw.sj.engine.regular.benchmark.read_kafka
 import java.io.{File, FileWriter}
 
 /**
-  * Provides methods for running [[KafkaReaderBenchmark]] and writing result into a file
+  * Provides methods for running [[KafkaReaderBenchmark]] and writing a result into a file
   *
   * @param benchmark benchmark
   * @param config    config for benchmark

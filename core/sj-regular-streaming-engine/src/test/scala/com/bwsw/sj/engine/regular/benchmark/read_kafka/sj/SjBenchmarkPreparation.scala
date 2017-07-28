@@ -35,6 +35,8 @@ import scala.collection.JavaConverters._
 import scala.util.Try
 
 /**
+  * It is needed to upload SJ entities such as providers, services, streams, a module and an instance
+  *
   * @author Pavel Tomskikh
   */
 class SjBenchmarkPreparation(mongoPort: Int,

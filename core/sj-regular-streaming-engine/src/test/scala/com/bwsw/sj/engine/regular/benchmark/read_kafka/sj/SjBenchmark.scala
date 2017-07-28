@@ -35,7 +35,7 @@ import com.bwsw.sj.engine.regular.benchmark.utils.BenchmarkUtils.retrieveResultF
 import com.typesafe.config.ConfigFactory
 
 /**
-  * Provides methods for testing speed of reading data from Kafka by Stream Juggler.
+  * Provides methods for testing the speed of reading data from Kafka by Stream Juggler.
   *
   * Topic deletion must be enabled on the Kafka server.
   *
@@ -44,7 +44,7 @@ import com.typesafe.config.ConfigFactory
   * @param zkHost       ZooKeeper server's host
   * @param zkPort       ZooKeeper server's port
   * @param kafkaAddress Kafka server's address
-  * @param words        list of words that sends to the kafka server
+  * @param words        list of words that are sent to the Kafka server
   * @author Pavel Tomskikh
   */
 class SjBenchmark(zkHost: String,

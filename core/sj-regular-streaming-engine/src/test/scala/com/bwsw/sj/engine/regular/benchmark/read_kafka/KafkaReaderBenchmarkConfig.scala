@@ -26,7 +26,7 @@ import com.typesafe.config.Config
 import scala.util.Try
 
 /**
-  * Loads configs parameters from typesafe config for [[KafkaReaderBenchmark]]
+  * Loads the config parameters from typesafe config for [[KafkaReaderBenchmark]]
   *
   * @param config               typesafe config
   * @param outputFilenamePrefix prefix for default name of output file
