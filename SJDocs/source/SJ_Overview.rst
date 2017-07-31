@@ -48,14 +48,17 @@ Short Features List for Impatient
 -------------------------------
 Major features implemented in SJ-Platform are listed in the following list:
 
-**Processes data in "exactly-once" mode**. This is a very critical requirement which is important for many systems. SJ-Platform supports exactly-once mode across the pipeline.
+**Processes data exactly-once**. This is a very critical requirement which is important for many systems. SJ-Platform supports exactly-once mode across the pipeline.
 
-**Two kinds of processing - "per-event" and "micro-batch"**. These modes are widely used and cover requirements of all stream processing tasks.
+**Two kinds of processing - per-event and micro-batch**. These modes are widely used and cover requirements of all stream processing tasks.
+
+**Stateful and stateless processing**. Developers can use special state management API implementing their algorithms. That API supports resilent and reliable state behaviour during system failures and crashes.
+
+**Distributed synchronized data processing**. Micro-batch processing mode provides developers with capability to synchronize computations across the nodes which is sometimes required.
+
+**Custom context-based batching methods**. Micro-batch processing mode provides developers with API to implement custom algorithms to determine batch completeness which is important feature required in many real-life tasks.
 
 
-3. stateful and stateless processing;
-4. distributed synchronized data processing;
-5. custom context-based batching methods;
 6. use of Apache Kafka or TCP as input source of events;
 7. JDBC/Elasticsearch/RESTful interface as output destination for processing data;
 8. performance metrics.
