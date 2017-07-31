@@ -46,14 +46,18 @@ The problem is not a case of "heavy" task but it includes some problems which ar
 
 Short Features List for Impatient
 -------------------------------
-Major features of SJ-Platform are listed in the following list:
+Major features supported by SJ-Platform are listed in the following list:
 
 1. processes data in "exactly-once" mode;
-2. two kinds of processing --- "per-event" and "micro-batch";
+2. two kinds of processing - "per-event" and "micro-batch";
 3. stateful and stateless processing;
-4. distributed synchronized processing;
-5. supports custom context-based batching methods;
-6. 
+4. distributed synchronized data processing;
+5. custom context-based batching methods;
+6. use of Apache Kafka or TCP as input source of events;
+7. JDBC/Elasticsearch/RESTful interface as output destination for processing data;
+8. performance metrics.
+
+These features will be explained in the documentation in depth.
 
 
 What can Stream Juggler Do?
