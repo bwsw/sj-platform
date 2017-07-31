@@ -12,7 +12,7 @@ Stream Processing Systems are widely used in the modern world. There are a lot o
 
 There are many systems which can compete today - Apache Spark, Apache Kafka, Apache Flink, Apache Storm are the most famous. Every system has its own strenghts and weaknesses, making it better or worse for certain cases. SJ-Platform also has such features. But we developed it to be universal and convinient for broad range of tasks. We hope the features of SJ-Platform make developers solve and support tasks faster and system engineers operate clusters easily. 
 
-Every stream processing system must be fast and scalable. This is the most important requirement. SJ-Platform is fast and scalable as well. It is written in `Scala <https://www.scala-lang.org/>`_ language - well known JVM language which is fast and provides an access to lots of open source libraries and frameworks.
+Every stream processing system must be fast and scalable. This is the most important requirement. SJ-Platform is fast and scalable as well. It is written in `Scala <https://www.scala-lang.org/>`_ language - well known JVM language which is fast and provides an access to lots of open source libraries and frameworks. From the other hand, horizontal scaling is vital for stream processing systems which require the capability to distribute computations between compute nodes. SJ-Platform achieves that goal with help of well-known distributed scheduler system Apache Mesos.
 
 SJ-Platform stands on shoulders of well-known technologies which simplify the deployment and operation and support best industrial practices. Core SJ-Platform technologies are mentioned in following list:
 
@@ -24,7 +24,6 @@ SJ-Platform stands on shoulders of well-known technologies which simplify the de
 6. `Hazelcast <https://hazelcast.com/>`_ - leading in-memory grid.
 
 Further in the documentation we explain how, why and when technologies mentioned above are used in the system.
-
 
 What can Stream Juggler Do?
 -------------------------------
