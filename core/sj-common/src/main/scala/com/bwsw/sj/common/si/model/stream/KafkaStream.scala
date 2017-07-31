@@ -22,7 +22,7 @@ import java.util.Date
 
 import com.bwsw.common.KafkaClient
 import com.bwsw.sj.common.config.SettingsUtils
-import com.bwsw.sj.common.dal.model.service.KafkaServiceDomain
+import com.bwsw.sj.common.dal.model.service.{KafkaServiceDomain, ServiceDomain}
 import com.bwsw.sj.common.dal.model.stream.KafkaStreamDomain
 import com.bwsw.sj.common.utils.{ServiceLiterals, StreamLiterals}
 import kafka.common.TopicAlreadyMarkedForDeletionException
@@ -65,7 +65,9 @@ class KafkaStream(name: String,
 
   override def create(): Unit = {
     Try {
-      val kafkaClient = createKafkaClient()
+      //TODO can be service extraction errors
+      val (serviceDomain, serrors) = extractServiceByName(service, ServiceLiterals.kafkaType)
+      val kafkaClient = createKafkaClient(serviceDomain.asInstanceOf[KafkaServiceDomain])
       if (doesStreamHaveForcedCreation(kafkaClient)) {
         deleteTopic(kafkaClient)
         createTopic(kafkaClient)
@@ -86,7 +88,9 @@ class KafkaStream(name: String,
 
   override def delete(): Unit = {
     Try {
-      val kafkaClient = createKafkaClient()
+      //TODO can be service extraction errors
+      val (serviceDomain, serrors) = extractServiceByName(service, ServiceLiterals.kafkaType)
+      val kafkaClient = createKafkaClient(serviceDomain.asInstanceOf[KafkaServiceDomain])
       if (doesTopicExist(kafkaClient)) {
         deleteTopic(kafkaClient)
       }
@@ -115,10 +119,46 @@ class KafkaStream(name: String,
         createMessage("entity.error.attribute.must.be.positive.integer", "replicationFactor")
     }
 
+    val (serviceDomain: Option[ServiceDomain], serrors: ArrayBuffer[String]) = extractServiceByName(service, ServiceLiterals.kafkaType)
+
+    if (serviceDomain.isEmpty)
+      errors ++= serrors
+
+    if (errors.isEmpty)
+      errors ++= checkStreamPartitionsOnConsistency(serviceDomain.asInstanceOf[KafkaServiceDomain])
+
+// TODO remove this commented code if 'extractServiceByName' is OK
+//    Option(service) match {
+//      case Some("") | None =>
+//        errors += createMessage("entity.error.attribute.required", "Service")
+//
+//      case Some(x) =>
+//        val serviceDAO = connectionRepository.getServiceRepository
+//        val serviceObj = serviceDAO.get(x)
+//        serviceObj match {
+//          case None =>
+//            errors += createMessage("entity.error.doesnot.exist", "Service", x)
+//          case Some(someService) =>
+//            if (someService.serviceType != ServiceLiterals.kafkaType) {
+//              errors += createMessage("entity.error.must.one.type.other.given",
+//                s"Service for '${StreamLiterals.kafkaType}' stream",
+//                ServiceLiterals.kafkaType,
+//                someService.serviceType)
+//            } else {
+//
+//            }
+//        }
+//    }
+
+    errors
+  }
+
+  private def extractServiceByName(serviceName: String, serviceType: String): (Option[ServiceDomain], ArrayBuffer[String]) ={
+    val errors = new ArrayBuffer[String]()
+    var serviceDomain: Option[ServiceDomain] = None
     Option(service) match {
       case Some("") | None =>
         errors += createMessage("entity.error.attribute.required", "Service")
-
       case Some(x) =>
         val serviceDAO = connectionRepository.getServiceRepository
         val serviceObj = serviceDAO.get(x)
@@ -126,24 +166,26 @@ class KafkaStream(name: String,
           case None =>
             errors += createMessage("entity.error.doesnot.exist", "Service", x)
           case Some(someService) =>
-            if (someService.serviceType != ServiceLiterals.kafkaType) {
-              errors += createMessage("entity.error.must.one.type.other.given",
-                s"Service for '${StreamLiterals.kafkaType}' stream",
-                ServiceLiterals.kafkaType,
+            if (someService.serviceType != serviceType) {
+                errors += createMessage("entity.error.must.one.type.other.given",
+                s"Service for '$serviceType' stream",
+                  serviceType,
                 someService.serviceType)
             } else {
-              if (errors.isEmpty)
-                errors ++= checkStreamPartitionsOnConsistency(someService.asInstanceOf[KafkaServiceDomain])
+              serviceDomain = Some(someService)
             }
         }
     }
+    (serviceDomain, errors)
+  }
 
-    errors
+  private def createKafkaClient(service: KafkaServiceDomain): KafkaClient ={
+    new KafkaClient(service.zkProvider.hosts, settingsUtils.getZkSessionTimeout())
   }
 
   private def checkStreamPartitionsOnConsistency(service: KafkaServiceDomain): ArrayBuffer[String] = {
     val errors = new ArrayBuffer[String]()
-    val kafkaClient = new KafkaClient(service.zkProvider.hosts, settingsUtils.getZkSessionTimeout())
+    val kafkaClient = createKafkaClient(service)
     val topicMetadata = kafkaClient.fetchTopicMetadataFromZk(name)
     if (!topicMetadata.partitionMetadata().isEmpty && topicMetadata.partitionMetadata().size != partitions) {
       errors += createMessage("entity.error.mismatch.partitions", name, s"$partitions", s"${topicMetadata.partitionMetadata().size}")
