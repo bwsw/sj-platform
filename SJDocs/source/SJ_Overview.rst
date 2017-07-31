@@ -8,12 +8,18 @@ Stream Juggler Platform (**SJ-Platform**) is an open source, scalable solution f
 
 Basically, SJ-Platform is inspired by `Apache Samza <http://samza.apache.org/>`_, but has a lot of features which Samza doesn't provide, like exactly-once processing capability, integrated RESTful API and Web UI and lots of others.
 
-Tasks Which Can Be Solved With SJ-Platform
--------------------------------
-
 Stream Processing Systems are widely used in the modern world. There are a lot of cases where developers should use stream processing systems. All those cases are usually involve large data streams which can not be handled by single computer effectively, specific requirements applied to computations like processing idempotence, exactly-once processing and predictable behaviour in case of crashes. Every stream processing platform is a framework which enforces certain code restrictions guaranteeng that the processing is stable and results are reproduceable if a developer follows the restrictions.
 
-There are many systems which can compete today - Apache Spark, Apache Kafka, Apache Flink, Apache Storm are the most famous. Every system has its own strenghts and weaknesses, making it better or worse for certain cases. SJ-Platform also has such features. But we developed it to be universal and convinient for broad range of tasks. We hope the features of SJ-Platform make developers solve and support tasks faster and system engineers operate clusters easily.
+There are many systems which can compete today - Apache Spark, Apache Kafka, Apache Flink, Apache Storm are the most famous. Every system has its own strenghts and weaknesses, making it better or worse for certain cases. SJ-Platform also has such features. But we developed it to be universal and convinient for broad range of tasks. We hope the features of SJ-Platform make developers solve and support tasks faster and system engineers operate clusters easily. 
+
+SJ-Platform stands on shoulders of well-known technologies to simplify the deployment and operation and support best industrial practices. Core SJ-Platform technologies are mentioned in following list:
+1. `Apache Mesos <http://mesos.apache.org>`_ - universal distributed computational engine;
+2. `Apache Zookeeper <http://zookeeper.apache.org>`_ - distributed configuration and coordination broker;
+3. `Apache Kafka <http://kafka.apache.org>`_ - high performance message broker;
+4. `Mesosphere Marathon <https://mesosphere.github.io/marathon/`_
+5. `MongoDB <https://www.mongodb.com/`_
+6. `Hazelcast <https://hazelcast.com/>`_
+
 
 What can Stream Juggler Do?
 -------------------------------
