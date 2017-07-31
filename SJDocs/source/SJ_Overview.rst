@@ -17,8 +17,8 @@ SJ-Platform stands on shoulders of well-known technologies to simplify the deplo
 1. `Apache Mesos <http://mesos.apache.org>`_ - universal distributed computational engine;
 2. `Apache Zookeeper <http://zookeeper.apache.org>`_ - distributed configuration and coordination broker;
 3. `Apache Kafka <http://kafka.apache.org>`_ - high performance message broker;
-4. `Mesosphere Marathon <https://mesosphere.github.io/marathon/`_ - universal framework for executing tasks on Mesos;
-5. `MongoDB <https://www.mongodb.com/`_ - highly available document database;
+4. `Mesosphere Marathon <https://mesosphere.github.io/marathon/>`_ - universal framework for executing tasks on Mesos;
+5. `MongoDB <https://www.mongodb.com/>`_ - highly available document database;
 6. `Hazelcast <https://hazelcast.com/>`_ - leading in-memory grid.
 
 
