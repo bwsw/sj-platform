@@ -31,12 +31,18 @@ The documentation is organized in two big parts. The first one is tutorial part 
 
 Preliminary Requirements to The Reader
 -------------------------------
-To achieve the success the reader must have a knowledge of:
+SJ-Platform is a quite complex system, but the tutorial tries to guide the reader as smooth as possible. So, there are quite small amount of requirements to a reader: to achieve the success the reader must have a knowledge of:
 
 1. scala programming language and generic data structures;
 2. basics of Docker.
 
 Also, the reader should have working Linux host with 4-8GB of RAM and 4 CPU cores with Docker installed (in the tutorial the installation of Docker for Ubuntu 17.04 OS will be explained).
+
+In the tutorial we will demonstrate the functionality of SJ-Platform and train the reader develop the modules for it using the example problem, which is listed further:
+
+TODO PROBLEM DESCRIPTION
+
+The problem is not a case of "heavy" task but it includes some problems which are very specific to stream processing tasks and introduces all SJ-Platform functionality step-by-step without deep knowledge requirements of specific problem domains.
 
 
 What can Stream Juggler Do?
