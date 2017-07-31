@@ -34,7 +34,7 @@ Preliminary Requirements to The Reader
 To achieve the success the reader must have a knowledge of:
 
 1. scala programming language and generic data structures;
-2. basics of Docker
+2. basics of Docker.
 
 Also, the reader should have working Linux host with 4-8GB of RAM and 4 CPU cores with Docker installed (in the tutorial the installation of Docker for Ubuntu 17.04 OS will be explained).
 
