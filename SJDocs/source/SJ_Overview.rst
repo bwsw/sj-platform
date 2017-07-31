@@ -13,6 +13,8 @@ Tasks Which Can Be Solved With SJ-Platform
 
 Stream Processing Systems are widely used in the modern world. There are a lot of cases where developers should use stream processing systems. All those cases are usually involve large data streams which can not be handled by single computer effectively, specific requirements applied to computations like processing idempotence, exactly-once processing and predictable behaviour in case of crashes. Every stream processing platform is a framework which enforces certain code restrictions guaranteeng that the processing is stable and results are reproduceable if a developer follows the restrictions.
 
+There are many systems which can compete today &mdash; Apache Spark, Apache Kafka, Apache Flink, Apache Storm.
+
 What can Stream Juggler Do?
 -------------------------------
 
