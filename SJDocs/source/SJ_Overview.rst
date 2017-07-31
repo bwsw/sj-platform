@@ -1,7 +1,7 @@
 Stream Juggler Platform Overview
 ================================
 
-What is Stream Juggler?
+Introduction to Stream Juggler Platform
 ----------------------------
 
 Stream Juggler Platform (**SJ-Platform**) is an open source, scalable solution for real-time and micro-batched unbounded streams processing. The system fits for building a event processing systems and allows a developer to construct connected pipelines for analyzing data streams. **Stream** is unbound sequence of events processed sequentially from the oldest ones to newest ones. SJ-Platform is built to be smooth and easy to understand and learn for an average developer who knows Scala language. The system doesn't require any specific knowledge of mathematical concepts like some competing require. Basically, SJ-Platform is inspired by `Apache Samza <http://samza.apache.org/>`_, but has a lot of features which Samza doesn't provide, like exactly-once processing capability, integrated RESTful API and Web UI and lots of others.
