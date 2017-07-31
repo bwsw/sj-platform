@@ -29,6 +29,15 @@ Documentation Structure
 -------------------------------
 The documentation is organized in two big parts. The first one is tutorial part which guides a reader through the system in a way which motivates him/her to observe, try and explain every step in practice. The second part is a referential one, which explain specific topics and lists system specifications for administrative and programming API, RESTful interface and Web UI.
 
+Preliminary Requirements to The Reader
+-------------------------------
+To achieve the success the reader must have a knowledge of:
+
+1. scala programming language and generic data structures;
+2. basics of Docker
+
+Also, the reader should have working Linux host with 4-8GB of RAM and 4 CPU cores with Docker installed (in the tutorial the installation of Docker for Ubuntu 17.04 OS will be explained).
+
 
 What can Stream Juggler Do?
 -------------------------------
