@@ -143,21 +143,13 @@ class KafkaStream(name: String,
 
   private def checkStreamPartitionsOnConsistency(service: KafkaServiceDomain): ArrayBuffer[String] = {
     val errors = new ArrayBuffer[String]()
-    val kafkaClient = createKafkaClient()
+    val kafkaClient = new KafkaClient(service.zkProvider.hosts, settingsUtils.getZkSessionTimeout())
     val topicMetadata = kafkaClient.fetchTopicMetadataFromZk(name)
     if (!topicMetadata.partitionMetadata().isEmpty && topicMetadata.partitionMetadata().size != partitions) {
       errors += createMessage("entity.error.mismatch.partitions", name, s"$partitions", s"${topicMetadata.partitionMetadata().size}")
     }
 
     errors
-  }
-
-  private def createKafkaClient(): KafkaClient = {
-    val serviceDAO = connectionRepository.getServiceRepository
-    val service = serviceDAO.get(this.service).get.asInstanceOf[KafkaServiceDomain]
-    val zkServers = service.zkProvider.hosts
-
-    new KafkaClient(zkServers, settingsUtils.getZkSessionTimeout())
   }
 
   private def doesStreamHaveForcedCreation(kafkaClient: KafkaClient): Boolean =
