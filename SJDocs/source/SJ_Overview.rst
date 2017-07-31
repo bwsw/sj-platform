@@ -25,6 +25,11 @@ SJ-Platform stands on shoulders of well-known technologies which simplify the de
 
 Further in the documentation we explain how, why and when technologies mentioned above are used in the system.
 
+Documentation Structure
+-------------------------------
+The documentation is organized in two big parts. The first one is tutorial part which guides a reader through the system in a way which motivates him/her to observe, try and explain every step in practice. The second part is a referential one, which explain specific topics and lists system specifications for administrative and programming API, RESTful interface and Web UI.
+
+
 What can Stream Juggler Do?
 -------------------------------
 
