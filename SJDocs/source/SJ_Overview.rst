@@ -66,8 +66,11 @@ The second is **Apache Kafka**. Apache Kafka is de-facto standard for message qu
 
 The third is **T-streams**. T-streams is Kafka-like message broker which is native to SJ-Platform and is used as internal data exchange bus inside the system.
 
-7. JDBC/Elasticsearch/RESTful interface as output destination for processing data;
-8. performance metrics.
+**JDBC/Elasticsearch/RESTful interface as output destination for processing data**. Processed data are exported to JDBC-compatible database, Elasticsearch or RESTful interface.
+
+**Performance metrics**. SJ-Platform supports embedded performance metrics which help system managers to observe the runtime performance of the system.
+
+**Extensive simulator development framework**. SJ-Platform provdies developers with special "mock" infrastructure which helps develop and test modules without actual deployment to the runtime.
 
 These features will be explained in the documentation in depth.
 
