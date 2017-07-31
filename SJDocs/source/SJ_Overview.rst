@@ -58,8 +58,14 @@ Major features implemented in SJ-Platform are listed in the following list:
 
 **Custom context-based batching methods**. Micro-batch processing mode provides developers with API to implement custom algorithms to determine batch completeness which is important feature required in many real-life tasks.
 
+**Use of Apache Kafka, T-streams or TCP as input source of events**. External systems feed SJ-Platform with events via list of supported interfaces. Right now it supports several of them. 
 
-6. use of Apache Kafka or TCP as input source of events;
+The first is **TCP**. The method allows developers design custom protocol to receive events from external systems, deduplicate them and place into processing pipeline.
+
+The second is **Apache Kafka**. Apache Kafka is de-facto standard for message queueing, so we support it in SJ-Platform providing 3rd party applications with common integration interface.
+
+The third is **T-streams**. T-streams is Kafka-like message broker which is native to SJ-Platform and is used as internal data exchange bus inside the system.
+
 7. JDBC/Elasticsearch/RESTful interface as output destination for processing data;
 8. performance metrics.
 
