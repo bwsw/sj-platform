@@ -46,10 +46,13 @@ The problem is not a case of "heavy" task but it includes some problems which ar
 
 Short Features List for Impatient
 -------------------------------
-Major features supported by SJ-Platform are listed in the following list:
+Major features implemented in SJ-Platform are listed in the following list:
 
-1. processes data in "exactly-once" mode;
-2. two kinds of processing - "per-event" and "micro-batch";
+**Processes data in "exactly-once" mode**. This is a very critical requirement which is important for many systems. SJ-Platform supports exactly-once mode across the pipeline.
+
+**Two kinds of processing - "per-event" and "micro-batch"**. These modes are widely used and cover requirements of all stream processing tasks.
+
+
 3. stateful and stateless processing;
 4. distributed synchronized data processing;
 5. custom context-based batching methods;
