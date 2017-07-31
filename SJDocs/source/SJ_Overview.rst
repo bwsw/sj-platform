@@ -44,6 +44,17 @@ TODO PROBLEM DESCRIPTION
 
 The problem is not a case of "heavy" task but it includes some problems which are very specific to stream processing tasks and introduces all SJ-Platform functionality step-by-step without deep knowledge requirements of specific problem domains.
 
+Short Features List for Impatient
+-------------------------------
+Major features of SJ-Platform are listed in the following list:
+
+1. processes data in "exactly-once" mode;
+2. two kinds of processing --- "per-event" and "micro-batch";
+3. stateful and stateless processing;
+4. distributed synchronized processing;
+5. supports custom context-based batching methods;
+6. 
+
 
 What can Stream Juggler Do?
 -------------------------------
