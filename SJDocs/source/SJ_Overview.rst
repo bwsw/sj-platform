@@ -4,17 +4,17 @@ Stream Juggler Platform Overview
 Introduction to Stream Juggler Platform
 ----------------------------
 
-Stream Juggler Platform (**SJ-Platform**) is an open source, scalable solution for real-time and micro-batched unbounded streams processing. The system fits for building a event processing systems and allows a developer to construct connected pipelines for analyzing data streams. **Stream** is unbound sequence of events processed sequentially from the oldest ones to newest ones. SJ-Platform is built to be smooth and easy to understand and learn for an average developer who knows Scala language. The system doesn't require any specific knowledge of mathematical concepts like some competing require. Thus it makes it easy for a common type engineer to solve stream processing tasks.
+Stream Juggler Platform (**SJ-Platform**) is an open source, scalable solution for real-time and micro-batched unbounded streams processing. The system fits for building an event processing systems and allows a developer to construct connected pipelines for analyzing data streams. **Stream** is unbound sequence of events processed sequentially from the oldest ones to newest ones. SJ-Platform is built to be smooth and easy to understand and learn for an average developer who knows Scala language. The system doesn't require any specific knowledge of mathematical concepts like some competing require. Thus, it makes it easy for a common type engineer to solve stream processing tasks.
 
 Basically, SJ-Platform is inspired by `Apache Samza <http://samza.apache.org/>`_, but has a lot of features which Samza doesn't provide, like exactly-once processing capability, integrated RESTful API and Web UI and lots of others.
 
-Stream Processing Systems are widely used in the modern world. There are a lot of cases where developers should use stream processing systems. All those cases are usually involve large data streams which can not be handled by single computer effectively, specific requirements applied to computations like processing idempotence, exactly-once processing and predictable behaviour in case of crashes. Every stream processing platform is a framework which enforces certain code restrictions guaranteeng that the processing is stable and results are reproduceable if a developer follows the restrictions.
+Stream Processing Systems are widely used in the modern world. There are a lot of cases where developers should use stream processing systems. All those cases are usually involve large data streams which can not be handled by a single computer effectively, specific requirements applied to computations like processing idempotence, exactly-once processing and predictable behaviour in case of crashes. Every stream processing platform is a framework which enforces certain code restrictions guaranteeng that the processing is stable and results are reproduceable if a developer follows the restrictions.
 
 There are many systems which can compete today - Apache Spark, Apache Kafka, Apache Flink, Apache Storm are the most famous. Every system has its own strenghts and weaknesses, making it better or worse for certain cases. SJ-Platform also has such features. But we developed it to be universal and convinient for broad range of tasks. We hope the features of SJ-Platform make developers solve and support tasks faster and system engineers operate clusters easily. 
 
-Every stream processing system must be fast and scalable. This is the most important requirement. SJ-Platform is fast and scalable as well. It is written in `Scala <https://www.scala-lang.org/>`_ language - well known JVM language which is fast and provides an access to lots of open source libraries and frameworks. From the other hand, horizontal scaling is vital for stream processing systems which require the capability to distribute computations between compute nodes. SJ-Platform achieves that goal with help of well-known distributed scheduler system Apache Mesos.
+Every stream processing system must be fast and scalable. This is the most important requirement. SJ-Platform is fast and scalable as well. It is written in `Scala <https://www.scala-lang.org/>`_ language - well known JVM language which is fast and provides an access to lots of open-source libraries and frameworks. On the other hand, horizontal scaling is vital for stream processing systems which require the capability to distribute computations between compute nodes. SJ-Platform achieves that goal with the help of well-known distributed scheduler system - Apache Mesos.
 
-SJ-Platform stands on shoulders of well-known technologies which simplify the deployment and operation and support best industrial practices. Core SJ-Platform technologies are mentioned in following list:
+SJ-Platform stands on shoulders of well-known technologies which simplify the deployment and operation and support best industrial practices. Core SJ-Platform technologies are mentioned in the following list:
 
 1. `Apache Mesos <http://mesos.apache.org>`_ - universal distributed computational engine;
 2. `Apache Zookeeper <http://zookeeper.apache.org>`_ - distributed configuration and coordination broker;
@@ -27,11 +27,11 @@ Further in the documentation we explain how, why and when technologies mentioned
 
 Documentation Structure
 -------------------------------
-The documentation is organized in two big parts. The first one is tutorial part which guides a reader through the system in a way which motivates him/her to observe, try and explain every step in practice. The second part is a referential one, which explain specific topics and lists system specifications for administrative and programming API, RESTful interface and Web UI.
+The documentation is organized in two big parts. The first one is a tutorial part which guides a reader through the system in a way which motivates him/her to observe, try and explain every step in practice. The second part is a referential one, which explains specific topics and lists system specifications for administrative and programming API, RESTful interface and Web UI.
 
 Preliminary Requirements to The Reader
 -------------------------------
-SJ-Platform is a quite complex system, but the tutorial tries to guide the reader as smooth as possible. So, there are quite small amount of requirements to a reader: to achieve the success the reader must have a knowledge of:
+SJ-Platform is a quite complex system, but the tutorial tries to guide the reader as smooth as possible. So, there are quite small amount of requirements to a reader. To achieve the success the reader must have knowledge of:
 
 1. scala programming language and generic data structures;
 2. basics of Docker.
@@ -58,7 +58,7 @@ Major features implemented in SJ-Platform are listed in the following list:
 
 **Custom context-based batching methods**. Micro-batch processing mode provides developers with API to implement custom algorithms to determine batch completeness which is important feature required in many real-life tasks.
 
-**Use of Apache Kafka, T-streams or TCP as input source of events**. External systems feed SJ-Platform with events via list of supported interfaces. Right now it supports several of them. 
+**Use of Apache Kafka, T-streams or TCP as input source of events**. External systems feed SJ-Platform with events via a list of supported interfaces. Right now it supports several of them. 
 
 The first is **TCP**. The method allows developers design custom protocol to receive events from external systems, deduplicate them and place into processing pipeline.
 
