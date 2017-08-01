@@ -8,9 +8,9 @@ Stream Juggler Platform (**SJ-Platform**) is an open source, scalable solution f
 
 Basically, SJ-Platform is inspired by `Apache Samza <http://samza.apache.org/>`_, but has a lot of features which Samza doesn't provide, like exactly-once processing capability, integrated RESTful API and Web UI and lots of others.
 
-Stream Processing Systems are widely used in the modern world. There are a lot of cases where developers should use stream processing systems. All those cases are usually involve large data streams which can not be handled by a single computer effectively, specific requirements applied to computations like processing idempotence, exactly-once processing and predictable behaviour in case of crashes. Every stream processing platform is a framework which enforces certain code restrictions guaranteeng that the processing is stable and results are reproduceable if a developer follows the restrictions.
+Stream Processing Systems are widely used in the modern world. There are a lot of cases where developers should use stream processing systems. All those cases usually involve large data streams which can not be handled by a single computer effectively, specific requirements are applied to computations like processing idempotence, exactly-once processing and predictable behavior in case of crashes. Every stream processing platform is a framework which enforces certain code restrictions guaranteeing that the processing is stable and results are reproducible if a developer follows the restrictions.
 
-There are many systems which can compete today - Apache Spark, Apache Kafka, Apache Flink, Apache Storm are the most famous. Every system has its own strenghts and weaknesses, making it better or worse for certain cases. SJ-Platform also has such features. But we developed it to be universal and convinient for broad range of tasks. We hope the features of SJ-Platform make developers solve and support tasks faster and system engineers operate clusters easily. 
+There are many systems which can compete today - Apache Spark, Apache Kafka, Apache Flink, Apache Storm are the most famous. Every system has its own strengths and weaknesses, making it better or worse for certain cases. SJ-Platform also has such features. But we developed it to be universal and convenient for a broad range of tasks. We hope the features of SJ-Platform make developers solve and support tasks faster and system engineers operate clusters easily. 
 
 Every stream processing system must be fast and scalable. This is the most important requirement. SJ-Platform is fast and scalable as well. It is written in `Scala <https://www.scala-lang.org/>`_ language - well known JVM language which is fast and provides an access to lots of open-source libraries and frameworks. On the other hand, horizontal scaling is vital for stream processing systems which require the capability to distribute computations between compute nodes. SJ-Platform achieves that goal with the help of well-known distributed scheduler system - Apache Mesos.
 
@@ -18,12 +18,12 @@ SJ-Platform stands on shoulders of well-known technologies which simplify the de
 
 1. `Apache Mesos <http://mesos.apache.org>`_ - universal distributed computational engine;
 2. `Apache Zookeeper <http://zookeeper.apache.org>`_ - distributed configuration and coordination broker;
-3. `Apache Kafka <http://kafka.apache.org>`_ - high performance message broker;
+3. `Apache Kafka <http://kafka.apache.org>`_ - high-performance message broker;
 4. `Mesosphere Marathon <https://mesosphere.github.io/marathon/>`_ - universal framework for executing tasks on Mesos;
 5. `MongoDB <https://www.mongodb.com/>`_ - highly available document database;
 6. `Hazelcast <https://hazelcast.com/>`_ - leading in-memory grid.
 
-Further in the documentation we explain how, why and when technologies mentioned above are used in the system.
+Further, in the documentation, we explain how, why and when technologies mentioned above are used in the system.
 
 Documentation Structure
 -------------------------------
@@ -31,18 +31,18 @@ The documentation is organized in two big parts. The first one is a tutorial par
 
 Preliminary Requirements to The Reader
 -------------------------------
-SJ-Platform is a quite complex system, but the tutorial tries to guide the reader as smooth as possible. So, there are quite small amount of requirements to a reader. To achieve the success the reader must have knowledge of:
+SJ-Platform is a quite complex system, but the tutorial tries to guide the reader as smooth as possible. So, there is quite a small amount of requirements to a reader. To achieve the success the reader must have knowledge of:
 
 1. scala programming language and generic data structures;
 2. basics of Docker.
 
 Also, the reader should have working Linux host with 4-8GB of RAM and 4 CPU cores with Docker installed (in the tutorial the installation of Docker for Ubuntu 17.04 OS will be explained).
 
-In the tutorial we will demonstrate the functionality of SJ-Platform and train the reader develop the modules for it using the example problem, which is listed further:
+In the tutorial we will demonstrate the functionality of SJ-Platform and train the reader to develop the modules for it using the example problem, which is listed further:
 
 TODO PROBLEM DESCRIPTION
 
-The problem is not a case of "heavy" task but it includes some problems which are very specific to stream processing tasks and introduces all SJ-Platform functionality step-by-step without deep knowledge requirements of specific problem domains.
+The problem is not a case of a "heavy" task but it includes some problems which are very specific to stream processing tasks and introduces all SJ-Platform functionality step-by-step without deep knowledge requirements of specific problem domains.
 
 Short Features List for Impatient
 -------------------------------
@@ -52,25 +52,25 @@ Major features implemented in SJ-Platform are listed in the following list:
 
 **Two kinds of processing - per-event and micro-batch**. These modes are widely used and cover requirements of all stream processing tasks.
 
-**Stateful and stateless processing**. Developers can use special state management API implementing their algorithms. That API supports resilent and reliable state behaviour during system failures and crashes.
+**Stateful and stateless processing**. Developers can use special state management API implementing their algorithms. That API supports resilient and reliable state behavior during system failures and crashes.
 
-**Distributed synchronized data processing**. Micro-batch processing mode provides developers with capability to synchronize computations across the nodes which is sometimes required.
+**Distributed synchronized data processing**. Micro-batch processing mode provides developers with the capability to synchronize computations across the nodes which is sometimes required.
 
 **Custom context-based batching methods**. Micro-batch processing mode provides developers with API to implement custom algorithms to determine batch completeness which is important feature required in many real-life tasks.
 
-**Use of Apache Kafka, T-streams or TCP as input source of events**. External systems feed SJ-Platform with events via a list of supported interfaces. Right now it supports several of them. 
+**Use of Apache Kafka, T-streams or TCP as an input source of events**. External systems feed SJ-Platform with events via a list of supported interfaces. Right now it supports several of them. 
 
 The first is **TCP**. The method allows developers design custom protocol to receive events from external systems, deduplicate them and place into processing pipeline.
 
-The second is **Apache Kafka**. Apache Kafka is de-facto standard for message queueing, so we support it in SJ-Platform providing 3rd party applications with common integration interface.
+The second is **Apache Kafka**. Apache Kafka is the de-facto standard for message queueing, so we support it in SJ-Platform providing 3rd party applications with common integration interface.
 
 The third is **T-streams**. T-streams is Kafka-like message broker which is native to SJ-Platform and is used as internal data exchange bus inside the system.
 
-**JDBC/Elasticsearch/RESTful interface as output destination for processing data**. Processed data are exported to JDBC-compatible database, Elasticsearch or RESTful interface.
+**JDBC/Elasticsearch/RESTful interface as an output destination for processing data**. Processed data are exported to JDBC-compatible database, Elasticsearch or RESTful interface.
 
 **Performance metrics**. SJ-Platform supports embedded performance metrics which help system managers to observe the runtime performance of the system.
 
-**Extensive simulator development framework**. SJ-Platform provdies developers with special "mock" infrastructure which helps develop and test modules without actual deployment to the runtime.
+**Extensive simulator development framework**. SJ-Platform provides developers with special "mock" infrastructure which helps develop and test modules without actual deployment to the runtime.
 
 These features will be explained in the documentation in depth.
 
@@ -80,7 +80,7 @@ What can Stream Juggler Do?
 
 Streams can be very intensive and all events can not be handled by a single server of arbitrary performance. The system allows **scaling** the computations horizontally to handle increasing demands. Infrastructure scalability of the platform is handled by `Apache Mesos <http://mesos.apache.org/>`_ –  a well-known and production-ready ecosystem which represents clusters as a single supercomputer with a pool of resources.
 
-The platform preforms a **real-time** **processing** that means the system can handle events as soon as they are available inside the system without specific delay. The other end includes batch processing systems which organize data into batches before processing them.
+The platform performs a **real-time** **processing** that means the system can handle events as soon as they are available inside the system without specific delay. The other end includes batch processing systems which organize data into batches before processing them.
 
 Data queues are implemented with `Apache Kafka <https://kafka.apache.org/>`_ and `T-streams <http://t-streams.com/>`_. Kafka is a high-performance queue engine, which performs scaling very well. T-streams is another open-source queue broker project which was developed as the core of SJ-Platform. T-streams engine is designed to provide transactional, exactly-once processing across the pipeline. 
 
@@ -100,11 +100,11 @@ The Stream Juggler provides a developer with three generic event processor types
 
 A processor contains Module with an executor and a validator and Engine that uses module settings to handle data flow making it into streams. The data elements in a stream are assembled in partitions. A **partition** is a part of a data stream allocated for convenience in operation.  Upon creation, every stream gets a name and a certain amount of partitions. The streams with many partitions allow handling the idea of **parallelism** properly. In such case, an engine divides existing partitions fairly among executors and it enables to scale the data processing. Partitions are also helpful in distributing processing load between several workers.
 
-The PSP modules perform **checkpoint** and, if the module has a **state**, stores the variables in a state. That fulfills the idea of Platform`s fault-tolerance. In case of the live datastream processing failure, the variables stored in the state are recovered and the module is restarted.
+The PSP modules perform a **checkpoint** and, if the module has a **state**, stores the variables in a state. That fulfills the idea of Platform`s fault-tolerance. In the case of the live data stream processing failure, the variables stored in the state are recovered and the module is restarted.
 
 The modules fulfill a **group** **checkpoint** conception. It means that all producers and consumers are bunched into a group and do a checkpoint automatically fixing the current state. This is the key idea of exactly-once processing.
 
-Thus, Stream Juggler Platform is a platform that enables high-throughput, fault-tolerant stream processing of live data streams. Data can be ingested from different sources like Kafka, or TCP sockets, and can be processed using complex algorithms. Finally, processed data can be pushed out to filesystems, external databases.
+Thus, Stream Juggler Platform is a platform that enables high-throughput, fault-tolerant stream processing of live data streams. Data can be ingested from different sources like Kafka, or TCP sockets, and can be processed using complex algorithms. Finally, processed data can be pushed out to file systems, external databases.
 
 .. figure:: _static/Overview1.png
 
@@ -123,7 +123,7 @@ In general, the main ideas of the Stream Juggler Platform are:
 
 To find more about the platform, please, visit the pages below:
 
-:ref:`Architecture` - here the architecture of the Stream Juggler Platform is presented, its components, connections between them, necessary services and other prerequisits for the Platform operation are described.
+:ref:`Architecture` - here the architecture of the Stream Juggler Platform is presented, its components, connections between them, necessary services and other prerequisites for the Platform operation are described.
 
 :ref:`Modules` - here more information on modules is given: what module types are supported in the Stream Juggler Platform, how they work, etc.
 
