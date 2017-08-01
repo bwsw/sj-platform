@@ -104,7 +104,7 @@ class KafkaStream(name: String,
     }
   }
 
-  override def validateSpecificField(): ArrayBuffer[String] = {
+  override def validateSpecificFields(): ArrayBuffer[String] = {
     val errors = new ArrayBuffer[String]()
     //partitions
     if (partitions <= 0)

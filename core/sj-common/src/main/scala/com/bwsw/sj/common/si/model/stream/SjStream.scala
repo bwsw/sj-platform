@@ -61,10 +61,10 @@ class SjStream(val streamType: String,
     if (serviceDomain.isEmpty)
       errors ++= extractionErrors
     else this.serviceDomain = serviceDomain.get
-    errors ++= validateSpecificField()
+    errors ++= validateSpecificFields()
   }
 
-  def validateSpecificField(): ArrayBuffer[String] = ???
+  def validateSpecificFields(): ArrayBuffer[String] = ArrayBuffer[String]()
 
   /**
     * Creates structure in storage, used by stream
