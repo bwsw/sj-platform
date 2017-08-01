@@ -16,26 +16,33 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.sj.common.utils.benchmark
+package com.bwsw.sj.engine.regular.benchmark.utils
 
-import scala.collection.JavaConverters._
+import java.io.{BufferedReader, File, FileReader}
 
 /**
-  * Executes class in a separate process
+  * Provides some useful methods for benchmarks
   *
-  * @param clazz       class to execute, must contain method main
-  * @param environment environment variables
   * @author Pavel Tomskikh
   */
-class SeparateProcess(clazz: Class[_], environment: Map[String, String] = Map.empty) {
-  private val command = Seq(
-    System.getProperty("java.home") + "/bin/java",
-    "-classpath",
-    System.getProperty("java.class.path"),
-    clazz.getName)
+object BenchmarkUtils {
 
-  private val processBuilder = new ProcessBuilder(command.asJava).inheritIO()
-  processBuilder.environment().putAll(environment.asJava)
+  /**
+    * Retrieves result from file
+    *
+    * @param outputFile file that must contain result
+    * @return result if a file exists or None otherwise
+    */
+  def retrieveResultFromFile(outputFile: File): Option[String] = {
+    if (outputFile.exists()) {
+      val reader = new BufferedReader(new FileReader(outputFile))
+      val result = reader.readLine()
+      reader.close()
+      outputFile.delete()
 
-  def start(): Process = processBuilder.start()
+      Some(result)
+    }
+    else
+      None
+  }
 }

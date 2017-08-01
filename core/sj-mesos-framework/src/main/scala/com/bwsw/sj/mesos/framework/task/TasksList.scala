@@ -32,32 +32,28 @@ import scaldi.Injector
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
-import scala.util.{Failure, Success, Try}
 
 
 /**
   * Data model for list of tasks
   */
 object TasksList {
-  /**
-    * availablePorts - ports that can be used for current task. This parameter update after new offer come.
-    */
-
   private val logger = Logger.getLogger(this.getClass)
   private val tasksToLaunch = mutable.ListBuffer[String]()
   private val listTasks = mutable.Map[String, Task]()
   private var message: String = "Initialization"
-  private val availablePorts = collection.mutable.ListBuffer[Long]()
   private var launchedOffers = Map[OfferID, ArrayBuffer[TaskInfo]]()
-
   private var launchedTasks = mutable.ListBuffer[String]()
+
+  /** availablePorts - ports that can be used for current task. This parameter is updated after new offer come. */
+  private val availablePorts = collection.mutable.ListBuffer[Long]()
 
   var perTaskCores: Double = 0.0
   var perTaskMem: Double = 0.0
   var perTaskPortsCount: Int = 0
 
   /**
-    * Create new task
+    * Creates new task
     * @param taskId
     * @return
     */
@@ -68,7 +64,7 @@ object TasksList {
   }
 
   /**
-    * Return all tasks
+    * Returns all tasks
     * @return
     */
   def getList: Iterable[Task] = {
@@ -76,7 +72,7 @@ object TasksList {
   }
 
   /**
-    * Return task by ID
+    * Returns task by ID
     * @param taskId
     * @return
     */
@@ -85,7 +81,7 @@ object TasksList {
   }
 
   /**
-    * Add tasks to launch
+    * Adds tasks to launch
     * @param taskId
     * @return
     */
@@ -95,7 +91,7 @@ object TasksList {
   }
 
   /**
-    * Return tasks ready to launch
+    * Returns tasks ready to launch
     * @return mutable.ListBuffer[String]
     */
   def toLaunch: mutable.ListBuffer[String] = {
@@ -103,7 +99,7 @@ object TasksList {
   }
 
   /**
-    * Add task to launched list
+    * Adds task to launched list
     * @param taskId
     * @return ListBuffer[String]
     */
@@ -116,7 +112,7 @@ object TasksList {
   }
 
   /**
-    * Remove task from launched tasks list
+    * Removes task from launched tasks list
     * @param taskId
     * @return ListBuffer[String]
     */
@@ -127,7 +123,7 @@ object TasksList {
   }
 
   /**
-    * Kill task by ID
+    * Kills task by ID
     * @param taskId
     * @return ListBuffer[String]
     */
@@ -137,7 +133,7 @@ object TasksList {
   }
 
   /**
-    * Clear launched tasks list
+    * Clears launched tasks list
     */
   def clearLaunchedTasks(): Unit = {
     launchedTasks = mutable.ListBuffer[String]()
@@ -152,7 +148,7 @@ object TasksList {
   }
 
   /**
-    * Return task from tasks list by ID
+    * Returns task from tasks list by ID
     * @param taskId Task id
     * @return Option[Task]
     */
@@ -161,14 +157,14 @@ object TasksList {
   }
 
   /**
-    * Clear available list of ports
+    * Clears available list of ports
     */
   def clearAvailablePorts(): Unit = {
     availablePorts.remove(0, availablePorts.length)
   }
 
   /**
-    * Return available ports
+    * Returns available ports
     * @return ListBuffer[Long]
     */
   def getAvailablePorts: ListBuffer[Long] = {
@@ -176,7 +172,7 @@ object TasksList {
   }
 
   /**
-    * Add to available ports list new list of ports
+    * Adds to available ports list new list of ports
     * @param ports List of ports
     * @return Unit
     */
@@ -185,7 +181,7 @@ object TasksList {
   }
 
   /**
-    * How much tasks to launch
+    * Returns how much tasks to launch
     * @return
     */
   def count: Int = {
@@ -193,7 +189,7 @@ object TasksList {
   }
 
   /**
-    * Return offers list where tasks launched
+    * Returns offers list where tasks launched
     * @return
     */
   def getLaunchedOffers: Map[OfferID, ArrayBuffer[TaskInfo]] = {
@@ -201,7 +197,7 @@ object TasksList {
   }
 
   /**
-    * Return launched tasks list
+    * Returns launched tasks list
     * @return
     */
   def getLaunchedTasks: ListBuffer[String] = {
@@ -216,7 +212,7 @@ object TasksList {
   }
 
   /**
-    * Set message to display
+    * Sets message to display
     * @param message String
     */
   def setMessage(message: String): Unit = {
@@ -224,7 +220,7 @@ object TasksList {
   }
 
   /**
-    * Return ports resource occupied by task
+    * Returns ports resource occupied by task
     * @param taskId
     * @return
     */
@@ -233,7 +229,7 @@ object TasksList {
   }
 
   /**
-    * Initialize tasks list, fetch tasks from instance
+    * Initializes tasks list, fetch tasks from instance
     * @param instance
     */
   def prepareTasks(instance: Instance): Unit = {
@@ -256,7 +252,7 @@ object TasksList {
   }
 
   /**
-    * Prepare task to launch on offer
+    * Prepares task to launch on offer
     * @param taskId Current task id
     * @param offer Current offer
     * @param injector
@@ -277,7 +273,7 @@ object TasksList {
   }
 
   /**
-    * Prepare command for task
+    * Prepares command for task
     * @param taskId Current task id
     * @param offer Current offer
     * @param injector
@@ -290,7 +286,7 @@ object TasksList {
       * @return
       */
     def getAgentPorts: String = {
-      var taskPort: String = ""
+      var taskPort = ""
       val ports = TasksList.getTaskPorts(taskId)
 
       var availablePorts = ports.getRanges.getRangeList.asScala.map(_.getBegin.toString)
@@ -309,7 +305,7 @@ object TasksList {
     }
 
     /**
-      * Return hosts from all tasks
+      * Returns hosts from all tasks
       * @return String
       */
     def getInstanceHosts: String = {
@@ -321,10 +317,10 @@ object TasksList {
     }
 
     /**
-      * Prepare environment
+      * Prepares environment
       * @return Environment
       */
-    def getEnvironments: Environment = {
+    def getEnvironment: Environment = {
      Environment.newBuilder
         .addVariables(Environment.Variable.newBuilder.setName("INSTANCE_NAME").setValue(FrameworkParameters(FrameworkParameters.instanceId)))
         .addVariables(Environment.Variable.newBuilder.setName("TASK_NAME").setValue(taskId))
@@ -332,7 +328,7 @@ object TasksList {
         .addVariables(Environment.Variable.newBuilder.setName("AGENTS_PORTS").setValue(getAgentPorts))
         .addVariables(Environment.Variable.newBuilder.setName("INSTANCE_HOSTS").setValue(getInstanceHosts))
         .addVariables(Environment.Variable.newBuilder.setName("MONGO_HOSTS").setValue(FrameworkParameters(FrameworkParameters.mongoHosts)))
-        .addVariables(Environment.Variable.newBuilder.setName("MONGO_USER").setValue(FrameworkParameters(FrameworkParameters.mognoUser)))
+        .addVariables(Environment.Variable.newBuilder.setName("MONGO_USER").setValue(FrameworkParameters(FrameworkParameters.mongoUser)))
         .addVariables(Environment.Variable.newBuilder.setName("MONGO_PASSWORD").setValue(FrameworkParameters(FrameworkParameters.mongoPassword)))
 //        .addVariables(Environment.Variable.newBuilder.setName("ENTRY_PORT").setValue("8888"))
         .build()
@@ -344,7 +340,7 @@ object TasksList {
     val cmdInfo = CommandInfo.newBuilder
       .addUris(CommandInfo.URI.newBuilder.setValue(FrameworkUtil.getModuleUrl(FrameworkUtil.instance.get)))
       .setValue("java " + FrameworkUtil.getJvmOptions + " -jar " + FrameworkUtil.jarName.get)
-      .setEnvironment(getEnvironments).build()
+      .setEnvironment(getEnvironment).build()
 
 
     logger.debug("Complete building command info")
@@ -353,7 +349,7 @@ object TasksList {
   }
 
   /**
-    * Add launched task to current offer
+    * Adds launched task to current offer
     * @param task Current task info
     * @param offer Current offer
     * @return

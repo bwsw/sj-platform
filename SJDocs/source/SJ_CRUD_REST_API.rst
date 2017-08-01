@@ -1156,7 +1156,7 @@ Error response example::
  {
   "status-code": 400,
   "entity": {
-    "message": "Cannot create system config setting. Errors: <creation_errors_string>."
+    "message": "Cannot create system configuration. Errors: <creation_errors_string>."
   }
  }
 
@@ -1283,7 +1283,7 @@ Error response example::
  
  {
     "entity": {
-        "message": "Cannot recognize config setting domain 'system'. Domain must be one of the following values: 'configuration.system, configuration.t-streams, configuration.apache-kafka, configuration.elasticsearch, configuration.apache-zookeeper, configuration.sql-database'."
+        "message": "Cannot recognize configuration domain 'system'. Domain must be one of the following values: 'configuration.system, configuration.t-streams, configuration.apache-kafka, configuration.elasticsearch, configuration.apache-zookeeper, configuration.sql-database'."
     },
     "status-code": 400
  }
@@ -1383,7 +1383,7 @@ Success response example::
   status-code: 200
  }
 
-.. tip:: A full range of error responses can be found at :ref:`Config_Setting_Errors`
+.. tip:: A full range of error responses can be found at :ref:`Config_Settings_Errors`
 
 CRUD Rest-API for Custom Files
 ----------------------------------------
@@ -2984,5 +2984,26 @@ Success response json example::
  ],
  "message": "Tasks launched" 
  }
+
+The following information on tasks is returned:
+
+- ``state`` - the status of task performance. The following options are possible: 
+  
+ - "TASK_STAGING" - the task is created but is not started executing, 
+ - "TASK_RUNNING" - the task is launched and is being executed now, 
+ - "TASK_FAILED" - the task is failed, 
+ - "TASK_ERROR" - an error is detected in the task execution. 
+
+- ``directories`` - directories of tasks of the instance. 
+
+- ``state-change`` - the date of the last status change.
+
+- ``reason`` - the reason for the task status change.
+
+- ``id`` - the task id.
+
+- ``node`` - name of node used by the task.
+
+- ``last node`` - name of node that was used by a task before the status change.
 
 .. tip:: A full range of error responses can be found at :ref:`Instances_Errors`

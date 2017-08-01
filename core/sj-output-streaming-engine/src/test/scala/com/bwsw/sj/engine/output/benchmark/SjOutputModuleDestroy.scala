@@ -20,7 +20,6 @@ package com.bwsw.sj.engine.output.benchmark
 
 import java.io.File
 
-import com.bwsw.sj.common.config.TempHelperForConfigDestroy
 import com.bwsw.sj.engine.output.benchmark.DataFactory._
 
 import scala.util.Try
@@ -47,7 +46,7 @@ object SjESOutputModuleDestroy extends App {
   deleteInstance(esInstanceName)
   deleteModule(module.getName)
   close()
-  TempHelperForConfigDestroy.deleteConfigs()
+  tempHelperForConfigDestroy.deleteConfigs()
   connectionRepository.close()
 
   println("DONE")
@@ -64,8 +63,8 @@ object SjJDBCOutputModuleDestroy extends App {
   deleteModule(jdbcModule.getName)
 
   close()
-  TempHelperForConfigDestroy.deleteJdbcDriver()
-  TempHelperForConfigDestroy.deleteConfigs()
+  tempHelperForConfigDestroy.deleteJdbcDriver()
+  tempHelperForConfigDestroy.deleteConfigs()
   connectionRepository.close()
 
   println("DONE")
@@ -81,7 +80,7 @@ object SjRestOutputModuleDestroy extends App {
   deleteModule(restModule.getName)
 
   close()
-  TempHelperForConfigDestroy.deleteConfigs()
+  tempHelperForConfigDestroy.deleteConfigs()
   connectionRepository.close()
 
   println("DONE")
