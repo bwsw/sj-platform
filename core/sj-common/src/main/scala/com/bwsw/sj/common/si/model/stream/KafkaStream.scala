@@ -24,7 +24,7 @@ import com.bwsw.common.KafkaClient
 import com.bwsw.sj.common.config.SettingsUtils
 import com.bwsw.sj.common.dal.model.service.KafkaServiceDomain
 import com.bwsw.sj.common.dal.model.stream.KafkaStreamDomain
-import com.bwsw.sj.common.utils.{ServiceLiterals, StreamLiterals}
+import com.bwsw.sj.common.utils.ServiceLiterals
 import kafka.common.TopicAlreadyMarkedForDeletionException
 import org.apache.kafka.common.errors.TopicExistsException
 import scaldi.Injectable.inject
@@ -49,6 +49,7 @@ class KafkaStream(name: String,
 
   private val settingsUtils = inject[SettingsUtils]
   private val timeout = settingsUtils.getZkSessionTimeout()
+  override protected val serviceType = ServiceLiterals.kafkaType
 
   override def to(): KafkaStreamDomain = {
     val serviceRepository = connectionRepository.getServiceRepository
@@ -103,10 +104,8 @@ class KafkaStream(name: String,
     }
   }
 
-  override def validate(): ArrayBuffer[String] = {
+  override def validateSpecificField(): ArrayBuffer[String] = {
     val errors = new ArrayBuffer[String]()
-    errors ++= super.validateGeneralFields()
-
     //partitions
     if (partitions <= 0)
       errors += createMessage("entity.error.attribute.required", "Partitions") + ". " +
@@ -118,28 +117,8 @@ class KafkaStream(name: String,
         createMessage("entity.error.attribute.must.be.positive.integer", "replicationFactor")
     }
 
-    Option(service) match {
-      case Some("") | None =>
-        errors += createMessage("entity.error.attribute.required", "Service")
-
-      case Some(x) =>
-        val serviceDAO = connectionRepository.getServiceRepository
-        val serviceObj = serviceDAO.get(x)
-        serviceObj match {
-          case None =>
-            errors += createMessage("entity.error.doesnot.exist", "Service", x)
-          case Some(someService) =>
-            if (someService.serviceType != ServiceLiterals.kafkaType) {
-              errors += createMessage("entity.error.must.one.type.other.given",
-                s"Service for '${StreamLiterals.kafkaType}' stream",
-                ServiceLiterals.kafkaType,
-                someService.serviceType)
-            } else {
-              if (errors.isEmpty)
-                errors ++= checkStreamPartitionsOnConsistency(someService.asInstanceOf[KafkaServiceDomain])
-            }
-        }
-    }
+    if (errors.isEmpty)
+      errors ++= checkStreamPartitionsOnConsistency(serviceDomain.asInstanceOf[KafkaServiceDomain])
 
     errors
   }
