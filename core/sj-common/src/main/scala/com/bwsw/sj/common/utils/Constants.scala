@@ -116,6 +116,14 @@ object StreamLiterals {
 
   private val tstreamFactory = new TStreamsFactory()
   final val ttl: Int = tstreamFactory.getProperty(ConfigurationOptions.Stream.ttlSec).asInstanceOf[Int]
+
+  val typeToServiceType: Map[String, String] = Map(
+    elasticsearchType -> ServiceLiterals.elasticsearchType,
+    kafkaType -> ServiceLiterals.kafkaType,
+    jdbcType -> ServiceLiterals.jdbcType,
+    restType -> ServiceLiterals.restType,
+    tstreamsType -> ServiceLiterals.zookeeperType
+  )
 }
 
 object ServiceLiterals {

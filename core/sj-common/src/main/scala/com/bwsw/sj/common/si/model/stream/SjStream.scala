@@ -22,7 +22,7 @@ import com.bwsw.sj.common.dal.model.service.ServiceDomain
 import com.bwsw.sj.common.dal.model.stream._
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.rest.utils.ValidationUtils.validateName
-import com.bwsw.sj.common.utils.{MessageResourceUtils, ServiceLiterals, StreamLiterals}
+import com.bwsw.sj.common.utils.{MessageResourceUtils, StreamLiterals}
 import scaldi.Injectable.inject
 import scaldi.Injector
 
@@ -45,13 +45,7 @@ class SjStream(val streamType: String,
 
   protected var serviceDomain: ServiceDomain = _
 
-  protected val serviceType: String = streamType match {
-    case StreamLiterals.kafkaType => ServiceLiterals.kafkaType
-    case StreamLiterals.elasticsearchType => ServiceLiterals.elasticsearchType
-    case StreamLiterals.jdbcType => ServiceLiterals.jdbcType
-    case StreamLiterals.restType => ServiceLiterals.restType
-    case StreamLiterals.tstreamsType => ServiceLiterals.tstreamsType
-  }
+  protected val serviceType: String = StreamLiterals.typeToServiceType(streamType)
 
   def to(): StreamDomain = ???
 
@@ -62,13 +56,17 @@ class SjStream(val streamType: String,
     */
   def validate(): ArrayBuffer[String] = {
     val errors = ArrayBuffer[String]()
-    validateGeneralFields()
-    val (serviceDomain, extractionErrors) = extractServiceByName(service, serviceType)
+
+    errors ++= validateGeneralFields()
+
+    val (serviceDomain, extractedErrors) = extractServiceByName(service, serviceType)
     if (serviceDomain.isEmpty)
-      errors ++= extractionErrors
-    else this.serviceDomain = serviceDomain.get
-    if (errors.isEmpty)
+      errors ++= extractedErrors
+    else {
+      this.serviceDomain = serviceDomain.get
       errors ++= validateSpecificFields()
+    }
+
     errors
   }
 
@@ -119,7 +117,7 @@ class SjStream(val streamType: String,
     errors
   }
 
-  protected def extractServiceByName(serviceName: String, serviceType: String): (Option[ServiceDomain], ArrayBuffer[String]) ={
+  protected def extractServiceByName(serviceName: String, serviceType: String): (Option[ServiceDomain], ArrayBuffer[String]) = {
     val errors = new ArrayBuffer[String]()
     var serviceDomain: Option[ServiceDomain] = None
     Option(service) match {
