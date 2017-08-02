@@ -22,7 +22,7 @@ import com.bwsw.sj.common.dal.model.service.ServiceDomain
 import com.bwsw.sj.common.dal.model.stream._
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.rest.utils.ValidationUtils.validateName
-import com.bwsw.sj.common.utils.{MessageResourceUtils, StreamLiterals}
+import com.bwsw.sj.common.utils.{MessageResourceUtils, ServiceLiterals, StreamLiterals}
 import scaldi.Injectable.inject
 import scaldi.Injector
 
@@ -43,9 +43,15 @@ class SjStream(val streamType: String,
 
   protected val connectionRepository = inject[ConnectionRepository]
 
-  protected var serviceDomain: ServiceDomain = ???
+  protected var serviceDomain: ServiceDomain = _
 
-  protected val serviceType: String = ???
+  protected val serviceType: String = streamType match {
+    case StreamLiterals.kafkaType => ServiceLiterals.kafkaType
+    case StreamLiterals.elasticsearchType => ServiceLiterals.elasticsearchType
+    case StreamLiterals.jdbcType => ServiceLiterals.jdbcType
+    case StreamLiterals.restType => ServiceLiterals.restType
+    case StreamLiterals.tstreamsType => ServiceLiterals.tstreamsType
+  }
 
   def to(): StreamDomain = ???
 
@@ -61,7 +67,9 @@ class SjStream(val streamType: String,
     if (serviceDomain.isEmpty)
       errors ++= extractionErrors
     else this.serviceDomain = serviceDomain.get
-    errors ++= validateSpecificFields()
+    if (errors.isEmpty)
+      errors ++= validateSpecificFields()
+    errors
   }
 
   def validateSpecificFields(): ArrayBuffer[String] = ArrayBuffer[String]()
