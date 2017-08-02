@@ -52,7 +52,7 @@ class EmbeddedElasticsearch {
   }
 
   def stop(): Unit = {
-    node.close()
+    if (!node.isClosed) node.close()
     Try(FileUtils.forceDelete(dataDir))
   }
 }

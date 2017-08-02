@@ -27,7 +27,7 @@ import org.scalatest.{BeforeAndAfterEach, FlatSpec, Matchers}
 import scala.util.Random
 
 class ElasticsearchClientTestSuite extends FlatSpec with Matchers with BeforeAndAfterEach {
-  val hosts = Set(("localhost", 9300))
+  val hosts = Set(("127.0.0.1", 9300))
   var embeddedElasticsearch: Option[EmbeddedElasticsearch] = None
 
   override protected def beforeEach(): Unit = {
@@ -186,7 +186,7 @@ class ElasticsearchClientTestSuite extends FlatSpec with Matchers with BeforeAnd
     val index = "test_index"
     val documentType = "test"
     client.createIndex(index)
-    val testField = "test_filed"
+    val testField = "test_field"
     val testValue = "test_value"
     val numberOfDocuments = 5
     (0 until numberOfDocuments).foreach(x => {
