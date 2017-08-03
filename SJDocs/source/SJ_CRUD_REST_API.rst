@@ -68,8 +68,8 @@ The range of REST API methods described below allows to create or delete a provi
   "name*", "String", "Provider name.", "Name must be unique and contain only letters, digits or hyphens."
   "description", "String", "Provider description.", ""
   "hosts*", "Array[String]", "List of provider hosts.", ""
-  "login", "String", "Provider login.", ""
-  "password", "String", "Provider password.", ""
+  "login", "String", "Provider login.", "For 'provider.sql-database', 'provider.elasticsearch' types "
+  "password", "String", "Provider password.", "For 'provider.sql-database', 'provider.elasticsearch' types"
   "type*", "String", "Provider type.", "One of the following values are possible: 'provider.elasticsearch', 'provider.apache-kafka', 'provider.apache-zookeeper', 'provider.sql-database', 'provider.restful'."
   "driver*", "String", "Driver name.", "For 'provider.sql-database' provider type only."
 
