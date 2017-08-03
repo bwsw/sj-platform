@@ -182,7 +182,8 @@ The type of the provider is determined with the type of the instance you want to
 - *Password* *
        Enter a password for the provider if necessary.
 
-- *Driver* * - Enter a provider driver for SQL database provider type. 
+- *Driver* * 
+       Enter a provider driver for SQL database provider type. 
 
 **Elasticsearch** **Provider** **Type**
 
