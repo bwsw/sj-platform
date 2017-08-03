@@ -156,17 +156,17 @@ Success response example::
   "status-code": 200,
   "entity": {
     "provider": {
-      "name": "kafka-provider",
-     "description": "example kafka provider",
-     "type": "kafka",
-     "hosts": [
+      "name": "kafka-example",
+      "description": "example kafka provider",
+      "type": "provider.apache-kafka",
+      "hosts": [
         "192.168.1.133:9092",
         "192.168.1.135:9092"
-      ]
-      "creationDate": "Thu Jul 20 08:32:51 NOVT 2017" 
+      ],
+      "creationDate": "Thu Jul 20 08:32:51 NOVT 2017"
     }
   }
- }
+ } 
 
 
 Error response example::
@@ -204,7 +204,7 @@ Success response example::
       {
         "name": "kafka-provider",
         "description": "example kafka provider",
-        "type": "kafka",
+        "type": "provider.apache-kafka",
         "hosts": [
            "192.168.1.133:9092",
            "192.168.1.135:9092"
@@ -216,7 +216,7 @@ Success response example::
        "description": "elasticsearch provider example",
        "login": "my_login",
        "password": "my_pass",
-       "type": "ES",
+       "type": "provider.elasticsearch",
        "hosts": [
            "192.168.1.133"
        ],
