@@ -172,18 +172,26 @@ The type of the provider is determined with the type of the instance you want to
        Enter a provider host that determines a file location.
        Add more hosts clicking at the «Add Host» button and entering host names in the appeared lines.
 
-- *Login*
-       Enter a provider login here if necessary
-
-- *Password*
-       Enter a password for the provider if necessary.
-
 **Specific fields:**
 
 **SQL database** **Provider** **Type**
 
+- *Login* *
+       Enter a provider login here if necessary
+        
+- *Password* *
+       Enter a password for the provider if necessary.
+
 - *Driver* * - Enter a provider driver for SQL database provider type. 
 
+**Elasticsearch** **Provider** **Type**
+
+- *Login* *
+       Enter a provider login here.
+       
+- *Password* *
+       Enter a password for the provider.
+       
 .. note:: Required fields are marked with an asterisk (*)
 
 Click «Create» at the bottom and see the provider is in the list of providers now. Details of the node are displayed to the right when clicking the provider in the list. 
