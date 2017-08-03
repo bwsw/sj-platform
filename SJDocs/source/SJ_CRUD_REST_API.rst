@@ -104,8 +104,6 @@ Request json example::
  {
      "name": "kafka-provider",
      "description": "example of kafka provider",
-     "login": "my_login",
-     "password": "my_pass",
      "type": "kafka",
      "hosts": [
         "192.168.1.133:9092",
@@ -160,8 +158,6 @@ Success response example::
     "provider": {
       "name": "kafka-provider",
      "description": "example kafka provider",
-     "login": "my_login",
-     "password": "my_pass",
      "type": "kafka",
      "hosts": [
         "192.168.1.133:9092",
@@ -208,8 +204,6 @@ Success response example::
       {
         "name": "kafka-provider",
         "description": "example kafka provider",
-        "login": "my_login",
-        "password": "my_pass",
         "type": "kafka",
         "hosts": [
            "192.168.1.133:9092",
