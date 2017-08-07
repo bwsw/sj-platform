@@ -1,3 +1,5 @@
+.. _Custom_Module:
+
 Custom Module Development Guide
 ======================================
 
