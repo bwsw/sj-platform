@@ -19,6 +19,7 @@
 package com.bwsw.sj.common.dal.model.instance
 
 import java.util
+import java.util.Date
 
 import com.bwsw.sj.common.dal.model.service.ZKServiceDomain
 import com.bwsw.sj.common.dal.morphia.MorphiaAnnotations.PropertyField
@@ -59,7 +60,8 @@ class InputInstanceDomain(override val name: String,
                           @Property("eviction-policy") var evictionPolicy: String = EngineLiterals.fixTimeEvictionPolicy,
                           @Property("backup-count") var backupCount: Int = 0,
                           @Property("async-backup-count") var asyncBackupCount: Int = 0,
-                          var tasks: java.util.Map[String, InputTask] = new util.HashMap())
+                          var tasks: java.util.Map[String, InputTask] = new util.HashMap(),
+                          creationDate: Date)
   extends InstanceDomain(
     name,
     moduleType,
@@ -80,4 +82,5 @@ class InputInstanceDomain(override val name: String,
     environmentVariables,
     stage,
     performanceReportingInterval,
-    frameworkId)
+    frameworkId,
+    creationDate)

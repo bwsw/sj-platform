@@ -18,6 +18,8 @@
  */
 package com.bwsw.sj.common.si.model.instance
 
+import java.util.Date
+
 import com.bwsw.sj.common.dal.model.instance.{ExecutionPlan, FrameworkStage, OutputInstanceDomain}
 import com.bwsw.sj.common.dal.model.service.ZKServiceDomain
 import com.bwsw.sj.common.utils.StreamUtils.clearStreamFromMode
@@ -50,7 +52,8 @@ class OutputInstance(name: String,
                      private val _restAddress: Option[String] = None,
                      stage: FrameworkStage = FrameworkStage(),
                      private val _status: String = EngineLiterals.ready,
-                     frameworkId: String = System.currentTimeMillis().toString)
+                     frameworkId: String = System.currentTimeMillis().toString,
+                     creationDate: String)
                     (implicit injector: Injector)
   extends Instance(
     name,
@@ -72,7 +75,8 @@ class OutputInstance(name: String,
     stage,
     _status,
     frameworkId,
-    Array(output)) {
+    Array(output),
+    creationDate) {
 
   override def to: OutputInstanceDomain = {
     val serviceRepository = connectionRepository.getServiceRepository
@@ -102,7 +106,8 @@ class OutputInstance(name: String,
       checkpointMode,
       checkpointInterval,
       executionPlan,
-      startFrom)
+      startFrom,
+      new Date())
   }
 
   override def inputsOrEmptyList: Array[String] = Array(input)
