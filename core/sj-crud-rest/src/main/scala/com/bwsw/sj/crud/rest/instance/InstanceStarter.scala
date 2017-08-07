@@ -83,29 +83,21 @@ class InstanceStarter(instance: Instance,
   }
 
   protected def startInstance(): Unit = {
-    val marathonInfo = marathonManager.getMarathonInfo()
-    if (isStatusOK(marathonInfo)) {
-      val marathonMaster = marathonManager.getMarathonMaster(marathonInfo)
-      leaderLatch = Option(createLeaderLatch(marathonMaster))
+    val maybeMarathonInfo = marathonManager.tryToGetMarathonInfo()
+    if (isStatusOK(maybeMarathonInfo)) {
+      val marathonInfo = marathonManager.getMarathonInfo(maybeMarathonInfo)
+      val zooKeeperNode = marathonInfo.zooKeeperConfig.zk
+      val zookeeperServer = getZooKeeperServers(zooKeeperNode)
+      leaderLatch = Option(createLeaderLatch(zookeeperServer))
       instanceManager.updateFrameworkStage(instance, starting)
-      startFramework(marathonMaster)
+      startFramework(marathonInfo.marathonConfig.master, zookeeperServer)
       leaderLatch.foreach(_.close())
     } else {
       instanceManager.updateInstanceStatus(instance, failed)
     }
   }
 
-  protected def createLeaderLatch(marathonMaster: String): LeaderLatch = {
-    logger.debug(s"Instance: '${instance.name}'. Creating a leader latch to start the instance.")
-    val zkServers = getZooKeeperServers(marathonMaster)
-    val leader = new LeaderLatch(Set(zkServers), RestLiterals.masterNode)
-    leader.start()
-    leader.acquireLeadership(delay)
-
-    leader
-  }
-
-  protected def getZooKeeperServers(marathonMaster: String): String = {
+  protected def getZooKeeperServers(zooKeeperNode: String): String = {
     logger.debug(s"Instance: '${instance.name}'. Getting a zookeeper address.")
     (zookeeperHost, zookeeperPort) match {
       case (Some(zkHost), Some(zkPort)) =>
@@ -114,20 +106,29 @@ class InstanceStarter(instance: Instance,
         zooKeeperServers
 
       case _ =>
-        val marathonMasterUrl = new URI(marathonMaster)
-        val zooKeeperServers = marathonMasterUrl.getHost + ":" + marathonMasterUrl.getPort
+        val zooKeeperNodeUrl = new URI(zooKeeperNode)
+        val zooKeeperServers = zooKeeperNodeUrl.getHost + ":" + zooKeeperNodeUrl.getPort
         logger.debug(s"Instance: '${instance.name}'. Get a zookeeper address: '$zooKeeperServers' from marathon.")
         zooKeeperServers
     }
   }
 
-  protected def startFramework(marathonMaster: String): Unit = {
+  protected def createLeaderLatch(zookeeperServer: String): LeaderLatch = {
+    logger.debug(s"Instance: '${instance.name}'. Creating a leader latch to start the instance.")
+    val leader = new LeaderLatch(Set(zookeeperServer), RestLiterals.masterNode)
+    leader.start()
+    leader.acquireLeadership(delay)
+
+    leader
+  }
+
+  protected def startFramework(marathonMaster: String, zookeeperServer: String): Unit = {
     logger.debug(s"Instance: '${instance.name}'. Try to launch or create a framework: '$frameworkName'.")
     val frameworkApplicationInfo = marathonManager.getApplicationInfo(frameworkName)
     if (isStatusOK(frameworkApplicationInfo)) {
       launchFramework()
     } else {
-      createFramework(marathonMaster)
+      createFramework(marathonMaster, zookeeperServer)
     }
   }
 
@@ -143,9 +144,9 @@ class InstanceStarter(instance: Instance,
     }
   }
 
-  protected def createFramework(marathonMaster: String): Unit = {
+  protected def createFramework(marathonMaster: String, zookeeperServer: String): Unit = {
     logger.debug(s"Instance: '${instance.name}'. Create a framework: '$frameworkName'.")
-    val request = createRequestForFrameworkCreation(marathonMaster)
+    val request = createRequestForFrameworkCreation(marathonMaster, zookeeperServer)
     val startFrameworkResult = marathonManager.startMarathonApplication(request)
     if (isStatusCreated(startFrameworkResult)) {
       waitForFrameworkToStart()
@@ -156,11 +157,11 @@ class InstanceStarter(instance: Instance,
     }
   }
 
-  protected def createRequestForFrameworkCreation(marathonMaster: String): MarathonRequest = {
+  protected def createRequestForFrameworkCreation(marathonMaster: String, zookeeperServer: String): MarathonRequest = {
     val frameworkJarName = settingsUtils.getFrameworkJarName()
     val command = FrameworkLiterals.createCommandToLaunch(frameworkJarName)
     val restUrl = new URI(s"$restAddress/v1/custom/jars/$frameworkJarName")
-    val environmentVariables = getFrameworkEnvironmentVariables(marathonMaster)
+    val environmentVariables = getFrameworkEnvironmentVariables(marathonMaster, zookeeperServer)
 
     val backoffSettings = settingsUtils.getBackoffSettings()
     val request = MarathonRequest(
@@ -176,11 +177,12 @@ class InstanceStarter(instance: Instance,
     request
   }
 
-  protected def getFrameworkEnvironmentVariables(marathonMaster: String): Map[String, String] = {
+  protected def getFrameworkEnvironmentVariables(marathonMaster: String, zookeeperServer: String): Map[String, String] = {
     var environmentVariables = Map(
       instanceIdLabel -> instance.name,
       mesosMasterLabel -> marathonMaster,
-      frameworkIdLabel -> frameworkName
+      frameworkIdLabel -> frameworkName,
+      zookeeperLabel -> FrameworkLiterals.createZookepeerAddress(zookeeperServer)
     )
     environmentVariables = environmentVariables ++ inject[ConnectionRepository].mongoEnvironment
     environmentVariables = environmentVariables ++ instance.environmentVariables

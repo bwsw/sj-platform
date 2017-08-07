@@ -23,6 +23,7 @@ import java.util.Date
 
 import com.bwsw.common.jdbc.JdbcClientBuilder
 import com.bwsw.sj.common.utils.ProviderLiterals
+import scaldi.Injector
 
 import scala.collection.mutable.ArrayBuffer
 import scala.util.{Failure, Success, Try}
@@ -34,6 +35,7 @@ class JDBCProviderDomain(override val name: String,
                          override val password: String,
                          val driver: String,
                          override val creationDate: Date)
+                        (implicit injector: Injector)
   extends ProviderDomain(name, description, hosts, login, password, ProviderLiterals.jdbcType, creationDate) {
 
   override def checkJdbcConnection(address: String): ArrayBuffer[String] = {

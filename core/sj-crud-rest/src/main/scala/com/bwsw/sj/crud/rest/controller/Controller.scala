@@ -30,7 +30,7 @@ import scaldi.Injector
 trait Controller {
   protected implicit val injector: Injector
   protected val serializer: JsonSerializer = inject[JsonSerializer]
-  serializer.disableNullForPrimitives(true)
+  serializer.enableNullForPrimitives(false)
   protected val jsonDeserializationErrorMessageCreator = inject[JsonDeserializationErrorMessageCreator]
   protected val serviceInterface: ServiceInterface[_, _]
 

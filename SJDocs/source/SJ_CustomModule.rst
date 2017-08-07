@@ -3,13 +3,13 @@ Custom Module Development Guide
 
 .. Contents::
 
-Under this section how to write your own module for Stream Juggler will be described.
+Under this section how to write your own module for the Stream Juggler Platform will be described.
 
-Stream Juggler is a platform for your custom module implementation. It allows to adjust the system to your custom aims. Creation of a custom module will not become a challenge for a practicing developer or a programmer as no special tools or services are necessary.
+The Stream Juggler Platform is a platform for your custom module implementation. It allows to adjust the system to your custom aims. Creation of a custom module will not become a challenge for a practicing developer or a programmer as no special tools or services are necessary.
 
 Prior to the module development, please, take a look at the platform :ref:`Architecture` and :ref:`Modules`.
 
-As a simple refresher, processing modules in Stream Juggler can be of the following types:
+As a simple refresher, processing modules in the Stream Juggler Platform can be of the following types:
 
 1. Input module - It handles external inputs, does data deduplication, transforms raw data to objects.
 2. Processing module:
@@ -19,13 +19,13 @@ As a simple refresher, processing modules in Stream Juggler can be of the follow
 
 3. Output module - It handles the data outcoming from event processing pipeline to external data destinations (Elasticsearch, JDBC, etc.).
 
-The workflow of the platform implies the structure:
+The workflow of the SJ-Platform implies the structure:
 
 1. As incoming information can be fed to a processing module in T-streams or Kafka, the input module is necessary at the first step of ingesting data to transform it from TCP into T-streams. If you want to process the data from Kafka, the input module is not required.
 2. A processing module performs the main transformation and calculation of data. It accepts data via T-streams and Kafka. The processed data is put into T-streams only. So an output module is required in the next step.
 3. An output module is necessary to transform the data from T-streams into the result data of the type appropriate for the external storage.
 
-.. figure:: _static/ModulePipeline.png
+.. figure:: _static/ModulePipeline1.png
 
 Below you will find the instructions on custom module creation in Scala.
 
@@ -148,7 +148,7 @@ There could be error messages as output of fping utility which are sent to stdou
  ICMP Unreachable (Communication with Host Prohibited) from 91.221.61.215 for ICMP Echo sent to 91.221.61.215 1499143417152
  <...>
 
-As we can see, awk processes them too - so there is also timestamp in the ends of error lines.
+As we can see, awk processes them too - so there is also a timestamp in the ends of error lines.
 
 So, there could be 2 types of lines:
 
@@ -177,7 +177,7 @@ Everything we receive from 'fping + awk' pipe is going to our configured stream-
  
 for all IPs it has received data about at that particular minute.
 
-All output data we are going to send into Elasticsearch to store them and have an ability to show on plot (via Kibana).
+All output data is to be sent into Elasticsearch to store them and have an ability to show on plot (via Kibana).
 
 Basic classes description 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -626,3 +626,11 @@ specification.json
 +++++++++++++++++++++
 
 This file describes the module. Examples of description can be found at :ref:`Json_schema`.
+
+
+More Code
+------------------------
+
+The custom module example above represents one of custom implication of a `demo module <https://github.com/bwsw/sj-fping-demo>`_ available at out repository. 
+
+`Here <https://github.com/bwsw/sj-sflow-demo/tree/develop>`_ you can find another example of module workflow. This is a demo that performs the processing workflow for collecting of sflow information. 

@@ -18,6 +18,7 @@
  */
 package com.bwsw.sj.common.si.model.stream
 
+import com.bwsw.sj.common.dal.model.service.ServiceDomain
 import com.bwsw.sj.common.dal.model.stream._
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.rest.utils.ValidationUtils.validateName
@@ -42,6 +43,10 @@ class SjStream(val streamType: String,
 
   protected val connectionRepository = inject[ConnectionRepository]
 
+  protected var serviceDomain: ServiceDomain = _
+
+  protected val serviceType: String = StreamLiterals.typeToServiceType(streamType)
+
   def to(): StreamDomain = ???
 
   /**
@@ -49,7 +54,23 @@ class SjStream(val streamType: String,
     *
     * @return empty array if stream is correct, validation errors otherwise
     */
-  def validate(): ArrayBuffer[String] = validateGeneralFields()
+  def validate(): ArrayBuffer[String] = {
+    val errors = ArrayBuffer[String]()
+
+    errors ++= validateGeneralFields()
+
+    val (serviceDomain, extractedErrors) = extractServiceByName(service, serviceType)
+    if (serviceDomain.isEmpty)
+      errors ++= extractedErrors
+    else {
+      this.serviceDomain = serviceDomain.get
+      errors ++= validateSpecificFields()
+    }
+
+    errors
+  }
+
+  def validateSpecificFields(): ArrayBuffer[String] = ArrayBuffer[String]()
 
   /**
     * Creates structure in storage, used by stream
@@ -94,6 +115,33 @@ class SjStream(val streamType: String,
     }
 
     errors
+  }
+
+  protected def extractServiceByName(serviceName: String, serviceType: String): (Option[ServiceDomain], ArrayBuffer[String]) = {
+    val errors = new ArrayBuffer[String]()
+    var serviceDomain: Option[ServiceDomain] = None
+    Option(service) match {
+      case Some("") | None =>
+        errors += createMessage("entity.error.attribute.required", "Service")
+      case Some(x) =>
+        val serviceDAO = connectionRepository.getServiceRepository
+        val serviceObj = serviceDAO.get(x)
+        serviceObj match {
+          case None =>
+            errors += createMessage("entity.error.doesnot.exist", "Service", x)
+          case Some(someService) =>
+            if (someService.serviceType != serviceType) {
+              errors += createMessage("entity.error.must.one.type.other.given",
+                s"Service for '$serviceType' stream",
+                serviceType,
+                someService.serviceType)
+            } else {
+              serviceDomain = Some(someService)
+            }
+        }
+    }
+
+    (serviceDomain, errors)
   }
 
   protected def validateStreamName(name: String): ArrayBuffer[String] = {

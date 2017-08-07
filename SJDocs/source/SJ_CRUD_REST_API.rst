@@ -8,7 +8,10 @@ REST API Guide
 Introduction
 ---------------
 The Stream Juggler platform provides developers with the opportunity of retrieving data by programming means. The range of REST API functions described on this page is intended for this purposes. 
+
 Each method request will return specific data. Choose the method you need from the list, and generate a request according to the method description below. 
+
+REST API provides access to resources (data entities) via URI paths. To use the REST API, the application will make an HTTP request and parse the response. The response format is JSON. The methods are standard HTTP methods: GET, POST and DELETE.
 
 HTTP Methods
 ~~~~~~~~~~~~
@@ -65,13 +68,13 @@ The range of REST API methods described below allows to create or delete a provi
   "name*", "String", "Provider name.", "Name must be unique and contain only letters, digits or hyphens."
   "description", "String", "Provider description.", ""
   "hosts*", "Array[String]", "List of provider hosts.", ""
-  "login", "String", "Provider login.", ""
-  "password", "String", "Provider password.", ""
-  "type*", "String", "Provider type.", "One of the following values are possible: 'zookeeper', 'kafka', 'ES', 'JDBC', 'REST'."
-  "driver*", "String", "Driver name.", "For JDBC provider type only."
+  "login", "String", "Provider login.", "For 'provider.sql-database', 'provider.elasticsearch' types."
+  "password", "String", "Provider password.", "For 'provider.sql-database', 'provider.elasticsearch' types."
+  "type*", "String", "Provider type.", "One of the following values are possible: 'provider.elasticsearch', 'provider.apache-kafka', 'provider.apache-zookeeper', 'provider.sql-database', 'provider.restful'."
+  "driver*", "String", "Driver name.", "For 'provider.sql-database' provider type only."
 
 .. important:: 
-   - Config settings must contain (<driver> is a value of the "driver" field):
+   - Configurations must contain the following settings (<driver> is a value of the "driver" field) of sql database domain:
       
      - driver.<driver> - name of file with JDBC driver (must exists in files) (e.g. "mysql-connector-java-5.1.6.jar")
      - driver.<driver>.class - name of class of this driver (e.g. "com.mysql.jdbc.Driver")
@@ -101,8 +104,6 @@ Request json example::
  {
      "name": "kafka-provider",
      "description": "example of kafka provider",
-     "login": "my_login",
-     "password": "my_pass",
      "type": "kafka",
      "hosts": [
         "192.168.1.133:9092",
@@ -155,18 +156,17 @@ Success response example::
   "status-code": 200,
   "entity": {
     "provider": {
-      "name": "kafka-provider",
-     "description": "example kafka provider",
-     "login": "my_login",
-     "password": "my_pass",
-     "type": "kafka",
-     "hosts": [
+      "name": "kafka-example",
+      "description": "example kafka provider",
+      "type": "provider.apache-kafka",
+      "hosts": [
         "192.168.1.133:9092",
         "192.168.1.135:9092"
-      ]
+      ],
+      "creationDate": "Thu Jul 20 08:32:51 NOVT 2017"
     }
   }
- }
+ } 
 
 
 Error response example::
@@ -204,23 +204,23 @@ Success response example::
       {
         "name": "kafka-provider",
         "description": "example kafka provider",
-        "login": "my_login",
-        "password": "my_pass",
-        "type": "kafka",
+        "type": "provider.apache-kafka",
         "hosts": [
            "192.168.1.133:9092",
            "192.168.1.135:9092"
          ]
+	 "creationDate": "Thu Jul 20 08:32:51 NOVT 2017"
      },
      {
        "name": "es-provider",
        "description": "elasticsearch provider example",
        "login": "my_login",
        "password": "my_pass",
-       "type": "ES",
+       "type": "provider.elasticsearch",
        "hosts": [
            "192.168.1.133"
-       ]
+       ],
+       "creationDate": "Thu Jul 20 08:32:51 NOVT 2017"
      }
     ]
   }
@@ -246,17 +246,33 @@ Request format::
 Success response example::
 
  {
-  "entity": {
-    "types": [
-      "zookeeper",
-      "kafka",
-      "ES",
-      "JDBC",
-      "REST"
+  entity: {
+    types: [
+      {
+        id: "provider.elasticsearch",
+        name: "Elasticsearch" 
+      },
+      {
+        id: "provider.apache-zookeeper",
+        name: "Apache Zookeeper" 
+      },
+      {
+        id: "provider.apache-kafka",
+        name: "Apache Kafka" 
+      },
+      {
+        id: "provider.restful",
+        name: "RESTful" 
+      },
+      {
+        id: "provider.sql-database",
+        name: "SQL database" 
+      }
     ]
   },
-  "statusCode": 200
+  status-code: 200
  }
+
 
 
 Delete provider by name
@@ -322,9 +338,7 @@ Success response example (provider is available)::
   }
  }
 
-Error response example:
-
-Provider is not available::
+Error response example (provider is not available)::
 
  {
   "entity": {
@@ -334,15 +348,6 @@ Provider is not available::
   "statusCode": 409
  }
 
-
-Unknown provider::
-
- {
-  "status-code": 404,
-  "entity": {
-    "message": "Provider 'kafka' has not been found."
-  }
- }
 
 Get services related to a provider (by provider name)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -394,19 +399,18 @@ Service fields
 
 Each particular service has its own set of fields.
 
-.. csv-table::  Available types and its aliases name for request.
-  :header: "Service type","Alias for request"
-  :widths: 25, 60  
+.. csv-table::  Service type names for request.
+ :header: "Service Types"
+ :widths: 25
   
-  "Elasticsearch Index", "ESInd"
-  "Kafka queue", "KfkQ"
-  "T-streams queue", "TstrQ"
-  "Zookeeper coordination", "ZKCoord" 
-  "Redis coordination", "RdsCoord"
-  "SQL database", "JDBC"
-  "RESTful service", "REST"
+ "service.elasticsearch"
+ "service.apache-kafka"
+ "service.t-streams"
+ "service.apache-zookeeper"
+ "service.sql-database"
+ "service.restful"
 
-Elasticsearch Index (ESInd)
+Elasticsearch 
 """"""""""""""""""""""""""""""""""""""
 
 .. csv-table::  
@@ -417,12 +421,12 @@ Elasticsearch Index (ESInd)
    "name*", "String", "Service name.", "Must be unique and contain only letters, digits or hyphens."
    "description", "String", "Service description.", ""
    "index*", "String", "Elasticsearch index.", ""
-   "provider*", "String", "Provider name.", "Provider can be of 'ES' type only."
+   "provider*", "String", "Provider name.", "Provider can be of 'provider.elasticsearch' type only."
    "login", "String", "User name.", ""
    "password", "String", "User password.", ""
+   "creationDate", "String", "The time when a service has been created.", ""
 
-
-Kafka queue (KfkQ)
+Apache Kafka 
 """"""""""""""""""""""""""""""
 
 .. csv-table::  
@@ -432,12 +436,12 @@ Kafka queue (KfkQ)
   "type*", "String", "Service type", ""
   "name*", "String", "Service name", "Must be unique and contain only letters, digits or hyphens."
   "description", "String", "Service description", ""
-  "provider*", "String", "Provider name.", "Provider can be of 'kafka' type only."
-  "zkProvider*", "String", "zk provider name.", "zkProvider can be of 'zookeeper' type only."
+  "provider*", "String", "Provider name.", "Provider can be of 'provider.apache-kafka' type only."
+  "zkProvider*", "String", "zk provider name.", "zkProvider can be of 'provider.apache-zookeeper' type only."
   "zkNamespace*", "String", "Namespace.", ""
+  "creationDate", "String", "The time when a service has been created.", ""
 
-
-T-streams queue (TstrQ)
+T-streams 
 """"""""""""""""""""""""""""""
 
 .. csv-table::  
@@ -447,12 +451,13 @@ T-streams queue (TstrQ)
   "type*", "String", "Service type.", ""
   "name*", "String", "Service name.", "Must be unique and contain only letters, digits or hyphens."
   "description", "String", "Service description.", ""
-  "provider*", "String", "Provider name.", "Provider can be of 'zookeeper' type only."
+  "provider*", "String", "Provider name.", "Provider can be of 'provider.apache-zookeeper' type only."
   "prefix*", "String", "A znode path", "Must be a valid znode path."
   "token*", "String", "A token", "Should not contain more than 32 symbols."
+  "creationDate", "String", "The time when a service has been created.", ""
 
 
-Zookeeper Coordination (ZKCoord)
+Apache Zookeeper 
 """"""""""""""""""""""""""""""""""""""
 
 .. csv-table::  
@@ -463,10 +468,10 @@ Zookeeper Coordination (ZKCoord)
   "name*", "String", "Service name.", "Must be unique and contain only letters, digits or hyphens."
   "description", "String", "Service description.", ""
   "namespace*", "String", "Zookeeper namespace.", ""
-  "provider*", "String", "Provider name.", "Provider can be of 'zookeeper' type only."
+  "provider*", "String", "Provider name.", "Provider can be of 'provide.apache-zookeeper' type only."
+  "creationDate", "String", "The time when a service has been created.", ""
 
-
-SQL database (JDBC)
+SQL database 
 """""""""""""""""""""""""
 
 .. csv-table::  
@@ -478,9 +483,9 @@ SQL database (JDBC)
   "description", "String", "Service description.", ""
   "provider*", "String", "Provider name.", "Provider can be of 'JDBC' type only."
   "database*", "String", "Database name.", ""
+  "creationDate", "String", "The time when a service has been created.", ""
 
-
-RESTful service (REST)
+RESTful 
 """""""""""""""""""""""""""""
 
 .. csv-table::  
@@ -490,12 +495,14 @@ RESTful service (REST)
   "type*", "String", "Service type.", ""
   "name*", "String", "Service name.", "Must be unique and contain only letters, digits or hyphens."
   "description", "String", "Service description.", ""
-  "provider*", "String", "Provider name.", "Provider can be  of 'REST' type only."
+  "provider*", "String", "Provider name.", "Provider can be  of 'provider.restful' type only."
   "basePath", "String", "Path to storage (/ by default)", ""
+  "httpScheme", "String", "The time when a service has been created.", "Scheme of HTTP protocol, one of ('http', 'https'); ('http' by default)"
   "httpVersion", "String", "Version og HTTP protocol", "One of (1.0, 1.1, 2); (1.1 by default)"
   "headers", "Object", "Extra HTTP headers.", "Values in object must be only String type. ({} by default)"
-
-.. note: `*` - required fields.
+  "creationDate", "String", "The time when a service has been created.", ""
+  
+.. note:: `*` - required fields.
 
 Create a new service
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -520,7 +527,7 @@ Request json example::
  {
     "name": "test-rest-zk-service",
     "description": "ZK test service created with REST",
-    "type": "ZKCoord",
+    "type": "service.apache-zookeeper",
     "provider": "zk-prov",
     "namespace": "namespace"
  }
@@ -570,7 +577,7 @@ Success response example::
     "service": {
       "name": "test-rest-zk-service",
       "description": "ZK test service created with REST",
-      "type": "ZKCoord",
+      "type": "service.apache-zookeeper",
       "provider": "zk-prov",
       "namespace": "namespace"
     }
@@ -612,16 +619,18 @@ Success response example::
       {
         "name": "test-rest-zk-service",
         "description": "ZK test service created with REST",
-        "type": "ZKCoord",
+        "type": "service.apache-zookeeper",
         "provider": "zk-prov",
         "namespace": "namespace"
+	"creationDate": "Thu Jul 20 08:32:51 NOVT 2017"
       },
       {
         "name": "rest-service",
         "description": "rest test service",
         "namespace": "mynamespace",
         "provider": "rest-prov",
-        "type": "REST"
+        "type": "service.restful"
+	"creationDate": "Thu Jul 20 08:32:51 NOVT 2017"
       },
       
     ]
@@ -648,17 +657,35 @@ Request format::
 Success response example::
 
  {
-  "entity": {
-    "types": [
-      "ESInd",
-      "KfkQ",
-      "TstrQ",
-      "ZKCoord",
-      "JDBC",
-      "REST"
+  entity: {
+    types: [
+      {
+        id: "service.elasticsearch",
+        name: "Elasticsearch" 
+      },
+      {
+        id: "service.sql-database",
+        name: "SQL database" 
+      },
+      {
+        id: "service.t-streams",
+        name: "T-streams" 
+      },
+      {
+        id: "service.apache-kafka",
+        name: "Apache Kafka" 
+      },
+      {
+        id: "service.apache-zookeeper",
+        name: "Apache Zookeeper" 
+      },
+      {
+        id: "service.restful",
+        name: "RESTful" 
+      }
     ]
   },
-  "statusCode": 200
+  status-code: 200
  }
 
 
@@ -761,6 +788,17 @@ The range of REST API methods described below allows to create or delete a strea
 
 Stream fields
 ~~~~~~~~~~~~~~~~~
+
+.. csv-table::  Stream types for requests
+ :header: "Types"
+ :widths: 25
+  
+ "stream.elasticsearch"
+ "stream.apache-kafka"
+ "stream.t-streams"
+ "stream.sql-database"
+ "stream.restful"
+
 .. csv-table:: Response
    :header: "Field", "Format", "Description", "Requirements"
    :widths: 10, 10, 20, 20
@@ -768,20 +806,20 @@ Stream fields
    "name*", "String", "Stream name.", "Must be unique and contain only lowercase letters, digits or hyphens."
    "description", "String", "Stream description", ""
    "service*", "String", "Service id", ""
-   "type*", "String", "Stream type", "One of the following values : stream.t-stream, stream.kafka, jdbc-output, elasticsearch-output, rest-output."
+   "type*", "String", "Stream type", "One of the following values : stream.t-streams, stream.apache-kafka, stream.sql-database, stream.elasticsearch, stream.restful."
    "tags", "Array[String]", "Tags.", ""
-   "partitions*", "Int", "Partitions.", "For stream.t-stream, stream.kafka types"
-   "replicationFactor*", "Int", "Replication factor (how many zookeeper nodes to utilize).", "For stream.kafka stream type only."
-   "primary", "String", "Primary key field name used in sql database.", "For jdbc-output stream type only."
+   "partitions*", "Int", "Partitions.", "For stream.t-streams, stream.apache-kafka types"
+   "replicationFactor*", "Int", "Replication factor (how many zookeeper nodes to utilize).", "For stream.apache-kafka stream type only."
+   "primary", "String", "Primary key field name used in sql database.", "For stream.sql-database stream type only."
    "force", "Boolean", "Indicates if a stream should be removed and re-created by force (if it exists). False by default.", ""
 
 
 .. important:: 
-           - Service type for 'stream.t-stream' stream can be 'TstrQ' only. 
-           - Service type for 'stream.kafka' stream can be 'KfkQ' only. 
-           - Service type for 'jdbc-output' stream can be 'JDBC' only. 
-           - Service type for 'elasticsearch-output' stream can be 'ESInd' only.
-           - Service type for 'rest-output' stream can be 'REST' only.
+           - Service type for 'stream.t-streams' stream can be 'service.t-streams' only. 
+           - Service type for 'stream.apache-kafka' stream can be 'service.apache-kafka' only. 
+           - Service type for 'stream.sql-database' stream can be 'service.sql-database' only. 
+           - Service type for 'stream.elasticsearch' stream can be 'service.elasticsearch' only.
+           - Service type for 'stream.restful' stream can be 'service.restful' only.
 
 .. note:: `*` - required field.
 
@@ -802,14 +840,14 @@ Request format::
   "400", "Cannot create stream. Errors: <list-of-errors>."
   "500", "Internal server error."
 
-Request json example::
+Request example::
 
  {
       "name": "tstream-2",
       "description": "Tstream example",
       "partitions": 3,
       "service": "some-tstrq-service",
-      "type": "stream.t-stream",
+      "type": "stream.t-streams",
       "tags": ["lorem", "ipsum"]
  }
 
@@ -859,17 +897,19 @@ Success response example::
         "description": "Tstream example",
         "partitions": 3,
         "service": "some-tstrq-service",
-        "type": "stream.t-stream",
+        "type": "stream.t-streams",
         "tags": ["lorem", "ipsum"]
+	"creationDate": "Thu Jul 20 08:32:51 NOVT 2017"
       },
       {
         "name": "kafka-stream",
         "description": "One of the streams",
         "partitions": 1,
         "service": "some-kfkq-service",
-        "type": "stream.kafka",
+        "type": "stream.apache-kafka",
         "tags": ["lorem", "ipsum"],
         "replicationFactor": 2
+	"creationDate": "Thu Jul 20 08:32:51 NOVT 2017"
       }
     ]
   }
@@ -895,16 +935,31 @@ Request format::
 Success response example::
 
  {
-  "entity": {
-    "types": [
-      "stream.t-stream",
-      "stream.kafka",
-      "jdbc-output",
-      "elasticsearch-output",
-      "rest-output"
+  entity: {
+    types: [
+      {
+        id: "stream.restful",
+        name: "RESTful" 
+      },
+      {
+        id: "stream.elasticsearch",
+        name: "Elasticsearch" 
+      },
+      {
+        id: "stream.t-streams",
+        name: "T-streams" 
+      },
+      {
+        id: "stream.apache-kafka",
+        name: "Apache Kafka" 
+      },
+      {
+        id: "stream.sql-database",
+        name: "SQL database" 
+      }
     ]
   },
-  "statusCode": 200
+  status-code: 200
  }
 
 Get stream by name
@@ -938,7 +993,8 @@ Success response example::
       ],
       "force": false,
       "partitions": 1,
-      "type": "stream.t-stream"
+      "type": "stream.t-streams"
+      "creationDate": "Thu Jul 20 08:32:51 NOVT 2017"
     }
   },
   "statusCode": 200
@@ -1030,26 +1086,38 @@ Error response example::
 
 .. tip:: A full range of error responses can be found at :ref:`Streams_Errors`
 
-CRUD Rest-API for Config Settings
+CRUD Rest-API for Configurations
 -----------------------------------
 
-The range of REST API methods described below allows to create or delete config settings, get the information on the config setting, get the list of config settings existing in the system, get list of domains.
+The range of REST API methods described below allows to create or delete configuration, get the information on the configuration, get the list of configurations existing in the system, get list of domains.
 
-Config setting fields
+Configuration fields
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. csv-table::  
   :header: "Field", "Format",  "Description", "Requirements"
   :widths: 15, 15, 20, 20
 
-  "name*", "String", "Name of the setting (key).", "Should be unique and contain digits, lowercase letters, hyphens or periods and start with a letter."
-  "value*", "String", "Value of setting.", ""
-  "domain*", "String", "Name of config-domain.", "Should be one of the following values: 'system', 't-streams', 'kafka', 'es', 'zk', 'jdbc'"
+  "name*", "String", "Name of the configuration (key).", "Should be unique and contain digits, lowercase letters, hyphens or periods and start with a letter."
+  "value*", "String", "Value of configuration.", ""
+  "domain*", "String", "Name of config-domain.", "(see the table below)"
 
 .. note:: `*` - required field.
 
+{config-domain} must be one of the following values:
 
-Create a new config setting
+.. csv-table::  
+  :header: "Types"
+  :widths: 25 
+  
+  "configuration.system"
+  "configuration.t-streams"
+  "configuration.apache-kafka"
+  "configuration.elasticsearch"
+  "configuration.apache-zookeeper"
+  "configuration.sql-database"
+
+Create a new configuration
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Request method: POST
@@ -1062,8 +1130,8 @@ Request format::
   :header: "Status code",  "Description"
   :widths: 25, 60
 
-  "201", "<config-domain> config setting <name> has been created."
-  "400", "Cannot create <config-domain> config setting. Errors: <list-of-errors>."
+  "201", "<config-domain> configuration <name> has been created."
+  "400", "Cannot create <config-domain> configuration. Errors: <list-of-errors>."
   "500", "Internal server error."
 
 
@@ -1082,12 +1150,12 @@ Error response example::
  {
   "status-code": 400,
   "entity": {
-    "message": "Cannot create system config setting. Errors: <creation_errors_string>."
+    "message": "Cannot create system configuration. Errors: <creation_errors_string>."
   }
  }
 
 
-Get a config setting by name
+Get a configuration by name
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Request method: GET
@@ -1100,9 +1168,9 @@ Request format::
   :header: "Status code", "Description"
   :widths: 25, 60
 
-  "200", "Json with requested config setting for specific config domain."
-  "400",  "Cannot recognize config setting domain <config-domain>. Domain must be one of the following values: 'system, t-streams, kafka, es, zk, jdbc, rest'."
-  "404", "<config-domain> сonfig setting <name> has not been found."
+  "200", "Json with requested configuration for specific config domain."
+  "400",  "Cannot recognize configuration domain <config-domain>. Domain must be one of the following values: 'configuration.system, configuration.t-streams, configuration.apache-kafka, configuration.elasticsearch, configuration.apache-zookeeper, configuration.sql-database'."
+  "404", "<config-domain> сonfiguration <name> has not been found."
   "500", "Internal server error."
 
 Success response example::
@@ -1113,7 +1181,8 @@ Success response example::
     "configSetting": {
       "name": "crud-rest-host",
       "value": "localhost",
-      "domain": "system"
+      "domain": "configuration.system"
+      "creationDate": "Thu Jul 20 08:32:51 NOVT 2017"
     }
   }
  }
@@ -1122,13 +1191,13 @@ Error response example::
 
  {
     "entity": {
-        "message": "Cannot recognize config setting domain 'elasticsearch'. Domain must be one of the following values: 'system, t-streams, kafka, es, zk, jdbc, rest'."
+        "message": "Cannot recognize configuration domain 'elasticsearch'. Domain must be one of the following values: 'configuration.system, configuration.t-streams, configuration.apache-kafka, configuration.elasticsearch, configuration.apache-zookeeper, configuration.sql-database'."
     },
     "status-code": 400
  }
 
 
-Get all config settings for specific config domain
+Get all configurations for specific config domain
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Request method: GET
@@ -1141,8 +1210,8 @@ Request format::
   :header: "Status code",  "Description"
   :widths: 25, 60
 
-  "200", "Json of set of config settings for specific config domain."
-  "400", "Cannot recognize config setting domain <config-domain>. Domain must be one of the following values: 'system, t-streams, kafka, es, zk, jdbc, rest'."
+  "200", "Json of set of configurations for specific config domain."
+  "400", "Cannot recognize configuration domain <config-domain>. Domain must be one of the following values: 'configuration.system, configuration.t-streams, configuration.apache-kafka, configuration.elasticsearch, configuration.apache-zookeeper, configuration.sql-database'."
   "500", "Internal server error."
 
 Success response example::
@@ -1155,11 +1224,13 @@ Success response example::
         "name": "crud-rest-host",
         "value": "localhost",
         "domain": {config-domain}
+	"creationDate": "Thu Jul 20 08:32:51 NOVT 2017"
      },
      {
        "name": "crud-rest-port",
        "value": "8000",
        "domain": {config-domain}
+       "creationDate": "Thu Jul 20 08:32:51 NOVT 2017"
      }
     ]
   }
@@ -1169,13 +1240,13 @@ Error response example::
 
  {
     "entity": {
-        "message": "Cannot recognize config setting domain 'elasticsearch'. Domain must be one of the following values: 'system, t-streams, kafka, es, zk, jdbc, rest'."
+        "message": "Cannot recognize configuration domain 'elasticsearch'. Domain must be one of the following values: 'configuration.system, configuration.t-streams, configuration.apache-kafka, configuration.elasticsearch, configuration.apache-zookeeper, configuration.sql-database'."
     },
     "status-code": 400
  }
 
 
-Delete a config setting by name
+Delete a configuration by name
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Request method: DELETE
@@ -1188,23 +1259,30 @@ Request format::
   :header: "Status code",  "Description"
   :widths: 25, 60
 
-  "200", "<config-domain> config setting <name> has been deleted."
-  "400", "Cannot recognize config setting domain <config-domain>. Domain must be one of the following values: 'system, t-streams, kafka, es, zk, jdbc, rest'."
-  "404", "<config-domain> сonfig setting <name> has not been found."
+  "200", "<config-domain> configuration <name> has been deleted."
+  "400", "Cannot recognize configuration domain <config-domain>. Domain must be one of the following values: 'configuration.system, configuration.t-streams, configuration.apache-kafka, configuration.elasticsearch, configuration.apache-zookeeper, configuration.sql-database'."
+  "404", "<config-domain> configuration <name> has not been found."
   "500", "Internal server error."
 
 Success response example::
 
  {
     "entity": {
-        "message": "Config setting 'system.crud-rest-host' has been deleted."
+        "message": "Configuration 'system.crud-rest-host' has been deleted."
     },
     "status-code": 200
  }
 
+Error response example::
+ 
+ {
+    "entity": {
+        "message": "Cannot recognize configuration domain 'system'. Domain must be one of the following values: 'configuration.system, configuration.t-streams, configuration.apache-kafka, configuration.elasticsearch, configuration.apache-zookeeper, configuration.sql-database'."
+    },
+    "status-code": 400
+ }
 
-
-Get all config settings
+Get all configurations
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Request method: GET
@@ -1217,7 +1295,7 @@ Request format::
   :header: "Status code",  "Description"
   :widths: 25, 60
 
-  "200", "Json of set of config settings"
+  "200", "Json of set of configurations"
   "500", "Internal server error"
 
 Success response example::
@@ -1229,17 +1307,20 @@ Success response example::
       {
           "name": "crud-rest-host",
           "value": "localhost",
-          "domain": "system"
+          "domain": "configuration.system"
+	  "creationDate": "Thu Jul 20 08:32:51 NOVT 2017"
       },
       {
           "name": "crud-rest-port",
           "value": "8000",
-          "domain": "system"
+          "domain": "configuration.system"
+	  "creationDate": "Thu Jul 20 08:32:51 NOVT 2017"
       },
       {
           "name": "session.timeout",
           "value": "7000",
-          "domain": "zk"
+          "domain": "configuration.apache-zookeeper"
+	  "creationDate": "Thu Jul 20 08:32:51 NOVT 2017"
       }
     ]
   }
@@ -1265,20 +1346,38 @@ Request format::
 Success response example::
 
  {
-  "entity": {
-    "domains": [
-      "system",
-      "t-streams",
-      "kafka",
-      "es",
-      "zk",
-      "jdbc"
+  entity: {
+    domains: [
+      {
+        id: "configuration.sql-database",
+        name: "SQL database" 
+      },
+      {
+        id: "configuration.elasticsearch",
+        name: "Elasticsearch" 
+      },
+      {
+        id: "configuration.apache-zookeeper",
+        name: "Apache Zookeeper" 
+      },
+      {
+        id: "configuration.system",
+        name: "System" 
+      },
+      {
+        id: "configuration.t-streams",
+        name: "T-streams" 
+      },
+      {
+        id: "configuration.apache-kafka",
+        name: "Apache Kafka" 
+      }
     ]
   },
-  "statusCode": 200
+  status-code: 200
  }
 
-.. tip:: A full range of error responses can be found at :ref:`Config_Setting_Errors`
+.. tip:: A full range of error responses can be found at :ref:`Config_Settings_Errors`
 
 CRUD Rest-API for Custom Files
 ----------------------------------------
@@ -1328,10 +1427,18 @@ Success response example::
  {
   "status-code": 200,
   "entity": {
-    "message": "Custom jar is uploaded."
+    "message": "Custom jar 'Custom_jar.jar' has been uploaded."
   }
  }
 
+Error response example::
+
+ {
+    "entity": {
+        "message": "Cannot upload custom jar. Errors: Custom jar 'Upload_custom_jar.jar' already exists."
+    },
+    "status-code": 400
+ }
 
 Download a custom jar by file name
 """"""""""""""""""""""""""""""""""""""""""
@@ -1362,6 +1469,10 @@ Response headers example::
   "404", "Jar <custom-jar-file-name> has not been found."
   "500", "Internal server error."
 
+Success response:
+
+A jar file is downloaded.
+
 Error response example::
 
  {
@@ -1387,6 +1498,10 @@ Request format::
   "200", "Jar-file for download."
   "404", "Jar <custom-jar-name>-<custom-jar-version> has not been found."
   "500", "Internal server error."
+
+Success response:
+
+A jar file is downloaded.
 
 Error response example::
 
@@ -1493,11 +1608,13 @@ Success response example::
         "name": "com.bwsw.fw",
         "version": "1.0",
         "size": "98060032"
+	"uploadDate": "Wed Jul 19 13:46:31 NOVT 2017"
       },
       {
         "name": "com.bwsw.tg",
         "version": "1.0",
         "size": "97810217"
+	"uploadDate": "Wed Jul 19 13:46:31 NOVT 2017"
       }
     ]
   },
@@ -1648,13 +1765,13 @@ Success response example::
       {
         "name": "GeoIPASNum.dat",
         "description": "",
-        "upload-date": "Mon Jul 04 10:42:03 NOVT 2016",
+        "uploadDate": "Mon Jul 04 10:42:03 NOVT 2016",
         "size": "46850"
       },
       {
         "name": "GeoIPASNumv6.dat",
         "description": "",
-        "upload-date": "Mon Jul 04 10:42:58 NOVT 2016",
+        "uploadDate": "Mon Jul 04 10:42:58 NOVT 2016",
         "size": "52168"
       }
     ]
@@ -1666,13 +1783,16 @@ Success response example::
 CRUD Rest-API for Modules 
 ------------------------------
 
-This is the CRUD Rest-API for modules uploaded as jar files, instantiated and running modules as well as  for custom jar files.
+This is the CRUD Rest-API for modules uploaded as jar files, instantiated and running modules as well as for custom jar files.
 
-The following types of modules are supported in the system:
-* regular-streaming (base type)
-* batch-streaming
-* output-streaming
-* input-streaming
+.. csv-table::  Module types
+ :header: "Types"
+ :widths: 25 
+  
+ "input-streaming"
+ "regular-streaming"
+ "batch-streaming"
+ "output-streaming"
 
 .. csv-table::  **Specification fields**
   :header: "Field", "Format",  "Description"
@@ -1787,6 +1907,19 @@ Response headers example::
   "404", "1. Module '<module_type>-<module_name>-<module_version>' has not been found.
   2. Jar of module '<module_type>-<module_name>-<module_version>' has not been found in the storage."
   "500", "Internal server error"
+  
+Success response:
+
+A jar file is downloaded.
+
+Error response example::
+
+ {
+    "entity": {
+        "message": "Module 'regular-streaming-process-1.0' has not been found."
+    },
+    "status-code": 404
+ }
 
 Delete uploaded module
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1855,12 +1988,14 @@ Success response example::
         "moduleName": "com.bwsw.sj.stub",
         "moduleVersion": "0.1",
         "size": "68954210"
+	"uploadDate": "Wed Jul 19 13:46:31 NOVT 2017"
       },
       {
         "moduleType": "batch-streaming",
         "moduleName": "com.bwsw.sj.stub-win",
         "moduleVersion": "0.1",
         "size": "69258954"
+	"uploadDate": "Wed Jul 19 13:46:31 NOVT 2017"
       }
     ]
   }
@@ -1926,6 +2061,7 @@ Success response example::
         "moduleName": "com.bwsw.sj.stub",
         "moduleVersion": "0.1",
         "size": 106959926
+	"uploadDate": "Wed Jul 19 13:46:31 NOVT 2017"
       }
     ]
   }
@@ -1974,8 +2110,8 @@ Success response example::
           10
         ],
         "types": [
-          "stream.kafka",
-          "stream.t-stream"
+          "stream.apache-kafka",
+          "stream.t-streams"
         ]
       },
       "outputs": {
@@ -1984,7 +2120,7 @@ Success response example::
           10
         ],
         "types": [
-          "stream.t-stream"
+          "stream.t-streams"
         ]
       },
       "moduleType": "batch-streaming",
@@ -2078,8 +2214,8 @@ Instance fields
 
   "checkpointMode*", "String", "Value must be 'time-interval' or 'every-nth'", "every-nth" 
   "checkpointInterval*", "Int", "Interval for creating checkpoint", 100 
-  "inputs*", "List[String]", "Names of input streams. Name format must be <stream-name>/<'full' or 'split'> ('split' by default). Stream must exist in database (must be stream.t-stream or stream.kafka)", "[s1/full, s2/split]" 
-  "outputs*", "List[String]", "Names of output streams (must be stream.t-stream only)", "[s3, s4]" 
+  "inputs*", "List[String]", "Names of input streams. Name format must be <stream-name>/<'full' or 'split'> ('split' by default). Stream must exist in database (must be stream.t-streams or stream.apache-kafka)", "[s1/full, s2/split]" 
+  "outputs*", "List[String]", "Names of output streams (must be stream.t-streams only)", "[s3, s4]" 
   "startFrom", "String or Datetime", "Value must be 'newest', 'oldest' or datetime. If instance have kafka input streams, then 'start-from' must be only 'oldest' or 'newest' (newest by default)", "newest" 
   "stateManagement", "String", "Must be 'ram' or 'none' (none by default)", "ram" 
   "stateFullCheckpoint", "Int", "Interval for full checkpoint (100 by default)", "5"
@@ -2088,14 +2224,14 @@ Instance fields
 **Batch-streaming instance fields**
 
 .. csv-table:: 
-  :header: "Field name", "Format",  "Description", "Example"
-  :widths: 15, 10, 60, 20
+ :header: "Field name", "Format",  "Description", "Example"
+ :widths: 15, 10, 60, 20
 
   "outputs*", "List[String]", "Names of output streams (must be stream.t-stream only)", "[s3, s4]"
   "window", "Int", "Count of batches that will be contained into a window (1 by default). Must be greater than zero",  3 
   "slidingInterval", "Int", "The interval at which a window will be shifted (сount of batches that will be removed from the window after its processing). Must be greater than zero and less or equal than window (1 by default)", 3
   "inputs*", "String", "Names of input streams. Name format must be <stream-name>/<'full' or 'split'> ('split' by default).
- Stream must exist in database (must be stream.t-stream or stream.kafka)", "[s1/full]"
+ Stream must exist in database (must be stream.t-streams or stream.apache-kafka)", "[s1/full]"
   "startFrom", "String or Datetime", "Value must be 'newest', 'oldest' or datetime. If instance have kafka input streams, then 'start-from' must be only 'oldest' or 'newest' (newest by default)", "newest" 
   "stateManagement", "String", "Must be 'ram' or 'none' (none by default)",  "ram" 
   "stateFullCheckpoint", "Int", "Interval for full checkpoint (100 by default)", 5 
@@ -2109,8 +2245,8 @@ Instance fields
 
   "checkpointMode*", "String",  "Value must be 'time-interval'", "time-interval" 
   "checkpointInterval*", "Int", "Interval for creating checkpoint", 100 
-  "input*", "String", "Names of input stream. Must be only 't-stream' type. Stream for this type of module is 'split' only.  Stream must be exists in database.", "s1" 
-  "output*", "String", "Names of output stream (must be elasticsearch-output, jdbc-ouptut or rest-output)", "es1" 
+  "input*", "String", "Names of input stream. Must be only 'stream.t-streams' type. Stream for this type of module is 'split' only.  Stream must be exists in database.", "s1" 
+  "output*", "String", "Names of output stream (must be stream.elasticsearch, stream.sql-database or stream.restful)", "es1" 
   "startFrom", "String or Datetime", "Value must be 'newest', 'oldest' or datetime (newest by default)", "newest" 
 
 
@@ -2310,6 +2446,15 @@ Success response json example of a created instance::
   "eventWaitTime": 10000,
   "restAddress" : ""
  }
+ }
+ 
+Error response example::
+
+ {
+    "entity": {
+        "message": "Module 'input-streaming-Instance1-2.0' has not been found."
+    },
+    "status-code": 404
  }
 
 Instance statuses
@@ -2562,6 +2707,64 @@ Request format::
   "404", "Instance '<instance_name>' has not been found."
   "500", "Internal server error"
 
+Success response example::
+
+ {
+    "entity": {
+        "instance": {
+            "moduleName": "pingstation-output",
+            "moduleVersion": "1.0",
+            "moduleType": "output-streaming",
+            "stage": {
+                "state": "stopped",
+                "datetime": 1500966502569,
+                "duration": 0
+            },
+            "status": "stopped",
+            "name": "output-streaming-imstance",
+            "description": "No description",
+            "parallelism": 1,
+            "options": {},
+            "perTaskCores": 1,
+            "perTaskRam": 1024,
+            "jvmOptions": {},
+            "nodeAttributes": {},
+            "coordinationService": "zk-service",
+            "environmentVariables": {},
+            "performanceReportingInterval": 60000,
+            "engine": "com.bwsw.output.streaming.engine-1.0",
+            "restAddress": "",
+            "checkpointMode": "every-nth",
+            "checkpointInterval": 3,
+            "executionPlan": {
+                "tasks": {
+                    "output-streaming-imstance-task0": {
+                        "inputs": {
+                            "output-tstream": [
+                                0,
+                                0
+                            ]
+                        }
+                    }
+                }
+            },
+            "startFrom": "newest",
+            "input": "output-tstreamk",
+            "output": "stream-es"
+        }
+    },
+    "status-code": 200
+ }
+ 
+Error response example::
+
+ {
+    "entity": {
+        "message": "Instance 'batch-streaming' has not been found."
+    },
+    "status-code": 404
+ }
+
 Start an instance
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -2630,14 +2833,20 @@ Success response example::
       {
         "state": "TASK_RUNNING",
         "directories": [
-          "http://stream-juggler.z1.netpoint-dc.com:5050/#/slaves/3599865a-47b1-4a17-9381-b708d42eb0fc-S0/browse?path=/var/lib/mesos/slaves/3599865a-47b1-4a17-9381-b708d42eb0fc-S0/frameworks/c69ce526-c420-44f4-a401-6b566b1a0823-0003/executors/pingstation-process-task0/runs/d9748d7a-3d0e-4bb6-88eb-3a3340d133d8",
-          "http://stream-juggler.z1.netpoint-dc.com:5050/#/slaves/3599865a-47b1-4a17-9381-b708d42eb0fc-S0/browse?path=/var/lib/mesos/slaves/3599865a-47b1-4a17-9381-b708d42eb0fc-S0/frameworks/c69ce526-c420-44f4-a401-6b566b1a0823-0003/executors/pingstation-process-task0/runs/8a62f2a4-6f3c-412f-9d17-4f63e9052868"
+          {
+            "name": "Mon Dec 05 11:33:47 NOVT 2016",
+            "path": "http://stream-juggler.z1.netpoint-dc.com:5050/#/slaves/3599865a-47b1-4a17-9381-b708d42eb0fc-S0/browse?path=/var/lib/mesos/slaves/3599865a-47b1-4a17-9381-b708d42eb0fc-S0/frameworks/c69ce526-c420-44f4-a401-                       6b566b1a0823-0003/executors/pingstation-process-task0/runs/d9748d7a-3d0e-4bb6-88eb-3a3340d133d8" 
+          },
+          {
+            "name": "Mon Dec 05 11:56:47 NOVT 2016",
+            "path": "http://stream-juggler.z1.netpoint-dc.com:5050/#/slaves/3599865a-47b1-4a17-9381-b708d42eb0fc-S0/browse?path=/var/lib/mesos/slaves/3599865a-47b1-4a17-9381-b708d42eb0fc-S0/frameworks/c69ce526-c420-44f4-a401-                       6b566b1a0823-0003/executors/pingstation-process-task0/runs/8a62f2a4-6f3c-412f-9d17-4f63e9052868" 
+          }
         ],
         "state-change": "Mon Dec 05 11:56:47 NOVT 2016",
         "reason": "Executor terminated",
         "id": "pingstation-process-task0",
         "node": "3599865a-47b1-4a17-9381-b708d42eb0fc-S0",
-        "last-node": "3599865a-47b1-4a17-9381-b708d42eb0fc-S0"
+        "last-node": "3599865a-47b1-4a17-9381-b708d42eb0fc-S0" 
       }
     ]
   }
@@ -2752,30 +2961,43 @@ Request format::
 
 Success response json example::
 
+ entity: {
+ "tasks": [
  {
-  "status-code": 200,
-  "entity": {
-    "tasks": [
-      {
-        "state": "TASK_RUNNING",
-        "directories": [
-          {
-            "name": "Mon Dec 05 11:33:47 NOVT 2016",
-            "path": "http://stream-juggler.z1.netpoint-dc.com:5050/#/slaves/3599865a-47b1-4a17-9381-b708d42eb0fc-S0/browse?path=/var/lib/mesos/slaves/3599865a-47b1-4a17-9381-b708d42eb0fc-S0/frameworks/c69ce526-c420-44f4-a401-                       6b566b1a0823-0003/executors/pingstation-process-task0/runs/d9748d7a-3d0e-4bb6-88eb-3a3340d133d8" 
-          },
-          {
-            "name": "Mon Dec 05 11:56:47 NOVT 2016",
-            "path": "http://stream-juggler.z1.netpoint-dc.com:5050/#/slaves/3599865a-47b1-4a17-9381-b708d42eb0fc-S0/browse?path=/var/lib/mesos/slaves/3599865a-47b1-4a17-9381-b708d42eb0fc-S0/frameworks/c69ce526-c420-44f4-a401-                       6b566b1a0823-0003/executors/pingstation-process-task0/runs/8a62f2a4-6f3c-412f-9d17-4f63e9052868" 
-          }
-        ],
-        "state-change": "Mon Dec 05 11:56:47 NOVT 2016",
-        "reason": "Executor terminated",
-        "id": "pingstation-process-task0",
-        "node": "3599865a-47b1-4a17-9381-b708d42eb0fc-S0",
-        "last-node": "3599865a-47b1-4a17-9381-b708d42eb0fc-S0" 
-      }
-    ]
-  }
+ "state": "TASK_RUNNING",
+ "directories": [
+ "http://stream-juggler.z1.netpoint-dc.com:5050/#/slaves/3599865a-47b1-4a17-9381-b708d42eb0fc-S0/browse?path=/var/lib/mesos/slaves/3599865a-47b1-4a17-9381-b708d42eb0fc-S0/frameworks/c69ce526-c420-44f4-a401-6b566b1a0823-0003/executors/pingstation- process-task0/runs/d9748d7a-3d0e-4bb6-88eb-3a3340d133d8",
+ "http://stream-juggler.z1.netpoint-dc.com:5050/#/slaves/3599865a-47b1-4a17-9381-b708d42eb0fc-S0/browse?path=/var/lib/mesos/slaves/3599865a-47b1-4a17-9381-b708d42eb0fc-S0/frameworks/c69ce526-c420-44f4-a401-6b566b1a0823-0003/executors/pingstation-process-task0/runs/8a62f2a4-6f3c-412f-9d17-4f63e9052868" 
+ ],
+ "state-change": "Mon Dec 05 11:56:47 NOVT 2016",
+ "reason": "Executor terminated",
+ "id": "pingstation-process-task0",
+ "node": "3599865a-47b1-4a17-9381-b708d42eb0fc-S0",
+ "last-node": "3599865a-47b1-4a17-9381-b708d42eb0fc-S0" 
  }
+ ],
+ "message": "Tasks launched" 
+ }
+
+The following information on tasks is returned:
+
+- ``state`` - the status of task performance. The following options are possible: 
+  
+ - "TASK_STAGING" - the task is created but is not started executing, 
+ - "TASK_RUNNING" - the task is launched and is being executed now, 
+ - "TASK_FAILED" - the task is failed, 
+ - "TASK_ERROR" - an error is detected in the task execution. 
+
+- ``directories`` - directories of tasks of the instance. 
+
+- ``state-change`` - the date of the last status change.
+
+- ``reason`` - the reason for the task status change.
+
+- ``id`` - the task id.
+
+- ``node`` - name of node used by the task.
+
+- ``last node`` - name of node that was used by a task before the status change.
 
 .. tip:: A full range of error responses can be found at :ref:`Instances_Errors`

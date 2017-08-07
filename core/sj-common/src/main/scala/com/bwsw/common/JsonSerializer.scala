@@ -20,7 +20,7 @@ package com.bwsw.common
 
 import java.lang.reflect.{ParameterizedType, Type}
 
-import com.bwsw.common.exceptions._
+import com.bwsw.common.exceptions.{JsonNotParsedException, _}
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.core.JsonParseException
 import com.fasterxml.jackson.core.`type`.TypeReference
@@ -37,10 +37,10 @@ import scala.util.{Failure, Success, Try}
   * Class based on jackson for json serialization.
   * Most commonly used in REST to serialize/deserialize api entities
   *
-  * @param ignoreUnknown            indicates that unknown properties in JSON will be ignored
-  * @param disableNullForPrimitives indicates that value of field with primitive type must contain any non-null value
+  * @param ignoreUnknown           indicates that unknown properties in JSON will be ignored
+  * @param enableNullForPrimitives indicates that value of field with primitive type could contain null
   */
-class JsonSerializer(ignoreUnknown: Boolean = false, disableNullForPrimitives: Boolean = false) {
+class JsonSerializer(ignoreUnknown: Boolean = false, enableNullForPrimitives: Boolean = true) {
   private val logger = LoggerFactory.getLogger(this.getClass)
 
   private val mapper = new ObjectMapper()
@@ -48,7 +48,7 @@ class JsonSerializer(ignoreUnknown: Boolean = false, disableNullForPrimitives: B
   mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)
 
   setIgnoreUnknown(ignoreUnknown)
-  disableNullForPrimitives(disableNullForPrimitives)
+  enableNullForPrimitives(enableNullForPrimitives)
 
   def serialize(value: Any): String = {
     import java.io.StringWriter
@@ -71,7 +71,7 @@ class JsonSerializer(ignoreUnknown: Boolean = false, disableNullForPrimitives: B
 
       case Failure(e: JsonMappingException) =>
         if (e.getMessage.startsWith("No content"))
-          throw new JsonDeserializationException("Empty JSON")
+          throw new JsonIsEmptyException
         else if (e.getMessage.startsWith("Missing required creator property"))
           throw new JsonMissedPropertyException(getMissedProperty(e))
         else
@@ -84,7 +84,7 @@ class JsonSerializer(ignoreUnknown: Boolean = false, disableNullForPrimitives: B
         throw new JsonNotParsedException(value.substring(leftBound, rightBound))
 
       case Failure(_: NullPointerException) =>
-        throw new JsonDeserializationException("JSON is null")
+        throw new JsonIsNullException
 
       case Failure(e) => throw e
     }
@@ -124,7 +124,7 @@ class JsonSerializer(ignoreUnknown: Boolean = false, disableNullForPrimitives: B
   }
 
   def setIgnoreUnknown(ignore: Boolean): Unit = {
-    logger.debug(s"Set a value of flag: FAIL_ON_UNKNOWN_PROPERTIES to '$ignore'.")
+    logger.debug(s"Set a value of flag: FAIL_ON_UNKNOWN_PROPERTIES to '${!ignore}'.")
     mapper.configure(FAIL_ON_UNKNOWN_PROPERTIES, !ignore)
   }
 
@@ -133,13 +133,13 @@ class JsonSerializer(ignoreUnknown: Boolean = false, disableNullForPrimitives: B
     !mapper.isEnabled(FAIL_ON_UNKNOWN_PROPERTIES)
   }
 
-  def disableNullForPrimitives(disable: Boolean): Unit = {
-    logger.debug(s"Set a value of flag: FAIL_ON_NULL_FOR_PRIMITIVES to '$disable'.")
-    mapper.configure(FAIL_ON_NULL_FOR_PRIMITIVES, disable)
+  def enableNullForPrimitives(enable: Boolean): Unit = {
+    logger.debug(s"Set a value of flag: FAIL_ON_NULL_FOR_PRIMITIVES to '${!enable}'.")
+    mapper.configure(FAIL_ON_NULL_FOR_PRIMITIVES, !enable)
   }
 
-  def nullForPrimitivesIsDisabled: Boolean = {
+  def nullForPrimitivesIsEnabled: Boolean = {
     logger.debug(s"Retrieve a value of flag: FAIL_ON_NULL_FOR_PRIMITIVES.")
-    mapper.isEnabled(FAIL_ON_NULL_FOR_PRIMITIVES)
+    !mapper.isEnabled(FAIL_ON_NULL_FOR_PRIMITIVES)
   }
 }

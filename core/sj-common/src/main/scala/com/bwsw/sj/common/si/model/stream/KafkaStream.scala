@@ -24,7 +24,7 @@ import com.bwsw.common.KafkaClient
 import com.bwsw.sj.common.config.SettingsUtils
 import com.bwsw.sj.common.dal.model.service.KafkaServiceDomain
 import com.bwsw.sj.common.dal.model.stream.KafkaStreamDomain
-import com.bwsw.sj.common.utils.{ServiceLiterals, StreamLiterals}
+import com.bwsw.sj.common.utils.ServiceLiterals
 import kafka.common.TopicAlreadyMarkedForDeletionException
 import org.apache.kafka.common.errors.TopicExistsException
 import scaldi.Injectable.inject
@@ -48,6 +48,8 @@ class KafkaStream(name: String,
   import messageResourceUtils.createMessage
 
   private val settingsUtils = inject[SettingsUtils]
+  private val timeout = settingsUtils.getZkSessionTimeout()
+  override protected val serviceType = ServiceLiterals.kafkaType
 
   override def to(): KafkaStreamDomain = {
     val serviceRepository = connectionRepository.getServiceRepository
@@ -65,7 +67,8 @@ class KafkaStream(name: String,
 
   override def create(): Unit = {
     Try {
-      val kafkaClient = createKafkaClient()
+      val serviceDomain = connectionRepository.getServiceRepository.get(service).get.asInstanceOf[KafkaServiceDomain]
+      val kafkaClient = createKafkaClient(serviceDomain.asInstanceOf[KafkaServiceDomain])
       if (doesStreamHaveForcedCreation(kafkaClient)) {
         deleteTopic(kafkaClient)
         createTopic(kafkaClient)
@@ -86,7 +89,8 @@ class KafkaStream(name: String,
 
   override def delete(): Unit = {
     Try {
-      val kafkaClient = createKafkaClient()
+      val serviceDomain = connectionRepository.getServiceRepository.get(service).get.asInstanceOf[KafkaServiceDomain]
+      val kafkaClient = createKafkaClient(serviceDomain.asInstanceOf[KafkaServiceDomain])
       if (doesTopicExist(kafkaClient)) {
         deleteTopic(kafkaClient)
       }
@@ -100,10 +104,8 @@ class KafkaStream(name: String,
     }
   }
 
-  override def validate(): ArrayBuffer[String] = {
+  override def validateSpecificFields(): ArrayBuffer[String] = {
     val errors = new ArrayBuffer[String]()
-    errors ++= super.validateGeneralFields()
-
     //partitions
     if (partitions <= 0)
       errors += createMessage("entity.error.attribute.required", "Partitions") + ". " +
@@ -115,49 +117,25 @@ class KafkaStream(name: String,
         createMessage("entity.error.attribute.must.be.positive.integer", "replicationFactor")
     }
 
-    Option(service) match {
-      case Some("") | None =>
-        errors += createMessage("entity.error.attribute.required", "Service")
-
-      case Some(x) =>
-        val serviceDAO = connectionRepository.getServiceRepository
-        val serviceObj = serviceDAO.get(x)
-        serviceObj match {
-          case None =>
-            errors += createMessage("entity.error.doesnot.exist", "Service", x)
-          case Some(someService) =>
-            if (someService.serviceType != ServiceLiterals.kafkaType) {
-              errors += createMessage("entity.error.must.one.type.other.given",
-                s"Service for '${StreamLiterals.kafkaType}' stream",
-                ServiceLiterals.kafkaType,
-                someService.serviceType)
-            } else {
-              if (errors.isEmpty)
-                errors ++= checkStreamPartitionsOnConsistency(someService.asInstanceOf[KafkaServiceDomain])
-            }
-        }
-    }
+    if (errors.isEmpty)
+      errors ++= checkStreamPartitionsOnConsistency(serviceDomain.asInstanceOf[KafkaServiceDomain])
 
     errors
   }
 
+  private def createKafkaClient(service: KafkaServiceDomain): KafkaClient = {
+    new KafkaClient(service.zkProvider.hosts, timeout)
+  }
+
   private def checkStreamPartitionsOnConsistency(service: KafkaServiceDomain): ArrayBuffer[String] = {
     val errors = new ArrayBuffer[String]()
-    val kafkaClient = createKafkaClient()
+    val kafkaClient = createKafkaClient(service)
     val topicMetadata = kafkaClient.fetchTopicMetadataFromZk(name)
     if (!topicMetadata.partitionMetadata().isEmpty && topicMetadata.partitionMetadata().size != partitions) {
       errors += createMessage("entity.error.mismatch.partitions", name, s"$partitions", s"${topicMetadata.partitionMetadata().size}")
     }
 
     errors
-  }
-
-  private def createKafkaClient(): KafkaClient = {
-    val serviceDAO = connectionRepository.getServiceRepository
-    val service = serviceDAO.get(this.service).get.asInstanceOf[KafkaServiceDomain]
-    val zkServers = service.zkProvider.hosts
-
-    new KafkaClient(zkServers, settingsUtils.getZkSessionTimeout())
   }
 
   private def doesStreamHaveForcedCreation(kafkaClient: KafkaClient): Boolean =

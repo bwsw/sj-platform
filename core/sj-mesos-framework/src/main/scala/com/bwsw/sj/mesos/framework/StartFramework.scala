@@ -48,6 +48,7 @@ object StartFramework {
   val frameworkRole = "*"
 
   val master_path = Try(config.getString(FrameworkLiterals.mesosMaster)).getOrElse("zk://127.0.0.1:2181/mesos")
+  val zookeeper_address = Try(config.getString(FrameworkLiterals.zookeeperAddress)).getOrElse("zk://127.0.0.1:2181/")
   val frameworkTaskId = Try(config.getString(FrameworkLiterals.frameworkId)).getOrElse("broken")
 
   val connectionRepository: ConnectionRepository = inject[ConnectionRepository]
@@ -88,7 +89,7 @@ object StartFramework {
       else new MesosSchedulerDriver(scheduler, frameworkInfo, master_path)
     }
 
-    val zkServers: String = getZooKeeperServers(master_path)
+    val zkServers: String = getZooKeeperServers(zookeeper_address)
     val leader: LeaderLatch = new LeaderLatch(Set(zkServers), s"/framework/$frameworkTaskId/lock")
     leader.start()
     leader.acquireLeadership(5)
@@ -102,9 +103,13 @@ object StartFramework {
     System.exit(0)
   }
 
-
-  private def getZooKeeperServers(mesosMaster: String): String = {
-    val mesosMasterUrl = new URI(mesosMaster)
+  /**
+    * Return zookeeper address
+    * @param zookeeperURI
+    * @return
+    */
+  private def getZooKeeperServers(zookeeperURI: String): String = {
+    val mesosMasterUrl = new URI(zookeeperURI)
     mesosMasterUrl.getHost + ":" + mesosMasterUrl.getPort
   }
 }

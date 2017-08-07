@@ -52,12 +52,14 @@ class EmbeddedElasticsearch {
   }
 
   def stop(): Unit = {
-    node.close()
+    if (!node.isClosed) node.close()
     Try(FileUtils.forceDelete(dataDir))
   }
 }
 
-//the first plugin is used for connection, the second - for deleting
+/**
+  * The first plugin is used for connection, the second - for deleting
+  */
 class PluginNode(settings: Settings)
   extends Node(InternalSettingsPreparer.prepareEnvironment(settings, null),
     Collections.list(Iterator[Class[_ <: org.elasticsearch.plugins.Plugin]](classOf[Netty4Plugin], classOf[ReindexPlugin]).asJavaEnumeration))

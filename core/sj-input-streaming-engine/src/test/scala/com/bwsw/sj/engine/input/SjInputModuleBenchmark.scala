@@ -46,7 +46,8 @@ object SjInputServices {
 object SjInputModuleSetup extends App {
   LogManager.getLogManager.reset()
 
-  TempHelperForConfigSetup.setupConfigs()
+  val tempHelperForConfigSetup = new TempHelperForConfigSetup(connectionRepository)
+  tempHelperForConfigSetup.setupConfigs()
   println("config loaded")
 
   loadModule(SjInputServices.inputModule, SjInputServices.fileStorage)
@@ -118,7 +119,8 @@ object SjInputModuleDestroy extends App {
   deleteInstance(SjInputServices.instanceService)
   deleteModule(SjInputServices.fileStorage, SjInputServices.inputModule.getName)
 
-  TempHelperForConfigDestroy.deleteConfigs()
+  val tempHelperForConfigDestroy = new TempHelperForConfigDestroy(connectionRepository)
+  tempHelperForConfigDestroy.deleteConfigs()
   connectionRepository.close()
 
   println("DONE")

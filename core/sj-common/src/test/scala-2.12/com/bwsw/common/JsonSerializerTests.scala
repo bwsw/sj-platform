@@ -18,9 +18,9 @@
  */
 package com.bwsw.common
 
-import com.bwsw.common.exceptions.{JsonDeserializationException, JsonIncorrectValueException, JsonUnrecognizedPropertyException}
+import com.bwsw.common.exceptions._
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type
-import com.fasterxml.jackson.annotation.{JsonSubTypes, JsonTypeInfo}
+import com.fasterxml.jackson.annotation.{JsonProperty, JsonSubTypes, JsonTypeInfo}
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import org.scalatest.prop.TableDrivenPropertyChecks
@@ -63,12 +63,12 @@ class JsonSerializerTests extends FlatSpec with Matchers with TableDrivenPropert
     }
   }
 
-  it should "return 'disableNullForPrimitives' flag properly" in {
+  it should "return 'enableNullForPrimitives' flag properly" in {
     flags.foreach { flag =>
       val serializer = new JsonSerializer
 
-      serializer.disableNullForPrimitives(flag)
-      serializer.nullForPrimitivesIsDisabled shouldBe flag
+      serializer.enableNullForPrimitives(flag)
+      serializer.nullForPrimitivesIsEnabled shouldBe flag
     }
   }
 
@@ -95,7 +95,7 @@ class JsonSerializerTests extends FlatSpec with Matchers with TableDrivenPropert
     }
   }
 
-  it should "deserialize json with missed fields when 'disableNullForPrimitives' flag isn't set" in {
+  it should "deserialize json with missed fields when 'enableNullForPrimitives' flag is set" in {
     val someType = "some-type"
     val field1Value = 123
     val field4Value = 456
@@ -115,7 +115,7 @@ class JsonSerializerTests extends FlatSpec with Matchers with TableDrivenPropert
       (new OuterObjectType2(field1Value, field2Value, "field 3 value"), field3Name,
         new OuterObjectType2(field1Value, field2Value, null)))
 
-    val serializer = new JsonSerializer(disableNullForPrimitives = false)
+    val serializer = new JsonSerializer(enableNullForPrimitives = true)
 
     forAll(objects) { (obj, missedField, expectedObject) =>
       val json = mapToJson(removeFieldFromMap(obj.toMap, missedField))
@@ -123,10 +123,10 @@ class JsonSerializerTests extends FlatSpec with Matchers with TableDrivenPropert
     }
   }
 
-  it should "not deserialize json without some primitive values when 'disableNullForPrimitives' flag is set" in {
+  it should "not deserialize json without some primitive values when 'disableNullForPrimitives' flag isn't set" in {
     val obj = new OuterObjectType1(123, InnerObject(456, "field 5 value"), true)
     val missedFields = Seq(field1Name, field3Name, field4Name)
-    val serializer = new JsonSerializer(disableNullForPrimitives = true)
+    val serializer = new JsonSerializer(enableNullForPrimitives = false)
     missedFields.foreach { missedField =>
       val json = mapToJson(removeFieldFromMap(obj.toMap, missedField))
       a[JsonIncorrectValueException] shouldBe thrownBy {
@@ -149,7 +149,7 @@ class JsonSerializerTests extends FlatSpec with Matchers with TableDrivenPropert
     val json = mapToJson(obj.toMap + (unknownField -> "value"))
     val serializer = new JsonSerializer(ignoreUnknown = false)
     val thrown = the[JsonUnrecognizedPropertyException] thrownBy {
-      serializer.deserialize[OuterObject](json) shouldBe obj
+      serializer.deserialize[OuterObject](json)
     }
 
     thrown.getMessage should include(unknownField)
@@ -176,17 +176,59 @@ class JsonSerializerTests extends FlatSpec with Matchers with TableDrivenPropert
     }
   }
 
-  it should "throw JsonDeserializationException for incorrect json" in {
+  it should "throw JsonNotParsedException for incorrect json" in {
     val incorrectJsons = Seq(
-      null,
-      "",
+      """{"a":1""",
+      """{"a":1,""",
       """{"a":1,}""")
 
     val serializer = new JsonSerializer()
     incorrectJsons.foreach { incorrectJson =>
-      a[JsonDeserializationException] shouldBe thrownBy {
-        serializer.deserialize(incorrectJson)
+      a[JsonNotParsedException] shouldBe thrownBy {
+        serializer.deserialize[OuterObject](incorrectJson)
       }
+    }
+  }
+
+  it should "throw JsonIsNullException for null string" in {
+    val serializer = new JsonSerializer()
+
+    a[JsonIsNullException] shouldBe thrownBy {
+      serializer.deserialize[OuterObject](null)
+    }
+  }
+
+  it should "throw JsonIsEmptyException for empty string" in {
+    val serializer = new JsonSerializer()
+
+    a[JsonIsEmptyException] shouldBe thrownBy {
+      serializer.deserialize[OuterObject]("")
+    }
+  }
+
+  it should "throw JsonMissedPropertyException if json doesn't have a required property" in {
+    val jsonsWithoutRequiredField = Seq(
+      "{}",
+      s"""{"$field2Name":"field2-value"}""")
+    val serializer = new JsonSerializer()
+
+    jsonsWithoutRequiredField.foreach { json =>
+      val thrown = the[JsonMissedPropertyException] thrownBy {
+        serializer.deserialize[ObjectWithRequiredField](json)
+      }
+
+      thrown.getMessage shouldBe field1Name
+    }
+  }
+
+  it should "not throw JsonMissedPropertyException if json has a required property" in {
+    val jsonsWithoutRequiredField = Table(
+      s"""{"$field1Name":"field1-value"}""",
+      s"""{"$field1Name":"field1-value","$field2Name":"field2-value"}""")
+    val serializer = new JsonSerializer()
+
+    jsonsWithoutRequiredField.foreach { json =>
+      serializer.deserialize[ObjectWithRequiredField](json) shouldBe an[ObjectWithRequiredField]
     }
   }
 }
@@ -264,4 +306,7 @@ object JsonSerializerTests {
     case _ =>
       map + (field -> value)
   }
+
+  case class ObjectWithRequiredField(@JsonProperty(required = true) field1: String, field2: String)
+
 }

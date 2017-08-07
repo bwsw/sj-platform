@@ -194,7 +194,7 @@ class ModuleControllerTests extends FlatSpec with Matchers with MockitoSugar wit
     val unknownTypeError = "unknown type"
     when(serviceInterface.getByType(wrongType)).thenReturn(Left(unknownTypeError))
 
-    val expectedResponse = BadRequestRestResponse(MessageResponseEntity(unknownTypeError))
+    val expectedResponse = NotFoundRestResponse(MessageResponseEntity(unknownTypeError))
 
     controller.getByType(wrongType) shouldBe expectedResponse
   }
@@ -221,7 +221,7 @@ class ModuleControllerTests extends FlatSpec with Matchers with MockitoSugar wit
   it should "not give module specification if module does not exist" in {
     val expectedResponse = NotFoundRestResponse(MessageResponseEntity(moduleNotFoundError))
 
-    controller.get(wrongType, wrongName, wrongVersion) shouldBe expectedResponse
+    controller.getSpecification(wrongType, wrongName, wrongVersion) shouldBe expectedResponse
   }
 
   // delete

@@ -28,6 +28,7 @@ import com.bwsw.sj.common.engine.core.output.Entity
 import com.bwsw.sj.engine.core.output.types.jdbc.JdbcCommandBuilder
 import com.bwsw.sj.engine.output.task.OutputTaskManager
 import com.bwsw.sj.engine.output.task.reporting.OutputStreamingPerformanceMetrics
+import scaldi.Injector
 
 /**
   * ref. [[OutputProcessor]] object
@@ -36,6 +37,7 @@ class JdbcOutputProcessor[T <: AnyRef](outputStream: StreamDomain,
                                        performanceMetrics: OutputStreamingPerformanceMetrics,
                                        manager: OutputTaskManager,
                                        entity: Entity[_])
+                                      (implicit injector: Injector)
   extends OutputProcessor[T](outputStream, performanceMetrics) {
 
   private val jdbcStream = outputStream.asInstanceOf[JDBCStreamDomain]

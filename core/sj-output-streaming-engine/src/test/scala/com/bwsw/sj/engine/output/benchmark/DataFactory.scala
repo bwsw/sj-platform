@@ -26,7 +26,7 @@ import com.bwsw.common._
 import com.bwsw.common.es.ElasticsearchClient
 import com.bwsw.common.file.utils.MongoFileStorage
 import com.bwsw.common.jdbc.JdbcClientBuilder
-import com.bwsw.sj.common.config.BenchmarkConfigNames
+import com.bwsw.sj.common.config.{BenchmarkConfigNames, TempHelperForConfigDestroy, TempHelperForConfigSetup}
 import com.bwsw.sj.common.dal.model._
 import com.bwsw.sj.common.dal.model.instance.{ExecutionPlan, Task}
 import com.bwsw.sj.common.dal.model.provider.{JDBCProviderDomain, ProviderDomain}
@@ -59,6 +59,8 @@ object DataFactory {
   import com.bwsw.sj.common.SjModule._
 
   val connectionRepository: ConnectionRepository = inject[ConnectionRepository]
+  val tempHelperForConfigSetup = new TempHelperForConfigSetup(connectionRepository)
+  val tempHelperForConfigDestroy = new TempHelperForConfigDestroy(connectionRepository)
   private val config = ConfigFactory.load()
   private val agentsHost = "localhost"
   val zookeeperProviderName: String = "output-zookeeper-test-provider"

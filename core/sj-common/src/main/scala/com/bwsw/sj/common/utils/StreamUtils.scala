@@ -30,14 +30,22 @@ object StreamUtils {
 
   /**
     * Returns one of the following stream modes: [[EngineLiterals.streamModes]]
-    *
-    * @param streamName name of stream that can contain a stream mode [[EngineLiterals.fullStreamMode]] or [[EngineLiterals.splitStreamMode]] is returned in all other cases
     */
-  def getStreamMode(streamName: String): String = {
+  def getCorrectStreamMode(streamName: String): String = {
     if (streamName.contains(s"/${EngineLiterals.fullStreamMode}")) {
       EngineLiterals.fullStreamMode
     } else {
       EngineLiterals.splitStreamMode
     }
+  }
+
+  /**
+    * Returns a stream mode. Used for validation
+    *
+    * @param streamName name of stream that contains any stream mode.
+    */
+  def getStreamMode(streamName: String): String = {
+    val maybeMode = streamName.replaceAll(s".*/", "")
+    if (maybeMode == streamName) EngineLiterals.splitStreamMode else maybeMode
   }
 }

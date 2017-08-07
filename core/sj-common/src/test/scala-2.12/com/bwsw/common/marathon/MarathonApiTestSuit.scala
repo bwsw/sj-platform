@@ -48,15 +48,15 @@ class MarathonApiTestSuit extends FlatSpec with Matchers {
     marathonApplication shouldBe marathonApplicationStub
   }
 
-  it should s"getMarathonMaster() method works properly" in new MarathonApiMocks {
+  it should s"getMarathonInfo() method works properly" in new MarathonApiMocks {
     //arrange
     val response = getClosableHttpResponseWithEntityMock(marathonInfoStub)
 
     //act
-    val marathonMaster = marathonApi.getMarathonMaster(response)
+    val marathonInfo = marathonApi.getMarathonInfo(response)
 
     //assert
-    marathonMaster shouldBe marathonConfigStub.master
+    marathonInfo shouldBe marathonInfoStub
   }
 
   it should s"getLeaderTask() method returns marathon task if marathon info contains it" in new MarathonApiMocks {
@@ -103,7 +103,7 @@ class MarathonApiTestSuit extends FlatSpec with Matchers {
     frameworkId shouldBe None
   }
 
-  it should s"getMarathonInfo() method works properly" in new MarathonApiMocks {
+  it should s"tryToGetMarathonInfo() method works properly" in new MarathonApiMocks {
     //arrange
     val expectedUri = new URI(s"$marathonAddress/v2/info")
     var uri: URI = _
@@ -118,7 +118,7 @@ class MarathonApiTestSuit extends FlatSpec with Matchers {
       })
 
     //act
-    val response = marathonApi.getMarathonInfo()
+    val response = marathonApi.tryToGetMarathonInfo()
 
     //assert
     response shouldBe marathonInfo
@@ -344,7 +344,8 @@ trait MarathonApiMocks extends MockitoSugar {
   val emptyMarathonApplication = MarathonApplication(emptyMarathonApplicationInfo)
 
   val marathonConfigStub = MarathonConfig("zk://localhost:2181/mesos")
-  val marathonInfoStub = MarathonInfo(marathonConfigStub)
+  val zooKeeperConfigStub = ZooKeeperConfig("zk://localhost:2181/marathon")
+  val marathonInfoStub = MarathonInfo(marathonConfigStub, zooKeeperConfigStub)
 
   val marathonRequestStub = MarathonRequest("id", "sleep 100", 1, Map(), List())
 }
