@@ -48,16 +48,17 @@ See more information on the platform structure and architecture at the :ref:`Arc
 
 Below you will find the information on uploading your module via UI and starting data processing.
 
+.. _Configuration:
 Configuration 
 ----------------------
 
-And the first step is to upload necessary configuration settings to the platform.
+And the first step is to upload necessary configurations to the platform.
 
 Here the basic settings necessary for the platform are described. Besides, the flow of Configuration addition to the system is clarified here.
 
-Configuration settings are the settings required for the modules start working.
+Configurations are the settings required for the modules start working.
  
-The config settings can be added under the "Configuration" tab of the main navigation bar. Please, click at "Add Settings" in the upper-right corner above the list and fill in the form (the information on the required settings can be found in the table_ below):
+The configurations can be added under the "Configuration" tab of the main navigation bar. Please, click at "Add Settings" in the upper-right corner above the list and fill in the form (the information on the required settings can be found in the table_ below):
 
 1. *Name* *
         Enter a setting name here. 
