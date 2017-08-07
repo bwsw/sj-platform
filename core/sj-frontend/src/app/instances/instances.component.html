@@ -311,7 +311,7 @@
                     <select [(ngModel)]="newInstance.inputs[i]"
                             (change)="checkTimestampAcceptable()"
                             name="instanceInputs{{i}}" required class="form-control">
-                      <option *ngFor="let stream of streamsList | streamFilter: 'stream.t-streams, stream.apache-kafka'">
+                      <option *ngFor="let stream of streamsList | streamFilter: 'stream.t-streams, stream.apache-kafka'"  value="{{stream.name}}">
                         {{stream.name}} ({{stream.service}}, {{providerList[stream.service]}})
                       </option>
                     </select>
