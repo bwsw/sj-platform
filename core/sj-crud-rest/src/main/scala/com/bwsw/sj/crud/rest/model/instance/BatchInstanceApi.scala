@@ -45,7 +45,8 @@ class BatchInstanceApi(name: String,
                        val startFrom: String = EngineLiterals.newestStartMode,
                        val stateManagement: String = EngineLiterals.noneStateMode,
                        @JsonDeserialize(contentAs = classOf[Int]) val stateFullCheckpoint: Option[Int] = Some(100),
-                       @JsonDeserialize(contentAs = classOf[Long]) val eventWaitIdleTime: Option[Long] = Some(1000))
+                       @JsonDeserialize(contentAs = classOf[Long]) val eventWaitIdleTime: Option[Long] = Some(1000),
+                       creationDate: String)
   extends InstanceApi(
     name,
     coordinationService,
@@ -57,35 +58,37 @@ class BatchInstanceApi(name: String,
     jvmOptions,
     nodeAttributes,
     environmentVariables,
-    performanceReportingInterval) {
+    performanceReportingInterval,
+    creationDate = creationDate) {
 
   override def to(moduleType: String, moduleName: String, moduleVersion: String)
                  (implicit injector: Injector): BatchInstance = {
     val serializer = new JsonSerializer()
 
     new BatchInstance(
-      name,
-      Option(description).getOrElse(RestLiterals.defaultDescription),
-      Option(parallelism).getOrElse(1),
-      serializer.serialize(Option(options).getOrElse(Map())),
-      perTaskCores.getOrElse(1),
-      perTaskRam.getOrElse(1024),
-      Option(jvmOptions).getOrElse(Map()),
-      Option(nodeAttributes).getOrElse(Map()),
-      coordinationService,
-      Option(environmentVariables).getOrElse(Map()),
-      performanceReportingInterval.getOrElse(60000l),
-      moduleName,
-      moduleVersion,
-      moduleType,
-      getEngine(moduleType, moduleName, moduleVersion),
-      Option(inputs).getOrElse(Array()),
-      Option(outputs).getOrElse(Array()),
-      window.getOrElse(1),
-      slidingInterval.getOrElse(1),
-      Option(startFrom).getOrElse(EngineLiterals.newestStartMode),
-      Option(stateManagement).getOrElse(EngineLiterals.noneStateMode),
-      stateFullCheckpoint.getOrElse(100),
-      eventWaitIdleTime.getOrElse(1000l))
+      name = name,
+      description = Option(description).getOrElse(RestLiterals.defaultDescription),
+      parallelism = Option(parallelism).getOrElse(1),
+      options = serializer.serialize(Option(options).getOrElse(Map())),
+      perTaskCores = perTaskCores.getOrElse(1),
+      perTaskRam = perTaskRam.getOrElse(1024),
+      jvmOptions = Option(jvmOptions).getOrElse(Map()),
+      nodeAttributes = Option(nodeAttributes).getOrElse(Map()),
+      coordinationService = coordinationService,
+      environmentVariables = Option(environmentVariables).getOrElse(Map()),
+      performanceReportingInterval = performanceReportingInterval.getOrElse(60000l),
+      moduleName = moduleName,
+      moduleVersion = moduleVersion,
+      moduleType = moduleType,
+      engine = getEngine(moduleType, moduleName, moduleVersion),
+      inputs = Option(inputs).getOrElse(Array()),
+      outputs = Option(outputs).getOrElse(Array()),
+      window = window.getOrElse(1),
+      slidingInterval = slidingInterval.getOrElse(1),
+      startFrom = Option(startFrom).getOrElse(EngineLiterals.newestStartMode),
+      stateManagement = Option(stateManagement).getOrElse(EngineLiterals.noneStateMode),
+      stateFullCheckpoint = stateFullCheckpoint.getOrElse(100),
+      eventWaitIdleTime = eventWaitIdleTime.getOrElse(1000l),
+      creationDate = creationDate)
   }
 }

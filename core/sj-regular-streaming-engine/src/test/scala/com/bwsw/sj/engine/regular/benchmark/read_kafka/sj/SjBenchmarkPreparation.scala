@@ -166,7 +166,8 @@ class SjBenchmarkPreparation(mongoPort: Int,
       checkpointMode = EngineLiterals.everyNthMode,
       startFrom = EngineLiterals.oldestStartMode,
       executionPlan = new ExecutionPlan(Map(taskName -> task).asJava),
-      performanceReportingInterval = Long.MaxValue)
+      performanceReportingInterval = Long.MaxValue,
+      creationDate = new Date())
   }
 
   private def updateMessageCount(instance: RegularInstanceDomain, outputFile: String, messagesCount: Long): RegularInstanceDomain = {
@@ -200,6 +201,7 @@ class SjBenchmarkPreparation(mongoPort: Int,
       startFrom = instance.startFrom,
       stateManagement = instance.stateManagement,
       stateFullCheckpoint = instance.stateFullCheckpoint,
-      eventWaitIdleTime = instance.eventWaitIdleTime)
+      eventWaitIdleTime = instance.eventWaitIdleTime,
+      creationDate = new Date())
   }
 }

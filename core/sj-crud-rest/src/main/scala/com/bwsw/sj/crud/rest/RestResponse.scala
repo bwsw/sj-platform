@@ -81,7 +81,8 @@ case class ShortInstance(name: String,
                          moduleVersion: String,
                          description: String,
                          status: String,
-                         restAddress: String)
+                         restAddress: String,
+                         creationDate: String)
 
 case class CustomJar(filename: String, source: Source[akka.util.ByteString, scala.Any]) extends RestResponse
 

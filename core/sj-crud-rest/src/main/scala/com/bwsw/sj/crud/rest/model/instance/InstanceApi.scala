@@ -19,7 +19,6 @@
 package com.bwsw.sj.crud.rest.model.instance
 
 import com.bwsw.common.JsonSerializer
-import com.bwsw.sj.common.dal.model.module.FileMetadataDomain
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.si.model.instance._
 import com.bwsw.sj.common.si.model.module.Specification
@@ -27,8 +26,6 @@ import com.bwsw.sj.common.utils.RestLiterals
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import scaldi.Injectable.inject
 import scaldi.Injector
-
-import scala.collection.mutable
 
 /**
   * API entity for instance
@@ -43,28 +40,30 @@ class InstanceApi(val name: String,
                   val jvmOptions: Map[String, String] = Map(),
                   val nodeAttributes: Map[String, String] = Map(),
                   val environmentVariables: Map[String, String] = Map(),
-                  @JsonDeserialize(contentAs = classOf[Long]) val performanceReportingInterval: Option[Long] = Some(60000l)) {
+                  @JsonDeserialize(contentAs = classOf[Long]) val performanceReportingInterval: Option[Long] = Some(60000l),
+                  val creationDate: String) {
 
   def to(moduleType: String, moduleName: String, moduleVersion: String)
         (implicit injector: Injector): Instance = {
     val serializer = new JsonSerializer()
 
     new Instance(
-      name,
-      Option(description).getOrElse(RestLiterals.defaultDescription),
-      Option(parallelism).getOrElse(1),
-      serializer.serialize(Option(options).getOrElse(Map())),
-      perTaskCores.getOrElse(1),
-      perTaskRam.getOrElse(1024),
-      Option(jvmOptions).getOrElse(Map()),
-      Option(nodeAttributes).getOrElse(Map()),
-      coordinationService,
-      Option(environmentVariables).getOrElse(Map()),
-      performanceReportingInterval.getOrElse(60000l),
-      moduleName,
-      moduleVersion,
-      moduleType,
-      getEngine(moduleType, moduleName, moduleVersion))
+      name = name,
+      description = Option(description).getOrElse(RestLiterals.defaultDescription),
+      parallelism = Option(parallelism).getOrElse(1),
+      options = serializer.serialize(Option(options).getOrElse(Map())),
+      perTaskCores = perTaskCores.getOrElse(1),
+      perTaskRam = perTaskRam.getOrElse(1024),
+      jvmOptions = Option(jvmOptions).getOrElse(Map()),
+      nodeAttributes = Option(nodeAttributes).getOrElse(Map()),
+      coordinationService = coordinationService,
+      environmentVariables = Option(environmentVariables).getOrElse(Map()),
+      performanceReportingInterval = performanceReportingInterval.getOrElse(60000l),
+      moduleName = moduleName,
+      moduleVersion = moduleVersion,
+      moduleType = moduleType,
+      engine = getEngine(moduleType, moduleName, moduleVersion),
+      creationDate = creationDate)
   }
 
   protected def getFilesMetadata(moduleType: String, moduleName: String, moduleVersion: String)

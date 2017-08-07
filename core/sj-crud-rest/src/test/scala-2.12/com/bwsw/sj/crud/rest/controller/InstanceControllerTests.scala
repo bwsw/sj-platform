@@ -577,6 +577,7 @@ class InstanceControllerTests extends FlatSpec with Matchers with MockitoSugar w
     val description = "description"
     val status = ready
     val restAddress = "rest.address"
+    val date = new Date().toString
 
     val instance = mock[Instance]
     when(instance.name).thenReturn(name)
@@ -586,6 +587,7 @@ class InstanceControllerTests extends FlatSpec with Matchers with MockitoSugar w
     when(instance.description).thenReturn(description)
     when(instance.status).thenReturn(status)
     when(instance.restAddress).thenReturn(Some(restAddress))
+    when(instance.creationDate).thenReturn(date)
 
     val short = ShortInstance(
       name,
@@ -594,7 +596,8 @@ class InstanceControllerTests extends FlatSpec with Matchers with MockitoSugar w
       moduleVersion,
       description,
       status,
-      restAddress)
+      restAddress,
+      date)
 
     val apiResponse = mock[InstanceApiResponse]
     when(createInstanceApiResponse.from(instance)).thenReturn(apiResponse)

@@ -118,7 +118,8 @@ class InstanceController(implicit injector: Injector) {
         instance.moduleVersion,
         instance.description,
         instance.status,
-        instance.restAddress.getOrElse(RestLiterals.defaultRestAddress))
+        instance.restAddress.getOrElse(RestLiterals.defaultRestAddress),
+        instance.creationDate)
     }
 
     OkRestResponse(ShortInstancesResponseEntity(instances))
