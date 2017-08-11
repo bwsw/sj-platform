@@ -26,10 +26,11 @@ object Dependencies {
   }
 
   lazy val sjCommonDependencies = Def.setting(Seq(
-    "org.slf4j" % "slf4j-log4j12" % "1.7.22",
+    "org.slf4j" % "slf4j-log4j12" % "1.7.24",
     ("com.bwsw" % "t-streams_2.12" % "3.0.5-SNAPSHOT")
       .exclude("org.slf4j", "slf4j-simple")
       .exclude("org.slf4j", "slf4j-api")
+      .exclude("org.slf4j", "slf4j-log4j12")
       .exclude("log4j", "log4j")
       .exclude("io.netty", "netty")
       .exclude("io.netty", "netty-all")
@@ -64,7 +65,8 @@ object Dependencies {
     "org.scaldi" %% "scaldi" % "0.5.8",
     "org.mock-server" % "mockserver-netty" % "3.10.8" % "test",
     "com.carrotsearch" % "java-sizeof" % "0.0.5",
-    "de.flapdoodle.embed" % "de.flapdoodle.embed.mongo" % "2.0.0"
+    ("de.flapdoodle.embed" % "de.flapdoodle.embed.mongo" % "2.0.0")
+      .exclude("org.slf4j", "slf4j-api")
   ))
 
   lazy val sjEngineCoreDependencies = Def.setting(Seq(
@@ -93,9 +95,9 @@ object Dependencies {
       .exclude("log4j", "log4j")
       .exclude("org.slf4j", "slf4j-log4j12")
       .exclude("org.slf4j", "log4j-over-slf4j")
-      .exclude("org.slf4j", "slf4j-api"),
-    ("org.apache.storm" % "storm-kafka" % "1.1.0")
-      .exclude("org.slf4j", "slf4j-log4j12")
+      .exclude("org.slf4j", "slf4j-api")
+      .exclude("org.apache.logging.log4j", "log4j-slf4j-impl"),
+    "org.apache.storm" % "storm-kafka" % "1.1.0"
   ))
 
   lazy val sjOutputEngineDependencies = Def.setting(Seq(

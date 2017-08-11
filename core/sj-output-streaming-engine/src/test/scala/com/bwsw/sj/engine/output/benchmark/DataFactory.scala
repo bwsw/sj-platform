@@ -384,7 +384,8 @@ object DataFactory {
       options = """{"hey": "hey"}""",
       startFrom = EngineLiterals.oldestStartMode,
       executionPlan = executionPlan,
-      checkpointMode = checkpointMode)
+      checkpointMode = checkpointMode,
+      creationDate = new Date().toString)
 
 
     instanceService.save(instance.to)

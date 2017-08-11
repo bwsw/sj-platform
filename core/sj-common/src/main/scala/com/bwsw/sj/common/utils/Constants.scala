@@ -122,7 +122,7 @@ object StreamLiterals {
     kafkaType -> ServiceLiterals.kafkaType,
     jdbcType -> ServiceLiterals.jdbcType,
     restType -> ServiceLiterals.restType,
-    tstreamsType -> ServiceLiterals.zookeeperType
+    tstreamsType -> ServiceLiterals.tstreamsType
   )
 }
 

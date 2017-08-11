@@ -43,7 +43,8 @@ class OutputInstanceApi(name: String,
                         nodeAttributes: Map[String, String] = Map(),
                         environmentVariables: Map[String, String] = Map(),
                         @JsonDeserialize(contentAs = classOf[Long]) performanceReportingInterval: Option[Long] = Some(60000),
-                        val startFrom: String = EngineLiterals.newestStartMode)
+                        val startFrom: String = EngineLiterals.newestStartMode,
+                        creationDate: String)
   extends InstanceApi(
     name,
     coordinationService,
@@ -55,7 +56,8 @@ class OutputInstanceApi(name: String,
     jvmOptions,
     nodeAttributes,
     environmentVariables,
-    performanceReportingInterval) {
+    performanceReportingInterval,
+    creationDate = creationDate) {
 
   override def to(moduleType: String, moduleName: String, moduleVersion: String)
                  (implicit injector: Injector): OutputInstance = {
@@ -81,6 +83,7 @@ class OutputInstanceApi(name: String,
       checkpointInterval,
       input,
       output,
-      Option(startFrom).getOrElse(EngineLiterals.newestStartMode))
+      Option(startFrom).getOrElse(EngineLiterals.newestStartMode),
+      creationDate = creationDate)
   }
 }

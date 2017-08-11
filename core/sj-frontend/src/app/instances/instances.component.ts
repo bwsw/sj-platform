@@ -248,6 +248,7 @@ export class InstancesComponent implements OnInit, AfterViewChecked, OnDestroy {
         this.showAlert({message: response.message, type: 'success', closable: true, timeout: 3000});
         this.getInstancesList();
         this.currentForm.reset();
+        this.formAlerts = [];
       },
       error => {
         this.showSpinner = false;

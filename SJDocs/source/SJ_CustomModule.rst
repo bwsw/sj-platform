@@ -1,3 +1,5 @@
+.. _Custom_Module:
+
 Custom Module Development Guide
 ======================================
 
@@ -148,7 +150,7 @@ There could be error messages as output of fping utility which are sent to stdou
  ICMP Unreachable (Communication with Host Prohibited) from 91.221.61.215 for ICMP Echo sent to 91.221.61.215 1499143417152
  <...>
 
-As we can see, awk processes them too - so there is also timestamp in the ends of error lines.
+As we can see, awk processes them too - so there is also a timestamp in the ends of error lines.
 
 So, there could be 2 types of lines:
 
@@ -177,7 +179,7 @@ Everything we receive from 'fping + awk' pipe is going to our configured stream-
  
 for all IPs it has received data about at that particular minute.
 
-All output data we are going to send into Elasticsearch to store them and have an ability to show on plot (via Kibana).
+All output data is to be sent into Elasticsearch to store them and have an ability to show on plot (via Kibana).
 
 Basic classes description 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

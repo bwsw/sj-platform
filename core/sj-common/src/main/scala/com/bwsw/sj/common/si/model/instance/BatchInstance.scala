@@ -18,6 +18,8 @@
  */
 package com.bwsw.sj.common.si.model.instance
 
+import java.util.Date
+
 import com.bwsw.sj.common.dal.model.instance.{BatchInstanceDomain, ExecutionPlan, FrameworkStage}
 import com.bwsw.sj.common.dal.model.service.ZKServiceDomain
 import com.bwsw.sj.common.utils.StreamUtils.clearStreamFromMode
@@ -53,62 +55,65 @@ class BatchInstance(name: String,
                     private val _restAddress: Option[String] = None,
                     stage: FrameworkStage = FrameworkStage(),
                     private val _status: String = EngineLiterals.ready,
-                    frameworkId: String = System.currentTimeMillis().toString)
+                    frameworkId: String = System.currentTimeMillis().toString,
+                    creationDate: String)
                    (implicit injector: Injector)
   extends Instance(
-    name,
-    description,
-    parallelism,
-    options,
-    perTaskCores,
-    perTaskRam,
-    jvmOptions,
-    nodeAttributes,
-    coordinationService,
-    environmentVariables,
-    performanceReportingInterval,
-    moduleName,
-    moduleVersion,
-    moduleType,
-    engine,
-    _restAddress,
-    stage,
-    _status,
-    frameworkId,
-    outputs) {
+    name = name,
+    description = description,
+    parallelism = parallelism,
+    options = options,
+    perTaskCores = perTaskCores,
+    perTaskRam = perTaskRam,
+    jvmOptions = jvmOptions,
+    nodeAttributes = nodeAttributes,
+    coordinationService = coordinationService,
+    environmentVariables = environmentVariables,
+    performanceReportingInterval = performanceReportingInterval,
+    moduleName = moduleName,
+    moduleVersion = moduleVersion,
+    moduleType = moduleType,
+    engine = engine,
+    restAddress = _restAddress,
+    stage = stage,
+    status = _status,
+    frameworkId = frameworkId,
+    outputs = outputs,
+    creationDate = creationDate) {
 
   override def to: BatchInstanceDomain = {
     val serviceRepository = connectionRepository.getServiceRepository
 
     new BatchInstanceDomain(
-      name,
-      moduleType,
-      moduleName,
-      moduleVersion,
-      engine,
-      serviceRepository.get(coordinationService).get.asInstanceOf[ZKServiceDomain],
-      status,
-      restAddress.getOrElse(RestLiterals.defaultRestAddress),
-      description,
-      countParallelism,
-      options,
-      perTaskCores,
-      perTaskRam,
-      jvmOptions.asJava,
-      nodeAttributes.asJava,
-      environmentVariables.asJava,
-      stage,
-      performanceReportingInterval,
-      frameworkId,
-      inputs,
-      outputs,
-      window,
-      slidingInterval,
-      executionPlan,
-      startFrom,
-      stateManagement,
-      stateFullCheckpoint,
-      eventWaitIdleTime)
+      name = name,
+      moduleType = moduleType,
+      moduleName = moduleName,
+      moduleVersion = moduleVersion,
+      engine = engine,
+      coordinationService = serviceRepository.get(coordinationService).get.asInstanceOf[ZKServiceDomain],
+      status = status,
+      restAddress = restAddress.getOrElse(RestLiterals.defaultRestAddress),
+      description = description,
+      parallelism = countParallelism,
+      options = options,
+      perTaskCores = perTaskCores,
+      perTaskRam = perTaskRam,
+      jvmOptions = jvmOptions.asJava,
+      nodeAttributes = nodeAttributes.asJava,
+      environmentVariables = environmentVariables.asJava,
+      stage = stage,
+      performanceReportingInterval = performanceReportingInterval,
+      frameworkId = frameworkId,
+      inputs = inputs,
+      outputs = outputs,
+      window = window,
+      slidingInterval = slidingInterval,
+      executionPlan = executionPlan,
+      startFrom = startFrom,
+      stateManagement = stateManagement,
+      stateFullCheckpoint = stateFullCheckpoint,
+      eventWaitIdleTime = eventWaitIdleTime,
+      creationDate = new Date())
   }
 
   override protected def inputsOrEmptyList: Array[String] = inputs

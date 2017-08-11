@@ -141,6 +141,7 @@ export class StreamsComponent implements OnInit {
           this.getStreamList();
           this.newStream = new StreamModel();
           this.newStream.tags = [];
+          this.formAlerts = [];
           this.currentForm.reset();
         },
         error => {

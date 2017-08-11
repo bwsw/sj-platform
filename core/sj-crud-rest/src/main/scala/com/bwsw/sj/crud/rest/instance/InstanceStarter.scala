@@ -83,13 +83,14 @@ class InstanceStarter(instance: Instance,
   }
 
   protected def startInstance(): Unit = {
-    val marathonInfo = marathonManager.getMarathonInfo()
-    if (isStatusOK(marathonInfo)) {
-      val zooKeeperNode = marathonManager.getZooKeeperAddress(marathonInfo)
+    val maybeMarathonInfo = marathonManager.tryToGetMarathonInfo()
+    if (isStatusOK(maybeMarathonInfo)) {
+      val marathonInfo = marathonManager.getMarathonInfo(maybeMarathonInfo)
+      val zooKeeperNode = marathonInfo.zooKeeperConfig.zk
       val zookeeperServer = getZooKeeperServers(zooKeeperNode)
       leaderLatch = Option(createLeaderLatch(zookeeperServer))
       instanceManager.updateFrameworkStage(instance, starting)
-      startFramework(zooKeeperNode, zookeeperServer)
+      startFramework(marathonInfo.marathonConfig.master, zookeeperServer)
       leaderLatch.foreach(_.close())
     } else {
       instanceManager.updateInstanceStatus(instance, failed)

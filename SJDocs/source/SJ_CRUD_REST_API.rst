@@ -68,8 +68,8 @@ The range of REST API methods described below allows to create or delete a provi
   "name*", "String", "Provider name.", "Name must be unique and contain only letters, digits or hyphens."
   "description", "String", "Provider description.", ""
   "hosts*", "Array[String]", "List of provider hosts.", ""
-  "login", "String", "Provider login.", ""
-  "password", "String", "Provider password.", ""
+  "login", "String", "Provider login.", "For 'provider.sql-database', 'provider.elasticsearch' types."
+  "password", "String", "Provider password.", "For 'provider.sql-database', 'provider.elasticsearch' types."
   "type*", "String", "Provider type.", "One of the following values are possible: 'provider.elasticsearch', 'provider.apache-kafka', 'provider.apache-zookeeper', 'provider.sql-database', 'provider.restful'."
   "driver*", "String", "Driver name.", "For 'provider.sql-database' provider type only."
 
@@ -104,8 +104,6 @@ Request json example::
  {
      "name": "kafka-provider",
      "description": "example of kafka provider",
-     "login": "my_login",
-     "password": "my_pass",
      "type": "kafka",
      "hosts": [
         "192.168.1.133:9092",
@@ -158,19 +156,17 @@ Success response example::
   "status-code": 200,
   "entity": {
     "provider": {
-      "name": "kafka-provider",
-     "description": "example kafka provider",
-     "login": "my_login",
-     "password": "my_pass",
-     "type": "kafka",
-     "hosts": [
+      "name": "kafka-example",
+      "description": "example kafka provider",
+      "type": "provider.apache-kafka",
+      "hosts": [
         "192.168.1.133:9092",
         "192.168.1.135:9092"
-      ]
-      "creationDate": "Thu Jul 20 08:32:51 NOVT 2017" 
+      ],
+      "creationDate": "Thu Jul 20 08:32:51 NOVT 2017"
     }
   }
- }
+ } 
 
 
 Error response example::
@@ -208,9 +204,7 @@ Success response example::
       {
         "name": "kafka-provider",
         "description": "example kafka provider",
-        "login": "my_login",
-        "password": "my_pass",
-        "type": "kafka",
+        "type": "provider.apache-kafka",
         "hosts": [
            "192.168.1.133:9092",
            "192.168.1.135:9092"
@@ -222,7 +216,7 @@ Success response example::
        "description": "elasticsearch provider example",
        "login": "my_login",
        "password": "my_pass",
-       "type": "ES",
+       "type": "provider.elasticsearch",
        "hosts": [
            "192.168.1.133"
        ],

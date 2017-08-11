@@ -48,7 +48,8 @@ class InputInstanceApi(name: String,
                        val defaultEvictionPolicy: String = EngineLiterals.noneDefaultEvictionPolicy,
                        val evictionPolicy: String = EngineLiterals.fixTimeEvictionPolicy,
                        @JsonDeserialize(contentAs = classOf[Int]) val backupCount: Option[Int] = Some(0),
-                       @JsonDeserialize(contentAs = classOf[Int]) val asyncBackupCount: Option[Int] = Some(0))
+                       @JsonDeserialize(contentAs = classOf[Int]) val asyncBackupCount: Option[Int] = Some(0),
+                       creationDate: String)
   extends InstanceApi(
     name,
     coordinationService,
@@ -60,7 +61,8 @@ class InputInstanceApi(name: String,
     jvmOptions,
     nodeAttributes,
     environmentVariables,
-    performanceReportingInterval) {
+    performanceReportingInterval,
+    creationDate = creationDate) {
 
   override def to(moduleType: String, moduleName: String, moduleVersion: String)
                  (implicit injector: Injector): InputInstance = {
@@ -91,7 +93,8 @@ class InputInstanceApi(name: String,
       Option(defaultEvictionPolicy).getOrElse(EngineLiterals.noneDefaultEvictionPolicy),
       Option(evictionPolicy).getOrElse(EngineLiterals.fixTimeEvictionPolicy),
       backupCount.getOrElse(0),
-      asyncBackupCount.getOrElse(0))
+      asyncBackupCount.getOrElse(0),
+      creationDate = creationDate)
   }
 }
 

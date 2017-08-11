@@ -46,7 +46,8 @@ class RegularInstanceApi(name: String,
                          val startFrom: String = EngineLiterals.newestStartMode,
                          val stateManagement: String = EngineLiterals.noneStateMode,
                          @JsonDeserialize(contentAs = classOf[Int]) val stateFullCheckpoint: Option[Int] = Some(100),
-                         @JsonDeserialize(contentAs = classOf[Long]) val eventWaitIdleTime: Option[Long] = Some(1000l))
+                         @JsonDeserialize(contentAs = classOf[Long]) val eventWaitIdleTime: Option[Long] = Some(1000l),
+                         creationDate: String)
   extends InstanceApi(
     name,
     coordinationService,
@@ -58,7 +59,8 @@ class RegularInstanceApi(name: String,
     jvmOptions,
     nodeAttributes,
     environmentVariables,
-    performanceReportingInterval) {
+    performanceReportingInterval,
+    creationDate = creationDate) {
 
   override def to(moduleType: String, moduleName: String, moduleVersion: String)
                  (implicit injector: Injector): RegularInstance = {
@@ -87,6 +89,7 @@ class RegularInstanceApi(name: String,
       Option(startFrom).getOrElse(EngineLiterals.newestStartMode),
       Option(stateManagement).getOrElse(EngineLiterals.noneStateMode),
       stateFullCheckpoint.getOrElse(100),
-      eventWaitIdleTime.getOrElse(1000l))
+      eventWaitIdleTime.getOrElse(1000l),
+      creationDate = creationDate)
   }
 }

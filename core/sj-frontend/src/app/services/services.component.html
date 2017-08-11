@@ -119,6 +119,12 @@
             <li *ngIf="currentService.type === 'service.restful' && currentService.basePath">
               <span class="title">Base path:</span>{{currentService.basePath}}
             </li>
+            <li *ngIf="currentService.prefix">
+              <span class="title">Prefix:</span>{{currentService.prefix}}
+            </li>
+            <li *ngIf="currentService.token">
+              <span class="title">Token:</span>{{currentService.token}}
+            </li>
           </ul>
         </div>
       </div>
@@ -200,7 +206,7 @@
           </fieldset>
 
           <!-- http Scheme -->
-          <fieldset *ngIf="newService.type" class="form-group row">
+          <fieldset *ngIf="newService.type === 'service.restful'" class="form-group row">
             <label class="col-sm-2 col-form-label required">Http scheme</label>
             <div class="col-sm-10">
               <select [(ngModel)]="newService.httpScheme" name="httpScheme" required
