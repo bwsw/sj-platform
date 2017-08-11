@@ -6,6 +6,13 @@ val sjVersion = "1.0-SNAPSHOT"
 
 addCommandAlias("rebuild", ";clean; compile; package")
 
+artifact in (Compile, assembly) := {
+  val art = (artifact in (Compile, assembly)).value
+  art.copy(`classifier` = Some("assembly"))
+}
+
+addArtifact(artifact in (Compile, assembly), assembly)
+
 val commonSettings = Seq(
   version := sjVersion,
   scalaVersion := Dependencies.Versions.scala,
