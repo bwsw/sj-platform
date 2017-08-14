@@ -8,13 +8,40 @@ Architecture Overview
 
 A good real-time data processing architecture needs to be fault-tolerant and scalable; it needs to support micro-batch and event-by-event data processing, and must be extensible. All these aspects are fulfilled in the Stream Juggler Platform. 
 
-The Stream Juggler Platform is an integrated processing system. It means the system includes all the parts required to achieve goals: the part for computation, administration, components for processing pipeline building. These ready-to-use components can be reused in different pipelines that allows to build sophisticated processing graphs to customize the system.
+The Stream Juggler Platform is an integrated processing system. It means the system includes all the parts required to achieve goals: parts for computation, administration, components for processing pipeline building. These ready-to-use components can be rearranged in different pipelines that allows to build sophisticated processing graphs to customize the system.
 
-SJ-Platform's architecture is designed so that exactly-once processing is performed not only within a single processing block but throughout the entire sequence, starting from the moment stream events are fed to the system and up to the moment when the output data is stored to conventional data storage.
+SJ-Platform's architecture is designed so that exactly-once processing is performed not only within a single processing block but throughout the entire platform, starting from the moment stream events are fed to the system and up to the moment when the output data is stored to conventional data storage.
 
 The approach based on loosely coupled blocks with exactly-once processing support throughout the entire sequence allows for decomposing data processing in order to provide better modularity, performance management and simplicity in development.
 
 At this section we will take a closer look into the system components, their functions within the data flow pipeline.
+
+But previously, let's get the general idea of the platform structure and concepts.
+
+General Concepts
+------------------------
+
+The Stream Juggler Platform performs data processing that is fulfilled in modules. A module is a processor. Its processing mode is determined by a set of configurations uploaded to the system via the UI. 
+
+The events enter the platform in streams from a list of supported interfaces - TCP, Kafka and T-streams. A result data are put into an external datastorage.
+
+.. figure:: _static/Overview1.png
+
+Actually, the platform represents a pipeline of the modules that perform input data transformation, computation and result data exporting...
+
+SJ-Platform performs a **real-time data processing**. That means the system can handle events as soon as they are available inside the system without specific delay. 
+
+The events are guaranteed to be processed exactly-once. This processing mode is supported 
+
+The events enter the platform in streams from a list of supported interfaces - TCP, Kafka and T-streams. 
+
+Streams can be very intensive and all events can not be handled by a single server of arbitrary performance. The system allows **scaling** the computations horizontally to handle increasing demands.
+
+The streaming layer allows handling the idea of parallelism through multipartitioning. A **partition** is a part of a data stream allocated for convenience in operation. The data elements in a stream are assembled in partitions. Upon creation, every stream gets a name and a certain amount of partitions. The parallelism is enabled by dividing existing partitions fairly among modules' tasks and it enables to scale the data processing. Partitions are also helpful in distributing processing load between several workers.
+
+
+  
+
 
 Platform Components
 ------------------------
