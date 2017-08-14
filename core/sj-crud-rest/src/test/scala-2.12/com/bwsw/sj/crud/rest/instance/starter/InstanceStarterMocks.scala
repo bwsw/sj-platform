@@ -62,9 +62,12 @@ trait InstanceStarterMocks extends MockitoSugar {
 
   private val serializer = new JsonSerializer(true)
 
-  val master = "zk://localhost:2181/mesos"
+  val zookeeperServer = "localhost:2181"
+  val zookeeperAddress = FrameworkLiterals.createZookepeerAddress(zookeeperServer)
+  val master = s"zk://$zookeeperServer/mesos"
   val marathonConfigStub = MarathonConfig(master)
-  val marathonInfoStub = MarathonInfo(marathonConfigStub)
+  val zooKeeperConfigStub = ZooKeeperConfig(s"zk://$zookeeperServer/marathon")
+  val marathonInfoStub = MarathonInfo(marathonConfigStub, zooKeeperConfigStub)
 
   val marathonTasksStub = MarathonTask("id", "127.0.0.1", List(31045))
   private val frameworkIdStub = "framework_id"

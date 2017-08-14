@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory
   *
   * @author Kseniya Tomskikh
   */
-class MarathonApi(private val client: HttpClient, marathonAddress: String){
+class MarathonApi(private val client: HttpClient, marathonAddress: String) {
   private val logger = LoggerFactory.getLogger(getClass.getName)
   private val marathonEntitySerializer = new JsonSerializer(true)
 
@@ -46,12 +46,11 @@ class MarathonApi(private val client: HttpClient, marathonAddress: String){
     entity
   }
 
-  def getMarathonMaster(marathonInfo: CloseableHttpResponse): String = {
-    logger.debug(s"Get a marathon master.")
+  def getMarathonInfo(marathonInfo: CloseableHttpResponse): MarathonInfo = {
+    logger.debug(s"Get marathon info from marathon response.")
     val entity = marathonEntitySerializer.deserialize[MarathonInfo](EntityUtils.toString(marathonInfo.getEntity, "UTF-8"))
-    val master = entity.marathonConfig.master
 
-    master
+    entity
   }
 
   def getLeaderTask(marathonTasks: CloseableHttpResponse): Option[MarathonTask] = {
@@ -69,7 +68,7 @@ class MarathonApi(private val client: HttpClient, marathonAddress: String){
     id
   }
 
-  def getMarathonInfo(): CloseableHttpResponse = {
+  def tryToGetMarathonInfo(): CloseableHttpResponse = {
     logger.debug(s"Get info about the marathon.")
     val url = new URI(s"$marathonAddress/v2/info")
     val httpGet = new HttpGet(url.toString)

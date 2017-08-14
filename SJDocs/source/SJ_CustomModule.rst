@@ -1,3 +1,5 @@
+.. _Custom_Module:
+
 Custom Module Development Guide
 ======================================
 
@@ -25,7 +27,7 @@ The workflow of the SJ-Platform implies the structure:
 2. A processing module performs the main transformation and calculation of data. It accepts data via T-streams and Kafka. The processed data is put into T-streams only. So an output module is required in the next step.
 3. An output module is necessary to transform the data from T-streams into the result data of the type appropriate for the external storage.
 
-.. figure:: _static/ModulePipeline.png
+.. figure:: _static/ModulePipeline1.png
 
 Below you will find the instructions on custom module creation in Scala.
 
@@ -148,7 +150,7 @@ There could be error messages as output of fping utility which are sent to stdou
  ICMP Unreachable (Communication with Host Prohibited) from 91.221.61.215 for ICMP Echo sent to 91.221.61.215 1499143417152
  <...>
 
-As we can see, awk processes them too - so there is also timestamp in the ends of error lines.
+As we can see, awk processes them too - so there is also a timestamp in the ends of error lines.
 
 So, there could be 2 types of lines:
 
@@ -177,7 +179,7 @@ Everything we receive from 'fping + awk' pipe is going to our configured stream-
  
 for all IPs it has received data about at that particular minute.
 
-All output data we are going to send into Elasticsearch to store them and have an ability to show on plot (via Kibana).
+All output data is to be sent into Elasticsearch to store them and have an ability to show on plot (via Kibana).
 
 Basic classes description 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -631,6 +633,6 @@ This file describes the module. Examples of description can be found at :ref:`Js
 More Code
 ------------------------
 
-The custom module example above represents one of custom application of a `demo module <https://github.com/bwsw/sj-fping-demo>`_ available at out repository. 
+The custom module example above represents one of custom implication of a `demo module <https://github.com/bwsw/sj-fping-demo>`_ available at out repository. 
 
 `Here <https://github.com/bwsw/sj-sflow-demo/tree/develop>`_ you can find another example of module workflow. This is a demo that performs the processing workflow for collecting of sflow information. 

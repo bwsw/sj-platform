@@ -19,6 +19,7 @@
 package com.bwsw.sj.common.dal.model.instance
 
 import java.util
+import java.util.Date
 
 import com.bwsw.sj.common.dal.model.service.ZKServiceDomain
 import com.bwsw.sj.common.dal.morphia.MorphiaAnnotations.PropertyField
@@ -55,7 +56,8 @@ class OutputInstanceDomain(override val name: String,
                            @PropertyField("checkpoint-mode") val checkpointMode: String,
                            @Property("checkpoint-interval") var checkpointInterval: Long = 0,
                            @Embedded("execution-plan") var executionPlan: ExecutionPlan = new ExecutionPlan(),
-                           @Property("start-from") var startFrom: String = "newest")
+                           @Property("start-from") var startFrom: String = "newest",
+                           creationDate: Date)
   extends InstanceDomain(
     name,
     moduleType,
@@ -76,7 +78,8 @@ class OutputInstanceDomain(override val name: String,
     environmentVariables,
     stage,
     performanceReportingInterval,
-    frameworkId) {
+    frameworkId,
+    creationDate) {
 
   override def getInputsWithoutStreamMode: Array[String] = inputs.map(clearStreamFromMode)
 }

@@ -19,8 +19,8 @@
 package com.bwsw.sj.engine.batch.module
 
 import java.io.{BufferedReader, File, InputStreamReader}
-import java.util.{Date, Properties}
 import java.util.jar.JarFile
+import java.util.{Date, Properties}
 
 import com.bwsw.common.file.utils.FileStorage
 import com.bwsw.common.{JsonSerializer, KafkaClient, ObjectSerializer}
@@ -311,7 +311,8 @@ object DataFactory {
       stateFullCheckpoint = stateFullCheckpoint,
       startFrom = EngineLiterals.oldestStartMode,
       //executionPlan = new ExecutionPlan(Map((instanceName + "-task0", task), (instanceName + "-task1", task)).asJava) //for barriers test,
-      executionPlan = new ExecutionPlan(Map(instanceName + "-task0" -> task).asJava)
+      executionPlan = new ExecutionPlan(Map(instanceName + "-task0" -> task).asJava),
+      creationDate = new Date().toString
     )
 
     instanceService.save(instance.to)

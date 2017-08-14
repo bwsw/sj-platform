@@ -164,7 +164,8 @@ object DataFactory {
       queueMaxSize = 500,
       defaultEvictionPolicy = EngineLiterals.lruDefaultEvictionPolicy,
       evictionPolicy = "expanded-time",
-      tasks = tasks)
+      tasks = tasks,
+      creationDate = new Date().toString)
 
     instanceService.save(instance.to)
   }

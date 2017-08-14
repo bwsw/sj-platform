@@ -18,7 +18,7 @@
  */
 package com.bwsw.sj.module.input.regex
 
-import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.annotation.{JsonIgnore, JsonProperty}
 
 /**
   * Constants for options names and possible values
@@ -43,7 +43,16 @@ object RegexInputOptionsNames {
   final val fallbackFieldName = "data"
 }
 
-case class RegexInputOptions(lineSeparator: String, policy: String, encoding: String, fallbackStream: String, rules: List[Rule])
+case class RegexInputOptions(lineSeparator: String, policy: String, encoding: String, fallbackStream: String, rules: List[Rule]) {
+  @JsonIgnore()
+  def isEmpty(): Boolean = {
+    Option(lineSeparator).isEmpty &&
+      Option(policy).isEmpty &&
+      Option(encoding).isEmpty &&
+      Option(fallbackStream).isEmpty &&
+      Option(rules).isEmpty
+  }
+}
 
 /**
   * Model class for list of fields in Rule

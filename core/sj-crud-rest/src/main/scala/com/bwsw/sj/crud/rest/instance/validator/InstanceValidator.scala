@@ -26,7 +26,7 @@ import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepo
 import com.bwsw.sj.common.rest.utils.ValidationUtils._
 import com.bwsw.sj.common.si.model.instance.Instance
 import com.bwsw.sj.common.si.model.module.Specification
-import com.bwsw.sj.common.utils.{MessageResourceUtils, StreamLiterals}
+import com.bwsw.sj.common.utils.{MessageResourceUtils, ServiceLiterals, StreamLiterals}
 import com.bwsw.sj.crud.rest.utils.CompletionUtils
 import org.slf4j.{Logger, LoggerFactory}
 import scaldi.Injectable.inject
@@ -116,7 +116,7 @@ abstract class InstanceValidator(implicit val injector: Injector) extends Comple
           val coordService = serviceRepository.get(x)
           if (coordService.isDefined) {
             if (!coordService.get.isInstanceOf[ZKServiceDomain]) {
-              errors += createMessage("rest.validator.attribute.not", "coordinationService", "ZKCoord")
+              errors += createMessage("rest.validator.attribute.not", "coordinationService", ServiceLiterals.zookeeperType)
             }
           } else {
             errors += createMessage("rest.validator.not.exist", s"'coordinationService' $x")

@@ -69,7 +69,7 @@ class FrameworkScheduler(implicit injector: Injector) extends Scheduler {
 
 
   /**
-    * Execute when task change status.
+    * Handles update of task status.
     *
     * @param driver scheduler driver
     * @param status received status from master
@@ -86,7 +86,7 @@ class FrameworkScheduler(implicit injector: Injector) extends Scheduler {
 
 
   /**
-    * Obtain resources and launch tasks.
+    * Obtains resources and launch tasks.
     *
     * @param driver scheduler driver
     * @param offers resources, that master offered to framework
@@ -138,7 +138,7 @@ class FrameworkScheduler(implicit injector: Injector) extends Scheduler {
   }
 
   /**
-    * Ask driver to launch prepared tasks.
+    * Asks driver to launch prepared tasks.
     *
     * @param driver
     */
@@ -159,7 +159,7 @@ class FrameworkScheduler(implicit injector: Injector) extends Scheduler {
   }
 
   /**
-    * Registering framework.
+    * Registers framework.
     */
   def registered(driver: SchedulerDriver, frameworkId: FrameworkID, masterInfo: MasterInfo): Unit = {
     logger.info(s"Registered framework as: ${frameworkId.getValue}.")
@@ -168,13 +168,13 @@ class FrameworkScheduler(implicit injector: Injector) extends Scheduler {
     FrameworkUtil.frameworkId = Option(frameworkId.getValue)
     FrameworkUtil.master = Option(masterInfo)
 
-    FrameworkUtil.params = FrameworkUtil.getEnvParams
-    logger.debug(s"Got environment variable: ${FrameworkUtil.params}.")
+    FrameworkParameters.prepareEnvParams()
+    logger.debug(s"Got environment variable: ${FrameworkParameters()}.")
 
     FrameworkUtil.updateInstance()
     logger.debug(s"Got instance ${FrameworkUtil.instance.get.name}.")
 
-    TasksList.prepare(FrameworkUtil.instance.get)
+    TasksList.prepareTasks(FrameworkUtil.instance.get)
     logger.debug(s"Got tasks: $TasksList.")
 
     val config = ConfigFactory.load()

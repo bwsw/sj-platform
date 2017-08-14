@@ -97,7 +97,7 @@ class ModuleController(implicit injector: Injector) {
           ModulesResponseEntity(
             modules.map(fileMetadataUtils.toModuleInfo)))
       case Left(error) =>
-        BadRequestRestResponse(MessageResponseEntity(error))
+        NotFoundRestResponse(MessageResponseEntity(error))
     }
   }
 
@@ -138,7 +138,7 @@ class ModuleController(implicit injector: Injector) {
                                       (f: ModuleMetadata => RestResponse): RestResponse = {
     serviceInterface.getMetadataWithoutFile(moduleType, moduleName, moduleVersion) match {
       case Right(moduleMetadata) => f(moduleMetadata)
-      case Left(error) => BadRequestRestResponse(MessageResponseEntity(error))
+      case Left(error) => NotFoundRestResponse(MessageResponseEntity(error))
     }
   }
 

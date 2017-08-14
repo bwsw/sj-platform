@@ -22,33 +22,29 @@ import java.io.File
 import java.net.URL
 import java.util.Date
 
-import com.bwsw.sj.common.SjModule
 import com.bwsw.sj.common.dal.model.ConfigurationSettingDomain
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
 import com.bwsw.sj.common.si.model.FileMetadataLiterals
 import com.bwsw.sj.common.si.model.config.ConfigurationSetting
 import com.bwsw.sj.common.utils.RestLiterals
 import org.apache.commons.io.FileUtils
-import scaldi.Injectable.inject
 
-object TempHelperForConfigSetup {
+class TempHelperForConfigSetup(connectionRepository: ConnectionRepository) {
 
-  import SjModule._
   import TempHelperForConfigConstants._
 
-  val connectionRepository: ConnectionRepository = inject[ConnectionRepository]
   val configService: GenericMongoRepository[ConfigurationSettingDomain] = connectionRepository.getConfigRepository
 
   def setupConfigs(): Unit = {
     configService.save(ConfigurationSettingDomain(ConfigLiterals.frameworkTag, "com.bwsw.fw-1.0", ConfigLiterals.systemDomain, new Date()))
 
-  configService.save(ConfigurationSettingDomain(ConfigurationSetting.createConfigurationSettingName(ConfigLiterals.systemDomain, "regular-streaming-validator-class"),
+  configService.save(ConfigurationSettingDomain(ConfigurationSetting.createConfigurationSettingName(ConfigLiterals.systemDomain, regularStreamingValidatorClass),
     "com.bwsw.sj.crud.rest.instance.validator.RegularInstanceValidator", ConfigLiterals.systemDomain, new Date()))
-  configService.save(ConfigurationSettingDomain(ConfigurationSetting.createConfigurationSettingName(ConfigLiterals.systemDomain, "batch-streaming-validator-class"),
+  configService.save(ConfigurationSettingDomain(ConfigurationSetting.createConfigurationSettingName(ConfigLiterals.systemDomain, batchStreamingValidatorClass),
     "com.bwsw.sj.crud.rest.instance.validator.BatchInstanceValidator", ConfigLiterals.systemDomain, new Date()))
-  configService.save(ConfigurationSettingDomain(ConfigurationSetting.createConfigurationSettingName(ConfigLiterals.systemDomain, "output-streaming-validator-class"),
+  configService.save(ConfigurationSettingDomain(ConfigurationSetting.createConfigurationSettingName(ConfigLiterals.systemDomain, outputStreamingValidatorClass),
     "com.bwsw.sj.crud.rest.instance.validator.OutputInstanceValidator", ConfigLiterals.systemDomain, new Date()))
-  configService.save(ConfigurationSettingDomain(ConfigurationSetting.createConfigurationSettingName(ConfigLiterals.systemDomain, "input-streaming-validator-class"),
+  configService.save(ConfigurationSettingDomain(ConfigurationSetting.createConfigurationSettingName(ConfigLiterals.systemDomain, inputStreamingValidatorClass),
     "com.bwsw.sj.crud.rest.instance.validator.InputInstanceValidator", ConfigLiterals.systemDomain, new Date()))
 
     configService.save(ConfigurationSettingDomain(
@@ -84,12 +80,9 @@ object TempHelperForConfigSetup {
   }
 }
 
-object TempHelperForConfigDestroy {
+class TempHelperForConfigDestroy(connectionRepository: ConnectionRepository) {
 
-  import SjModule._
   import TempHelperForConfigConstants._
-
-  val connectionRepository: ConnectionRepository = inject[ConnectionRepository]
 
   def deleteConfigs(): Unit = {
     connectionRepository.getConfigRepository.delete(ConfigLiterals.frameworkTag)

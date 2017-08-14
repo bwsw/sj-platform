@@ -22,18 +22,19 @@ import java.sql.SQLException
 import java.util.Date
 
 import com.bwsw.common.jdbc.JdbcClientBuilder
+import com.bwsw.sj.common.SjModule
 import com.bwsw.sj.common.utils.ProviderLiterals
 
 import scala.collection.mutable.ArrayBuffer
 import scala.util.{Failure, Success, Try}
 
-class JDBCProviderDomain(override val name: String,
-                         override val description: String,
-                         override val hosts: Array[String],
-                         override val login: String,
-                         override val password: String,
+class JDBCProviderDomain(name: String,
+                         description: String,
+                         hosts: Array[String],
+                         login: String,
+                         password: String,
                          val driver: String,
-                         override val creationDate: Date)
+                         creationDate: Date)
   extends ProviderWithAuthDomain(name, description, hosts, login, password, ProviderLiterals.jdbcType, creationDate) {
 
   override def checkJdbcConnection(address: String): ArrayBuffer[String] = {
@@ -44,7 +45,7 @@ class JDBCProviderDomain(override val name: String,
         setDriver(driver).
         setUsername(login).
         setPassword(password).
-        build()
+        build()(SjModule.injector)
 
       client.checkConnectionToDatabase()
     } match {

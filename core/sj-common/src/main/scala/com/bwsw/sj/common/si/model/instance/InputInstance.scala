@@ -18,6 +18,8 @@
  */
 package com.bwsw.sj.common.si.model.instance
 
+import java.util.Date
+
 import com.bwsw.sj.common.dal.model.instance.{FrameworkStage, InputInstanceDomain, InputTask}
 import com.bwsw.sj.common.dal.model.service.ZKServiceDomain
 import com.bwsw.sj.common.utils.{EngineLiterals, RestLiterals}
@@ -55,7 +57,8 @@ class InputInstance(name: String,
                     private val _restAddress: Option[String] = None,
                     stage: FrameworkStage = FrameworkStage(),
                     private val _status: String = EngineLiterals.ready,
-                    frameworkId: String = System.currentTimeMillis().toString)
+                    frameworkId: String = System.currentTimeMillis().toString,
+                    creationDate: String)
                    (implicit injector: Injector)
   extends Instance(
     name,
@@ -77,7 +80,8 @@ class InputInstance(name: String,
     stage,
     _status,
     frameworkId,
-    outputs) {
+    outputs,
+    creationDate) {
 
   override def to: InputInstanceDomain = {
     val serviceRepository = connectionRepository.getServiceRepository
@@ -113,7 +117,8 @@ class InputInstance(name: String,
       evictionPolicy,
       backupCount,
       asyncBackupCount,
-      tasks.asJava)
+      tasks.asJava,
+      creationDate = new Date())
   }
 
   override def prepareInstance(): Unit = {

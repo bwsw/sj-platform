@@ -62,12 +62,13 @@ class InstanceStarterTestSuit extends FlatSpec with Matchers with PrivateMethodT
     val getFrameworkEnvironmentVariables = PrivateMethod[Map[String, String]]('getFrameworkEnvironmentVariables)
 
     //act
-    val envs = instanceStarter invokePrivate getFrameworkEnvironmentVariables(master)
+    val envs = instanceStarter invokePrivate getFrameworkEnvironmentVariables(master, zookeeperServer)
 
     //assert
     envs shouldBe Map(FrameworkLiterals.frameworkIdLabel -> frameworkName,
       FrameworkLiterals.instanceIdLabel -> instanceName,
-      FrameworkLiterals.mesosMasterLabel -> master) ++ mongoEnv ++ instanceEnv
+      FrameworkLiterals.mesosMasterLabel -> master,
+      FrameworkLiterals.zookeeperLabel -> zookeeperAddress) ++ mongoEnv ++ instanceEnv
   }
 
   it should "getZooKeeperServers() method returns a zookeeper address that has been passed to InstanceStarter" in {
@@ -90,11 +91,11 @@ class InstanceStarterTestSuit extends FlatSpec with Matchers with PrivateMethodT
     //arrange
     val expectedZkHost = "host"
     val expectedZkPort = "2181"
-    val marathonMaster = s"zk://$expectedZkHost:$expectedZkPort/mesos"
+    val zooKeeperNode = s"zk://$expectedZkHost:$expectedZkPort/marathon"
     val getZooKeeperServers = PrivateMethod[String]('getZooKeeperServers)
 
     //act
-    val zkServers = instanceStarter invokePrivate getZooKeeperServers(marathonMaster)
+    val zkServers = instanceStarter invokePrivate getZooKeeperServers(zooKeeperNode)
 
     //assert
     zkServers shouldBe (expectedZkHost + ":" + expectedZkPort)
@@ -109,7 +110,7 @@ class InstanceStarterTestSuit extends FlatSpec with Matchers with PrivateMethodT
     val createRequestForFrameworkCreation = PrivateMethod[MarathonRequest]('createRequestForFrameworkCreation)
 
     //act
-    val marathonRequest = instanceStarter invokePrivate createRequestForFrameworkCreation(marathonMaster)
+    val marathonRequest = instanceStarter invokePrivate createRequestForFrameworkCreation(marathonMaster, zookeeperServer)
 
     //assert
     marathonRequest shouldBe MarathonRequest(
@@ -118,7 +119,8 @@ class InstanceStarterTestSuit extends FlatSpec with Matchers with PrivateMethodT
       instances = 1,
       env = Map(FrameworkLiterals.frameworkIdLabel -> frameworkName,
         FrameworkLiterals.instanceIdLabel -> instanceName,
-        FrameworkLiterals.mesosMasterLabel -> marathonMaster) ++ mongoEnv ++ instanceEnv,
+        FrameworkLiterals.mesosMasterLabel -> marathonMaster,
+        FrameworkLiterals.zookeeperLabel -> zookeeperAddress) ++ mongoEnv ++ instanceEnv,
       uris = List(new URI(s"$restAddress/v1/custom/jars/$frameworkJarNameStub").toString),
       backoffSeconds = backoffSecondsStub,
       backoffFactor = backoffFactorStub,
@@ -134,8 +136,8 @@ class InstanceStarterTestSuit extends FlatSpec with Matchers with PrivateMethodT
     val okMarathonResponse = getClosableHttpResponseMock(marathonInfoStub, okStatus)
     val okFrameworkResponse = getClosableHttpResponseMock(marathonApplicationStub, okStatus)
     val marathonManager = mock[MarathonApi]
-    when(marathonManager.getMarathonInfo()).thenReturn(okMarathonResponse)
-    when(marathonManager.getMarathonMaster(any())).thenReturn(master)
+    when(marathonManager.tryToGetMarathonInfo()).thenReturn(okMarathonResponse)
+    when(marathonManager.getMarathonInfo(any())).thenReturn(marathonInfoStub)
     when(marathonManager.getApplicationInfo(frameworkName)).thenReturn(okFrameworkResponse)
     when(marathonManager.getApplicationEntity(any())).thenReturn(marathonApplicationStub)
     when(marathonManager.scaleMarathonApplication(any(), any())).thenReturn(okStatus)
@@ -159,7 +161,7 @@ class InstanceStarterTestSuit extends FlatSpec with Matchers with PrivateMethodT
 
     val notOkMarathonResponse = getClosableHttpResponseMock(marathonInfoStub, errorStatus)
     val marathonManager = mock[MarathonApi]
-    when(marathonManager.getMarathonInfo()).thenReturn(notOkMarathonResponse)
+    when(marathonManager.tryToGetMarathonInfo()).thenReturn(notOkMarathonResponse)
 
     val instanceManager = mock[InstanceDomainRenewer]
 
@@ -186,7 +188,7 @@ class InstanceStarterTestSuit extends FlatSpec with Matchers with PrivateMethodT
     val instanceManager = mock[InstanceDomainRenewer]
 
     //act
-    instanceStarterMock(marathonManager, instanceManager) invokePrivate startFramework(master)
+    instanceStarterMock(marathonManager, instanceManager) invokePrivate startFramework(master, zookeeperServer)
 
     //assert
     verify(marathonManager, times(1)).scaleMarathonApplication(frameworkName, 1)
@@ -211,7 +213,7 @@ class InstanceStarterTestSuit extends FlatSpec with Matchers with PrivateMethodT
     val instanceManager = mock[InstanceDomainRenewer]
 
     //act
-    instanceStarterMock(marathonManager, instanceManager) invokePrivate startFramework(master)
+    instanceStarterMock(marathonManager, instanceManager) invokePrivate startFramework(master, zookeeperServer)
 
     //assert
     verify(marathonManager, times(1)).startMarathonApplication(any())
@@ -284,7 +286,7 @@ class InstanceStarterTestSuit extends FlatSpec with Matchers with PrivateMethodT
     val instanceManager = mock[InstanceDomainRenewer]
 
     //act
-    instanceStarterMock(marathonManager, instanceManager) invokePrivate createFramework(master)
+    instanceStarterMock(marathonManager, instanceManager) invokePrivate createFramework(master, zookeeperServer)
 
     //assert
     verify(marathonManager, times(1)).startMarathonApplication(any())
@@ -308,7 +310,7 @@ class InstanceStarterTestSuit extends FlatSpec with Matchers with PrivateMethodT
     val instanceManager = mock[InstanceDomainRenewer]
 
     //act
-    instanceStarterMock(marathonManager, instanceManager) invokePrivate createFramework(master)
+    instanceStarterMock(marathonManager, instanceManager) invokePrivate createFramework(master, zookeeperServer)
 
     //assert
     verify(marathonManager, times(1)).startMarathonApplication(any())
@@ -411,8 +413,8 @@ class InstanceStarterTestSuit extends FlatSpec with Matchers with PrivateMethodT
     val okMarathonResponse = getClosableHttpResponseMock(marathonInfoStub, okStatus)
     val okFrameworkResponse = getClosableHttpResponseMock(marathonApplicationStub, okStatus)
     val marathonManager = mock[MarathonApi]
-    when(marathonManager.getMarathonInfo()).thenReturn(okMarathonResponse)
-    when(marathonManager.getMarathonMaster(any())).thenReturn(master)
+    when(marathonManager.tryToGetMarathonInfo()).thenReturn(okMarathonResponse)
+    when(marathonManager.getMarathonInfo(any())).thenReturn(marathonInfoStub)
     when(marathonManager.getApplicationInfo(frameworkName)).thenReturn(okFrameworkResponse)
     when(marathonManager.getApplicationEntity(any())).thenReturn(marathonApplicationStub)
     when(marathonManager.scaleMarathonApplication(any(), any())).thenReturn(okStatus)
@@ -437,8 +439,8 @@ class InstanceStarterTestSuit extends FlatSpec with Matchers with PrivateMethodT
     val okFrameworkResponse = getClosableHttpResponseMock(marathonApplicationStub, okStatus)
     val notOkFrameworkResponse = getClosableHttpResponseMock(marathonApplicationStub, errorStatus)
     val marathonManager = mock[MarathonApi]
-    when(marathonManager.getMarathonInfo()).thenReturn(okMarathonResponse)
-    when(marathonManager.getMarathonMaster(any())).thenReturn(master)
+    when(marathonManager.tryToGetMarathonInfo()).thenReturn(okMarathonResponse)
+    when(marathonManager.getMarathonInfo(any())).thenReturn(marathonInfoStub)
     when(marathonManager.getApplicationInfo(frameworkName)).thenReturn(okFrameworkResponse, notOkFrameworkResponse)
     when(marathonManager.scaleMarathonApplication(any(), any())).thenReturn(okStatus)
 
