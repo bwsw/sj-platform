@@ -21,29 +21,39 @@ But previously, let's get the general idea of the platform structure and concept
 General Concepts
 ------------------------
 
+The platform features presented above have conditioned the architecture developed for SJ-Platform. The platform is made up of the following components:
+
+1) **Processing** component for data computation,
+2) **Streaming** component for data transportation,
+3) **Core** component for task execution,
+4) **API/UI** component for administration.
+
+.. figure:: _static/GenCon.png
+
 The Stream Juggler Platform performs data processing that is fulfilled in modules. A module is a processor. The mode of processing in it is determined by a set of configurations uploaded to the system via the UI. 
 
 The events enter the processor in streams from a list of supported interfaces - TCP, Kafka and T-streams. A result data are put into an external datastorage. 
 
 .. figure:: _static/Overview2.png
 
-Actually, the platform represents a pipeline of modules that perform input data transformation, computation and result data exporting.
+Actually, the processing componenet of the platform represents a pipeline of modules that perform input data transformation, computation and result data exporting.
 
-Below the general concepts fulfilled within the platform are presented.
+Below the general concepts fulfilled within the platform components are presented.
 
 SJ-Platform performs a **real-time data processing**. That means the system can handle events as soon as they are available inside the system without specific delay. 
-
-The events are guaranteed to be processed **exactly-once**. The key idea of exactly-once processing lies in a group **checkpoint**. That means all producers and consumers are bunched into a group and do a checkpoint automatically fixing the current state.
-
-Storing the variables in a state fulfills the idea of Platform`s **fault-tolerance**. In case of the live datastream processing failure, the variables stored in the state are recovered and the module is restarted.
 
 The events enter the platform in streams from a list of supported interfaces - TCP, Kafka and T-streams. 
 
 Streams can be very intensive and all events can not be handled by a single server of arbitrary performance. The system allows **scaling** the computations horizontally to handle increasing demands.
 
+The events are guaranteed to be processed **exactly-once**. The key idea of exactly-once processing lies in a group **checkpoint**. That means all producers and consumers are bunched into a group and do a checkpoint automatically fixing the current state.
+
+Storing the variables in a state fulfills the idea of Platform`s **fault-tolerance**. In case of the live datastream processing failure, the variables stored in the state are recovered and the module is restarted.
+
 The streaming layer allows handling the idea of **parallelism** through multipartitioning. The data elements in a stream are assembled in partitions.  A **partition** is a part of a data stream allocated for convenience in operation. Upon creation, every stream gets a name and a certain amount of partitions. The parallelism is enabled by dividing existing partitions fairly among modules' tasks and it enables to scale the data processing. Partitions are also helpful in distributing processing load between several workers.
 
-The platform features presented above are responsible for the architecture developed for SJ-Platform.
+SJ-Platform provides a developer with the comprehensive **API** and **UI**, which allow him to develop, customize and manage the event processing pipeline.
+
 
 
 Platform Components
