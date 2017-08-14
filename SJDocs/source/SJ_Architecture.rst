@@ -21,13 +21,13 @@ But previously, let's get the general idea of the platform structure and concept
 General Concepts
 ------------------------
 
-The Stream Juggler Platform performs data processing that is fulfilled in modules. A module is a processor. Its processing mode is determined by a set of configurations uploaded to the system via the UI. 
+The Stream Juggler Platform performs data processing that is fulfilled in modules. A module is a processor. The mode of processing in it is determined by a set of configurations uploaded to the system via the UI. 
 
-The events enter the platform in streams from a list of supported interfaces - TCP, Kafka and T-streams. A result data are put into an external datastorage.
+The events enter the processor in streams from a list of supported interfaces - TCP, Kafka and T-streams. A result data are put into an external datastorage. 
 
 .. figure:: _static/Overview1.png
 
-Actually, the platform represents a pipeline of the modules that perform input data transformation, computation and result data exporting...
+Actually, the platform represents a pipeline of modules that perform input data transformation, computation and result data exporting...
 
 SJ-Platform performs a **real-time data processing**. That means the system can handle events as soon as they are available inside the system without specific delay. 
 
@@ -37,10 +37,8 @@ The events enter the platform in streams from a list of supported interfaces - T
 
 Streams can be very intensive and all events can not be handled by a single server of arbitrary performance. The system allows **scaling** the computations horizontally to handle increasing demands.
 
-The streaming layer allows handling the idea of parallelism through multipartitioning. A **partition** is a part of a data stream allocated for convenience in operation. The data elements in a stream are assembled in partitions. Upon creation, every stream gets a name and a certain amount of partitions. The parallelism is enabled by dividing existing partitions fairly among modules' tasks and it enables to scale the data processing. Partitions are also helpful in distributing processing load between several workers.
+The streaming layer allows handling the idea of parallelism through multipartitioning. The data elements in a stream are assembled in partitions.  A **partition** is a part of a data stream allocated for convenience in operation. Upon creation, every stream gets a name and a certain amount of partitions. The parallelism is enabled by dividing existing partitions fairly among modules' tasks and it enables to scale the data processing. Partitions are also helpful in distributing processing load between several workers.
 
-
-  
 
 
 Platform Components
