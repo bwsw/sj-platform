@@ -32,49 +32,77 @@ import scaldi.Injector
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
-import scala.util.{Failure, Success, Try}
 
+
+/**
+  * Data model for list of tasks
+  */
 object TasksList {
-  /***
-    * availablePorts - ports that can be used for current task. This parameter update after new offer come.
-    */
-
   private val logger = Logger.getLogger(this.getClass)
   private val tasksToLaunch = mutable.ListBuffer[String]()
   private val listTasks = mutable.Map[String, Task]()
   private var message: String = "Initialization"
-  private val availablePorts = collection.mutable.ListBuffer[Long]()
   private var launchedOffers = Map[OfferID, ArrayBuffer[TaskInfo]]()
-
   private var launchedTasks = mutable.ListBuffer[String]()
+
+  /** availablePorts - ports that can be used for current task. This parameter is updated after new offer come. */
+  private val availablePorts = collection.mutable.ListBuffer[Long]()
 
   var perTaskCores: Double = 0.0
   var perTaskMem: Double = 0.0
   var perTaskPortsCount: Int = 0
 
+  /**
+    * Creates new task
+    * @param taskId
+    * @return
+    */
   def newTask(taskId: String) = {
     val task = new Task(taskId)
     listTasks += taskId -> task
 //    tasksToLaunch += taskId
   }
 
+  /**
+    * Returns all tasks
+    * @return
+    */
   def getList: Iterable[Task] = {
     listTasks.values
   }
 
+  /**
+    * Returns task by ID
+    * @param taskId
+    * @return
+    */
   def getTask(taskId: String): Task = {
     listTasks(taskId)
   }
 
+  /**
+    * Adds tasks to launch
+    * @param taskId
+    * @return
+    */
   def addToLaunch(taskId: String) = {
     if (!tasksToLaunch.contains(taskId))
       tasksToLaunch += taskId
   }
 
+  /**
+    * Returns tasks ready to launch
+    * @return mutable.ListBuffer[String]
+    */
   def toLaunch: mutable.ListBuffer[String] = {
     tasksToLaunch
   }
 
+  /**
+    * Adds task to launched list
+    * @param taskId
+    * @return ListBuffer[String]
+    */
   def launched(taskId: String): ListBuffer[String] = {
     if (tasksToLaunch.contains(taskId))
       tasksToLaunch -= taskId
@@ -83,66 +111,128 @@ object TasksList {
     launchedTasks
   }
 
+  /**
+    * Removes task from launched tasks list
+    * @param taskId
+    * @return ListBuffer[String]
+    */
   def stopped(taskId: String): ListBuffer[String] = {
     if (launchedTasks.contains(taskId))
       launchedTasks -= taskId
     launchedTasks
   }
 
+  /**
+    * Kills task by ID
+    * @param taskId
+    * @return ListBuffer[String]
+    */
   def killTask(taskId: String): ListBuffer[String] = {
     FrameworkUtil.driver.get.killTask(TaskID.newBuilder().setValue(taskId).build)
     stopped(taskId)
   }
 
+  /**
+    * Clears launched tasks list
+    */
   def clearLaunchedTasks(): Unit = {
     launchedTasks = mutable.ListBuffer[String]()
   }
 
+  /**
+    * Transform to FrameworkTask
+    * @return FrameworkRestEntity
+    */
   def toFrameworkTask: FrameworkRestEntity = {
     FrameworkRestEntity(listTasks.values.map(_.toFrameworkTask).toSeq)
   }
 
+  /**
+    * Returns task from tasks list by ID
+    * @param taskId Task id
+    * @return Option[Task]
+    */
   def apply(taskId: String): Option[Task] = {
     listTasks.get(taskId)
   }
 
+  /**
+    * Clears available list of ports
+    */
   def clearAvailablePorts(): Unit = {
     availablePorts.remove(0, availablePorts.length)
   }
 
+  /**
+    * Returns available ports
+    * @return ListBuffer[Long]
+    */
   def getAvailablePorts: ListBuffer[Long] = {
     availablePorts
   }
 
+  /**
+    * Adds to available ports list new list of ports
+    * @param ports List of ports
+    * @return Unit
+    */
   def addAvailablePorts(ports: ListBuffer[Long]) = {
     availablePorts ++= ports
   }
 
+  /**
+    * Returns how much tasks to launch
+    * @return
+    */
   def count: Int = {
     toLaunch.size
   }
 
+  /**
+    * Returns offers list where tasks launched
+    * @return
+    */
   def getLaunchedOffers: Map[OfferID, ArrayBuffer[TaskInfo]] = {
     launchedOffers
   }
 
+  /**
+    * Returns launched tasks list
+    * @return
+    */
   def getLaunchedTasks: ListBuffer[String] = {
     launchedTasks
   }
 
+  /**
+    * Clear offers list with tasks
+    */
   def clearLaunchedOffers(): Unit = {
     launchedOffers = Map[OfferID, ArrayBuffer[TaskInfo]]()
   }
 
+  /**
+    * Sets message to display
+    * @param message String
+    */
   def setMessage(message: String): Unit = {
     this.message = message
   }
 
-  def getTaskPorts(task: String): Resource = {
-    this.getTask(task).ports
+  /**
+    * Returns ports resource occupied by task
+    * @param taskId
+    * @return
+    */
+  def getTaskPorts(taskId: String): Resource = {
+    this.getTask(taskId).ports
   }
 
-  def prepare(instance: Instance): Unit = {
+  /**
+    * Initializes tasks list, fetch tasks from instance
+    * @param instance
+    */
+  def prepareTasks(instance: Instance): Unit = {
     perTaskCores = FrameworkUtil.instance.get.perTaskCores
     perTaskMem = FrameworkUtil.instance.get.perTaskRam
     perTaskPortsCount = FrameworkUtil.getCountPorts(FrameworkUtil.instance.get)
@@ -161,41 +251,63 @@ object TasksList {
     tasks.foreach(task => newTask(task))
   }
 
-  def createTaskToLaunch(task: String, offer: Offer)(implicit injector: Injector): TaskInfo = {
+  /**
+    * Prepares task to launch on offer
+    * @param taskId Current task id
+    * @param offer Current offer
+    * @param injector
+    * @return
+    */
+  def createTaskToLaunch(taskId: String, offer: Offer)(implicit injector: Injector): TaskInfo = {
     logger.debug("Creating task info")
     val taskInfo = TaskInfo.newBuilder
-      .setCommand(getCommand(task, offer))
-      .setName(task)
-      .setTaskId(TaskID.newBuilder.setValue(task).build())
+      .setCommand(getCommand(taskId, offer))
+      .setName(taskId)
+      .setTaskId(TaskID.newBuilder.setValue(taskId).build())
       .addResources(OffersHandler.getCpusResource)
       .addResources(OffersHandler.getMemResource)
-      .addResources(TasksList.getTaskPorts(task))
+      .addResources(TasksList.getTaskPorts(taskId))
       .setSlaveId(offer.getSlaveId)
       .build()
     taskInfo
   }
 
-  def getCommand(task: String, offer: Offer)(implicit injector: Injector): CommandInfo = {
-    TasksList(task).foreach(task => task.update(ports=OffersHandler.getPortsResource(offer)))
+  /**
+    * Prepares command for task
+    * @param taskId Current task id
+    * @param offer Current offer
+    * @param injector
+    * @return
+    */
+  def getCommand(taskId: String, offer: Offer)(implicit injector: Injector): CommandInfo = {
+    TasksList(taskId).foreach(task => task.update(ports=OffersHandler.getPortsResource(offer)))
+    /**
+      * Return available ports for current offer
+      * @return
+      */
     def getAgentPorts: String = {
-      var taskPort: String = ""
-      val ports = TasksList.getTaskPorts(task)
+      var taskPort = ""
+      val ports = TasksList.getTaskPorts(taskId)
 
       var availablePorts = ports.getRanges.getRangeList.asScala.map(_.getBegin.toString)
 
       val host = OffersHandler.getOfferIp(offer)
-      TasksList(task).foreach(task => task.update(host=host))
+      TasksList(taskId).foreach(task => task.update(host=host))
       if (FrameworkUtil.instance.get.moduleType.equals(EngineLiterals.inputStreamingType)) {
         taskPort = availablePorts.head
         availablePorts = availablePorts.tail
         val inputInstance = FrameworkUtil.instance.get.asInstanceOf[InputInstance]
-        inputInstance.tasks.put(task, new InputTask(host, taskPort.toInt))
+        inputInstance.tasks.put(taskId, new InputTask(host, taskPort.toInt))
         inject[ConnectionRepository].getInstanceRepository.save(FrameworkUtil.instance.get.to)
       }
 
       availablePorts.mkString(",")
     }
 
+    /**
+      * Returns hosts from all tasks
+      * @return String
+      */
     def getInstanceHosts: String = {
       val hosts: collection.mutable.ListBuffer[String] = collection.mutable.ListBuffer()
       TasksList.toLaunch.foreach(task =>
@@ -204,15 +316,19 @@ object TasksList {
       hosts.mkString(",")
     }
 
-    def getEnvironments: Environment = {
+    /**
+      * Prepares environment
+      * @return Environment
+      */
+    def getEnvironment: Environment = {
      Environment.newBuilder
         .addVariables(Environment.Variable.newBuilder.setName("INSTANCE_NAME").setValue(FrameworkParameters(FrameworkParameters.instanceId)))
-        .addVariables(Environment.Variable.newBuilder.setName("TASK_NAME").setValue(task))
+        .addVariables(Environment.Variable.newBuilder.setName("TASK_NAME").setValue(taskId))
         .addVariables(Environment.Variable.newBuilder.setName("AGENTS_HOST").setValue(OffersHandler.getOfferIp(offer)))
         .addVariables(Environment.Variable.newBuilder.setName("AGENTS_PORTS").setValue(getAgentPorts))
         .addVariables(Environment.Variable.newBuilder.setName("INSTANCE_HOSTS").setValue(getInstanceHosts))
         .addVariables(Environment.Variable.newBuilder.setName("MONGO_HOSTS").setValue(FrameworkParameters(FrameworkParameters.mongoHosts)))
-        .addVariables(Environment.Variable.newBuilder.setName("MONGO_USER").setValue(FrameworkParameters(FrameworkParameters.mognoUser)))
+        .addVariables(Environment.Variable.newBuilder.setName("MONGO_USER").setValue(FrameworkParameters(FrameworkParameters.mongoUser)))
         .addVariables(Environment.Variable.newBuilder.setName("MONGO_PASSWORD").setValue(FrameworkParameters(FrameworkParameters.mongoPassword)))
 //        .addVariables(Environment.Variable.newBuilder.setName("ENTRY_PORT").setValue("8888"))
         .build()
@@ -224,7 +340,7 @@ object TasksList {
     val cmdInfo = CommandInfo.newBuilder
       .addUris(CommandInfo.URI.newBuilder.setValue(FrameworkUtil.getModuleUrl(FrameworkUtil.instance.get)))
       .setValue("java " + FrameworkUtil.getJvmOptions + " -jar " + FrameworkUtil.jarName.get)
-      .setEnvironment(getEnvironments).build()
+      .setEnvironment(getEnvironment).build()
 
 
     logger.debug("Complete building command info")
@@ -232,7 +348,12 @@ object TasksList {
     cmdInfo
   }
 
-
+  /**
+    * Adds launched task to current offer
+    * @param task Current task info
+    * @param offer Current offer
+    * @return
+    */
   def addTaskToSlave(task: TaskInfo, offer: (Offer, Int)) = {
     if (launchedOffers.contains(offer._1.getId)) {
       launchedOffers(offer._1.getId) += task

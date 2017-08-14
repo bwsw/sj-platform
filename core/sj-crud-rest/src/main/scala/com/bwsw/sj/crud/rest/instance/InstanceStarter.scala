@@ -83,20 +83,21 @@ class InstanceStarter(instance: Instance,
   }
 
   protected def startInstance(): Unit = {
-    val marathonInfo = marathonManager.getMarathonInfo()
-    if (isStatusOK(marathonInfo)) {
-      val marathonMaster = marathonManager.getMarathonMaster(marathonInfo)
-      val zookeeperServer = getZooKeeperServers(marathonMaster)
+    val maybeMarathonInfo = marathonManager.tryToGetMarathonInfo()
+    if (isStatusOK(maybeMarathonInfo)) {
+      val marathonInfo = marathonManager.getMarathonInfo(maybeMarathonInfo)
+      val zooKeeperNode = marathonInfo.zooKeeperConfig.zk
+      val zookeeperServer = getZooKeeperServers(zooKeeperNode)
       leaderLatch = Option(createLeaderLatch(zookeeperServer))
       instanceManager.updateFrameworkStage(instance, starting)
-      startFramework(marathonMaster, zookeeperServer)
+      startFramework(marathonInfo.marathonConfig.master, zookeeperServer)
       leaderLatch.foreach(_.close())
     } else {
       instanceManager.updateInstanceStatus(instance, failed)
     }
   }
 
-  protected def getZooKeeperServers(marathonMaster: String): String = {
+  protected def getZooKeeperServers(zooKeeperNode: String): String = {
     logger.debug(s"Instance: '${instance.name}'. Getting a zookeeper address.")
     (zookeeperHost, zookeeperPort) match {
       case (Some(zkHost), Some(zkPort)) =>
@@ -105,8 +106,8 @@ class InstanceStarter(instance: Instance,
         zooKeeperServers
 
       case _ =>
-        val marathonMasterUrl = new URI(marathonMaster)
-        val zooKeeperServers = marathonMasterUrl.getHost + ":" + marathonMasterUrl.getPort
+        val zooKeeperNodeUrl = new URI(zooKeeperNode)
+        val zooKeeperServers = zooKeeperNodeUrl.getHost + ":" + zooKeeperNodeUrl.getPort
         logger.debug(s"Instance: '${instance.name}'. Get a zookeeper address: '$zooKeeperServers' from marathon.")
         zooKeeperServers
     }

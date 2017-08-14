@@ -19,6 +19,7 @@
 package com.bwsw.sj.common.dal.model.instance
 
 import java.util
+import java.util.Date
 
 import com.bwsw.sj.common.dal.model.service.ZKServiceDomain
 import com.bwsw.sj.common.dal.morphia.MorphiaAnnotations.PropertyField
@@ -58,7 +59,8 @@ class RegularInstanceDomain(override val name: String,
                             @Property("start-from") var startFrom: String = EngineLiterals.newestStartMode,
                             @Property("state-management") var stateManagement: String = EngineLiterals.noneStateMode,
                             @Property("state-full-checkpoint") var stateFullCheckpoint: Int = 100,
-                            @Property("event-wait-idle-time") var eventWaitIdleTime: Long = 1000)
+                            @Property("event-wait-idle-time") var eventWaitIdleTime: Long = 1000,
+                            creationDate: Date)
   extends InstanceDomain(
     name,
     moduleType,
@@ -79,7 +81,8 @@ class RegularInstanceDomain(override val name: String,
     environmentVariables,
     stage,
     performanceReportingInterval,
-    frameworkId) {
+    frameworkId,
+    creationDate) {
 
   override def getInputsWithoutStreamMode: Array[String] = inputs.map(clearStreamFromMode)
 }

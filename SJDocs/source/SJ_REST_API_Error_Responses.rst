@@ -826,7 +826,7 @@ Stop an instance
  
 .. _Config_Settings_Errors:
 
-Config Settings API Error Responses
+Configurations API Error Responses
 --------------------------------------------
 
 The responses description for CRUD REST-API for Configurations methods are presented below.
@@ -845,7 +845,7 @@ Possible error responses for **configuration creation**:
  :widths: 25, 60
   
  ":ref:`Incorrect_Json_Api_Responses`", "Incorrect JSON"
- "Configuration with name '<confguration_name>' already exists.", "All fields are completed correctly according to the requirements but a config setting with the same name already exists."
+ "Configuration with name '<confguration_name>' already exists.", "All fields are completed correctly according to the requirements but a configuration with the same name already exists."
  "Сonfiguration has incorrect name: '<confguration_name>'. Name of configuration can contain digits, lowercase letters, hyphens or periods. First symbol must be a letter.", "All fields are completed correctly according to the requirements except the 'Name' field."
  "Сonfiguration has incorrect name: '<confguration_name>'. T-streams domain configuration must be only for consumer or producer.", "All fields are completed correctly according to the requirements except the 'Name' field. For T-streams the configuration can be set only for a consumer/producer. The list of valid settings is at the T-streams site for `producers <http://t-streams.com/docs/a2-api/tstreams-factory-api/#TSF_DictionaryProducer_keyset>`_ and `consumers <http://t-streams.com/docs/a2-api/tstreams-factory-api/#TSF_DictionaryConsumer_keyset>`_ (the 'Textual constant' column)."
  "'Name' attribute is required.", "The Name field is not completed or is an empty string."
@@ -853,7 +853,7 @@ Possible error responses for **configuration creation**:
  "'Domain' attribute is required.", "The Domain field is not completed or is an empty string."
  "Unknown value of 'domain' attribute: '<confg-setting_domain>'. 'Domain' must be one of: [configuration.system, configuration.t-streams, configuration.apache-kafka, configuration.elasticsearch, configuration.apache-zookeeper, configuration.sql-database].", "All fields are completed correctly according to the requirements except the 'Domain' field."
 
-Delete a config setting
+Delete a configuation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. csv-table::  
@@ -864,16 +864,16 @@ Delete a config setting
  "Cannot recognize configuration domain '<domain>'. Domain must be one of the following values: 'configuration.system, configuration.t-streams, configuration.apache-kafka, configuration.elasticsearch, configuration.apache-zookeeper, configuration.sql-database'.", "The domen for the configuration does not exist."
 
 
-Get all config settings for specific config domain
+Get all configurations for specific config domain
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. csv-table::  
  :header: "Response", "Description"
  :widths: 25, 60
  
- "Cannot recognize configuration domain '<domain>'. Domain must be one of the following values: 'configuration.system, configuration.t-streams, configuration.apache-kafka, configuration.elasticsearch, configuration.apache-zookeeper, configuration.sql-database'.", "The domen for the config setting does not exist."
+ "Cannot recognize configuration domain '<domain>'. Domain must be one of the following values: 'configuration.system, configuration.t-streams, configuration.apache-kafka, configuration.elasticsearch, configuration.apache-zookeeper, configuration.sql-database'.", "The domain for the configuration does not exist."
 
-Get a config setting
+Get a configuration
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. csv-table::  

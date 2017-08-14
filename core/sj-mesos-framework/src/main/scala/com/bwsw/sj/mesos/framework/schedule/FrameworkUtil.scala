@@ -36,7 +36,9 @@ import scaldi.Injectable.inject
 import scala.collection.immutable
 import scala.util.Try
 
-
+/**
+  * Contains several common functions to control framework
+  */
 object FrameworkUtil {
 
   import com.bwsw.sj.common.SjModule._
@@ -56,10 +58,10 @@ object FrameworkUtil {
   private val logger = Logger.getLogger(this.getClass)
 
   /**
-    * Count how much ports must be for current task.
+    * Returns count of ports needed for current task.
     *
     * @param instance current launched task
-    * @return ports count for current task
+    * @return count of ports for current task
     */
   def getCountPorts(instance: Instance): Int = {
     instance match {
@@ -71,7 +73,7 @@ object FrameworkUtil {
   }
 
   /**
-    * Handler for Scheduler Exception
+    * Handles Scheduler Exception
     */
   def handleSchedulerException(e: Exception, logger: Logger): Unit = {
     val sw = new StringWriter
@@ -84,7 +86,7 @@ object FrameworkUtil {
 
 
   /**
-    * Get jar URI for framework
+    * Returns jar URI for framework
     *
     * @param instance :Instance
     * @return String
@@ -98,11 +100,18 @@ object FrameworkUtil {
     restAddress
   }
 
-  def isInstanceStarted: Boolean = {
+  /**
+    * Check if instance started
+    * @return Boolean
+    */
+  private def isInstanceStarted: Boolean = {
     updateInstance()
     instance.exists(_.status == "started")
   }
 
+  /**
+    * Killing all launched tasks when it needed
+    */
   def killAllLaunchedTasks(): Unit = {
     TasksList.getLaunchedTasks.foreach(taskId => {
       TasksList.killTask(taskId)
@@ -110,24 +119,25 @@ object FrameworkUtil {
   }
 
   /**
-    * Teardown framework, do it if instance not started.
+    * Teardowns framework, needed to be executed if instance did not started.
     */
   def teardown(): Unit = {
     logger.info(s"Kill all launched tasks: ${TasksList.getLaunchedTasks}")
     killAllLaunchedTasks()
   }
 
-  /**
-    * Selecting which tasks would be launched
-    */
-  def prepareTasksToLaunch(): Unit = {
+
+  def selectingNotLaunchedTasks(): Unit = {
     TasksList.getList.foreach(task => {
       if (!TasksList.getLaunchedTasks.contains(task.id)) TasksList.addToLaunch(task.id)
     })
     logger.info(s"Selecting tasks to launch: ${TasksList.toLaunch}")
   }
 
-
+  /**
+    * Fetch instance info from database
+    * @return
+    */
   def updateInstance(): Any = {
     val optionInstance = connectionRepository.getInstanceRepository.get(FrameworkParameters(FrameworkParameters.instanceId))
       .map(inject[InstanceCreator].from)
@@ -145,9 +155,12 @@ object FrameworkUtil {
     instance.get.jvmOptions.foldLeft("")((acc, option) => s"$acc ${option._1}${option._2}")
   }
 
+  /**
+    * Launch tasks if instance started, else teardown
+    */
   def checkInstanceStarted(): Unit = {
     logger.info(s"Check is instance status 'started': $isInstanceStarted")
-    if (isInstanceStarted) prepareTasksToLaunch()
+    if (isInstanceStarted) selectingNotLaunchedTasks()
     else teardown()
   }
 }

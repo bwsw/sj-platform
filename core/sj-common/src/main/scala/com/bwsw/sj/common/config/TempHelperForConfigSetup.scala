@@ -22,21 +22,17 @@ import java.io.File
 import java.net.URL
 import java.util.Date
 
-import com.bwsw.sj.common.SjModule
 import com.bwsw.sj.common.dal.model.ConfigurationSettingDomain
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
 import com.bwsw.sj.common.si.model.FileMetadataLiterals
 import com.bwsw.sj.common.si.model.config.ConfigurationSetting
 import com.bwsw.sj.common.utils.RestLiterals
 import org.apache.commons.io.FileUtils
-import scaldi.Injectable.inject
 
-object TempHelperForConfigSetup {
+class TempHelperForConfigSetup(connectionRepository: ConnectionRepository) {
 
-  import SjModule._
   import TempHelperForConfigConstants._
 
-  val connectionRepository: ConnectionRepository = inject[ConnectionRepository]
   val configService: GenericMongoRepository[ConfigurationSettingDomain] = connectionRepository.getConfigRepository
 
   def setupConfigs(): Unit = {
@@ -84,12 +80,9 @@ object TempHelperForConfigSetup {
   }
 }
 
-object TempHelperForConfigDestroy {
+class TempHelperForConfigDestroy(connectionRepository: ConnectionRepository) {
 
-  import SjModule._
   import TempHelperForConfigConstants._
-
-  val connectionRepository: ConnectionRepository = inject[ConnectionRepository]
 
   def deleteConfigs(): Unit = {
     connectionRepository.getConfigRepository.delete(ConfigLiterals.frameworkTag)

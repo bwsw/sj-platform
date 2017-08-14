@@ -206,7 +206,7 @@ class JsonSerializerTests extends FlatSpec with Matchers with TableDrivenPropert
     }
   }
 
-  it should "throw JsonMissedPropertyException if json has not required property" in {
+  it should "throw JsonMissedPropertyException if json doesn't have a required property" in {
     val jsonsWithoutRequiredField = Seq(
       "{}",
       s"""{"$field2Name":"field2-value"}""")
@@ -221,7 +221,7 @@ class JsonSerializerTests extends FlatSpec with Matchers with TableDrivenPropert
     }
   }
 
-  it should "not throw JsonMissedPropertyException if json has required property" in {
+  it should "not throw JsonMissedPropertyException if json has a required property" in {
     val jsonsWithoutRequiredField = Table(
       s"""{"$field1Name":"field1-value"}""",
       s"""{"$field1Name":"field1-value","$field2Name":"field2-value"}""")

@@ -124,7 +124,7 @@ class JsonSerializer(ignoreUnknown: Boolean = false, enableNullForPrimitives: Bo
   }
 
   def setIgnoreUnknown(ignore: Boolean): Unit = {
-    logger.debug(s"Set a value of flag: FAIL_ON_UNKNOWN_PROPERTIES to '$ignore'.")
+    logger.debug(s"Set a value of flag: FAIL_ON_UNKNOWN_PROPERTIES to '${!ignore}'.")
     mapper.configure(FAIL_ON_UNKNOWN_PROPERTIES, !ignore)
   }
 

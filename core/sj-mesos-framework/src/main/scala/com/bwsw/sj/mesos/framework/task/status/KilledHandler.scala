@@ -21,9 +21,7 @@ package com.bwsw.sj.mesos.framework.task.status
 import com.bwsw.sj.mesos.framework.task.{StatusHandler, TasksList}
 import org.apache.mesos.Protos.TaskStatus
 
-/**
-  * Created by diryavkin_dn on 06.02.17.
-  */
+
 object KilledHandler {
 
   def process(status: TaskStatus): Unit = {

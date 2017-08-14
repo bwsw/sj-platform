@@ -97,7 +97,7 @@ class ModuleController(implicit injector: Injector) {
           ModulesResponseEntity(
             modules.map(fileMetadataUtils.toModuleInfo)))
       case Left(error) =>
-        BadRequestRestResponse(MessageResponseEntity(error))
+        NotFoundRestResponse(MessageResponseEntity(error))
     }
   }
 

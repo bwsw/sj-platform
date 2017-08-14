@@ -26,12 +26,12 @@ import scala.collection.immutable
 import scala.util.Try
 
 /**
-  * Created by diryavkin_dn on 25.07.17.
+  * Environment variables store
   */
 object FrameworkParameters {
   val instanceId = "instanceId"
   val mongoHosts = "mongodbHosts"
-  val mognoUser = "mongodbUser"
+  val mongoUser = "mongodbUser"
   val mongoPassword = "mongoPassword"
 
   private var params: Map[String, String] = immutable.Map[String, String]()
@@ -43,7 +43,7 @@ object FrameworkParameters {
       instanceId ->
         Try(config.getString(FrameworkLiterals.instanceId)).getOrElse("00000000-0000-0000-0000-000000000000"),
       mongoHosts -> Try(config.getString(CommonAppConfigNames.mongoHosts)).getOrElse("127.0.0.1:27017"),
-      mognoUser -> Try(config.getString(CommonAppConfigNames.mongoUser)).getOrElse("user"),
+      mongoUser -> Try(config.getString(CommonAppConfigNames.mongoUser)).getOrElse("user"),
       mongoPassword -> Try(config.getString(CommonAppConfigNames.mongoPassword)).getOrElse("password")
     )
   }

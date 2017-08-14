@@ -48,16 +48,17 @@ See more information on the platform structure and architecture at the :ref:`Arc
 
 Below you will find the information on uploading your module via UI and starting data processing.
 
+.. _Configuration:
 Configuration 
 ----------------------
 
-And the first step is to upload necessary configuration settings to the platform.
+And the first step is to upload necessary configurations to the platform.
 
 Here the basic settings necessary for the platform are described. Besides, the flow of Configuration addition to the system is clarified here.
 
-Configuration settings are the settings required for the modules start working.
+Configurations are the settings required for the modules start working.
  
-The config settings can be added under the "Configuration" tab of the main navigation bar. Please, click at "Add Settings" in the upper-right corner above the list and fill in the form (the information on the required settings can be found in the table_ below):
+The configurations can be added under the "Configuration" tab of the main navigation bar. Please, click at "Add Settings" in the upper-right corner above the list and fill in the form (the information on the required settings can be found in the table_ below):
 
 1. *Name* *
         Enter a setting name here. 
@@ -172,18 +173,27 @@ The type of the provider is determined with the type of the instance you want to
        Enter a provider host that determines a file location.
        Add more hosts clicking at the «Add Host» button and entering host names in the appeared lines.
 
-- *Login*
-       Enter a provider login here if necessary
-
-- *Password*
-       Enter a password for the provider if necessary.
-
 **Specific fields:**
 
 **SQL database** **Provider** **Type**
 
-- *Driver* * - Enter a provider driver for SQL database provider type. 
+- *Login* *
+       Enter a provider login here if necessary
+        
+- *Password* *
+       Enter a password for the provider if necessary.
 
+- *Driver* * 
+       Enter a provider driver for SQL database provider type. 
+
+**Elasticsearch** **Provider** **Type**
+
+- *Login* *
+       Enter a provider login here.
+       
+- *Password* *
+       Enter a password for the provider.
+       
 .. note:: Required fields are marked with an asterisk (*)
 
 Click «Create» at the bottom and see the provider is in the list of providers now. Details of the node are displayed to the right when clicking the provider in the list. 
@@ -799,11 +809,11 @@ Please, note, the details of an Instance show not only the instance settings but
 - Stages
    Stages display information about current status of the framework that starts Instance. It allows you to follow the start or stop processes of Instance.
    
-The stages include:
+   The stages include:
 
-- state - Instance status
-- datetime - The time when a state has been changed 
-- duration  -  How long a stage has got a current state. This field makes sense if a state field is 'starting', 'stopping' or 'deleting'.
+    - state - Instance status
+    - datetime - The time when a state has been changed 
+    - duration  -  How long a stage has got a current state. This field makes sense if a state field is 'starting', 'stopping' or 'deleting'.
   
 - Execution plan
     Execution plan consists of tasks. The number of tasks equals to a 'Parallelism' parameter. Each task has a unique name within the execution plan. Also the task has a set of Input stream names and their intervals of partitions. In general, it provides the information of the sources from which the data will be consumed.
@@ -853,21 +863,28 @@ If an instance stuck in 'failed' or 'error' status, you should use the following
 
 If all described above is correct, but the "failed" or the "error" status still takes place, please contact the support team.
 
-The *statistics* on the task execution is also available from the list of instances. Click at the "Information" icon next to the Instance name you want to get the statistics for. 
+The *statistics* on the task execution is also available from the list of instances. 
 
- .. _static/FrameworkStatsIcon1.png
+Click at the "Information" icon next to the Instance name you want to get the statistics for. 
 
-A window will pop-up to show the stats. It includes the following information for each task in the list:
+.. figure:: _static/FrameworkStatsIcon1.png
+
+A window will pop-up to show the stats. 
+
+.. figure:: _static/FrameworkStats.png
+
+
+It includes the following information for each task in the list:
 
 - Task name
 - State - Task status
-- Directories - Directories of tasks of the instance
+- Directories - Directories of tasks of the instance. They are live references to the task change logs on Mesos.
 - State change - The date of the last status change
 - Reason - The reason of the status change
 - Last node - Name of node that was used by a task before the status change (task failure)
 - Node - Name of node used by the task
 
-This is the statistic data from a Mesos framework that starts a module. The statistics is aggregated for started instances. 
+This is the statistic data from a Mesos framework that starts a module. The statistics is aggregated for started instances. ()
 
 The list of instances can be filtered by its type and/or a name using the search tool above the list.
 

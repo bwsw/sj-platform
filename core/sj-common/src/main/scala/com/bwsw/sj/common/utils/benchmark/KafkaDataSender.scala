@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.sj.kafka.data_sender
+package com.bwsw.sj.common.utils.benchmark
 
 import java.util.Properties
 
@@ -33,7 +33,7 @@ import scala.util.Random
   * @param separator separator between words
   * @author Pavel Tomskikh
   */
-class DataSender(address: String, topic: String, words: Seq[String], separator: String) {
+class KafkaDataSender(address: String, topic: String, words: Seq[String], separator: String) {
   require(separator.length == 1, "separator must contain exactly one symbol")
 
   private val stringSerializerClass = "org.apache.kafka.common.serialization.StringSerializer"
@@ -45,11 +45,16 @@ class DataSender(address: String, topic: String, words: Seq[String], separator: 
   /**
     * Generates data and send it to a kafka server
     *
-    * @param messageSize size of one message
-    * @param messages    count of messages
+    * @param messageSize  size of one message
+    * @param messages     count of messages
+    * @param firstMessage message that will be sent first
     */
-  def send(messageSize: Long, messages: Long): Unit = {
+  def send(messageSize: Long, messages: Long, firstMessage: Option[String] = None): Unit = {
     val producer = new KafkaProducer[String, String](producerProps)
+
+    firstMessage.foreach { message =>
+      producer.send(new ProducerRecord[String, String](topic, message))
+    }
 
     (0l until messages).foreach { _ =>
       var message = words(Random.nextInt(words.length))

@@ -25,6 +25,9 @@ import org.eclipse.jetty.server.handler.AbstractHandler
 import org.eclipse.jetty.server.{Server, Request}
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 
+/**
+  * Handler of framework rest.
+  */
 private class Handler extends AbstractHandler {
   val serializer: JsonSerializer = new JsonSerializer()
 

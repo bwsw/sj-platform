@@ -188,7 +188,7 @@ class ElasticsearchClientTestSuite extends FlatSpec with Matchers with BeforeAnd
     val index = "test_index"
     val documentType = "test"
     client.createIndex(index)
-    val testField = "test_filed"
+    val testField = "test_field"
     val testValue = "test_value"
     val numberOfDocuments = 5
     (0 until numberOfDocuments).foreach(x => {

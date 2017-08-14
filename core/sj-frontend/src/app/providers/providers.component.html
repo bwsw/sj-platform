@@ -168,7 +168,8 @@
           </fieldset>
 
           <!-- Login -->
-          <fieldset class="form-group row">
+          <fieldset *ngIf="newProvider.type === 'provider.sql-database' || newProvider.type === 'provider.elasticsearch'"
+                    class="form-group row">
             <label class="col-sm-2 col-form-label">Login</label>
             <div class="col-sm-10">
               <input [(ngModel)]="newProvider.login" name="providerLogin" type="text" class="form-control"
@@ -177,7 +178,8 @@
           </fieldset>
 
           <!-- Password -->
-          <fieldset class="form-group row">
+          <fieldset *ngIf="newProvider.type === 'provider.sql-database' || newProvider.type === 'provider.elasticsearch'"
+                    class="form-group row">
             <label class="col-sm-2 col-form-label">Password</label>
             <div class="col-sm-10">
               <input [(ngModel)]="newProvider.password" name="providerPassword" type="text"

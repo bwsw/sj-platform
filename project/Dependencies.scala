@@ -26,10 +26,11 @@ object Dependencies {
   }
 
   lazy val sjCommonDependencies = Def.setting(Seq(
-    "org.slf4j" % "slf4j-log4j12" % "1.7.22",
+    "org.slf4j" % "slf4j-log4j12" % "1.7.24",
     ("com.bwsw" % "t-streams_2.12" % "3.0.5-SNAPSHOT")
       .exclude("org.slf4j", "slf4j-simple")
       .exclude("org.slf4j", "slf4j-api")
+      .exclude("org.slf4j", "slf4j-log4j12")
       .exclude("log4j", "log4j")
       .exclude("io.netty", "netty")
       .exclude("io.netty", "netty-all")
@@ -64,17 +65,12 @@ object Dependencies {
     "org.scaldi" %% "scaldi" % "0.5.8",
     "org.mock-server" % "mockserver-netty" % "3.10.8" % "test",
     "com.carrotsearch" % "java-sizeof" % "0.0.5",
-    "de.flapdoodle.embed" % "de.flapdoodle.embed.mongo" % "2.0.0",
+    ("de.flapdoodle.embed" % "de.flapdoodle.embed.mongo" % "2.0.0")
+      .exclude("org.slf4j", "slf4j-api"),
     "ru.yandex.qatools.embed" % "postgresql-embedded" % "2.2" %"test"
   ))
 
   lazy val sjEngineCoreDependencies = Def.setting(Seq(
-    "org.slf4j" % "slf4j-log4j12" % "1.7.22" % "provided",
-    ("org.apache.kafka" % "kafka_2.12" % "0.10.1.1" % "provided")
-      .exclude("org.slf4j", "slf4j-log4j12")
-      .exclude("org.slf4j", "slf4j-api")
-      .exclude("log4j", "log4j")
-      .exclude("io.netty", "netty"),
     "org.apache.commons" % "commons-lang3" % "3.5",
     ("com.mockrunner" % "mockrunner-jdbc" % "1.1.2" % "test")
       .exclude("jakarta-regexp", "jakarta-regexp")
@@ -84,49 +80,32 @@ object Dependencies {
   ))
 
   lazy val sjRestDependencies = Def.setting(Seq(
-    "org.slf4j" % "slf4j-log4j12" % "1.7.22" % "provided",
     "com.typesafe.akka" %% "akka-http" % "10.0.3",
     ("org.apache.httpcomponents" % "httpclient" % "4.5.2")
       .exclude("commons-logging", "commons-logging"),
     "com.typesafe.akka" %% "akka-slf4j" % "2.4.16"
   ))
 
-  lazy val sjInputEngineDependencies = Def.setting(Seq(
-    "org.slf4j" % "slf4j-log4j12" % "1.7.22" % "provided"
-  ))
-
   lazy val sjRegularEngineDependencies = Def.setting(Seq(
-    "org.slf4j" % "slf4j-log4j12" % "1.7.22" % "provided",
-    ("org.apache.kafka" % "kafka_2.12" % "0.10.1.1" % "provided")
+    ("org.apache.samza" % "samza-kafka_2.12" % "0.13.0" % "test")
+      .exclude("org.apache.kafka", "kafka-clients")
+      .exclude("org.apache.kafka", "kafka_2.12")
+      .exclude("org.eclipse.jetty", "jetty-webapp"),
+    "org.eclipse.jetty" % "jetty-webapp" % "9.4.3.v20170317" % "test",
+    ("org.apache.storm" % "storm-core" % "1.1.0")
+      .exclude("log4j", "log4j")
       .exclude("org.slf4j", "slf4j-log4j12")
+      .exclude("org.slf4j", "log4j-over-slf4j")
       .exclude("org.slf4j", "slf4j-api")
-      .exclude("log4j", "log4j")
-      .exclude("io.netty", "netty")
-  ))
-
-  lazy val sjBatchEngineDependencies = Def.setting(Seq(
-    "org.slf4j" % "slf4j-log4j12" % "1.7.22" % "provided",
-    ("org.apache.kafka" % "kafka_2.12" % "0.10.1.1" % "provided")
-      .exclude("org.slf4j", "slf4j-log4j12")
-      .exclude("org.slf4j", "slf4j-api")
-      .exclude("log4j", "log4j")
-      .exclude("io.netty", "netty"),
-    ("org.apache.curator" % "curator-recipes" % "2.11.1" % "provided")
-      .exclude("org.slf4j", "slf4j-api")
-      .exclude("log4j", "log4j")
-      .exclude("io.netty", "netty")
+      .exclude("org.apache.logging.log4j", "log4j-slf4j-impl"),
+    "org.apache.storm" % "storm-kafka" % "1.1.0"
   ))
 
   lazy val sjOutputEngineDependencies = Def.setting(Seq(
-    "org.slf4j" % "slf4j-log4j12" % "1.7.22" % "provided",
-    "org.elasticsearch.client" % "transport" % "5.1.1" % "provided",
-    "org.apache.logging.log4j" % "log4j-core" % "2.7" % "provided",
-    "org.apache.logging.log4j" % "log4j-api" % "2.7" % "provided",
     "org.eclipse.jetty" % "jetty-server" % "9.4.3.v20170317" % "test"
   ))
 
   lazy val sjFrameworkDependencies = Def.setting(Seq(
-    "org.slf4j" % "slf4j-log4j12" % "1.7.22" % "provided",
     "org.apache.mesos" % "mesos" % "0.28.1",
     "org.eclipse.jetty" % "jetty-runner" % "9.4.3.v20170317",
     ("org.apache.httpcomponents" % "httpclient" % "4.5.2")
@@ -138,7 +117,8 @@ object Dependencies {
     "org.mockito" % "mockito-core" % "2.8.9" % "test"
   ))
 
-  lazy val sjKafkaDataLoader = Def.setting(Seq(
-    "org.apache.kafka" % "kafka-clients" % "0.11.0.0"
+  lazy val flinkDependencies = Def.setting(Seq(
+    "org.apache.flink" % "flink-streaming-scala_2.11" % "1.3.1",
+    "org.apache.flink" % "flink-connector-kafka-0.10_2.11" % "1.3.1"
   ))
 }

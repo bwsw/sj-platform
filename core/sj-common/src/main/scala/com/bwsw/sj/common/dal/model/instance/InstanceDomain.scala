@@ -19,6 +19,7 @@
 package com.bwsw.sj.common.dal.model.instance
 
 import java.util
+import java.util.Date
 
 import com.bwsw.sj.common.dal.model.service.ZKServiceDomain
 import com.bwsw.sj.common.dal.morphia.MorphiaAnnotations.{EmbeddedField, IdField, PropertyField}
@@ -50,7 +51,8 @@ class InstanceDomain(@IdField val name: String,
                      @PropertyField("environment-variables") val environmentVariables: java.util.Map[String, String] = new util.HashMap[String, String](),
                      val stage: FrameworkStage = FrameworkStage(),
                      @PropertyField("performance-reporting-interval") val performanceReportingInterval: Long = 60000,
-                     @PropertyField("framework-id") val frameworkId: String = System.currentTimeMillis().toString) {
+                     @PropertyField("framework-id") val frameworkId: String = System.currentTimeMillis().toString,
+                     val creationDate: Date) {
 
   def getInputsWithoutStreamMode: Array[String] = Array()
 }

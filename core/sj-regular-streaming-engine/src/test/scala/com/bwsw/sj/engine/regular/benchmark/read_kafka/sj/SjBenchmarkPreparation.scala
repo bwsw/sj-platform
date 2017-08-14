@@ -16,37 +16,40 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.sj.engine.regular.benchmark.performance
+package com.bwsw.sj.engine.regular.benchmark.read_kafka.sj
 
 import java.io.File
 import java.util.Date
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.benchmark.RegularExecutorOptions
-import com.bwsw.sj.common.dal.model.instance.{ExecutionPlan, RegularInstanceDomain, Task}
+import com.bwsw.sj.common.dal.model.instance.{ExecutionPlan, InstanceDomain, RegularInstanceDomain, Task}
 import com.bwsw.sj.common.dal.model.module.SpecificationDomain
 import com.bwsw.sj.common.dal.model.provider.ProviderDomain
 import com.bwsw.sj.common.dal.model.service.{KafkaServiceDomain, TStreamServiceDomain, ZKServiceDomain}
 import com.bwsw.sj.common.dal.model.stream.{KafkaStreamDomain, TStreamStreamDomain}
-import com.bwsw.sj.common.dal.repository.ConnectionRepository
+import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
 import com.bwsw.sj.common.utils.{EngineLiterals, ProviderLiterals, SpecificationUtils}
 
 import scala.collection.JavaConverters._
+import scala.util.Try
 
 /**
+  * It is needed to upload SJ entities such as providers, services, streams, a module and an instance
+  *
   * @author Pavel Tomskikh
   */
-class BenchmarkPreparation(mongoPort: Int,
-                           zooKeeperHost: String,
-                           zooKeeperPort: Int,
-                           module: File,
-                           kafkaAddress: String,
-                           kafkaTopic: String,
-                           zkNamespace: String,
-                           tStreamPrefix: String,
-                           tStreamToken: String,
-                           instanceName: String,
-                           taskName: String) {
+class SjBenchmarkPreparation(mongoPort: Int,
+                             zooKeeperHost: String,
+                             zooKeeperPort: Int,
+                             module: File,
+                             kafkaAddress: String,
+                             kafkaTopic: String,
+                             zkNamespace: String,
+                             tStreamPrefix: String,
+                             tStreamToken: String,
+                             instanceName: String,
+                             taskName: String) {
 
   private val jsonSerializer = new JsonSerializer(ignoreUnknown = true)
 
@@ -104,11 +107,19 @@ class BenchmarkPreparation(mongoPort: Int,
     partitions = 1,
     creationDate = new Date())
 
+  private var maybeInstance: Option[RegularInstanceDomain] = None
 
-  def prepare(outputFile: String, messagesCount: Long, connectionRepository: ConnectionRepository) = {
+  def prepare(connectionRepository: ConnectionRepository) = {
     loadMetadata(connectionRepository)
     val specification = loadModule(module, connectionRepository)
-    loadInstance(outputFile, messagesCount, specification, connectionRepository)
+    maybeInstance = Some(createInstance(specification))
+  }
+
+  def loadInstance(outputFile: String, messagesCount: Long, instanceRepository: GenericMongoRepository[InstanceDomain]): Unit = {
+    Try(instanceRepository.delete(instanceName))
+    maybeInstance = Some(updateMessageCount(maybeInstance.get, outputFile, messagesCount))
+
+    instanceRepository.save(maybeInstance.get)
   }
 
 
@@ -137,20 +148,7 @@ class BenchmarkPreparation(mongoPort: Int,
     jsonSerializer.deserialize[SpecificationDomain](serializedSpecification)
   }
 
-  private def loadInstance(outputFile: String,
-                           messagesCount: Long,
-                           specification: SpecificationDomain,
-                           connectionRepository: ConnectionRepository): Unit = {
-    val instance = createInstance(outputFile, messagesCount, specification)
-    val instanceRepository = connectionRepository.getInstanceRepository
-
-    instanceRepository.save(instance)
-  }
-
-  private def createInstance(outputFile: String,
-                             messagesCount: Long,
-                             specification: SpecificationDomain): RegularInstanceDomain = {
-    val options = RegularExecutorOptions(outputFile, messagesCount)
+  private def createInstance(specification: SpecificationDomain): RegularInstanceDomain = {
     val task = new Task()
     task.inputs.put(kafkaStream.name, Array(0, kafkaStream.partitions - 1))
 
@@ -162,12 +160,48 @@ class BenchmarkPreparation(mongoPort: Int,
       engine = specification.engineName + "-" + specification.engineVersion,
       coordinationService = zooKeeperService,
       status = EngineLiterals.started,
-      options = jsonSerializer.serialize(options),
       inputs = Array(kafkaStream.name + "/split"),
       outputs = Array(tStreamStream.name),
       eventWaitIdleTime = 1,
       checkpointMode = EngineLiterals.everyNthMode,
       startFrom = EngineLiterals.oldestStartMode,
-      executionPlan = new ExecutionPlan(Map(taskName -> task).asJava))
+      executionPlan = new ExecutionPlan(Map(taskName -> task).asJava),
+      performanceReportingInterval = Long.MaxValue,
+      creationDate = new Date())
+  }
+
+  private def updateMessageCount(instance: RegularInstanceDomain, outputFile: String, messagesCount: Long): RegularInstanceDomain = {
+    val options = RegularExecutorOptions(outputFile, messagesCount)
+
+    new RegularInstanceDomain(
+      name = instance.name,
+      moduleType = instance.moduleType,
+      moduleName = instance.moduleName,
+      moduleVersion = instance.moduleVersion,
+      engine = instance.engine,
+      coordinationService = instance.coordinationService,
+      status = instance.status,
+      restAddress = instance.restAddress,
+      description = instance.description,
+      parallelism = instance.parallelism,
+      options = jsonSerializer.serialize(options),
+      perTaskCores = instance.perTaskCores,
+      perTaskRam = instance.perTaskRam,
+      jvmOptions = instance.jvmOptions,
+      nodeAttributes = instance.nodeAttributes,
+      environmentVariables = instance.environmentVariables,
+      stage = instance.stage,
+      performanceReportingInterval = instance.performanceReportingInterval,
+      frameworkId = instance.frameworkId,
+      inputs = instance.inputs,
+      outputs = instance.outputs,
+      checkpointMode = instance.checkpointMode,
+      checkpointInterval = instance.checkpointInterval,
+      executionPlan = instance.executionPlan,
+      startFrom = instance.startFrom,
+      stateManagement = instance.stateManagement,
+      stateFullCheckpoint = instance.stateFullCheckpoint,
+      eventWaitIdleTime = instance.eventWaitIdleTime,
+      creationDate = new Date())
   }
 }

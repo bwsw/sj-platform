@@ -16,17 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.sj.kafka.data_sender
+package com.bwsw.sj.engine.regular.benchmark.read_kafka.storm
 
 /**
   * @author Pavel Tomskikh
   */
-object PropertiesNames {
-  val address = "address"
-  val wordsFile = "wordsFile"
-  val words = "words"
-  val topic = "topic"
-  val separator = "separator"
-  val messageSize = "size"
-  val messageCount = "count"
+object StormBenchmarkLiterals {
+  val messagesCountProperty = "messages.count"
+  val outputFilenameProperty = "output.file"
+  val kafkaTopicProperty = "kafka.topic"
 }

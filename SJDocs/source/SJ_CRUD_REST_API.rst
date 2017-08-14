@@ -68,8 +68,8 @@ The range of REST API methods described below allows to create or delete a provi
   "name*", "String", "Provider name.", "Name must be unique and contain only letters, digits or hyphens."
   "description", "String", "Provider description.", ""
   "hosts*", "Array[String]", "List of provider hosts.", ""
-  "login", "String", "Provider login.", ""
-  "password", "String", "Provider password.", ""
+  "login", "String", "Provider login.", "For 'provider.sql-database', 'provider.elasticsearch' types."
+  "password", "String", "Provider password.", "For 'provider.sql-database', 'provider.elasticsearch' types."
   "type*", "String", "Provider type.", "One of the following values are possible: 'provider.elasticsearch', 'provider.apache-kafka', 'provider.apache-zookeeper', 'provider.sql-database', 'provider.restful'."
   "driver*", "String", "Driver name.", "For 'provider.sql-database' provider type only."
 
@@ -104,8 +104,6 @@ Request json example::
  {
      "name": "kafka-provider",
      "description": "example of kafka provider",
-     "login": "my_login",
-     "password": "my_pass",
      "type": "kafka",
      "hosts": [
         "192.168.1.133:9092",
@@ -158,19 +156,17 @@ Success response example::
   "status-code": 200,
   "entity": {
     "provider": {
-      "name": "kafka-provider",
-     "description": "example kafka provider",
-     "login": "my_login",
-     "password": "my_pass",
-     "type": "kafka",
-     "hosts": [
+      "name": "kafka-example",
+      "description": "example kafka provider",
+      "type": "provider.apache-kafka",
+      "hosts": [
         "192.168.1.133:9092",
         "192.168.1.135:9092"
-      ]
-      "creationDate": "Thu Jul 20 08:32:51 NOVT 2017" 
+      ],
+      "creationDate": "Thu Jul 20 08:32:51 NOVT 2017"
     }
   }
- }
+ } 
 
 
 Error response example::
@@ -208,9 +204,7 @@ Success response example::
       {
         "name": "kafka-provider",
         "description": "example kafka provider",
-        "login": "my_login",
-        "password": "my_pass",
-        "type": "kafka",
+        "type": "provider.apache-kafka",
         "hosts": [
            "192.168.1.133:9092",
            "192.168.1.135:9092"
@@ -222,7 +216,7 @@ Success response example::
        "description": "elasticsearch provider example",
        "login": "my_login",
        "password": "my_pass",
-       "type": "ES",
+       "type": "provider.elasticsearch",
        "hosts": [
            "192.168.1.133"
        ],
@@ -1156,7 +1150,7 @@ Error response example::
  {
   "status-code": 400,
   "entity": {
-    "message": "Cannot create system config setting. Errors: <creation_errors_string>."
+    "message": "Cannot create system configuration. Errors: <creation_errors_string>."
   }
  }
 
@@ -1283,7 +1277,7 @@ Error response example::
  
  {
     "entity": {
-        "message": "Cannot recognize config setting domain 'system'. Domain must be one of the following values: 'configuration.system, configuration.t-streams, configuration.apache-kafka, configuration.elasticsearch, configuration.apache-zookeeper, configuration.sql-database'."
+        "message": "Cannot recognize configuration domain 'system'. Domain must be one of the following values: 'configuration.system, configuration.t-streams, configuration.apache-kafka, configuration.elasticsearch, configuration.apache-zookeeper, configuration.sql-database'."
     },
     "status-code": 400
  }
@@ -1383,7 +1377,7 @@ Success response example::
   status-code: 200
  }
 
-.. tip:: A full range of error responses can be found at :ref:`Config_Setting_Errors`
+.. tip:: A full range of error responses can be found at :ref:`Config_Settings_Errors`
 
 CRUD Rest-API for Custom Files
 ----------------------------------------
@@ -2984,5 +2978,26 @@ Success response json example::
  ],
  "message": "Tasks launched" 
  }
+
+The following information on tasks is returned:
+
+- ``state`` - the status of task performance. The following options are possible: 
+  
+ - "TASK_STAGING" - the task is created but is not started executing, 
+ - "TASK_RUNNING" - the task is launched and is being executed now, 
+ - "TASK_FAILED" - the task is failed, 
+ - "TASK_ERROR" - an error is detected in the task execution. 
+
+- ``directories`` - directories of tasks of the instance. 
+
+- ``state-change`` - the date of the last status change.
+
+- ``reason`` - the reason for the task status change.
+
+- ``id`` - the task id.
+
+- ``node`` - name of node used by the task.
+
+- ``last node`` - name of node that was used by a task before the status change.
 
 .. tip:: A full range of error responses can be found at :ref:`Instances_Errors`

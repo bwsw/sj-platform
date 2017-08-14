@@ -18,6 +18,8 @@
  */
 package com.bwsw.sj.common.si.model.instance
 
+import java.util.Date
+
 import com.bwsw.sj.common.dal.model.instance._
 import com.bwsw.sj.common.dal.model.service.ZKServiceDomain
 import com.bwsw.sj.common.dal.model.stream.{KafkaStreamDomain, StreamDomain, TStreamStreamDomain}
@@ -49,7 +51,8 @@ class Instance(val name: String,
                val stage: FrameworkStage = FrameworkStage(),
                var status: String = EngineLiterals.ready,
                val frameworkId: String = System.currentTimeMillis().toString,
-               val outputs: Array[String] = Array())
+               val outputs: Array[String] = Array(),
+               val creationDate: String)
               (implicit injector: Injector) {
 
   protected val connectionRepository: ConnectionRepository = inject[ConnectionRepository]
@@ -77,7 +80,8 @@ class Instance(val name: String,
       environmentVariables = environmentVariables.asJava,
       stage = stage,
       performanceReportingInterval = performanceReportingInterval,
-      frameworkId = frameworkId
+      frameworkId = frameworkId,
+      creationDate = new Date()
     )
   }
 
@@ -198,7 +202,8 @@ class InstanceCreator {
           Option(inputInstance.restAddress),
           inputInstance.stage,
           inputInstance.status,
-          inputInstance.frameworkId)
+          inputInstance.frameworkId,
+          inputInstance.creationDate.toString)
 
       case EngineLiterals.batchStreamingType =>
         val batchInstance = instance.asInstanceOf[BatchInstanceDomain]
@@ -233,7 +238,8 @@ class InstanceCreator {
           Option(batchInstance.restAddress),
           batchInstance.stage,
           batchInstance.status,
-          batchInstance.frameworkId)
+          batchInstance.frameworkId,
+          creationDate = batchInstance.creationDate.toString)
 
       case EngineLiterals.regularStreamingType =>
         val regularInstance = instance.asInstanceOf[RegularInstanceDomain]
@@ -268,7 +274,8 @@ class InstanceCreator {
           Option(regularInstance.restAddress),
           regularInstance.stage,
           regularInstance.status,
-          regularInstance.frameworkId)
+          regularInstance.frameworkId,
+          regularInstance.creationDate.toString)
 
       case EngineLiterals.outputStreamingType =>
         val outputInstance = instance.asInstanceOf[OutputInstanceDomain]
@@ -300,28 +307,30 @@ class InstanceCreator {
           Option(outputInstance.restAddress),
           outputInstance.stage,
           outputInstance.status,
-          outputInstance.frameworkId)
+          outputInstance.frameworkId,
+          outputInstance.creationDate.toString)
 
       case _ =>
         new Instance(
-          instance.name,
-          instance.description,
-          instance.parallelism,
-          instance.options,
-          instance.perTaskCores,
-          instance.perTaskRam,
-          Map(instance.jvmOptions.asScala.toList: _*),
-          Map(instance.nodeAttributes.asScala.toList: _*),
-          instance.coordinationService.name,
-          Map(instance.environmentVariables.asScala.toList: _*),
-          instance.performanceReportingInterval,
-          instance.moduleName,
-          instance.moduleVersion,
-          instance.moduleType,
-          instance.engine,
-          Option(instance.restAddress),
-          instance.stage,
-          instance.status)
+          name = instance.name,
+          description = instance.description,
+          parallelism = instance.parallelism,
+          options = instance.options,
+          perTaskCores = instance.perTaskCores,
+          perTaskRam = instance.perTaskRam,
+          jvmOptions = Map(instance.jvmOptions.asScala.toList: _*),
+          nodeAttributes = Map(instance.nodeAttributes.asScala.toList: _*),
+          coordinationService = instance.coordinationService.name,
+          environmentVariables = Map(instance.environmentVariables.asScala.toList: _*),
+          performanceReportingInterval = instance.performanceReportingInterval,
+          moduleName = instance.moduleName,
+          moduleVersion = instance.moduleVersion,
+          moduleType = instance.moduleType,
+          engine = instance.engine,
+          restAddress = Option(instance.restAddress),
+          stage = instance.stage,
+          status = instance.status,
+          creationDate = instance.creationDate.toString)
     }
   }
 }

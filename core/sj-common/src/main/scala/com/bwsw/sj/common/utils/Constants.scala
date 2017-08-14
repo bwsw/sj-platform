@@ -116,6 +116,14 @@ object StreamLiterals {
 
   private val tstreamFactory = new TStreamsFactory()
   final val ttl: Int = tstreamFactory.getProperty(ConfigurationOptions.Stream.ttlSec).asInstanceOf[Int]
+
+  val typeToServiceType: Map[String, String] = Map(
+    elasticsearchType -> ServiceLiterals.elasticsearchType,
+    kafkaType -> ServiceLiterals.kafkaType,
+    jdbcType -> ServiceLiterals.jdbcType,
+    restType -> ServiceLiterals.restType,
+    tstreamsType -> ServiceLiterals.tstreamsType
+  )
 }
 
 object ServiceLiterals {
@@ -269,10 +277,20 @@ object BenchmarkConfigNames {
 
   val messageConfig = performanceBenchmarkConfig + ".message"
   val messageSizesConfig = messageConfig + ".sizes"
-  val messagesCountConfig = messageConfig + ".count"
+  val messagesCountsConfig = messageConfig + ".counts"
 
   val kafkaAddressConfig = performanceBenchmarkConfig + ".kafka.address"
   val mongoPortConfig = performanceBenchmarkConfig + ".mongo.port"
   val outputFileConfig = performanceBenchmarkConfig + ".output-file"
   val wordsConfig = performanceBenchmarkConfig + ".words"
+  val zooKeeperAddressConfig = performanceBenchmarkConfig + ".zookeeper.address"
+
+  val repetitionsConfig = performanceBenchmarkConfig + ".repetitions"
+}
+
+object BenchmarkLiterals {
+  val sjDefaultOutputFile = "sj-benchmark-output"
+  val samzaDefaultOutputFile = "samza-benchmark-output"
+  val flinkDefaultOutputFile = "flink-benchmark-output"
+  val stormDefaultOutputFile = "storm-benchmark-output"
 }

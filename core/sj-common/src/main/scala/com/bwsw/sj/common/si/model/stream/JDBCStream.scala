@@ -23,7 +23,6 @@ import java.util.Date
 import com.bwsw.sj.common.dal.model.service.JDBCServiceDomain
 import com.bwsw.sj.common.dal.model.stream.JDBCStreamDomain
 import com.bwsw.sj.common.rest.utils.ValidationUtils.validateNamespace
-import com.bwsw.sj.common.utils.{ServiceLiterals, StreamLiterals}
 import scaldi.Injector
 
 import scala.collection.mutable.ArrayBuffer
@@ -52,32 +51,6 @@ class JDBCStream(name: String,
       force = force,
       tags = tags,
       creationDate = new Date())
-  }
-
-  override def validate(): ArrayBuffer[String] = {
-    val errors = new ArrayBuffer[String]()
-    errors ++= super.validateGeneralFields()
-
-    Option(service) match {
-      case Some("") | None =>
-        errors += createMessage("entity.error.attribute.required", "Service")
-      case Some(x) =>
-        val serviceDAO = connectionRepository.getServiceRepository
-        val serviceObj = serviceDAO.get(x)
-        serviceObj match {
-          case None =>
-            errors += createMessage("entity.error.doesnot.exist", "Service", x)
-          case Some(someService) =>
-            if (someService.serviceType != ServiceLiterals.jdbcType) {
-              errors += createMessage("entity.error.must.one.type.other.given",
-                s"Service for '${StreamLiterals.jdbcType}' stream",
-                ServiceLiterals.jdbcType,
-                someService.serviceType)
-            }
-        }
-    }
-
-    errors
   }
 
   //it is necessary to work with PostgreSQL that doesn't allow to use hyphens in the table name
