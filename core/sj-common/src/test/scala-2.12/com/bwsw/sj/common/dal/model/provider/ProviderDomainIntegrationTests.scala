@@ -53,7 +53,7 @@ class ProviderDomainIntegrationTests extends FlatSpec with Matchers with BeforeA
   val zkServer2 = new TestingServer(false)
 
 
-  def withZkServer(testCode: (ProviderDomain, ServerWrapper, ServerWrapper) => Assertion): Assertion = {
+  "ProviderDomain" should "check connection to the ZooKeeper server properly" in {
     zkServer1.restart()
     zkServer2.restart()
 
@@ -72,7 +72,7 @@ class ProviderDomainIntegrationTests extends FlatSpec with Matchers with BeforeA
     val wrappedServer1 = new ServerWrapper(createZkConnectionError(address1), () => zkServer1.stop())
     val wrappedServer2 = new ServerWrapper(createZkConnectionError(address2), () => zkServer2.stop())
 
-    val result = Try(testCode(provider, wrappedServer1, wrappedServer2))
+    val result = Try(testProviderConnection(provider, wrappedServer1, wrappedServer2))
 
     wrappedServer1.stop()
     wrappedServer2.stop()
@@ -80,10 +80,8 @@ class ProviderDomainIntegrationTests extends FlatSpec with Matchers with BeforeA
     result.get
   }
 
-  "ProviderDomain" should "check connection to the ZooKeeper server properly" in withZkServer(testProviderConnection)
 
-
-  def withRestServer(testCode: (ProviderDomain, ServerWrapper, ServerWrapper) => Assertion): Assertion = {
+  it should "check connection to the RESTful server properly" in {
     val server1 = new ClientAndServer()
     val server2 = new ClientAndServer()
     val address1 = "localhost:" + server1.getPort
@@ -101,7 +99,7 @@ class ProviderDomainIntegrationTests extends FlatSpec with Matchers with BeforeA
     val wrappedServer1 = new ServerWrapper(createRestConnectionError(address1), () => server1.stop())
     val wrappedServer2 = new ServerWrapper(createRestConnectionError(address2), () => server2.stop())
 
-    val result = Try(testCode(provider, wrappedServer1, wrappedServer2))
+    val result = Try(testProviderConnection(provider, wrappedServer1, wrappedServer2))
 
     wrappedServer1.stop()
     wrappedServer2.stop()
@@ -109,10 +107,7 @@ class ProviderDomainIntegrationTests extends FlatSpec with Matchers with BeforeA
     result.get
   }
 
-  it should "check connection to the RESTful server properly" in withRestServer(testProviderConnection)
-
-
-  def withKafkaServer(testCode: (ProviderDomain, ServerWrapper, ServerWrapper) => Assertion): Assertion = {
+  it should "check connection to the Kafka server properly" in {
     zkServer1.restart()
     zkServer2.restart()
 
@@ -136,7 +131,7 @@ class ProviderDomainIntegrationTests extends FlatSpec with Matchers with BeforeA
     val wrappedServer1 = new ServerWrapper(createKafkaConnectionError(address1), () => server1.stop())
     val wrappedServer2 = new ServerWrapper(createKafkaConnectionError(address2), () => server2.stop())
 
-    val result = Try(testCode(provider, wrappedServer1, wrappedServer2))
+    val result = Try(testProviderConnection(provider, wrappedServer1, wrappedServer2))
 
     wrappedServer1.stop()
     wrappedServer2.stop()
@@ -146,10 +141,7 @@ class ProviderDomainIntegrationTests extends FlatSpec with Matchers with BeforeA
     result.get
   }
 
-  it should "check connection to the Kafka server properly" in withKafkaServer(testProviderConnection)
-
-
-  def withSqlDatabase(testCode: (JDBCProviderDomain, ServerWrapper, ServerWrapper) => Assertion): Assertion = {
+  it should "check connection to the PostgreSQL database properly" in {
     val mongoPort = SocketUtil.findFreePort()
     val mongoServer = new EmbeddedMongo(mongoPort)
     mongoServer.start()
@@ -192,7 +184,7 @@ class ProviderDomainIntegrationTests extends FlatSpec with Matchers with BeforeA
     val wrappedServer1 = new ServerWrapper(createJdbcConnectionError(address1), () => server1.stop())
     val wrappedServer2 = new ServerWrapper(createJdbcConnectionError(address2), () => server2.stop())
 
-    val result = Try(testCode(provider, wrappedServer1, wrappedServer2))
+    val result = Try(testProviderConnection(provider, wrappedServer1, wrappedServer2))
 
     wrappedServer1.stop()
     wrappedServer2.stop()
@@ -201,10 +193,7 @@ class ProviderDomainIntegrationTests extends FlatSpec with Matchers with BeforeA
     result.get
   }
 
-  it should "check connection to the SQL database properly" in withSqlDatabase(testProviderConnection)
-
-
-  def withElasticsearch(testCode: (ProviderDomain, ServerWrapper, ServerWrapper) => Assertion): Assertion = {
+  it should "check connection to the Elasticsearch database properly" in {
     val server1 = new EmbeddedElasticsearch(SocketUtil.findFreePort())
     server1.start()
     val server2 = new EmbeddedElasticsearch(SocketUtil.findFreePort())
@@ -225,15 +214,13 @@ class ProviderDomainIntegrationTests extends FlatSpec with Matchers with BeforeA
     val wrappedServer1 = new ServerWrapper(createEsConnectionError(address1), () => server1.stop())
     val wrappedServer2 = new ServerWrapper(createEsConnectionError(address2), () => server2.stop())
 
-    val result = Try(testCode(provider, wrappedServer1, wrappedServer2))
+    val result = Try(testProviderConnection(provider, wrappedServer1, wrappedServer2))
 
     wrappedServer1.stop()
     wrappedServer2.stop()
 
     result.get
   }
-
-  it should "check connection to the Elasticsearch database properly" in withElasticsearch(testProviderConnection)
 
 
   override def afterAll(): Unit = {
