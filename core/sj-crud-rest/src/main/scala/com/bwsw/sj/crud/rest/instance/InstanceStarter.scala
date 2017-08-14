@@ -97,6 +97,11 @@ class InstanceStarter(instance: Instance,
     }
   }
 
+  /**
+    *
+    * @param zooKeeperNode TODO put zooKeeperNode string format
+    * @return
+    */
   protected def getZooKeeperServers(zooKeeperNode: String): String = {
     logger.debug(s"Instance: '${instance.name}'. Getting a zookeeper address.")
     (zookeeperHost, zookeeperPort) match {
@@ -107,7 +112,7 @@ class InstanceStarter(instance: Instance,
 
       case _ =>
         val zooKeeperNodeUrl = new URI(zooKeeperNode)
-        val zooKeeperServers = zooKeeperNodeUrl.getHost + ":" + zooKeeperNodeUrl.getPort
+        val zooKeeperServers = s"${zooKeeperNodeUrl.getHost}:${zooKeeperNodeUrl.getPort}"
         logger.debug(s"Instance: '${instance.name}'. Get a zookeeper address: '$zooKeeperServers' from marathon.")
         zooKeeperServers
     }
@@ -177,12 +182,20 @@ class InstanceStarter(instance: Instance,
     request
   }
 
+  /**
+    *
+    * @param marathonMaster
+    * @param zookeeperServer Format: '<zookeeper_ip>:<zookeeper_port>'
+    * @return
+    */
   protected def getFrameworkEnvironmentVariables(marathonMaster: String, zookeeperServer: String): Map[String, String] = {
+    val zooUrl = new URI(zookeeperServer)
     var environmentVariables = Map(
       instanceIdLabel -> instance.name,
       mesosMasterLabel -> marathonMaster,
       frameworkIdLabel -> frameworkName,
-      zookeeperLabel -> FrameworkLiterals.createZookepeerAddress(zookeeperServer)
+      zookeeperHostLabel -> zooUrl.getHost,
+      zookeeperPortLabel -> zooUrl.getPort
     )
     environmentVariables = environmentVariables ++ inject[ConnectionRepository].mongoEnvironment
     environmentVariables = environmentVariables ++ instance.environmentVariables
