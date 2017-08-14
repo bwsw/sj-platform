@@ -16,22 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.sj.engine.regular.benchmark.read_kafka
+package com.bwsw.sj.engine.regular.benchmark.read_tstream
 
 import com.bwsw.sj.common.utils.BenchmarkConfigNames._
 import com.bwsw.sj.engine.regular.benchmark.ReaderBenchmarkConfig
 import com.typesafe.config.Config
 
 /**
-  * Loads the config parameters from typesafe config for [[KafkaReaderBenchmark]]
+  * Loads the config parameters from typesafe config for [[TStreamReaderBenchmark]]
   *
   * @param config               typesafe config
   * @param outputFilenamePrefix prefix for default name of output file
   * @author Pavel Tomskikh
   */
-class KafkaReaderBenchmarkConfig(config: Config, outputFilenamePrefix: String)
+class TStreamReaderBenchmarkConfig(config: Config, outputFilenamePrefix: String)
   extends ReaderBenchmarkConfig(config, outputFilenamePrefix) {
 
   val zooKeeperAddress = config.getString(zooKeeperAddressConfig)
-  val kafkaAddress = config.getString(kafkaAddressConfig)
+  val tStreamPrefix = config.getString(tStreamPrefixConfig)
+  val tStreamToken = config.getString(tStreamTokenConfig)
 }

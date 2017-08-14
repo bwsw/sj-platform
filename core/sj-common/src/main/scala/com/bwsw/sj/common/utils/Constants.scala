@@ -286,6 +286,10 @@ object BenchmarkConfigNames {
   val zooKeeperAddressConfig = performanceBenchmarkConfig + ".zookeeper.address"
 
   val repetitionsConfig = performanceBenchmarkConfig + ".repetitions"
+
+  val tStreamConfig = performanceBenchmarkConfig + ".tstreams"
+  val tStreamPrefixConfig = tStreamConfig + ".prefix"
+  val tStreamTokenConfig = tStreamConfig + ".token"
 }
 
 object BenchmarkLiterals {

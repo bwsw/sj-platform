@@ -16,45 +16,34 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.sj.engine.regular.benchmark.utils
-
-import java.io.{BufferedReader, File, FileReader}
-import java.net.ServerSocket
+package com.bwsw.sj.engine.regular.benchmark
 
 /**
-  * Provides some useful methods for benchmarks
+  * Provides methods for testing the speed of reading data from storage by some application.
   *
   * @author Pavel Tomskikh
   */
-object BenchmarkUtils {
+trait ReaderBenchmark {
+
+  protected val warmingUpMessageSize: Long = 10
+  protected val warmingUpMessagesCount: Long = 10
 
   /**
-    * Retrieves result from file
+    * Performs the first test because it needs more time than subsequent tests
+    */
+  def warmUp(): Long = runTest(warmingUpMessageSize, warmingUpMessagesCount)
+
+  /**
+    * Sends data into the Kafka server and runs an application under test
     *
-    * @param outputFile file that must contain result
-    * @return result if a file exists or None otherwise
+    * @param messageSize   size of one message that is sent to the storage
+    * @param messagesCount count of messages
+    * @return time in milliseconds within which an application under test reads messages from storage
     */
-  def retrieveResultFromFile(outputFile: File): Option[String] = {
-    if (outputFile.exists()) {
-      val reader = new BufferedReader(new FileReader(outputFile))
-      val result = reader.readLine()
-      reader.close()
-      outputFile.delete()
-
-      Some(result)
-    }
-    else
-      None
-  }
+  def runTest(messageSize: Long, messagesCount: Long): Long
 
   /**
-    * Returns free port
+    * Closes opened connections, deletes temporary files
     */
-  def findFreePort(): Int = {
-    val randomSocket = new ServerSocket(0)
-    val port = randomSocket.getLocalPort
-    randomSocket.close()
-
-    port
-  }
+  def close(): Unit
 }

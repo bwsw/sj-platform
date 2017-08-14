@@ -21,7 +21,8 @@ package com.bwsw.sj.engine.regular.benchmark.read_kafka.flink
 import java.util.Calendar
 
 import com.bwsw.sj.common.utils.BenchmarkLiterals.flinkDefaultOutputFile
-import com.bwsw.sj.engine.regular.benchmark.read_kafka.{KafkaReaderBenchmarkConfig, KafkaReaderBenchmarkRunner}
+import com.bwsw.sj.engine.regular.benchmark.ReaderBenchmarkRunner
+import com.bwsw.sj.engine.regular.benchmark.read_kafka.KafkaReaderBenchmarkConfig
 import com.typesafe.config.ConfigFactory
 
 /**
@@ -50,7 +51,7 @@ object FlinkBenchmarkRunner extends App {
 
   private val benchmarkConfig = new KafkaReaderBenchmarkConfig(ConfigFactory.load(), flinkDefaultOutputFile)
   private val benchmark = new FlinkBenchmark(benchmarkConfig.zooKeeperAddress, benchmarkConfig.kafkaAddress, benchmarkConfig.words)
-  private val benchmarkRunner = new KafkaReaderBenchmarkRunner(benchmark, benchmarkConfig)
+  private val benchmarkRunner = new ReaderBenchmarkRunner(benchmark, benchmarkConfig)
 
   private val results = benchmarkRunner.run()
   benchmarkRunner.writeResult(results)

@@ -19,7 +19,6 @@
 package com.bwsw.sj.engine.regular.benchmark.read_kafka.sj
 
 import java.io._
-import java.net.ServerSocket
 import java.util.UUID
 
 import com.bwsw.common.embedded.EmbeddedMongo
@@ -31,7 +30,7 @@ import com.bwsw.sj.common.utils.benchmark.ClassRunner
 import com.bwsw.sj.engine.core.testutils.{Server, TestStorageServer}
 import com.bwsw.sj.engine.regular.RegularTaskRunner
 import com.bwsw.sj.engine.regular.benchmark.read_kafka.KafkaReaderBenchmark
-import com.bwsw.sj.engine.regular.benchmark.utils.BenchmarkUtils.retrieveResultFromFile
+import com.bwsw.sj.engine.regular.benchmark.utils.BenchmarkUtils.{findFreePort, retrieveResultFromFile}
 import com.typesafe.config.ConfigFactory
 
 /**
@@ -140,12 +139,4 @@ class SjBenchmark(zkHost: String,
 
   override protected def retrieveResult(messageSize: Long, messagesCount: Long): Option[Long] =
     retrieveResultFromFile(outputFile).map(_.toLong)
-
-  private def findFreePort(): Int = {
-    val randomSocket = new ServerSocket(0)
-    val port = randomSocket.getLocalPort
-    randomSocket.close()
-
-    port
-  }
 }

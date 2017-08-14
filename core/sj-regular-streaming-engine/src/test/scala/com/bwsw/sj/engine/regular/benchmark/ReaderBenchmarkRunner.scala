@@ -16,28 +16,28 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.sj.engine.regular.benchmark.read_kafka
+package com.bwsw.sj.engine.regular.benchmark
 
 import java.io.{File, FileWriter}
 
 /**
-  * Provides methods for running [[KafkaReaderBenchmark]] and writing a result into a file
+  * Provides methods for running [[ReaderBenchmark]] and writing a result into a file
   *
   * @param benchmark benchmark
   * @param config    config for benchmark
   * @author Pavel Tomskikh
   */
-class KafkaReaderBenchmarkRunner(benchmark: KafkaReaderBenchmark,
-                                 config: KafkaReaderBenchmarkConfig) {
+class ReaderBenchmarkRunner(benchmark: ReaderBenchmark,
+                            config: ReaderBenchmarkConfig) {
 
-  def run(): Array[KafkaReaderBenchmarkResult] = {
+  def run(): Array[ReaderBenchmarkResult] = {
     benchmark.warmUp()
 
     val benchmarkResults = config.messagesCounts.flatMap { messagesCount =>
       config.messageSizes.map { messageSize =>
         val result = (0 until config.repetitions).map(_ => benchmark.runTest(messageSize, messagesCount))
 
-        KafkaReaderBenchmarkResult(messageSize, messagesCount, result)
+        ReaderBenchmarkResult(messageSize, messagesCount, result)
       }
     }
 
@@ -46,14 +46,14 @@ class KafkaReaderBenchmarkRunner(benchmark: KafkaReaderBenchmark,
     benchmarkResults
   }
 
-  def writeResult(benchmarkResults: Seq[KafkaReaderBenchmarkResult]) = {
+  def writeResult(benchmarkResults: Seq[ReaderBenchmarkResult]) = {
     val writer = new FileWriter(new File(config.outputFileName))
     writer.write(benchmarkResults.mkString("\n"))
     writer.close()
   }
 }
 
-case class KafkaReaderBenchmarkResult(messageSize: Long, messagesCount: Long, results: Seq[Long]) {
+case class ReaderBenchmarkResult(messageSize: Long, messagesCount: Long, results: Seq[Long]) {
   def averageResult: Long =
     results.sum / results.length
 

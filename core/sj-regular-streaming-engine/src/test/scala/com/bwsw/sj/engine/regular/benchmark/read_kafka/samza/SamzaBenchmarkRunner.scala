@@ -21,7 +21,8 @@ package com.bwsw.sj.engine.regular.benchmark.read_kafka.samza
 import java.util.Calendar
 
 import com.bwsw.sj.common.utils.BenchmarkLiterals.samzaDefaultOutputFile
-import com.bwsw.sj.engine.regular.benchmark.read_kafka.{KafkaReaderBenchmarkConfig, KafkaReaderBenchmarkRunner}
+import com.bwsw.sj.engine.regular.benchmark.ReaderBenchmarkRunner
+import com.bwsw.sj.engine.regular.benchmark.read_kafka.KafkaReaderBenchmarkConfig
 import com.typesafe.config.ConfigFactory
 
 /**
@@ -51,7 +52,7 @@ object SamzaBenchmarkRunner extends App {
 
   private val benchmarkConfig = new KafkaReaderBenchmarkConfig(ConfigFactory.load(), samzaDefaultOutputFile)
   private val benchmark = new SamzaBenchmark(benchmarkConfig.zooKeeperAddress, benchmarkConfig.kafkaAddress, benchmarkConfig.words)
-  private val benchmarkRunner = new KafkaReaderBenchmarkRunner(benchmark, benchmarkConfig)
+  private val benchmarkRunner = new ReaderBenchmarkRunner(benchmark, benchmarkConfig)
 
   private val results = benchmarkRunner.run()
   benchmarkRunner.writeResult(results)

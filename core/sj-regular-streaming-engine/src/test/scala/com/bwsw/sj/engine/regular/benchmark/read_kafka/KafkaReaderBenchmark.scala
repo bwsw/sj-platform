@@ -22,6 +22,7 @@ import java.util.UUID
 
 import com.bwsw.common.KafkaClient
 import com.bwsw.sj.common.utils.benchmark.KafkaDataSender
+import com.bwsw.sj.engine.regular.benchmark.ReaderBenchmark
 
 /**
   * Provides methods for testing the speed of reading data from Kafka by some application.
@@ -35,18 +36,12 @@ import com.bwsw.sj.common.utils.benchmark.KafkaDataSender
   */
 abstract class KafkaReaderBenchmark(zooKeeperAddress: String,
                                     kafkaAddress: String,
-                                    words: Array[String]) {
+                                    words: Array[String]) extends ReaderBenchmark {
   protected val kafkaTopic: String = "performance-benchmark-" + UUID.randomUUID().toString
   protected val kafkaClient: KafkaClient = new KafkaClient(Array(zooKeeperAddress))
   protected val kafkaSender: KafkaDataSender = new KafkaDataSender(kafkaAddress, kafkaTopic, words, " ")
-  protected val warmingUpMessageSize: Long = 10
-  protected val warmingUpMessagesCount: Long = 10
   protected val lookupResultTimeout: Long = 5000
 
-  /**
-    * Performs the first test because it needs more time than subsequent tests
-    */
-  def warmUp(): Long = runTest(warmingUpMessageSize, warmingUpMessagesCount)
 
   /**
     * Sends data into the Kafka server and runs an application under test
@@ -55,7 +50,7 @@ abstract class KafkaReaderBenchmark(zooKeeperAddress: String,
     * @param messagesCount count of messages
     * @return time in milliseconds within which an application under test reads messages from Kafka
     */
-  def runTest(messageSize: Long, messagesCount: Long): Long = {
+  override def runTest(messageSize: Long, messagesCount: Long): Long = {
     println(s"$messagesCount messages of $messageSize bytes")
 
     kafkaClient.createTopic(kafkaTopic, 1, 1)
@@ -89,7 +84,7 @@ abstract class KafkaReaderBenchmark(zooKeeperAddress: String,
   /**
     * Closes opened connections, deletes temporary files
     */
-  def close(): Unit =
+  override def close(): Unit =
     kafkaClient.close()
 
 
