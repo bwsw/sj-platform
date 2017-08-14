@@ -18,7 +18,7 @@
  */
 package com.bwsw.sj.crud.rest.model.provider
 
-import com.bwsw.sj.common.si.model.provider.{JDBCProvider, Provider, ProviderWithAuth}
+import com.bwsw.sj.common.si.model.provider.{JDBCProvider, Provider, ESProvider}
 import com.bwsw.sj.common.utils.{ProviderLiterals, RestLiterals}
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type
 import com.fasterxml.jackson.annotation.{JsonIgnore, JsonProperty, JsonSubTypes, JsonTypeInfo}
@@ -27,7 +27,7 @@ import scaldi.Injector
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type", defaultImpl = classOf[ProviderApi], visible = true, include = JsonTypeInfo.As.EXISTING_PROPERTY)
 @JsonSubTypes(Array(
   new Type(value = classOf[JDBCProviderApi], name = ProviderLiterals.jdbcType),
-  new Type(value = classOf[ProviderWithAuthApi], name = ProviderLiterals.elasticsearchType)
+  new Type(value = classOf[ESProviderApi], name = ProviderLiterals.elasticsearchType)
 ))
 class ProviderApi(val name: String,
                   @JsonProperty("type") val providerType: String,
@@ -64,17 +64,17 @@ class ProviderApiCreator {
           description = Some(jdbcProviderMid.description),
           creationDate = jdbcProviderMid.creationDate)
 
-      case providerType if ProviderLiterals.withAuth.contains(providerType) =>
-        val providerWithAuth = provider.asInstanceOf[ProviderWithAuth]
+      case ProviderLiterals.elasticsearchType =>
+        val esProvider = provider.asInstanceOf[ESProvider]
 
-        new ProviderWithAuthApi(
-          name = providerWithAuth.name,
-          login = providerWithAuth.login,
-          password = providerWithAuth.password,
-          providerType = providerWithAuth.providerType,
-          hosts = providerWithAuth.hosts,
-          description = Some(providerWithAuth.description),
-          creationDate = providerWithAuth.creationDate)
+        new ESProviderApi(
+          name = esProvider.name,
+          login = esProvider.login,
+          password = esProvider.password,
+          providerType = esProvider.providerType,
+          hosts = esProvider.hosts,
+          description = Some(esProvider.description),
+          creationDate = esProvider.creationDate)
 
       case _ =>
         new ProviderApi(

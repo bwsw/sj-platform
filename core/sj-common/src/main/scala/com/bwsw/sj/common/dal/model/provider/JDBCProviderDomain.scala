@@ -31,11 +31,11 @@ import scala.util.{Failure, Success, Try}
 class JDBCProviderDomain(name: String,
                          description: String,
                          hosts: Array[String],
-                         login: String,
-                         password: String,
+                         val login: String,
+                         val password: String,
                          val driver: String,
                          creationDate: Date)
-  extends ProviderWithAuthDomain(name, description, hosts, login, password, ProviderLiterals.jdbcType, creationDate) {
+  extends ProviderDomain(name, description, hosts, ProviderLiterals.jdbcType, creationDate) {
 
   override def checkJdbcConnection(address: String): ArrayBuffer[String] = {
     val errors = ArrayBuffer[String]()

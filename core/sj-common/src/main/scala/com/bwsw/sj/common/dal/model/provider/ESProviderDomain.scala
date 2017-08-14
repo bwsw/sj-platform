@@ -21,7 +21,7 @@ package com.bwsw.sj.common.dal.model.provider
 import java.util.Date
 
 import com.bwsw.common.es.ElasticsearchClient
-import com.bwsw.sj.common.dal.morphia.MorphiaAnnotations.PropertyField
+import com.bwsw.sj.common.utils.ProviderLiterals
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -29,14 +29,13 @@ import scala.collection.mutable.ArrayBuffer
 /**
   * protected methods and variables need for testing purposes
   */
-class ProviderWithAuthDomain(override val name: String,
-                             override val description: String,
-                             override val hosts: Array[String],
-                             val login: String,
-                             val password: String,
-                             @PropertyField("provider-type") override val providerType: String,
-                             override val creationDate: Date)
-  extends ProviderDomain(name, description, hosts, providerType, creationDate) {
+class ESProviderDomain(name: String,
+                       description: String,
+                       hosts: Array[String],
+                       val login: String,
+                       val password: String,
+                       creationDate: Date)
+  extends ProviderDomain(name, description, hosts, ProviderLiterals.elasticsearchType, creationDate) {
 
   override protected def checkESConnection(address: String): ArrayBuffer[String] = {
     val errors = ArrayBuffer[String]()

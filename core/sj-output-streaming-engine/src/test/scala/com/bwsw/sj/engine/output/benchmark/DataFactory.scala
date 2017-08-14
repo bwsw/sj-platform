@@ -29,7 +29,7 @@ import com.bwsw.common.jdbc.JdbcClientBuilder
 import com.bwsw.sj.common.config.{BenchmarkConfigNames, TempHelperForConfigDestroy, TempHelperForConfigSetup}
 import com.bwsw.sj.common.dal.model._
 import com.bwsw.sj.common.dal.model.instance.{ExecutionPlan, Task}
-import com.bwsw.sj.common.dal.model.provider.{JDBCProviderDomain, ProviderDomain, ProviderWithAuthDomain}
+import com.bwsw.sj.common.dal.model.provider.{JDBCProviderDomain, ProviderDomain, ESProviderDomain}
 import com.bwsw.sj.common.dal.model.service._
 import com.bwsw.sj.common.dal.model.stream._
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
@@ -273,8 +273,8 @@ object DataFactory {
 
 
   def createProviders() = {
-    val esProvider = new ProviderWithAuthDomain(
-      esProviderName, "", esProviderHosts, "", "", ProviderLiterals.elasticsearchType, new Date())
+    val esProvider = new ESProviderDomain(
+      esProviderName, "", esProviderHosts, "", "", new Date())
     providerService.save(esProvider)
 
     providerService.save(zookeeperProvider)
@@ -287,7 +287,7 @@ object DataFactory {
   }
 
   def createServices() = {
-    val esProv: ProviderWithAuthDomain = providerService.get(esProviderName).get.asInstanceOf[ProviderWithAuthDomain]
+    val esProv: ESProviderDomain = providerService.get(esProviderName).get.asInstanceOf[ESProviderDomain]
     val esService: ESServiceDomain = new ESServiceDomain(esServiceName, esServiceName, esProv,
       esIndex, creationDate = new Date())
     serviceManager.save(esService)

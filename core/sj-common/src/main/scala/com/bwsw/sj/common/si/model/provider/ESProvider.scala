@@ -16,17 +16,30 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.sj.common.dal.model.service
+package com.bwsw.sj.common.si.model.provider
 
 import java.util.Date
 
 import com.bwsw.sj.common.dal.model.provider.ESProviderDomain
-import com.bwsw.sj.common.utils.ServiceLiterals
+import scaldi.Injector
 
-class ESServiceDomain(name: String,
-                      description: String,
-                      override val provider: ESProviderDomain,
-                      val index: String,
-                      creationDate: Date)
-  extends ServiceDomain(name, description, provider, ServiceLiterals.elasticsearchType, creationDate) {
+class ESProvider(name: String,
+                 val login: String,
+                 val password: String,
+                 providerType: String,
+                 hosts: Array[String],
+                 description: String,
+                 creationDate: String)
+                (implicit injector: Injector)
+  extends Provider(name, providerType, hosts, description, creationDate) {
+
+  override def to() = {
+    new ESProviderDomain(
+      name = name,
+      description = description,
+      hosts = hosts,
+      login = login,
+      password = password,
+      creationDate = new Date())
+  }
 }

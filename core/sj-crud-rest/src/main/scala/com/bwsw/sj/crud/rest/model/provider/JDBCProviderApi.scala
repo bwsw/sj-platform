@@ -25,14 +25,14 @@ import scaldi.Injector
 
 
 class JDBCProviderApi(name: String,
-                      login: String,
-                      password: String,
+                      val login: String,
+                      val password: String,
                       hosts: Array[String],
                       val driver: String,
                       description: Option[String] = Some(RestLiterals.defaultDescription),
                       @JsonProperty("type") providerType: Option[String] = Some(ProviderLiterals.jdbcType),
                       creationDate: String)
-  extends ProviderWithAuthApi(name, login, password, providerType.getOrElse(ProviderLiterals.jdbcType),
+  extends ProviderApi(name,  providerType.getOrElse(ProviderLiterals.jdbcType),
     hosts, description, creationDate) {
 
   @JsonIgnore

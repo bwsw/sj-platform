@@ -21,7 +21,7 @@ package com.bwsw.sj.common.si.model.provider
 import java.net.{URI, URISyntaxException}
 import java.util.Date
 
-import com.bwsw.sj.common.dal.model.provider.{JDBCProviderDomain, ProviderDomain, ProviderWithAuthDomain}
+import com.bwsw.sj.common.dal.model.provider.{JDBCProviderDomain, ProviderDomain, ESProviderDomain}
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.rest.utils.ValidationUtils.{normalizeName, validateName}
 import com.bwsw.sj.common.utils.ProviderLiterals.types
@@ -162,17 +162,17 @@ class ProviderCreator {
           providerType = jdbcProvider.providerType,
           creationDate = jdbcProvider.creationDate.toString)
 
-      case providerType if ProviderLiterals.withAuth.contains(providerType) =>
-        val providerWithAuth = providerDomain.asInstanceOf[ProviderWithAuthDomain]
+      case ProviderLiterals.elasticsearchType =>
+        val esProvider = providerDomain.asInstanceOf[ESProviderDomain]
 
-        new ProviderWithAuth(
-          name = providerWithAuth.name,
-          login = providerWithAuth.login,
-          password = providerWithAuth.password,
-          providerType = providerWithAuth.providerType,
-          hosts = providerWithAuth.hosts,
-          description = providerWithAuth.description,
-          creationDate = providerWithAuth.creationDate.toString)
+        new ESProvider(
+          name = esProvider.name,
+          login = esProvider.login,
+          password = esProvider.password,
+          providerType = esProvider.providerType,
+          hosts = esProvider.hosts,
+          description = esProvider.description,
+          creationDate = esProvider.creationDate.toString)
 
       case _ =>
         new Provider(

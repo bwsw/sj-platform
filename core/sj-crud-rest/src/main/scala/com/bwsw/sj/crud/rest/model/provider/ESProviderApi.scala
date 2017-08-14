@@ -16,31 +16,32 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.sj.common.si.model.provider
+package com.bwsw.sj.crud.rest.model.provider
 
-import java.util.Date
-
-import com.bwsw.sj.common.dal.model.provider.ProviderWithAuthDomain
+import com.bwsw.sj.common.si.model.provider.ESProvider
+import com.bwsw.sj.common.utils.RestLiterals
+import com.fasterxml.jackson.annotation.{JsonIgnore, JsonProperty}
 import scaldi.Injector
 
-class ProviderWithAuth(name: String,
-                       val login: String,
-                       val password: String,
-                       providerType: String,
-                       hosts: Array[String],
-                       description: String,
-                       creationDate: String)
-                      (implicit injector: Injector)
-  extends Provider(name, providerType, hosts, description, creationDate) {
 
-  override def to() = {
-    new ProviderWithAuthDomain(
+class ESProviderApi(name: String,
+                    val login: String,
+                    val password: String,
+                    @JsonProperty("type") providerType: String,
+                    hosts: Array[String],
+                    description: Option[String] = Some(RestLiterals.defaultDescription),
+                    creationDate: String)
+  extends ProviderApi(name, providerType, hosts, description, creationDate) {
+
+  @JsonIgnore
+  override def to()(implicit injector: Injector): ESProvider = {
+    new ESProvider(
       name = name,
-      description = description,
+      description = description.getOrElse(RestLiterals.defaultDescription),
       hosts = hosts,
       login = login,
       password = password,
       providerType = providerType,
-      creationDate = new Date())
+      creationDate = creationDate)
   }
 }
