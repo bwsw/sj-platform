@@ -3,9 +3,6 @@
 Stream Juggler Architecture
 ==============================
 
-Architecture Overview
--------------------------
-
 A good real-time data processing architecture needs to be fault-tolerant and scalable; it needs to support micro-batch and event-by-event data processing, and must be extensible. All these aspects are fulfilled in the Stream Juggler Platform. 
 
 The Stream Juggler Platform is an integrated processing system. It means the system includes all the parts required to achieve goals: parts for computation, administration, components for processing pipeline building. These ready-to-use components can be rearranged in different pipelines that allows to build sophisticated processing graphs to customize the system.
@@ -18,8 +15,9 @@ At this section we will take a closer look into the system components, their fun
 
 But previously, let's get the general idea of the platform structure and concepts.
 
-General Concepts
-------------------------
+
+Architecture Overview
+-------------------------
 
 The platform features presented above have conditioned the architecture developed for SJ-Platform. The platform is made up of the following components:
 
@@ -29,6 +27,7 @@ The platform features presented above have conditioned the architecture develope
 4) **API/UI** component for administration.
 
 .. figure:: _static/GenCon.png
+    :align: center
 
 The Stream Juggler Platform performs data processing that is fulfilled in modules. A module is a processor. The mode of processing in it is determined by a set of configurations uploaded to the system via the UI. 
 
