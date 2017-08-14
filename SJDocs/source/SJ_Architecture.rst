@@ -29,19 +29,13 @@ The platform features presented above have conditioned the architecture develope
 .. figure:: _static/GenCon.png
     :align: center
 
-The Stream Juggler Platform performs data processing that is fulfilled in modules. A module is a processor. The mode of processing in it is determined by a set of configurations uploaded to the system via the UI. 
+The Stream Juggler Platform performs data processing that is fulfilled in modules. A module is a processor. The mode of processing in it is determined by a set of configurations uploaded to the system via the UI.
 
-The events enter the processor in streams from a list of supported interfaces - TCP, Kafka and T-streams. A result data are put into an external datastorage. 
+The events enter the processor in streams from a list of supported interfaces - TCP, Kafka and T-streams. A result data are put into an external datastorage.
 
 .. figure:: _static/Overview2.png
 
-Actually, the processing componenet of the platform represents a pipeline of modules that perform input data transformation, computation and result data exporting.
-
-Below the general concepts fulfilled within the platform components are presented.
-
 SJ-Platform performs a **real-time data processing**. That means the system can handle events as soon as they are available inside the system without specific delay. 
-
-The events enter the platform in streams from a list of supported interfaces - TCP, Kafka and T-streams. 
 
 Streams can be very intensive and all events can not be handled by a single server of arbitrary performance. The system allows **scaling** the computations horizontally to handle increasing demands.
 
@@ -53,10 +47,12 @@ The streaming layer allows handling the idea of **parallelism** through multipar
 
 SJ-Platform provides a developer with the comprehensive **API** and **UI**, which allow him to develop, customize and manage the event processing pipeline.
 
-
+The core component is presented with Mesos and other services that simplify the deployment and operation and support best industrial practices. 
 
 Platform Components
 ------------------------
+
+.. warning:: *The section is under development!*
 
 The diagram below presents the structure of the SJ-Platform. 
 
