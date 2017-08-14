@@ -28,7 +28,7 @@ import com.bwsw.sj.common.config.{ConfigLiterals, SettingsUtils}
 import com.bwsw.sj.common.dal.model.ConfigurationSettingDomain
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.si.model.FileMetadataLiterals
-import com.bwsw.sj.common.utils.ProviderLiterals
+import com.bwsw.sj.common.utils.{MessageResourceUtils, ProviderLiterals}
 import org.apache.commons.io.FileUtils
 import org.apache.curator.test.TestingServer
 import org.mockserver.integration.ClientAndServer
@@ -47,6 +47,8 @@ import scala.util.Try
   * @author Pavel Tomskikh
   */
 class ProviderDomainIntegrationTests extends FlatSpec with Matchers with BeforeAndAfterAll {
+
+  val messageResourceUtils = new MessageResourceUtils
 
   val zkTimeout = 1000
   val zkServer1 = new TestingServer(false)
@@ -242,19 +244,19 @@ class ProviderDomainIntegrationTests extends FlatSpec with Matchers with BeforeA
   }
 
   private def createZkConnectionError(address: String): String =
-    s"Can gain an access to Zookeeper on '$address'"
+    messageResourceUtils.createMessage("rest.providers.provider.cannot.connect.zk", address)
 
   private def createRestConnectionError(address: String): String =
-    s"Can not establish connection to Rest on '$address'"
+    messageResourceUtils.createMessage("rest.providers.provider.cannot.connect.rest", address)
 
   private def createKafkaConnectionError(address: String): String =
-    s"Can not establish connection to Kafka on '$address'"
+    messageResourceUtils.createMessage("rest.providers.provider.cannot.connect.kafka", address)
 
   private def createJdbcConnectionError(address: String): String =
-    s"Cannot gain an access to JDBC on '$address'"
+    messageResourceUtils.createMessage("rest.providers.provider.cannot.connect.jdbc", address)
 
   private def createEsConnectionError(address: String): String =
-    s"Can not establish connection to ElasticSearch on '$address'"
+    messageResourceUtils.createMessage("rest.providers.provider.cannot.connect.es", address)
 
 
   private def createConnectionRepository(mongoPort: Int): ConnectionRepository = {

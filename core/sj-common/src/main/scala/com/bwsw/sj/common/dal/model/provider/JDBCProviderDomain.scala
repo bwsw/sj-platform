@@ -22,7 +22,6 @@ import java.sql.SQLException
 import java.util.Date
 
 import com.bwsw.common.jdbc.JdbcClientBuilder
-import com.bwsw.sj.common.SjModule
 import com.bwsw.sj.common.utils.ProviderLiterals
 import scaldi.Injector
 
@@ -54,7 +53,7 @@ class JDBCProviderDomain(name: String,
       case Success(_) =>
       case Failure(ex: SQLException) =>
         ex.printStackTrace()
-        errors += s"Cannot gain an access to JDBC on '$address'"
+        errors += messageResourceUtils.createMessage("rest.providers.provider.cannot.connect.jdbc", address)
       case Failure(e) => throw e
     }
 

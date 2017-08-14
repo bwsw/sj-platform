@@ -24,7 +24,7 @@ import java.util.{Collections, Date}
 
 import com.bwsw.common.es.ElasticsearchClient
 import com.bwsw.sj.common.dal.morphia.MorphiaAnnotations.{IdField, PropertyField}
-import com.bwsw.sj.common.utils.ProviderLiterals
+import com.bwsw.sj.common.utils.{MessageResourceUtils, ProviderLiterals}
 import kafka.javaapi.TopicMetadataRequest
 import kafka.javaapi.consumer.SimpleConsumer
 import org.apache.zookeeper.ZooKeeper
@@ -46,6 +46,8 @@ class ProviderDomain(@IdField val name: String,
                      val password: String,
                      @PropertyField("provider-type") val providerType: String,
                      val creationDate: Date) {
+
+  protected val messageResourceUtils = new MessageResourceUtils
 
   def getConcatenatedHosts(separator: String = ","): String = {
     hosts.mkString(separator)
@@ -88,11 +90,11 @@ class ProviderDomain(@IdField val name: String,
           connected = client.getState.isConnected
         }
         if (!connected) {
-          errors += s"Can gain an access to Zookeeper on '$address'"
+          errors += messageResourceUtils.createMessage("rest.providers.provider.cannot.connect.zk", address)
         }
         client.close()
       case Failure(_) =>
-        errors += s"Wrong host '$address'"
+        errors += messageResourceUtils.createMessage("rest.providers.provider.cannot.connect.zk.wrong.host", address)
     }
 
     errors
@@ -107,9 +109,9 @@ class ProviderDomain(@IdField val name: String,
     Try(consumer.send(req)) match {
       case Success(_) =>
       case Failure(_: ClosedChannelException) | Failure(_: java.io.EOFException) =>
-        errors += s"Can not establish connection to Kafka on '$address'"
+        errors += messageResourceUtils.createMessage("rest.providers.provider.cannot.connect.kafka", address)
       case Failure(_) =>
-        errors += s"Some issues encountered while trying to establish connection to '$address'"
+        errors += messageResourceUtils.createMessage("rest.providers.provider.cannot.connect.kafka.wrong.host", address)
     }
 
     errors
@@ -119,7 +121,7 @@ class ProviderDomain(@IdField val name: String,
     val errors = ArrayBuffer[String]()
     val client = new ElasticsearchClient(Set(getHostAndPort(address)))
     if (!client.isConnected()) {
-      errors += s"Can not establish connection to ElasticSearch on '$address'"
+      errors += messageResourceUtils.createMessage("rest.providers.provider.cannot.connect.es", address)
     }
     client.close()
 
@@ -133,11 +135,11 @@ class ProviderDomain(@IdField val name: String,
     val (host, port) = getHostAndPort(address)
     var socket: Option[Socket] = None
     Try {
-       socket = Some(new Socket(host, port))
+      socket = Some(new Socket(host, port))
     } match {
       case Success(_) =>
-      case Failure(a) =>
-        errors += s"Can not establish connection to Rest on '$address'"
+      case Failure(_) =>
+        errors += messageResourceUtils.createMessage("rest.providers.provider.cannot.connect.rest", address)
     }
     socket.foreach(_.close())
 
@@ -146,8 +148,8 @@ class ProviderDomain(@IdField val name: String,
 
   private def getHostAndPort(address: String): (String, Int) = {
     val uri = new URI("dummy://" + address)
-    val host = uri.getHost()
-    val port = uri.getPort()
+    val host = uri.getHost
+    val port = uri.getPort
 
     (host, port)
   }
