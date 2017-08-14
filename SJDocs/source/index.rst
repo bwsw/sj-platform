@@ -21,7 +21,9 @@ Contents:
    :maxdepth: 2
 
    SJ_Overview
+   SJ_Tutorial
    SJ_Architecture
+   Glossary
    SJ_Modules
    SJ_Engines
    SJ_CustomModule
@@ -30,7 +32,7 @@ Contents:
    SJ_CRUD_REST_API
    SJ_Deployment
    SJ_Demo_Deployment
-   Glossary
+   
    
  
 
