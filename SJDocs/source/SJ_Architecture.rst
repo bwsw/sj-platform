@@ -51,20 +51,9 @@ The core component is presented with Mesos and other services that simplify the 
 
 Platform Components
 ------------------------
-
 .. warning:: *The section is under development!*
 
-The diagram below presents the structure of the SJ-Platform. 
-
-.. figure:: _static/SJ_General1.png
-
-Figuratively, it can be divided into two layers. 
-
-The *first layer* – data processing – is provided by the Stream Juggler Platform. At this layer the data processing itself is performed via custom modules. The ingested data is transformed into streams, processed and sent to an external storage.  Data transformation and computation are the two major tasks of this layer.
-
-In the diagram this layer is placed within the Stream Juggler Platform area. More information on module workflow you can find at the :ref:`Modules` page.
-
-The *second layer* is composed of prerequisites for the platform. These are the services and settings that should be deployed prior to exploring the Stream Juggler Platform features. The services at this layer are responsible for input data ingestion, platform management, data storage. In the diagram they are placed beyond the Stream Juggler Platform area.
+The *Core* is composed of prerequisites for the platform. These are the services and settings that should be deployed prior to exploring the Stream Juggler Platform features. The services at this layer are responsible for input data ingestion, platform management, data storage. In the diagram they are placed beyond the Stream Juggler Platform area.
 
 - Resource management is fulfilled via `Apache Mesos <http://mesos.apache.org/>`_ that allows to run the system at scale and to support different types of workloads.
 
@@ -90,9 +79,45 @@ The platform kernel is coded in Scala.
 
 The UI is presented via Node JS.
 
+
+The *Processing component* is provided by the Stream Juggler Platform. At this layer the data processing itself is performed via modules, or processors. In fact, the platform represents a pipeline of modules.
+
+The major one is Pipeline Stream Processor (PSP) that handles data processing inside the pipeline. Two types of PSP exist in SJ-Platform:
+
+- Regular – the most generic processor which receives event, does some data transformation and sends transformation to the next processing step.
+
+- Windowed (Batch) – the processor which organizes incoming data into batches and processing is done with a sliding window. Windowed PSP may be used to implement streaming joins and processing where algorithm must observe a range of input messages rather than current one.
+
+As PSP receives data from Kafka and T-streams, and data can be passed form other sources, there is a need in input module. The Input Stream Processor (ISP) handles external inputs, does data deduplication, transforms raw data into objects. Currently the platform supports the TCP Input Stream Processor.
+
+To receive the result of processing an output module is required. The Output Stream Processor (OSP) handles external output from event processing pipeline to external data destinations (Elasticsearch, JDBC, etc.).
+
+So the pipeline may look like at the scheme:
+
+.. figure:: _static/ModulePipeline1.png
+
+At the Processing platform componenet the ingested data is transformed into streams, processed and sent to an external storage.  Data transformation and computation are the two major tasks of this component.
+
+More information on module workflow you can find at the :ref:`Modules` page.
+
+The data is fed to the system, transported between modules and exported to an external storage via streams. The *Streaming* component ...
+
+The following types of streams are supported in the platform:
+1) TCP
+2) Kafka
+3) T-streams
+
+*Administration* via UI and REST API...
+
+
 The diagram below represents the interconnections between platform components.
 
 .. figure:: _static/SJComponentDiagram.png
+
+
+The general structure of SJ-Platform canbe rendered as at the scheme below:. 
+
+.. figure:: _static/SJ_General1.png
 
 Every component deployed to the Stream Juggler Platform contributes to the main idea of hitting three V-s of data processing:
 
@@ -110,4 +135,5 @@ Stream Juggler Platform provides `UI <http://streamjuggler.readthedocs.io/en/dev
 Stream Juggler Platform easily integrates with in-memory grid systems, for example, Hazelcast, Apache Ignite.
 
 The systems is available under Apache License v2. 
+    
     
