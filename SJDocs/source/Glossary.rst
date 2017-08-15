@@ -2,7 +2,7 @@ Glossary
 ================
 
 .. glossary::
-   :sorted:
+  :sorted:
   
 Batch 
   A minimum time interval during which a handler collect events in a stream.
