@@ -9,7 +9,7 @@ Batch
 
 Check-every policy
 
-Check point
+Checkpoint
   Completeness check of the data received after the stream processing.
 
 Custom handler 
@@ -25,7 +25,7 @@ Exactly once processing
   The system processes events in a stream only once
 
 Handler 
-  A programm module processing streams.
+  A program module processing streams.
 
 Instance 
   A full range of settings to perform an exact executor type.
