@@ -39,7 +39,7 @@ SJ-Platform performs a **real-time data processing**. That means the system can 
 
 Streams can be very intensive and all events can not be handled by a single server of arbitrary performance. The system allows **scaling** the computations horizontally to handle increasing demands.
 
-The events are guaranteed to be processed **exactly-once**. The key idea of exactly-once processing lies in a group **checkpoint**. That means all producers and consumers are bunched into a group and do a checkpoint automatically fixing the current state.
+The events are guaranteed to be processed **exactly-once**. The key idea of exactly-once processing lies in a group **checkpoint**. That means all producers and consumers are bunched into a group and do a checkpoint automatically fixing the current state. Moreover, an additional checkpoint is possible whenever it is necessary.
 
 Storing the variables in a state fulfills the idea of SJ-Platform`s **fault-tolerance**. In case of a live datastream processing failure, the variables stored in the state are recovered and the module is restarted.
 
@@ -82,15 +82,15 @@ The UI is presented via Node JS.
 
 The *Processing component* is provided by the Stream Juggler Platform. At this layer the data processing itself is performed via modules, or processors. In fact, the platform represents a pipeline of modules.
 
-The major one is Pipeline Stream Processor (PSP) that handles data processing inside the pipeline. Two types of PSP exist in SJ-Platform:
+The major one is **Pipeline Stream Processor** (PSP) that handles data processing inside the pipeline. Two types of PSP exist in SJ-Platform:
 
 - Regular – the most generic processor which receives event, does some data transformation and sends transformation to the next processing step.
 
 - Windowed (Batch) – the processor which organizes incoming data into batches and processing is done with a sliding window. Windowed PSP may be used to implement streaming joins and processing where algorithm must observe a range of input messages rather than current one.
 
-As PSP receives data from Kafka and T-streams, and data can be passed form other sources, there is a need in input module. The Input Stream Processor (ISP) handles external inputs, does data deduplication, transforms raw data into objects. Currently the platform supports the TCP Input Stream Processor.
+As PSP receives data from Kafka and T-streams, and data can be passed form other sources, there is a need in an input module. The **Input Stream Processor** (ISP) handles external inputs, does data deduplication, transforms raw data into objects. Currently the platform supports the TCP Input Stream Processor.
 
-To receive the result of processing an output module is required. The Output Stream Processor (OSP) handles external output from event processing pipeline to external data destinations (Elasticsearch, JDBC, etc.).
+To receive the result of processing an output module is required. The **Output Stream Processor** (OSP) handles external output from event processing pipeline to external data destinations (Elasticsearch, JDBC, etc.).
 
 So the pipeline may look like at the scheme:
 
@@ -98,16 +98,19 @@ So the pipeline may look like at the scheme:
 
 At the Processing platform componenet the ingested data is transformed into streams, processed and sent to an external storage.  Data transformation and computation are the two major tasks of this component.
 
-More information on module workflow you can find at the :ref:`Modules` page.
+.. tip:: More information on module workflow you can find at the :ref:`Modules` page.
 
-The data is fed to the system, transported between modules and exported to an external storage via streams. The *Streaming* component ...
+The *Streaming component* is essential in SJ-Platform. The data is fed to the system, transported between modules and exported to an external storage via streams. It is streaming that makes possible such platform features as exactly-once processing, parallelism, fault-tolerance, horizontal scalability
 
-The following types of streams are supported in the platform:
-1) TCP
-2) Kafka
-3) T-streams
+The data can be received from different sources. Currently the platform supports obtaining data from TCP sockets and Kafka.
 
-*Administration* via UI and REST API...
+Using **TCP** as an input source a custom protocol can be applied for receiving events, deduplicating them and putting into the processing pipeline.
+
+SJ-Platform supports **Apache Kafka** as a standard providing a common interface for integration for most applications.
+
+Within the platfrom the data is transported to and from modules via *transactional streams* or **T-streams**. It is a message broker and a Scala library native to SJ-Platform and designed primarily for exactly-once processing  (so it includes transactional producer, consumer and subscriber). More information on T-streams can be found at <the project site `http://t-streams.com/`>. 
+
+*Administration* of the platform is performed through the UI. It is presented via Node JS. The platform UI provides REST API instrumentation that allows you to interact with the platform, monitor module performance, retrieve metrics data and configuration information as well as manage operations such as starting or stopping modules.
 
 
 The diagram below represents the interconnections between platform components.
