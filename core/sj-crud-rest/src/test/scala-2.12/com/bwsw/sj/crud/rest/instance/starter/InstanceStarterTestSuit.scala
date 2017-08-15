@@ -68,7 +68,9 @@ class InstanceStarterTestSuit extends FlatSpec with Matchers with PrivateMethodT
     envs shouldBe Map(FrameworkLiterals.frameworkIdLabel -> frameworkName,
       FrameworkLiterals.instanceIdLabel -> instanceName,
       FrameworkLiterals.mesosMasterLabel -> master,
-      FrameworkLiterals.zookeeperLabel -> zookeeperAddress) ++ mongoEnv ++ instanceEnv
+      FrameworkLiterals.zookeeperHostLabel -> new URI(zookeeperServer).getHost,
+      FrameworkLiterals.zookeeperPortLabel -> new URI(zookeeperServer).getPort.toString
+    ) ++ mongoEnv ++ instanceEnv
   }
 
   it should "getZooKeeperServers() method returns a zookeeper address that has been passed to InstanceStarter" in {
@@ -120,7 +122,9 @@ class InstanceStarterTestSuit extends FlatSpec with Matchers with PrivateMethodT
       env = Map(FrameworkLiterals.frameworkIdLabel -> frameworkName,
         FrameworkLiterals.instanceIdLabel -> instanceName,
         FrameworkLiterals.mesosMasterLabel -> marathonMaster,
-        FrameworkLiterals.zookeeperLabel -> zookeeperAddress) ++ mongoEnv ++ instanceEnv,
+        FrameworkLiterals.zookeeperHostLabel -> new URI(zookeeperServer).getHost,
+        FrameworkLiterals.zookeeperPortLabel -> new URI(zookeeperServer).getPort.toString
+      ) ++ mongoEnv ++ instanceEnv,
       uris = List(new URI(s"$restAddress/v1/custom/jars/$frameworkJarNameStub").toString),
       backoffSeconds = backoffSecondsStub,
       backoffFactor = backoffFactorStub,

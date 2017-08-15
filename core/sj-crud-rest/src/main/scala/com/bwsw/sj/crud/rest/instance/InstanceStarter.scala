@@ -195,7 +195,7 @@ class InstanceStarter(instance: Instance,
       mesosMasterLabel -> marathonMaster,
       frameworkIdLabel -> frameworkName,
       zookeeperHostLabel -> zooUrl.getHost,
-      zookeeperPortLabel -> zooUrl.getPort
+      zookeeperPortLabel -> zooUrl.getPort.toString
     )
     environmentVariables = environmentVariables ++ inject[ConnectionRepository].mongoEnvironment
     environmentVariables = environmentVariables ++ instance.environmentVariables
