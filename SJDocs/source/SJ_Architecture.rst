@@ -112,15 +112,13 @@ Within the platfrom the data is transported to and from modules via *transaction
 
 *Administration* of the platform is performed through the UI. It is presented via Node JS. The platform UI provides REST API instrumentation that allows you to interact with the platform, monitor module performance, retrieve metrics data and configuration information as well as manage operations such as starting or stopping modules.
 
+The general structure of SJ-Platform can be rendered as at the scheme below:. 
+
+.. figure:: _static/SJ_General1.png
 
 The diagram below represents the interconnections between platform components.
 
 .. figure:: _static/SJComponentDiagram.png
-
-
-The general structure of SJ-Platform canbe rendered as at the scheme below:. 
-
-.. figure:: _static/SJ_General1.png
 
 Every component deployed to the Stream Juggler Platform contributes to the main idea of hitting three V-s of data processing:
 
