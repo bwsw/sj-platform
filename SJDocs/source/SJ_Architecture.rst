@@ -41,7 +41,7 @@ Streams can be very intensive and all events can not be handled by a single serv
 
 The events are guaranteed to be processed **exactly-once**. The key idea of exactly-once processing lies in a group **checkpoint**. That means all producers and consumers are bunched into a group and do a checkpoint automatically fixing the current state.
 
-Storing the variables in a state fulfills the idea of Platform`s **fault-tolerance**. In case of the live datastream processing failure, the variables stored in the state are recovered and the module is restarted.
+Storing the variables in a state fulfills the idea of SJ-Platform`s **fault-tolerance**. In case of a live datastream processing failure, the variables stored in the state are recovered and the module is restarted.
 
 The streaming layer allows handling the idea of **parallelism** through multipartitioning. The data elements in a stream are assembled in partitions.  A **partition** is a part of a data stream allocated for convenience in operation. Upon creation, every stream gets a name and a certain amount of partitions. The parallelism is enabled by dividing existing partitions fairly among modules' tasks and it enables to scale the data processing. Partitions are also helpful in distributing processing load between several workers.
 
