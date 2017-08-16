@@ -106,7 +106,7 @@ The data can be received from different sources. Currently, the platform support
 
 Using **TCP** as an input source a custom protocol can be applied for receiving events, deduplicating them and putting into the processing pipeline.
 
-SJ-Platform supports **Apache Kafka** as a standard providing a common interface for integration for most applications.
+SJ-Platform supports **Apache Kafka** as a standard streaming platform providing a common interface for integration for most applications.
 
 Within the platform, the data is transported to and from modules via *transactional streams* or **T-streams**. It is a message broker and a Scala library native to SJ-Platform and designed primarily for exactly-once processing  (so it includes a transactional producer, a consumer and a subscriber). More information on T-streams can be found at `the project site <http://t-streams.com/>`_. 
 
