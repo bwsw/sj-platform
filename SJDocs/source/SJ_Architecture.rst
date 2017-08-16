@@ -118,7 +118,9 @@ The general structure of SJ-Platform can be rendered as at the scheme below wher
 
 
 
-The diagram below represents the interconnections between platform components.
+The diagram below represents the interconnections between platform components. 
+
+SJ-Platform uses a range of data sources and data storages. Client operates the platform via REST API/UI. And he/she uploads a custom module to the platform with a set of configurations. The platform runs the module via an "executable" engine on Mesos and Marathon that also uses MongoDB as a data store.
 
 .. figure:: _static/SJComponentDiagram.png
 
