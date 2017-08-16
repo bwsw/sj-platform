@@ -35,11 +35,11 @@ The events enter the processor in streams from a list of supported interfaces - 
 
 .. figure:: _static/Overview2.png
 
-SJ-Platform performs a **real-time data processing**. That means the system can handle events as soon as they are available inside the system without specific delay. 
+SJ-Platform performs **real-time data processing**. That means the system can handle events as soon as they are available inside the system without specific delay. 
 
 Streams can be very intensive and all events can not be handled by a single server of arbitrary performance. The system allows **scaling** the computations horizontally to handle increasing demands.
 
-The events are guaranteed to be processed **exactly-once**. The key idea of exactly-once processing lies in a group **checkpoint**. That means all producers and consumers are bunched into a group and do a checkpoint automatically fixing the current state. Moreover, an additional checkpoint is possible whenever it is necessary.
+The events are guaranteed to be processed **exactly-once**. The key idea of exactly-once processing lies in a group **checkpoint**. That means all producers and consumers of a stream are bunched into a group and do a checkpoint automatically fixing the current state. Moreover, an additional checkpoint is possible whenever it is necessary.
 
 Storing the variables in a state fulfills the idea of SJ-Platform`s **fault-tolerance**. In case of a live datastream processing failure, the variables stored in the state are recovered and the module is restarted.
 
@@ -51,9 +51,9 @@ The core component is presented with Mesos and other services that simplify the 
 
 Platform Components
 ------------------------
-.. warning:: *The section is under development!*
+Now let's have a look at each component in detail.
 
-The *Core* is composed of prerequisites for the platform. These are the services and settings that should be deployed prior to exploring the Stream Juggler Platform features. The services at this layer are responsible for input data ingestion, platform management, data storage. In the diagram they are placed beyond the Stream Juggler Platform area.
+The *Core* is composed of prerequisites for the platform. These are the services and settings that should be deployed prior to exploring the Stream Juggler Platform features. The services at this layer are responsible for input data ingestion, platform management, data storage. 
 
 - Resource management is fulfilled via `Apache Mesos <http://mesos.apache.org/>`_ that allows to run the system at scale and to support different types of workloads.
 
