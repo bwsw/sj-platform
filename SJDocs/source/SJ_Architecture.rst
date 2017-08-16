@@ -94,7 +94,7 @@ To receive the result of processing an output module is required. The **Output S
 
 So the pipeline may look like at the scheme:
 
-.. figure:: _static/ModulePipeline1.png
+.. figure:: _static/ModuleStructure3.png
 
 At the Processing platform component, the ingested data is transformed into streams, processed and sent to an external storage.  Data transformation and computation are the two major tasks of this component.
 
@@ -114,7 +114,9 @@ Within the platform, the data is transported to and from modules via *transactio
 
 The general structure of SJ-Platform can be rendered as at the scheme below where all the mentioned above  components are presented in detail:
 
-.. figure:: _static/SJ_General1.png
+.. figure:: _static/SJ_General2.png
+
+
 
 The diagram below represents the interconnections between platform components.
 
