@@ -208,6 +208,11 @@ lazy val regularPerformanceBenchmark = Project(id = "sj-regular-performance-benc
   .settings(commonSettings: _*)
   .dependsOn(engineCore % "provided")
 
+lazy val batchPerformanceBenchmark = Project(id = "sj-batch-performance-benchmark",
+  base = file("./contrib/benchmarks/sj-batch-performance-benchmark"))
+  .settings(commonSettings: _*)
+  .dependsOn(engineCore % "provided")
+
 lazy val flinkBenchmarkTask = Project(id = "flink-benchmark-task",
   base = file("./contrib/benchmarks/flink-benchmark-task"))
   .settings(commonSettings: _*)
