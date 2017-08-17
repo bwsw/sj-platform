@@ -19,15 +19,15 @@ But previously, let's get the general idea of the platform structure and concept
 Architecture Overview
 -------------------------
 
-The platform features presented above have conditioned the architecture developed for SJ-Platform. The platform is made up of the following components:
+The platform features presented above have conditioned the architecture developed for SJ-Platform. The diagram below represents the overview of the platform components:
+
+.. figure:: _static/GenCon.png
+    :align: center
 
 1) **Processing** component for data computation,
 2) **Streaming** component for data transportation,
 3) **Core** component for task execution,
 4) **API/UI** component for administration.
-
-.. figure:: _static/GenCon.png
-    :align: center
 
 The Stream Juggler Platform performs data processing that is fulfilled in modules. A module is a processor. The mode of processing in it is determined by a set of configurations uploaded to the system via the UI.
 
