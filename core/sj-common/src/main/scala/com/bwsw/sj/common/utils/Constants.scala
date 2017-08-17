@@ -289,6 +289,11 @@ object BenchmarkConfigNames {
   val zooKeeperAddressConfig = performanceBenchmarkConfig + ".zookeeper.address"
 
   val repetitionsConfig = performanceBenchmarkConfig + ".repetitions"
+
+  val batchConfig = performanceBenchmarkConfig + ".batch"
+  val batchSizesConfig = batchConfig + ".sizes"
+  val windowSizesConfig = batchConfig + ".window.sizes"
+  val slidingIntervalsConfig = batchConfig + ".sliding.intervals"
 }
 
 object BenchmarkLiterals {
