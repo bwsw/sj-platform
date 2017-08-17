@@ -56,3 +56,5 @@ object BatchTaskRunner extends {
     taskEngine.asInstanceOf[BatchTaskEngine].taskInputService
   }
 }
+
+class BatchTaskRunner

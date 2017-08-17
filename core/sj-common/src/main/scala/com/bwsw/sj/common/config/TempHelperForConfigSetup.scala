@@ -35,31 +35,39 @@ class TempHelperForConfigSetup(connectionRepository: ConnectionRepository) {
 
   val configService: GenericMongoRepository[ConfigurationSettingDomain] = connectionRepository.getConfigRepository
 
-  def setupConfigs(): Unit = {
+  def setupConfigs(marathonTimeout: Int = 60000,
+                   zkSessionTimeout: Int = 7000,
+                   kafkaSubscriberTimeout: Int = 100,
+                   lowWatermark: Int = 100): Unit = {
     configService.save(ConfigurationSettingDomain(ConfigLiterals.frameworkTag, "com.bwsw.fw-1.0", ConfigLiterals.systemDomain, new Date()))
 
-  configService.save(ConfigurationSettingDomain(ConfigurationSetting.createConfigurationSettingName(ConfigLiterals.systemDomain, regularStreamingValidatorClass),
-    "com.bwsw.sj.crud.rest.instance.validator.RegularInstanceValidator", ConfigLiterals.systemDomain, new Date()))
-  configService.save(ConfigurationSettingDomain(ConfigurationSetting.createConfigurationSettingName(ConfigLiterals.systemDomain, batchStreamingValidatorClass),
-    "com.bwsw.sj.crud.rest.instance.validator.BatchInstanceValidator", ConfigLiterals.systemDomain, new Date()))
-  configService.save(ConfigurationSettingDomain(ConfigurationSetting.createConfigurationSettingName(ConfigLiterals.systemDomain, outputStreamingValidatorClass),
-    "com.bwsw.sj.crud.rest.instance.validator.OutputInstanceValidator", ConfigLiterals.systemDomain, new Date()))
-  configService.save(ConfigurationSettingDomain(ConfigurationSetting.createConfigurationSettingName(ConfigLiterals.systemDomain, inputStreamingValidatorClass),
-    "com.bwsw.sj.crud.rest.instance.validator.InputInstanceValidator", ConfigLiterals.systemDomain, new Date()))
+    configService.save(ConfigurationSettingDomain(ConfigurationSetting.createConfigurationSettingName(ConfigLiterals.systemDomain, regularStreamingValidatorClass),
+      "com.bwsw.sj.crud.rest.instance.validator.RegularInstanceValidator", ConfigLiterals.systemDomain, new Date()))
+    configService.save(ConfigurationSettingDomain(ConfigurationSetting.createConfigurationSettingName(ConfigLiterals.systemDomain, batchStreamingValidatorClass),
+      "com.bwsw.sj.crud.rest.instance.validator.BatchInstanceValidator", ConfigLiterals.systemDomain, new Date()))
+    configService.save(ConfigurationSettingDomain(ConfigurationSetting.createConfigurationSettingName(ConfigLiterals.systemDomain, outputStreamingValidatorClass),
+      "com.bwsw.sj.crud.rest.instance.validator.OutputInstanceValidator", ConfigLiterals.systemDomain, new Date()))
+    configService.save(ConfigurationSettingDomain(ConfigurationSetting.createConfigurationSettingName(ConfigLiterals.systemDomain, inputStreamingValidatorClass),
+      "com.bwsw.sj.crud.rest.instance.validator.InputInstanceValidator", ConfigLiterals.systemDomain, new Date()))
 
     configService.save(ConfigurationSettingDomain(
       ConfigLiterals.marathonTag,
       "http://stream-juggler.z1.netpoint-dc.com:8080",
       ConfigLiterals.systemDomain, new Date()))
 
-    configService.save(ConfigurationSettingDomain(ConfigLiterals.marathonTimeoutTag, "60000", ConfigLiterals.systemDomain, new Date()))
+    configService.save(ConfigurationSettingDomain(
+      ConfigLiterals.marathonTimeoutTag, marathonTimeout.toString, ConfigLiterals.systemDomain, new Date()))
 
-    configService.save(ConfigurationSettingDomain(ConfigLiterals.zkSessionTimeoutTag, "7000", ConfigLiterals.zookeeperDomain, new Date()))
+    configService.save(ConfigurationSettingDomain(
+      ConfigLiterals.zkSessionTimeoutTag, zkSessionTimeout.toString, ConfigLiterals.zookeeperDomain, new Date()))
 
     //configService.save(new ConfigurationSetting("session.timeout.ms", "30000", ConfigConstants.kafkaDomain))
 
-    configService.save(ConfigurationSettingDomain(ConfigLiterals.kafkaSubscriberTimeoutTag, "100", ConfigLiterals.systemDomain, new Date()))
-    configService.save(ConfigurationSettingDomain(ConfigLiterals.lowWatermark, "100", ConfigLiterals.systemDomain, new Date()))
+    configService.save(ConfigurationSettingDomain(
+      ConfigLiterals.kafkaSubscriberTimeoutTag, lowWatermark.toString, ConfigLiterals.systemDomain, new Date()))
+
+    configService.save(ConfigurationSettingDomain(
+      ConfigLiterals.lowWatermark, lowWatermark.toString, ConfigLiterals.systemDomain, new Date()))
   }
 
   def loadJdbcDriver(): Unit = {
