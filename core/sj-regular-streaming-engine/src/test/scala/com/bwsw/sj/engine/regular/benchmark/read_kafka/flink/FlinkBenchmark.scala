@@ -22,7 +22,7 @@ import java.io.File
 import java.util.UUID
 
 import com.bwsw.sj.engine.regular.benchmark.read_kafka.KafkaReaderBenchmark
-import com.bwsw.sj.engine.regular.benchmark.utils.BenchmarkUtils.retrieveResultFromFile
+import com.bwsw.sj.common.utils.benchmark.BenchmarkUtils.retrieveResultFromFile
 
 import scala.collection.JavaConverters._
 

@@ -24,7 +24,7 @@ import java.util.UUID
 import com.bwsw.sj.common.utils.benchmark.ClassRunner
 import com.bwsw.sj.engine.regular.benchmark.read_kafka.KafkaReaderBenchmark
 import com.bwsw.sj.engine.regular.benchmark.read_kafka.storm.StormBenchmarkLiterals._
-import com.bwsw.sj.engine.regular.benchmark.utils.BenchmarkUtils.retrieveResultFromFile
+import com.bwsw.sj.common.utils.benchmark.BenchmarkUtils.retrieveResultFromFile
 
 /**
   * Provides methods for testing the speed of reading data by [[http://storm.apache.org Apache Storm]] from Kafka.

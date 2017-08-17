@@ -23,7 +23,7 @@ import java.util.UUID
 
 import com.bwsw.sj.common.utils.benchmark.ClassRunner
 import com.bwsw.sj.engine.regular.benchmark.read_kafka.KafkaReaderBenchmark
-import com.bwsw.sj.engine.regular.benchmark.utils.BenchmarkUtils.retrieveResultFromFile
+import com.bwsw.sj.common.utils.benchmark.BenchmarkUtils.retrieveResultFromFile
 import org.apache.samza.job.JobRunner
 
 /**
