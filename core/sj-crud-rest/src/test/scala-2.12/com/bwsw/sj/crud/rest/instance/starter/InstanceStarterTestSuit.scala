@@ -68,8 +68,8 @@ class InstanceStarterTestSuit extends FlatSpec with Matchers with PrivateMethodT
     envs shouldBe Map(FrameworkLiterals.frameworkIdLabel -> frameworkName,
       FrameworkLiterals.instanceIdLabel -> instanceName,
       FrameworkLiterals.mesosMasterLabel -> master,
-      FrameworkLiterals.zookeeperHostLabel -> new URI(zookeeperServer).getHost,
-      FrameworkLiterals.zookeeperPortLabel -> new URI(zookeeperServer).getPort.toString
+      FrameworkLiterals.zookeeperHostLabel -> new URI("zk://"+zookeeperServer).getHost,
+      FrameworkLiterals.zookeeperPortLabel -> new URI("zk://"+zookeeperServer).getPort.toString
     ) ++ mongoEnv ++ instanceEnv
   }
 
@@ -122,8 +122,8 @@ class InstanceStarterTestSuit extends FlatSpec with Matchers with PrivateMethodT
       env = Map(FrameworkLiterals.frameworkIdLabel -> frameworkName,
         FrameworkLiterals.instanceIdLabel -> instanceName,
         FrameworkLiterals.mesosMasterLabel -> marathonMaster,
-        FrameworkLiterals.zookeeperHostLabel -> new URI(zookeeperServer).getHost,
-        FrameworkLiterals.zookeeperPortLabel -> new URI(zookeeperServer).getPort.toString
+        FrameworkLiterals.zookeeperHostLabel -> new URI("zk://"+zookeeperServer).getHost,
+        FrameworkLiterals.zookeeperPortLabel -> new URI("zk://"+zookeeperServer).getPort.toString
       ) ++ mongoEnv ++ instanceEnv,
       uris = List(new URI(s"$restAddress/v1/custom/jars/$frameworkJarNameStub").toString),
       backoffSeconds = backoffSecondsStub,

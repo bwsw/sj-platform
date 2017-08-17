@@ -189,7 +189,7 @@ class InstanceStarter(instance: Instance,
     * @return
     */
   protected def getFrameworkEnvironmentVariables(marathonMaster: String, zookeeperServer: String): Map[String, String] = {
-    val zooUrl = new URI(zookeeperServer)
+    val zooUrl = new URI("zk://"+zookeeperServer)
     var environmentVariables = Map(
       instanceIdLabel -> instance.name,
       mesosMasterLabel -> marathonMaster,
