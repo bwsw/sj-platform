@@ -40,23 +40,25 @@ class TimeBatchCollector(instance: BatchInstanceDomain,
   private val batchSize = options.batchSize
   private var lastTimestamp: Long = System.currentTimeMillis()
 
-  private val streamHasEnvelopes: mutable.Map[String, Boolean] =
-    mutable.Map(instance.getInputsWithoutStreamMode.map(stream => stream -> false): _*)
-
+  private val streams = instance.getInputsWithoutStreamMode.toSeq
+  private val emptyBatchesPerStream = mutable.Map(streams.map(s => s -> 0): _*)
 
   override def getBatchesToCollect(): Seq[String] = {
     val currentTimestamp = System.currentTimeMillis()
 
-    if (currentTimestamp - lastTimestamp >= batchSize) {
+    if (currentTimestamp - lastTimestamp >= batchSize && emptyBatchesPerStream.values.exists(_ < instance.window)) {
       lastTimestamp = currentTimestamp
 
-      streamHasEnvelopes.filter(_._2).keySet.toSeq
+      streams
     } else
       Seq.empty
   }
 
-  override protected def afterEnvelopeReceive(envelope: Envelope): Unit = {}
+  override protected def afterEnvelopeReceive(envelope: Envelope): Unit = {
+    emptyBatchesPerStream(envelope.stream) = 0
+  }
 
-  override protected def prepareForNextCollecting(streamName: String): Unit =
-    streamHasEnvelopes(streamName) = false
+  override protected def prepareForNextCollecting(streamName: String): Unit = {
+    emptyBatchesPerStream(streamName) += 1
+  }
 }

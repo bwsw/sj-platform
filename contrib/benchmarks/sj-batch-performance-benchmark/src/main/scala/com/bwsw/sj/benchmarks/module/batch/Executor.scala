@@ -56,9 +56,9 @@ class Executor(manager: ModuleEnvironmentManager) extends BatchStreamingExecutor
         windowRepository.getAll().values.flatMap(_.batches.takeRight(windowRepository.slidingInterval))
     }.foreach {
       _.envelopes.foreach {
-        case _: KafkaEnvelope[String] =>
+        case _: KafkaEnvelope[String@unchecked] =>
           processedMessages += 1
-        case e: TStreamEnvelope[String] =>
+        case e: TStreamEnvelope[String@unchecked] =>
           processedMessages += e.data.length
       }
     }
@@ -74,4 +74,6 @@ class Executor(manager: ModuleEnvironmentManager) extends BatchStreamingExecutor
       isDone = true
     }
   }
+
+  override def deserialize(bytes: Array[Byte]): AnyRef = new String(bytes)
 }

@@ -24,7 +24,7 @@
       "stream.t-streams"
     ]
   },
-  "module-type": "regular-streaming",
+  "module-type": "batch-streaming",
   "engine-name": "com.bwsw.batch.streaming.engine",
   "engine-version": "1.0",
   "validator-class": "com.bwsw.sj.benchmarks.module.batch.Validator",
