@@ -34,6 +34,8 @@ The Stream Juggler Platform performs data processing that is fulfilled in module
 The events enter the processor in streams from a list of supported interfaces - TCP, Kafka and T-streams. A result data are put into an external data storage.
 
 .. figure:: _static/Overview2.png
+    :align: center
+    :scale: 80%
 
 SJ-Platform performs **real-time data processing**. That means the system can handle events as soon as they are available inside the system without specific delay. 
 
@@ -95,6 +97,7 @@ To receive the result of processing an output module is required. The **Output S
 So the pipeline may look like at the scheme:
 
 .. figure:: _static/ModuleStructure3.png
+   :scale: 80%
 
 At the Processing platform component, the ingested data is transformed into streams, processed and sent to an external storage.  Data transformation and computation are the two major tasks of this component.
 
