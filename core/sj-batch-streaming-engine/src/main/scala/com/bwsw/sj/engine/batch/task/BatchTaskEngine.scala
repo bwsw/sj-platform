@@ -124,19 +124,13 @@ class BatchTaskEngine(manager: CommonTaskManager,
   private def retrieveAndProcessEnvelopes(): Unit = {
     retrievableStreams.foreach(stream => {
       logger.debug(s"Retrieve an available envelope from '$stream' stream.")
-      envelopeFetcher.get(stream) match {
-        case Some(envelope) =>
-          batchCollector.onReceive(envelope)
-          processBatches()
+      envelopeFetcher.get(stream).foreach(batchCollector.onReceive)
+      processBatches()
 
-          moduleService.onTimer()
+      moduleService.onTimer()
 
-          if (allWindowsCollected) {
-            onWindow()
-          }
-
-        case None =>
-          moduleService.onTimer()
+      if (allWindowsCollected) {
+        onWindow()
       }
     })
   }
