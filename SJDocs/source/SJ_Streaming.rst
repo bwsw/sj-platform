@@ -48,7 +48,7 @@ They can be of different types. The types of platform entities in the pipeline d
 
 The diagram of platform entities interconnections can be useful in selecting the necessary types of providers and services.
 
-.. figure:: _static/InstanceCorrelation.png
+.. figure:: _static/InstanceCorrelation1.png
 
 Firstly, decide what type of modules will be included into the pipline.
 
