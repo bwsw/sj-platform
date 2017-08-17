@@ -93,7 +93,7 @@ At the Processing platform component, the ingested data is transformed into stre
 
 .. tip:: More information on module workflow you can find at the :ref:`Modules` page.
 
-The *Streaming component* is essential in SJ-Platform. The data is fed to the system, transported between modules and exported to an external storage via streams. It is streaming that makes possible such platform features as exactly-once processing, parallelism, fault-tolerance, horizontal scalability
+The *Streaming component* is essential in SJ-Platform. The data is fed to the system, transported between modules and exported to an external storage via streams. It is streaming that makes possible such platform features as exactly-once processing, parallelism, fault-tolerance, horizontal scalability.
 
 The data can be received from different sources. Currently, the platform supports obtaining data from TCP sockets and Kafka.
 
