@@ -11,6 +11,9 @@ Check-every policy
 
 Checkpoint
   Completeness check of the data received after the stream processing.
+  
+Checkpoint Group
+  A special entity which allows a developer to do atomic checkpoint for a group of producers and consumers. 
 
 Custom handler 
   A handler specified by a user.
