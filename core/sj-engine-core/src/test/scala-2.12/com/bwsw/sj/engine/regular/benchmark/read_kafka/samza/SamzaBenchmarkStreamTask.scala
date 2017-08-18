@@ -20,9 +20,6 @@ package com.bwsw.sj.engine.regular.benchmark.read_kafka.samza
 
 import java.io.{File, FileWriter}
 
-import org.apache.samza.system.IncomingMessageEnvelope
-import org.apache.samza.task.{MessageCollector, StreamTask, TaskCoordinator}
-
 /**
   * @author Pavel Tomskikh
   */

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.sj.engine.regular.benchmark.read_kafka
+package com.bwsw.sj.engine.core.testutils.benchmark.read_kafka.batch
 
 import java.util.Date
 
@@ -37,6 +37,9 @@ class KafkaReaderBenchmarkConfig(config: Config, outputFilenamePrefix: String) {
   val kafkaAddress = config.getString(kafkaAddressConfig)
   val messagesCounts = config.getString(messagesCountsConfig).split(",").map(_.toLong)
   val words = config.getString(wordsConfig).split(",")
+  val batchSizes = config.getString(batchSizesConfig).split(",").map(_.toInt)
+  val windowSizes = config.getString(windowSizesConfig).split(",").map(_.toInt)
+  val slidingIntervals = config.getString(slidingIntervalsConfig).split(",").map(_.toInt)
 
   private val format = new java.text.SimpleDateFormat("yyyy-MM-dd-HH-mm-ss")
   val outputFileName = Try(config.getString(outputFileConfig)).getOrElse(s"$outputFilenamePrefix-${format.format(new Date())}")

@@ -21,8 +21,8 @@ package com.bwsw.sj.engine.regular.benchmark.read_kafka.flink
 import java.io.File
 import java.util.UUID
 
-import com.bwsw.sj.engine.regular.benchmark.read_kafka.KafkaReaderBenchmark
 import com.bwsw.sj.common.utils.benchmark.BenchmarkUtils.retrieveResultFromFile
+import com.bwsw.sj.engine.core.testutils.benchmark.read_kafka.regular.KafkaReaderBenchmark
 
 import scala.collection.JavaConverters._
 

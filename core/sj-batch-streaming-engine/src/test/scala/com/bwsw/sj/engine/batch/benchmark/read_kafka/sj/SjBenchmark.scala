@@ -28,7 +28,7 @@ import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.CommonAppConfigNames
 import com.bwsw.sj.common.utils.benchmark.ClassRunner
 import com.bwsw.sj.engine.batch.BatchTaskRunner
-import com.bwsw.sj.engine.batch.benchmark.read_kafka.KafkaReaderBenchmark
+import com.bwsw.sj.engine.core.testutils.benchmark.read_kafka.batch.KafkaReaderBenchmark
 import com.bwsw.sj.engine.core.testutils.{Server, TestStorageServer}
 import com.typesafe.config.ConfigFactory
 

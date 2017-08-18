@@ -75,17 +75,7 @@ object Dependencies {
       .exclude("jakarta-regexp", "jakarta-regexp")
       .exclude("xerces", "xerces"),
     "org.mockito" % "mockito-core" % "2.8.9",
-    "com.hazelcast" % "hazelcast" % "3.7.3"
-  ))
-
-  lazy val sjRestDependencies = Def.setting(Seq(
-    "com.typesafe.akka" %% "akka-http" % "10.0.3",
-    ("org.apache.httpcomponents" % "httpclient" % "4.5.2")
-      .exclude("commons-logging", "commons-logging"),
-    "com.typesafe.akka" %% "akka-slf4j" % "2.4.16"
-  ))
-
-  lazy val sjRegularEngineDependencies = Def.setting(Seq(
+    "com.hazelcast" % "hazelcast" % "3.7.3",
     ("org.apache.samza" % "samza-kafka_2.12" % "0.13.0" % "test")
       .exclude("org.apache.kafka", "kafka-clients")
       .exclude("org.apache.kafka", "kafka_2.12")
@@ -98,6 +88,13 @@ object Dependencies {
       .exclude("org.slf4j", "slf4j-api")
       .exclude("org.apache.logging.log4j", "log4j-slf4j-impl"),
     "org.apache.storm" % "storm-kafka" % "1.1.0"
+  ))
+
+  lazy val sjRestDependencies = Def.setting(Seq(
+    "com.typesafe.akka" %% "akka-http" % "10.0.3",
+    ("org.apache.httpcomponents" % "httpclient" % "4.5.2")
+      .exclude("commons-logging", "commons-logging"),
+    "com.typesafe.akka" %% "akka-slf4j" % "2.4.16"
   ))
 
   lazy val sjOutputEngineDependencies = Def.setting(Seq(

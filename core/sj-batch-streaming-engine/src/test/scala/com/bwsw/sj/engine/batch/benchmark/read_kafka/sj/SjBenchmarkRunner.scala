@@ -23,7 +23,7 @@ import java.util.Calendar
 import com.bwsw.sj.common.utils.BenchmarkConfigNames._
 import com.bwsw.sj.common.utils.BenchmarkLiterals.sjDefaultOutputFile
 import com.bwsw.sj.common.utils.CommonAppConfigNames.{zooKeeperHost, zooKeeperPort}
-import com.bwsw.sj.engine.batch.benchmark.read_kafka.{KafkaReaderBenchmarkConfig, KafkaReaderBenchmarkRunner}
+import com.bwsw.sj.engine.core.testutils.benchmark.read_kafka.batch.{KafkaReaderBenchmarkConfig, KafkaReaderBenchmarkRunner}
 import com.typesafe.config.{Config, ConfigFactory, ConfigValueFactory}
 
 /**

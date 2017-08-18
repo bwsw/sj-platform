@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.sj.engine.regular.benchmark.read_kafka
+package com.bwsw.sj.engine.core.testutils.benchmark.read_kafka.regular
 
 import java.io.{File, FileWriter}
 

@@ -23,10 +23,6 @@ import java.util.UUID
 import com.bwsw.sj.common.utils.BenchmarkConfigNames.zooKeeperAddressConfig
 import com.bwsw.sj.engine.regular.benchmark.read_kafka.storm.StormBenchmarkLiterals._
 import com.typesafe.config.ConfigFactory
-import org.apache.storm.kafka.{KafkaSpout, SpoutConfig, StringScheme, ZkHosts}
-import org.apache.storm.spout.SchemeAsMultiScheme
-import org.apache.storm.topology.TopologyBuilder
-import org.apache.storm.{Config, LocalCluster}
 
 /**
   * @author Pavel Tomskikh

@@ -21,10 +21,9 @@ package com.bwsw.sj.engine.regular.benchmark.read_kafka.samza
 import java.io.{File, FileWriter}
 import java.util.UUID
 
-import com.bwsw.sj.common.utils.benchmark.ClassRunner
-import com.bwsw.sj.engine.regular.benchmark.read_kafka.KafkaReaderBenchmark
 import com.bwsw.sj.common.utils.benchmark.BenchmarkUtils.retrieveResultFromFile
-import org.apache.samza.job.JobRunner
+import com.bwsw.sj.common.utils.benchmark.ClassRunner
+import com.bwsw.sj.engine.core.testutils.benchmark.read_kafka.regular.KafkaReaderBenchmark
 
 /**
   * Provides methods for testing the speed of reading data by [[http://samza.apache.org Apache Samza]] from Kafka.

@@ -30,8 +30,8 @@ import com.bwsw.sj.common.utils.CommonAppConfigNames
 import com.bwsw.sj.common.utils.benchmark.ClassRunner
 import com.bwsw.sj.engine.core.testutils.{Server, TestStorageServer}
 import com.bwsw.sj.engine.regular.RegularTaskRunner
-import com.bwsw.sj.engine.regular.benchmark.read_kafka.KafkaReaderBenchmark
 import com.bwsw.sj.common.utils.benchmark.BenchmarkUtils.retrieveResultFromFile
+import com.bwsw.sj.engine.core.testutils.benchmark.read_kafka.regular.KafkaReaderBenchmark
 import com.typesafe.config.ConfigFactory
 
 /**

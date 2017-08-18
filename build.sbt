@@ -95,6 +95,7 @@ lazy val engineCore = Project(id = "sj-engine-core",
   base = file("./core/sj-engine-core"))
   .settings(commonSettings: _*)
   .settings(
+    resolvers += "Clojars Repository" at "http://clojars.org/repo/",
     libraryDependencies ++= Dependencies.sjEngineCoreDependencies.value,
     libraryDependencies ++= Dependencies.sjTestDependencies.value
   )
@@ -120,10 +121,6 @@ lazy val inputStreamingEngine = Project(id = "sj-input-streaming-engine",
 lazy val regularStreamingEngine = Project(id = "sj-regular-streaming-engine",
   base = file("./core/sj-regular-streaming-engine"))
   .settings(commonSettings: _*)
-  .settings(
-    resolvers += "Clojars Repository" at "http://clojars.org/repo/",
-    libraryDependencies ++= Dependencies.sjRegularEngineDependencies.value
-  )
   .dependsOn(engineCore)
 
 lazy val batchStreamingEngine = Project(id = "sj-batch-streaming-engine",

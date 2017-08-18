@@ -16,20 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.sj.engine.regular.benchmark.read_kafka.samza
+package com.bwsw.sj.engine.regular.benchmark.read_kafka.storm
 
 import java.util.Calendar
 
-import com.bwsw.sj.common.utils.BenchmarkLiterals.samzaDefaultOutputFile
-import com.bwsw.sj.engine.regular.benchmark.read_kafka.{KafkaReaderBenchmarkConfig, KafkaReaderBenchmarkRunner}
+import com.bwsw.sj.common.utils.BenchmarkLiterals.stormDefaultOutputFile
+import com.bwsw.sj.engine.core.testutils.benchmark.read_kafka.regular.{KafkaReaderBenchmarkConfig, KafkaReaderBenchmarkRunner}
 import com.typesafe.config.ConfigFactory
 
 /**
-  * Performs [[SamzaBenchmark]]
+  * Performs [[StormBenchmark]]
   *
   * Configuration:
   *
-  * sj-benchmark.performance.message.sizes - list of messages' sizes that separated by a comma (',').
   * sj-benchmark.performance.message.sizes - list of messages' sizes that separated by a comma (',').
   * Environment variable MESSAGES_SIZE_PER_TEST.
   * sj-benchmark.performance.message.counts - list of counts of messages per test (1000000 by default).
@@ -38,19 +37,19 @@ import com.typesafe.config.ConfigFactory
   * sj-benchmark.performance.zookeeper.address - ZooKeeper server's address. Must point to the ZooKeeper server that used
   * by the Kafka server. Environment variable ZOOKEEPER_ADDRESS.
   * sj-benchmark.performance.output-file - file to output results in csv format (message size, milliseconds)
-  * (samza-benchmark-output-`<`date-time`>` by default). Environment variable OUTPUT_FILE.
+  * (storm-benchmark-output-`<`date-time`>` by default). Environment variable OUTPUT_FILE.
   * sj-benchmark.performance.words - list of words that sends to the Kafka server ("lorem,ipsum,dolor,sit,amet" by default).
   * Environment variable WORDS.
-  * sj-benchmark.performance.repetitions - count of repetitions of the same test configuration (messages count and message size)
+  * sj-benchmark.performance.repetitions - count of repetitions of same test configuration (messages count and message size)
   * (1 by default). Environment variable REPETITIONS.
   *
   * @author Pavel Tomskikh
   */
-object SamzaBenchmarkRunner extends App {
+object StormBenchmarkRunner extends App {
   println(Calendar.getInstance().getTime)
 
-  private val benchmarkConfig = new KafkaReaderBenchmarkConfig(ConfigFactory.load(), samzaDefaultOutputFile)
-  private val benchmark = new SamzaBenchmark(benchmarkConfig.zooKeeperAddress, benchmarkConfig.kafkaAddress, benchmarkConfig.words)
+  private val benchmarkConfig = new KafkaReaderBenchmarkConfig(ConfigFactory.load(), stormDefaultOutputFile)
+  private val benchmark = new StormBenchmark(benchmarkConfig.zooKeeperAddress, benchmarkConfig.kafkaAddress, benchmarkConfig.words)
   private val benchmarkRunner = new KafkaReaderBenchmarkRunner(benchmark, benchmarkConfig)
 
   private val results = benchmarkRunner.run()

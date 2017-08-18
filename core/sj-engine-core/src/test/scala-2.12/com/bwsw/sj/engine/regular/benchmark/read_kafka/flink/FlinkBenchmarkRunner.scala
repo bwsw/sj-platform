@@ -21,7 +21,7 @@ package com.bwsw.sj.engine.regular.benchmark.read_kafka.flink
 import java.util.Calendar
 
 import com.bwsw.sj.common.utils.BenchmarkLiterals.flinkDefaultOutputFile
-import com.bwsw.sj.engine.regular.benchmark.read_kafka.{KafkaReaderBenchmarkConfig, KafkaReaderBenchmarkRunner}
+import com.bwsw.sj.engine.core.testutils.benchmark.read_kafka.regular.{KafkaReaderBenchmarkConfig, KafkaReaderBenchmarkRunner}
 import com.typesafe.config.ConfigFactory
 
 /**
