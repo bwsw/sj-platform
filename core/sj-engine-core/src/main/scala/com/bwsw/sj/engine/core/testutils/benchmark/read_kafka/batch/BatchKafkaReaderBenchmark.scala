@@ -65,7 +65,6 @@ abstract class BatchKafkaReaderBenchmark(zooKeeperAddress: String,
               batchSize: Int,
               windowSize: Int,
               slidingInterval: Int): Long = {
-    println(s"Messages count: $messagesCount")
     println(s"Batch size: $batchSize")
     println(s"Window size: $windowSize")
     println(s"Sliding interval: $slidingInterval")
@@ -77,14 +76,15 @@ abstract class BatchKafkaReaderBenchmark(zooKeeperAddress: String,
       slidingInterval)
 
     var maybeResult: Option[Long] = retrieveResultFromFile()
-    while (maybeResult.isEmpty) {
+    while (maybeResult.isEmpty && process.isAlive) {
       Thread.sleep(lookupResultTimeout)
       maybeResult = retrieveResultFromFile()
     }
 
-    process.destroy()
+    if (process.isAlive)
+      process.destroy()
 
-    maybeResult.get
+    maybeResult.getOrElse(-1L)
   }
 
 

@@ -18,6 +18,8 @@
  */
 package com.bwsw.sj.engine.core.testutils.benchmark.read_kafka.batch
 
+import java.util.Date
+
 import com.bwsw.sj.engine.core.testutils.benchmark.read_kafka.{KafkaReaderBenchmarkResult, KafkaReaderBenchmarkRunner}
 
 /**
@@ -45,10 +47,10 @@ class BatchKafkaReaderBenchmarkRunner(benchmark: BatchKafkaReaderBenchmark,
               else i
             }.map { slidingInterval =>
               val result = (0 until config.repetitions).map { _ =>
-                benchmark.runTest(messagesCount,
-                  batchSize,
-                  windowSize,
-                  slidingInterval)
+                val millis = benchmark.runTest(messagesCount, batchSize, windowSize, slidingInterval)
+                println(s"[${new Date()}] $millis")
+
+                millis
               }
 
               BatchKafkaReaderBenchmarkResult(
