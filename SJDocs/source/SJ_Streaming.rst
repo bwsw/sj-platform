@@ -21,7 +21,7 @@ SJ-Platform supports Apache Kafka as a standard providing a common interface for
 
 Using TCP as an input source a custom protocol can be applied for receiving events, deduplicating them and putting into the processing pipeline. 
 
-At the project `repository <https://github.com/bwsw/sj-platform/tree/develop>`_ two input modules are available for users - CSV input module and Regex input module - that trnasform data flow of csv/regex type to envelopes for T-streams.
+At the project `repository <https://github.com/bwsw/sj-platform/tree/develop>`_ two input modules are available for users - CSV input module and Regex input module - that transform data flow of CSV/regex type to envelopes for T-streams.
 
 Within the platform, the data is transported to and from modules via *transactional streams* or T-streams. It is a message broker and a Scala library native to SJ-Platform and designed primarily for exactly-once processing (so it includes a transactional producer, a consumer and a subscriber). More information on T-streams can be found at the `project site <http://t-streams.com/>`_.
 
@@ -33,15 +33,15 @@ T-streams architecture is not complicated. T-streams consist of partitions. Each
 
 Data elements are time-sorted in a transaction. 
 
-Consumers and Producers use transactions to write or read data from T-streams.  Transaction is also a basic recovery element. This means, that in a case of a crash, Consumers and Producers can recover from a transaction.
+Consumers and Producers use transactions to write or read data from T-streams.  The transaction is also a basic recovery element. This means, that in a case of a crash, Consumers and Producers can recover from a transaction.
 
-Consumer iterates over transactions from earliest to the latest and reads data from every transaction. Every Consumer works in a specific T-stream and specific partitions. Consumer implements polling approach of processing.  After a transaction (or transaction set) was handled properly, the consumer does checkpoint which means that even in a cause of a crash or for another reason that consumer will start processing the transaction which is the next to the processed one.
+Consumer iterates over transactions from earliest to the latest and reads data from every transaction. Every Consumer works in a specific T-stream and specific partitions. Consumer implements polling approach of processing.  After a transaction (or transaction set) was handled properly, the consumer does checkpoint which means that even in a case of a crash or for another reason that consumer will start processing the transaction which is the next to the processed one.
 
-Producers open transactions in a strictly ordered mode. Consumers and Subscribers always process transactions in the same order they have been opened. Producer can checkpoint or cancel transactions in an arbitrary way, but Subscriber will start handling them once the first (the eraliest) one is checkpointed. 
+Producers open transactions in a strictly ordered mode. Consumers and Subscribers always process transactions in the same order they have been opened. Producer can checkpoint or cancel transactions in an arbitrary way, but Subscriber will start handling them once the first (the earliest) one is checkpointed. 
 
-For the strictly ordered way of transaction opening a master producer is responsible. A master is registered in Apache Zookeeper per each transaction. The master generates a new transaction, registers it in Zookeeper, and returns the transaction ID to a Producer. Producer fills the transaction with data from the storage server. Then, it sends checkpoint or cancel to the server commit log and the transaction is checkpointed or canceled. 
+For the strictly ordered way of transaction opening a master producer is responsible. A master is registered in Apache Zookeeper per each transaction. The master generates a new transaction, registers it in Zookeeper, and returns the transaction ID to a Producer. Producer fills the transaction with data from the storage server. Then, it sends checkpoint or cancels to the server commit log and the transaction is checkpointed or canceled. 
 
-Finally, storage server commit logs are played and results are stored to RocksDB. 
+Finally, storage server commits logs are played and results are stored to RocksDB. 
 
 Checkpoint Group
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -51,7 +51,7 @@ Checkpoint Group
 Streaming Infrastructure
 -----------------------------------
 
-Streams need infrastructure: Providers and Services. This is a required presetting without which streaming will not be so flexible. Streaming flexibility lies in one-to-many connection between providers and services, services and streams. One provider works with many services (they can be of various types) as well as one service can provide several streams. These streams take necessary settings from the common infrastructure (providers and services). There is no need to duplicate the settings for each individual stream.
+Streams need infrastructure: Providers and Services. This is a required presetting without which streaming will not be so flexible. Streaming flexibility lies in the one-to-many connection between providers and services, services and streams. One provider works with many services (they can be of various types) as well as one service can provide several streams. These streams take necessary settings from the common infrastructure (providers and services). There is no need to duplicate the settings for each individual stream.
 
 Provider is the service provider for data transformation into a stream.
 
@@ -63,7 +63,7 @@ The diagram of platform entities interconnections can be useful in selecting the
 
 .. figure:: _static/InstanceCorrelation1.png
 
-Firstly, decide what type of modules will be included into the pipline.
+Firstly, decide what type of modules will be included into the pipeline.
 
 That will help to clarify which streams are required for these particular modules.
 
