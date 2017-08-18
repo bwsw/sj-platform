@@ -55,17 +55,13 @@ class SamzaBenchmark(zooKeeperAddress: String,
   }
 
 
-  override protected def runProcess(messageSize: Long, messagesCount: Long): Process = {
+  override protected def runProcess(messagesCount: Long): Process = {
     prepareProperties(messagesCount)
-
     val arguments = Seq(
       "--config-factory=org.apache.samza.config.factories.PropertiesConfigFactory",
       s"--config-path=${propertiesFile.getAbsolutePath}")
 
-    val jobRunner = new ClassRunner(classOf[JobRunner], arguments = arguments).start()
-    println("JobRunner started")
-
-    jobRunner
+    new ClassRunner(classOf[JobRunner], arguments = arguments).start()
   }
 
 

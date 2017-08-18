@@ -38,53 +38,38 @@ abstract class RegularKafkaReaderBenchmark(zooKeeperAddress: String,
   /**
     * Performs the first test because it needs more time than subsequent tests
     */
-  def warmUp(): Long = runTest(warmingUpMessageSize, warmingUpMessagesCount)
+  def warmUp(): Long = {
+    sendData(warmingUpMessageSize, warmingUpMessagesCount)
+    runTest(warmingUpMessagesCount)
+  }
 
   /**
-    * Sends data into the Kafka server and runs an application under test
+    * Runs an application under test
     *
-    * @param messageSize   size of one message that is sent to the Kafka server
     * @param messagesCount count of messages
     * @return time in milliseconds within which an application under test reads messages from Kafka
     */
-  def runTest(messageSize: Long, messagesCount: Long): Long = {
-    println(s"$messagesCount messages of $messageSize bytes")
-
-    kafkaClient.createTopic(kafkaTopic, 1, 1)
-    while (!kafkaClient.topicExists(kafkaTopic))
-      Thread.sleep(100)
-
-    println(s"Kafka topic $kafkaTopic created")
-
-    kafkaSender.send(messageSize, messagesCount)
-    println("Data sent to the Kafka")
-
-    val process: Process = runProcess(messageSize, messagesCount)
+  def runTest(messagesCount: Long): Long = {
+    val process: Process = runProcess(messagesCount)
 
     var maybeResult: Option[Long] = retrieveResultFromFile()
-    while (maybeResult.isEmpty) {
+    while (maybeResult.isEmpty && process.isAlive) {
       Thread.sleep(lookupResultTimeout)
       maybeResult = retrieveResultFromFile()
     }
 
-    process.destroy()
+    if (process.isAlive)
+      process.destroy()
 
-    kafkaClient.deleteTopic(kafkaTopic)
-    while (kafkaClient.topicExists(kafkaTopic))
-      Thread.sleep(100)
-
-    println(s"Kafka topic $kafkaTopic deleted")
-
-    maybeResult.get
+    maybeResult.getOrElse(-1L)
   }
 
 
   /**
     * Used to run an application under test in a separate process
     *
-    * @param messageSize   size of one message that is sent to the Kafka server
     * @param messagesCount count of messages
     * @return process of an application under test
     */
-  protected def runProcess(messageSize: Long, messagesCount: Long): Process
+  protected def runProcess(messagesCount: Long): Process
 }

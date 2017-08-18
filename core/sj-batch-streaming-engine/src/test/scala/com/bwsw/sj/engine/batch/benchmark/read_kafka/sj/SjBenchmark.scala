@@ -121,8 +121,7 @@ class SjBenchmark(zkHost: String,
     super.close()
   }
 
-  override protected def runProcess(messageSize: Long,
-                                    messagesCount: Long,
+  override protected def runProcess(messagesCount: Long,
                                     batchSize: Int,
                                     windowSize: Int,
                                     slidingInterval: Int): Process = {

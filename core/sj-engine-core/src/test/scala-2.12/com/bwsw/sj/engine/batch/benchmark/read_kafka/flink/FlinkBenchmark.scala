@@ -41,8 +41,7 @@ class FlinkBenchmark(zooKeeperAddress: String,
   private val taskJarPath = "../../contrib/benchmarks/flink-batch-benchmark-task/target/scala-2.11/" +
     "flink-batch-benchmark-task-1.0-SNAPSHOT.jar"
 
-  override protected def runProcess(messageSize: Long,
-                                    messagesCount: Long,
+  override protected def runProcess(messagesCount: Long,
                                     batchSize: Int,
                                     windowSize: Int,
                                     slidingInterval: Int): Process = {

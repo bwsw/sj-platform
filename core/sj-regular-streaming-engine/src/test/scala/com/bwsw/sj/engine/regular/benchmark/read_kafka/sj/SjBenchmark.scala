@@ -128,7 +128,7 @@ class SjBenchmark(zkHost: String,
   }
 
 
-  override protected def runProcess(messageSize: Long, messagesCount: Long): Process = {
+  override protected def runProcess(messagesCount: Long): Process = {
     benchmarkPreparation.loadInstance(outputFile.getAbsolutePath, messagesCount, connectionRepository.getInstanceRepository)
 
     new ClassRunner(classOf[RegularTaskRunner], environment = environment).start()

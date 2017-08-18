@@ -36,6 +36,8 @@ class BatchKafkaReaderBenchmarkRunner(benchmark: BatchKafkaReaderBenchmark,
 
     val benchmarkResults = config.messagesCounts.flatMap { messagesCount =>
       config.messageSizes.flatMap { messageSize =>
+        benchmark.sendData(messageSize, messagesCount)
+
         config.batchSizes.flatMap { batchSize =>
           config.windowSizes.flatMap { windowSize =>
             config.slidingIntervals.map { i =>
@@ -43,8 +45,7 @@ class BatchKafkaReaderBenchmarkRunner(benchmark: BatchKafkaReaderBenchmark,
               else i
             }.map { slidingInterval =>
               val result = (0 until config.repetitions).map { _ =>
-                benchmark.runTest(messageSize,
-                  messagesCount,
+                benchmark.runTest(messagesCount,
                   batchSize,
                   windowSize,
                   slidingInterval)

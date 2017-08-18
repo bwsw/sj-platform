@@ -55,10 +55,52 @@ abstract class KafkaReaderBenchmark(zooKeeperAddress: String,
   def warmUp(): Long
 
   /**
+    * Generates data and send it to a kafka server
+    *
+    * @param messageSize   size of one message
+    * @param messagesCount count of messages
+    */
+  def sendData(messageSize: Long, messagesCount: Long): Unit = {
+    println(s"Messages count: $messagesCount")
+    println(s"Message size: $messageSize")
+
+    deleteTopic()
+    createTopic()
+
+    kafkaSender.send(messageSize, messagesCount)
+    println("Data sent to the Kafka")
+  }
+
+  /**
     * Closes opened connections, deletes temporary files
     */
-  def close(): Unit =
+  def close(): Unit = {
+    deleteTopic()
     kafkaClient.close()
+  }
+
+
+  /**
+    * Creates topic if it does not exists
+    */
+  protected def createTopic(): Unit = {
+    if (!kafkaClient.topicExists(kafkaTopic)) {
+      kafkaClient.createTopic(kafkaTopic, 1, 1)
+      while (!kafkaClient.topicExists(kafkaTopic))
+        Thread.sleep(100)
+    }
+  }
+
+  /**
+    * Deletes topic if it exists
+    */
+  protected def deleteTopic(): Unit = {
+    if (kafkaClient.topicExists(kafkaTopic)) {
+      kafkaClient.deleteTopic(kafkaTopic)
+      while (kafkaClient.topicExists(kafkaTopic))
+        Thread.sleep(100)
+    }
+  }
 
   /**
     * Retrieves result from file

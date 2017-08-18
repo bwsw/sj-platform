@@ -39,7 +39,7 @@ class FlinkBenchmark(zooKeeperAddress: String,
 
   private val taskJarPath = "../../contrib/benchmarks/flink-benchmark-task/target/scala-2.11/flink-benchmark-task-1.0-SNAPSHOT.jar"
 
-  override protected def runProcess(messageSize: Long, messagesCount: Long): Process = {
+  override protected def runProcess(messagesCount: Long): Process = {
     val arguments = Seq(
       s"--messagesCount", messagesCount.toString,
       s"--outputFile", outputFile.getAbsolutePath,
@@ -50,9 +50,6 @@ class FlinkBenchmark(zooKeeperAddress: String,
 
     val command = Seq("java", "-jar", taskJarPath) ++ arguments
 
-    val process = new ProcessBuilder(command.asJava).start()
-    println("Flink Application started")
-
-    process
+    new ProcessBuilder(command.asJava).start()
   }
 }

@@ -42,17 +42,18 @@ abstract class BatchKafkaReaderBenchmark(zooKeeperAddress: String,
   /**
     * Performs the first test because it needs more time than subsequent tests
     */
-  def warmUp(): Long = runTest(
-    warmingUpMessageSize,
-    warmingUpMessagesCount,
-    warmingUpBatchSize,
-    warmingUpWindowSize,
-    warmingUpSlidingInterval)
+  def warmUp(): Long = {
+    sendData(warmingUpMessageSize, warmingUpMessagesCount)
+    runTest(
+      warmingUpMessagesCount,
+      warmingUpBatchSize,
+      warmingUpWindowSize,
+      warmingUpSlidingInterval)
+  }
 
   /**
-    * Sends data into the Kafka server and runs an application under test
+    * Runs an application under test
     *
-    * @param messageSize     size of one message that is sent to the Kafka server
     * @param messagesCount   count of messages
     * @param batchSize       size of batch in milliseconds
     * @param windowSize      count of batches that will be contained into a window
@@ -60,28 +61,16 @@ abstract class BatchKafkaReaderBenchmark(zooKeeperAddress: String,
     *                        from the window)
     * @return time in milliseconds within which an application under test reads messages from Kafka
     */
-  def runTest(messageSize: Long,
-              messagesCount: Long,
+  def runTest(messagesCount: Long,
               batchSize: Int,
               windowSize: Int,
               slidingInterval: Int): Long = {
     println(s"Messages count: $messagesCount")
-    println(s"Message size: $messageSize")
     println(s"Batch size: $batchSize")
     println(s"Window size: $windowSize")
     println(s"Sliding interval: $slidingInterval")
 
-    kafkaClient.createTopic(kafkaTopic, 1, 1)
-    while (!kafkaClient.topicExists(kafkaTopic))
-      Thread.sleep(100)
-
-    println(s"Kafka topic $kafkaTopic created")
-
-    kafkaSender.send(messageSize, messagesCount)
-    println("Data sent to the Kafka")
-
     val process: Process = runProcess(
-      messageSize,
       messagesCount,
       batchSize,
       windowSize,
@@ -95,12 +84,6 @@ abstract class BatchKafkaReaderBenchmark(zooKeeperAddress: String,
 
     process.destroy()
 
-    kafkaClient.deleteTopic(kafkaTopic)
-    while (kafkaClient.topicExists(kafkaTopic))
-      Thread.sleep(100)
-
-    println(s"Kafka topic $kafkaTopic deleted")
-
     maybeResult.get
   }
 
@@ -108,12 +91,14 @@ abstract class BatchKafkaReaderBenchmark(zooKeeperAddress: String,
   /**
     * Used to run an application under test in a separate process
     *
-    * @param messageSize   size of one message that is sent to the Kafka server
-    * @param messagesCount count of messages
+    * @param messagesCount   count of messages
+    * @param batchSize       size of batch in milliseconds
+    * @param windowSize      count of batches that will be contained into a window
+    * @param slidingInterval the interval at which a window will be shifted (count of processed batches that will be removed
+    *                        from the window)
     * @return process of an application under test
     */
-  protected def runProcess(messageSize: Long,
-                           messagesCount: Long,
+  protected def runProcess(messagesCount: Long,
                            batchSize: Int,
                            windowSize: Int,
                            slidingInterval: Int): Process

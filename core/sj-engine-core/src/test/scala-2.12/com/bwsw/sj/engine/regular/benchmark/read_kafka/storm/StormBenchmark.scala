@@ -37,15 +37,12 @@ class StormBenchmark(zooKeeperAddress: String,
                      words: Array[String])
   extends RegularKafkaReaderBenchmark(zooKeeperAddress, kafkaAddress, words) {
 
-  override protected def runProcess(messageSize: Long, messagesCount: Long): Process = {
+  override protected def runProcess(messagesCount: Long): Process = {
     val properties = Map(
       kafkaTopicProperty -> kafkaTopic,
       outputFilenameProperty -> outputFile.getAbsolutePath,
       messagesCountProperty -> messagesCount.toString)
 
-    val process = new ClassRunner(classOf[StormBenchmarkLocalCluster], properties = properties).start()
-    println("Storm cluster started")
-
-    process
+    new ClassRunner(classOf[StormBenchmarkLocalCluster], properties = properties).start()
   }
 }

@@ -18,6 +18,8 @@
  */
 package com.bwsw.sj.engine.core.testutils.benchmark.read_kafka.regular
 
+import java.util.Date
+
 import com.bwsw.sj.engine.core.testutils.benchmark.read_kafka.{KafkaReaderBenchmarkConfig, KafkaReaderBenchmarkResult, KafkaReaderBenchmarkRunner}
 
 /**
@@ -36,7 +38,13 @@ class RegularKafkaReaderBenchmarkRunner(benchmark: RegularKafkaReaderBenchmark,
 
     val benchmarkResults = config.messagesCounts.flatMap { messagesCount =>
       config.messageSizes.map { messageSize =>
-        val result = (0 until config.repetitions).map(_ => benchmark.runTest(messageSize, messagesCount))
+        benchmark.sendData(messageSize, messagesCount)
+        val result = (0 until config.repetitions).map { _ =>
+          val millis = benchmark.runTest(messagesCount)
+          println(s"[${new Date()}] $millis")
+
+          millis
+        }
 
         RegularKafkaReaderBenchmarkResult(messageSize, messagesCount, result)
       }
