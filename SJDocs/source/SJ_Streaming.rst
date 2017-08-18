@@ -43,6 +43,10 @@ For the strictly ordered way of transaction opening a master producer is respons
 
 Finally, storage server commit logs are played and results are stored to RocksDB. 
 
+Checkpoint Group
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**CheckpointGroup** is the special entity which allows a developer to do atomic checkpoint for a group of producers and consumers. CheckpointGroup is the core component for exactly-once data exchange.
 
 Streaming Infrastructure
 -----------------------------------
