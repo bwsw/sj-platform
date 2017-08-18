@@ -10,9 +10,9 @@ The Streaming component is essential in SJ-Platform. The data is fed to the syst
 
 There are two kinds of streams in SJ-Platform:
 
-- An input stream - a stream which provides new events. There are two different input stream types in SJ-Platform: Kafka & T-Stream
+- An input stream - a stream which provides new events. There are two different input stream types in SJ-Platform: Kafka and T-Stream.
 
-- An output stream - a stream which is a destination for results. There is one output stream type in SJ-Platform: T-Stream
+- An output stream - a stream which is a destination for results. There is one output stream type in SJ-Platform: T-Stream.
 
 
 The data can be received from different sources. Currently, the platform supports obtaining data from Kafka and TCP sockets.
