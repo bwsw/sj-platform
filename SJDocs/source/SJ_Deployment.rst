@@ -368,7 +368,7 @@ Via the Marathon interface make sure the services are deployed.
  $ git clone https://github.com/bwsw/sj-platform.git
 
 5) Add the settings if running the framework on Mesos needs principal/secret:: 
- 
+
  $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"framework-principal\",\"value\": <principal>,\"domain\": \"configuration.system\"}" 
  $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"framework-secret\",\"value\": <secret>,\"domain\": \"configuration.system\"}" 
 
@@ -377,21 +377,21 @@ Now look and make sure you have access to the Web UI. You will see the platform 
 Module Uploading
 """"""""""""""""""""""
 
-First, the environment should be configured::
+1. First, the environment should be configured::
 
  address=<host>:<port>
 
 <host>:<port> — SJ Rest host and port.
 
-To upload modules to the system:
+2. To upload modules to the system::
 
-$ curl --form jar=@<module .jar file path and name here> http://$address/v1/modules
-$ curl --form jar=@ps-process/target/scala-2.11/ps-process-1.0.jar http://$address/v1/modules
-$ curl --form jar=@ps-output/target/scala-2.11/ps-output-1.0.jar http://$address/v1/modules
+ $ curl --form jar=@<module .jar file path and name here> http://$address/v1/modules
+ $ curl --form jar=@ps-process/target/scala-2.11/ps-process-1.0.jar http://$address/v1/modules
+ $ curl --form jar=@ps-output/target/scala-2.11/ps-output-1.0.jar http://$address/v1/modules
 
-Now engines are necessary for modules.
+3. Now engines are necessary for modules.
 
-Please, upload the engine jars for the modules (input-streaming, regular-streaming, output-streaming) and a Mesos framework. You can find them at our github repository:
+Please, upload the engine jars for the modules (input-streaming, regular-streaming, output-streaming) and a Mesos framework. You can find them at our github repository::
 
  cd sj-platform
 
@@ -402,13 +402,13 @@ Please, upload the engine jars for the modules (input-streaming, regular-streami
  $ curl --form jar=@core/sj-regular-streaming-engine/target/scala-2.12/sj-regular-streaming-engine-1.0-SNAPSHOT.jar http://$address/v1/custom/jars
  $ curl --form jar=@core/sj-output-streaming-engine/target/scala-2.12/sj-output-streaming-engine-1.0-SNAPSHOT.jar http://$address/v1/custom/jars
  
-Setup configurations for engines.
+4. Setup configurations for engines.
 
 The range of configurations include required and optional ones. To resolve the example task it is enough to upload the required configurations only.
 
-The list of all configurations can be viewed at the :ref:`Configuration`_ page.
+The list of all configurations can be viewed at the :ref:`Configuration` page.
 
-Setup settings for the engines, but first replace <rest_ip> with the IP of rest and <marathon_address> with the address of marathon::
+5. Setup settings for the engines, but first replace <rest_ip> with the IP of rest and <marathon_address> with the address of marathon::
 
  $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"session-timeout\",\"value\": \"7000\",\"domain\": \"configuration.apache-zookeeper\"}" 
  $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"current-framework\",\"value\": \"com.bwsw.fw-1.0\",\"domain\": \"configuration.system\"}" 
@@ -421,7 +421,7 @@ Setup settings for the engines, but first replace <rest_ip> with the IP of rest 
  $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"kafka-subscriber-timeout\",\"value\": \"100\",\"domain\": \"configuration.system\"}" 
  $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"low-watermark\",\"value\": \"100\",\"domain\": \"configuration.system\"}" 
 
-Send the next POST requests to upload configurations for module validators::
+6. Send the next POST requests to upload configurations for module validators::
 
  $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"regular-streaming-validator-class\",\"value\": \"com.bwsw.sj.crud.rest.instance.validator.RegularInstanceValidator\",\"domain\": \"configuration.system\"}" 
  $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"input-streaming-validator-class\",\"value\": \"com.bwsw.sj.crud.rest.instance.validator.InputInstanceValidator\",\"domain\": \"configuration.system\"}" 
@@ -429,10 +429,51 @@ Send the next POST requests to upload configurations for module validators::
 
 In the UI you can see the uploaded configurations under the “Configurations” tab of the main navigation.
 
+Stream Creation
+""""""""""""""""""""""""""""""
 
-Mesos framework
+1. Set up providers:
+
+There is default value of elasticsearch, kafka and zookeeper IPs (176.120.25.19) in json configuration files, so you shall change it appropriately via sed app before using (replace the following placeholders <elasticsearch_ip>, <kafka_ip>, <zookeeper_address>, <provider_name>)::
+
+ sed -i 's/176.120.25.19:9300/<elasticsearch_ip>:31930/g' api-json/providers/elasticsearch-ps-provider.json
+ curl --request POST "http://$address/v1/providers" -H 'Content-Type: application/json' --data "@api-json/providers/ <provider_name>.json" 
+
+ sed -i 's/176.120.25.19:9092/<kafka_ip>:31992/g' api-json/providers/kafka-ps-provider.json
+ curl --request POST "http://$address/v1/providers" -H 'Content-Type: application/json' --data "@api-json/providers/ <provider_name>.json" 
+
+ sed -i 's/176.120.25.19:2181/<zookeeper_address>/g' api-json/providers/zookeeper-ps-provider.json
+ curl --request POST "http://$address/v1/providers" -H 'Content-Type: application/json' --data "@api-json/providers/ <provider_name>.json" 
+
+2. Next set up services (replace <service_name> with the name of the service json file)::
+
+ $ curl --request POST "http://$address/v1/services" -H 'Content-Type: application/json' --data "@api-json/services/<service_name>.json" 
+
+3. Create streams (replace <stream_name> with a name of the stream json file)::
+
+ $ curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/<stream_name>.json" 
+
+4. Create output destination
+
+At this step all necessary indexes, tables and mapping should be created for storing the processed result.
+
+
+Instance Creation
+""""""""""""""""""""""""""""
+
+Create instances (replace <module_name> with the name of the module the instance is created for, <instance_name> with a name of the instance)::
+
+ $ curl --request POST "http://$address/v1/modules/input-streaming/<module_name>/1.0/instance" -H 'Content-Type: application/json' --data "@api-json/instances/<instance_name>.json" 
+ 
+Instance Launching
 """"""""""""""""""""""""
-.. warning:: The section is under development!
+Laucnh the created instances by sending GET request (replace <module_name> and <instance_name> with the name of the instance and the name of its module)::
+
+ $ curl --request GET "http://$address/v1/modules/input-streaming/<module_name>/1.0/instance/<instance_name>/start" 
+
+Start Flow
+""""""""""""""""""""""""
+Start the flow of data into the system.
 
 Minimesos Deployment
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
