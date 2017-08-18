@@ -18,7 +18,6 @@
  */
 package com.bwsw.sj.engine.core.testutils.benchmark.read_kafka.batch
 
-import com.bwsw.sj.common.utils.benchmark.BenchmarkUtils.retrieveResultFromFile
 import com.bwsw.sj.engine.core.testutils.benchmark.read_kafka.KafkaReaderBenchmark
 
 /**
@@ -88,10 +87,10 @@ abstract class BatchKafkaReaderBenchmark(zooKeeperAddress: String,
       windowSize,
       slidingInterval)
 
-    var maybeResult: Option[Long] = retrieveResultFromFile(outputFile).map(_.toLong)
+    var maybeResult: Option[Long] = retrieveResultFromFile()
     while (maybeResult.isEmpty) {
       Thread.sleep(lookupResultTimeout)
-      maybeResult = retrieveResultFromFile(outputFile).map(_.toLong)
+      maybeResult = retrieveResultFromFile()
     }
 
     process.destroy()

@@ -18,7 +18,7 @@
  */
 package com.bwsw.sj.engine.core.testutils.benchmark.read_kafka
 
-import java.io.File
+import java.io.{BufferedReader, File, FileReader}
 import java.util.UUID
 
 import com.bwsw.common.KafkaClient
@@ -59,4 +59,22 @@ abstract class KafkaReaderBenchmark(zooKeeperAddress: String,
     */
   def close(): Unit =
     kafkaClient.close()
+
+  /**
+    * Retrieves result from file
+    *
+    * @return result if a file exists or None otherwise
+    */
+  protected def retrieveResultFromFile(): Option[Long] = {
+    if (outputFile.exists()) {
+      val reader = new BufferedReader(new FileReader(outputFile))
+      val result = reader.readLine()
+      reader.close()
+      outputFile.delete()
+
+      Some(result.toLong)
+    }
+    else
+      None
+  }
 }

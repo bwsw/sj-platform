@@ -18,7 +18,6 @@
  */
 package com.bwsw.sj.engine.regular.benchmark.read_kafka.flink
 
-import com.bwsw.sj.common.utils.benchmark.BenchmarkUtils.retrieveResultFromFile
 import com.bwsw.sj.engine.core.testutils.benchmark.read_kafka.regular.RegularKafkaReaderBenchmark
 
 import scala.collection.JavaConverters._
@@ -56,7 +55,4 @@ class FlinkBenchmark(zooKeeperAddress: String,
 
     process
   }
-
-  override protected def retrieveResult(messageSize: Long, messagesCount: Long): Option[Long] =
-    retrieveResultFromFile(outputFile).map(_.toLong)
 }

@@ -56,15 +56,15 @@ abstract class RegularKafkaReaderBenchmark(zooKeeperAddress: String,
 
     println(s"Kafka topic $kafkaTopic created")
 
-    kafkaSender.send(messageSize, messagesCount, firstMessage(messageSize, messagesCount))
+    kafkaSender.send(messageSize, messagesCount)
     println("Data sent to the Kafka")
 
     val process: Process = runProcess(messageSize, messagesCount)
 
-    var maybeResult: Option[Long] = retrieveResult(messageSize, messagesCount)
+    var maybeResult: Option[Long] = retrieveResultFromFile()
     while (maybeResult.isEmpty) {
       Thread.sleep(lookupResultTimeout)
-      maybeResult = retrieveResult(messageSize, messagesCount)
+      maybeResult = retrieveResultFromFile()
     }
 
     process.destroy()
@@ -87,23 +87,4 @@ abstract class RegularKafkaReaderBenchmark(zooKeeperAddress: String,
     * @return process of an application under test
     */
   protected def runProcess(messageSize: Long, messagesCount: Long): Process
-
-  /**
-    * Is invoked every [[lookupResultTimeout]] milliseconds until result retrieved.
-    * A result is a time in milliseconds within which an application under test reads messages from Kafka.
-    *
-    * @param messageSize   size of one message that is sent to the Kafka server
-    * @param messagesCount count of messages
-    * @return result if a test has done or None otherwise
-    */
-  protected def retrieveResult(messageSize: Long, messagesCount: Long): Option[Long]
-
-  /**
-    * Used to create a specific message that will be sent to the Kafka server as the first message
-    *
-    * @param messageSize   size of one message that is sent to the Kafka server
-    * @param messagesCount count of messages
-    * @return specific first message or None
-    */
-  protected def firstMessage(messageSize: Long, messagesCount: Long): Option[String] = None
 }

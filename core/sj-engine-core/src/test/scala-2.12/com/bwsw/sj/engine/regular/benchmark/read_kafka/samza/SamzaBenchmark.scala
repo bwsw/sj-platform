@@ -21,7 +21,6 @@ package com.bwsw.sj.engine.regular.benchmark.read_kafka.samza
 import java.io.{File, FileWriter}
 import java.util.UUID
 
-import com.bwsw.sj.common.utils.benchmark.BenchmarkUtils.retrieveResultFromFile
 import com.bwsw.sj.common.utils.benchmark.ClassRunner
 import com.bwsw.sj.engine.core.testutils.benchmark.read_kafka.regular.RegularKafkaReaderBenchmark
 import com.bwsw.sj.engine.regular.benchmark.read_kafka.samza.SamzaBenchmarkLiterals._
@@ -68,9 +67,6 @@ class SamzaBenchmark(zooKeeperAddress: String,
 
     jobRunner
   }
-
-  override protected def retrieveResult(messageSize: Long, messagesCount: Long): Option[Long] =
-    retrieveResultFromFile(outputFile).map(_.toLong)
 
 
   private def prepareProperties(messagesCount: Long): Unit = {

@@ -18,7 +18,6 @@
  */
 package com.bwsw.sj.engine.regular.benchmark.read_kafka.storm
 
-import com.bwsw.sj.common.utils.benchmark.BenchmarkUtils.retrieveResultFromFile
 import com.bwsw.sj.common.utils.benchmark.ClassRunner
 import com.bwsw.sj.engine.core.testutils.benchmark.read_kafka.regular.RegularKafkaReaderBenchmark
 import com.bwsw.sj.engine.regular.benchmark.read_kafka.storm.StormBenchmarkLiterals._
@@ -49,7 +48,4 @@ class StormBenchmark(zooKeeperAddress: String,
 
     process
   }
-
-  override protected def retrieveResult(messageSize: Long, messagesCount: Long): Option[Long] =
-    retrieveResultFromFile(outputFile).map(_.toLong)
 }

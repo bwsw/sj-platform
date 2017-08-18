@@ -26,7 +26,6 @@ import com.bwsw.sj.common.MongoAuthChecker
 import com.bwsw.sj.common.config.TempHelperForConfigSetup
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.CommonAppConfigNames
-import com.bwsw.sj.common.utils.benchmark.BenchmarkUtils.retrieveResultFromFile
 import com.bwsw.sj.common.utils.benchmark.ClassRunner
 import com.bwsw.sj.engine.core.testutils.benchmark.read_kafka.regular.RegularKafkaReaderBenchmark
 import com.bwsw.sj.engine.core.testutils.{Server, TestStorageServer}
@@ -134,9 +133,6 @@ class SjBenchmark(zkHost: String,
 
     new ClassRunner(classOf[RegularTaskRunner], environment = environment).start()
   }
-
-  override protected def retrieveResult(messageSize: Long, messagesCount: Long): Option[Long] =
-    retrieveResultFromFile(outputFile).map(_.toLong)
 
   private def findFreePort(): Int = {
     val randomSocket = new ServerSocket(0)
