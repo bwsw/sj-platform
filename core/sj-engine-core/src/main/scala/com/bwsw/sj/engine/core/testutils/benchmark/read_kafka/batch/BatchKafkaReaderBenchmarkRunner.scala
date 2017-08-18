@@ -18,19 +18,20 @@
  */
 package com.bwsw.sj.engine.core.testutils.benchmark.read_kafka.batch
 
-import java.io.{File, FileWriter}
+import com.bwsw.sj.engine.core.testutils.benchmark.read_kafka.{KafkaReaderBenchmarkResult, KafkaReaderBenchmarkRunner}
 
 /**
-  * Provides methods for running [[KafkaReaderBenchmark]] and writing a result into a file
+  * Provides methods for running [[BatchKafkaReaderBenchmark]] and writing a result into a file
   *
   * @param benchmark benchmark
   * @param config    config for benchmark
   * @author Pavel Tomskikh
   */
-class KafkaReaderBenchmarkRunner(benchmark: KafkaReaderBenchmark,
-                                 config: KafkaReaderBenchmarkConfig) {
+class BatchKafkaReaderBenchmarkRunner(benchmark: BatchKafkaReaderBenchmark,
+                                      config: BatchKafkaReaderBenchmarkConfig)
+  extends KafkaReaderBenchmarkRunner(config) {
 
-  def run(): Array[KafkaReaderBenchmarkResult] = {
+  def run(): Seq[BatchKafkaReaderBenchmarkResult] = {
     benchmark.warmUp()
 
     val benchmarkResults = config.messagesCounts.flatMap { messagesCount =>
@@ -49,7 +50,7 @@ class KafkaReaderBenchmarkRunner(benchmark: KafkaReaderBenchmark,
                   slidingInterval)
               }
 
-              KafkaReaderBenchmarkResult(
+              BatchKafkaReaderBenchmarkResult(
                 messageSize,
                 messagesCount,
                 batchSize,
@@ -66,22 +67,16 @@ class KafkaReaderBenchmarkRunner(benchmark: KafkaReaderBenchmark,
 
     benchmarkResults
   }
-
-  def writeResult(benchmarkResults: Seq[KafkaReaderBenchmarkResult]) = {
-    val writer = new FileWriter(new File(config.outputFileName))
-    writer.write(benchmarkResults.mkString("\n"))
-    writer.close()
-  }
 }
 
-case class KafkaReaderBenchmarkResult(messageSize: Long,
-                                      messagesCount: Long,
-                                      batchSize: Int,
-                                      windowSize: Int,
-                                      slidingInterval: Int,
-                                      results: Seq[Long]) {
-  def averageResult: Long =
-    results.sum / results.length
+
+case class BatchKafkaReaderBenchmarkResult(messageSize: Long,
+                                           messagesCount: Long,
+                                           batchSize: Int,
+                                           windowSize: Int,
+                                           slidingInterval: Int,
+                                           results: Seq[Long])
+  extends KafkaReaderBenchmarkResult(results) {
 
   override def toString: String =
     s"$messagesCount,$messageSize,$batchSize,$windowSize,$slidingInterval,${results.mkString(",")},$averageResult"

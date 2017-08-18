@@ -18,10 +18,7 @@
  */
 package com.bwsw.sj.engine.core.testutils.benchmark.read_kafka.regular
 
-import java.util.UUID
-
-import com.bwsw.common.KafkaClient
-import com.bwsw.sj.common.utils.benchmark.KafkaDataSender
+import com.bwsw.sj.engine.core.testutils.benchmark.read_kafka.KafkaReaderBenchmark
 
 /**
   * Provides methods for testing the speed of reading data from Kafka by some application.
@@ -33,15 +30,10 @@ import com.bwsw.sj.common.utils.benchmark.KafkaDataSender
   * @param words            list of words that are sent to the kafka server
   * @author Pavel Tomskikh
   */
-abstract class KafkaReaderBenchmark(zooKeeperAddress: String,
-                                    kafkaAddress: String,
-                                    words: Array[String]) {
-  protected val kafkaTopic: String = "performance-benchmark-" + UUID.randomUUID().toString
-  protected val kafkaClient: KafkaClient = new KafkaClient(Array(zooKeeperAddress))
-  protected val kafkaSender: KafkaDataSender = new KafkaDataSender(kafkaAddress, kafkaTopic, words, " ")
-  protected val warmingUpMessageSize: Long = 10
-  protected val warmingUpMessagesCount: Long = 10
-  protected val lookupResultTimeout: Long = 5000
+abstract class RegularKafkaReaderBenchmark(zooKeeperAddress: String,
+                                           kafkaAddress: String,
+                                           words: Array[String])
+  extends KafkaReaderBenchmark(zooKeeperAddress, kafkaAddress, words) {
 
   /**
     * Performs the first test because it needs more time than subsequent tests
@@ -85,12 +77,6 @@ abstract class KafkaReaderBenchmark(zooKeeperAddress: String,
 
     maybeResult.get
   }
-
-  /**
-    * Closes opened connections, deletes temporary files
-    */
-  def close(): Unit =
-    kafkaClient.close()
 
 
   /**

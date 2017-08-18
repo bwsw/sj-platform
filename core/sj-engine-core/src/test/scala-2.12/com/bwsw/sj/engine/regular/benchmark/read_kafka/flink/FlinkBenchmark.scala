@@ -18,11 +18,8 @@
  */
 package com.bwsw.sj.engine.regular.benchmark.read_kafka.flink
 
-import java.io.File
-import java.util.UUID
-
 import com.bwsw.sj.common.utils.benchmark.BenchmarkUtils.retrieveResultFromFile
-import com.bwsw.sj.engine.core.testutils.benchmark.read_kafka.regular.KafkaReaderBenchmark
+import com.bwsw.sj.engine.core.testutils.benchmark.read_kafka.regular.RegularKafkaReaderBenchmark
 
 import scala.collection.JavaConverters._
 
@@ -39,10 +36,8 @@ import scala.collection.JavaConverters._
 class FlinkBenchmark(zooKeeperAddress: String,
                      kafkaAddress: String,
                      words: Array[String])
-  extends KafkaReaderBenchmark(zooKeeperAddress, kafkaAddress, words) {
+  extends RegularKafkaReaderBenchmark(zooKeeperAddress, kafkaAddress, words) {
 
-  private val outputFilename = "benchmark-output-" + UUID.randomUUID().toString
-  private val outputFile = new File(outputFilename)
   private val taskJarPath = "../../contrib/benchmarks/flink-benchmark-task/target/scala-2.11/flink-benchmark-task-1.0-SNAPSHOT.jar"
 
   override protected def runProcess(messageSize: Long, messagesCount: Long): Process = {

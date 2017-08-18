@@ -28,7 +28,7 @@ import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.CommonAppConfigNames
 import com.bwsw.sj.common.utils.benchmark.ClassRunner
 import com.bwsw.sj.engine.batch.BatchTaskRunner
-import com.bwsw.sj.engine.core.testutils.benchmark.read_kafka.batch.KafkaReaderBenchmark
+import com.bwsw.sj.engine.core.testutils.benchmark.read_kafka.batch.BatchKafkaReaderBenchmark
 import com.bwsw.sj.engine.core.testutils.{Server, TestStorageServer}
 import com.typesafe.config.ConfigFactory
 
@@ -50,7 +50,7 @@ class SjBenchmark(zkHost: String,
                   kafkaAddress: String,
                   words: Array[String]) extends {
   private val zooKeeperAddress = zkHost + ":" + zkPort
-} with KafkaReaderBenchmark(zooKeeperAddress, kafkaAddress, words) {
+} with BatchKafkaReaderBenchmark(zooKeeperAddress, kafkaAddress, words) {
 
   private val moduleFilename = "../../contrib/benchmarks/sj-batch-performance-benchmark/target/scala-2.12/" +
     "sj-batch-performance-benchmark-1.0-SNAPSHOT.jar"

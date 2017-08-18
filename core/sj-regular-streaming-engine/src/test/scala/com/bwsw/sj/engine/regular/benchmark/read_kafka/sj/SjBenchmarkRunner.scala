@@ -23,7 +23,8 @@ import java.util.Calendar
 import com.bwsw.sj.common.utils.BenchmarkConfigNames._
 import com.bwsw.sj.common.utils.BenchmarkLiterals.sjDefaultOutputFile
 import com.bwsw.sj.common.utils.CommonAppConfigNames.{zooKeeperHost, zooKeeperPort}
-import com.bwsw.sj.engine.core.testutils.benchmark.read_kafka.regular.{KafkaReaderBenchmarkConfig, KafkaReaderBenchmarkRunner}
+import com.bwsw.sj.engine.core.testutils.benchmark.read_kafka.KafkaReaderBenchmarkConfig
+import com.bwsw.sj.engine.core.testutils.benchmark.read_kafka.regular.RegularKafkaReaderBenchmarkRunner
 import com.typesafe.config.{Config, ConfigFactory, ConfigValueFactory}
 
 /**
@@ -69,7 +70,7 @@ object SjBenchmarkRunner extends App {
   benchmark.startServices()
   benchmark.prepare()
 
-  private val benchmarkRunner = new KafkaReaderBenchmarkRunner(benchmark, benchmarkConfig)
+  private val benchmarkRunner = new RegularKafkaReaderBenchmarkRunner(benchmark, benchmarkConfig)
   private val results = benchmarkRunner.run()
   benchmarkRunner.writeResult(results)
 

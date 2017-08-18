@@ -23,7 +23,8 @@ import java.util.UUID
 
 import com.bwsw.sj.common.utils.benchmark.BenchmarkUtils.retrieveResultFromFile
 import com.bwsw.sj.common.utils.benchmark.ClassRunner
-import com.bwsw.sj.engine.core.testutils.benchmark.read_kafka.regular.KafkaReaderBenchmark
+import com.bwsw.sj.engine.core.testutils.benchmark.read_kafka.regular.RegularKafkaReaderBenchmark
+import org.apache.samza.job.JobRunner
 
 /**
   * Provides methods for testing the speed of reading data by [[http://samza.apache.org Apache Samza]] from Kafka.
@@ -38,10 +39,8 @@ import com.bwsw.sj.engine.core.testutils.benchmark.read_kafka.regular.KafkaReade
 class SamzaBenchmark(zooKeeperAddress: String,
                      kafkaAddress: String,
                      words: Array[String])
-  extends KafkaReaderBenchmark(zooKeeperAddress, kafkaAddress, words) {
+  extends RegularKafkaReaderBenchmark(zooKeeperAddress, kafkaAddress, words) {
 
-  private val outputFilename = "benchmark-output-" + UUID.randomUUID().toString
-  private val outputFile = new File(outputFilename)
   private val propertiesFilename = s"samza-benchmark-${UUID.randomUUID().toString}.properties"
   private val propertiesFile = new File(propertiesFilename)
 

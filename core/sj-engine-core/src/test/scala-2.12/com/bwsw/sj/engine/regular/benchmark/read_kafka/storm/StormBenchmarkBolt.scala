@@ -21,6 +21,11 @@ package com.bwsw.sj.engine.regular.benchmark.read_kafka.storm
 import java.io.{File, FileWriter}
 import java.util
 
+import org.apache.storm.task.{OutputCollector, TopologyContext}
+import org.apache.storm.topology.OutputFieldsDeclarer
+import org.apache.storm.topology.base.BaseRichBolt
+import org.apache.storm.tuple.Tuple
+
 /**
   * @author Pavel Tomskikh
   */

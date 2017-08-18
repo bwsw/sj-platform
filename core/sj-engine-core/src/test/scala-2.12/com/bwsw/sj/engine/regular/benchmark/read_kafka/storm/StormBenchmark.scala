@@ -18,12 +18,9 @@
  */
 package com.bwsw.sj.engine.regular.benchmark.read_kafka.storm
 
-import java.io.File
-import java.util.UUID
-
 import com.bwsw.sj.common.utils.benchmark.BenchmarkUtils.retrieveResultFromFile
 import com.bwsw.sj.common.utils.benchmark.ClassRunner
-import com.bwsw.sj.engine.core.testutils.benchmark.read_kafka.regular.KafkaReaderBenchmark
+import com.bwsw.sj.engine.core.testutils.benchmark.read_kafka.regular.RegularKafkaReaderBenchmark
 import com.bwsw.sj.engine.regular.benchmark.read_kafka.storm.StormBenchmarkLiterals._
 
 /**
@@ -39,10 +36,7 @@ import com.bwsw.sj.engine.regular.benchmark.read_kafka.storm.StormBenchmarkLiter
 class StormBenchmark(zooKeeperAddress: String,
                      kafkaAddress: String,
                      words: Array[String])
-  extends KafkaReaderBenchmark(zooKeeperAddress, kafkaAddress, words) {
-
-  private val outputFilename = "benchmark-output-" + UUID.randomUUID().toString
-  private val outputFile = new File(outputFilename)
+  extends RegularKafkaReaderBenchmark(zooKeeperAddress, kafkaAddress, words) {
 
   override protected def runProcess(messageSize: Long, messagesCount: Long): Process = {
     val properties = Map(
