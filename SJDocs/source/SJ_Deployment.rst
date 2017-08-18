@@ -327,15 +327,15 @@ For sj-rest.json it is better to upload the docker image separately::
 
 3. Run the services on Marathon:
 
-Mongo::
+**Mongo**::
  
  $ curl -X POST http://172.17.0.1:8080/v2/apps -H "Content-type: application/json" -d @mongo.json 
 
-Kafka::
+**Kafka**::
 
  $ curl -X POST http://172.17.0.1:8080/v2/apps -H "Content-type: application/json" -d @kafka.json 
 
-Elasticsearch:
+**Elasticsearch**:
 
 Please, note that `vm.max_map_count` should be slave::
 
@@ -347,16 +347,16 @@ Then launch elasticsearch::
  $ curl -X POST http://172.17.0.1:8080/v2/apps -H "Content-type: application/json" -d @elasticsearch.json
 
 
-SJ-rest::
+**SJ-rest**::
 
  $ curl -X POST http://172.17.0.1:8080/v2/apps -H "Content-type: application/json" -d @sj-rest.json    
     
-T-Streams::
+**T-Streams**::
  
  $ curl -X POST http://172.17.0.1:8080/v2/apps -H "Content-type: application/json" -d @tts.json 
 
 
-Kibana::
+**Kibana**::
 
  $ curl -X POST http://172.17.0.1:8080/v2/apps -H "Content-type: application/json" -d @kibana.json
 
@@ -365,12 +365,12 @@ Via the Marathon interface make sure the services are deployed.
 
 4. Copy the github repository of the SJ-Platform::
 
- $ git clone https://github.com/bwsw/sj-platform.git
+   $ git clone https://github.com/bwsw/sj-platform.git
 
 5. Add the settings if running the framework on Mesos needs principal/secret:: 
 
- $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"framework-principal\",\"value\": <principal>,\"domain\": \"configuration.system\"}" 
- $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"framework-secret\",\"value\": <secret>,\"domain\": \"configuration.system\"}" 
+   $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"framework-principal\",\"value\": <principal>,\"domain\": \"configuration.system\"}" 
+   $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"framework-secret\",\"value\": <secret>,\"domain\": \"configuration.system\"}" 
 
 Now look and make sure you have access to the Web UI. You will see the platform but it is not completed with any entities yet. They will be added in the next steps.
 
@@ -379,15 +379,15 @@ Module Uploading
 
 1. First, the environment should be configured::
 
- address=<host>:<port>
+    address=<host>:<port>
 
 <host>:<port> — SJ Rest host and port.
 
 2. To upload modules to the system::
 
- $ curl --form jar=@<module .jar file path and name here> http://$address/v1/modules
- $ curl --form jar=@ps-process/target/scala-2.11/ps-process-1.0.jar http://$address/v1/modules
- $ curl --form jar=@ps-output/target/scala-2.11/ps-output-1.0.jar http://$address/v1/modules
+   $ curl --form jar=@<module .jar file path and name here> http://$address/v1/modules
+   $ curl --form jar=@ps-process/target/scala-2.11/ps-process-1.0.jar http://$address/v1/modules
+   $ curl --form jar=@ps-output/target/scala-2.11/ps-output-1.0.jar http://$address/v1/modules
 
 3. Now engines are necessary for modules.
 
