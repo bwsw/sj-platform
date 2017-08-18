@@ -36,9 +36,17 @@ class BatchKafkaReaderBenchmarkRunner(benchmark: BatchKafkaReaderBenchmark,
   def run(): Seq[BatchKafkaReaderBenchmarkResult] = {
     benchmark.warmUp()
 
-    val benchmarkResults = config.messagesCounts.flatMap { messagesCount =>
-      config.messageSizes.flatMap { messageSize =>
-        benchmark.sendData(messageSize, messagesCount)
+    val benchmarkResults = config.messageSizes.flatMap { messageSize =>
+      println(s"Message size: $messageSize")
+      benchmark.clearTopic()
+      var topicSize: Long = 0
+
+      config.messagesCounts.flatMap { messagesCount =>
+        println(s"Messages count: $messagesCount")
+        if (messagesCount > topicSize) {
+          benchmark.sendData(messageSize, messagesCount - topicSize)
+          topicSize = messagesCount
+        }
 
         config.batchSizes.flatMap { batchSize =>
           config.windowSizes.flatMap { windowSize =>

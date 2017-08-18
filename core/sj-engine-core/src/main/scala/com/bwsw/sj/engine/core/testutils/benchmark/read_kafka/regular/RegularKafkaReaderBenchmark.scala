@@ -39,6 +39,7 @@ abstract class RegularKafkaReaderBenchmark(zooKeeperAddress: String,
     * Performs the first test because it needs more time than subsequent tests
     */
   def warmUp(): Long = {
+    clearTopic()
     sendData(warmingUpMessageSize, warmingUpMessagesCount)
     runTest(warmingUpMessagesCount)
   }

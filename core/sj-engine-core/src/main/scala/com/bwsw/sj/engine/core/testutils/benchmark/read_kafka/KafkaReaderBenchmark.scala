@@ -61,15 +61,18 @@ abstract class KafkaReaderBenchmark(zooKeeperAddress: String,
     * @param messagesCount count of messages
     */
   def sendData(messageSize: Long, messagesCount: Long): Unit = {
-    println(s"Messages count: $messagesCount")
-    println(s"Message size: $messageSize")
-
-    deleteTopic()
-    createTopic()
-
     kafkaSender.send(messageSize, messagesCount)
     println("Data sent to the Kafka")
   }
+
+  /**
+    * Removes data from a kafka topic
+    */
+  def clearTopic(): Unit = {
+    deleteTopic()
+    createTopic()
+  }
+
 
   /**
     * Closes opened connections, deletes temporary files

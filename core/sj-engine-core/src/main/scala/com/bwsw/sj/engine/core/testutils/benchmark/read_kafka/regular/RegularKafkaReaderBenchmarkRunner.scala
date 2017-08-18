@@ -36,9 +36,18 @@ class RegularKafkaReaderBenchmarkRunner(benchmark: RegularKafkaReaderBenchmark,
   def run(): Seq[RegularKafkaReaderBenchmarkResult] = {
     benchmark.warmUp()
 
-    val benchmarkResults = config.messagesCounts.flatMap { messagesCount =>
-      config.messageSizes.map { messageSize =>
-        benchmark.sendData(messageSize, messagesCount)
+    val benchmarkResults = config.messageSizes.flatMap { messageSize =>
+      println(s"Message size: $messageSize")
+      benchmark.clearTopic()
+      var topicSize: Long = 0
+
+      config.messagesCounts.map { messagesCount =>
+        println(s"Messages count: $messagesCount")
+        if (messagesCount > topicSize) {
+          benchmark.sendData(messageSize, messagesCount - topicSize)
+          topicSize = messagesCount
+        }
+
         val result = (0 until config.repetitions).map { _ =>
           val millis = benchmark.runTest(messagesCount)
           println(s"[${new Date()}] $millis")
