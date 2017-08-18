@@ -42,7 +42,7 @@ Streams need infrastructure: Providers and Services. This is a required presetti
 
 Provider is the service provider for data transformation into a stream.
 
-Service is service to transform data into a stream of an exact type.
+Service is a service to transform data into a stream of an exact type.
 
 They can be of different types. The types of platform entities in the pipeline determine the type of providers and services that are necessary in the particular case.
 
@@ -58,7 +58,7 @@ Secondly, find in the diagram what services are necessary for these types of str
 
 Finally, when services are determined, it is easy to see what types of providers should be created. 
 
-Start creating the infrastructure from providers, then proceed with services and then streams. Detailed instructions can be found in `Tutorial <>`_ (for creating infrastructure via REST API) or in the `UI Guide <http://streamjuggler.readthedocs.io/en/develop/SJ_UI_Guide.html>`_ for creating through the Web UI.
+Start creating the infrastructure from providers, then proceed with services and then streams. Detailed instructions can be found in the `Tutorial <>`_ (for creating infrastructure via REST API) or in the `UI Guide <http://streamjuggler.readthedocs.io/en/develop/SJ_UI_Guide.html>`_ for creating through the Web UI.
 
 
 
