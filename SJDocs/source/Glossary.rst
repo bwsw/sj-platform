@@ -7,10 +7,11 @@ Glossary
 Batch 
   A minimum time interval during which a handler collect events in a stream.
 
-Check-every policy
-
 Checkpoint
   Completeness check of the data received after the stream processing.
+  
+Checkpoint Group
+  A special entity which allows a developer to do atomic checkpoint for a group of producers and consumers. 
 
 Custom handler 
   A handler specified by a user.
@@ -18,11 +19,20 @@ Custom handler
 Database service 
   The database provided by an exact provider.
 
+Engine
+  Uses module settings to handle data flow making it into streams.
+
+Envelope
+  A container for messages or events with data records.
+
 Event 
   Minimal data unit in a stream.
 
 Exactly once processing 
   The system processes events in a stream only once
+
+Executor
+  A part of a module that performs data processing.
 
 Handler 
   A program module processing streams.
@@ -63,8 +73,14 @@ Stream
 Streams service 
   A service to perform an input data into a stream of an exact type. 
 
+Task
+  The actual data processing.
+
 Transaction 
   A separate atomic operations with events.
+
+T-streams
+  (transactional streams); a Scala library and infrastructure components which implement transactional messaging.
 
 Typed stream 
   A stream the avro schema for which is specified.
@@ -72,17 +88,7 @@ Typed stream
 Window 
   A time period multiple of a batch during which the event collecting takes place.
   
-T-streams
-  (transactional streams); a Scala library and infrastructure components which implement transactional messaging.
 
-Envelope
-  A container for messages or events with data records.
 
-Task
-  The actual data processing.
 
-Executor
-  A part of a module that performs data processing.
 
-Engine
-  Uses module settings to handle data flow making it into streams.

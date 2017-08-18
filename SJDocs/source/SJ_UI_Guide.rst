@@ -34,7 +34,7 @@ The SJ-Platform allows to upload your custom module for data stream processing w
 
 For correct performance a module requires creating a stream/streams with its service(-s) and service providers.
 
-The diagram below may help you to understand the dependency of instances in the platform.
+The diagram below may help you to understand the dependency of entity types in the platform.
 
 .. figure:: _static/InstanceCorrelation1.png
 

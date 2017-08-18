@@ -67,7 +67,7 @@ An input type of modules handles external input streams, does data deduplication
 
 .. figure:: _static/InputModuleStructure1.png
   :scale: 80 %
-It performs the transformation of the streams incoming from TCP to T-streams. T-streams are persistent streams designed for exactly-once processing (so it includes transactional producer, consumer and subscriber). Find more information about T-streams at `the site: <http://t-streams.com>`_ 
+It performs the transformation of the streams incoming from TCP to T-streams. T-streams are persistent streams designed for exactly-once processing (so it includes transactional producer, consumer and subscriber). Find more information about T-streams at `the site <http://t-streams.com>`_ .
 
 In the diagram below you can see the illustrated dataflow for an input module.
 
