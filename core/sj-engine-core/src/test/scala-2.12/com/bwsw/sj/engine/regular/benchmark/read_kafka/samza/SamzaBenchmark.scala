@@ -24,6 +24,7 @@ import java.util.UUID
 import com.bwsw.sj.common.utils.benchmark.BenchmarkUtils.retrieveResultFromFile
 import com.bwsw.sj.common.utils.benchmark.ClassRunner
 import com.bwsw.sj.engine.core.testutils.benchmark.read_kafka.regular.RegularKafkaReaderBenchmark
+import com.bwsw.sj.engine.regular.benchmark.read_kafka.samza.SamzaBenchmarkLiterals._
 import org.apache.samza.job.JobRunner
 
 /**
@@ -44,22 +45,20 @@ class SamzaBenchmark(zooKeeperAddress: String,
   private val propertiesFilename = s"samza-benchmark-${UUID.randomUUID().toString}.properties"
   private val propertiesFile = new File(propertiesFilename)
 
-  prepareProperties()
-
   /**
     * Closes opened connections, deletes temporary files
     */
   override def close(): Unit = {
-    propertiesFile.delete()
+    if (propertiesFile.exists())
+      propertiesFile.delete()
 
     super.close()
   }
 
 
-  override protected def firstMessage(messageSize: Long, messagesCount: Long): Option[String] =
-    Some(s"$messagesCount,${outputFile.getAbsolutePath}")
-
   override protected def runProcess(messageSize: Long, messagesCount: Long): Process = {
+    prepareProperties(messagesCount)
+
     val arguments = Seq(
       "--config-factory=org.apache.samza.config.factories.PropertiesConfigFactory",
       s"--config-path=${propertiesFile.getAbsolutePath}")
@@ -74,7 +73,10 @@ class SamzaBenchmark(zooKeeperAddress: String,
     retrieveResultFromFile(outputFile).map(_.toLong)
 
 
-  private def prepareProperties(): Unit = {
+  private def prepareProperties(messagesCount: Long): Unit = {
+    if (propertiesFile.exists())
+      propertiesFile.delete()
+
     val properties = Seq(
       "job.factory.class=org.apache.samza.job.local.ThreadJobFactory",
       "job.name=samza-benchmark",
@@ -94,7 +96,9 @@ class SamzaBenchmark(zooKeeperAddress: String,
 
       "job.coordinator.factory=org.apache.samza.zk.ZkJobCoordinatorFactory",
       s"job.coordinator.zk.connect=$zooKeeperAddress",
-      "job.coordinator.replication.factor=1")
+      "job.coordinator.replication.factor=1",
+      s"$messagesCountConfig=$messagesCount",
+      s"$outputFileConfig=${outputFile.getAbsolutePath}")
 
     val fileWriter = new FileWriter(propertiesFile)
     fileWriter.write(properties.mkString("\n"))

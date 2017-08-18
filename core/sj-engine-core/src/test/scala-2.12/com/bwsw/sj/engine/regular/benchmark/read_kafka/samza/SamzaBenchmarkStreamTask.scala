@@ -20,39 +20,38 @@ package com.bwsw.sj.engine.regular.benchmark.read_kafka.samza
 
 import java.io.{File, FileWriter}
 
+import com.bwsw.sj.engine.regular.benchmark.read_kafka.samza.SamzaBenchmarkLiterals._
+import org.apache.samza.config.Config
 import org.apache.samza.system.IncomingMessageEnvelope
-import org.apache.samza.task.{MessageCollector, StreamTask, TaskCoordinator}
+import org.apache.samza.task._
 
 /**
   * @author Pavel Tomskikh
   */
-class SamzaBenchmarkStreamTask extends StreamTask {
+class SamzaBenchmarkStreamTask extends StreamTask with InitableTask {
   private var readMessages: Int = 0
-  private var messageCount: Long = 10
+  private var messagesCount: Long = 10
   private var outputFilename: String = "samza-benchmark-result"
-  private var gotInitEnvelope: Boolean = false
   private var firstMessageTimestamp: Long = 0
 
+  override def init(config: Config, context: TaskContext): Unit = {
+    outputFilename = config.get(outputFileConfig)
+    messagesCount = config.getLong(messagesCountConfig)
+  }
+
   override def process(envelope: IncomingMessageEnvelope, collector: MessageCollector, coordinator: TaskCoordinator): Unit = {
-    if (gotInitEnvelope) {
-      if (readMessages == 0)
-        firstMessageTimestamp = System.currentTimeMillis()
+    if (readMessages == 0)
+      firstMessageTimestamp = System.currentTimeMillis()
 
-      readMessages += 1
+    readMessages += 1
 
-      if (readMessages == messageCount) {
-        val lastMessageTimestamp = System.currentTimeMillis()
+    if (readMessages == messagesCount) {
+      val lastMessageTimestamp = System.currentTimeMillis()
 
-        val outputFile = new File(outputFilename)
-        val writer = new FileWriter(outputFile, true)
-        writer.write(s"${lastMessageTimestamp - firstMessageTimestamp}\n")
-        writer.close()
-      }
-    } else {
-      val options = envelope.getMessage.asInstanceOf[String].split(",", 2)
-      messageCount = options(0).toLong
-      outputFilename = options(1)
-      gotInitEnvelope = true
+      val outputFile = new File(outputFilename)
+      val writer = new FileWriter(outputFile, true)
+      writer.write(s"${lastMessageTimestamp - firstMessageTimestamp}\n")
+      writer.close()
     }
   }
 }
