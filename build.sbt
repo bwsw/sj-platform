@@ -217,3 +217,11 @@ lazy val flinkBenchmarkTask = Project(id = "flink-benchmark-task",
     scalaVersion := "2.11.8",
     libraryDependencies ++= Dependencies.flinkDependencies.value
   )
+
+lazy val flinkBatchBenchmarkTask = Project(id = "flink-batch-benchmark-task",
+  base = file("./contrib/benchmarks/flink-batch-benchmark-task"))
+  .settings(commonSettings: _*)
+  .settings(
+    scalaVersion := "2.11.8",
+    libraryDependencies ++= Dependencies.flinkDependencies.value
+  )
