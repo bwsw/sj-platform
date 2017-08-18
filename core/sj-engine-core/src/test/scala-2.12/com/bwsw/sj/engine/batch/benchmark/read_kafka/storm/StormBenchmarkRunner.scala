@@ -20,7 +20,7 @@ package com.bwsw.sj.engine.batch.benchmark.read_kafka.storm
 
 import java.util.Calendar
 
-import com.bwsw.sj.common.utils.BenchmarkLiterals.stormDefaultOutputFile
+import com.bwsw.sj.common.utils.BenchmarkLiterals.Batch.stormDefaultOutputFile
 import com.bwsw.sj.engine.core.testutils.benchmark.read_kafka.batch.{BatchKafkaReaderBenchmarkConfig, BatchKafkaReaderBenchmarkRunner}
 import com.typesafe.config.ConfigFactory
 
@@ -41,7 +41,7 @@ import com.typesafe.config.ConfigFactory
   * by the Kafka server. Environment variable ZOOKEEPER_ADDRESS.
   *
   * sj-benchmark.performance.output-file - file to output results in csv format (message size, milliseconds)
-  * (storm-benchmark-output-`<`date-time`>` by default). Environment variable OUTPUT_FILE.
+  * (storm-batch-benchmark-output-`<`date-time`>` by default). Environment variable OUTPUT_FILE.
   *
   * sj-benchmark.performance.words - list of words that sends to the Kafka server ("lorem,ipsum,dolor,sit,amet" by default).
   * Environment variable WORDS.

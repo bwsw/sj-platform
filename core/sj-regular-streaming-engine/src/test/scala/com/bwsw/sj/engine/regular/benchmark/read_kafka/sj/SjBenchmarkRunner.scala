@@ -21,7 +21,7 @@ package com.bwsw.sj.engine.regular.benchmark.read_kafka.sj
 import java.util.Calendar
 
 import com.bwsw.sj.common.utils.BenchmarkConfigNames._
-import com.bwsw.sj.common.utils.BenchmarkLiterals.sjDefaultOutputFile
+import com.bwsw.sj.common.utils.BenchmarkLiterals.Regular.sjDefaultOutputFile
 import com.bwsw.sj.common.utils.CommonAppConfigNames.{zooKeeperHost, zooKeeperPort}
 import com.bwsw.sj.engine.core.testutils.benchmark.read_kafka.KafkaReaderBenchmarkConfig
 import com.bwsw.sj.engine.core.testutils.benchmark.read_kafka.regular.RegularKafkaReaderBenchmarkRunner
@@ -34,18 +34,25 @@ import com.typesafe.config.{Config, ConfigFactory, ConfigValueFactory}
   *
   * sj-benchmark.performance.message.sizes - list of messages' sizes that separated by a comma (',').
   * Environment variable MESSAGES_SIZE_PER_TEST.
+  *
   * sj-benchmark.performance.message.counts - list of counts of messages per test (1000000 by default).
   * Counts separated by a comma (','). Environment variable MESSAGES_COUNT_PER_TEST.
+  *
   * sj-benchmark.performance.kafka.address - Kafka server's address. Environment variable KAFKA_ADDRESS.
+  *
   * sj-benchmark.performance.output-file - file to output results in csv format (message size, milliseconds)
-  * (sj-benchmark-output-`<`date-time`>` by default). Environment variable OUTPUT_FILE.
+  * (sj-regular-benchmark-output-`<`date-time`>` by default). Environment variable OUTPUT_FILE.
+  *
   * sj-benchmark.performance.words - list of words that sends to the Kafka server ("lorem,ipsum,dolor,sit,amet" by default).
   * Environment variable WORDS.
+  *
   * sj-benchmark.performance.repetitions - count of repetitions of same test configuration (messages count and message size)
   * (1 by default). Environment variable REPETITIONS.
   *
   * sj-common.zookeeper.host - ZooKeeper server's host. Environment variable ZOOKEEPER_HOST.
+  *
   * sj-common.zookeeper.port - ZooKeeper server's port. Environment variable ZOOKEEPER_PORT.
+  *
   * Host and port must point to the ZooKeeper server that used by the Kafka server.
   *
   * @author Pavel Tomskikh

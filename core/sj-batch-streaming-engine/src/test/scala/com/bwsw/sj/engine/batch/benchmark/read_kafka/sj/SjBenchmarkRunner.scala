@@ -21,7 +21,7 @@ package com.bwsw.sj.engine.batch.benchmark.read_kafka.sj
 import java.util.Calendar
 
 import com.bwsw.sj.common.utils.BenchmarkConfigNames._
-import com.bwsw.sj.common.utils.BenchmarkLiterals.sjDefaultOutputFile
+import com.bwsw.sj.common.utils.BenchmarkLiterals.Batch.sjDefaultOutputFile
 import com.bwsw.sj.common.utils.CommonAppConfigNames.{zooKeeperHost, zooKeeperPort}
 import com.bwsw.sj.engine.core.testutils.benchmark.read_kafka.batch.{BatchKafkaReaderBenchmarkConfig, BatchKafkaReaderBenchmarkRunner}
 import com.typesafe.config.{Config, ConfigFactory, ConfigValueFactory}
@@ -40,7 +40,7 @@ import com.typesafe.config.{Config, ConfigFactory, ConfigValueFactory}
   * sj-benchmark.performance.kafka.address - Kafka server's address. Environment variable KAFKA_ADDRESS.
   *
   * sj-benchmark.performance.output-file - file to output results in csv format (message size, milliseconds)
-  * (sj-benchmark-output-`<`date-time`>` by default). Environment variable OUTPUT_FILE.
+  * (sj-batch-benchmark-output-`<`date-time`>` by default). Environment variable OUTPUT_FILE.
   *
   * sj-benchmark.performance.words - list of words that sends to the Kafka server ("lorem,ipsum,dolor,sit,amet" by default).
   * Environment variable WORDS.

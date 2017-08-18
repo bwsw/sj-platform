@@ -20,7 +20,7 @@ package com.bwsw.sj.engine.regular.benchmark.read_kafka.storm
 
 import java.util.Calendar
 
-import com.bwsw.sj.common.utils.BenchmarkLiterals.stormDefaultOutputFile
+import com.bwsw.sj.common.utils.BenchmarkLiterals.Regular.stormDefaultOutputFile
 import com.bwsw.sj.engine.core.testutils.benchmark.read_kafka.KafkaReaderBenchmarkConfig
 import com.bwsw.sj.engine.core.testutils.benchmark.read_kafka.regular.RegularKafkaReaderBenchmarkRunner
 import com.typesafe.config.ConfigFactory
@@ -32,15 +32,21 @@ import com.typesafe.config.ConfigFactory
   *
   * sj-benchmark.performance.message.sizes - list of messages' sizes that separated by a comma (',').
   * Environment variable MESSAGES_SIZE_PER_TEST.
+  *
   * sj-benchmark.performance.message.counts - list of counts of messages per test (1000000 by default).
   * Counts separated by a comma (','). Environment variable MESSAGES_COUNT_PER_TEST.
+  *
   * sj-benchmark.performance.kafka.address - Kafka server's address. Environment variable KAFKA_ADDRESS.
+  *
   * sj-benchmark.performance.zookeeper.address - ZooKeeper server's address. Must point to the ZooKeeper server that used
   * by the Kafka server. Environment variable ZOOKEEPER_ADDRESS.
+  *
   * sj-benchmark.performance.output-file - file to output results in csv format (message size, milliseconds)
-  * (storm-benchmark-output-`<`date-time`>` by default). Environment variable OUTPUT_FILE.
+  * (storm-regular-benchmark-output-`<`date-time`>` by default). Environment variable OUTPUT_FILE.
+  *
   * sj-benchmark.performance.words - list of words that sends to the Kafka server ("lorem,ipsum,dolor,sit,amet" by default).
   * Environment variable WORDS.
+  *
   * sj-benchmark.performance.repetitions - count of repetitions of same test configuration (messages count and message size)
   * (1 by default). Environment variable REPETITIONS.
   *

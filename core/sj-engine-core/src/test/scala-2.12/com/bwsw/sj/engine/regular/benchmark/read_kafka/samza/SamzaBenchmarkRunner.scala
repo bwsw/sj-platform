@@ -20,7 +20,7 @@ package com.bwsw.sj.engine.regular.benchmark.read_kafka.samza
 
 import java.util.Calendar
 
-import com.bwsw.sj.common.utils.BenchmarkLiterals.samzaDefaultOutputFile
+import com.bwsw.sj.common.utils.BenchmarkLiterals.Regular.samzaDefaultOutputFile
 import com.bwsw.sj.engine.core.testutils.benchmark.read_kafka.KafkaReaderBenchmarkConfig
 import com.bwsw.sj.engine.core.testutils.benchmark.read_kafka.regular.RegularKafkaReaderBenchmarkRunner
 import com.typesafe.config.ConfigFactory
@@ -31,17 +31,22 @@ import com.typesafe.config.ConfigFactory
   * Configuration:
   *
   * sj-benchmark.performance.message.sizes - list of messages' sizes that separated by a comma (',').
-  * sj-benchmark.performance.message.sizes - list of messages' sizes that separated by a comma (',').
   * Environment variable MESSAGES_SIZE_PER_TEST.
+  *
   * sj-benchmark.performance.message.counts - list of counts of messages per test (1000000 by default).
   * Counts separated by a comma (','). Environment variable MESSAGES_COUNT_PER_TEST.
+  *
   * sj-benchmark.performance.kafka.address - Kafka server's address. Environment variable KAFKA_ADDRESS.
+  *
   * sj-benchmark.performance.zookeeper.address - ZooKeeper server's address. Must point to the ZooKeeper server that used
   * by the Kafka server. Environment variable ZOOKEEPER_ADDRESS.
+  *
   * sj-benchmark.performance.output-file - file to output results in csv format (message size, milliseconds)
-  * (samza-benchmark-output-`<`date-time`>` by default). Environment variable OUTPUT_FILE.
+  * (samza-regular-benchmark-output-`<`date-time`>` by default). Environment variable OUTPUT_FILE.
+  *
   * sj-benchmark.performance.words - list of words that sends to the Kafka server ("lorem,ipsum,dolor,sit,amet" by default).
   * Environment variable WORDS.
+  *
   * sj-benchmark.performance.repetitions - count of repetitions of the same test configuration (messages count and message size)
   * (1 by default). Environment variable REPETITIONS.
   *
