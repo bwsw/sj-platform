@@ -7,8 +7,6 @@ Glossary
 Batch 
   A minimum time interval during which a handler collect events in a stream.
 
-Check-every policy
-
 Checkpoint
   Completeness check of the data received after the stream processing.
   
