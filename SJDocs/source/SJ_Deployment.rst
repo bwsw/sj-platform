@@ -48,9 +48,9 @@ Firstly, deploy Mesos and other services.
 
 Please, note, Docker container should be supported for Mesos-slave.
 
-Start Mesos and the services. Make sure you have access to Mesos interface, Marathon interface, and Zookeeper is running. 
-
 For Docker deployment follow the instructions at the official installation guide: https://docs.docker.com/engine/installation/linux/docker-ce/ubuntu/#install-docker-ce 
+
+Start Mesos and the services. Make sure you have access to Mesos interface, Marathon interface, and Zookeeper is running. 
 
 2. Create json files and a configuration file (config.properties) for tts. 
 
