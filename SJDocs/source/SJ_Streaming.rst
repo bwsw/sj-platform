@@ -35,6 +35,15 @@ Data elements are time-sorted in a transaction.
 
 Consumers and Producers use transactions to write or read data from T-streams.  Transaction is also a basic recovery element. This means, that in a case of a crash, Consumers and Producers can recover from a transaction.
 
+Consumer iterates over transactions from earliest to the latest and reads data from every transaction. Every Consumer works in a specific T-stream and specific partitions. Consumer implements polling approach of processing.  After a transaction (or transaction set) was handled properly, the consumer does checkpoint which means that even in a cause of a crash or for another reason that consumer will start processing the transaction which is the next to the processed one.
+
+Producers open transactions in a strictly ordered mode. Consumers and Subscribers always process transactions in the same order they have been opened. Producer can checkpoint or cancel transactions in an arbitrary way, but Subscriber will start handling them once the first (the eraliest) one is checkpointed. 
+
+For the strictly ordered way of transaction opening a master producer is responsible. A master is registered in Apache Zookeeper per each transaction. The master generates a new transaction, registers it in Zookeeper, and returns the transaction ID to a Producer. Producer fills the transaction with data from the storage server. Then, it sends checkpoint or cancel to the server commit log and the transaction is checkpointed or canceled. 
+
+Finally, storage server commit logs are played and results are stored to RocksDB. 
+
+
 Streaming Infrastructure
 -----------------------------------
 
