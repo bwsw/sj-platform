@@ -325,7 +325,7 @@ For sj-rest.json it is better to upload the docker image separately::
    }
  }
 
-2) Run the services on Marathon:
+3. Run the services on Marathon:
 
 Mongo::
  
@@ -363,11 +363,11 @@ Kibana::
 
 Via the Marathon interface make sure the services are deployed.
 
-4) Copy the github repository of the SJ-Platform::
+4. Copy the github repository of the SJ-Platform::
 
  $ git clone https://github.com/bwsw/sj-platform.git
 
-5) Add the settings if running the framework on Mesos needs principal/secret:: 
+5. Add the settings if running the framework on Mesos needs principal/secret:: 
 
  $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"framework-principal\",\"value\": <principal>,\"domain\": \"configuration.system\"}" 
  $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"framework-secret\",\"value\": <secret>,\"domain\": \"configuration.system\"}" 
@@ -436,13 +436,13 @@ Stream Creation
 
 There is default value of elasticsearch, kafka and zookeeper IPs (176.120.25.19) in json configuration files, so you shall change it appropriately via sed app before using (replace the following placeholders <elasticsearch_ip>, <kafka_ip>, <zookeeper_address>, <provider_name>)::
 
- sed -i 's/176.120.25.19:9300/<elasticsearch_ip>:31930/g' api-json/providers/elasticsearch-ps-provider.json
+ $ sed -i 's/176.120.25.19:9300/<elasticsearch_ip>:31930/g' api-json/providers/elasticsearch-ps-provider.json
  curl --request POST "http://$address/v1/providers" -H 'Content-Type: application/json' --data "@api-json/providers/ <provider_name>.json" 
 
- sed -i 's/176.120.25.19:9092/<kafka_ip>:31992/g' api-json/providers/kafka-ps-provider.json
+ $ sed -i 's/176.120.25.19:9092/<kafka_ip>:31992/g' api-json/providers/kafka-ps-provider.json
  curl --request POST "http://$address/v1/providers" -H 'Content-Type: application/json' --data "@api-json/providers/ <provider_name>.json" 
 
- sed -i 's/176.120.25.19:2181/<zookeeper_address>/g' api-json/providers/zookeeper-ps-provider.json
+ $ sed -i 's/176.120.25.19:2181/<zookeeper_address>/g' api-json/providers/zookeeper-ps-provider.json
  curl --request POST "http://$address/v1/providers" -H 'Content-Type: application/json' --data "@api-json/providers/ <provider_name>.json" 
 
 2. Next set up services (replace <service_name> with the name of the service json file)::
@@ -467,7 +467,7 @@ Create instances (replace <module_name> with the name of the module the instance
  
 Instance Launching
 """"""""""""""""""""""""
-Laucnh the created instances by sending GET request (replace <module_name> and <instance_name> with the name of the instance and the name of its module)::
+Laucnh the created instances by sending GET request for each instance (replace <module_name> and <instance_name> with the name of the instance and the name of its module)::
 
  $ curl --request GET "http://$address/v1/modules/input-streaming/<module_name>/1.0/instance/<instance_name>/start" 
 
