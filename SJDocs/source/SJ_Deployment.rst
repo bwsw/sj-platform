@@ -44,7 +44,7 @@ The deployment is performed via REST API.
 
 Firstly, deploy Mesos and other services.
 
-Deploy Mesos, Marathon, Zookeeper. You can follow the instructions at the official instalation guide: <http://www.bogotobogo.com/DevOps/DevOps_Mesos_Install.php>_
+1. Deploy Mesos, Marathon, Zookeeper. You can follow the instructions at the official instalation guide: <http://www.bogotobogo.com/DevOps/DevOps_Mesos_Install.php>_
 
 Please, note, Docker container should be supported for Mesos-slave.
 
@@ -52,9 +52,9 @@ Start Mesos and the services. Make sure you have access to Mesos interface, Mara
 
 For Docker deployment follow the instructions at the official installation guide: https://docs.docker.com/engine/installation/linux/docker-ce/ubuntu/#install-docker-ce 
 
-Create json files and a configuration file (config.properties) for tts. 
+2. Create json files and a configuration file (config.properties) for tts. 
 
-mongo.json::
+**mongo.json**::
 
  {  
    "id":"mongo",
@@ -83,7 +83,7 @@ mongo.json::
    "mem":512
  }
 
-sj-rest.json::
+**sj-rest.json**::
 
  {  
    "id":"sj-rest",
@@ -121,7 +121,7 @@ For sj-rest.json it is better to upload the docker image separately::
  
  $ sudo docker pull bwsw/sj-rest:dev
 
-kafka.json::
+**kafka.json**::
 
  {  
    "id":"kafka",
@@ -161,7 +161,7 @@ kafka.json::
    }
  }
 
-elasticsearch.json::
+**elasticsearch.json**::
 
  {  
    "id":"elasticsearch",
@@ -196,7 +196,7 @@ elasticsearch.json::
    "mem":256
  }
 
-Config.properties (replace <zk_ip> with a valid ip)::
+**Configuration properties** (replace <zk_ip> with a valid ip)::
 
  key=pingstation
  active.tokens.number=100
@@ -253,7 +253,7 @@ Config.properties (replace <zk_ip> with a valid ip)::
 
 
 
-tts.json (replace <path_to_conf_directory> with an appropriate path to the configuration directory on your computer and <external_host> with a valid host)::
+**tts.json** (replace <path_to_conf_directory> with an appropriate path to the configuration directory on your computer and <external_host> with a valid host)::
 
  {
     "id": "tts",
@@ -293,10 +293,7 @@ tts.json (replace <path_to_conf_directory> with an appropriate path to the confi
     }
 }
 
-
-
- 
-kibana.json::
+**kibana.json**::
 
  {  
    "id":"kibana",
@@ -388,9 +385,49 @@ First, the environment should be configured::
 
 To upload modules to the system:
 
-$ curl --form jar=@<module .jar file name here> http://$address/v1/modules
+$ curl --form jar=@<module .jar file path and name here> http://$address/v1/modules
 $ curl --form jar=@ps-process/target/scala-2.11/ps-process-1.0.jar http://$address/v1/modules
 $ curl --form jar=@ps-output/target/scala-2.11/ps-output-1.0.jar http://$address/v1/modules
+
+Now engines are necessary for modules.
+
+Please, upload the engine jars for the modules (input-streaming, regular-streaming, output-streaming) and a Mesos framework. You can find them at our github repository:
+
+ cd sj-platform
+
+ address=sj-rest.marathon.mm:8080
+
+ $ curl --form jar=@core/sj-mesos-framework/target/scala-2.12/sj-mesos-framework-1.0-SNAPSHOT.jar http://$address/v1/custom/jars
+ $ curl --form jar=@core/sj-input-streaming-engine/target/scala-2.12/sj-input-streaming-engine-1.0-SNAPSHOT.jar http://$address/v1/custom/jars
+ $ curl --form jar=@core/sj-regular-streaming-engine/target/scala-2.12/sj-regular-streaming-engine-1.0-SNAPSHOT.jar http://$address/v1/custom/jars
+ $ curl --form jar=@core/sj-output-streaming-engine/target/scala-2.12/sj-output-streaming-engine-1.0-SNAPSHOT.jar http://$address/v1/custom/jars
+ 
+Setup configurations for engines.
+
+The range of configurations include required and optional ones. To resolve the example task it is enough to upload the required configurations only.
+
+The list of all configurations can be viewed at the :ref:`Configuration`_ page.
+
+Setup settings for the engines, but first replace <rest_ip> with the IP of rest and <marathon_address> with the address of marathon::
+
+ $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"session-timeout\",\"value\": \"7000\",\"domain\": \"configuration.apache-zookeeper\"}" 
+ $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"current-framework\",\"value\": \"com.bwsw.fw-1.0\",\"domain\": \"configuration.system\"}" 
+
+ $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"crud-rest-host\",\"value\": \"<rest_ip>\",\"domain\": \"configuration.system\"}" 
+ $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"crud-rest-port\",\"value\": \"31080\",\"domain\": \"configuration.system\"}" 
+
+ $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"marathon-connect\",\"value\": \"http://<marathon_address>\",\"domain\": \"configuration.system\"}" 
+ $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"marathon-connect-timeout\",\"value\": \"60000\",\"domain\": \"configuration.system\"}" 
+ $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"kafka-subscriber-timeout\",\"value\": \"100\",\"domain\": \"configuration.system\"}" 
+ $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"low-watermark\",\"value\": \"100\",\"domain\": \"configuration.system\"}" 
+
+Send the next POST requests to upload configurations for module validators::
+
+ $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"regular-streaming-validator-class\",\"value\": \"com.bwsw.sj.crud.rest.instance.validator.RegularInstanceValidator\",\"domain\": \"configuration.system\"}" 
+ $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"input-streaming-validator-class\",\"value\": \"com.bwsw.sj.crud.rest.instance.validator.InputInstanceValidator\",\"domain\": \"configuration.system\"}" 
+ $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"output-streaming-validator-class\",\"value\": \"com.bwsw.sj.crud.rest.instance.validator.OutputInstanceValidator\",\"domain\": \"configuration.system\"}" 
+
+In the UI you can see the uploaded configurations under the “Configurations” tab of the main navigation.
 
 
 Mesos framework
