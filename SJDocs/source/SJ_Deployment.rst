@@ -44,11 +44,11 @@ The deployment is performed via REST API.
 
 Firstly, deploy Mesos and other services.
 
-1. Deploy Mesos, Marathon, Zookeeper. You can follow the instructions at the official instalation guide: <http://www.bogotobogo.com/DevOps/DevOps_Mesos_Install.php>_
+1. Deploy Mesos, Marathon, Zookeeper. You can follow the instructions at the official `instalation guide <http://www.bogotobogo.com/DevOps/DevOps_Mesos_Install.php>`_ .
 
 Please, note, Docker container should be supported for Mesos-slave.
 
-For Docker deployment follow the instructions at the official installation guide: https://docs.docker.com/engine/installation/linux/docker-ce/ubuntu/#install-docker-ce 
+For Docker deployment follow the instructions at the official `installation guide <https://docs.docker.com/engine/installation/linux/docker-ce/ubuntu/#install-docker-ce>`_
 
 Install Java::
                                          
