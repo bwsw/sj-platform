@@ -491,7 +491,7 @@ Minimesos Deployment
 Requirements: 
 
 - git,
-- sbt (http://www.scala-sbt.org/download.html),
+- sbt (downloading instructions `here <http://www.scala-sbt.org/download.html>`_),
 - docker,
 - curl
 
