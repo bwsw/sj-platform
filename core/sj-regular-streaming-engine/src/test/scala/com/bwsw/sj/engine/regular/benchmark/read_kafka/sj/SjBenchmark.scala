@@ -114,7 +114,7 @@ class SjBenchmark(zkHost: String,
     */
   def prepare(): Unit = {
     val tempHelperForConfigSetup = new TempHelperForConfigSetup(connectionRepository)
-    tempHelperForConfigSetup.setupConfigs()
+    tempHelperForConfigSetup.setupConfigs(lowWatermark = 5000)
     println("Config settings loaded")
 
     benchmarkPreparation.prepare(connectionRepository)
