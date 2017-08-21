@@ -23,9 +23,9 @@ import java.util.concurrent.{Callable, TimeUnit}
 
 import com.bwsw.common.{JsonSerializer, ObjectSerializer, ObjectSizeFetcher}
 import com.bwsw.sj.common.dal.model.stream.TStreamStreamDomain
-import com.bwsw.sj.common.si.model.instance.Instance
-import com.bwsw.sj.common.engine.core.entities.{Envelope, KafkaEnvelope, TStreamEnvelope}
+import com.bwsw.sj.common.engine.core.entities.{EnvelopeInterface, KafkaEnvelope, TStreamEnvelope}
 import com.bwsw.sj.common.engine.core.managment.TaskManager
+import com.bwsw.sj.common.si.model.instance.Instance
 import com.bwsw.tstreams.agents.producer.{NewProducerTransactionPolicy, Producer}
 import org.slf4j.{Logger, LoggerFactory}
 
@@ -99,7 +99,7 @@ abstract class PerformanceMetrics(manager: TaskManager) extends Callable[Unit] {
     */
   protected def clear(): Unit
 
-  def addEnvelopeToInputStream(envelope: Envelope): Unit = {
+  def addEnvelopeToInputStream(envelope: EnvelopeInterface): Unit = {
     envelope match {
       case tStreamEnvelope: TStreamEnvelope[_] =>
         addEnvelopeToInputStream(tStreamEnvelope.stream, tStreamEnvelope.data.map(ObjectSizeFetcher.getObjectSize).toList)

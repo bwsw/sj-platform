@@ -50,7 +50,7 @@ trait KafkaTaskInput[T <: AnyRef] extends SjInjector {
   protected val settingsUtils: SettingsUtils = inject[SettingsUtils]
   protected val kafkaSubscriberTimeout: Int = settingsUtils.getKafkaSubscriberTimeout()
   protected val kafkaInputs: mutable.Map[StreamDomain, Array[Int]] = getKafkaInputs()
-  protected val streamNamesToTags: Map[String, Array[String]] = kafkaInputs.map(x => (x._1.name, x._1.tags)).toMap
+  val streamNamesToTags: Map[String, Array[String]] = kafkaInputs.map(x => (x._1.name, x._1.tags)).toMap
   protected var kafkaOffsetsStorage: mutable.Map[(String, Int), Long] = mutable.Map[(String, Int), Long]()
   protected val kafkaOffsetsStream: String = manager.taskName + "_kafka_offsets"
   protected val offsetStream: TStreamStreamDomain = createOffsetStream()

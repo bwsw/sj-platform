@@ -18,13 +18,13 @@
  */
 package com.bwsw.sj.engine.core.engine.input
 
-import java.util.concurrent.{ArrayBlockingQueue, Callable}
+import java.util.concurrent.Callable
 
 import com.bwsw.common.SerializerInterface
 import com.bwsw.sj.common.dal.model.stream.StreamDomain
-import com.bwsw.sj.common.utils.StreamLiterals
-import com.bwsw.sj.common.engine.core.entities.Envelope
+import com.bwsw.sj.common.engine.core.entities.{Envelope, EnvelopeInterface, WeightedBlockingQueue}
 import com.bwsw.sj.common.engine.core.managment.CommonTaskManager
+import com.bwsw.sj.common.utils.StreamLiterals
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import org.slf4j.LoggerFactory
 import scaldi.Injector
@@ -36,7 +36,7 @@ object CallableCheckpointTaskInput {
   private val logger = LoggerFactory.getLogger(this.getClass)
 
   def apply[T <: AnyRef](manager: CommonTaskManager,
-                         blockingQueue: ArrayBlockingQueue[Envelope],
+                         blockingQueue: WeightedBlockingQueue[EnvelopeInterface],
                          checkpointGroup: CheckpointGroup,
                          envelopeDataSerializer: SerializerInterface)
                         (implicit injector: Injector): CallableCheckpointTaskInput[_ <: Envelope] = {
@@ -59,8 +59,7 @@ object CallableCheckpointTaskInput {
       case (true, false) => new CallableKafkaCheckpointTaskInput[T](
         manager,
         blockingQueue,
-        checkpointGroup,
-        envelopeDataSerializer)
+        checkpointGroup)
 
       case _ =>
         logger.error("Type of input stream is not 'kafka' or 't-stream'")

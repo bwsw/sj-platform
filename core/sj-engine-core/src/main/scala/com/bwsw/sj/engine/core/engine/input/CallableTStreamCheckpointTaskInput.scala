@@ -19,11 +19,10 @@
 package com.bwsw.sj.engine.core.engine.input
 
 import java.util.Date
-import java.util.concurrent.ArrayBlockingQueue
 
 import com.bwsw.common.SerializerInterface
 import com.bwsw.sj.common.dal.model.stream.TStreamStreamDomain
-import com.bwsw.sj.common.engine.core.entities.{Envelope, TStreamEnvelope}
+import com.bwsw.sj.common.engine.core.entities.{EnvelopeInterface, WeightedBlockingQueue, TStreamEnvelope}
 import com.bwsw.sj.common.engine.core.managment.TaskManager
 import com.bwsw.sj.common.si.model.instance.{BatchInstance, OutputInstance, RegularInstance}
 import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
@@ -48,7 +47,7 @@ import scala.collection.mutable
   *
   */
 class CallableTStreamCheckpointTaskInput[T <: AnyRef](manager: TaskManager,
-                                                      blockingQueue: ArrayBlockingQueue[Envelope],
+                                                      blockingQueue: WeightedBlockingQueue[EnvelopeInterface],
                                                       override val checkpointGroup: CheckpointGroup,
                                                       envelopeDataSerializer: SerializerInterface)
                                                      (implicit injector: Injector)

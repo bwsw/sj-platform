@@ -18,8 +18,6 @@
  */
 package com.bwsw.sj.engine.output.task
 
-import java.util.concurrent.{ArrayBlockingQueue, TimeUnit}
-
 import com.bwsw.sj.common.dal.model.stream.StreamDomain
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.engine.TaskEngine
@@ -52,7 +50,7 @@ abstract class OutputTaskEngine(manager: OutputTaskManager,
 
   private val currentThread: Thread = Thread.currentThread()
   currentThread.setName(s"output-task-${manager.taskName}-engine")
-  private val blockingQueue: ArrayBlockingQueue[Envelope] = new ArrayBlockingQueue[Envelope](EngineLiterals.queueSize)
+  private val blockingQueue: WeightedBlockingQueue[Envelope] = new WeightedBlockingQueue[Envelope](EngineLiterals.queueSize)
   private val instance: OutputInstance = manager.instance.asInstanceOf[OutputInstance]
   private val connectionRepository = inject[ConnectionRepository]
   private val streamService = connectionRepository.getStreamRepository
@@ -100,11 +98,11 @@ abstract class OutputTaskEngine(manager: OutputTaskManager,
       s"Run output task engine in a separate thread of execution service.")
 
     while (true) {
-      val maybeEnvelope = blockingQueue.poll(EngineLiterals.eventWaitTimeout, TimeUnit.MILLISECONDS)
+      val maybeEnvelope = blockingQueue.poll(EngineLiterals.eventWaitTimeout)
 
-      Option(maybeEnvelope) match {
+      maybeEnvelope match {
         case Some(envelope) =>
-          processOutputEnvelope(envelope)
+          processOutputEnvelope(envelope.asInstanceOf[Envelope])
         case _ =>
       }
       if (isItTimeToCheckpoint(environmentManager.isCheckpointInitiated)) doCheckpoint()

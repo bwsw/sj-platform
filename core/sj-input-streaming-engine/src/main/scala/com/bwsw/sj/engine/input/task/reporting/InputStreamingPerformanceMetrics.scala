@@ -21,7 +21,7 @@ package com.bwsw.sj.engine.input.task.reporting
 import java.util.Calendar
 
 import com.bwsw.common.ObjectSizeFetcher
-import com.bwsw.sj.common.engine.core.entities.{Envelope, InputEnvelope}
+import com.bwsw.sj.common.engine.core.entities.{EnvelopeInterface, InputEnvelope}
 import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
 import com.bwsw.sj.engine.input.task.InputTaskManager
 
@@ -48,7 +48,7 @@ class InputStreamingPerformanceMetrics(manager: InputTaskManager)
   /**
     * Invokes when a new envelope from the input stream is received
     */
-  override def addEnvelopeToInputStream(envelope: Envelope): Unit = {
+  override def addEnvelopeToInputStream(envelope: EnvelopeInterface): Unit = {
     val inputEnvelope = envelope.asInstanceOf[InputEnvelope[AnyRef]]
     super.addEnvelopeToInputStream(inputStreamName, List(ObjectSizeFetcher.getObjectSize(inputEnvelope.data)))
   }
