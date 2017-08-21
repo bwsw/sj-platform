@@ -50,7 +50,17 @@ Please, note, Docker container should be supported for Mesos-slave.
 
 For Docker deployment follow the instructions at the official installation guide: https://docs.docker.com/engine/installation/linux/docker-ce/ubuntu/#install-docker-ce 
 
-Start Mesos and the services. Make sure you have access to Mesos interface, Marathon interface, and Zookeeper is running. 
+Install Java::
+                                         
+ $ sudo add-apt-repository ppa:webupd8team/java
+ $ sudo apt-get update
+ $ sudo apt-get install oracle-java8-installer
+ $ sudo apt-get install oracle-java8-set-default
+
+Find a detailed instructions `here <https://tecadmin.net/install-oracle-java-8-ubuntu-via-ppa/ >`_.
+
+Start Mesos and the services. Make sure you have access to Mesos interface, Marathon interface, and Zookeeper is running.
+
 
 2. Create json files and a configuration file (config.properties) for tts. 
 
