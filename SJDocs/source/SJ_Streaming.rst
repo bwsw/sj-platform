@@ -21,9 +21,12 @@ SJ-Platform supports Apache Kafka as a standard providing a common interface for
 
 Using TCP as an input source a custom protocol can be applied for receiving events, deduplicating them and putting into the processing pipeline. 
 
-At the project `repository <https://github.com/bwsw/sj-platform/tree/develop>`_ two input modules are available for users - CSV input module and Regex input module - that transform data flow of CSV/regex type to envelopes for T-streams.
+But there is a need in an input module to transform the input data into a stream to bring it to processing. At the project `repository <https://github.com/bwsw/sj-platform/tree/develop>`_ two input modules are available for users - CSV input module and Regex input module - that transform data flow of CSV/regex type to envelopes for T-streams.
 
 Within the platform, the data is transported to and from modules via *transactional streams* or T-streams. It is a message broker and a Scala library native to SJ-Platform and designed primarily for exactly-once processing (so it includes a transactional producer, a consumer and a subscriber). More information on T-streams can be found at the `project site <http://t-streams.com/>`_.
+
+About T-Streams
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The easiest way to try T-streams and dive into basic operation with t-streams is to download `T-streams-hello <http://t-streams.com/getting-started/>`_ . The demo shows the basic operation mode between producer and subscriber.
 
@@ -41,7 +44,7 @@ Producers open transactions in a strictly ordered mode. Consumers and Subscriber
 
 For the strictly ordered way of transaction opening a master producer is responsible. A master is registered in Apache Zookeeper per each transaction. The master generates a new transaction, registers it in Zookeeper, and returns the transaction ID to a Producer. Producer fills the transaction with data from the storage server. Then, it sends checkpoint or cancels to the server commit log and the transaction is checkpointed or canceled. 
 
-Finally, storage server commits logs are played and results are stored to RocksDB. 
+Finally, storage server commit logs are played and results are stored to RocksDB. 
 
 Checkpoint Group
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
