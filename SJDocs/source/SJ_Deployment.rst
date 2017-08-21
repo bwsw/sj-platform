@@ -481,7 +481,7 @@ Laucnh the created instances by sending GET request for each instance (replace <
 
 Start Flow
 """"""""""""""""""""""""
-Start the flow of data into the system.
+Start the flow of data into the system. Now the data is delevered into the system. The instance(-s) starts data processing. 
 
 Minimesos Deployment
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
