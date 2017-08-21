@@ -39,6 +39,8 @@ case class InputEnvelope[T <: AnyRef](key: String,
                                       duplicateCheck: Option[Boolean] = None) extends Envelope {
   streamType = StreamLiterals.inputDummy
 
+  override val weight: Int = 1
+
   @JsonIgnore
   override def equals(obj: Any): Boolean = obj match {
     case i: InputEnvelope[_] =>

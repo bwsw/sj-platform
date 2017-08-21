@@ -18,31 +18,11 @@
  */
 package com.bwsw.sj.common.engine.core.entities
 
-import com.bwsw.sj.common.utils.StreamLiterals
-import com.fasterxml.jackson.annotation.JsonIgnore
+import org.apache.kafka.clients.consumer.ConsumerRecords
 
 /**
-  * Provides a wrapper for kafka message.
-  *
-  * @param data message data
-  * @tparam T type of data containing in a message
+  * @author Pavel Tomskikh
   */
-
-class KafkaEnvelope[T <: AnyRef](var data: T) extends Envelope {
-  streamType = StreamLiterals.kafkaType
-
-  override val weight: Int = 1
-
-  @JsonIgnore
-  override def equals(obj: Any): Boolean = obj match {
-    case k: KafkaEnvelope[_] =>
-      data == k.data &&
-        streamType == k.streamType &&
-        id == k.id &&
-        stream == k.stream &&
-        (tags sameElements k.tags) &&
-        partition == k.partition
-
-    case _ => super.equals(obj)
-  }
+case class KafkaRecords(records: ConsumerRecords[Array[Byte], Array[Byte]]) extends EnvelopeInterface {
+  override val weight: Int = records.count()
 }
