@@ -21,7 +21,7 @@ Contents:
    :maxdepth: 2
 
    SJ_Overview
-   SJ_Tutorial
+   Tutorial
    SJ_Architecture
    Glossary
    SJ_Modules
