@@ -734,6 +734,8 @@ Creating Instances
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 For instance creation we will send the POST requests. See the instructions below for creating insatnces for the example task solution.
 
+Example task
+
 For creating an instance of the sj-regex-input module send the following POST request::
 
  $ curl --request POST "http://$address/v1/modules/input-streaming/pingstation-input/1.0/instance" -H 'Content-Type: application/json' --data "@api-json/instances/pingstation-input.json"
