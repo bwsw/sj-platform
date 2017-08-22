@@ -111,13 +111,17 @@ abstract class KafkaReaderBenchmark(zooKeeperAddress: String,
     * @return result if a file exists or None otherwise
     */
   protected def retrieveResultFromFile(): Option[Long] = {
-    if (outputFile.exists()) {
+    if (outputFile.exists() && outputFile.length() > 0) {
       val reader = new BufferedReader(new FileReader(outputFile))
       val result = reader.readLine()
       reader.close()
-      outputFile.delete()
 
-      Some(result.toLong)
+      if (Option(result).exists(_.nonEmpty)) {
+        outputFile.delete()
+
+        Some(result.toLong)
+      } else
+        None
     }
     else
       None
