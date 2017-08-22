@@ -66,8 +66,7 @@ The input module receives raw data and transforms them into a data stream of a p
 The processing module performs data aggregation and sends the result to the output module. In the provided example the data aggregation is performed with a regular-streaming module.
 
 In the output module the processed data is transformed into a flow of entities appropriate for storing into an external storage of a specified type. In the provided example the output module will export the result data into the Elasticsearch external data storage.
-
-                   
+                
 The illustrated pipeline is a general solution. It fits for most real-life problems.
 But the platform allows resolution of more complicated tasks. So the pipeline can be more expanded. More input streams can ingest raw data. Several Input modules can be included in the pipeline to accept the raw data and transform it for passing further to the processing stage.
 
@@ -76,7 +75,6 @@ You can launch more than one processing module. The data streams can be distribu
 A few Output modules may receive the processed data and put them to a storage.
 
 In the example task solution the processing workflow is formed in the following way:
-
 
 .. figure:: _static/FPingDemo.png
 
@@ -411,18 +409,18 @@ Via the Marathon interface make sure the services are deployed.
 
 4) Copy the github repository of SJ-Platform::
 
- $ git clone https://github.com/bwsw/sj-platform.git
+    $ git clone https://github.com/bwsw/sj-platform.git
 
 5) Add the settings if running the framework on Mesos needs principal/secret:: 
  
- $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"framework-principal\",\"value\": <principal>,\"domain\": \"configuration.system\"}" 
- $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"framework-secret\",\"value\": <secret>,\"domain\": \"configuration.system\"}" 
+    $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"framework-principal\",\"value\": <principal>,\"domain\": \"configuration.system\"}" 
+    $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"framework-secret\",\"value\": <secret>,\"domain\": \"configuration.system\"}" 
  
-6) Copy the demo project repository:
+6) Copy the demo project repository::
 
-  cd ..
- $ git clone https://github.com/bwsw/sj-fping-demo.git
- $ cd sj-fping-demo
+     cd ..
+    $ git clone https://github.com/bwsw/sj-fping-demo.git
+    $ cd sj-fping-demo
 
 
 Now look and make sure you have access to the Web UI. You will see the platform but it is not completed with any entities yet. They will be added in the next steps.
@@ -468,15 +466,15 @@ Module Downloading from Sonatype Repository
 
 - To download the sj-regex-input module from the sonatype repository::
 
- $ curl "https://oss.sonatype.org/content/repositories/snapshots/com/bwsw/sj-regex-input_2.12/1.0-SNAPSHOT/sj-regex-input_2.12-1.0-SNAPSHOT.jar" -o sj-regex-input.jar 
+   $ curl "https://oss.sonatype.org/content/repositories/snapshots/com/bwsw/sj-regex-input_2.12/1.0-SNAPSHOT/sj-regex-input_2.12-1.0-SNAPSHOT.jar" -o sj-regex-input.jar 
 
 - To download the ps-process module from the sonatype repository::
 
- $ curl “https://oss.sonatype.org/content/repositories/snapshots/com/bwsw/ps-process_2.12/1.0-SNAPSHOT/ps-process_2.12-1.0-SNAPSHOT.jar” -o ps-process-1.0.jar
+   $ curl “https://oss.sonatype.org/content/repositories/snapshots/com/bwsw/ps-process_2.12/1.0-SNAPSHOT/ps-process_2.12-1.0-SNAPSHOT.jar” -o ps-process-1.0.jar
 
 - To download the ps-output module from the sonatype repository::
 
- $ curl “https://oss.sonatype.org/content/repositories/snapshots/com/bwsw/ps-output_2.12/1.0-SNAPSHOT/ps-output_2.12-1.0-SNAPSHOT.jar” -o ps-output-1.0.jar
+   $ curl “https://oss.sonatype.org/content/repositories/snapshots/com/bwsw/ps-output_2.12/1.0-SNAPSHOT/ps-output_2.12-1.0-SNAPSHOT.jar” -o ps-output-1.0.jar
 
 Module Uploading
 """"""""""""""""""""""""""""""""""""
@@ -529,9 +527,12 @@ Setup configurations for engines
 
 The configurations will be added to the system via REST. 
 
-The range of configurations includes required and optional ones. To resolve the example task it is enough to upload the required configurations only.
+The range of configurations includes required and optional ones. The full list of all configurations can be viewed at the :ref:`Configuration` page. 
 
-The list of all configurations can be viewed at the :ref:`Configuration` page.
+To resolve the example task it is enough to upload the required configurations only.
+
+Example Task
+""""""""""""""""""
 
 For solving an example task, we will upload the following configurations via REST:
 
@@ -582,7 +583,7 @@ Different modules require different stream types for input and output.
 A module receives data from input streams from TCP or Kafka. Within the platform, the data is transported to and from modules via T-streams. It is a native streaming type for SJ-Platform that allows exactly-once data exchange between modules. 
 
 
-.. figure:: _static/MosuleStreaming.png
+.. figure:: _static/ModuleStreaming.png
 
 Streams need infrastructure: **Providers** and **Services**. This is a required presetting without which streaming will not be so flexible. 
 
@@ -627,15 +628,15 @@ Services of  Apache Zookeeper, T-streams and Elasticsearch types.
 
 - Apache Zookeeper for T-streams streaming (‘echo-response’ and ‘unreachable-response’ streams) within the platform, for Zookeeper service necessary for all types of  instances::
 
- $ sed -i 's/176.120.25.19:2181/<zookeeper_address>/g' api-json/providers/zookeeper-ps-provider.json
- $ curl --request POST "http://$address/v1/providers" -H 'Content-Type: application/json' --data "@api-json/providers/zookeeper-ps-provider.json"
+   $ sed -i 's/176.120.25.19:2181/<zookeeper_address>/g' api-json/providers/zookeeper-ps-provider.json
+   $ curl --request POST "http://$address/v1/providers" -H 'Content-Type: application/json' --data "@api-json/providers/zookeeper-ps-provider.json"
 
 - Elasticsearch for output streaming (all ‘es-echo-response’ streams).
 
 There is a default value of Elasticsearch IP (176.120.25.19) in json configuration files, so we need to change it appropriately via sed app before using:
 
-$ sed -i 's/176.120.25.19/elasticsearch.marathon.mm/g'  api-json/providers/elasticsearch-ps-provider.json
-$ curl --request POST "http://$address/v1/providers" -H 'Content-Type: application/json' --data "@api-json/providers /elasticsearch-ps-provider.json"
+   $ sed -i 's/176.120.25.19/elasticsearch.marathon.mm/g'  api-json/providers/elasticsearch-ps-provider.json
+   $ curl --request POST "http://$address/v1/providers" -H 'Content-Type: application/json' --data "@api-json/providers /elasticsearch-ps-provider.json"
 
 The created providers are available in the UI under the “Providers” tab.
 
@@ -645,15 +646,15 @@ The created providers are available in the UI under the “Providers” tab.
 
 - Apache Zookeeper service for all modules::
 
- $ curl --request POST "http://$address/v1/services" -H 'Content-Type: application/json' --data "@api-json/services/zookeeper-ps-service.json"
+   $ curl --request POST "http://$address/v1/services" -H 'Content-Type: application/json' --data "@api-json/services/zookeeper-ps-service.json"
 
 - T-streams service for T-streams streaming (all ‘echo-response’ streams and the ‘unreachable-response’ stream) within the platform and the instances of the input-streaming and the regular-streaming modules::
 
- $ curl --request POST "http://$address/v1/services" -H 'Content-Type: application/json' --data "@api-json/services/tstream-ps-service.json"
+   $ curl --request POST "http://$address/v1/services" -H 'Content-Type: application/json' --data "@api-json/services/tstream-ps-service.json"
 
 - Elasticsearch service for output streaming (all ‘es-echo-response’ streams) and the output-streaming module::
 
- $ curl --request POST "http://$address/v1/services" -H 'Content-Type: application/json' --data "@api-json/services/elasticsearch-ps-service.json"
+   $ curl --request POST "http://$address/v1/services" -H 'Content-Type: application/json' --data "@api-json/services/elasticsearch-ps-service.json"
 
 Please, make sure the created services have appeared in UI under the “Services” tab.
 
@@ -663,7 +664,7 @@ Creating Streams
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Once streaming infrastructure is created, it is high time to create streams. Please, use the “POST” API requests below to create streams that will be used in the instances of input-streaming, regular-streaming and output-streaming modules.
 
-Exampole task
+Example task
 """"""""""""""""""""""""
 
 For **sj-regex-input module**:
@@ -735,6 +736,7 @@ Creating Instances
 For instance creation we will send the POST requests. See the instructions below for creating insatnces for the example task solution.
 
 Example task
+"""""""""""""""""""""""
 
 For creating an instance of the sj-regex-input module send the following POST request::
 
@@ -868,21 +870,21 @@ For suspending the **sj-regex-input module instance** send::
 
  $ curl --request GET "http://$address/v1/modules/input-streaming/pingstation-input/1.0/instance/pingstation-input/stop"
 
-For suspending the **ps-process module instances** send:
+For suspending the **ps-process module instances** send::
 
-$ curl --request GET "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance/pingstation-process/stop "
+ $ curl --request GET "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance/pingstation-process/stop "
 
-$ curl --request GET "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance/pingstation-process-3m/stop "
+ $ curl --request GET "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance/pingstation-process-3m/stop "
 
-$ curl --request GET "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance/pingstation-process-1h/stop "
+ $ curl --request GET "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance/pingstation-process-1h/stop "
 
-For suspending the **ps-output module instances** send:
+For suspending the **ps-output module instances** send::
 
-$ curl --request GET "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance/pingstation-output/stop" 
+ $ curl --request GET "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance/pingstation-output/stop" 
 
-$ curl --request GET "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance/pingstation-output-3m/stop"  
+ $ curl --request GET "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance/pingstation-output-3m/stop"  
 
-$ curl --request GET "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance/pingstation-output-1h/stop" 
+ $ curl --request GET "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance/pingstation-output-1h/stop" 
 
 In the UI, you will see the suspended instances with the “stopped” status.
 
