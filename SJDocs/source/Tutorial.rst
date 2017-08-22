@@ -633,7 +633,7 @@ Services of  Apache Zookeeper, T-streams and Elasticsearch types.
 
 - Elasticsearch for output streaming (all ‘es-echo-response’ streams).
 
-There is a default value of Elasticsearch IP (176.120.25.19) in json configuration files, so we need to change it appropriately via sed app before using:
+There is a default value of Elasticsearch IP (176.120.25.19) in json configuration files, so we need to change it appropriately via sed app before using::
 
    $ sed -i 's/176.120.25.19/elasticsearch.marathon.mm/g'  api-json/providers/elasticsearch-ps-provider.json
    $ curl --request POST "http://$address/v1/providers" -H 'Content-Type: application/json' --data "@api-json/providers /elasticsearch-ps-provider.json"
@@ -851,7 +851,7 @@ The example below is compiled in Kibana v.5.5.1.
 
 It illustrates average time of echo-responses by IPs per a selected period of time (e.g. 1 min). As you can see, different nodes have the different average time of response. Some nodes respond faster than others. 
 
-.. figurer:: _static/Kibana.png
+.. figure:: _static/Kibana.png
 
 Lots of other parameter combinations can be implemented to view the results.
 
