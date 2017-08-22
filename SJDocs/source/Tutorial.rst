@@ -1,7 +1,7 @@
 Tutorial
 ========================
 
-:Contents:
+.. Contents::
 
 Introduction 
 -----------------------
