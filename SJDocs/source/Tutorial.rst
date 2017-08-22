@@ -1,7 +1,10 @@
+Tutorial
+========================
+
 :Contents:
 
 Introduction 
-===========================
+-----------------------
 
 This tutorial is aimed to represent  SJ-Platform and give a quick start for a user to see the platform at work.
 
@@ -11,7 +14,7 @@ Through an example project a user will get to know the system structure, its key
 
 
 SJ-Platform Overview
-===================================
+----------------------------------
 
 As a quick reminder,  SJ-Platform is a real-time processing system. The data are processed in modules where they are passed via streams. The result data are exported to an external storage.
 
@@ -35,7 +38,7 @@ Below an example of a real-life task will be provided for better understanding o
 
 
 Example task
------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Let’s introduce an example task which will illustrate the platform workflow in the real-world use.
 
@@ -50,7 +53,7 @@ Besides, calculated average response time on each node will give the idea of the
 Before providing a solution to the task let’s have a quick look at a processing level of the platform.
 
 Processing
----------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The processing workflow in the platform can be generally illustrated as at the diagram below:
 
@@ -101,7 +104,7 @@ And the first step is the system deployment.
 
 
 Step 1. Deployment 
-===========================
+-----------------------------
 
 The system works on the basis of the following core technologies: Apache Mesos, Apache Zookeeper, Apache Kafka, Docker, MongoDB, Hazelcast, Elasticsearch, SQL database, REST.
 
@@ -428,7 +431,7 @@ At first, the infrastructure for the module performance can be created next.
 
 
 Step 2. Module Uploading 
-===================================
+---------------------------------
 
 Now as the system is deployed, modules can be uploaded.
 
@@ -450,7 +453,7 @@ Download the modules from the Sonatype repository and upload it to the system fo
 
 
 Example Task
----------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Please, follow these steps to build and upload the modules of pingstation demo.
 
@@ -461,7 +464,7 @@ To configure environment::
 <host>:<port> — SJ Rest host and port.
 
 Module Downloading from Sonatype Repository
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 - To download the sj-regex-input module from the sonatype repository::
 
@@ -476,7 +479,7 @@ Module Downloading from Sonatype Repository
  $ curl “https://oss.sonatype.org/content/repositories/snapshots/com/bwsw/ps-output_2.12/1.0-SNAPSHOT/ps-output_2.12-1.0-SNAPSHOT.jar” -o ps-output-1.0.jar
 
 Module Uploading
-~~~~~~~~~~~~~~~~~~~~~~~~~
+""""""""""""""""""""""""""""""""""""
 
 Upload modules to the system::
 
@@ -489,7 +492,7 @@ Now in UI you can see the uploaded modules under the ‘Modules’ tab.
 .. figure:: _static/ModulesUploaded.png
 
 Step 3. Configurations and Engine Jars Uploading 
-==============================================================
+----------------------------------------------------------------
 
 An engine is required to start a module. A module can not process data without an engine (that is a .jar file containing required configuration settings). In fact, it is a framework that launches the module executor.
 
@@ -504,7 +507,7 @@ To implement the processing workflow for the example task resolution the followi
 Thus, as a next step engines should be compiled and uploaded.
  
 Upload engine jars
----------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Please, upload the engine jars for the three modules ( input-streaming, regular-streaming, output-streaming) and the Mesos framework. You can find them at our GitHub repository::
 
@@ -522,7 +525,7 @@ Now engine jars should appear in the UI under Custom Jars of the "Custom files" 
 .. figure:: _static/EnginesUploaded.png
 
 Setup configurations for engines
--------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The configurations will be added to the system via REST. 
 
@@ -568,7 +571,7 @@ In the UI you can see the uploaded configurations under the “Configuration” 
 .. figure:: _static/ConfigurationsUploaded.png
 
 Step 4. Creating Streaming Layer 
-============================================
+------------------------------------------
 
 The raw data is fed to the platform from different sources. And within the platform, the data is passed to and from a module in streams. Thus, in the next step, the streams for data ingesting and exporting will be created.
 
@@ -600,14 +603,14 @@ In the example task solution the following stream types are implemented:
 Below the steps for creating streaming infrastructure such as providers, services, and streams via REST API can be found.
 
 Set Up Streaming Infrastructure
-----------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Prior to creating streams, it is necessary to provide the infrastructure: providers and services.
 
 They can be of different types. The types of platform entities in the pipeline determine the type of providers and services that are necessary in the particular case.
 
 Example Task
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""""""""""""""""""""""
 
 In the example task pipeline the modules of three types take place: the input-streaming, regular-streaming and output-streaming. For all types of modules, the Apache Zookeeper service is necessary. Thus, it requires the Apache Zookeeper provider.
 
@@ -657,12 +660,11 @@ Please, make sure the created services have appeared in UI under the “Services
 .. figure:: _static/ServicesCreated.png
 
 Creating Streams
-------------------------------
-
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Once streaming infrastructure is created, it is high time to create streams. Please, use the “POST” API requests below to create streams that will be used in the instances of input-streaming, regular-streaming and output-streaming modules.
 
 Exampole task
-~~~~~~~~~~~~~~~~~~~~~~~
+""""""""""""""""""""""""
 
 For **sj-regex-input module**:
 
@@ -699,13 +701,13 @@ The created streams should be available now in UI under the “Streams” tab.
 
 .. figure:: _static/StreamsCreated.png
 
-Step 5. Create output destination
-================================================
+Step 5. Create Output Destination
+---------------------------------------------
 
 At this step all necessary indexes, tables and mapping should be created for storing the processed result.
 
 Example task
------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 In the provided example task the result data is stored to the Elasticsearch data storage.
 
 Thus, it is necessary to create the index and mapping for ES.
@@ -716,7 +718,7 @@ Create the index and the mapping for Elasticsearch sending the PUT request::
 
 
 Step 6. Creating Instances 
-==========================================
+-----------------------------------------
 
 Once the system is deployed, configurations and modules are uploaded, the streaming layer with necessary infrastructure is created, an instance is to be created in the next step.
 
@@ -729,8 +731,7 @@ An instance is created with specific parameters and is set to particular streams
 For each module an instance should be created.
 
 Creating Instances
--------------------------
-
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 For instance creation we will send the POST requests. See the instructions below for creating insatnces for the example task solution.
 
 For creating an instance of the sj-regex-input module send the following POST request::
@@ -767,7 +768,7 @@ The created instances should be available now in UI under the “Instances” ta
 Ready! The module can be launched.
 
 Launching Instances
-============================
+----------------------------------
 
 After the streaming layer with its infrastructure and instances are created you can start a module. 
 
@@ -826,7 +827,7 @@ If you have a look in the UI, you will see the launched modules with the “star
 .. figure:: _static/InstancesStarted.png
 
 See the Results 
-================================
+------------------------------
 
 To see the processing results saved in ElasticSearch, please, go to Kibana. There the aggregated data can be rendered in a diagram.
 
@@ -851,7 +852,7 @@ It illustrates average time of echo-responses by IPs per a selected period of ti
 Lots of other parameter combinations can be implemented to view the results.
 
 Instance Shutdown 
-==========================
+-----------------------------
 
 Once the task is resolved and necessary data is aggregated, the instance can be stopped. 
 
@@ -886,7 +887,7 @@ In the UI, you will see the suspended instances with the “stopped” status.
 .. figure:: _static/InstancesStopped.png
 
 Deleting Instance
-==============================
+---------------------------------
 
 A stopped instance can be deleted if there is no need for it anymore. An instance of a specific module can be deleted via REST API by sending a DELETE request (as described below). Or instance deleting action is available in the UI under the “Instances” tab.
 
