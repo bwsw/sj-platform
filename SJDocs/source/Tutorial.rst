@@ -140,7 +140,7 @@ Install Java::
  $ sudo apt-get install oracle-java8-installer
  $ sudo apt-get install oracle-java8-set-default
 
-Find detailed instructions `here <https://tecadmin.net/install-oracle-java-8-ubuntu-via-ppa/ >`_.
+Find detailed instructions `here <https://tecadmin.net/install-oracle-java-8-ubuntu-via-ppa/>`_.
 
 2) Create json files and a configuration file (config.properties) for tts. 
 
@@ -436,7 +436,8 @@ Now as the system is deployed, modules can be uploaded.
 A module is a .jar file, containing module specification and configurations.
 
 .. figure:: _static/ModuleExecutorAndValidator.png
-
+   :scale: 120%
+   
 .. note:: Find more about modules at the :ref:`Modules` page.  A hello-world on a custom module can be found at the :ref:`Custom_Module` section.
 
 For the stated example task the following modules will be uploaded:
@@ -495,7 +496,8 @@ Step 3. Configurations and Engine Jars Uploading
 An engine is required to start a module. A module can not process data without an engine (that is a .jar file containing required configuration settings). In fact, it is a framework that launches the module executor.
 
 .. figure:: _static/Engine.png
-
+   :scale: 110%
+   
 To implement the processing workflow for the example task resolution the following jars should be uploaded:
 
 1. a jar per each module type  - input-streaming, regular-streaming, output-streaming;
@@ -726,7 +728,8 @@ Once the system is deployed, configurations and modules are uploaded, the stream
 A module uses a specific instance to personalize its work. An instance is a full range of settings to perform a specific executor type.
 
 .. figure:: _static/Instance.png
-
+   :scale: 120%
+   
 An instance is created with specific parameters and is set to particular streams.
  
 For each module an instance should be created.
