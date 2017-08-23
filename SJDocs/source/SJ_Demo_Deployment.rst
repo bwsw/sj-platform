@@ -17,12 +17,12 @@ To determine if cpu vt extensions are enabled in bios, do the following:
 
 1) Install cpu-checker::
 
- $ sudo apt-get update
- $ sudo apt-get install cpu-checker
+    $ sudo apt-get update
+    $ sudo apt-get install cpu-checker
 
 2) Then check::
 
- $ kvm-ok
+    $ kvm-ok
 
 If the CPU is enabled, you will see::
 
