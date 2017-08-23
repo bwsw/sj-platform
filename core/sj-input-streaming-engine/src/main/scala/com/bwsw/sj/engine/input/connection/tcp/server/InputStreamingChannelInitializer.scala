@@ -20,7 +20,6 @@ package com.bwsw.sj.engine.input.connection.tcp.server
 
 import java.util.concurrent.ArrayBlockingQueue
 
-import io.netty.buffer.ByteBuf
 import io.netty.channel.socket.SocketChannel
 import io.netty.channel.{ChannelHandlerContext, ChannelInitializer}
 import io.netty.handler.codec.string.StringEncoder
@@ -36,7 +35,7 @@ import scala.collection.concurrent
   *                             with the appropriate channel context [[io.netty.channel.ChannelHandlerContext]]
   */
 class InputStreamingChannelInitializer(channelContextQueue: ArrayBlockingQueue[ChannelHandlerContext],
-                                       bufferForEachContext: concurrent.Map[ChannelHandlerContext, ByteBuf])
+                                       bufferForEachContext: concurrent.Map[ChannelHandlerContext, ChannelContextState])
   extends ChannelInitializer[SocketChannel] {
 
   def initChannel(channel: SocketChannel): Unit = {

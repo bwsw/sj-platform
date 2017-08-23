@@ -41,26 +41,46 @@ import scala.util.{Failure, Success, Try}
 
 @Sharable
 class InputStreamingServerHandler(channelContextQueue: ArrayBlockingQueue[ChannelHandlerContext],
-                                  bufferForEachContext: concurrent.Map[ChannelHandlerContext, ByteBuf])
+                                  bufferForEachContext: concurrent.Map[ChannelHandlerContext, ChannelContextState])
   extends ChannelInboundHandlerAdapter {
 
   override def channelRead(ctx: ChannelHandlerContext, msg: Any): Unit = {
     val result = Try {
       val message = msg.asInstanceOf[ByteBuf]
+      var maybeState = bufferForEachContext.get(ctx)
 
-      if (bufferForEachContext.contains(ctx)) {
-        bufferForEachContext(ctx).writeBytes(message)
-      } else {
-        bufferForEachContext += ctx -> ctx.alloc().buffer().writeBytes(message)
+      maybeState match {
+        case Some(state) =>
+          state.buffer.writeBytes(message)
+
+        case None =>
+          maybeState = Some(ChannelContextState(ctx.alloc().buffer().writeBytes(message)))
+          bufferForEachContext += ctx -> maybeState.get
       }
 
-      channelContextQueue.add(ctx)
+      if (!maybeState.get.isQueued) {
+        channelContextQueue.add(ctx)
+        maybeState.get.isQueued = true
+      }
     }
     ReferenceCountUtil.release(msg)
     result match {
       case Success(_) =>
       case Failure(e) => throw e
     }
+  }
+
+  override def channelInactive(ctx: ChannelHandlerContext): Unit = {
+    bufferForEachContext.get(ctx) match {
+      case Some(state) =>
+        state.isActive = false
+        if (!state.buffer.isReadable)
+          bufferForEachContext -= ctx
+
+      case None =>
+    }
+
+    super.channelInactive(ctx)
   }
 
   /**
@@ -70,6 +90,7 @@ class InputStreamingServerHandler(channelContextQueue: ArrayBlockingQueue[Channe
     * @param cause what has caused an exception
     */
   override def exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable): Unit = {
+    bufferForEachContext -= ctx
     cause.printStackTrace()
     ctx.close()
   }

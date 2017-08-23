@@ -26,10 +26,9 @@ import com.bwsw.sj.common.engine.TaskEngine
 import com.bwsw.sj.common.engine.core.managment.TaskManager
 import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
 import com.bwsw.sj.engine.core.engine.TaskRunner
-import com.bwsw.sj.engine.input.connection.tcp.server.InputStreamingServer
+import com.bwsw.sj.engine.input.connection.tcp.server.{ChannelContextState, InputStreamingServer}
 import com.bwsw.sj.engine.input.task.reporting.InputStreamingPerformanceMetrics
 import com.bwsw.sj.engine.input.task.{InputTaskEngine, InputTaskManager}
-import io.netty.buffer.ByteBuf
 import io.netty.channel.ChannelHandlerContext
 import scaldi.Injectable.inject
 
@@ -47,8 +46,8 @@ object InputTaskRunner extends {
   override val threadName = "InputTaskRunner-%d"
 } with TaskRunner {
 
-  private val queueSize = 1000
-  private val bufferForEachContext = new ConcurrentHashMap[ChannelHandlerContext, ByteBuf]().asScala
+  private val queueSize = 5000
+  private val bufferForEachContext = new ConcurrentHashMap[ChannelHandlerContext, ChannelContextState]().asScala
   private val channelContextQueue = new ArrayBlockingQueue[ChannelHandlerContext](queueSize)
 
   override protected def createTaskManager(): TaskManager = new InputTaskManager()

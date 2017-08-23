@@ -30,6 +30,7 @@ import com.bwsw.sj.common.si.model.instance.InputInstance
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.core.engine.{NumericalCheckpointTaskEngine, TimeCheckpointTaskEngine}
 import com.bwsw.sj.engine.input.config.InputEngineConfigNames
+import com.bwsw.sj.engine.input.connection.tcp.server.ChannelContextState
 import com.bwsw.sj.engine.input.eviction_policy.InputInstanceEvictionPolicy
 import com.bwsw.sj.engine.input.task.reporting.InputStreamingPerformanceMetrics
 import com.bwsw.tstreams.agents.producer.{NewProducerTransactionPolicy, ProducerTransaction}
@@ -38,6 +39,7 @@ import io.netty.buffer.ByteBuf
 import io.netty.channel.{ChannelFuture, ChannelHandlerContext}
 import org.slf4j.{Logger, LoggerFactory}
 
+import scala.collection.mutable
 
 /**
   * Class contains methods for running input module
@@ -53,7 +55,7 @@ import org.slf4j.{Logger, LoggerFactory}
 abstract class InputTaskEngine(manager: InputTaskManager,
                                performanceMetrics: InputStreamingPerformanceMetrics,
                                channelContextQueue: ArrayBlockingQueue[ChannelHandlerContext],
-                               bufferForEachContext: scala.collection.concurrent.Map[ChannelHandlerContext, ByteBuf],
+                               bufferForEachContext: scala.collection.concurrent.Map[ChannelHandlerContext, ChannelContextState],
                                connectionRepository: ConnectionRepository) extends TaskEngine {
 
   import InputTaskEngine.logger
@@ -86,7 +88,7 @@ abstract class InputTaskEngine(manager: InputTaskManager,
     * Set of channel contexts related to the input envelopes to send a response to client
     * that a checkpoint has been initiated
     */
-  private val contextsToSendCheckpointResponse: scala.collection.mutable.Set[ChannelHandlerContext] = collection.mutable.Set[ChannelHandlerContext]()
+  private val contextsToSendCheckpointResponse: mutable.Set[ChannelHandlerContext] = mutable.Set[ChannelHandlerContext]()
 
   addProducersToCheckpointGroup()
 
@@ -142,14 +144,19 @@ abstract class InputTaskEngine(manager: InputTaskManager,
       s"Run input task engine in a separate thread of execution service.")
     while (true) {
       getChannelContext() match {
-        case Some(channelContext) =>
-          contextsToSendCheckpointResponse.add(channelContext)
+        case Some((channelContext, state)) =>
           logger.debug(s"Task name: ${manager.taskName}. Invoke tokenize() method of executor.")
-          val maybeInterval = executor.tokenize(bufferForEachContext(channelContext))
+          val maybeInterval = executor.tokenize(state.buffer)
           if (maybeInterval.isDefined) {
             logger.debug(s"Task name: ${manager.taskName}. Tokenize() method returned a defined interval.")
-            tryToRead(channelContext, maybeInterval.get)
+            tryToRead(channelContext, state, maybeInterval.get)
           }
+
+          if (state.isActive)
+            contextsToSendCheckpointResponse += channelContext
+          else
+            contextsToSendCheckpointResponse -= channelContext
+
         case None =>
       }
 
@@ -157,32 +164,37 @@ abstract class InputTaskEngine(manager: InputTaskManager,
     }
   }
 
-  private def getChannelContext(): Option[ChannelHandlerContext] = {
-    var channelContext = Option(channelContextQueue.poll(EngineLiterals.eventWaitTimeout, TimeUnit.MILLISECONDS))
-    if (channelContext.isEmpty) channelContext = getCtxOfNonEmptyBuffer
+  private def getChannelContext(): Option[(ChannelHandlerContext, ChannelContextState)] = {
+    val maybeChannelContext = Option(channelContextQueue.poll(EngineLiterals.eventWaitTimeout, TimeUnit.MILLISECONDS))
 
-    channelContext
+    if (maybeChannelContext.isEmpty)
+      bufferForEachContext.find(_._2.buffer.isReadable)
+    else
+      maybeChannelContext.map { channelContext =>
+        val state = bufferForEachContext(channelContext)
+        state.isQueued = false
+
+        (channelContext, state)
+      }
   }
 
-  private def getCtxOfNonEmptyBuffer: Option[ChannelHandlerContext] =
-    bufferForEachContext.find(x => x._2.readableBytes() > 0).map(_._1)
-
-  private def tryToRead(channelContext: ChannelHandlerContext, interval: Interval): ChannelFuture = {
-    val buffer = bufferForEachContext(channelContext)
-    if (buffer.isReadable(interval.finalValue)) {
+  private def tryToRead(channelContext: ChannelHandlerContext,
+                        state: ChannelContextState,
+                        interval: Interval): Unit = {
+    if (state.buffer.isReadable(interval.finalValue)) {
       logger.debug(s"Task name: ${manager.taskName}. The end index of interval is valid.")
       logger.debug(s"Task name: ${manager.taskName}. Invoke parse() method of executor.")
-      val inputEnvelope = executor.parse(buffer, interval)
-      clearBufferAfterParse(buffer, interval.finalValue)
+      val inputEnvelope = executor.parse(state.buffer, interval)
+      clearBufferAfterParse(state.buffer, interval.finalValue)
       val isNotDuplicateOrEmpty = processEnvelope(inputEnvelope)
-      sendClientResponse(inputEnvelope, isNotDuplicateOrEmpty, channelContext)
+      if (state.isActive)
+        sendClientResponse(inputEnvelope, isNotDuplicateOrEmpty, channelContext)
     } else {
-      logger.error(s"Task name: ${manager.taskName}. " +
+      val errorMessage = s"Task name: ${manager.taskName}. " +
         s"Method tokenize() returned an interval with a final value: ${interval.finalValue} " +
-        s"that an input stream is not defined at (buffer write index: ${buffer.writerIndex()}).")
-      throw new IndexOutOfBoundsException(s"Task name: ${manager.taskName}. " +
-        s"Method tokenize() returned an interval with a final value: ${interval.finalValue} " +
-        s"that an input stream is not defined at (buffer write index: ${buffer.writerIndex()})")
+        s"that an input stream is not defined at (buffer write index: ${state.buffer.writerIndex()})."
+      logger.error(errorMessage)
+      throw new IndexOutOfBoundsException(errorMessage)
     }
   }
 
@@ -250,7 +262,9 @@ abstract class InputTaskEngine(manager: InputTaskManager,
     *                              If it is true it means a processed envelope is duplicate or empty and false otherwise
     * @param ctx                   Channel context related with this input envelope to send a message about this event
     */
-  private def sendClientResponse(envelope: Option[InputEnvelope[AnyRef]], isNotEmptyOrDuplicate: Boolean, ctx: ChannelHandlerContext): ChannelFuture = {
+  private def sendClientResponse(envelope: Option[InputEnvelope[AnyRef]],
+                                 isNotEmptyOrDuplicate: Boolean,
+                                 ctx: ChannelHandlerContext): ChannelFuture = {
     val inputStreamingResponse = executor.createProcessedMessageResponse(envelope, isNotEmptyOrDuplicate)
     if (inputStreamingResponse.sendResponsesNow) ctx.write(inputStreamingResponse.message)
     else ctx.writeAndFlush(inputStreamingResponse.message)
@@ -274,8 +288,10 @@ abstract class InputTaskEngine(manager: InputTaskManager,
     */
   private def checkpointInitiated(): Unit = {
     val inputStreamingResponse = executor.createCheckpointResponse()
-    if (inputStreamingResponse.sendResponsesNow) contextsToSendCheckpointResponse.foreach(x => x.write(inputStreamingResponse.message))
-    else contextsToSendCheckpointResponse.foreach(x => x.writeAndFlush(inputStreamingResponse.message))
+    if (inputStreamingResponse.sendResponsesNow)
+      contextsToSendCheckpointResponse.foreach(x => x.write(inputStreamingResponse.message))
+    else
+      contextsToSendCheckpointResponse.foreach(x => x.writeAndFlush(inputStreamingResponse.message))
   }
 
   protected def prepareForNextCheckpoint(): Unit
@@ -333,16 +349,21 @@ object InputTaskEngine {
   def apply(manager: InputTaskManager,
             performanceMetrics: InputStreamingPerformanceMetrics,
             channelContextQueue: ArrayBlockingQueue[ChannelHandlerContext],
-            bufferForEachContext: scala.collection.concurrent.Map[ChannelHandlerContext, ByteBuf],
+            bufferForEachContext: scala.collection.concurrent.Map[ChannelHandlerContext, ChannelContextState],
             connectionRepository: ConnectionRepository): InputTaskEngine = {
 
     manager.inputInstance.checkpointMode match {
       case EngineLiterals.`timeIntervalMode` =>
-        logger.info(s"Task: ${manager.taskName}. Input module has a '${EngineLiterals.timeIntervalMode}' checkpoint mode, create an appropriate task engine.")
-        new InputTaskEngine(manager, performanceMetrics, channelContextQueue, bufferForEachContext, connectionRepository) with TimeCheckpointTaskEngine
+        logger.info(s"Task: ${manager.taskName}." +
+          s" Input module has a '${EngineLiterals.timeIntervalMode}' checkpoint mode, create an appropriate task engine.")
+        new InputTaskEngine(manager, performanceMetrics, channelContextQueue, bufferForEachContext, connectionRepository)
+          with TimeCheckpointTaskEngine
+
       case EngineLiterals.`everyNthMode` =>
-        logger.info(s"Task: ${manager.taskName}. Input module has an '${EngineLiterals.everyNthMode}' checkpoint mode, create an appropriate task engine.")
-        new InputTaskEngine(manager, performanceMetrics, channelContextQueue, bufferForEachContext, connectionRepository) with NumericalCheckpointTaskEngine
+        logger.info(s"Task: ${manager.taskName}." +
+          s" Input module has an '${EngineLiterals.everyNthMode}' checkpoint mode, create an appropriate task engine.")
+        new InputTaskEngine(manager, performanceMetrics, channelContextQueue, bufferForEachContext, connectionRepository)
+          with NumericalCheckpointTaskEngine
     }
   }
 }

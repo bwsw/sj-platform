@@ -22,7 +22,7 @@ import java.io.Closeable
 import java.util.concurrent.{ArrayBlockingQueue, Callable}
 
 import io.netty.bootstrap.ServerBootstrap
-import io.netty.buffer.{ByteBuf, PooledByteBufAllocator}
+import io.netty.buffer.PooledByteBufAllocator
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.nio.NioServerSocketChannel
 import io.netty.channel.{ChannelHandlerContext, ChannelOption, EventLoopGroup}
@@ -48,7 +48,8 @@ import scala.util.{Failure, Success, Try}
 class InputStreamingServer(host: String,
                            port: Int,
                            channelContextQueue: ArrayBlockingQueue[ChannelHandlerContext],
-                           bufferForEachContext: concurrent.Map[ChannelHandlerContext, ByteBuf]) extends Callable[Unit] with Closeable {
+                           bufferForEachContext: concurrent.Map[ChannelHandlerContext, ChannelContextState])
+  extends Callable[Unit] with Closeable {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val bossGroup: EventLoopGroup = new NioEventLoopGroup(1)
