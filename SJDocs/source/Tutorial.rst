@@ -940,7 +940,7 @@ Find more information at:
 
 :ref:`Modules` - more about module structure.
 
-:ref:`Custom_Modules` - how to create a module.
+:ref:`Custom_Module` - how to create a module.
 
 `sflow demo on github repo <https://github.com/bwsw/sj-sflow-demo/tree/develop>`_ - another demo task
 
