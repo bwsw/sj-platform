@@ -154,8 +154,6 @@ abstract class InputTaskEngine(manager: InputTaskManager,
 
           if (state.isActive)
             contextsToSendCheckpointResponse += channelContext
-          else
-            contextsToSendCheckpointResponse -= channelContext
 
         case None =>
       }
@@ -288,6 +286,7 @@ abstract class InputTaskEngine(manager: InputTaskManager,
     */
   private def checkpointInitiated(): Unit = {
     val inputStreamingResponse = executor.createCheckpointResponse()
+    contextsToSendCheckpointResponse.retain(c => bufferForEachContext.get(c).exists(_.isActive))
     if (inputStreamingResponse.sendResponsesNow)
       contextsToSendCheckpointResponse.foreach(x => x.write(inputStreamingResponse.message))
     else
