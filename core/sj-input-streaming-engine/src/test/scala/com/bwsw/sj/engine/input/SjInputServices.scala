@@ -18,8 +18,6 @@
  */
 package com.bwsw.sj.engine.input
 
-import java.io.File
-
 import com.bwsw.sj.engine.input.DataFactory.connectionRepository
 
 /**
@@ -31,11 +29,4 @@ object SjInputServices {
   val providerService = connectionRepository.getProviderRepository
   val instanceService = connectionRepository.getInstanceRepository
   val fileStorage = connectionRepository.getFileStorage
-
-  val host = "localhost"
-  val port = 8888
-  val inputModule = new File("./contrib/stubs/sj-stub-input-streaming/target/scala-2.12/sj-stub-input-streaming-1.0-SNAPSHOT.jar")
-  val checkpointInterval = 10
-  val numberOfDuplicates = 10
-  val totalInputElements = 2 * checkpointInterval + numberOfDuplicates // increase/decrease a constant to change the number of input elements
 }

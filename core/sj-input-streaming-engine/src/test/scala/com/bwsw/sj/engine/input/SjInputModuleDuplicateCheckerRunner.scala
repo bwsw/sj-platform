@@ -18,7 +18,7 @@
  */
 package com.bwsw.sj.engine.input
 
-import com.bwsw.sj.engine.input.SjInputServices.{numberOfDuplicates, totalInputElements}
+import com.bwsw.sj.engine.input.SjInputModuleBenchmarkConstants.{numberOfDuplicates, totalInputElements}
 
 /**
   * @author Pavel Tomskikh
@@ -26,3 +26,5 @@ import com.bwsw.sj.engine.input.SjInputServices.{numberOfDuplicates, totalInputE
 object SjInputModuleDuplicateCheckerRunner extends App {
   DuplicateChecker.main(Array(totalInputElements.toString, numberOfDuplicates.toString))
 }
+
+class SjInputModuleDuplicateCheckerRunner

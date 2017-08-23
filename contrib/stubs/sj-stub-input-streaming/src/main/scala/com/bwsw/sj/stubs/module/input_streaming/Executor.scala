@@ -18,6 +18,8 @@
  */
 package com.bwsw.sj.stubs.module.input_streaming
 
+import java.net.Socket
+
 import com.bwsw.common.ObjectSerializer
 import com.bwsw.sj.common.engine.core.entities.InputEnvelope
 import com.bwsw.sj.common.engine.core.environment.InputEnvironmentManager
@@ -27,13 +29,17 @@ import io.netty.buffer.ByteBuf
 class Executor(manager: InputEnvironmentManager) extends InputStreamingExecutor[String](manager) {
   val objectSerializer = new ObjectSerializer()
   val outputs = manager.getStreamsByTags(Array("output"))
+  val splittedOptions = manager.options.split(",")
+  val totalInputElements = splittedOptions(0).toInt
+  val benchmarkPort = splittedOptions(1).toInt
+  var inputElements = 0
 
   /**
-   * Will be invoked every time when a new part of data is received
- *
-   * @param buffer Input stream is a flow of bytes
-   * @return Interval into buffer that probably contains a message or None
-   */
+    * Will be invoked every time when a new part of data is received
+    *
+    * @param buffer Input stream is a flow of bytes
+    * @return Interval into buffer that probably contains a message or None
+    */
   override def tokenize(buffer: ByteBuf): Option[Interval] = {
     val writeIndex = buffer.writerIndex()
     val endIndex = buffer.indexOf(0, writeIndex, 10)
@@ -42,11 +48,11 @@ class Executor(manager: InputEnvironmentManager) extends InputStreamingExecutor[
   }
 
   /**
-   * Will be invoked after each calling tokenize method if tokenize doesn't return None
- *
-   * @param buffer Input stream is a flow of bytes
-   * @return Input envelope or None
-   */
+    * Will be invoked after each calling tokenize method if tokenize doesn't return None
+    *
+    * @param buffer Input stream is a flow of bytes
+    * @return Input envelope or None
+    */
   override def parse(buffer: ByteBuf, interval: Interval) = {
 
     val rawData = buffer.slice(interval.initialValue, interval.finalValue)
@@ -61,6 +67,10 @@ class Executor(manager: InputEnvironmentManager) extends InputStreamingExecutor[
       outputs.map(x => (x, 0)),
       new String(data)
     )
+
+    inputElements += 1
+    if (inputElements == totalInputElements)
+      new Socket("localhost", benchmarkPort)
 
     Some(envelope)
   }

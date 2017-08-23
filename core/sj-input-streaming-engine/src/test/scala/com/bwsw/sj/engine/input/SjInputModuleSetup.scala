@@ -22,7 +22,9 @@ import java.util.logging.LogManager
 
 import com.bwsw.sj.common.config.TempHelperForConfigSetup
 import com.bwsw.sj.engine.input.DataFactory._
-import com.bwsw.sj.engine.input.SjInputServices.checkpointInterval
+import com.bwsw.sj.engine.input.SjInputModuleBenchmarkConstants.{checkpointInterval, inputModule}
+
+import scala.util.{Failure, Success, Try}
 
 /**
   * @author Pavel Tomskikh
@@ -30,22 +32,34 @@ import com.bwsw.sj.engine.input.SjInputServices.checkpointInterval
 object SjInputModuleSetup extends App {
   LogManager.getLogManager.reset()
 
-  val tempHelperForConfigSetup = new TempHelperForConfigSetup(connectionRepository)
-  tempHelperForConfigSetup.setupConfigs()
-  println("config loaded")
+  val exitCode = Try {
+    val tempHelperForConfigSetup = new TempHelperForConfigSetup(connectionRepository)
+    tempHelperForConfigSetup.setupConfigs()
+    println("config loaded")
 
-  loadModule(SjInputServices.inputModule, SjInputServices.fileStorage)
-  println("module loaded")
-  createProviders(SjInputServices.providerService)
-  println("providers created")
-  createServices(SjInputServices.serviceManager, SjInputServices.providerService)
-  println("services created")
-  createStreams(SjInputServices.streamService, SjInputServices.serviceManager, outputCount)
-  println("streams created")
-  createInstance(SjInputServices.serviceManager, SjInputServices.instanceService, checkpointInterval)
-  println("instances created")
+    loadModule(inputModule, SjInputServices.fileStorage)
+    println("module loaded")
+    createProviders(SjInputServices.providerService)
+    println("providers created")
+    createServices(SjInputServices.serviceManager, SjInputServices.providerService)
+    println("services created")
+    createStreams(SjInputServices.streamService, SjInputServices.serviceManager, outputCount)
+    println("streams created")
+    createInstance(SjInputServices.serviceManager, SjInputServices.instanceService, checkpointInterval)
+    println("instances created")
 
-  connectionRepository.close()
+    connectionRepository.close()
+  } match {
+    case Success(_) =>
+      println("DONE")
+      0
 
-  println("DONE")
+    case Failure(e) =>
+      e.printStackTrace()
+      1
+  }
+
+  System.exit(exitCode)
 }
+
+class SjInputModuleSetup

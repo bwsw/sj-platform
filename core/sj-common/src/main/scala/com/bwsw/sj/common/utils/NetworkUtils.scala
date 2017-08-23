@@ -16,11 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.sj.common.config
+package com.bwsw.sj.common.utils
 
-object BenchmarkConfigNames {
-  val test = "test"
-  val zkHosts = test + ".zookeeper.hosts"
-  val kafkaHosts = test + ".kafka.hosts"
-  val benchmarkPort = test + ".benchmark.port"
+import java.net.ServerSocket
+
+/**
+  * @author Pavel Tomskikh
+  */
+object NetworkUtils {
+  def findFreePort(): Int = {
+    val randomSocket = new ServerSocket(0)
+    val port = randomSocket.getLocalPort
+    randomSocket.close()
+
+    port
+  }
 }

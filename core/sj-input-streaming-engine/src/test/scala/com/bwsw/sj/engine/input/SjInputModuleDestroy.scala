@@ -30,7 +30,7 @@ object SjInputModuleDestroy extends App {
   deleteServices(SjInputServices.serviceManager)
   deleteProviders(SjInputServices.providerService)
   deleteInstance(SjInputServices.instanceService)
-  deleteModule(SjInputServices.fileStorage, SjInputServices.inputModule.getName)
+  deleteModule(SjInputServices.fileStorage, SjInputModuleBenchmarkConstants.inputModule.getName)
 
   val tempHelperForConfigDestroy = new TempHelperForConfigDestroy(connectionRepository)
   tempHelperForConfigDestroy.deleteConfigs()

@@ -24,3 +24,5 @@ package com.bwsw.sj.engine.input
 object SjInputModuleRunner extends App {
   InputTaskRunner.main(Array())
 }
+
+class SjInputModuleRunner

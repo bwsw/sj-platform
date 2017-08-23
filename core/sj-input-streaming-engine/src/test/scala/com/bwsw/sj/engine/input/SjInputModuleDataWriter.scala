@@ -22,7 +22,8 @@ import java.io.PrintStream
 import java.net.Socket
 import java.util.logging.LogManager
 
-import com.bwsw.sj.engine.input.SjInputServices.{host, numberOfDuplicates, port, totalInputElements}
+import com.bwsw.sj.engine.input.DataFactory.instancePort
+import com.bwsw.sj.engine.input.SjInputModuleBenchmarkConstants.{instanceHost, numberOfDuplicates, totalInputElements}
 
 import scala.util.{Failure, Success, Try}
 
@@ -31,11 +32,12 @@ import scala.util.{Failure, Success, Try}
   */
 object SjInputModuleDataWriter extends App {
   LogManager.getLogManager.reset()
-  writeData(totalInputElements, numberOfDuplicates)
+  val exitCode = writeData(totalInputElements, numberOfDuplicates)
+  System.exit(exitCode)
 
-  private def writeData(totalInputElements: Int, numberOfDuplicates: Int) = {
+  private def writeData(totalInputElements: Int, numberOfDuplicates: Int): Int = {
     Try {
-      val socket = new Socket(host, port)
+      val socket = new Socket(instanceHost, instancePort)
       var amountOfDuplicates = -1
       var amountOfElements = 0
       var currentElement = 1
@@ -59,8 +61,13 @@ object SjInputModuleDataWriter extends App {
       socket.close()
     } match {
       case Success(_) =>
+        println("DONE")
+        0
       case Failure(e) =>
-        System.out.println("init error: " + e)
+        println("init error: " + e)
+        1
     }
   }
 }
+
+class SjInputModuleDataWriter
