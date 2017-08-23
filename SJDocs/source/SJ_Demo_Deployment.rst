@@ -80,7 +80,7 @@ Description
 
 Vagrant creates Ubuntu/Xenial64 VM with 4 cpus, 12 GB memory and 10 GB disk space.
 
-In VM there is a launched Mesos with all required services on docker swarm via docker stack deploy.
+In VM Mesos is launched with all the required services on Docker in swarm mode via Docker stack deployment.
 
 Host - 0.0.0.0
 
