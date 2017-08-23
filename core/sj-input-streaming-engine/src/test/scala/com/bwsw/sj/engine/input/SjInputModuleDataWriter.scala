@@ -22,51 +22,40 @@ import java.io.PrintStream
 import java.net.Socket
 import java.util.logging.LogManager
 
+import com.bwsw.sj.common.utils.benchmark.BenchmarkUtils
 import com.bwsw.sj.engine.input.DataFactory.instancePort
 import com.bwsw.sj.engine.input.SjInputModuleBenchmarkConstants.{instanceHost, numberOfDuplicates, totalInputElements}
-
-import scala.util.{Failure, Success, Try}
 
 /**
   * @author Pavel Tomskikh
   */
 object SjInputModuleDataWriter extends App {
   LogManager.getLogManager.reset()
-  val exitCode = writeData(totalInputElements, numberOfDuplicates)
-  System.exit(exitCode)
 
-  private def writeData(totalInputElements: Int, numberOfDuplicates: Int): Int = {
-    Try {
-      val socket = new Socket(instanceHost, instancePort)
-      var amountOfDuplicates = -1
-      var amountOfElements = 0
-      var currentElement = 1
-      val out = new PrintStream(socket.getOutputStream)
+  BenchmarkUtils.exitAfter { () =>
+    val socket = new Socket(instanceHost, instancePort)
+    var amountOfDuplicates = -1
+    var amountOfElements = 0
+    var currentElement = 1
+    val out = new PrintStream(socket.getOutputStream)
 
-      while (amountOfElements < totalInputElements) {
-        if (amountOfDuplicates != numberOfDuplicates) {
-          out.println(currentElement)
-          out.flush()
-          amountOfElements += 1
-          amountOfDuplicates += 1
-        }
-        else {
-          currentElement += 1
-          out.println(currentElement)
-          out.flush()
-          amountOfElements += 1
-        }
+    while (amountOfElements < totalInputElements) {
+      if (amountOfDuplicates != numberOfDuplicates) {
+        out.println(currentElement)
+        out.flush()
+        amountOfElements += 1
+        amountOfDuplicates += 1
       }
-
-      socket.close()
-    } match {
-      case Success(_) =>
-        println("DONE")
-        0
-      case Failure(e) =>
-        println("init error: " + e)
-        1
+      else {
+        currentElement += 1
+        out.println(currentElement)
+        out.flush()
+        amountOfElements += 1
+      }
     }
+
+    socket.close()
+    println("DONE")
   }
 }
 

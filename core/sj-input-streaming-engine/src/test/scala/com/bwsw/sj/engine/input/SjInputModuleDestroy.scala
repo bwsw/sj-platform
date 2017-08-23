@@ -21,20 +21,23 @@ package com.bwsw.sj.engine.input
 import java.util.logging.LogManager
 
 import com.bwsw.sj.common.config.TempHelperForConfigDestroy
+import com.bwsw.sj.common.utils.benchmark.BenchmarkUtils
 import com.bwsw.sj.engine.input.DataFactory._
 
 object SjInputModuleDestroy extends App {
-  LogManager.getLogManager.reset()
+  BenchmarkUtils.exitAfter { () =>
+    LogManager.getLogManager.reset()
 
-  deleteStreams(SjInputServices.streamService, outputCount)
-  deleteServices(SjInputServices.serviceManager)
-  deleteProviders(SjInputServices.providerService)
-  deleteInstance(SjInputServices.instanceService)
-  deleteModule(SjInputServices.fileStorage, SjInputModuleBenchmarkConstants.inputModule.getName)
+    deleteStreams(SjInputServices.streamService, outputCount)
+    deleteServices(SjInputServices.serviceManager)
+    deleteProviders(SjInputServices.providerService)
+    deleteInstance(SjInputServices.instanceService)
+    deleteModule(SjInputServices.fileStorage, SjInputModuleBenchmarkConstants.inputModule.getName)
 
-  val tempHelperForConfigDestroy = new TempHelperForConfigDestroy(connectionRepository)
-  tempHelperForConfigDestroy.deleteConfigs()
-  connectionRepository.close()
+    val tempHelperForConfigDestroy = new TempHelperForConfigDestroy(connectionRepository)
+    tempHelperForConfigDestroy.deleteConfigs()
+    connectionRepository.close()
 
-  println("DONE")
+    println("DONE")
+  }
 }

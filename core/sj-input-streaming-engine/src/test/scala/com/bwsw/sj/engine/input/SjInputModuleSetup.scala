@@ -21,10 +21,9 @@ package com.bwsw.sj.engine.input
 import java.util.logging.LogManager
 
 import com.bwsw.sj.common.config.TempHelperForConfigSetup
+import com.bwsw.sj.common.utils.benchmark.BenchmarkUtils
 import com.bwsw.sj.engine.input.DataFactory._
 import com.bwsw.sj.engine.input.SjInputModuleBenchmarkConstants.{checkpointInterval, inputModule}
-
-import scala.util.{Failure, Success, Try}
 
 /**
   * @author Pavel Tomskikh
@@ -32,7 +31,7 @@ import scala.util.{Failure, Success, Try}
 object SjInputModuleSetup extends App {
   LogManager.getLogManager.reset()
 
-  val exitCode = Try {
+  BenchmarkUtils.exitAfter { () =>
     val tempHelperForConfigSetup = new TempHelperForConfigSetup(connectionRepository)
     tempHelperForConfigSetup.setupConfigs()
     println("config loaded")
@@ -49,17 +48,8 @@ object SjInputModuleSetup extends App {
     println("instances created")
 
     connectionRepository.close()
-  } match {
-    case Success(_) =>
-      println("DONE")
-      0
-
-    case Failure(e) =>
-      e.printStackTrace()
-      1
+    println("DONE")
   }
-
-  System.exit(exitCode)
 }
 
 class SjInputModuleSetup
