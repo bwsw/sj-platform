@@ -23,6 +23,7 @@ As a quick reminder,  SJ-Platform is a real-time processing system. The data are
 A general structure of SJ-Platform can be presented as at the image below:
 
 .. figure:: _static/TutorialGeneral.png
+   :aligne: center
 
 Processor represents a module pipeline where the data processing is performed.
 
@@ -60,6 +61,7 @@ Processing
 The processing workflow in the platform can be generally illustrated as at the diagram below:
 
 .. figure:: _static/ModulePipeline.png
+   :scale: 80%
 
 Green, yellow and purple blocks are executed with SJ-Platform and it is an input module, a processing module and an output module, respectively.
 
@@ -439,6 +441,7 @@ A module is a .jar file, containing module specification and configurations.
 
 .. figure:: _static/ModuleExecutorAndValidator.png
    :scale: 120%
+   :align: center
    
 .. note:: Find more about modules at the :ref:`Modules` page.  A hello-world on a custom module can be found at the :ref:`Custom_Module` section.
 
@@ -499,6 +502,7 @@ An engine is required to start a module. A module can not process data without a
 
 .. figure:: _static/Engine.png
    :scale: 110%
+   :align: center
    
 To implement the processing workflow for the example task resolution the following jars should be uploaded:
 
@@ -588,6 +592,7 @@ A module receives data from input streams from TCP or Kafka. Within the platform
 
 
 .. figure:: _static/ModuleStreaming.png
+   :scale: 80%
 
 Streams need infrastructure: **Providers** and **Services**. This is a required presetting without which streaming will not be so flexible. 
 
@@ -604,7 +609,7 @@ In the example task solution the following stream types are implemented:
 3. output modules export aggregated data from T-streams to Elasticsearch.
 
 .. figure:: _static/StreamingInPlatform.png
-
+   :scale: 80%
 Below the steps for creating streaming infrastructure such as providers, services, and streams via REST API can be found.
 
 Set Up Streaming Infrastructure
@@ -731,6 +736,7 @@ A module uses a specific instance to personalize its work. An instance is a full
 
 .. figure:: _static/Instance.png
    :scale: 120%
+   :align: center
    
 An instance is created with specific parameters and is set to particular streams.
  
