@@ -183,7 +183,7 @@ abstract class InputTaskEngine(manager: InputTaskManager,
       logger.debug(s"Task name: ${manager.taskName}. The end index of interval is valid.")
       logger.debug(s"Task name: ${manager.taskName}. Invoke parse() method of executor.")
       val inputEnvelope = executor.parse(state.buffer, interval)
-      clearBufferAfterParse(state.buffer, interval.finalValue)
+      clearBufferAfterParse(channelContext, state, interval.finalValue)
       val isNotDuplicateOrEmpty = processEnvelope(inputEnvelope)
       if (state.isActive)
         sendClientResponse(inputEnvelope, isNotDuplicateOrEmpty, channelContext)
@@ -199,12 +199,17 @@ abstract class InputTaskEngine(manager: InputTaskManager,
   /**
     * Removes the read bytes of the byte buffer
     *
-    * @param buffer          a buffer for keeping incoming bytes
+    * @param channelContext  channel context
+    * @param state           contains a buffer for keeping incoming bytes and a state of channelContext
     * @param endReadingIndex index that was last at reading
     */
-  private def clearBufferAfterParse(buffer: ByteBuf, endReadingIndex: Int): ByteBuf = {
-    buffer.readerIndex(endReadingIndex + 1)
-    buffer.discardReadBytes()
+  private def clearBufferAfterParse(channelContext: ChannelHandlerContext,
+                                    state: ChannelContextState,
+                                    endReadingIndex: Int): Unit = {
+    state.buffer.readerIndex(endReadingIndex + 1)
+    state.buffer.discardReadBytes()
+    if (!state.isActive && !state.buffer.isReadable)
+      bufferForEachContext -= channelContext
   }
 
   /**
