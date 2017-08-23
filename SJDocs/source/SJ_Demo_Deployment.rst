@@ -3,11 +3,13 @@ Demo Deployment on Virtual Machine
 
 .. warning:: The section is under development!
 
-SJ-Platform can be deployed on the virtual machine. We suggest deployin the platform loccaly via Vagrant with VirtualBox as a provider.
+SJ-Platform can be deployed on the virtual machine. We suggest deploying the platform locally via Vagrant with VirtualBox as a provider.
+ 
+This is the most rapid way to get acquainted with the platform and assess its performance.
 
 Requirements:
 
-- At least 7GB free ram.
+- At least 7GB of free ram.
 
 - VT-x must be enabled in bios.
 
@@ -56,12 +58,12 @@ Check the versions of the services:
 
 Clone the project from the GitHub repository::
 
- git clone https://github.com/bwsw/sj-demo-vagrant.git
- cd sj-demo-vagrant
+ $ git clone https://github.com/bwsw/sj-demo-vagrant.git
+ $ cd sj-demo-vagrant
 
 Launch vagrant::
 
- vagrant up
+ $ vagrant up
 
 It takes up to two and a half hours, 10GB mem and 4 cpu
 
@@ -69,28 +71,40 @@ At the end of deploying you can see urls of all services.
 
 To destroy vagrant use::
 
- vagrant destroy
+ $ vagrant destroy
 
 Also, you can turn VM off and after a while turn it on again, without destroying. All services will work.
 
 Description
+~~~~~~~~~~~~~~~
 
 Vagrant creates Ubuntu/Xenial64 VM with 4 cpus, 12 GB memory and 10 GB disk space.
+
 In VM there is a launched Mesos with all required services on docker swarm via docker stack deploy.
+
+Host - 0.0.0.0
 
 List of used ports:
 
 8080 - Marathon
+
 5050 - Master
+
 5051 - Agent
+
 8888 - SJ Rest
+
 27017 - Mongo
+
 2181 - Zookeeper
+
 9200 - Elasticsearch
+
 5601 - Kibana
 
-Host - 0.0.0.0
 
 The platform is deployed with the entities: providers, services, streams, configurations.
 
-Modules and instances are created as for the f-ping-demo project described in :ref:`Tutorial`
+Modules and instances are created as for the f-ping-demo project described in :ref:`Tutorial` .
+
+Now you can launch instances, view the statistics of tasks.
