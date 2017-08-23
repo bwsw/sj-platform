@@ -414,11 +414,11 @@ Please, upload the engine jars for the modules (input-streaming, regular-streami
  
 4. Setup configurations for engines.
 
-The range of configurations include required and optional ones. To resolve the example task it is enough to upload the required configurations only.
+The range of configurations includes required and optional ones. 
 
 The list of all configurations can be viewed at the :ref:`Configuration` page.
 
-5. Setup settings for the engines, but first replace <rest_ip> with the IP of rest and <marathon_address> with the address of marathon::
+5. Set up configuration settings for the engines, but first replace <rest_ip> with the IP of rest and <marathon_address> with the address of marathon::
 
    $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"session-timeout\",\"value\": \"7000\",\"domain\": \"configuration.apache-zookeeper\"}" 
    $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"current-framework\",\"value\": \"com.bwsw.fw-1.0\",\"domain\": \"configuration.system\"}" 
