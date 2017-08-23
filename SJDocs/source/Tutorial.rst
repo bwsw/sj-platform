@@ -76,7 +76,7 @@ A few Output modules may receive the processed data and put them to a storage.
 
 In the example task solution the processing workflow is formed in the following way:
 
-.. figure:: _static/FPingDemo.png
+.. figure:: _static/FPingDemo1.png
 
 This diagram demonstrates the processing workflow of the demo. As a quick reminder, the task is to collect the aggregated information on the accessibility of nodes.
 
