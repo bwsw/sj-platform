@@ -150,42 +150,42 @@ lazy val framework = Project(id = "sj-mesos-framework",
 lazy val stubInput = Project(id = "sj-stub-input-streaming",
   base = file("./contrib/stubs/sj-stub-input-streaming"))
   .settings(commonSettings: _*)
-  .dependsOn(engineCore)
+  .dependsOn(engineCore % "provided")
 
 lazy val stubRegular = Project(id = "sj-stub-regular-streaming",
   base = file("./contrib/stubs/sj-stub-regular-streaming"))
   .settings(commonSettings: _*)
-  .dependsOn(engineCore)
+  .dependsOn(engineCore % "provided")
 
 lazy val stubBatch = Project(id = "sj-stub-batch-streaming",
   base = file("./contrib/stubs/sj-stub-batch-streaming"))
   .settings(commonSettings: _*)
-  .dependsOn(engineCore)
+  .dependsOn(engineCore % "provided")
 
 lazy val stubESOutput = Project(id = "sj-stub-es-output-streaming",
   base = file("./contrib/stubs/sj-stub-es-output-streaming"))
   .settings(commonSettings: _*)
-  .dependsOn(engineCore)
+  .dependsOn(engineCore % "provided")
 
 lazy val stubJDBCOutput = Project(id = "sj-stub-jdbc-output-streaming",
   base = file("./contrib/stubs/sj-stub-jdbc-output-streaming"))
   .settings(commonSettings: _*)
-  .dependsOn(engineCore)
+  .dependsOn(engineCore % "provided")
 
 lazy val stubRestOutput = Project(id = "sj-stub-rest-output-streaming",
   base = file("./contrib/stubs/sj-stub-rest-output-streaming"))
   .settings(commonSettings: _*)
-  .dependsOn(engineCore)
+  .dependsOn(engineCore % "provided")
 
 lazy val pmOutput = Project(id = "sj-performance-metrics-output-es",
   base = file("./contrib/sj-platform/sj-performance-metrics-output-es"))
   .settings(commonSettings: _*)
-  .dependsOn(engineCore)
+  .dependsOn(engineCore % "provided")
 
 lazy val sumBatch = Project(id = "sj-batch-sum",
   base = file("./contrib/examples/sj-batch-sum"))
   .settings(commonSettings: _*)
-  .dependsOn(engineCore)
+  .dependsOn(engineCore % "provided")
 
 lazy val csvInput = Project(id = "sj-csv-input",
   base = file("./contrib/sj-platform/sj-csv-input"))
@@ -193,7 +193,7 @@ lazy val csvInput = Project(id = "sj-csv-input",
   .settings(
     libraryDependencies ++= Dependencies.sjTestDependencies.value
   )
-  .dependsOn(engineCore)
+  .dependsOn(engineCore % "provided")
 
 lazy val regexInput = Project(id = "sj-regex-input",
   base = file("./contrib/sj-platform/sj-regex-input"))
@@ -201,7 +201,7 @@ lazy val regexInput = Project(id = "sj-regex-input",
   .settings(
     libraryDependencies ++= Dependencies.sjTestDependencies.value
   )
-  .dependsOn(engineCore)
+  .dependsOn(engineCore % "provided")
 
 lazy val regularPerformanceBenchmark = Project(id = "sj-regular-performance-benchmark",
   base = file("./contrib/benchmarks/sj-regular-performance-benchmark"))
