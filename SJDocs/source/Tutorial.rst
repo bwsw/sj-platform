@@ -3,6 +3,8 @@
 Tutorial
 ========================
 
+.. warning:: *The page is under development!*
+
 .. Contents::
 
 Introduction 
@@ -31,7 +33,7 @@ Configurations uploaded to the modules via REST determine the mode of data proce
 
 The processing result is exported to an external storage. It can be Elasticsearch, RESTful or JDBC-compatible data storages.
 
-Besides,  SJ-Platform provides a user with a comprehensive RESTful API instrumentation and Web UI.
+Besides, SJ-Platform provides a user with a comprehensive RESTful API instrumentation and Web UI.
 
 Below an example of a real-life task will be provided for better understanding of how the data processing can be performed in the platform. Thus, the tutorial will provide you with:
 
