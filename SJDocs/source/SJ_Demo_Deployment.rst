@@ -9,13 +9,13 @@ This is the most rapid way to get acquainted with the platform and assess its pe
 
 Requirements:
 
-- At least 7GB of free ram.
+- At least 7GB of free RAM.
 
-- VT-x must be enabled in bios.
+- VT-x must be enabled in BIOS.
 
-To determine if cpu vt extensions are enabled in bios, do the following:
+To determine if CPU VT extensions are enabled in BIOS, do the following:
 
-1) Install cpu-checker::
+1) Install CPU-checker::
 
     $ sudo apt-get update
     $ sudo apt-get install cpu-checker
@@ -45,12 +45,12 @@ Deployment
 
 At first install Vagrant and Virtualbox. 
 
-You can do it following official instructions: 
+You can do it following instructions in the official documentation: 
 
 - `for Vagrant <https://www.vagrantup.com/docs/installation/>`_
 - `for VirtualBox <https://www.virtualbox.org/wiki/Downloads>`_
 
-Check the versions of the services:
+PLease, make sure the versions of services are as specified below:
 
 1) Vagrant 1.9.1
 2) VirtualBox 5.0.40
@@ -86,25 +86,33 @@ Host - 0.0.0.0
 
 List of used ports:
 
-8080 - Marathon
+- 8080 - Marathon
 
-5050 - Master
+- 5050 - Master
 
-5051 - Agent
+- 5051 - Agent
 
-8888 - SJ Rest
+- 8888 - SJ Rest
 
-27017 - Mongo
+- 27017 - Mongo
 
-2181 - Zookeeper
+- 2181 - Zookeeper
 
-9200 - Elasticsearch
+- 9200 - Elasticsearch
 
-5601 - Kibana
+- 5601 - Kibana
 
 
 The platform is deployed with the entities: providers, services, streams, configurations.
 
 Modules and instances are created as for the f-ping-demo project described in :ref:`Tutorial` .
 
-Now you can launch instances, view the statistics of tasks.
+To proceed working with the platform via the UI, please, see the `UI Guide <http://streamjuggler.readthedocs.io/en/develop/SJ_UI_Guide.html>`
+
+Now you can launch the instances, view the statistics of tasks. 
+
+Or create your own pipeline with modules and instances that are suitable to achieve your goals.
+
+How to create your own module is described in detail `here <http://streamjuggler.readthedocs.io/en/develop/SJ_CustomModule.html>`.
+
+
