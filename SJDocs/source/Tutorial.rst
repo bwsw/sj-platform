@@ -25,7 +25,7 @@ As a quick reminder,  SJ-Platform is a real-time processing system. The data are
 A general structure of SJ-Platform can be presented as at the image below:
 
 .. figure:: _static/TutorialGeneral.png
-   :aligne: center
+   :align: center
 
 Processor represents a module pipeline where the data processing is performed.
 
@@ -35,7 +35,7 @@ The processing result is exported to an external storage. It can be Elasticsearc
 
 Besides, SJ-Platform provides a user with a comprehensive RESTful API instrumentation and Web UI.
 
-Below an example of a real-life task will be provided for better understanding of how the data processing can be performed in the platform. Thus, the tutorial will provide you with:
+Below an example of a real-life task solution will demonstrate the platform at work for better understanding of how the data processing can be performed in the platform. Thus, the tutorial will provide you with:
 
 1. a ready-to-use problem resolution of an example task on SJ-Platform base;
 
@@ -47,13 +47,7 @@ Example task
 
 Let’s introduce an example task which will illustrate the platform workflow in the real-world use.
 
-The demo code is responsible for collecting of aggregated information on the accessibility of nodes. 
-
-The result data will render the nodes’ work.
-
-The number of accessible and inaccessible IPs per a period of time will be summed up.
-
-Besides, calculated average response time on each node will give the idea of the node efficiency. 
+The demo code is responsible for collecting of aggregated information on the accessibility of nodes. The result data will render the nodes’ work. The number of accessible and inaccessible IPs per a period of time will be summed up. Besides, calculated average response time on each node will give the idea of the node efficiency. 
 
 Before providing a solution to the task let’s have a quick look at a processing level of the platform.
 
@@ -133,11 +127,11 @@ The deployment is performed via REST API.
 
 Firstly, deploy Mesos and other services.
 
-1) Deploy Mesos, Marathon, Zookeeper. You can follow the instructions at the official `installation guide <http://www.bogotobogo.com/DevOps/DevOps_Mesos_Install.php>`_
+1) Deploy Mesos, Marathon, Zookeeper. You can follow the instructions at the official `installation guide <http://www.bogotobogo.com/DevOps/DevOps_Mesos_Install.php>`_ .
 
 Start Mesos and the services. Make sure you have access to Mesos interface, Marathon interface, and Zookeeper is running. 
 
-For Docker deployment follow the instructions at the official `installation guide <https://docs.docker.com/engine/installation/linux/docker-ce/ubuntu/#install-docker-ce>`_
+For Docker deployment follow the instructions at the official `installation guide <https://docs.docker.com/engine/installation/linux/docker-ce/ubuntu/#install-docker-ce>`_ .
 
 Install Java::
                                          
@@ -413,7 +407,7 @@ Via the Marathon interface make sure the services are deployed.
 
 .. figure:: _static/ServicesOnMarathon.png
 
-4) Copy the github repository of SJ-Platform::
+4) Copy the GitHub repository of SJ-Platform::
 
     $ git clone https://github.com/bwsw/sj-platform.git
 
@@ -512,7 +506,7 @@ To implement the processing workflow for the example task resolution the followi
 
 2. a jar for Mesos framework that starts the engine.
 
-Thus, as a next step engines should be compiled and uploaded.
+Thus, engines should be compiled and uploaded in the next step.
  
 Upload engine jars
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -612,6 +606,7 @@ In the example task solution the following stream types are implemented:
 
 .. figure:: _static/StreamingInPlatform.png
    :scale: 80%
+
 Below the steps for creating streaming infrastructure such as providers, services, and streams via REST API can be found.
 
 Set Up Streaming Infrastructure
