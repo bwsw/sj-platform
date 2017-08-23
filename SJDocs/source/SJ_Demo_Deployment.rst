@@ -65,7 +65,7 @@ Launch vagrant::
 
  $ vagrant up
 
-It takes up to two and a half hours, 10GB mem and 4 cpu
+It takes up to a half of an hour, 8GB memory and 4 CPUs.
 
 At the end of deploying you can see urls of all services.
 
@@ -78,7 +78,7 @@ Also, you can turn VM off and after a while turn it on again, without destroying
 Description
 ~~~~~~~~~~~~~~~
 
-Vagrant creates Ubuntu/Xenial64 VM with 4 cpus, 12 GB memory and 10 GB disk space.
+Vagrant creates Ubuntu/Xenial64 VM with 4 CPUs, 8 GB memory and 10 GB disk space.
 
 In VM Mesos is launched with all the required services on Docker in swarm mode via Docker stack deployment.
 
