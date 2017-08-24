@@ -45,12 +45,12 @@ Deployment
 
 At first install Vagrant and Virtualbox. 
 
-You can do it following instructions in the official documentation: 
+You can do it following the instructions in the official documentation: 
 
 - `for Vagrant <https://www.vagrantup.com/docs/installation/>`_
 - `for VirtualBox <https://www.virtualbox.org/wiki/Downloads>`_
 
-PLease, make sure the versions of services are as specified below:
+Please, make sure the service versions are as specified below:
 
 1) Vagrant 1.9.1
 2) VirtualBox 5.0.40
@@ -69,7 +69,7 @@ It takes up to a half of an hour, 8GB memory and 4 CPUs.
 
 At the end of deploying you can see urls of all services.
 
-To destroy vagrant use::
+To suspend vagrant use::
 
  $ vagrant destroy
 
