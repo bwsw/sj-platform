@@ -58,8 +58,8 @@ Please, make sure the service versions are as specified below:
 
 2. Then, clone the project from the GitHub repository::
 
- $ git clone https://github.com/bwsw/sj-demo-vagrant.git
- $ cd sj-demo-vagrant
+    $ git clone https://github.com/bwsw/sj-demo-vagrant.git
+    $ cd sj-demo-vagrant
 
 Launching Virtual Machine
 ------------------------
