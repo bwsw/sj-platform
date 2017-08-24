@@ -23,34 +23,40 @@ import java.util.logging.LogManager
 
 import com.bwsw.sj.common.config.TempHelperForConfigSetup
 import com.bwsw.sj.common.utils.EngineLiterals
+import com.bwsw.sj.common.utils.benchmark.BenchmarkUtils
 import com.bwsw.sj.engine.regular.module.DataFactory._
+import com.bwsw.sj.engine.regular.module.SjRegularBenchmarkConstants._
 
 object SjRegularModuleSetup extends App {
   LogManager.getLogManager.reset()
-  val tempHelperForConfigSetup = new TempHelperForConfigSetup(connectionRepository)
-  tempHelperForConfigSetup.setupConfigs()
-  val streamService = connectionRepository.getStreamRepository
-  val serviceManager = connectionRepository.getServiceRepository
-  val providerService = connectionRepository.getProviderRepository
-  val instanceService = connectionRepository.getInstanceRepository
-  val fileStorage = connectionRepository.getFileStorage
-  val defaultValueOfTxns = 4
-  val defaultValueOfElements = 4
-  val checkpointInterval = 2
-  val stateManagement = EngineLiterals.ramStateMode
-  val stateFullCheckpoint = 2
-  val _type = commonMode
 
-  val module = new File("./contrib/stubs/sj-stub-regular-streaming/target/scala-2.12/sj-stub-regular-streaming-1.0-SNAPSHOT.jar")
+  BenchmarkUtils.exitAfter { () =>
+    val tempHelperForConfigSetup = new TempHelperForConfigSetup(connectionRepository)
+    tempHelperForConfigSetup.setupConfigs()
+    val streamService = connectionRepository.getStreamRepository
+    val serviceManager = connectionRepository.getServiceRepository
+    val providerService = connectionRepository.getProviderRepository
+    val instanceService = connectionRepository.getInstanceRepository
+    val fileStorage = connectionRepository.getFileStorage
+    val stateManagement = EngineLiterals.ramStateMode
+    val totalInputElements = defaultValueOfTxns * defaultValueOfElements * inputCount * {
+      if (inputStreamsType == commonMode) 2
+      else 1
+    }
 
-  loadModule(module, fileStorage)
-  createProviders(providerService)
-  createServices(serviceManager, providerService)
-  createStreams(streamService, serviceManager, partitions, _type, inputCount, outputCount)
-  createInstance(serviceManager, instanceService, checkpointInterval, stateManagement, stateFullCheckpoint)
+    val module = new File(modulePath)
 
-  createData(defaultValueOfTxns, defaultValueOfElements, partitions, _type, inputCount)
-  connectionRepository.close()
+    loadModule(module, fileStorage)
+    createProviders(providerService)
+    createServices(serviceManager, providerService)
+    createStreams(streamService, serviceManager, partitions, inputStreamsType, inputCount, outputCount)
+    createInstance(serviceManager, instanceService, checkpointInterval, totalInputElements, stateManagement, stateFullCheckpoint)
 
-  println("DONE")
+    createData(defaultValueOfTxns, defaultValueOfElements, partitions, inputStreamsType, inputCount)
+    connectionRepository.close()
+
+    println("DONE")
+  }
 }
+
+class SjRegularModuleSetup

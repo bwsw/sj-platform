@@ -18,13 +18,22 @@
  */
 package com.bwsw.sj.engine.regular.module
 
-import java.util.logging.LogManager
+/**
+  * @author Pavel Tomskikh
+  */
+object SjRegularBenchmarkConstants {
+  val inputCount = 2
+  val outputCount = 2
+  val partitions = 4
+  val defaultValueOfTxns = 4
+  val defaultValueOfElements = 4
+  val checkpointInterval = 2
+  val stateFullCheckpoint = 2
 
-import com.bwsw.sj.engine.regular.RegularTaskRunner
+  val kafkaMode = "kafka"
+  val tstreamMode = "tstream"
+  val commonMode = "both"
+  val inputStreamsType = commonMode
 
-object SjRegularModuleRunner extends App {
-  LogManager.getLogManager.reset()
-  RegularTaskRunner.main(Array())
+  val modulePath = "../../contrib/stubs/sj-stub-regular-streaming/target/scala-2.12/sj-stub-regular-streaming-1.0-SNAPSHOT.jar"
 }
-
-class SjRegularModuleRunner

@@ -123,7 +123,9 @@ lazy val regularStreamingEngine = Project(id = "sj-regular-streaming-engine",
   .settings(commonSettings: _*)
   .settings(
     resolvers += "Clojars Repository" at "http://clojars.org/repo/",
-    libraryDependencies ++= Dependencies.sjRegularEngineDependencies.value
+    libraryDependencies ++= Dependencies.sjRegularEngineDependencies.value,
+    libraryDependencies ++= Dependencies.sjTestDependencies.value,
+    test in Test <<= (test in Test).dependsOn(assembly in stubRegular)
   )
   .dependsOn(engineCore)
 
