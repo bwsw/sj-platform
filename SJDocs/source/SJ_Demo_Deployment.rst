@@ -43,7 +43,7 @@ Otherwise, the respond will look as presented below::
 Deployment
 -----------------------
 
-At the first step Vagrant and VirtualBox should be installed. 
+1. At the first step Vagrant and VirtualBox should be installed. 
 
 You can do it following the instructions in the official documentation: 
 
@@ -56,12 +56,12 @@ Please, make sure the service versions are as specified below:
 2) VirtualBox 5.0.40
 3) Ubuntu 16.04
 
-Clone the project from the GitHub repository::
+2. Then, clone the project from the GitHub repository::
 
  $ git clone https://github.com/bwsw/sj-demo-vagrant.git
  $ cd sj-demo-vagrant
 
-Launch Virtual Machine
+Launching Virtual Machine
 ------------------------
 
 To launch Vagrant use the following command::
@@ -87,11 +87,11 @@ Vagrant creates Ubuntu/Xenial64 virtual machine with specific parameters:
 
 - Executor VM - 1 CPUs, 200MB memory
 
-On virtual machine, Mesos is launched with all the required services on Docker in swarm mode via Docker stack deployment.
+On the virtual machine, Mesos is launched with all the required services on Docker in swarm mode via Docker stack deployment.
 
 Host - 0.0.0.0
 
-List of ports to geo access to the services:
+List of ports to get access to the services:
 
 - 8080 - Marathon
 
