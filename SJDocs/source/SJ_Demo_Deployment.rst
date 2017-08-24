@@ -109,20 +109,22 @@ List of ports to get access to the services:
 
 - 5601 - Kibana
 
+- 9092,7203 - Kafka
+
 
 The platform is deployed with the entities: providers, services, streams, configurations.
 
 Modules and instances are created as for the f-ping-demo project described in :ref:`Tutorial` .
 
-To proceed working with the platform via the UI, please, see the `UI Guide <http://streamjuggler.readthedocs.io/en/develop/SJ_UI_Guide.html>`
+To proceed working with the platform via the UI, please, see the `UI Guide <http://streamjuggler.readthedocs.io/en/develop/SJ_UI_Guide.html>`_ .
 
 Now you can launch the instances, view the statistics of tasks in the UI. 
 
 Or you are enabled to create your own pipeline with modules and instances that are suitable to achieve your goals.
 
-How to create your own module is described in detail `here <http://streamjuggler.readthedocs.io/en/develop/SJ_CustomModule.html>`.
+How to create your own module is described in detail `here <http://streamjuggler.readthedocs.io/en/develop/SJ_CustomModule.html>`_ .
 
-Destroy VM
+Destroying Virtual Machine
 -------------
 
 To destroy the virtual machine use::
