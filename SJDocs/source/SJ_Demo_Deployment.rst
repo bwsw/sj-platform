@@ -61,26 +61,33 @@ Clone the project from the GitHub repository::
  $ git clone https://github.com/bwsw/sj-demo-vagrant.git
  $ cd sj-demo-vagrant
 
-Launch vagrant::
+Launch VM
+------------------------
+
+To launch Vagrant use the following command::
 
  $ vagrant up
 
-It takes up to a half of an hour, 8GB memory and 4 CPUs.
+It will take up to a half of an hour, 8GB memory and 7 CPUs.
 
 At the end of deploying you can see urls of all services.
-
-To suspend vagrant use::
-
- $ vagrant destroy
-
-Also, you can turn VM off and after a while turn it on again, without destroying. All services will work.
 
 Description
 ~~~~~~~~~~~~~~~
 
-Vagrant creates Ubuntu/Xenial64 VM with 4 CPUs, 8 GB memory and 10 GB disk space.
+Vagrant creates Ubuntu/Xenial64 VM with specific parameters:
 
-In VM Mesos is launched with all the required services on Docker in swarm mode via Docker stack deployment.
+- Master VM - 2 CPUs, 1GB memory
+
+- Slave1 VM - 2 CPUs, 3GB memory
+
+- Slave2 VM - 1 CPUs, 2GB memory
+
+- Storage VM - 1 CPUs, 512MB memory
+
+- Executor VM - 1 CPUs, 200MB memory
+
+On VM, Mesos is launched with all the required services on Docker in swarm mode via Docker stack deployment.
 
 Host - 0.0.0.0
 
@@ -115,4 +122,11 @@ Or create your own pipeline with modules and instances that are suitable to achi
 
 How to create your own module is described in detail `here <http://streamjuggler.readthedocs.io/en/develop/SJ_CustomModule.html>`.
 
+Destroy VM
+-------------
+
+To destroy virtual machines created by vagrant use::
+
+ $ vagrant destroy
+ 
 
