@@ -29,10 +29,10 @@ If the CPU is enabled, you will see::
  INFO: /dev/kvm exists
  KVM acceleration can be used
 
-Otherwise, the respond will be::
+Otherwise, the respond will look as presented below::
 
  INFO: /dev/kvm does not exist
- HINT:   sudo modprobe kvm_intel 
+ HINT: sudo modprobe kvm_intel 
  INFO: Your CPU supports KVM extensions
  INFO: KVM (vmx) is disabled by your BIOS
  HINT: Enter your BIOS setup and enable Virtualization Technology (VT),
@@ -43,7 +43,7 @@ Otherwise, the respond will be::
 Deployment
 -----------------------
 
-At first install Vagrant and Virtualbox. 
+At the first step Vagrant and VirtualBox should be installed. 
 
 You can do it following the instructions in the official documentation: 
 
@@ -61,21 +61,21 @@ Clone the project from the GitHub repository::
  $ git clone https://github.com/bwsw/sj-demo-vagrant.git
  $ cd sj-demo-vagrant
 
-Launch VM
+Launch Virtual Machine
 ------------------------
 
 To launch Vagrant use the following command::
 
  $ vagrant up
 
-It will take up to a half of an hour, 8GB memory and 7 CPUs.
+It will take up to half an hour, 8GB memory and 7 CPUs.
 
 At the end of deploying you can see urls of all services.
 
 Description
 ~~~~~~~~~~~~~~~
 
-Vagrant creates Ubuntu/Xenial64 VM with specific parameters:
+Vagrant creates Ubuntu/Xenial64 virtual machine with specific parameters:
 
 - Master VM - 2 CPUs, 1GB memory
 
@@ -87,23 +87,23 @@ Vagrant creates Ubuntu/Xenial64 VM with specific parameters:
 
 - Executor VM - 1 CPUs, 200MB memory
 
-On VM, Mesos is launched with all the required services on Docker in swarm mode via Docker stack deployment.
+On virtual machine, Mesos is launched with all the required services on Docker in swarm mode via Docker stack deployment.
 
 Host - 0.0.0.0
 
-List of used ports:
+List of ports to geo access to the services:
 
 - 8080 - Marathon
 
-- 5050 - Master
+- 5050 - Mesos Master
 
-- 5051 - Agent
+- 5051 - Mesos Agent
 
-- 8888 - SJ Rest
+- 8888 - SJ REST
 
-- 27017 - Mongo
+- 27017 - MongoDB
 
-- 2181 - Zookeeper
+- 2181 - Apache Zookeeper
 
 - 9200 - Elasticsearch
 
@@ -125,8 +125,8 @@ How to create your own module is described in detail `here <http://streamjuggler
 Destroy VM
 -------------
 
-To destroy virtual machines created by vagrant use::
+To destroy virtual machine(-s) created by Vagrant use::
 
  $ vagrant destroy
  
-
+VM(-s) will be terminated. 
