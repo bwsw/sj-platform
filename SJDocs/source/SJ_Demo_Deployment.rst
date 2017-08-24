@@ -87,7 +87,7 @@ Vagrant creates Ubuntu/Xenial64 virtual machine with specific parameters:
 
 - Executor VM - 1 CPUs, 200MB memory
 
-On the virtual machine, Mesos is launched with all the required services on Docker in swarm mode via Docker stack deployment.
+On the virtual machine, Mesos is launched with all the required services.
 
 Host - 0.0.0.0
 
@@ -116,17 +116,17 @@ Modules and instances are created as for the f-ping-demo project described in :r
 
 To proceed working with the platform via the UI, please, see the `UI Guide <http://streamjuggler.readthedocs.io/en/develop/SJ_UI_Guide.html>`
 
-Now you can launch the instances, view the statistics of tasks. 
+Now you can launch the instances, view the statistics of tasks in the UI. 
 
-Or create your own pipeline with modules and instances that are suitable to achieve your goals.
+Or you are enabled to create your own pipeline with modules and instances that are suitable to achieve your goals.
 
 How to create your own module is described in detail `here <http://streamjuggler.readthedocs.io/en/develop/SJ_CustomModule.html>`.
 
 Destroy VM
 -------------
 
-To destroy virtual machine(-s) created by Vagrant use::
+To destroy the virtual machine use::
 
  $ vagrant destroy
  
-VM(-s) will be terminated. 
+VM will be terminated. 
