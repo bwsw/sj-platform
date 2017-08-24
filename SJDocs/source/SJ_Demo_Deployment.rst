@@ -117,7 +117,7 @@ Modules and instances are created as for the f-ping-demo project described in :r
 
 To proceed working with the platform via the UI, please, see the `UI Guide <http://streamjuggler.readthedocs.io/en/develop/SJ_UI_Guide.html>`_ .
 
-Now you can launch the instances, view the statistics of tasks in the UI. 
+Now you can launch the instances, view the statistics of task execution in the UI. 
 
 Or you are enabled to create your own pipeline with modules and instances that are suitable to achieve your goals.
 
