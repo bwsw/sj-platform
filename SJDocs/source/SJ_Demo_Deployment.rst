@@ -89,8 +89,6 @@ Vagrant creates Ubuntu/Xenial64 virtual machine with specific parameters:
 
 On the virtual machine, Mesos is launched with all the required services.
 
-Host - 0.0.0.0
-
 List of ports to get access to the services:
 
 - 8080 - Marathon
@@ -111,6 +109,7 @@ List of ports to get access to the services:
 
 - 9092,7203 - Kafka
 
+Use host - 0.0.0.0
 
 The platform is deployed with the entities: providers, services, streams, configurations.
 
@@ -125,7 +124,7 @@ Or you are enabled to create your own pipeline with modules and instances that a
 How to create your own module is described in detail `here <http://streamjuggler.readthedocs.io/en/develop/SJ_CustomModule.html>`_ .
 
 Destroying Virtual Machine
--------------
+-------------------------------
 
 To destroy the virtual machine use::
 
