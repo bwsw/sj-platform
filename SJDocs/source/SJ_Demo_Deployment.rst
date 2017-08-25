@@ -75,7 +75,7 @@ At the end of deploying you can see urls of all services.
 Description
 ~~~~~~~~~~~~~~~
 
-Vagrant creates Ubuntu/Xenial64 virtual machine with specific parameters:
+Vagrant creates Ubuntu/Xenial64 virtual machines with specific parameters:
 
 - Master VM - 2 CPUs, 1GB memory
 
@@ -87,9 +87,175 @@ Vagrant creates Ubuntu/Xenial64 virtual machine with specific parameters:
 
 - Executor VM - 1 CPUs, 200MB memory
 
-On the virtual machine, Mesos is launched with all the required services.
+All VMs are launched in the private network: 192.168.50.0
 
-List of ports to get access to the services:
+Also you can access VM with *vagrant ssh* <name>.
+
+**Master VM**
+
+name = master
+
+hostname = master
+
+*Resources*:
+
+- 2 CPUs
+
+- 1 GB memory
+
+- ip = 192.168.50.51
+
+- forwarded ports: 2181, 5050, 8080
+
+*Services*:
+
+- Apache Zookeeper - on port 2181
+
+- Mesos Master - on port 5050
+
+- Marathon - on port 8080
+
+Description:
+    After VM is launched, Vagrant installs Docker engine and firstly runs Apache Zookeeper in Docker.
+    
+    Next, Mesos-Master service is launched with the following configurations: 
+    
+    - ip=0.0.0.0, 
+    - advertise_ip=192.168.50.51, 
+    - hostname=192.168.50.51, 
+    - zk=zk://192.168.50.51:2181/mesos.
+    
+    Next, Marathon service is launched with the following configurations: 
+    
+    - hostname=192.168.50.51, 
+    - master=zk://192.168.50.51:2181/mesos, 
+    - zk=zk://192.168.50.51:2181/marathon.
+
+**Slave1 VM**
+
+name = slave1
+
+hostname = slave1
+
+*Resources*:
+
+- 2 CPUs
+
+- 3 GB memory
+
+- ip = 192.168.50.52
+
+- forwarded ports: 5051, 8888, 9092, 7203, 31071, 5601, 9200, 9300
+
+*Services*:
+
+- Mesos-Slave - on port 5051
+
+- Elasticsearch - on ports 9200, 9300
+
+- Kibana - on port 5601
+
+- SJ-rest - on port 8888
+
+- T-streams transaction server - on port 31071
+
+- Apache Kafka - on ports 9092, 7203
+
+Description:
+   After VM is launched, Vagrant firstly runs Mesos-Slave with following configurations: 
+   
+   - ip=0.0.0.0, 
+   
+   - advertise_ip=192.168.50.52, 
+   
+   - hostname=192.168.50.52, 
+   
+   - zk=zk://192.168.50.51:2181/mesos,
+   
+   - ports=forwarded ports.
+
+   Next, Docker engine is installed, and Elasticsearch and Kibana are launched in Docker.
+
+**Slave2 VM**
+
+name = slave2
+
+hostname = slave2
+
+*Resources*:
+
+- 1 CPUs
+
+- 2GB memory
+
+- ip = 192.168.50.53
+
+- forwarded ports: 31500 - 31600
+
+*Services*:
+
+- Mesos-Slave
+
+Description:
+  After VM is launched, Vagrant firstly launches Mesos-Slave with the following configurations: 
+  
+  - ip=0.0.0.0, 
+  
+  - advertise_ip=192.168.50.53, 
+  
+  - hostname=192.168.50.53, 
+  
+  - zk=zk://192.168.50.51:2181/mesos, 
+  
+  - ports=forwarded ports.
+  
+  Next, Docker engine is installed.
+
+**Storage VM**
+
+name = storage
+
+*Resource*:
+
+- 1 cpus
+
+- 512MB memory
+
+- ip = 192.168.50.55
+
+- forwarded ports: 27017
+
+*Srevices*:
+
+- MongoDB
+
+Description:
+
+After VM is launched, Vagrant firstly installs Docker engine and then launches MongoDB in Docker.
+
+**Executor VM**
+
+name = executor
+
+*Resource*:
+
+- 1 CPUs
+
+- 200MB memory
+
+- ip = 192.168.50.54
+
+- forwarded ports:
+
+Description:
+  This VM is used to launch services and create entities.
+  
+  Once VM is launched, Vagrant firstly launches services on Marathon: SJ-rest, Kafka, tts.
+  
+  After services are launched, Vagrant creates all entities via SJ-rest.
+
+
+A full list of ports to get access to the services:
 
 - 8080 - Marathon
 
@@ -109,7 +275,8 @@ List of ports to get access to the services:
 
 - 9092,7203 - Kafka
 
-Use host - 0.0.0.0
+Use local host - 0.0.0.0
+
 
 The platform is deployed with the entities: providers, services, streams, configurations.
 
@@ -126,8 +293,8 @@ How to create your own module is described in detail `here <http://streamjuggler
 Destroying Virtual Machine
 -------------------------------
 
-To destroy the virtual machine use::
+To destroy the virtual machine(s) use::
 
  $ vagrant destroy
  
-VM will be terminated. 
+VMs will be terminated. 
