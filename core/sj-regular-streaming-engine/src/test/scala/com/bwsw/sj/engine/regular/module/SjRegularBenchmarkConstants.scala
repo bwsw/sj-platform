@@ -31,9 +31,8 @@ object SjRegularBenchmarkConstants {
   val stateFullCheckpoint = 2
 
   val kafkaMode = "kafka"
-  val tstreamMode = "tstream"
+  val tStreamMode = "tstream"
   val commonMode = "both"
-  val inputStreamsType = commonMode
 
   val modulePath = "../../contrib/stubs/sj-stub-regular-streaming/target/scala-2.12/sj-stub-regular-streaming-1.0-SNAPSHOT.jar"
 }

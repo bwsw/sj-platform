@@ -56,6 +56,7 @@ object DataFactory {
   private val zookeeperHosts = config.getString(BenchmarkConfigNames.zkHosts).split(",")
   private val kafkaHosts = config.getString(BenchmarkConfigNames.kafkaHosts)
   private val benchmarkPort = config.getInt(BenchmarkConfigNames.benchmarkPort)
+  val inputStreamsType = config.getString(BenchmarkConfigNames.inputStreamTypes)
   private val agentsHost = "localhost"
   private val testNamespace = "test_namespace_for_regular_engine"
   private val instanceName = "test-instance-for-regular-engine"
@@ -136,7 +137,7 @@ object DataFactory {
   def createStreams(streamService: GenericMongoRepository[StreamDomain], serviceManager: GenericMongoRepository[ServiceDomain],
                     partitions: Int, _type: String, inputCount: Int, outputCount: Int) = {
     _type match {
-      case `tstreamMode` =>
+      case `tStreamMode` =>
         (1 to inputCount).foreach(x => {
           createInputTStream(streamService, serviceManager, partitions, x.toString)
           instanceInputs = instanceInputs :+ s"$tstreamInputNamePrefix$x/split"
@@ -170,7 +171,7 @@ object DataFactory {
           createOutputTStream(streamService, serviceManager, partitions, x.toString)
           instanceOutputs = instanceOutputs :+ (tstreamOutputNamePrefix + x)
         })
-      case _ => throw new Exception(s"Unknown type : ${_type}. Can be only: $tstreamMode, $kafkaMode, $commonMode")
+      case _ => throw new Exception(s"Unknown type : ${_type}. Can be only: $tStreamMode, $kafkaMode, $commonMode")
     }
   }
 
@@ -180,7 +181,7 @@ object DataFactory {
                     inputCount: Int,
                     outputCount: Int) = {
     _type match {
-      case `tstreamMode` =>
+      case `tStreamMode` =>
         (1 to inputCount).foreach(x => deleteInputTStream(streamService, x.toString))
         (1 to outputCount).foreach(x => deleteOutputTStream(streamService, x.toString))
       case `kafkaMode` =>
@@ -192,7 +193,7 @@ object DataFactory {
           deleteInputTStream(streamService, x.toString)
         })
         (1 to outputCount).foreach(x => deleteOutputTStream(streamService, x.toString))
-      case _ => throw new Exception(s"Unknown type : ${_type}. Can be only: $tstreamMode, $kafkaMode, $commonMode")
+      case _ => throw new Exception(s"Unknown type : ${_type}. Can be only: $tStreamMode, $kafkaMode, $commonMode")
     }
   }
 
@@ -389,7 +390,7 @@ object DataFactory {
     }
 
     _type match {
-      case `tstreamMode` =>
+      case `tStreamMode` =>
         (1 to count).foreach(x => createTstreamData(countTxns, countElements, x.toString))
       case `kafkaMode` =>
         (1 to count).foreach(x => createKafkaData(countTxns, countElements, x.toString))
@@ -398,7 +399,7 @@ object DataFactory {
           createTstreamData(countTxns, countElements, x.toString)
           createKafkaData(countTxns, countElements, x.toString)
         })
-      case _ => throw new Exception(s"Unknown type : ${_type}. Can be only: $tstreamMode, $kafkaMode, $commonMode")
+      case _ => throw new Exception(s"Unknown type : ${_type}. Can be only: $tStreamMode, $kafkaMode, $commonMode")
     }
   }
 

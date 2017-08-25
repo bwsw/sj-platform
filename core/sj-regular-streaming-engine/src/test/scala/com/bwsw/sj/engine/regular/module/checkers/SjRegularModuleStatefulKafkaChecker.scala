@@ -90,3 +90,5 @@ object SjRegularModuleStatefulKafkaChecker extends App {
     println("DONE")
   }
 }
+
+class SjRegularModuleStatefulKafkaChecker

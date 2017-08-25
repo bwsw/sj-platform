@@ -99,3 +99,5 @@ object SjRegularModuleStatefulTstreamChecker extends App {
     println("DONE")
   }
 }
+
+class SjRegularModuleStatefulTstreamChecker

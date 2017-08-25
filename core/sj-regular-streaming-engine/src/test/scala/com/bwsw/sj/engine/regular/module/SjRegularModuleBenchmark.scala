@@ -25,48 +25,52 @@ import com.bwsw.sj.common.utils.NetworkUtils.findFreePort
 import com.bwsw.sj.common.utils.benchmark.ClassRunner
 import com.bwsw.sj.engine.core.testutils.Server
 import com.bwsw.sj.engine.regular.module.SjRegularBenchmarkConstants._
-import com.bwsw.sj.engine.regular.module.checkers.SjRegularModuleStatefulChecker
+import com.bwsw.sj.engine.regular.module.checkers.{SjRegularModuleStatefulChecker, SjRegularModuleStatefulKafkaChecker, SjRegularModuleStatefulTstreamChecker}
 import org.apache.curator.test.TestingServer
-import org.scalatest.mockito.MockitoSugar
+import org.scalatest.prop.TableDrivenPropertyChecks
 import org.scalatest.{FlatSpec, Matchers, Outcome}
 
+import scala.collection.mutable
 import scala.util.Try
 
 /**
   * @author Pavel Tomskikh
   */
-class SjRegularModuleBenchmark extends FlatSpec with Matchers with MockitoSugar {
+class SjRegularModuleBenchmark extends FlatSpec with Matchers with TableDrivenPropertyChecks {
   val waitingTimeout = 1000
-  val zkServer = new TestingServer(true)
-  val zkAddress = zkServer.getConnectString
   val mongoPort = findFreePort()
   val ttsPort = findFreePort()
   val serverSocket = new ServerSocket(0)
-  val kafkaServer = new EmbeddedKafka(Some(zkAddress))
   val localhost = "localhost"
   val agentsPorts = (0 until inputCount).map(_ => findFreePort())
 
-  val environment = Map(
+  val environment = mutable.Map(
     "MONGO_HOSTS" -> s"$localhost:$mongoPort",
-    "ZOOKEEPER_HOSTS" -> zkAddress,
-    "TSS_PORT" -> ttsPort,
-    "KAFKA_HOSTS" -> s"$localhost:${kafkaServer.port}",
+    "TSS_PORT" -> ttsPort.toString,
     "INSTANCE_NAME" -> "test-instance-for-regular-engine",
     "TASK_NAME" -> "test-instance-for-regular-engine-task0",
     "AGENTS_HOST" -> localhost,
     "AGENTS_PORTS" -> agentsPorts.mkString(","),
-    "BENCHMARK_PORT" -> serverSocket.getLocalPort)
-    .mapValues(_.toString)
-
-  val ttsServer = new ClassRunner(classOf[Server], environment = environment).start()
-  Thread.sleep(waitingTimeout)
+    "BENCHMARK_PORT" -> serverSocket.getLocalPort.toString)
 
   val mongoServer = new EmbeddedMongo(mongoPort)
-  mongoServer.start()
-
-  kafkaServer.start()
 
   override def withFixture(test: NoArgTest): Outcome = {
+    val zkServer = new TestingServer(true)
+    val zkAddress = zkServer.getConnectString
+    environment += "ZOOKEEPER_HOSTS" -> zkAddress
+
+    val kafkaServer = new EmbeddedKafka(Some(zkAddress))
+    environment += "KAFKA_HOSTS" -> s"$localhost:${kafkaServer.port}"
+
+    val mongoServer = new EmbeddedMongo(mongoPort)
+
+    val ttsServer = runClass(classOf[Server])
+    Thread.sleep(waitingTimeout)
+
+    mongoServer.start()
+    kafkaServer.start()
+
     val result = Try(super.withFixture(test))
 
     mongoServer.stop()
@@ -77,7 +81,59 @@ class SjRegularModuleBenchmark extends FlatSpec with Matchers with MockitoSugar 
     result.get
   }
 
-  "Regular-streaming module" should "work properly" in {
+  "Regular-streaming module" should "work properly for T-Streams input streams" in {
+    environment += "INPUT_STREAM_TYPES" -> tStreamMode
+
+    val setup = runClass(classOf[SjRegularModuleSetup])
+    setup.waitFor() shouldBe 0
+
+    val waitResponseFromRunner = new Thread(() => serverSocket.accept())
+    waitResponseFromRunner.start()
+
+    var runner = runClass(classOf[SjRegularModuleRunner])
+
+    while (waitResponseFromRunner.isAlive) {
+      if (runner.isAlive)
+        Thread.sleep(waitingTimeout)
+      else
+        runner = runClass(classOf[SjRegularModuleRunner])
+    }
+
+    Thread.sleep(waitingTimeout * 3)
+    runner.destroy()
+
+    val checker = runClass(classOf[SjRegularModuleStatefulTstreamChecker])
+    checker.waitFor() shouldBe 0
+  }
+
+  it should "work properly for Kafka input streams" in {
+    environment += "INPUT_STREAM_TYPES" -> kafkaMode
+
+    val setup = runClass(classOf[SjRegularModuleSetup])
+    setup.waitFor() shouldBe 0
+
+    val waitResponseFromRunner = new Thread(() => serverSocket.accept())
+    waitResponseFromRunner.start()
+
+    var runner = runClass(classOf[SjRegularModuleRunner])
+
+    while (waitResponseFromRunner.isAlive) {
+      if (runner.isAlive)
+        Thread.sleep(waitingTimeout)
+      else
+        runner = runClass(classOf[SjRegularModuleRunner])
+    }
+
+    Thread.sleep(waitingTimeout * 3)
+    runner.destroy()
+
+    val checker = runClass(classOf[SjRegularModuleStatefulKafkaChecker])
+    checker.waitFor() shouldBe 0
+  }
+
+  it should "work properly for T-Streams and Kafka input streams" in {
+    environment += "INPUT_STREAM_TYPES" -> commonMode
+
     val setup = runClass(classOf[SjRegularModuleSetup])
     setup.waitFor() shouldBe 0
 
@@ -101,5 +157,5 @@ class SjRegularModuleBenchmark extends FlatSpec with Matchers with MockitoSugar 
   }
 
   def runClass(clazz: Class[_]): Process =
-    new ClassRunner(clazz, environment = environment).start()
+    new ClassRunner(clazz, environment = environment.toMap).start()
 }
