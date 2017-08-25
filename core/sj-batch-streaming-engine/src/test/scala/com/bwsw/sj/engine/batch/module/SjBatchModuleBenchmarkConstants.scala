@@ -34,7 +34,6 @@ object SjBatchModuleBenchmarkConstants {
   val kafkaMode = "kafka"
   val tStreamMode = "tstream"
   val commonMode = "both"
-  val inputStreamsType = commonMode
 
   val modulePath = "../../contrib/stubs/sj-stub-batch-streaming/target/scala-2.12/sj-stub-batch-streaming-1.0-SNAPSHOT.jar"
 }

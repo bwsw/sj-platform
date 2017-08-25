@@ -57,6 +57,7 @@ object DataFactory {
   private val zookeeperHosts = config.getString(BenchmarkConfigNames.zkHosts).split(",")
   private val kafkaHosts = config.getString(BenchmarkConfigNames.kafkaHosts)
   private val benchmarkPort = config.getInt(BenchmarkConfigNames.benchmarkPort)
+  val inputStreamsType = config.getString(BenchmarkConfigNames.inputStreamTypes)
   private val agentsHost = "localhost"
   private val testNamespace = "test_namespace_for_batch_engine"
   private val instanceName = "test-instance-for-batch-engine"

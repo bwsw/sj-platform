@@ -23,44 +23,47 @@ import java.net.ServerSocket
 import com.bwsw.common.embedded.{EmbeddedKafka, EmbeddedMongo}
 import com.bwsw.sj.common.utils.NetworkUtils.findFreePort
 import com.bwsw.sj.common.utils.benchmark.ClassRunner
-import com.bwsw.sj.engine.batch.module.SjBatchModuleBenchmarkConstants._
+import com.bwsw.sj.engine.batch.module.SjBatchModuleBenchmarkConstants.{commonMode, inputCount, kafkaMode, tStreamMode}
 import com.bwsw.sj.engine.batch.module.checkers.{SjBatchModuleStatefulBothChecker, SjBatchModuleStatefulKafkaChecker, SjBatchModuleStatefulTstreamChecker}
 import com.bwsw.sj.engine.core.testutils.Server
 import org.apache.curator.test.TestingServer
-import org.scalatest.mockito.MockitoSugar
+import org.scalatest.prop.TableDrivenPropertyChecks
 import org.scalatest.{FlatSpec, Matchers, Outcome}
 
+import scala.collection.mutable
 import scala.util.Try
 
 /**
   * @author Pavel Tomskikh
   */
-class SjBatchModuleBenchmark extends FlatSpec with Matchers with MockitoSugar {
+class SjBatchModuleBenchmark extends FlatSpec with Matchers with TableDrivenPropertyChecks {
   val waitingTimeout = 1000
-  val zkServer = new TestingServer(true)
-  val zkAddress = zkServer.getConnectString
   val mongoPort = findFreePort()
   val ttsPort = findFreePort()
   val serverSocket = new ServerSocket(0)
-  val kafkaServer = new EmbeddedKafka(Some(zkAddress))
-  val mongoServer = new EmbeddedMongo(mongoPort)
   val localhost = "localhost"
   val agentsPorts = (0 until inputCount).map(_ => findFreePort())
 
-  val environment = Map(
+  val environment = mutable.Map(
     "MONGO_HOSTS" -> s"$localhost:$mongoPort",
-    "ZOOKEEPER_HOSTS" -> zkAddress,
-    "TSS_PORT" -> ttsPort,
-    "KAFKA_HOSTS" -> s"$localhost:${kafkaServer.port}",
+    "TSS_PORT" -> ttsPort.toString,
     "INSTANCE_NAME" -> "test-instance-for-batch-engine",
     "TASK_NAME" -> "test-instance-for-batch-engine-task0",
     "AGENTS_HOST" -> localhost,
     "AGENTS_PORTS" -> agentsPorts.mkString(","),
-    "BENCHMARK_PORT" -> serverSocket.getLocalPort)
-    .mapValues(_.toString)
+    "BENCHMARK_PORT" -> serverSocket.getLocalPort.toString)
 
 
   override def withFixture(test: NoArgTest): Outcome = {
+    val zkServer = new TestingServer(true)
+    val zkAddress = zkServer.getConnectString
+    environment += "ZOOKEEPER_HOSTS" -> zkAddress
+
+    val kafkaServer = new EmbeddedKafka(Some(zkAddress))
+    environment += "KAFKA_HOSTS" -> s"$localhost:${kafkaServer.port}"
+
+    val mongoServer = new EmbeddedMongo(mongoPort)
+
     val ttsServer = runClass(classOf[Server])
     Thread.sleep(waitingTimeout)
 
@@ -77,7 +80,9 @@ class SjBatchModuleBenchmark extends FlatSpec with Matchers with MockitoSugar {
     result.get
   }
 
-  "Batch-streaming module" should "work properly" in {
+  "Batch-streaming module" should "work properly for T-Streams input streams" in {
+    environment += "INPUT_STREAM_TYPES" -> tStreamMode
+
     val setup = runClass(classOf[SjBatchModuleSetup])
     setup.waitFor() shouldBe 0
 
@@ -96,15 +101,60 @@ class SjBatchModuleBenchmark extends FlatSpec with Matchers with MockitoSugar {
     Thread.sleep(waitingTimeout * 3)
     runner.destroy()
 
-    val checker = runClass(typeToClass(inputStreamsType))
+    val checker = runClass(classOf[SjBatchModuleStatefulTstreamChecker])
+    checker.waitFor() shouldBe 0
+  }
+
+  it should "work properly for Kafka input streams" in {
+    environment += "INPUT_STREAM_TYPES" -> kafkaMode
+
+    val setup = runClass(classOf[SjBatchModuleSetup])
+    setup.waitFor() shouldBe 0
+
+    val waitResponseFromRunner = new Thread(() => serverSocket.accept())
+    waitResponseFromRunner.start()
+
+    var runner = runClass(classOf[SjBatchModuleRunner])
+
+    while (waitResponseFromRunner.isAlive) {
+      if (runner.isAlive)
+        Thread.sleep(waitingTimeout)
+      else
+        runner = runClass(classOf[SjBatchModuleRunner])
+    }
+
+    Thread.sleep(waitingTimeout * 3)
+    runner.destroy()
+
+    val checker = runClass(classOf[SjBatchModuleStatefulKafkaChecker])
+    checker.waitFor() shouldBe 0
+  }
+
+  it should "work properly for T-Streams and Kafka input streams" in {
+    environment += "INPUT_STREAM_TYPES" -> commonMode
+
+    val setup = runClass(classOf[SjBatchModuleSetup])
+    setup.waitFor() shouldBe 0
+
+    val waitResponseFromRunner = new Thread(() => serverSocket.accept())
+    waitResponseFromRunner.start()
+
+    var runner = runClass(classOf[SjBatchModuleRunner])
+
+    while (waitResponseFromRunner.isAlive) {
+      if (runner.isAlive)
+        Thread.sleep(waitingTimeout)
+      else
+        runner = runClass(classOf[SjBatchModuleRunner])
+    }
+
+    Thread.sleep(waitingTimeout * 3)
+    runner.destroy()
+
+    val checker = runClass(classOf[SjBatchModuleStatefulBothChecker])
     checker.waitFor() shouldBe 0
   }
 
   def runClass(clazz: Class[_]): Process =
-    new ClassRunner(clazz, environment = environment).start()
-
-  val typeToClass = Map(
-    tStreamMode -> classOf[SjBatchModuleStatefulTstreamChecker],
-    kafkaMode -> classOf[SjBatchModuleStatefulKafkaChecker],
-    commonMode -> classOf[SjBatchModuleStatefulBothChecker])
+    new ClassRunner(clazz, environment = environment.toMap).start()
 }
