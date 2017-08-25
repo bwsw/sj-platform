@@ -40,9 +40,448 @@ Mesos Deployment
 
 .. warning:: The section is under development!
 
-Mesos framework
+The deployment is performed via REST API.
+
+Firstly, deploy Mesos and other services.
+
+1. Deploy Mesos, Marathon, Zookeeper. You can follow the instructions at the official `instalation guide <http://www.bogotobogo.com/DevOps/DevOps_Mesos_Install.php>`_ .
+
+Please, note, Docker container should be supported for Mesos-slave.
+
+For Docker deployment follow the instructions at the official `installation guide <https://docs.docker.com/engine/installation/linux/docker-ce/ubuntu/#install-docker-ce>`_
+
+Install Java::
+                                         
+ $ sudo add-apt-repository ppa:webupd8team/java
+ $ sudo apt-get update
+ $ sudo apt-get install oracle-java8-installer
+ $ sudo apt-get install oracle-java8-set-default
+
+Find detailed instructions in the `installation guide <https://tecadmin.net/install-oracle-java-8-ubuntu-via-ppa/>`_.
+
+Start Mesos and the services. Make sure you have access to Mesos interface, Marathon interface, and Zookeeper is running.
+
+
+2. Create json files and a configuration file (config.properties) for tts. 
+
+**mongo.json**::
+
+ {  
+   "id":"mongo",
+   "container":{  
+      "type":"DOCKER",
+      "docker":{  
+         "image":"mongo",
+         "network":"BRIDGE",
+         "portMappings":[  
+            {  
+               "containerPort":27017,
+               "hostPort":31027,
+               "protocol":"tcp" 
+            }
+         ],
+         "parameters":[  
+            {  
+               "key":"restart",
+               "value":"always" 
+            }
+         ]
+      }
+   },
+   "instances":1,
+   "cpus":0.1,
+   "mem":512
+ }
+
+**sj-rest.json**::
+
+ {  
+   "id":"sj-rest",
+   "container":{  
+      "type":"DOCKER",
+      "docker":{  
+         "image":"bwsw/sj-rest:dev",
+         "network":"BRIDGE",
+         "portMappings":[  
+            {  
+               "containerPort":8080,
+               "hostPort":31080,
+               "protocol":"tcp" 
+            }
+         ],
+         "parameters":[  
+            {  
+               "key":"restart",
+               "value":"always" 
+            }
+         ]
+      }
+   },
+   "instances":1,
+   "cpus":0.1,
+   "mem":1024,
+   "env":{
+      "MONGO_HOSTS":"172.17.0.1:31027",
+      "ZOOKEEPER_HOST":"172.17.0.1",
+      "ZOOKEEPER_PORT":"2181" 
+   }
+ }
+
+For sj-rest.json it is better to upload the docker image separately::
+ 
+ $ sudo docker pull bwsw/sj-rest:dev
+
+**kafka.json**::
+
+ {  
+   "id":"kafka",
+   "container":{  
+      "type":"DOCKER",
+      "docker":{  
+         "image":"ches/kafka",
+         "network":"BRIDGE",
+         "portMappings":[  
+            {  
+               "containerPort":9092,
+               "hostPort":31992,
+               "servicePort":9092,
+               "protocol":"tcp" 
+            },
+        {  
+               "containerPort":7203,
+               "hostPort":31723,
+               "servicePort":7203,
+               "protocol":"tcp" 
+            }
+         ],
+         "parameters":[  
+            {  
+               "key":"restart",
+               "value":"always" 
+            }
+         ]
+      }
+   },
+   "instances":1,
+   "cpus":0.1,
+   "mem":512,
+   "env":{  
+      "ZOOKEEPER_IP":"172.17.0.1",
+      "KAFKA_ADVERTIZEED_HOST_NAME":"kafka" 
+   }
+ }
+
+**elasticsearch.json**::
+
+ {  
+   "id":"elasticsearch",
+   "container":{  
+      "type":"DOCKER",
+      "docker":{  
+         "image":"elasticsearch",
+         "network":"BRIDGE",
+         "portMappings":[  
+            {  
+               "containerPort":9200,
+               "hostPort":31920,
+               "protocol":"tcp" 
+            },
+        {  
+               "containerPort":9300,
+               "hostPort":31930,
+               "protocol":"tcp" 
+            }
+         ],
+         "parameters":[  
+            {  
+               "key":"restart",
+               "value":"always" 
+            }
+         ]
+      }
+   },
+   "args": ["-Etransport.host=0.0.0.0", "-Ediscovery.zen.minimum_master_nodes=1"],
+   "instances":1,
+   "cpus":0.2,
+   "mem":256
+ }
+
+**Configuration properties** (replace <zk_ip> with a valid ip)::
+
+ key=pingstation
+ active.tokens.number=100
+ token.ttl=120
+
+ host=0.0.0.0
+ port=8080
+ thread.pool=4
+
+ path=/tmp
+ data.directory=transaction_data
+ metadata.directory=transaction_metadata
+ commit.log.directory=commit_log
+ commit.log.rocks.directory=commit_log_rocks
+
+ berkeley.read.thread.pool = 2
+
+ counter.path.file.id.gen=/server_counter/file_id_gen
+
+ auth.key=dummy
+ endpoints=127.0.0.1:31071
+ name=server
+ group=group
+
+ write.thread.pool=4
+ read.thread.pool=2
+ ttl.add-ms=50
+ create.if.missing=true
+ max.background.compactions=1
+ allow.os.buffer=true
+ compression=LZ4_COMPRESSION
+ use.fsync=true
+
+ zk.endpoints=<zk_ip>
+ zk.prefix=/pingstation
+ zk.session.timeout-ms=10000
+ zk.retry.delay-ms=500
+ zk.connection.timeout-ms=10000
+
+ max.metadata.package.size=100000000
+ max.data.package.size=100000000
+ transaction.cache.size=300
+
+ commit.log.write.sync.value = 1
+ commit.log.write.sync.policy = every-nth
+ incomplete.commit.log.read.policy = skip-log
+ commit.log.close.delay-ms = 200
+ commit.log.file.ttl-sec = 86400
+ stream.zookeeper.directory=/tts/tstreams
+
+ ordered.execution.pool.size=2
+ transaction-database.transaction-keeptime-min=70000
+ subscribers.update.period-ms=500
+
+
+
+**tts.json** (replace <path_to_conf_directory> with an appropriate path to the configuration directory on your computer and <external_host> with a valid host)::
+
+ {
+    "id": "tts",
+    "container": {
+        "type": "DOCKER",
+        "volumes": [
+            {
+                "containerPath": "/etc/conf",
+                "hostPath": "<path_to_conf_directory>",
+                "mode": "RO" 
+            }
+        ],
+        "docker": {
+            "image": "bwsw/tstreams-transaction-server",
+            "network": "BRIDGE",
+            "portMappings": [
+                {
+                    "containerPort": 8080,
+                    "hostPort": 31071,
+                    "protocol": "tcp" 
+                }
+            ],
+            "parameters": [
+                {
+                    "key": "restart",
+                    "value": "always" 
+                }
+            ]
+        }
+    },
+    "instances": 1,
+    "cpus": 0.1,
+    "mem": 512,
+    "env": {
+      "HOST":"<external_host>",
+      "PORT0":"31071" 
+    }
+}
+
+**kibana.json**::
+
+ {  
+   "id":"kibana",
+   "container":{  
+      "type":"DOCKER",
+      "docker":{  
+         "image":"kibana",
+         "network":"BRIDGE",
+         "portMappings":[  
+            {  
+               "containerPort":5601,
+               "hostPort":31561,
+               "protocol":"tcp" 
+            }
+         ],
+         "parameters":[  
+            {  
+               "key":"restart",
+               "value":"always" 
+            }
+         ]
+      }
+   },
+   "instances":1,
+   "cpus":0.1,
+   "mem":256,
+   "env":{  
+      "ELASTICSEARCH_URL":"http://172.17.0.1:31920" 
+   }
+ }
+
+3. Run the services on Marathon:
+
+**Mongo**::
+ 
+ $ curl -X POST http://172.17.0.1:8080/v2/apps -H "Content-type: application/json" -d @mongo.json 
+
+**Kafka**::
+
+ $ curl -X POST http://172.17.0.1:8080/v2/apps -H "Content-type: application/json" -d @kafka.json 
+
+**Elasticsearch**:
+
+Please, note that `vm.max_map_count` should be slave::
+
+ sudo sysctl -w vm.max_map_count=262144
+
+
+Then launch elasticsearch::
+
+ $ curl -X POST http://172.17.0.1:8080/v2/apps -H "Content-type: application/json" -d @elasticsearch.json
+
+
+**SJ-rest**::
+
+ $ curl -X POST http://172.17.0.1:8080/v2/apps -H "Content-type: application/json" -d @sj-rest.json    
+    
+**T-Streams**::
+ 
+ $ curl -X POST http://172.17.0.1:8080/v2/apps -H "Content-type: application/json" -d @tts.json 
+
+
+**Kibana**::
+
+ $ curl -X POST http://172.17.0.1:8080/v2/apps -H "Content-type: application/json" -d @kibana.json
+
+
+Via the Marathon interface make sure the services are deployed.
+
+4. Copy the github repository of the SJ-Platform::
+
+   $ git clone https://github.com/bwsw/sj-platform.git
+
+5. Add the settings if running the framework on Mesos needs principal/secret:: 
+
+   $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"framework-principal\",\"value\": <principal>,\"domain\": \"configuration.system\"}" 
+   $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"framework-secret\",\"value\": <secret>,\"domain\": \"configuration.system\"}" 
+
+Now look and make sure you have access to the Web UI. You will see the platform but it is not completed with any entities yet. They will be added in the next steps.
+
+Module Uploading
+""""""""""""""""""""""
+
+1. First, the environment should be configured::
+
+    address=<host>:<port>
+
+<host>:<port> — SJ Rest host and port.
+
+2. To upload modules to the system::
+
+   $ curl --form jar=@<module .jar file path and name here> http://$address/v1/modules
+   $ curl --form jar=@ps-process/target/scala-2.11/ps-process-1.0.jar http://$address/v1/modules
+   $ curl --form jar=@ps-output/target/scala-2.11/ps-output-1.0.jar http://$address/v1/modules
+
+3. Now engines are necessary for modules.
+
+Please, upload the engine jars for the modules (input-streaming, regular-streaming, output-streaming) and a Mesos framework. You can find them at our github repository::
+
+ cd sj-platform
+
+ address=sj-rest.marathon.mm:8080
+
+ $ curl --form jar=@core/sj-mesos-framework/target/scala-2.12/sj-mesos-framework-1.0-SNAPSHOT.jar http://$address/v1/custom/jars
+ $ curl --form jar=@core/sj-input-streaming-engine/target/scala-2.12/sj-input-streaming-engine-1.0-SNAPSHOT.jar http://$address/v1/custom/jars
+ $ curl --form jar=@core/sj-regular-streaming-engine/target/scala-2.12/sj-regular-streaming-engine-1.0-SNAPSHOT.jar http://$address/v1/custom/jars
+ $ curl --form jar=@core/sj-output-streaming-engine/target/scala-2.12/sj-output-streaming-engine-1.0-SNAPSHOT.jar http://$address/v1/custom/jars
+ 
+4. Setup configurations for engines.
+
+The range of configurations includes required and optional ones. 
+
+The list of all configurations can be viewed at the :ref:`Configuration` page.
+
+5. Set up configuration settings for the engines, but first replace <rest_ip> with the IP of rest and <marathon_address> with the address of marathon::
+
+   $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"session-timeout\",\"value\": \"7000\",\"domain\": \"configuration.apache-zookeeper\"}" 
+   $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"current-framework\",\"value\": \"com.bwsw.fw-1.0\",\"domain\": \"configuration.system\"}" 
+   $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"crud-rest-host\",\"value\": \"<rest_ip>\",\"domain\": \"configuration.system\"}" 
+   $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"crud-rest-port\",\"value\": \"31080\",\"domain\": \"configuration.system\"}" 
+   $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"marathon-connect\",\"value\": \"http://<marathon_address>\",\"domain\": \"configuration.system\"}" 
+   $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"marathon-connect-timeout\",\"value\": \"60000\",\"domain\": \"configuration.system\"}" 
+   $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"kafka-subscriber-timeout\",\"value\": \"100\",\"domain\": \"configuration.system\"}" 
+   $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"low-watermark\",\"value\": \"100\",\"domain\": \"configuration.system\"}" 
+
+6. Send the next POST requests to upload configurations for module validators::
+
+   $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"regular-streaming-validator-class\",\"value\": \"com.bwsw.sj.crud.rest.instance.validator.RegularInstanceValidator\",\"domain\": \"configuration.system\"}" 
+   $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"input-streaming-validator-class\",\"value\": \"com.bwsw.sj.crud.rest.instance.validator.InputInstanceValidator\",\"domain\": \"configuration.system\"}" 
+   $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"output-streaming-validator-class\",\"value\": \"com.bwsw.sj.crud.rest.instance.validator.OutputInstanceValidator\",\"domain\": \"configuration.system\"}" 
+
+In the UI you can see the uploaded configurations under the “Configurations” tab of the main navigation.
+
+Stream Creation
+""""""""""""""""""""""""""""""
+
+1. Set up providers:
+
+There is default value of elasticsearch, kafka and zookeeper IPs (176.120.25.19) in json configuration files, so you shall change it appropriately via sed app before using (replace the following placeholders <elasticsearch_ip>, <kafka_ip>, <zookeeper_address>, <provider_name>)::
+
+ $ sed -i 's/176.120.25.19:9300/<elasticsearch_ip>:31930/g' api-json/providers/elasticsearch-ps-provider.json
+ curl --request POST "http://$address/v1/providers" -H 'Content-Type: application/json' --data "@api-json/providers/ <provider_name>.json" 
+
+ $ sed -i 's/176.120.25.19:9092/<kafka_ip>:31992/g' api-json/providers/kafka-ps-provider.json
+ curl --request POST "http://$address/v1/providers" -H 'Content-Type: application/json' --data "@api-json/providers/ <provider_name>.json" 
+
+ $ sed -i 's/176.120.25.19:2181/<zookeeper_address>/g' api-json/providers/zookeeper-ps-provider.json
+ curl --request POST "http://$address/v1/providers" -H 'Content-Type: application/json' --data "@api-json/providers/ <provider_name>.json" 
+
+2. Next set up services (replace <service_name> with the name of the service json file)::
+
+   $ curl --request POST "http://$address/v1/services" -H 'Content-Type: application/json' --data "@api-json/services/<service_name>.json" 
+
+3. Create streams (replace <stream_name> with a name of the stream json file)::
+
+   $ curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/<stream_name>.json" 
+
+4. Create output destination
+
+At this step all necessary indexes, tables and mapping should be created for storing the processed result.
+
+
+Instance Creation
+""""""""""""""""""""""""""""
+
+Create instances (replace <module_name> with the name of the module the instance is created for, <instance_name> with a name of the instance)::
+
+ $ curl --request POST "http://$address/v1/modules/input-streaming/<module_name>/1.0/instance" -H 'Content-Type: application/json' --data "@api-json/instances/<instance_name>.json" 
+ 
+Instance Launching
 """"""""""""""""""""""""
-.. warning:: The section is under development!
+Laucnh the created instances by sending GET request for each instance (replace <module_name> and <instance_name> with the name of the instance and the name of its module)::
+
+ $ curl --request GET "http://$address/v1/modules/input-streaming/<module_name>/1.0/instance/<instance_name>/start" 
+
+Start Flow
+""""""""""""""""""""""""
+Start the flow of data into the system. Now the data is delevered into the system. The instance(-s) starts data processing. 
 
 Minimesos Deployment
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -52,7 +491,7 @@ Minimesos Deployment
 Requirements: 
 
 - git,
-- sbt (http://www.scala-sbt.org/download.html),
+- sbt (downloading instructions `here <http://www.scala-sbt.org/download.html>`_),
 - docker,
 - curl
 
