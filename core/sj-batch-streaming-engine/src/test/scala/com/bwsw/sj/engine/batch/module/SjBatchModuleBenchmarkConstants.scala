@@ -18,13 +18,23 @@
  */
 package com.bwsw.sj.engine.batch.module
 
-import java.util.logging.LogManager
+/**
+  * @author Pavel Tomskikh
+  */
+object SjBatchModuleBenchmarkConstants {
+  val stateFullCheckpoint = 3
+  val window = 2
+  val slidingInterval = 1
+  val defaultValueOfTxns = 12
+  val defaultValueOfElements = 1
+  val inputCount = 2
+  val outputCount = 2
+  val partitions = 4
 
-import com.bwsw.sj.engine.batch.BatchTaskRunner
+  val kafkaMode = "kafka"
+  val tstreamMode = "tstream"
+  val commonMode = "both"
+  val inputStreamsType = commonMode
 
-object SjBatchModuleRunner extends App {
-  LogManager.getLogManager.reset()
-  BatchTaskRunner.main(Array())
+  val modulePath = "../../contrib/stubs/sj-stub-batch-streaming/target/scala-2.12/sj-stub-batch-streaming-1.0-SNAPSHOT.jar"
 }
-
-class SjBatchModuleRunner

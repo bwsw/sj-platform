@@ -161,6 +161,7 @@ class BatchTaskEngine(manager: CommonTaskManager,
   private def onIdle(): Unit = {
     logger.debug(s"An envelope has been received but no batches have been collected.")
     performanceMetrics.increaseTotalIdleTime(instance.eventWaitIdleTime)
+    Thread.sleep(instance.eventWaitIdleTime)
     executor.onIdle()
   }
 

@@ -33,6 +33,7 @@ import com.bwsw.sj.common.dal.model.stream.{KafkaStreamDomain, StreamDomain, TSt
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
 import com.bwsw.sj.common.si.model.instance.BatchInstance
 import com.bwsw.sj.common.utils._
+import com.bwsw.sj.engine.batch.module.SjBatchModuleBenchmarkConstants._
 import com.bwsw.sj.engine.core.testutils.TestStorageServer
 import com.bwsw.tstreams.agents.consumer.Consumer
 import com.bwsw.tstreams.agents.consumer.Offset.Oldest
@@ -55,9 +56,7 @@ object DataFactory {
   private val config = ConfigFactory.load()
   private val zookeeperHosts = config.getString(BenchmarkConfigNames.zkHosts).split(",")
   private val kafkaHosts = config.getString(BenchmarkConfigNames.kafkaHosts)
-  val kafkaMode = "kafka"
-  val tstreamMode = "tstream"
-  val commonMode = "both"
+  private val benchmarkPort = config.getInt(BenchmarkConfigNames.benchmarkPort)
   private val agentsHost = "localhost"
   private val testNamespace = "test_namespace_for_batch_engine"
   private val instanceName = "test-instance-for-batch-engine"
@@ -83,9 +82,6 @@ object DataFactory {
   setTStreamFactoryProperties()
   private val storageClient = tstreamFactory.getStorageClient()
 
-  val inputCount = 2
-  val outputCount = 2
-  val partitions = 4
 
   private def setTStreamFactoryProperties() = {
     setAuthOptions(tstrqService)
@@ -291,6 +287,7 @@ object DataFactory {
                      instanceService: GenericMongoRepository[InstanceDomain],
                      window: Int,
                      slidingInterval: Int,
+                     totalInputElements: Int,
                      stateManagement: String = EngineLiterals.noneStateMode,
                      stateFullCheckpoint: Int = 0) = {
     import scala.collection.JavaConverters._
@@ -310,6 +307,7 @@ object DataFactory {
       stateManagement = stateManagement,
       stateFullCheckpoint = stateFullCheckpoint,
       startFrom = EngineLiterals.oldestStartMode,
+      options = s"$totalInputElements,$benchmarkPort",
       //executionPlan = new ExecutionPlan(Map((instanceName + "-task0", task), (instanceName + "-task1", task)).asJava) //for barriers test,
       executionPlan = new ExecutionPlan(Map(instanceName + "-task0" -> task).asJava),
       creationDate = new Date().toString
