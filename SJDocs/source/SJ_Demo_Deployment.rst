@@ -105,7 +105,7 @@ VM hostname = master
 
 - ip = 192.168.50.51
 
-- forwarded ports: 2181, 5050, 8080
+- forwarding ports: 2181, 5050, 8080
 
 *Services*:
 
@@ -145,7 +145,7 @@ VM hostname = slave1
 
 - ip = 192.168.50.52
 
-- forwarded ports: 5051, 8888, 9092, 7203, 31071, 5601, 9200, 9300
+- forwarding ports: 5051, 8888, 9092, 7203, 31071, 5601, 9200, 9300
 
 *Services*:
 
@@ -162,7 +162,7 @@ VM hostname = slave1
 - Apache Kafka - on ports 9092, 7203
 
 Description:
-   After VM is launched, Vagrant firstly runs Mesos-Slave with following configurations: 
+   After VM is launched, Vagrant firstly runs Mesos-Slave with the following configurations: 
    
    - ip = 0.0.0.0, 
    
@@ -172,7 +172,7 @@ Description:
    
    - zk = zk://192.168.50.51:2181/mesos,
    
-   - ports = forwarded ports.
+   - ports = forwarding ports.
 
    Next, Docker engine is installed, and Elasticsearch and Kibana are launched in Docker.
 
@@ -190,7 +190,7 @@ VM hostname = slave2
 
 - ip = 192.168.50.53
 
-- forwarded ports: 31500 - 31600
+- forwarding ports: 31500 - 31600
 
 *Services*:
 
@@ -207,7 +207,7 @@ Description:
   
   - zk = zk://192.168.50.51:2181/mesos, 
   
-  - ports = forwarded ports.
+  - ports = forwarding ports.
   
   Next, Docker engine is installed.
 
@@ -223,7 +223,7 @@ VM name = storage
 
 - ip = 192.168.50.55
 
-- forwarded ports: 27017
+- forwarding ports: 27017
 
 *Srevices*:
 
@@ -244,8 +244,6 @@ VM name = executor
 - 200 MB memory
 
 - ip = 192.168.50.54
-
-- forwarded ports:
 
 Description:
   This VM is used to launch services and create entities.
