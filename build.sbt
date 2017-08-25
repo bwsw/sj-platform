@@ -142,7 +142,12 @@ lazy val outputStreamingEngine = Project(id = "sj-output-streaming-engine",
   base = file("./core/sj-output-streaming-engine"))
   .settings(commonSettings: _*)
   .settings(
-    libraryDependencies ++= Dependencies.sjOutputEngineDependencies.value
+    libraryDependencies ++= Dependencies.sjOutputEngineDependencies.value,
+    libraryDependencies ++= Dependencies.sjTestDependencies.value,
+    test in Test <<= (test in Test)
+      .dependsOn(assembly in stubESOutput)
+      .dependsOn(assembly in stubJDBCOutput)
+      .dependsOn(assembly in stubRestOutput)
   )
   .dependsOn(engineCore)
 

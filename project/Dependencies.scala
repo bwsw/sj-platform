@@ -101,7 +101,8 @@ object Dependencies {
   ))
 
   lazy val sjOutputEngineDependencies = Def.setting(Seq(
-    "org.eclipse.jetty" % "jetty-server" % "9.4.3.v20170317" % "test"
+    "org.eclipse.jetty" % "jetty-server" % "9.4.3.v20170317" % "test",
+    "ru.yandex.qatools.embed" % "postgresql-embedded" % "2.2" % "test"
   ))
 
   lazy val sjFrameworkDependencies = Def.setting(Seq(

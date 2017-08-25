@@ -44,3 +44,5 @@ object SjOutputModuleRunner extends App {
   LogManager.getLogManager.reset()
   OutputTaskRunner.main(Array())
 }
+
+class SjOutputModuleRunner

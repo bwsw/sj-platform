@@ -26,7 +26,7 @@ import com.bwsw.common._
 import com.bwsw.common.es.ElasticsearchClient
 import com.bwsw.common.file.utils.MongoFileStorage
 import com.bwsw.common.jdbc.JdbcClientBuilder
-import com.bwsw.sj.common.config.{BenchmarkConfigNames, TempHelperForConfigDestroy, TempHelperForConfigSetup}
+import com.bwsw.sj.common.config.{BenchmarkConfigNames, TempHelperForConfigConstants, TempHelperForConfigDestroy, TempHelperForConfigSetup}
 import com.bwsw.sj.common.dal.model._
 import com.bwsw.sj.common.dal.model.instance.{ExecutionPlan, Task}
 import com.bwsw.sj.common.dal.model.provider.{JDBCProviderDomain, ProviderDomain}
@@ -36,6 +36,7 @@ import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepo
 import com.bwsw.sj.common.si.model.instance.OutputInstance
 import com.bwsw.sj.common.utils.{ProviderLiterals, _}
 import com.bwsw.sj.engine.core.testutils.TestStorageServer
+import com.bwsw.sj.engine.output.benchmark.SjOutputModuleBenchmarkConstants.{databaseName, jdbcPassword, jdbcUsername}
 import com.bwsw.tstreams.agents.consumer
 import com.bwsw.tstreams.agents.consumer.Offset.Oldest
 import com.bwsw.tstreams.agents.producer.{NewProducerTransactionPolicy, Producer}
@@ -50,8 +51,6 @@ import scala.collection.JavaConverters._
 import scala.util.{Failure, Success, Try}
 
 /**
-  *
-  *
   * @author Kseniya Tomskikh
   */
 object DataFactory {
@@ -75,9 +74,8 @@ object DataFactory {
   val jdbcProviderName: String = "output-jdbc-test-provider"
   val jdbcServiceName: String = "output-jdbc-test-service"
   val jdbcStreamName: String = "jdbcoutput"
-  val jdbcDriver: String = "mysql"
+  val jdbcDriver: String = TempHelperForConfigConstants.driverName
 
-  val pathToRestModule = "./contrib/stubs/sj-stub-rest-output-streaming/target/scala-2.12/sj-stub-rest-output-streaming-1.0-SNAPSHOT.jar"
   val restProviderName = "output-rest-test-provider"
   val restServiceName = "output-rest-test-service"
   val restStreamName = "rest-output"
@@ -92,7 +90,6 @@ object DataFactory {
   val testNamespace = "test_namespace"
 
   val esIndex: String = "test_index_for_output_engine"
-  val databaseName: String = "test_database_for_output_engine"
   val restBasePath = "/test/base_path/for/output_engine"
 
   val streamService = connectionRepository.getStreamRepository
@@ -101,10 +98,6 @@ object DataFactory {
   val instanceService = connectionRepository.getInstanceRepository
   val fileStorage: MongoFileStorage = connectionRepository.getFileStorage
   val configService: GenericMongoRepository[ConfigurationSettingDomain] = connectionRepository.getConfigRepository
-
-  val esInstanceName: String = "test-es-instance-for-output-engine"
-  val jdbcInstanceName: String = "test-jdbc-instance-for-output-engine"
-  val restInstanceName: String = "test-rest-instance-for-output-engine"
 
   val tstreamPartitions: Int = 4
   val tstreamTtl: Long = 60000l
@@ -126,6 +119,8 @@ object DataFactory {
   private val jdbcHosts = config.getString(OutputBenchmarkConfigNames.jdbcHosts).split(",").map(host => host.trim)
   private val restHosts = config.getString(OutputBenchmarkConfigNames.restHosts).split(",").map(host => host.trim)
   private val zookeeperHosts = config.getString(BenchmarkConfigNames.zkHosts).split(",").map(host => host.trim)
+  private val benchmarkPort = config.getInt(BenchmarkConfigNames.benchmarkPort)
+  private val silent = Try(config.getAnyRef(OutputBenchmarkConfigNames.silent)).isSuccess
   private val zookeeperProvider = new ProviderDomain(zookeeperProviderName, zookeeperProviderName,
     zookeeperHosts, "", "", ProviderLiterals.zookeeperType, new Date())
   private val tstrqService = new TStreamServiceDomain(tstreamServiceName, tstreamServiceName, zookeeperProvider,
@@ -164,7 +159,8 @@ object DataFactory {
 
     val producer = createProducer(tStream)
     val s = System.currentTimeMillis()
-    writeData(countTxns,
+    writeData(
+      countTxns,
       countElements,
       producer)
     println(s"producer time: ${(System.currentTimeMillis - s) / 1000}")
@@ -175,16 +171,16 @@ object DataFactory {
                         countElements: Int,
                         producer: Producer) = {
     var number = 0
-    (0 until countTxns) foreach { (x: Int) =>
+    (0 until countTxns) foreach { _ =>
       val transaction = producer.newTransaction(NewProducerTransactionPolicy.ErrorIfOpened)
-      (0 until countElements) foreach { (y: Int) =>
+      (0 until countElements) foreach { _ =>
         number += 1
         val string = inputData(number % inputData.length)
-        println(s"write data $number, |$string|")
+        if (!silent) println(s"write data $number, |$string|")
         val msg = objectSerializer.serialize((number, string).asInstanceOf[Object])
         transaction.send(msg)
       }
-      println("checkpoint")
+      if (!silent) println("checkpoint")
       transaction.checkpoint()
     }
   }
@@ -278,7 +274,7 @@ object DataFactory {
 
     providerService.save(zookeeperProvider)
 
-    val jdbcProvider = new JDBCProviderDomain(jdbcProviderName, "", jdbcHosts, "admin", "admin", jdbcDriver, new Date())
+    val jdbcProvider = new JDBCProviderDomain(jdbcProviderName, "", jdbcHosts, jdbcUsername, jdbcPassword, jdbcDriver, new Date())
     providerService.save(jdbcProvider)
 
     val restProvider = new ProviderDomain(restProviderName, "", restHosts, "", "", ProviderLiterals.restType, new Date())
@@ -362,8 +358,12 @@ object DataFactory {
       tstreamInputName)
   }
 
-  def createInstance(instanceName: String, checkpointMode: String, checkpointInterval: Long,
-                     streamName: String, moduleName: String) = {
+  def createInstance(instanceName: String,
+                     checkpointMode: String,
+                     checkpointInterval: Long,
+                     streamName: String,
+                     moduleName: String,
+                     totalInputElements: Int) = {
 
     val task1 = new Task()
     task1.inputs = Map(tstreamInputName -> Array(0, tstreamPartitions - 1)).asJava
@@ -381,7 +381,7 @@ object DataFactory {
       input = tstreamInputName,
       output = streamName,
       checkpointInterval = checkpointInterval,
-      options = """{"hey": "hey"}""",
+      options = s"$totalInputElements,$benchmarkPort",
       startFrom = EngineLiterals.oldestStartMode,
       executionPlan = executionPlan,
       checkpointMode = checkpointMode,
@@ -452,12 +452,5 @@ object DataFactory {
 
   def deleteModule(filename: String) = {
     fileStorage.delete(filename)
-  }
-
-  private def splitHosts(hosts: Array[String]) = {
-    hosts.map(s => {
-      val address = s.split(":")
-      (address(0), address(1).toInt)
-    }).toSet
   }
 }

@@ -18,14 +18,33 @@
  */
 package com.bwsw.sj.engine.output.benchmark
 
-import com.bwsw.sj.common.config.BenchmarkConfigNames.test
+import java.io.File
 
+import com.bwsw.sj.engine.output.benchmark.DataFactory._
+import com.bwsw.sj.engine.output.benchmark.SjOutputModuleBenchmarkConstants.{pathToRestModule, restInstanceName}
 
-object OutputBenchmarkConfigNames {
-  val esHosts = test + ".es.hosts"
-  val jdbcHosts = test + ".jdbc.hosts"
-  val restHosts = test + ".restful.hosts"
+/**
+  * MONGO_HOST=176.120.25.19:27017
+  * AGENTS_HOST=176.120.25.19
+  * AGENTS_PORTS=31000,31001
+  * ZOOKEEPER_HOSTS=176.120.25.19:2181
+  * ES_HOSTS=176.120.25.19:9300
+  * JDBC_HOSTS=0.0.0.0:5432
+  *
+  * @author Pavel Tomskikh
+  */
+object SjRestOutputModuleDestroy extends App {
+  val restModule = new File(pathToRestModule)
 
-  val restPort = test + ".output.rest.port"
-  val silent = test + ".silent"
+  deleteStreams()
+  deleteServices()
+  deleteProviders()
+  deleteInstance(restInstanceName)
+  deleteModule(restModule.getName)
+
+  close()
+  tempHelperForConfigDestroy.deleteConfigs()
+  connectionRepository.close()
+
+  println("DONE")
 }
