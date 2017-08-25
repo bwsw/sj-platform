@@ -93,9 +93,9 @@ Also you can access VM with *vagrant ssh* <name>.
 
 **Master VM**
 
-name = master
+VM name = master
 
-hostname = master
+VM hostname = master
 
 *Resources*:
 
@@ -133,9 +133,9 @@ Description:
 
 **Slave1 VM**
 
-name = slave1
+VM name = slave1
 
-hostname = slave1
+VM hostname = slave1
 
 *Resources*:
 
@@ -164,29 +164,29 @@ hostname = slave1
 Description:
    After VM is launched, Vagrant firstly runs Mesos-Slave with following configurations: 
    
-   - ip=0.0.0.0, 
+   - ip = 0.0.0.0, 
    
-   - advertise_ip=192.168.50.52, 
+   - advertise_ip = 192.168.50.52, 
    
-   - hostname=192.168.50.52, 
+   - hostname = 192.168.50.52, 
    
-   - zk=zk://192.168.50.51:2181/mesos,
+   - zk = zk://192.168.50.51:2181/mesos,
    
-   - ports=forwarded ports.
+   - ports = forwarded ports.
 
    Next, Docker engine is installed, and Elasticsearch and Kibana are launched in Docker.
 
 **Slave2 VM**
 
-name = slave2
+VM name = slave2
 
-hostname = slave2
+VM hostname = slave2
 
 *Resources*:
 
 - 1 CPUs
 
-- 2GB memory
+- 2 GB memory
 
 - ip = 192.168.50.53
 
@@ -199,27 +199,27 @@ hostname = slave2
 Description:
   After VM is launched, Vagrant firstly launches Mesos-Slave with the following configurations: 
   
-  - ip=0.0.0.0, 
+  - ip = 0.0.0.0, 
   
-  - advertise_ip=192.168.50.53, 
+  - advertise_ip = 192.168.50.53, 
   
-  - hostname=192.168.50.53, 
+  - hostname = 192.168.50.53, 
   
-  - zk=zk://192.168.50.51:2181/mesos, 
+  - zk = zk://192.168.50.51:2181/mesos, 
   
-  - ports=forwarded ports.
+  - ports = forwarded ports.
   
   Next, Docker engine is installed.
 
 **Storage VM**
 
-name = storage
+VM name = storage
 
 *Resource*:
 
-- 1 cpus
+- 1 CPUs
 
-- 512MB memory
+- 512 MB memory
 
 - ip = 192.168.50.55
 
@@ -235,13 +235,13 @@ After VM is launched, Vagrant firstly installs Docker engine and then launches M
 
 **Executor VM**
 
-name = executor
+VM name = executor
 
 *Resource*:
 
 - 1 CPUs
 
-- 200MB memory
+- 200 MB memory
 
 - ip = 192.168.50.54
 
