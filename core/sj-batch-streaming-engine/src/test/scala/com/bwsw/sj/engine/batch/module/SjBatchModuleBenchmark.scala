@@ -24,7 +24,7 @@ import com.bwsw.common.embedded.{EmbeddedKafka, EmbeddedMongo}
 import com.bwsw.sj.common.utils.NetworkUtils.findFreePort
 import com.bwsw.sj.common.utils.benchmark.ClassRunner
 import com.bwsw.sj.engine.batch.module.SjBatchModuleBenchmarkConstants._
-import com.bwsw.sj.engine.batch.module.checkers.SjBatchModuleStatefulChecker
+import com.bwsw.sj.engine.batch.module.checkers.{SjBatchModuleStatefulBothChecker, SjBatchModuleStatefulKafkaChecker, SjBatchModuleStatefulTstreamChecker}
 import com.bwsw.sj.engine.core.testutils.Server
 import org.apache.curator.test.TestingServer
 import org.scalatest.mockito.MockitoSugar
@@ -96,10 +96,15 @@ class SjBatchModuleBenchmark extends FlatSpec with Matchers with MockitoSugar {
     Thread.sleep(waitingTimeout * 3)
     runner.destroy()
 
-    val checker = runClass(classOf[SjBatchModuleStatefulChecker])
+    val checker = runClass(typeToClass(inputStreamsType))
     checker.waitFor() shouldBe 0
   }
 
   def runClass(clazz: Class[_]): Process =
     new ClassRunner(clazz, environment = environment).start()
+
+  val typeToClass = Map(
+    tStreamMode -> classOf[SjBatchModuleStatefulTstreamChecker],
+    kafkaMode -> classOf[SjBatchModuleStatefulKafkaChecker],
+    commonMode -> classOf[SjBatchModuleStatefulBothChecker])
 }

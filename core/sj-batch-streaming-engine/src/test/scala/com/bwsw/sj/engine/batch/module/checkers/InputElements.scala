@@ -16,25 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.sj.engine.batch.module
+package com.bwsw.sj.engine.batch.module.checkers
 
-/**
-  * @author Pavel Tomskikh
-  */
-object SjBatchModuleBenchmarkConstants {
-  val stateFullCheckpoint = 3
-  val window = 2
-  val slidingInterval = 1
-  val defaultValueOfTxns = 12
-  val defaultValueOfElements = 1
-  val inputCount = 2
-  val outputCount = 2
-  val partitions = 4
+import com.bwsw.sj.engine.batch.module.checkers.elements_readers.{KafkaInputElementsReader, TStreamInputElementsReader}
 
-  val kafkaMode = "kafka"
-  val tStreamMode = "tstream"
-  val commonMode = "both"
-  val inputStreamsType = commonMode
+trait InputElements {
+  def getInputElements(): Seq[Int]
+}
 
-  val modulePath = "../../contrib/stubs/sj-stub-batch-streaming/target/scala-2.12/sj-stub-batch-streaming-1.0-SNAPSHOT.jar"
+trait InputElementsBothType extends InputElements {
+  override def getInputElements(): Seq[Int] =
+    TStreamInputElementsReader.getInputElements() ++ KafkaInputElementsReader.getInputElements()
+}
+
+trait InputElementsKafka extends InputElements {
+  override def getInputElements(): Seq[Int] =
+    KafkaInputElementsReader.getInputElements()
+}
+
+trait InputElementsTStream extends InputElements {
+  override def getInputElements(): Seq[Int] =
+    TStreamInputElementsReader.getInputElements()
 }

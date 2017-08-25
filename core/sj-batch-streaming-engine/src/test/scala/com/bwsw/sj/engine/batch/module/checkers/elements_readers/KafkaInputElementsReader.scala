@@ -16,25 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.sj.engine.batch.module
+package com.bwsw.sj.engine.batch.module.checkers.elements_readers
 
-/**
-  * @author Pavel Tomskikh
-  */
-object SjBatchModuleBenchmarkConstants {
-  val stateFullCheckpoint = 3
-  val window = 2
-  val slidingInterval = 1
-  val defaultValueOfTxns = 12
-  val defaultValueOfElements = 1
-  val inputCount = 2
-  val outputCount = 2
-  val partitions = 4
+import com.bwsw.common.ObjectSerializer
+import com.bwsw.sj.engine.batch.module.DataFactory.createInputKafkaConsumer
+import com.bwsw.sj.engine.batch.module.SjBatchModuleBenchmarkConstants.{inputCount, partitions}
 
-  val kafkaMode = "kafka"
-  val tStreamMode = "tstream"
-  val commonMode = "both"
-  val inputStreamsType = commonMode
+import scala.collection.JavaConverters._
 
-  val modulePath = "../../contrib/stubs/sj-stub-batch-streaming/target/scala-2.12/sj-stub-batch-streaming-1.0-SNAPSHOT.jar"
+object KafkaInputElementsReader {
+
+  def getInputElements(): List[Int] = {
+    val objectSerializer = new ObjectSerializer()
+    val inputKafkaConsumer = createInputKafkaConsumer(inputCount, partitions)
+
+    inputKafkaConsumer.poll(1000 * 20).asScala.toList
+      .map(_.value())
+      .map(bytes => objectSerializer.deserialize(bytes).asInstanceOf[Int])
+  }
 }

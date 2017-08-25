@@ -137,6 +137,7 @@ class BatchTaskEngine(manager: CommonTaskManager,
 
         case None =>
           moduleService.onTimer()
+          onIdle()
       }
     })
   }
@@ -144,9 +145,7 @@ class BatchTaskEngine(manager: CommonTaskManager,
   private def processBatches(): Unit = {
     logger.debug(s"Check whether there are batches to collect or not.")
     val batches = batchCollector.getBatchesToCollect().map(batchCollector.collectBatch)
-    if (batches.isEmpty) {
-      onIdle()
-    } else {
+    if (batches.nonEmpty) {
       batches.foreach(batch => {
         registerBatch(batch)
 

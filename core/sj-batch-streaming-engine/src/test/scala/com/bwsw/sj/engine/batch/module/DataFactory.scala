@@ -138,7 +138,7 @@ object DataFactory {
                     partitions: Int, _type: String, inputCount: Int, outputCount: Int) = {
     require(partitions >= 1, "Partitions must be a positive integer")
     _type match {
-      case `tstreamMode` =>
+      case `tStreamMode` =>
         (1 to inputCount).foreach(x => {
           createInputTStream(repository, serviceManager, partitions, x.toString)
           instanceInputs = instanceInputs :+ s"$tstreamInputNamePrefix$x/split"
@@ -172,7 +172,7 @@ object DataFactory {
           createOutputTStream(repository, serviceManager, partitions, x.toString)
           instanceOutputs = instanceOutputs :+ (tstreamOutputNamePrefix + x)
         })
-      case _ => throw new Exception(s"Unknown type : ${_type}. Can be only: $tstreamMode, $kafkaMode, $commonMode")
+      case _ => throw new Exception(s"Unknown type : ${_type}. Can be only: $tStreamMode, $kafkaMode, $commonMode")
     }
   }
 
@@ -182,7 +182,7 @@ object DataFactory {
                     inputCount: Int,
                     outputCount: Int) = {
     _type match {
-      case `tstreamMode` =>
+      case `tStreamMode` =>
         (1 to inputCount).foreach(x => deleteInputTStream(streamService, x.toString))
         (1 to outputCount).foreach(x => deleteOutputTStream(streamService, x.toString))
       case `kafkaMode` =>
@@ -194,7 +194,7 @@ object DataFactory {
           deleteInputTStream(streamService, x.toString)
         })
         (1 to outputCount).foreach(x => deleteOutputTStream(streamService, x.toString))
-      case _ => throw new Exception(s"Unknown type : ${_type}. Can be only: $tstreamMode, $kafkaMode, $commonMode")
+      case _ => throw new Exception(s"Unknown type : ${_type}. Can be only: $tStreamMode, $kafkaMode, $commonMode")
     }
   }
 
@@ -398,7 +398,7 @@ object DataFactory {
     }
 
     _type match {
-      case `tstreamMode` =>
+      case `tStreamMode` =>
         (1 to count).foreach(x => createTstreamData(countTxns, countElements, x.toString))
       case `kafkaMode` =>
         (1 to count).foreach(x => createKafkaData(countTxns, countElements, x.toString))
@@ -407,7 +407,7 @@ object DataFactory {
           createTstreamData(countTxns, countElements, x.toString)
           createKafkaData(countTxns, countElements, x.toString)
         })
-      case _ => throw new Exception(s"Unknown type : ${_type}. Can be only: $tstreamMode, $kafkaMode, $commonMode")
+      case _ => throw new Exception(s"Unknown type : ${_type}. Can be only: $tStreamMode, $kafkaMode, $commonMode")
     }
   }
 
