@@ -70,6 +70,8 @@ To launch Vagrant use the following command::
 
 It will take up to half an hour, 8GB memory and 7 CPUs.
 
+.. important:: Please, make sure the ports are opened!
+
 At the end of deploying you can see urls of all services.
 
 Description
