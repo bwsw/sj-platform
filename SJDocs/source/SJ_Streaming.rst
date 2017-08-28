@@ -1,4 +1,4 @@
-Streaming
+Streams in SJ-Platform
 =============================
 
 SJ-Platform enables scalable, high-throughput, fault-tolerant stream processing of live data streams. 
@@ -6,27 +6,28 @@ SJ-Platform enables scalable, high-throughput, fault-tolerant stream processing 
 Stream Conception in SJ-Platform 
 -------------------------------------------
 
-The streaming component is essential in SJ-Platform. The data is fed to the system, transported between modules and exported to an external storage via streams. It is streaming that makes possible such platform features as exactly-once processing, parallelism, fault-tolerance, horizontal scalability.
+The streaming component is essential in SJ-Platform. The data is fed to the system, transported between modules and exported to an external storage via streams.
 
 There are two kinds of streams in SJ-Platform:
 
-- An input stream - a stream which provides new events. There are two different input stream types in SJ-Platform: Kafka and T-Stream.
+- An input stream - a stream which provides new events. There are two different input stream types in SJ-Platform: TCP, Apache Kafka and T-Stream.
 
 - An output stream - a stream which is a destination for results. There is one output stream type in SJ-Platform: T-Stream.
 
+Input Streams
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The data can be received from different sources. Currently, the platform supports obtaining data from Apache Kafka and TCP sockets.
 
-The data can be received from different sources. Currently, the platform supports obtaining data from Kafka and TCP sockets.
-
-SJ-Platform supports Apache Kafka as a standard providing a common interface for integration for most applications.
+SJ-Platform supports `Apache Kafka <https://kafka.apache.org/documentation/>`_ as a standard providing a common interface for integration for most applications.
 
 Using TCP as an input source a custom protocol can be applied for receiving events, deduplicating them and putting into the processing pipeline. 
 
-But there is a need in an input module to transform the input data into a stream to bring it to processing. At the project `repository <https://github.com/bwsw/sj-platform/tree/develop>`_ two input modules are available for users - CSV input module and Regex input module - that transform data flow of CSV/regex type to envelopes for T-streams.
+But in case TCP is used as a source, there arises a need in an input module to transform the input data into a stream to bring it to processing. At the project `repository <https://github.com/bwsw/sj-platform/tree/develop>`_ two input modules are available for users - CSV input module and Regex input module - that transform data flow of CSV/regex type to message format acceptable for T-streams. 
 
 Within the platform, the data is transported to and from modules via *transactional streams* or T-streams. It is a message broker and a Scala library native to SJ-Platform and designed primarily for exactly-once processing (so it includes a transactional producer, a consumer and a subscriber). More information on T-streams can be found at the `project site <http://t-streams.com/>`_.
 
 About T-Streams
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+""""""""""""""""""""""""
 
 The easiest way to try T-streams and dive into basic operation with T-streams is to download `T-streams-hello <http://t-streams.com/getting-started/>`_ . The demo shows the basic operation mode between producer and subscriber.
 
@@ -47,9 +48,27 @@ For the strictly ordered way of transaction opening a master producer is respons
 Finally, storage server commit logs are played and results are stored to RocksDB. 
 
 Checkpoint Group
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""""""""""""""""""""
 
 **CheckpointGroup** is the special entity which allows a developer to do atomic checkpoint for a group of producers and consumers. CheckpointGroup is the core component for exactly-once data exchange.
+
+
+Output streams
+~~~~~~~~~~~~~~~~~~~~~~
+
+Output streams are streams which are a destination for results.
+
+The processed data is put in T-streams.
+
+The data is retrieved from T-streams with the help of an output module. The output module puts the data from T-streams to the streams of the type which is suitable for the type of the external data storage.
+
+The following types of output streams are supported in SJ-Platform:
+
+- Elasticsearch, to store data to Elasticsearch;
+- SQL database, to store data to JDBC-compatible databases;
+- RESTful, to store data to RESTful storage.
+
+
 
 Streaming Infrastructure
 -----------------------------------
