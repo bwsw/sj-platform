@@ -41,7 +41,7 @@ Otherwise, the respond will look as presented below::
 
 
 Deployment
------------------------
+~~~~~~~~~~~~~~~~~~~~~~~
 
 1. At the first step Vagrant and VirtualBox should be installed. 
 
@@ -62,7 +62,7 @@ Please, make sure the service versions are as specified below:
     $ cd sj-demo-vagrant
 
 Launching Virtual Machine
-------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To launch Vagrant use the following command::
 
@@ -75,7 +75,7 @@ It will take up to 30 minutes, 8GB memory and 7 CPUs.
 At the end of deploying you can see urls of all services.
 
 Description
-~~~~~~~~~~~~~~~
+"""""""""""""""""""
 
 Vagrant creates Ubuntu/Xenial64 virtual machines with specific parameters:
 
@@ -291,7 +291,7 @@ Or you are enabled to create your own pipeline with modules and instances that a
 How to create your own module is described in detail `here <http://streamjuggler.readthedocs.io/en/develop/SJ_CustomModule.html>`_ .
 
 Destroying Virtual Machine
--------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To destroy the virtual machine(s) use::
 
