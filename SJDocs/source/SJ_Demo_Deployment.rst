@@ -68,7 +68,7 @@ To launch Vagrant use the following command::
 
  $ vagrant up
 
-It will take up to half an hour, 8GB memory and 7 CPUs.
+It will take up to 30 minutes, 8GB memory and 7 CPUs.
 
 .. important:: Please, make sure the ports are opened!
 
