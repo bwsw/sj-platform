@@ -1,5 +1,9 @@
+.. _Tutorial:
+
 Tutorial
 ========================
+
+.. warning:: *The page is under development!*
 
 .. Contents::
 
@@ -21,6 +25,7 @@ As a quick reminder,  SJ-Platform is a real-time processing system. The data are
 A general structure of SJ-Platform can be presented as at the image below:
 
 .. figure:: _static/TutorialGeneral.png
+   :align: center
 
 Processor represents a module pipeline where the data processing is performed.
 
@@ -28,9 +33,9 @@ Configurations uploaded to the modules via REST determine the mode of data proce
 
 The processing result is exported to an external storage. It can be Elasticsearch, RESTful or JDBC-compatible data storages.
 
-Besides,  SJ-Platform provides a user with a comprehensive RESTful API instrumentation and Web UI.
+Besides, SJ-Platform provides a user with a comprehensive RESTful API instrumentation and Web UI.
 
-Below an example of a real-life task will be provided for better understanding of how the data processing can be performed in the platform. Thus, the tutorial will provide you with:
+Below an example of a real-life task solution will demonstrate the platform at work for better understanding of how the data processing can be performed in the platform. Thus, the tutorial will provide you with:
 
 1. a ready-to-use problem resolution of an example task on SJ-Platform base;
 
@@ -42,13 +47,7 @@ Example task
 
 Let’s introduce an example task which will illustrate the platform workflow in the real-world use.
 
-The demo code is responsible for collecting of aggregated information on the accessibility of nodes. 
-
-The result data will render the nodes’ work.
-
-The number of accessible and inaccessible IPs per a period of time will be summed up.
-
-Besides, calculated average response time on each node will give the idea of the node efficiency. 
+The demo code is responsible for collecting of aggregated information on the accessibility of nodes. The result data will render the nodes’ work. The number of accessible and inaccessible IPs per a period of time will be summed up. Besides, calculated average response time on each node will give the idea of the node efficiency. 
 
 Before providing a solution to the task let’s have a quick look at a processing level of the platform.
 
@@ -58,6 +57,7 @@ Processing
 The processing workflow in the platform can be generally illustrated as at the diagram below:
 
 .. figure:: _static/ModulePipeline.png
+   :scale: 80%
 
 Green, yellow and purple blocks are executed with SJ-Platform and it is an input module, a processing module and an output module, respectively.
 
@@ -76,7 +76,7 @@ A few Output modules may receive the processed data and put them to a storage.
 
 In the example task solution the processing workflow is formed in the following way:
 
-.. figure:: _static/FPingDemo.png
+.. figure:: _static/FPingDemo1.png
 
 This diagram demonstrates the processing workflow of the demo. As a quick reminder, the task is to collect the aggregated information on the accessibility of nodes.
 
@@ -127,11 +127,11 @@ The deployment is performed via REST API.
 
 Firstly, deploy Mesos and other services.
 
-1) Deploy Mesos, Marathon, Zookeeper. You can follow the instructions at the official `installation guide <http://www.bogotobogo.com/DevOps/DevOps_Mesos_Install.php>`_
+1) Deploy Mesos, Marathon, Zookeeper. You can follow the instructions at the official `installation guide <http://www.bogotobogo.com/DevOps/DevOps_Mesos_Install.php>`_ .
 
 Start Mesos and the services. Make sure you have access to Mesos interface, Marathon interface, and Zookeeper is running. 
 
-For Docker deployment follow the instructions at the official `installation guide <https://docs.docker.com/engine/installation/linux/docker-ce/ubuntu/#install-docker-ce>`_
+For Docker deployment follow the instructions at the official `installation guide <https://docs.docker.com/engine/installation/linux/docker-ce/ubuntu/#install-docker-ce>`_ .
 
 Install Java::
                                          
@@ -407,7 +407,7 @@ Via the Marathon interface make sure the services are deployed.
 
 .. figure:: _static/ServicesOnMarathon.png
 
-4) Copy the github repository of SJ-Platform::
+4) Copy the GitHub repository of SJ-Platform::
 
     $ git clone https://github.com/bwsw/sj-platform.git
 
@@ -437,6 +437,7 @@ A module is a .jar file, containing module specification and configurations.
 
 .. figure:: _static/ModuleExecutorAndValidator.png
    :scale: 120%
+   :align: center
    
 .. note:: Find more about modules at the :ref:`Modules` page.  A hello-world on a custom module can be found at the :ref:`Custom_Module` section.
 
@@ -497,6 +498,7 @@ An engine is required to start a module. A module can not process data without a
 
 .. figure:: _static/Engine.png
    :scale: 110%
+   :align: center
    
 To implement the processing workflow for the example task resolution the following jars should be uploaded:
 
@@ -504,7 +506,7 @@ To implement the processing workflow for the example task resolution the followi
 
 2. a jar for Mesos framework that starts the engine.
 
-Thus, as a next step engines should be compiled and uploaded.
+Thus, engines should be compiled and uploaded in the next step.
  
 Upload engine jars
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -586,6 +588,7 @@ A module receives data from input streams from TCP or Kafka. Within the platform
 
 
 .. figure:: _static/ModuleStreaming.png
+   :scale: 80%
 
 Streams need infrastructure: **Providers** and **Services**. This is a required presetting without which streaming will not be so flexible. 
 
@@ -602,6 +605,7 @@ In the example task solution the following stream types are implemented:
 3. output modules export aggregated data from T-streams to Elasticsearch.
 
 .. figure:: _static/StreamingInPlatform.png
+   :scale: 80%
 
 Below the steps for creating streaming infrastructure such as providers, services, and streams via REST API can be found.
 
@@ -729,6 +733,7 @@ A module uses a specific instance to personalize its work. An instance is a full
 
 .. figure:: _static/Instance.png
    :scale: 120%
+   :align: center
    
 An instance is created with specific parameters and is set to particular streams.
  
@@ -930,9 +935,9 @@ Find more information at:
 
 :ref:`Modules` - more about module structure.
 
-:ref:`Custom_Modules` - how to create a module.
+:ref:`Custom_Module` - how to create a module.
 
-`sflow demo on github repo <https://github.com/bwsw/sj-sflow-demo/tree/develop>`_ - another demo task
+`sflow demo on github repo <https://github.com/bwsw/sj-sflow-demo/tree/develop>`_ - another example task.
 
 :ref:`Architecture` - the structure of the platform.
 

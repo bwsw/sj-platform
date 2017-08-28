@@ -92,7 +92,7 @@ class ProviderSiTests extends FlatSpec with Matchers {
     providerStorage.toSet shouldBe initProviderStorage
   }
 
-  it should "not delete provider when it have related services" in new ProviderMocksWithServices {
+  it should "not delete provider when it has related services" in new ProviderMocksWithServices {
     val deletionError = s"rest.providers.provider.cannot.delete:$providerWithServicesName"
 
     providerSI.delete(providerWithServicesName) shouldBe DeletionError(deletionError)

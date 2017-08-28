@@ -25,7 +25,7 @@ import org.apache.commons.io.FileUtils
 import org.elasticsearch.common.settings.Settings
 import org.elasticsearch.index.reindex.ReindexPlugin
 import org.elasticsearch.node.Node
-import org.elasticsearch.node.internal.InternalSettingsPreparer
+import org.elasticsearch.node.InternalSettingsPreparer
 import org.elasticsearch.transport.Netty4Plugin
 
 import scala.collection.JavaConverters._

@@ -37,6 +37,7 @@ val commonSettings = Seq(
     case PathList("org", "apache", "commons", "logging", xs@_*) => MergeStrategy.first
     case PathList("io", "netty", xs@_*) => MergeStrategy.first
     case PathList("javax", "servlet", xs@_*) => MergeStrategy.first
+    case PathList("com", "sun", "jna", xs@_*) => MergeStrategy.first
     case x if x.endsWith("io.netty.versions.properties") => MergeStrategy.concat
     case "log4j.properties" => MergeStrategy.concat
     case "application.conf" => MergeStrategy.concat

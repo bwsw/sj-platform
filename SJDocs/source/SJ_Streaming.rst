@@ -1,12 +1,12 @@
 Streaming
 =============================
 
-SJ Platform enables scalable, high-throughput, fault-tolerant stream processing of live data streams. 
+SJ-Platform enables scalable, high-throughput, fault-tolerant stream processing of live data streams. 
 
 Stream Conception in SJ-Platform 
 -------------------------------------------
 
-The Streaming component is essential in SJ-Platform. The data is fed to the system, transported between modules and exported to an external storage via streams. It is streaming that makes possible such platform features as exactly-once processing, parallelism, fault-tolerance, horizontal scalability.
+The streaming component is essential in SJ-Platform. The data is fed to the system, transported between modules and exported to an external storage via streams. It is streaming that makes possible such platform features as exactly-once processing, parallelism, fault-tolerance, horizontal scalability.
 
 There are two kinds of streams in SJ-Platform:
 
@@ -28,7 +28,7 @@ Within the platform, the data is transported to and from modules via *transactio
 About T-Streams
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The easiest way to try T-streams and dive into basic operation with t-streams is to download `T-streams-hello <http://t-streams.com/getting-started/>`_ . The demo shows the basic operation mode between producer and subscriber.
+The easiest way to try T-streams and dive into basic operation with T-streams is to download `T-streams-hello <http://t-streams.com/getting-started/>`_ . The demo shows the basic operation mode between producer and subscriber.
 
 T-streams architecture is not complicated. T-streams consist of partitions. Each partition holds a number of transactions with data elements inside. 
 
@@ -74,7 +74,7 @@ Secondly, find in the diagram what services are necessary for these types of str
 
 Finally, when services are determined, it is easy to see what types of providers should be created. 
 
-Start creating the infrastructure from providers, then proceed with services and then streams. Detailed instructions can be found in the `Tutorial <>`_ (for creating infrastructure via REST API) or in the `UI Guide <http://streamjuggler.readthedocs.io/en/develop/SJ_UI_Guide.html>`_ for creating through the Web UI.
+Start creating the infrastructure from providers, then proceed with services and then streams. Detailed instructions can be found in the :ref:`Tutorial` (for creating infrastructure via REST API) or in the `UI Guide <http://streamjuggler.readthedocs.io/en/develop/SJ_UI_Guide.html>`_ for creating through the Web UI.
 
 
 

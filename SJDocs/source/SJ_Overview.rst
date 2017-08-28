@@ -77,10 +77,12 @@ These features will be explained in the documentation in depth.
 
 To find more about the platform, please, visit the pages below:
 
+:ref:`Tutorial` - a quick example to demonstrate the platform in action.
+
 :ref:`Architecture` - here the architecture of the Stream Juggler Platform is presented, its components, connections between them, necessary services and other prerequisites for the Platform operation are described.
 
-:ref:`Modules` - here more information on modules is given: what module types are supported in the Stream Juggler Platform, how they work, etc.
+:ref:`Modules` - here more information on modules is given: what module types are supported in Stream Juggler Platform, how they work, etc.
 
 :ref:`REST_API` - the REST API service is described here to work with the platform without the UI.
 
-:ref:`UI_Guide` - the section is devoted to the UI and its basic features.
+:ref:`UI_Guide` - the section is devoted to the UI and its basic features to configure and monitor the platform.

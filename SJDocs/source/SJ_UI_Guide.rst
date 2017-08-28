@@ -49,6 +49,7 @@ See more information on the platform structure and architecture at the :ref:`Arc
 Below you will find the information on uploading your module via UI and starting data processing.
 
 .. _Configuration:
+
 Configuration 
 ----------------------
 
