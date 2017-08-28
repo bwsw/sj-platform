@@ -9,7 +9,7 @@ This is the most rapid way to get acquainted with the platform and assess its pe
 
 Requirements:
 
-- At least 7GB of free RAM.
+- At least 8 GB of free RAM.
 
 - VT-x must be enabled in BIOS.
 
