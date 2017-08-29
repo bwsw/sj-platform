@@ -511,7 +511,7 @@ Thus, engines should be compiled and uploaded in the next step.
 Upload engine jars
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Please, upload the engine jars for the three modules ( input-streaming, regular-streaming, output-streaming) and the Mesos framework. You can find them at our GitHub repository::
+Please, upload the engine jars for the three modules (input-streaming, regular-streaming, output-streaming) and the Mesos framework. You can find them at our GitHub repository::
 
  $ cd sj-platform
 
@@ -602,9 +602,9 @@ In the example task solution the following stream types are implemented:
 
 2. T-streams streaming passes the data to and from the processing module;
 
-3. output modules export aggregated data from T-streams to Elasticsearch.
+3. output modules export aggregated data in streams to Elasticsearch.
 
-.. figure:: _static/StreamingInPlatform.png
+.. figure:: _static/StreamsInPlatform.png
    :scale: 80%
 
 Below the steps for creating streaming infrastructure such as providers, services, and streams via REST API can be found.
