@@ -38,6 +38,7 @@ import scala.util.Try
   */
 class SjBatchModuleBenchmark extends FlatSpec with Matchers with TableDrivenPropertyChecks {
   val waitingTimeout = 1000
+  val tStreamWritingTimeout = 30 * 1000
   val mongoPort = findFreePort()
   val ttsPort = findFreePort()
   val serverSocket = new ServerSocket(0)
@@ -98,7 +99,7 @@ class SjBatchModuleBenchmark extends FlatSpec with Matchers with TableDrivenProp
         runner = runClass(classOf[SjBatchModuleRunner])
     }
 
-    Thread.sleep(waitingTimeout * 3)
+    Thread.sleep(tStreamWritingTimeout)
     runner.destroy()
 
     val checker = runClass(classOf[SjBatchModuleStatefulTstreamChecker])
@@ -123,7 +124,7 @@ class SjBatchModuleBenchmark extends FlatSpec with Matchers with TableDrivenProp
         runner = runClass(classOf[SjBatchModuleRunner])
     }
 
-    Thread.sleep(waitingTimeout * 3)
+    Thread.sleep(tStreamWritingTimeout)
     runner.destroy()
 
     val checker = runClass(classOf[SjBatchModuleStatefulKafkaChecker])
@@ -148,7 +149,7 @@ class SjBatchModuleBenchmark extends FlatSpec with Matchers with TableDrivenProp
         runner = runClass(classOf[SjBatchModuleRunner])
     }
 
-    Thread.sleep(waitingTimeout * 3)
+    Thread.sleep(tStreamWritingTimeout)
     runner.destroy()
 
     val checker = runClass(classOf[SjBatchModuleStatefulBothChecker])
