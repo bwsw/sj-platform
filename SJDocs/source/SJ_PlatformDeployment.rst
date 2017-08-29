@@ -40,6 +40,6 @@ All that's needed is:
 
 These requirements are provided for deployment on Ubuntu 16.04 OS.
 
-Please, find detailed instruction in `the guide <http://streamjuggler.readthedocs.io/en/develop/SJ_Demo_Deployment.html>`_ .
+Please, find detailed instruction in `the guide on deployment on the virtual machine <http://streamjuggler.readthedocs.io/en/develop/SJ_Demo_Deployment.html>`_ .
 
 In case, any problems occur during the deployment, please, open an issue in the project `GitHub repository <https://github.com/bwsw/sj-platform/tree/develop>`_ and let the project team solve it.
