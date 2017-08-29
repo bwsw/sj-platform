@@ -94,6 +94,48 @@ Secondly, find in the diagram what services are necessary for these types of str
 
 Finally, when services are determined, it is easy to see what types of providers should be created. 
 
+The table below explains what types of streams may serve as input or output streams for particular instances:
+
+===============  ================================================  ===============================================
+Instance          Input stream                                     Output stream
+===============  ================================================  ===============================================
+*Input*            TCP                                               T-streams 
+
+                                                                      **Providers**: Apache Zookeeper
+                                       
+                                                                      **Services**: T-streams, Apache Zookeeper
+
+*Regular/Batch*    T-streams                                         T-streams
+               
+                    **Providers**: Apache Zookeeper                   **Providers**: Apache Zookeeper
+
+                    **Services**: T-streams, Apache Zookeeper         **Services**: T-streams, Apache Zookeeper
+               
+                   Apache Kafka
+              
+                    **Providers**: Apache Zookeeper, Apache Kafka
+ 
+                    **Services**: Apache Zookeeper, Apache Kafka
+
+*Output*           T-streams                                         Elasticsearch
+
+                    **Providers**: Apache Zookeeper                     **Providers**: Elasticsearch
+                 
+                    **Services**: T-streams, Apache Zookeeper           **Services**:  Elasticsearch, Apache Zookeeper
+
+                                                                     SQL database
+
+                                                                       **Providers**:  SQL database
+
+                                                                       **Services**: SQL database, Apache Zookeeper 
+                                                                   
+                                                                     RESTful
+                                                                   
+                                                                       **Providers**: RESTful
+
+                                                                       **Services**: RESTful,  Apache Zookeeper 
+===============  ================================================  ===============================================
+
 Start creating the infrastructure from providers, then proceed with services and then streams. 
 
 Detailed instructions can be found in the :ref:`Tutorial` (for creating infrastructure via REST API) or in the `UI Guide <http://streamjuggler.readthedocs.io/en/develop/SJ_UI_Guide.html>`_ for creating through the Web UI.
