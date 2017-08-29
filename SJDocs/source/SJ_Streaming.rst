@@ -138,7 +138,7 @@ Instance          Input stream                                     Output stream
 
 Start creating the infrastructure from providers, then proceed with services and then streams. 
 
-Detailed instructions can be found in the :ref:`Tutorial` (for creating infrastructure via REST API) or in the `UI Guide <http://streamjuggler.readthedocs.io/en/develop/SJ_UI_Guide.html>`_ for creating through the Web UI.
+Detailed instructions on stream creation can be found in the :ref:`Tutorial` (for creating infrastructure via REST API) or in the `UI Guide <http://streamjuggler.readthedocs.io/en/develop/SJ_UI_Guide.html>`_ for creating through the Web UI.
 
 
 
