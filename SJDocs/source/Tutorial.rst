@@ -605,7 +605,7 @@ Different modules require different stream types for input and output.
 A module receives data from input streams from TCP or Kafka. Within the platform, the data is transported to and from modules via T-streams. It is a native streaming type for SJ-Platform that allows exactly-once data exchange between modules. 
 
 
-.. figure:: _static/ModuleStreaming.png
+.. figure:: _static/ModuleStreams.png
    :scale: 80%
 
 Streams need infrastructure: **Providers** and **Services**. This is a required presetting without which streaming will not be so flexible. 
