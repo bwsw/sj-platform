@@ -52,9 +52,9 @@ You can do it following the instructions in the official documentation:
 
 Please, make sure the service versions are as specified below:
 
-1) Vagrant 1.9.1
-2) VirtualBox 5.0.40
-3) Ubuntu 16.04
+- Vagrant 1.9.1
+- VirtualBox 5.0.40
+- Ubuntu 16.04
 
 2. Then, clone the project from the GitHub repository::
 
