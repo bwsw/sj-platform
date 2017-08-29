@@ -25,7 +25,7 @@ import com.bwsw.sj.common.utils.NetworkUtils.findFreePort
 import com.bwsw.sj.common.utils.benchmark.ClassRunner
 import com.bwsw.sj.engine.core.testutils.Server
 import com.bwsw.sj.engine.regular.module.SjRegularBenchmarkConstants._
-import com.bwsw.sj.engine.regular.module.checkers.{SjRegularModuleStatefulChecker, SjRegularModuleStatefulKafkaChecker, SjRegularModuleStatefulTstreamChecker}
+import com.bwsw.sj.engine.regular.module.checkers.{SjRegularModuleStatefulBothChecker, SjRegularModuleStatefulKafkaChecker, SjRegularModuleStatefulTstreamChecker}
 import org.apache.curator.test.TestingServer
 import org.scalatest.prop.TableDrivenPropertyChecks
 import org.scalatest.{FlatSpec, Matchers, Outcome}
@@ -152,7 +152,7 @@ class SjRegularModuleBenchmark extends FlatSpec with Matchers with TableDrivenPr
     Thread.sleep(waitingTimeout * 3)
     runner.destroy()
 
-    val checker = runClass(classOf[SjRegularModuleStatefulChecker])
+    val checker = runClass(classOf[SjRegularModuleStatefulBothChecker])
     checker.waitFor() shouldBe 0
   }
 
