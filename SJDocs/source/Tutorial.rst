@@ -3,8 +3,6 @@
 Tutorial
 ========================
 
-.. warning:: *The page is under development!*
-
 .. Contents::
 
 Introduction 
@@ -119,14 +117,16 @@ To solve the example task we need to deploy:
 9) Elasticsearch - as an external data storage;
 10) Kibana - to visualize Elasticsearch data.
 
-There are 2 ways of the platform deployment – on **a cluster** (on Mesos) and **locally** (on minimesos). Choose which is more convenient for you. 
+There are 2 ways of the platform deployment – on `**a cluster** (on Mesos) <http://streamjuggler.readthedocs.io/en/develop/SJ_Deployment.html#mesos-deployment>`_ and `**locally** (on minimesos) <http://streamjuggler.readthedocs.io/en/develop/SJ_Deployment.html#minimesos-deployment>`_. Choose which is more convenient for you. 
 
 The following technical requirements should be met:
 
 - working Linux host with 4-8 GB of RAM and 4 CPU cores; 
-- Docker installed.  
+- Docker installed;
+- cURL;
+- sbt.  
 
-Besides, SJ-Platform can be deployed on **a virtual machine**. We suggest deploying the platform locally via Vagrant with VirtualBox as a provider.
+Besides, SJ-Platform can be deployed on `**a virtual machine** <http://streamjuggler.readthedocs.io/en/develop/SJ_Demo_Deployment.html>`_. We suggest deploying the platform locally via Vagrant with VirtualBox as a provider.
 
 This is the most rapid way to get acquainted with the platform and assess its performance. It takes up to 30 minutes. The platform is deployed with all entities necessary to demonstrate the solution for the example task: providers, services, streams, configurations.
 
