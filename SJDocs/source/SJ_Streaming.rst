@@ -10,9 +10,9 @@ The streaming component is essential in SJ-Platform. The data is fed to the syst
 
 There are two kinds of streams in SJ-Platform:
 
-- An input stream - a stream which provides new events. There are two different input stream types in SJ-Platform: TCP, Apache Kafka and T-Stream.
+- An input stream - a stream which provides new events. There are two different input stream types in SJ-Platform: TCP, Apache Kafka and T-Streams.
 
-- An output stream - a stream which is a destination for results. There is one output stream type in SJ-Platform: T-Stream.
+- An output stream - a stream which is a destination for results. There is one output stream type in SJ-Platform: T-Streams.
 
 Input Streams
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -43,7 +43,7 @@ Consumer iterates over transactions from earliest to the latest and reads data f
 
 Producers open transactions in a strictly ordered mode. Consumers and Subscribers always process transactions in the same order they have been opened. Producer can checkpoint or cancel transactions in an arbitrary way, but Subscriber will start handling them once the first (the earliest) one is checkpointed. 
 
-For the strictly ordered way of transaction opening a master producer is responsible. A master is registered in Apache Zookeeper per each transaction. The master generates a new transaction, registers it in Zookeeper, and returns the transaction ID to a Producer. Producer fills the transaction with data from the storage server. Then, it sends checkpoint or cancels to the server commit log and the transaction is checkpointed or canceled. 
+For the strictly ordered way of transaction opening a master producer is responsible. A master is registered in Apache Zookeeper per each transaction. The master generates a new transaction, registers it in Apache Zookeeper, and returns the transaction ID to a Producer. Producer fills the transaction with data from the storage server. Then, it sends checkpoint or cancels to the server commit log and the transaction is checkpointed or canceled. 
 
 Finally, storage server commit logs are played and results are stored to RocksDB. 
 
@@ -68,8 +68,6 @@ The following types of output streams are supported in SJ-Platform:
 - Elasticsearch, to store data to Elasticsearch;
 - SQL database, to store data to JDBC-compatible databases;
 - RESTful, to store data to RESTful storage.
-
-
 
 Streaming Infrastructure
 -----------------------------------
