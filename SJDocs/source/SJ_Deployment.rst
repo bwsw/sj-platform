@@ -1,6 +1,8 @@
 Platform Deployment on Cluster 
 =====================================
 
+.. Contents::
+
 The section provides a detailed step-by-step instruction on Stream Juggler Platform deployment on cluster. 
 
 Currently, the deployment is supported on Mesos.
