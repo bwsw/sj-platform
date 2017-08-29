@@ -50,8 +50,9 @@ Finally, storage server commit logs are played and results are stored to RocksDB
 Checkpoint Group
 """""""""""""""""""""
 
-**CheckpointGroup** is the special entity which allows a developer to do atomic checkpoint for a group of producers and consumers. CheckpointGroup is the core component for exactly-once data exchange.
+**CheckpointGroup** is the special entity which allows a developer to do atomic checkpoint for a group of producers and consumers. 
 
+Several producers and consumers can be bunched up into a group, which can do a checkpoint atomically. This means  all producers and consumers in that group fix the current state. This is the key component of exactly-once data processing in SJ-Platform. 
 
 Output streams
 ~~~~~~~~~~~~~~~~~~~~~~
