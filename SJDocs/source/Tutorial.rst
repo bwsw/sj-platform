@@ -598,19 +598,22 @@ Step 4. Creating Streaming Layer
 
 The raw data is fed to the platform from different sources. And within the platform, the data is passed to and from a module in streams. Thus, in the next step, the streams for data ingesting and exporting will be created.
 
-Prior to creating a stream, the infrastructure needs to be created for the streaming layer.
-
 Different modules require different stream types for input and output.
                    
-A module receives data from input streams from TCP or Kafka. Within the platform, the data is transported to and from modules via T-streams. It is a native streaming type for SJ-Platform that allows exactly-once data exchange between modules. 
+A module receives data from input streams from TCP or Kafka. 
 
+Within the platform, the data is transported to and from modules via T-streams. It is a native streaming type for SJ-Platform that allows exactly-once data exchange between modules. 
+
+A result data is exported from SJ-Plaform to an external storage with streams of types corresponding to the type of that storage: Elasticsearch, SQL database and RESTful.
 
 .. figure:: _static/ModuleStreams.png
    :scale: 80%
 
-Streams need infrastructure: **Providers** and **Services**. This is a required presetting without which streaming will not be so flexible. 
+Prior to creating a stream, the infrastructure needs to be created for the streaming layer.
 
-Streaming flexibility lies in the one-to-many connection between providers and services, services and streams. One provider works with many services (they can be of various types) as well as one service can provide several streams. These streams take necessary settings from the common infrastructure (providers and services). There is no need to duplicate the settings for each individual stream.
+The infrastructure for streams include **providers** and **services**. This is a required presetting without which streaming will not be so flexible. 
+
+Streaming flexibility lies in a one-to-many connection between providers and services, services and streams. One provider works with many services (they can be of various types) as well as one service can provide several streams. These streams take necessary settings from the common infrastructure (providers and services). There is no need to duplicate the settings for each individual stream.
 
 The type of Provider and Service is determined with the type of streams. Find more about types of platform entities at `the UI guide <http://streamjuggler.readthedocs.io/en/develop/SJ_UI_Guide.html#get-started>`_ .
 
