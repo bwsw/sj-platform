@@ -1,6 +1,6 @@
 .. _Architecture:
 
-Stream Juggler Architecture
+SJ-Platform Architecture
 ==============================
 
 A good real-time data processing architecture needs to be fault-tolerant and scalable; it needs to support micro-batch and event-by-event data processing and must be extensible. All these aspects are fulfilled in the Stream Juggler Platform. 
