@@ -955,7 +955,7 @@ Find more information at:
 
 :ref:`Custom_Module` - how to create a module.
 
-`sflow demo on github repo <https://github.com/bwsw/sj-sflow-demo/tree/develop>`_ - another example task.
+`sflow demo on GitHub repository <https://github.com/bwsw/sj-sflow-demo/tree/develop>`_ - another example task solved with the platform.
 
 :ref:`Architecture` - the structure of the platform.
 
