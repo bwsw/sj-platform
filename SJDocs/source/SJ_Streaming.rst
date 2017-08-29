@@ -85,15 +85,17 @@ The diagram of platform entities interconnections can be useful in selecting the
 
 .. figure:: _static/InstanceCorrelation1.png
 
-Firstly, decide what type of modules will be included into the pipeline.
+Firstly, decide what type of modules will be included into the pipeline. These modules will require instances of a particular type. So determine the type of instances that will be created.
 
-That will help to clarify which streams are required for these particular modules.
+That will help to clarify which streams are required for these particular instances.
 
 Secondly, find in the diagram what services are necessary for these types of streams. 
 
 Finally, when services are determined, it is easy to see what types of providers should be created. 
 
-Start creating the infrastructure from providers, then proceed with services and then streams. Detailed instructions can be found in the :ref:`Tutorial` (for creating infrastructure via REST API) or in the `UI Guide <http://streamjuggler.readthedocs.io/en/develop/SJ_UI_Guide.html>`_ for creating through the Web UI.
+Start creating the infrastructure from providers, then proceed with services and then streams. 
+
+Detailed instructions can be found in the :ref:`Tutorial` (for creating infrastructure via REST API) or in the `UI Guide <http://streamjuggler.readthedocs.io/en/develop/SJ_UI_Guide.html>`_ for creating through the Web UI.
 
 
 
