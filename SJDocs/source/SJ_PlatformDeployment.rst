@@ -36,7 +36,7 @@ All that's needed is:
 
 - Vagrant 1.9.1 installed;
 
-- Virtual Box 5.0.40 installed.
+- VirtualBox 5.0.40 installed.
 
 These requirements are provided for deployment on Ubuntu 16.04 OS.
 
