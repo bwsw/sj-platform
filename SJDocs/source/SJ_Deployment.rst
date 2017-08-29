@@ -1,14 +1,20 @@
-Deployment of Platform
-==========================
+Platform Deployment on Cluster 
+=====================================
 
-.. warning:: The section is under development!
+.. Contents::
+
+The section provides a detailed step-by-step instruction on Stream Juggler Platform deployment on cluster. 
+
+Currently, the deployment is supported on Mesos.
+
+A complete list of requirements and the deployment procedure description can be found below.
 
 Overall Deployment Infrastructure
 --------------------------------------------
 
 .. warning:: The section is under development!
 
-The Stream Juggler platform needs the following infrastructure components to be deployed:
+The Stream Juggler platform needs the following infrastructure components to be preliminarily deployed:
 
 - `Apache Mesos <http://mesos.apache.org/>`_  for resource management that allows to run the system at scale and to support different types of workloads.
 

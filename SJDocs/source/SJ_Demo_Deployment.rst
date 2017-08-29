@@ -9,7 +9,7 @@ This is the most rapid way to get acquainted with the platform and assess its pe
 
 Requirements:
 
-- At least 7GB of free RAM.
+- At least 8 GB of free RAM.
 
 - VT-x must be enabled in BIOS.
 
@@ -41,7 +41,7 @@ Otherwise, the respond will look as presented below::
 
 
 Deployment
------------------------
+~~~~~~~~~~~~~~~~~~~~~~~
 
 1. At the first step Vagrant and VirtualBox should be installed. 
 
@@ -52,9 +52,9 @@ You can do it following the instructions in the official documentation:
 
 Please, make sure the service versions are as specified below:
 
-1) Vagrant 1.9.1
-2) VirtualBox 5.0.40
-3) Ubuntu 16.04
+- Vagrant 1.9.1
+- VirtualBox 5.0.40
+- Ubuntu 16.04
 
 2. Then, clone the project from the GitHub repository::
 
@@ -62,18 +62,20 @@ Please, make sure the service versions are as specified below:
     $ cd sj-demo-vagrant
 
 Launching Virtual Machine
-------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To launch Vagrant use the following command::
 
  $ vagrant up
 
-It will take up to half an hour, 8GB memory and 7 CPUs.
+It will take up to 30 minutes, 8GB memory and 7 CPUs.
+
+.. important:: Please, make sure the ports are opened!
 
 At the end of deploying you can see urls of all services.
 
 Description
-~~~~~~~~~~~~~~~
+"""""""""""""""""""
 
 Vagrant creates Ubuntu/Xenial64 virtual machines with specific parameters:
 
@@ -289,7 +291,7 @@ Or you are enabled to create your own pipeline with modules and instances that a
 How to create your own module is described in detail `here <http://streamjuggler.readthedocs.io/en/develop/SJ_CustomModule.html>`_ .
 
 Destroying Virtual Machine
--------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To destroy the virtual machine(s) use::
 

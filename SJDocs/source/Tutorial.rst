@@ -3,8 +3,6 @@
 Tutorial
 ========================
 
-.. warning:: *The page is under development!*
-
 .. Contents::
 
 Introduction 
@@ -119,13 +117,33 @@ To solve the example task we need to deploy:
 9) Elasticsearch - as an external data storage;
 10) Kibana - to visualize Elasticsearch data.
 
-There are 2 ways of the platform deployment – on cluster (i.e. Mesos) and locally (on minimesos). Choose which is more convenient for you. 
+There are 2 ways of the platform deployment – on `a cluster (on Mesos) <http://streamjuggler.readthedocs.io/en/develop/SJ_Deployment.html#mesos-deployment>`_ and `locally (on minimesos) <http://streamjuggler.readthedocs.io/en/develop/SJ_Deployment.html#minimesos-deployment>`_. Choose which is more convenient for you. 
 
-For the example task, the instructions are provided for the system deployment on Mesos.
+The following technical requirements should be met:
+
+- working Linux host with 4-8 GB of RAM and 4 CPU cores; 
+- Docker installed;
+- cURL;
+- sbt.  
+
+Besides, SJ-Platform can be deployed on `a virtual machine <http://streamjuggler.readthedocs.io/en/develop/SJ_Demo_Deployment.html>`_. We suggest deploying the platform locally via Vagrant with VirtualBox as a provider.
+
+This is the most rapid way to get acquainted with the platform and assess its performance. It takes up to 30 minutes. The platform is deployed with all entities necessary to demonstrate the solution for the example task: providers, services, streams, configurations.
+
+The following technical requirements should be met:
+
+- At least 8 GB of free RAM;
+- VT-x must be enabled in BIOS;
+- Vagrant 1.9.1 installed;
+- VirtualBox 5.0.40 installed.
+
+These requirements are provided for deployment on Ubuntu 16.04 OS.
+
+For the example task, the instructions are provided for the system **deployment on Mesos**.
 
 The deployment is performed via REST API.
 
-Firstly, deploy Mesos and other services.
+So, as a first step deploy Mesos and other services.
 
 1) Deploy Mesos, Marathon, Zookeeper. You can follow the instructions at the official `installation guide <http://www.bogotobogo.com/DevOps/DevOps_Mesos_Install.php>`_ .
 
@@ -511,7 +529,7 @@ Thus, engines should be compiled and uploaded in the next step.
 Upload engine jars
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Please, upload the engine jars for the three modules ( input-streaming, regular-streaming, output-streaming) and the Mesos framework. You can find them at our GitHub repository::
+Please, upload the engine jars for the three modules (input-streaming, regular-streaming, output-streaming) and the Mesos framework. You can find them at our GitHub repository::
 
  $ cd sj-platform
 
@@ -587,7 +605,7 @@ Different modules require different stream types for input and output.
 A module receives data from input streams from TCP or Kafka. Within the platform, the data is transported to and from modules via T-streams. It is a native streaming type for SJ-Platform that allows exactly-once data exchange between modules. 
 
 
-.. figure:: _static/ModuleStreaming.png
+.. figure:: _static/ModuleStreams.png
    :scale: 80%
 
 Streams need infrastructure: **Providers** and **Services**. This is a required presetting without which streaming will not be so flexible. 
@@ -602,9 +620,9 @@ In the example task solution the following stream types are implemented:
 
 2. T-streams streaming passes the data to and from the processing module;
 
-3. output modules export aggregated data from T-streams to Elasticsearch.
+3. output modules export aggregated data in streams to Elasticsearch.
 
-.. figure:: _static/StreamingInPlatform.png
+.. figure:: _static/StreamsInPlatform.png
    :scale: 80%
 
 Below the steps for creating streaming infrastructure such as providers, services, and streams via REST API can be found.
@@ -675,18 +693,19 @@ Example task
 
 For **sj-regex-input module**:
 
-To create an ‘echo-response’ output stream of sj-regex-input module (consequently, an input stream of ps-process module). It will be used for keeping an IP and average time from ICMP echo-response and also a timestamp of the event::
+Create an ‘echo-response’ output stream of the sj-regex-input module (consequently, an input stream of ps-process module). It will be used for keeping an IP and average time from ICMP echo-response and also a timestamp of the event::
 
  $ curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/echo-response.json"
 
-To create an ‘unreachable response’ output stream of the input module (consequently, an input stream of processing module). It will be used for keeping an IP from ICMP unreachable response and also a timestamp of the event::
+Create an ‘unreachable response’ output stream of the sj-regex-input module (consequently, an input stream of the processing module). It will be used for keeping an IP from ICMP unreachable response and also a timestamp of the event::
 
  $ curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/unreachable-response.json"
 
+These streams are of T-streams type.
 
 For **ps-process module**:
 
-To create output streams of ps-process module (consequently, an input stream of the output module) named ‘echo-response-1m’, ‘echo-response-3m’ and ‘echo-response-1h’. They will be used for keeping an aggregated information about average time of echo response, total amount of echo responses, total amount of unreachable responses and the timestamp for each IP (per 1 minute, 3 minutes and 1 hour)::
+Create output streams of the ps-process module (consequently, an input stream of the output module) named ‘echo-response-1m’, ‘echo-response-3m’ and ‘echo-response-1h’. They will be used for keeping the aggregated information about average time of echo responses, total amount of echo responses, total amount of unreachable responses and the timestamp for each IP (per 1 minute, per 3 minutes and per 1 hour)::
 
  $ curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data   "@api-json/streams/echo-response-1m.json"
 
@@ -694,17 +713,21 @@ To create output streams of ps-process module (consequently, an input stream of 
 
  $ curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/echo-response-1h.json"
 
+These streams are of T-streams type.
+
 For **ps-output module**:
 
-To create output streams of ps-output module named ‘es-echo-response-1m’, ‘es-echo-response-3m’, ‘es-echo-response-1h’. They will be used for keeping an aggregated information (per 1 minute, 3 minutes and 1 hour) from the previous stream including total amount of responses::
+Create output streams of the ps-output module named ‘es-echo-response-1m’, ‘es-echo-response-3m’, ‘es-echo-response-1h’. They will be used for keeping the aggregated information (per 1 minute, per 3 minutes and per 1 hour) from the previous stream including total amount of responses::
 
  $ curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/es-echo-response-1m.json"
 
  $ curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/es-echo-response-3m.json"
 
  $ curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/es-echo-response-1h.json"
+ 
+These streams are of Elasticsearch type (as the external storage in the pipeline is Elasticsearch).
 
-The created streams should be available now in UI under the “Streams” tab.
+All the created streams should be available now in the UI under the “Streams” tab.
 
 .. figure:: _static/StreamsCreated.png
 
@@ -911,7 +934,7 @@ For deleting the sj-regex-input module instance send::
 
  $ curl --request DELETE "http://$address/v1/modules/input-streaming/pingstation-input/1.0/instance/pingstation-input/"
 
-For stopping the ps-process module instance send::
+For deleting the ps-process module instance send::
 
  $ curl --request DELETE "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance/pingstation-process/"
 
@@ -919,7 +942,7 @@ For stopping the ps-process module instance send::
 
  $ curl --request DELETE "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance/pingstation-process-1h/"
 
-For stopping the ps-output module instance send::
+For deleting the ps-output module instance send::
 
  $ curl --request DELETE "http://$address/v1/modules/output-streaming/pingstation-output/1.0/instance/pingstation-output/"
 
@@ -929,15 +952,14 @@ For stopping the ps-output module instance send::
 
 Via the UI you can make sure the instances are deleted.
 
-Make sure  via the UI that the instances are deleted.
 
-Find more information at: 
+Find more information about SJ-platform and its entities at: 
 
 :ref:`Modules` - more about module structure.
 
 :ref:`Custom_Module` - how to create a module.
 
-`sflow demo on github repo <https://github.com/bwsw/sj-sflow-demo/tree/develop>`_ - another example task.
+`sflow demo on GitHub repository <https://github.com/bwsw/sj-sflow-demo/tree/develop>`_ - another example task solved with the platform.
 
 :ref:`Architecture` - the structure of the platform.
 

@@ -29,8 +29,7 @@ Contents:
    SJ_Simulators
    SJ_Architecture
    SJ_Streaming
-   SJ_Deployment
-   SJ_Demo_Deployment
+   SJ_PlatformDeployment
    SJ_UI_Guide
    SJ_CRUD_REST_API
 
