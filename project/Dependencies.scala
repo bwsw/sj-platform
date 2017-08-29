@@ -49,10 +49,10 @@ object Dependencies {
       .exclude("org.slf4j", "slf4j-api")
       .exclude("log4j", "log4j")
       .exclude("io.netty", "netty"),
-    ("org.elasticsearch.client" % "transport" % "5.1.1")
+    ("org.elasticsearch.client" % "transport" % "5.5.1")
       .exclude("com.fasterxml.jackson.core", "jackson-core"),
-    "org.apache.logging.log4j" % "log4j-core" % "2.7",
-    "org.apache.logging.log4j" % "log4j-api" % "2.7",
+    "org.apache.logging.log4j" % "log4j-core" % "2.8.2",
+    "org.apache.logging.log4j" % "log4j-api" % "2.8.2",
     "com.maxmind.geoip" % "geoip-api" % "1.3.1",
     "io.netty" % "netty-all" % "4.1.7.Final",
     "com.opencsv" % "opencsv" % "3.9",

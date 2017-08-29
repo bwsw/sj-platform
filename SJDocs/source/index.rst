@@ -21,17 +21,18 @@ Contents:
    :maxdepth: 2
 
    SJ_Overview
-   SJ_Tutorial
-   SJ_Architecture
+   Tutorial
    Glossary
    SJ_Modules
    SJ_Engines
    SJ_CustomModule
    SJ_Simulators
+   SJ_Architecture
+   SJ_Streaming
+   SJ_PlatformDeployment
    SJ_UI_Guide
    SJ_CRUD_REST_API
-   SJ_Deployment
-   SJ_Demo_Deployment
+
    
    
  

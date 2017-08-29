@@ -23,7 +23,7 @@ As a simple refresher, processing modules in the Stream Juggler Platform can be 
 
 The workflow of the SJ-Platform implies the structure:
 
-1. As incoming information can be fed to a processing module in T-streams or Kafka, the input module is necessary at the first step of ingesting data to transform it from TCP into T-streams. If you want to process the data from Kafka, the input module is not required.
+1. As incoming information can be fed to a processing module from T-streams or Kafka, the input module is necessary at the first step of ingesting data to transform it from TCP into T-streams. If you want to process the data from Kafka, the input module is not required.
 2. A processing module performs the main transformation and calculation of data. It accepts data via T-streams and Kafka. The processed data is put into T-streams only. So an output module is required in the next step.
 3. An output module is necessary to transform the data from T-streams into the result data of the type appropriate for the external storage.
 
@@ -42,6 +42,9 @@ It is meant that all necessary services are deployed for the module and you know
 - what engine will be used (it should exist in the database);
 - what type of external storage you are going to use for result data.
 
+Below, the instructions on each module type are provided.
+
+A :ref:`hello-world-module` is presented as a tutorial on a module development.
 
 Input Streaming Custom Module
 ---------------------------------
