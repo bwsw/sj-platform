@@ -498,10 +498,10 @@ Requirements:
 
 - git,
 - sbt (downloading instructions `here <http://www.scala-sbt.org/download.html>`_),
-- docker,
-- curl
+- Docker,
+- cURL
 
-1) Pull and assemble the first project::
+1) Pull and assemble the SJ-Platform project::
 
     git clone https://github.com/bwsw/sj-platform.git
     cd sj-platform
@@ -514,7 +514,7 @@ Requirements:
 
     cd ..
 
-2) Pull and assemble the second project::
+2) Pull and assemble the demo project::
 
     git clone https://github.com/bwsw/sj-fping-demo.git
     cd sj-fping-demo
@@ -528,10 +528,14 @@ Requirements:
  
     curl -sSL https://minimesos.org/install | sh
 
- This command will display in terminal result like::
+ This command will be displayed in the terminal result::
 
    Run the following command to add it to your executables path:
    export PATH=$PATH:/root/.minimesos/bin
+
+You should execute this export command.
+
+Also, you can append this command to the end of file ~/.profile to have this instruction executed on each login. 
 
  Create a directory to place all minimesos-related files::
 
@@ -542,7 +546,11 @@ Requirements:
  
    touch minimesosFile
 
- and place into it all following settings::
+ Open the file to edit it::
+  
+   nano minimesosFile
+ 
+ Copy and paste all the following settings into it::
 
    minimesos {
     clusterName = "Minimesos Cluster"
