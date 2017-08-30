@@ -5,7 +5,7 @@ This section provides the information on Stream Juggler Platform deployment.
 
 Below, two ways of deployment are described. Please, read the requirements for each of them and decide what option is more suitable for your aims.
 
-Deployment on Claster
+Deployment on Cluster
 ---------------------------
 
 The `deployment guide <http://streamjuggler.readthedocs.io/en/develop/SJ_Deployment.html>`_ provides a detailed step-by-step instruction on Stream Juggler Platform deployment on a cluster. 
