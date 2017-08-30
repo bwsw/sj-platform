@@ -102,6 +102,47 @@ And the first step is the system deployment.
 Step 1. Deployment 
 -----------------------------
 
+Though, SJ-Platform is quite a complex system and it includes a range of necessary services, no special skills are required for its deployment. 
+
+There are three options to deploy the platform. Please, read the description for each option and choose the most convenient for you.
+
+**Option 1.** The easiest way is to deploy SJ-Platform on `a virtual machine <http://streamjuggler.readthedocs.io/en/develop/SJ_Demo_Deployment.html>`_. This is the most rapid way to get acquainted with the platform and assess its performance. 
+
+We suggest deploying the platform locally via Vagrant with VirtualBox as a provider. It takes up to 30 minutes. 
+
+The following technical requirements should be met:
+
+- At least 8 GB of free RAM;
+- VT-x must be enabled in BIOS;
+- Vagrant 1.9.1 installed;
+- VirtualBox 5.0.40 installed.
+
+These requirements are provided for deployment on Ubuntu 16.04 OS.
+
+The platform is deployed with all entities necessary to demonstrate the solution for the example task: providers, services, streams, configurations. So the instructions below for creating entities can be ommited. You may read about platform components here in the deployment step details and see the result in the UI.
+
+**Option 2.** Another option is to deploy the platform on a claster. Currently, the deployment on `Mesos  <http://streamjuggler.readthedocs.io/en/develop/SJ_Deployment.html#mesos-deployment>`_ as a universal distributed computational engine is supported.
+
+The following technical requirements should be met:
+
+- working Linux host with 4-8 GB of RAM and 4 CPU cores; 
+- Docker installed;
+- cURL;
+- sbt.  
+
+**Option 3.** Also you can run SJ-Platform locally deploying it on `minimesos <http://streamjuggler.readthedocs.io/en/develop/SJ_Deployment.html#minimesos-deployment>`_ as a testing environment.
+
+The following technical requirements should be met: 
+
+- git, 
+- sbt (http://www.scala-sbt.org/download.html), 
+- Docker, 
+- cURL.
+
+For the example task, the instructions are provided for the system deployment **on Mesos**.
+
+The deployment is performed via REST API.
+
 The system works on the basis of the following core technologies: Apache Mesos, Apache Zookeeper, Apache Kafka, Docker, MongoDB, Hazelcast, Elasticsearch, SQL database, REST.
 
 To solve the example task we need to deploy:
@@ -117,33 +158,7 @@ To solve the example task we need to deploy:
 9) Elasticsearch - as an external data storage;
 10) Kibana - to visualize Elasticsearch data.
 
-There are 2 ways of the platform deployment – on `a cluster (on Mesos) <http://streamjuggler.readthedocs.io/en/develop/SJ_Deployment.html#mesos-deployment>`_ and `locally (on minimesos) <http://streamjuggler.readthedocs.io/en/develop/SJ_Deployment.html#minimesos-deployment>`_. Choose which is more convenient for you. 
-
-The following technical requirements should be met:
-
-- working Linux host with 4-8 GB of RAM and 4 CPU cores; 
-- Docker installed;
-- cURL;
-- sbt.  
-
-Besides, SJ-Platform can be deployed on `a virtual machine <http://streamjuggler.readthedocs.io/en/develop/SJ_Demo_Deployment.html>`_. We suggest deploying the platform locally via Vagrant with VirtualBox as a provider.
-
-This is the most rapid way to get acquainted with the platform and assess its performance. It takes up to 30 minutes. The platform is deployed with all entities necessary to demonstrate the solution for the example task: providers, services, streams, configurations.
-
-The following technical requirements should be met:
-
-- At least 8 GB of free RAM;
-- VT-x must be enabled in BIOS;
-- Vagrant 1.9.1 installed;
-- VirtualBox 5.0.40 installed.
-
-These requirements are provided for deployment on Ubuntu 16.04 OS.
-
-For the example task, the instructions are provided for the system **deployment on Mesos**.
-
-The deployment is performed via REST API.
-
-So, as a first step deploy Mesos and other services.
+So, as a first step you should deploy Mesos and other services.
 
 1) Deploy Mesos, Marathon, Zookeeper. You can follow the instructions at the official `installation guide <http://www.bogotobogo.com/DevOps/DevOps_Mesos_Install.php>`_ .
 
