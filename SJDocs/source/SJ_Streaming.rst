@@ -84,9 +84,9 @@ The diagram of platform entities interconnections can be useful in selecting the
 
 .. figure:: _static/InstanceCorrelation1.png
 
-Firstly, decide what type of modules will be included into the pipeline. These modules will require instances of a particular type. So determine the type of instances that will be created.
+Firstly, decide what types of instances will perform processing in the pipeline. 
 
-That will help to clarify which streams are required for these particular instances.
+Determined instance types will help to clarify which streams are required for these particular instances.
 
 Secondly, find in the diagram what services are necessary for these types of streams. 
 
