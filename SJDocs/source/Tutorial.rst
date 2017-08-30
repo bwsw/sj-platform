@@ -102,7 +102,7 @@ And the first step is the system deployment.
 Step 1. Deployment 
 -----------------------------
 
-Though, SJ-Platform is quite a complex system and it includes a range of necessary services, no special skills are required for its deployment. 
+Though SJ-Platform is quite a complex system and it includes a range of necessary services, no special skills are required for its deployment. 
 
 There are three options to deploy the platform. Please, read the description for each option and choose the most convenient for you.
 
@@ -119,9 +119,9 @@ The following technical requirements should be met:
 
 These requirements are provided for deployment on Ubuntu 16.04 OS.
 
-The platform is deployed with all entities necessary to demonstrate the solution for the example task: providers, services, streams, configurations. So the instructions below for creating entities can be ommited. You may read about platform components here in the deployment step details and see the result in the UI.
+The platform is deployed with all entities necessary to demonstrate the solution for the example task: providers, services, streams, configurations. So the instructions below for creating entities can be omitted. You may read about platform components here in the deployment step details and see the result in the UI.
 
-**Option 2.** Another option is to deploy the platform on a claster. Currently, the deployment on `Mesos  <http://streamjuggler.readthedocs.io/en/develop/SJ_Deployment.html#mesos-deployment>`_ as a universal distributed computational engine is supported.
+**Option 2.** Another option is to deploy the platform on a cluster. Currently, the deployment on `Mesos  <http://streamjuggler.readthedocs.io/en/develop/SJ_Deployment.html#mesos-deployment>`_ as a universal distributed computational engine is supported.
 
 The following technical requirements should be met:
 
@@ -130,7 +130,7 @@ The following technical requirements should be met:
 - cURL;
 - sbt.  
 
-**Option 3.** Also you can run SJ-Platform locally deploying it on `minimesos <http://streamjuggler.readthedocs.io/en/develop/SJ_Deployment.html#minimesos-deployment>`_ as a testing environment.
+**Option 3.** Also, you can run SJ-Platform locally deploying it on `minimesos <http://streamjuggler.readthedocs.io/en/develop/SJ_Deployment.html#minimesos-deployment>`_ as a testing environment.
 
 The following technical requirements should be met: 
 
