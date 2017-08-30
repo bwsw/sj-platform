@@ -78,7 +78,8 @@
 					"key": "jar",
 					"type": "file",
 					"enabled": true,
-					"warning": ""
+					"warning": "",
+					"value": "ModuleInput_4.1.11.Output_types_numbers.jar"
 				}
 			],
 			"dataMode": "params",
@@ -107,7 +108,8 @@
 					"key": "jar",
 					"type": "file",
 					"enabled": true,
-					"warning": ""
+					"warning": "",
+					"value": "ModuleInput_4.1.10.Output_types_wrong_type.jar"
 				}
 			],
 			"dataMode": "params",
@@ -131,7 +133,7 @@
 			"data": null,
 			"dataMode": "params",
 			"version": 2,
-			"tests": "tests[\"Status code is 200\"] = responseCode.code === 200;\n\ntests[\"Body matches string\"] = responseBody.has(\"Module 'input-streaming-Masha-Input-1.0' has been deleted\");",
+			"tests": "tests[\"Status code is 200\"] = responseCode.code === 200;\n\ntests[\"Body matches string\"] = responseBody.has(\"Module 'input-streaming-input-streaming-stub-1.0' has been deleted\");",
 			"currentHelper": "normal",
 			"helperAttributes": {},
 			"time": 1481081718997,
@@ -150,7 +152,7 @@
 			"data": null,
 			"dataMode": "params",
 			"version": 2,
-			"tests": "tests[\"Status code is 200\"] = responseCode.code === 200;\n\ntests[\"Body matches string\"] = responseBody.has(\"input-streaming\");\n\ntests[\"Body matches string\"] = responseBody.has(\"Masha-Input\");",
+			"tests": "tests[\"Status code is 200\"] = responseCode.code === 200;\n\ntests[\"Body matches string\"] = responseBody.has(\"input-streaming\");\n\ntests[\"Body matches string\"] = responseBody.has(\"input-streaming-stub\");",
 			"currentHelper": "normal",
 			"helperAttributes": {},
 			"time": 1493279189866,
@@ -163,7 +165,7 @@
 			"id": "35a39ecf-744c-7309-4c4a-b73ab16a5b58",
 			"headers": "",
 			"headerData": [],
-			"url": "{{address}}/v1/modules/input-streaming/Masha-Input/1.0/specification",
+			"url": "{{address}}/v1/modules/input-streaming/input-streaming-stub/1.0/specification",
 			"queryParams": [],
 			"preRequestScript": null,
 			"pathVariables": {},
@@ -172,7 +174,7 @@
 			"data": null,
 			"dataMode": "params",
 			"version": 2,
-			"tests": "tests[\"Status code is 404\"] = responseCode.code === 404;\n\ntests[\"Body matches string\"] = responseBody.has(\"Module 'input-streaming-Masha-Input-1.0' has not been found\");",
+			"tests": "tests[\"Status code is 404\"] = responseCode.code === 404;\n\ntests[\"Body matches string\"] = responseBody.has(\"Module 'input-streaming-input-streaming-stub-1.0' has not been found\");",
 			"currentHelper": "normal",
 			"helperAttributes": {},
 			"time": 1500959850148,
@@ -184,14 +186,14 @@
 		{
 			"id": "3751b84d-d177-2eed-5599-bfdc1062b4ac",
 			"headers": "",
-			"url": "{{address}}/v1/modules/input-streaming/Masha-Input/1.0/specification",
+			"url": "{{address}}/v1/modules/input-streaming/input-streaming-stub/1.0/specification",
 			"preRequestScript": null,
 			"pathVariables": {},
 			"method": "GET",
 			"data": null,
 			"dataMode": "params",
 			"version": 2,
-			"tests": "tests[\"Status code is 200\"] = responseCode.code === 200;\n\n\n\ntests[\"Body matches string\"] = responseBody.has(\"Masha-Input\");\n\ntests[\"Body matches string\"] = responseBody.has(\"1.0\");\n\ntests[\"Body matches string\"] = responseBody.has(\"input\");\n\ntests[\"Body matches string\"] = responseBody.has(\"stream.t-streams\");\n\ntests[\"Body matches string\"] = responseBody.has(\"specification\");",
+			"tests": "tests[\"Status code is 200\"] = responseCode.code === 200;\n\n\n\ntests[\"Body matches string\"] = responseBody.has(\"input-streaming-stub\");\n\ntests[\"Body matches string\"] = responseBody.has(\"1.0\");\n\ntests[\"Body matches string\"] = responseBody.has(\"input\");\n\ntests[\"Body matches string\"] = responseBody.has(\"stream.t-streams\");\n\ntests[\"Body matches string\"] = responseBody.has(\"specification\");",
 			"currentHelper": "normal",
 			"helperAttributes": {},
 			"time": 1493279220833,
@@ -215,7 +217,8 @@
 					"key": "jar",
 					"type": "file",
 					"enabled": true,
-					"warning": ""
+					"warning": "",
+					"value": "ModuleInput_4.1.8.Output_cardinality_first_value_less_1.jar"
 				}
 			],
 			"dataMode": "params",
@@ -244,7 +247,8 @@
 					"key": "jar",
 					"type": "file",
 					"enabled": true,
-					"warning": ""
+					"warning": "",
+					"value": "ModuleInput_4.1.19.Output_cardinality_first_value_negative.jar"
 				}
 			],
 			"dataMode": "params",
@@ -268,7 +272,7 @@
 			"data": null,
 			"dataMode": "params",
 			"version": 2,
-			"tests": "tests[\"Status code is 200\"] = responseCode.code === 200;\n\n\ntests[\"Body matches string\"] = responseBody.has(\"input-streaming\");\n\ntests[\"Body matches string\"] = responseBody.has(\"Masha-Input\");",
+			"tests": "tests[\"Status code is 200\"] = responseCode.code === 200;\n\n\ntests[\"Body matches string\"] = responseBody.has(\"input-streaming\");\n\ntests[\"Body matches string\"] = responseBody.has(\"input-streaming-stub\");",
 			"currentHelper": "normal",
 			"helperAttributes": {},
 			"time": 1493279168139,
@@ -292,7 +296,8 @@
 					"key": "jar",
 					"type": "file",
 					"enabled": true,
-					"warning": ""
+					"warning": "",
+					"value": "ModuleInput_4.1.1.Upload_module.jar"
 				}
 			],
 			"dataMode": "params",
@@ -321,7 +326,8 @@
 					"key": "jar",
 					"type": "file",
 					"enabled": true,
-					"warning": ""
+					"warning": "",
+					"value": "ModuleInput_4.1.9.Output_cardinality_second_value_less_than_first.jar"
 				}
 			],
 			"dataMode": "params",
@@ -350,12 +356,13 @@
 					"key": "jar",
 					"type": "file",
 					"enabled": true,
-					"warning": ""
+					"warning": "",
+					"value": "ModuleInput_4.1.4.Name_type_version_already_exists.jar"
 				}
 			],
 			"dataMode": "params",
 			"version": 2,
-			"tests": "tests[\"Body matches string\"] = responseBody.has(\"Cannot upload jar file 'ModuleInput_4.1.4.Name_type_version_already_exists .jar' of module. Errors: module 'input-streaming-Masha-Input-1.0' already exists\");\n\ntests[\"Status code is 400\"] = responseCode.code === 400;",
+			"tests": "tests[\"Body matches string\"] = responseBody.has(\"Cannot upload jar file 'ModuleInput_4.1.4.Name_type_version_already_exists.jar' of module. Errors: module 'input-streaming-input-streaming-stub-1.0' already exists\");\n\ntests[\"Status code is 400\"] = responseCode.code === 400;",
 			"currentHelper": "normal",
 			"helperAttributes": {},
 			"time": 1500884878952,
@@ -379,7 +386,8 @@
 					"key": "jar",
 					"type": "file",
 					"enabled": true,
-					"warning": ""
+					"warning": "",
+					"value": "ModuleInput_4.1.21.Input_cardinality_string.jar"
 				}
 			],
 			"dataMode": "params",
@@ -408,7 +416,8 @@
 					"key": "jar",
 					"type": "file",
 					"enabled": true,
-					"warning": ""
+					"warning": "",
+					"value": "ModuleInput_4.1.15.Input_cardinality_second_value_not_0.jar"
 				}
 			],
 			"dataMode": "params",
@@ -437,7 +446,8 @@
 					"key": "jar",
 					"type": "file",
 					"enabled": true,
-					"warning": ""
+					"warning": "",
+					"value": "ModuleInput_4.1.18.Input_cardinality_second_value_is_negative.jar"
 				}
 			],
 			"dataMode": "params",
@@ -454,14 +464,14 @@
 		{
 			"id": "6968644f-b488-9cf8-a679-aadcb36ed39a",
 			"headers": "",
-			"url": "{{address}}/v1/modules/input-streaming/Masha-Input/1.0",
+			"url": "{{address}}/v1/modules/input-streaming/input-streaming-stub/1.0",
 			"preRequestScript": null,
 			"pathVariables": {},
 			"method": "DELETE",
 			"data": null,
 			"dataMode": "params",
 			"version": 2,
-			"tests": "tests[\"Status code is 404\"] = responseCode.code === 404;\n\ntests[\"Body matches string\"] = responseBody.has(\"Module 'input-streaming-Masha-Input-1.0' has not been found.\");",
+			"tests": "tests[\"Status code is 404\"] = responseCode.code === 404;\n\ntests[\"Body matches string\"] = responseBody.has(\"Module 'input-streaming-input-streaming-stub-1.0' has not been found.\");",
 			"currentHelper": "normal",
 			"helperAttributes": {},
 			"time": 1481081732308,
@@ -485,7 +495,8 @@
 					"key": "jar",
 					"type": "file",
 					"enabled": true,
-					"warning": ""
+					"warning": "",
+					"value": "ModuleInput_4.1.13.Input_types_letters(not_type).jar"
 				}
 			],
 			"dataMode": "params",
@@ -514,7 +525,8 @@
 					"key": "jar",
 					"type": "file",
 					"enabled": true,
-					"warning": ""
+					"warning": "",
+					"value": "ModuleInput_4.1.12.Unknown_module_type.jar"
 				}
 			],
 			"dataMode": "params",
@@ -531,7 +543,7 @@
 			"id": "7324fb8a-a648-5884-2e97-6407805ebbc8",
 			"headers": "",
 			"headerData": [],
-			"url": "{{address}}/v1/modules/input-streaming1/Masha-Input/2.0",
+			"url": "{{address}}/v1/modules/input-streaming1/input-streaming-stub/2.0",
 			"queryParams": [],
 			"preRequestScript": null,
 			"pathVariables": {},
@@ -564,7 +576,8 @@
 					"key": "jar",
 					"type": "file",
 					"enabled": true,
-					"warning": ""
+					"warning": "",
+					"value": "ModuleInput_4.1.17.Input_cardinality_first_value_is_negative.jar"
 				}
 			],
 			"dataMode": "params",
@@ -593,7 +606,8 @@
 					"key": "jar",
 					"type": "file",
 					"enabled": true,
-					"warning": ""
+					"warning": "",
+					"value": "ModuleInput_4.1.22.Input_types_numbers.jar"
 				}
 			],
 			"dataMode": "params",
@@ -622,12 +636,13 @@
 					"key": "jar",
 					"type": "file",
 					"enabled": true,
-					"warning": ""
+					"warning": "",
+					"value": "ModuleInput_4.1.3.Not_jar_file.json"
 				}
 			],
 			"dataMode": "params",
 			"version": 2,
-			"tests": "tests[\"Body matches string\"] = responseBody.has(\"Cannot upload jar file 'ModuleBatch_6.1.3.Not_jar_file.json' of module. Errors: file 'ModuleBatch_6.1.3.Not_jar_file.json' does not have the .jar extension;File 'ModuleBatch_6.1.3.Not_jar_file.json' not a jar archive\");\n\n\ntests[\"Status code is 400\"] = responseCode.code === 400;",
+			"tests": "tests[\"Body matches string\"] = responseBody.has(\"Cannot upload jar file ' ModuleInput_4.1.3.Not_jar_file.json' of module. Errors: file 'ModuleBatch_6.1.3.Not_jar_file.json' does not have the .jar extension;File ' ModuleInput_4.1.3.Not_jar_file.json' not a jar archive\");\n\n\ntests[\"Status code is 400\"] = responseCode.code === 400;",
 			"currentHelper": "normal",
 			"helperAttributes": {},
 			"time": 1500881191517,
@@ -651,7 +666,8 @@
 					"key": "jar",
 					"type": "file",
 					"enabled": true,
-					"warning": ""
+					"warning": "",
+					"value": "ModuleInput_4.1.20.Output_cardinality_negative_second_value.jar"
 				}
 			],
 			"dataMode": "params",
@@ -680,7 +696,8 @@
 					"key": "jar",
 					"type": "file",
 					"enabled": true,
-					"warning": ""
+					"warning": "",
+					"value": "ModuleInput_4.1.6.Input_cardinality_first_value_not_0.jar"
 				}
 			],
 			"dataMode": "params",
@@ -709,7 +726,8 @@
 					"key": "jar",
 					"type": "file",
 					"enabled": true,
-					"warning": ""
+					"warning": "",
+					"value": "ModuleInput_4.1.16.Output_cardinality_string.jar"
 				}
 			],
 			"dataMode": "params",
@@ -738,7 +756,8 @@
 					"key": "jar",
 					"type": "file",
 					"enabled": true,
-					"warning": ""
+					"warning": "",
+					"value": "ModuleInput_4.1.2.Nonexistent_engine.jar"
 				}
 			],
 			"dataMode": "params",
@@ -767,7 +786,8 @@
 					"key": "jar",
 					"type": "file",
 					"enabled": true,
-					"warning": ""
+					"warning": "",
+					"value": "ModuleInput_4.1.14.Output_types_letters_(not_type).jar"
 				}
 			],
 			"dataMode": "params",
@@ -796,7 +816,8 @@
 					"key": "jar",
 					"type": "file",
 					"enabled": true,
-					"warning": ""
+					"warning": "",
+					"value": "ModuleInput_4.1.7.Input_types_wrong_type.jar"
 				}
 			],
 			"dataMode": "params",
@@ -814,7 +835,7 @@
 			"id": "dfff86bb-e8b9-808d-67aa-ff81081c658c",
 			"headers": "",
 			"headerData": [],
-			"url": "{{address}}/v1/modules/input-streaming1/Masha-Input/1.0/specification",
+			"url": "{{address}}/v1/modules/input-streaming1/input-streaming-stub/1.0/specification",
 			"queryParams": [],
 			"preRequestScript": null,
 			"pathVariables": {},
@@ -847,12 +868,13 @@
 					"key": "jar",
 					"type": "file",
 					"enabled": true,
-					"warning": ""
+					"warning": "",
+					"value": "ModuleInput_4.1.1.Upload_module.jar"
 				}
 			],
 			"dataMode": "params",
 			"version": 2,
-			"tests": "tests[\"Body matches string\"] = responseBody.has(\"Cannot upload jar file 'ModuleInput_4.1.1.Upload_module.jar' of module. Errors: module 'input-streaming-Masha-Input-1.0' already exists;file 'ModuleInput_4.1.1.Upload_module.jar' already exists\");\n\ntests[\"Status code is 400\"] = responseCode.code === 400;",
+			"tests": "tests[\"Body matches string\"] = responseBody.has(\"Cannot upload jar file 'ModuleInput_4.1.1.Upload_module.jar' of module. Errors: module 'input-streaming-input-streaming-stub-1.0' already exists;file 'ModuleInput_4.1.1.Upload_module.jar' already exists\");\n\ntests[\"Status code is 400\"] = responseCode.code === 400;",
 			"currentHelper": "normal",
 			"helperAttributes": {},
 			"time": 1500884878016,
