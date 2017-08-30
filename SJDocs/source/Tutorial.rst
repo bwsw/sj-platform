@@ -130,6 +130,10 @@ The following technical requirements should be met:
 - cURL;
 - sbt.  
 
+The platform is deployed with no entities. Thus, the pipeline can be structured from scratch. 
+
+This tutorial provides step-by-step instructions for demo project deployment on Mesos. At first step, Mesos with all the services will be deployed. Then entities will be added to the platform. Finally, modules will be launched and results will be rendered in a diagram.
+
 **Option 3.** Also, you can run SJ-Platform locally deploying it on `minimesos <http://streamjuggler.readthedocs.io/en/develop/SJ_Deployment.html#minimesos-deployment>`_ as a testing environment.
 
 The following technical requirements should be met: 
