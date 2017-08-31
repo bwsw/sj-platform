@@ -674,17 +674,11 @@ Requirements:
  
    After launching you can see weavescope app (https://github.com/weaveworks/scope) on port 4040.
 
-   This application is an instrument to visualize, monitor your docker containers. It generates the map that can look like at the picture below:
+   This application is an instrument to visualize, monitor your docker containers. It generates the map that can look like at the picture below: (image here)
 
- .. _static/wavescope4.png
+   Besides you can obtain access to Mesos on port 5050: (image here)
 
-   Besides you can obtain access to Mesos on port 5050:
-
- .. _static/
-
- and also access to Marathon on port 8080:
-
- .. _static/
+   and also access to Marathon on port 8080: (image here)
 
    Check dns by ping master node::
 
@@ -715,19 +709,7 @@ Requirements:
 
   After deploying each service you may see corresponding applications in Marathon UI (port 8080) and corresponding tasks in Mesos UI (port 5050). The graph structure provided by weavescope will surely change (port 4040).
 
-  Marathon
-
- .. _static/
-
-  Mesos
-
- .. _static
- 
-  Wavescope
-
- .. _static/
-
-**mongo.json**::
+  **mongo.json**::
 
  {  
    "id":"mongo",
