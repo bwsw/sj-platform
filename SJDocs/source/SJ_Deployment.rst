@@ -678,7 +678,7 @@ Requirements:
 
  .. _static/wavescope4.png
 
- Besides you can obtain access to Mesos on port 5050:
+   Besides you can obtain access to Mesos on port 5050:
 
  .. _static/
 
@@ -705,25 +705,25 @@ Requirements:
 
  - use value of the MINIMESOS_MESOSDNS_IP variable (can be found in the previous step) instead of <dns-ip>
 
- Instead of creating each file with appropriate values by hand you may use a script which shall be executed in the minimesos folder.
+  Instead of creating each file with appropriate values by hand you may use a script which shall be executed in the minimesos folder.
  
- Create a file named `createAlLConfigs.sh` with the following content. Then execute it::
+  Create a file named `createAlLConfigs.sh` with the following content. Then execute it::
  
       $ ./createAlLConfigs.sh
  
- The json files will be created in the minimesos folder. All you need now is to deploy them to the system. Use the commands provided below for each json file.
+  The json files will be created in the minimesos folder. All you need now is to deploy them to the system. Use the commands provided below for each json file.
 
- After deploying each service you may see corresponding applications in Marathon UI (port 8080) and corresponding tasks in Mesos UI (port 5050). The graph structure provided by weavescope will surely change (port 4040).
+  After deploying each service you may see corresponding applications in Marathon UI (port 8080) and corresponding tasks in Mesos UI (port 5050). The graph structure provided by weavescope will surely change (port 4040).
 
- Marathon
+  Marathon
 
  .. _static/
 
-    Mesos
+  Mesos
 
  .. _static
  
-    Wavescope
+  Wavescope
 
  .. _static/
 
