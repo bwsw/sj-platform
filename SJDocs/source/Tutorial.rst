@@ -666,8 +666,9 @@ Besides, the Apache Zookeeper provider is required for T-streams service that is
 The provider and the service of Elasticsearch type are required by the Elasticsearch output streams to put the result in the Elasticsearch data storage.
 
 As a result, the following infrastructure is to be created:
-Providers of Apache Zookeeper and Elasticsearch types;
-Services of  Apache Zookeeper, T-streams and Elasticsearch types.
+
+- Providers of Apache Zookeeper and Elasticsearch types;
+- Services of Apache Zookeeper, T-streams and Elasticsearch types.
 
 
 1) Set up providers.
