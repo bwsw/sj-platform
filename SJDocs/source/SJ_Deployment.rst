@@ -648,33 +648,33 @@ Requirements:
     export MINIMESOS_MASTER=http://172.17.0.5:5050; export MINIMESOS_MASTER_IP=172.17.0.5
     Running dnsmasq? Add 'server=/mm/172.17.0.4#53' to /etc/dnsmasq.d/10-minimesos to resolve master.mm, zookeeper.mm and Marathon apps on app.marathon.mm.
 
-  If the result is not the same (absence of the last line or/and lack of some exports) you shall execute the following command::
+   If the result is not the same (absence of the last line or/and lack of some exports) you shall execute the following command::
 
-   $ minimesos destroy
+    $ minimesos destroy
 
-  and try to launch minimesos again.
+   and try to launch minimesos again.
 
-  Execute all the lines from the respond. First, export all variables with corresponding values.
+   Execute all the lines from the respond. First, export all variables with corresponding values.
  
-  Then, execute the command from the last line. Open the file for editing::
+   Then, execute the command from the last line. Open the file for editing::
  
-   $ nano /etc/dnsmasq.d/10-minimesos
+    $ nano /etc/dnsmasq.d/10-minimesos
    
-  Paste the line below in it (make sure the IP is the dns IP)::
+   Paste the line below in it (make sure the IP is the dns IP)::
   
-  server=/mm/172.17.0.4#53
+    server=/mm/172.17.0.4#53
  
-  After running minimesos, install dnsmasq::
+   After running minimesos, install dnsmasq::
   
-   $ sudo apt-get install dnsmasq
+    $ sudo apt-get install dnsmasq
 
-  And launch it:: 
+   And launch it:: 
   
-   $ sudo service dnsmasq restart
+    $ sudo service dnsmasq restart
  
-  After launching you can see weavescope app (https://github.com/weaveworks/scope) on port 4040.
+   After launching you can see weavescope app (https://github.com/weaveworks/scope) on port 4040.
 
-  This application is an instrument to visualize, monitor your docker containers. It generates the map that can look like at the picture below:
+   This application is an instrument to visualize, monitor your docker containers. It generates the map that can look like at the picture below:
 
  .. _static/wavescope4.png
 
@@ -686,36 +686,36 @@ Requirements:
 
  .. _static/
 
- Check dns by ping master node::
+   Check dns by ping master node::
 
-  $ ping -c 4 master.mm
+    $ ping -c 4 master.mm
 
- At the end you can see::
+   At the end you can see::
 
-  4 packets transmitted, 4 received, 0% packet loss
+    4 packets transmitted, 4 received, 0% packet loss
 
 
 5) Deploy services
 
-    Create the following files in the minimesos folder (mongo.json, sj-rest.json, etc.) and run services with the provided commands.
+   Create the following files in the minimesos folder (mongo.json, sj-rest.json, etc.) and run services with the provided commands.
 
-    In each file you shall perform some replacements:
+   In each file you shall perform some replacements:
 
  - use value of the MINIMESOS_ZOOKEEPER_IP variable (can be found in the previous step) instead of <zk-ip>
 
  - use value of the MINIMESOS_MESOSDNS_IP variable (can be found in the previous step) instead of <dns-ip>
 
-    Instead of creating each file with appropriate values by hand you may use a script which shall be executed in the minimesos folder.
+ Instead of creating each file with appropriate values by hand you may use a script which shall be executed in the minimesos folder.
  
-    Create a file named `createAlLConfigs.sh` with the following content. Then execute it::
+ Create a file named `createAlLConfigs.sh` with the following content. Then execute it::
  
       $ ./createAlLConfigs.sh
  
-    The json files will be created in the minimesos folder. All you need now is to deploy them to the system. Use the commands provided below for each json file.
+ The json files will be created in the minimesos folder. All you need now is to deploy them to the system. Use the commands provided below for each json file.
 
-    After deploying each service you may see corresponding applications in Marathon UI (port 8080) and corresponding tasks in Mesos UI (port 5050). The graph structure provided by weavescope will surely change (port 4040).
+ After deploying each service you may see corresponding applications in Marathon UI (port 8080) and corresponding tasks in Mesos UI (port 5050). The graph structure provided by weavescope will surely change (port 4040).
 
-    Marathon
+ Marathon
 
  .. _static/
 
