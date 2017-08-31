@@ -1,5 +1,5 @@
 {
-  "name": "com.bwsw.stub.output-bench-test-jdbc",
+  "name": "com.bwsw.stub.output-bench-test",
   "description": "Stub output-module by BW",
   "version": "1.0",
   "author": "Kseniya Tomskikh",
@@ -19,16 +19,13 @@
       1
     ],
     "types": [
-      "stream.sql-database"
+      "stream.elasticsearch"
     ]
   },
   "module-type": "output-streaming",
   "engine-name": "com.bwsw.output.streaming.engine",
   "engine-version": "1.0",
-  "options": {
-    "opt": 1
-  },
   "validator-class": "com.bwsw.sj.stubs.module.output.StubOutputValidator",
-  "executor-class": "com.bwsw.sj.stubs.module.output.StubOutputExecutorJdbc",
+  "executor-class": "com.bwsw.sj.stubs.module.output.StubOutputExecutor",
   "entity-class" : "com.bwsw.sj.stubs.module.output.data.StubEsData"
 }

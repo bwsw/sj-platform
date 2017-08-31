@@ -1,5 +1,5 @@
 {
-  "name": "com.bwsw.stub.output-bench-test-jdbc",
+  "name": "Integration-JDBC",
   "description": "Stub output-module by BW",
   "version": "1.0",
   "author": "Kseniya Tomskikh",

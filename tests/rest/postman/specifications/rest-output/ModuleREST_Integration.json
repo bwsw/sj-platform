@@ -1,8 +1,8 @@
 {
-  "name": "com.bwsw.stub.output-bench-test-jdbc",
+  "name": "Integration-REST",
   "description": "Stub output-module by BW",
   "version": "1.0",
-  "author": "Kseniya Tomskikh",
+  "author": "Pavel Tomskikh",
   "license": "Apache 2.0",
   "inputs": {
     "cardinality": [
@@ -19,7 +19,7 @@
       1
     ],
     "types": [
-      "stream.sql-database"
+      "stream.restful"
     ]
   },
   "module-type": "output-streaming",
@@ -29,6 +29,6 @@
     "opt": 1
   },
   "validator-class": "com.bwsw.sj.stubs.module.output.StubOutputValidator",
-  "executor-class": "com.bwsw.sj.stubs.module.output.StubOutputExecutorJdbc",
-  "entity-class" : "com.bwsw.sj.stubs.module.output.data.StubEsData"
+  "executor-class": "com.bwsw.sj.stubs.module.output.StubOutputExecutorRest",
+  "entity-class" : "com.bwsw.sj.stubs.module.output.data.StubRestData"
 }
