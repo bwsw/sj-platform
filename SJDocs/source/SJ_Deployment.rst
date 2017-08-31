@@ -52,7 +52,7 @@ Firstly, deploy Mesos and other services.
 
 1. Deploy Mesos, Marathon, Zookeeper. You can follow the instructions at the official `instalation guide <http://www.bogotobogo.com/DevOps/DevOps_Mesos_Install.php>`_ .
 
-Please, note, Docker container should be supported for Mesos-slave.
+Please, note, the deployment is described for one default Mesos-slave with available ports [31000-32000]. Docker container should be supported for Mesos-slave.
 
 For Docker deployment follow the instructions at the official `installation guide <https://docs.docker.com/engine/installation/linux/docker-ce/ubuntu/#install-docker-ce>`_
 
@@ -212,7 +212,7 @@ For sj-rest.json it is better to upload the docker image separately::
    "mem":256
  }
 
-**Configuration properties** (replace <zk_ip> with a valid ip)::
+**Configuration properties** (replace <zk_ip> with a valid zookeeper ip)::
 
  key=pingstation
  active.tokens.number=100
@@ -269,7 +269,7 @@ For sj-rest.json it is better to upload the docker image separately::
 
 
 
-**tts.json** (replace <path_to_conf_directory> with an appropriate path to the configuration directory on your computer and <external_host> with a valid host)::
+**tts.json** (replace <path_to_conf_directory> with an appropriate path to the configuration directory on your computer and replace <slave_advertise_ip> with slave advertise IP)::
 
  {
     "id": "tts",
@@ -277,7 +277,7 @@ For sj-rest.json it is better to upload the docker image separately::
         "type": "DOCKER",
         "volumes": [
             {
-                "containerPath": "/etc/conf",
+                "containerPath": "/etc/conf/config.properties",
                 "hostPath": "<path_to_conf_directory>",
                 "mode": "RO" 
             }
@@ -304,19 +304,19 @@ For sj-rest.json it is better to upload the docker image separately::
     "cpus": 0.1,
     "mem": 512,
     "env": {
-      "HOST":"<external_host>",
+      "HOST":"<slave_advertise_ip>",
       "PORT0":"31071" 
     }
 }
 
-**kibana.json**::
+**kibana.json** (<slave_advertise_ip> should be replaced with slave advertise IP)::
 
  {  
    "id":"kibana",
    "container":{  
       "type":"DOCKER",
       "docker":{  
-         "image":"kibana",
+         "image":"kibana:5.5.1",
          "network":"BRIDGE",
          "portMappings":[  
             {  
@@ -337,7 +337,7 @@ For sj-rest.json it is better to upload the docker image separately::
    "cpus":0.1,
    "mem":256,
    "env":{  
-      "ELASTICSEARCH_URL":"http://172.17.0.1:31920" 
+      "ELASTICSEARCH_URL":"https://<slave_advertise_ip>:31920" 
    }
  }
 
