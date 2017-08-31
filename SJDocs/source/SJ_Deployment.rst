@@ -637,44 +637,44 @@ Also, you can append this command to the end of file ~/.profile to have this ins
 
     $ minimesos up
 
- Try to launch minimesos until you will see the following result (it can differ from the example because IPs can differ)::
+   Try to launch minimesos until you will see the following result (it can differ from the example because IPs can differ)::
 
-  export MINIMESOS_NETWORK_GATEWAY=172.17.0.1
-  export MINIMESOS_AGENT=http://172.17.0.7:5051; export MINIMESOS_AGENT_IP=172.17.0.7
-  export MINIMESOS_ZOOKEEPER=zk://172.17.0.3:2181/mesos; export MINIMESOS_ZOOKEEPER_IP=172.17.0.3
-  export MINIMESOS_MARATHON=http://172.17.0.6:8080; export MINIMESOS_MARATHON_IP=172.17.0.6
-  export MINIMESOS_CONSUL=http://172.17.0.8:8500; export MINIMESOS_CONSUL_IP=172.17.0.8
-  export MINIMESOS_MESOSDNS=http://172.17.0.4:53; export MINIMESOS_MESOSDNS_IP=172.17.0.4
-  export MINIMESOS_MASTER=http://172.17.0.5:5050; export MINIMESOS_MASTER_IP=172.17.0.5
-  Running dnsmasq? Add 'server=/mm/172.17.0.4#53' to /etc/dnsmasq.d/10-minimesos to resolve master.mm, zookeeper.mm and Marathon apps on app.marathon.mm.
+    export MINIMESOS_NETWORK_GATEWAY=172.17.0.1
+    export MINIMESOS_AGENT=http://172.17.0.7:5051; export MINIMESOS_AGENT_IP=172.17.0.7
+    export MINIMESOS_ZOOKEEPER=zk://172.17.0.3:2181/mesos; export MINIMESOS_ZOOKEEPER_IP=172.17.0.3
+    export MINIMESOS_MARATHON=http://172.17.0.6:8080; export MINIMESOS_MARATHON_IP=172.17.0.6
+    export MINIMESOS_CONSUL=http://172.17.0.8:8500; export MINIMESOS_CONSUL_IP=172.17.0.8
+    export MINIMESOS_MESOSDNS=http://172.17.0.4:53; export MINIMESOS_MESOSDNS_IP=172.17.0.4
+    export MINIMESOS_MASTER=http://172.17.0.5:5050; export MINIMESOS_MASTER_IP=172.17.0.5
+    Running dnsmasq? Add 'server=/mm/172.17.0.4#53' to /etc/dnsmasq.d/10-minimesos to resolve master.mm, zookeeper.mm and Marathon apps on app.marathon.mm.
 
- If the result is not the same (absence of the last line or/and lack of some exports) you shall execute the following command::
+  If the result is not the same (absence of the last line or/and lack of some exports) you shall execute the following command::
 
-  $ minimesos destroy
+   $ minimesos destroy
 
- and try to launch minimesos again.
+  and try to launch minimesos again.
 
- Execute all the lines from the respond. First, export all variables with corresponding values.
+  Execute all the lines from the respond. First, export all variables with corresponding values.
  
- Then, execute the command from the last line. Open the file for editing::
+  Then, execute the command from the last line. Open the file for editing::
  
-  $ nano /etc/dnsmasq.d/10-minimesos
+   $ nano /etc/dnsmasq.d/10-minimesos
    
- Paste the line below in it (make sure the IP is the dns IP)::
+  Paste the line below in it (make sure the IP is the dns IP)::
   
   server=/mm/172.17.0.4#53
  
- After running minimesos, install dnsmasq::
+  After running minimesos, install dnsmasq::
   
-  $ sudo apt-get install dnsmasq
+   $ sudo apt-get install dnsmasq
 
- And launch it:: 
+  And launch it:: 
   
-  $ sudo service dnsmasq restart
+   $ sudo service dnsmasq restart
  
- After launching you can see weavescope app (https://github.com/weaveworks/scope) on port 4040.
+  After launching you can see weavescope app (https://github.com/weaveworks/scope) on port 4040.
 
- This application is an instrument to visualize, monitor your docker containers. It generates the map that can look like at the picture below:
+  This application is an instrument to visualize, monitor your docker containers. It generates the map that can look like at the picture below:
 
  .. _static/wavescope4.png
 
@@ -697,33 +697,33 @@ Also, you can append this command to the end of file ~/.profile to have this ins
 
 5) Deploy services
 
- Create the following files in the minimesos folder (mongo.json, sj-rest.json, etc.) and run services with the provided commands.
+    Create the following files in the minimesos folder (mongo.json, sj-rest.json, etc.) and run services with the provided commands.
 
- In each file you shall perform some replacements:
+    In each file you shall perform some replacements:
 
  - use value of the MINIMESOS_ZOOKEEPER_IP variable (can be found in the previous step) instead of <zk-ip>
 
  - use value of the MINIMESOS_MESOSDNS_IP variable (can be found in the previous step) instead of <dns-ip>
 
- Instead of creating each file with appropriate values by hand you may use a script which shall be executed in the minimesos folder.
+    Instead of creating each file with appropriate values by hand you may use a script which shall be executed in the minimesos folder.
  
- Create a file named `createAlLConfigs.sh` with the following content. Then execute it::
+    Create a file named `createAlLConfigs.sh` with the following content. Then execute it::
  
-  $ ./createAlLConfigs.sh
+      $ ./createAlLConfigs.sh
  
- The json files will be created in the minimesos folder. All you need now is to deploy them to the system. Use the commands provided below for each json file.
+    The json files will be created in the minimesos folder. All you need now is to deploy them to the system. Use the commands provided below for each json file.
 
- After deploying each service you may see corresponding applications in Marathon UI (port 8080) and corresponding tasks in Mesos UI (port 5050). The graph structure provided by weavescope will surely change (port 4040).
+    After deploying each service you may see corresponding applications in Marathon UI (port 8080) and corresponding tasks in Mesos UI (port 5050). The graph structure provided by weavescope will surely change (port 4040).
 
- Marathon
+    Marathon
 
  .. _static/
 
- Mesos
+    Mesos
 
  .. _static
  
- Wavescope
+    Wavescope
 
  .. _static/
 
@@ -856,7 +856,7 @@ And install it::
       "ZOOKEEPER_IP":"<zk-ip>",
       "KAFKA_ADVERTISED_HOST_NAME":"kafka" 
    }
-}
+ }
 
 And install it::
 
