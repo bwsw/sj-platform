@@ -709,7 +709,7 @@ Requirements:
 
   After deploying each service you may see corresponding applications in Marathon UI (port 8080) and corresponding tasks in Mesos UI (port 5050). The graph structure provided by weavescope will surely change (port 4040).
 
-  **mongo.json**::
+**mongo.json**::
 
  {  
    "id":"mongo",
