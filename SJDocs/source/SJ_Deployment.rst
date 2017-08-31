@@ -727,7 +727,7 @@ Also, you can append this command to the end of file ~/.profile to have this ins
 
  .. _static/
 
-* **mongo.json**::
+**mongo.json**::
 
  {  
    "id":"mongo",
@@ -772,7 +772,7 @@ And install it::
  $ minimesos install --marathonFile mongo.json
 
 
-* **sj-rest.json** (replace <dns-ip> and <zk-ip> with valid IPs)::
+**sj-rest.json** (replace <dns-ip> and <zk-ip> with valid IPs)::
 
  {  
    "id":"sj-rest",
@@ -814,9 +814,9 @@ And install it::
 
  $ minimesos install --marathonFile sj-rest.json
 
-* **kafka.json** (replace <dns-ip> and <zk-ip> with valid IPs)::
+**kafka.json** (replace <dns-ip> and <zk-ip> with valid IPs)::
 
-{  
+ {  
    "id":"kafka",
    "container":{  
       "type":"DOCKER",
@@ -862,7 +862,7 @@ And install it::
 
  $ minimesos install --marathonFile kafka.json
 
-***elasticsearch.json** (replace <dns-ip> with a valid IP)::
+**elasticsearch.json** (replace <dns-ip> with a valid IP)::
 
  {   
    "id":"elasticsearch",
@@ -906,7 +906,7 @@ And install it::
  $ sudo sysctl -w vm.max_map_count=262144
  $ minimesos install --marathonFile elasticsearch.json
  
-* **kibana.json** (replace <dns-ip> with a valid IP)::
+**kibana.json** (replace <dns-ip> with a valid IP)::
 
  {  
    "id":"kibana",
@@ -947,7 +947,7 @@ And install it::
  $ minimesos install --marathonFile kibana.json
 
 
-* config.properties
+**config.properties**
 
 In this file instead of <path_to_conf_directory> you shall specify path to directory with the `config.properties` file ::
 
@@ -1004,7 +1004,7 @@ In this file instead of <path_to_conf_directory> you shall specify path to direc
  transaction-database.transaction-keeptime-min=70000
  subscribers.update.period-ms=500
 
-* **tts.json**::
+**tts.json**::
 
   {
     "id": "tts",
