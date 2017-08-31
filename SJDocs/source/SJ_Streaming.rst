@@ -12,7 +12,7 @@ There are two kinds of streams in SJ-Platform:
 
 - An input stream - a stream which provides new events. There are two different input stream types in SJ-Platform: TCP, Apache Kafka and T-Streams.
 
-- An output stream - a stream which is a destination for results. There is one output stream type in SJ-Platform: T-Streams.
+- An output stream - a stream which is a destination for results. Within SJ-Platform the results are written in T-Streams. To export the processed data from T-streams additional output streams are required. They are created for an output module and correspond to the type of the external storage: Elasticsearch, SQL database and RESTful.
 
 Input Streams
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
