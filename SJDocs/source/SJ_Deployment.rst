@@ -528,41 +528,41 @@ Requirements:
  
     curl -sSL https://minimesos.org/install | sh
 
- This command will be displayed in the terminal result::
+   This command will be displayed in the terminal result::
 
-   Run the following command to add it to your executables path:
-   export PATH=$PATH:/root/.minimesos/bin
+    Run the following command to add it to your executables path:
+    export PATH=$PATH:/root/.minimesos/bin
 
-You should execute this export command::
+   You should execute this export command::
   
-   export PATH=$PATH:/root/.minimesos/bin
+    export PATH=$PATH:/root/.minimesos/bin
 
-Also, you can append this command to the end of file ~/.profile to have this instruction executed on each login. 
+   Also, you can append this command to the end of file ~/.profile to have this instruction executed on each login. 
 
- Create a directory to place all minimesos-related files::
+   Create a directory to place all minimesos-related files::
 
-   mkdir ~/minimesos
-   cd ~/minimesos
+    mkdir ~/minimesos
+    cd ~/minimesos
 
- Then you need to create `minimesosFile`::
+   Then you need to create `minimesosFile`::
  
-   touch minimesosFile
+    touch minimesosFile
 
- Open the file to edit it::
+   Open the file to edit it::
   
-   nano minimesosFile
+    nano minimesosFile
  
- Copy and paste all the following settings into it::
+   Copy and paste all the following settings into it::
 
-   minimesos {
-    clusterName = "Minimesos Cluster"
-    loggingLevel = "INFO"
-    mapAgentSandboxVolume = false
-    mapPortsToHost = true
-    mesosVersion = "1.0.0"
-    timeout = 60
+    minimesos {
+     clusterName = "Minimesos Cluster"
+     loggingLevel = "INFO"
+     mapAgentSandboxVolume = false
+     mapPortsToHost = true
+     mesosVersion = "1.0.0"
+     timeout = 60
 
-    agent {
+      agent {
         imageName = "containersol/mesos-agent"
         imageTag = "1.0.0-0.1.0"
         loggingLevel = "# INHERIT FROM CLUSTER"
@@ -590,14 +590,14 @@ Also, you can append this command to the end of file ~/.profile to have this ins
                 value = "[31000-32000]"
             }
         }
-    }
+      }
 
-    consul {
+      consul {
         imageName = "consul"
         imageTag = "0.7.1"
-    }
+     }
 
-    marathon {
+      marathon {
         cmd = "--master zk://minimesos-zookeeper:2181/mesos --zk zk://minimesos-zookeeper:2181/marathon"
         imageName = "mesosphere/marathon"
         imageTag = "v1.3.5"
@@ -606,32 +606,32 @@ Also, you can append this command to the end of file ~/.profile to have this ins
         app {
             marathonJson = "https://raw.githubusercontent.com/ContainerSolutions/minimesos/e2a43362f4581122762c80d8780d09b567783f1a/apps/weave-scope.json"
         }
-    }
+     }
 
-    master {
+      master {
         aclJson = null
         authenticate = false
         imageName = "containersol/mesos-master"
         imageTag = "1.0.0-0.1.0"
         loggingLevel = "# INHERIT FROM CLUSTER"
-    }
+     }
 
-    mesosdns {
+      mesosdns {
         imageName = "xebia/mesos-dns"
         imageTag = "0.0.5"
-    }
+     }
 
 
-    registrator {
+      registrator {
         imageName = "gliderlabs/registrator"
         imageTag = "v6"
-    }
+     }
 
-    zookeeper {
+      zookeeper {
         imageName = "jplock/zookeeper"
         imageTag = "3.4.6"
-    }
-  }
+     }
+   }
 
 4) Deploy minimesos::
 
