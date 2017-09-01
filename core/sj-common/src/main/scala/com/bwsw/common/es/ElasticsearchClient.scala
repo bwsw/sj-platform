@@ -43,6 +43,7 @@ import org.slf4j.LoggerFactory
 class ElasticsearchClient(hosts: Set[(String, Int)]) {
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val typeName = "_type"
+  System.setProperty("es.set.netty.runtime.available.processors", "false")
   private val client = new PreBuiltTransportClient(Settings.EMPTY)
   hosts.foreach(x => setTransportAddressToClient(x._1, x._2))
   private val deleteByQueryAction = DeleteByQueryAction.INSTANCE.newRequestBuilder(client)
