@@ -743,7 +743,7 @@ The following services are required before the platfrom deployment on minimesos:
 
    Instead of creating each file with appropriate values by hand you may use a script which shall be executed in the minimesos folder.
  
-   Create a file named `createAlLConfigs.sh` with the following `content <>`_. Then execute it::
+   Create a file named `createAlLConfigs.sh` and paste the content specified at :ref:`createAllConfigs.sh` for this script. Then execute it::
  
     $ ./createAlLConfigs.sh
  
