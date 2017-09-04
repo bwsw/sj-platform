@@ -7,14 +7,14 @@ The section provides a detailed step-by-step instruction on Stream Juggler Platf
 
 Currently, the deployment is supported on Mesos.
 
-A complete list of requirements and the deployment procedure description can be found below.
+A complete list of requirements and the deployment procedure description can be found below. This is a demo case for which all the services are deployed and started. Then entities are added to the platform - providers, services, streams, modules and instances. These entities are also of the particular types necessary to solve the demo task.
 
 Overall Deployment Infrastructure
 --------------------------------------------
 
 .. warning:: The section is under development!
 
-The Stream Juggler platform needs the following infrastructure components to be preliminarily deployed:
+The Stream Juggler platform needs the following services to be preliminarily deployed:
 
 - `Apache Mesos <http://mesos.apache.org/>`_  for resource management that allows to run the system at scale and to support different types of workloads.
 
@@ -40,11 +40,10 @@ The platform kernel is coded in Scala.
 
 The UI is presented via Node JS.
 
+Below, you will find necessary instructions to run the services. Two deployment options are described next - on cluster (Mesos) and locally (on minimesos). The steps to deploy services, SJ-Platform, entities for the platform are provided.
 
 Mesos Deployment
 ~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. warning:: The section is under development!
 
 The deployment is performed via REST API.
 
@@ -54,9 +53,9 @@ Firstly, deploy Mesos and other services.
 
 Please, note, the deployment is described for one default Mesos-slave with available ports [31000-32000]. 
 
-Docker containers should be supported for Mesos-slave. For Docker deployment follow the instructions at the official `installation guide <https://docs.docker.com/engine/installation/linux/docker-ce/ubuntu/#install-docker-ce>`_
+2. Docker containers should be supported for Mesos-slave. For Docker deployment follow the instructions at the official `installation guide <https://docs.docker.com/engine/installation/linux/docker-ce/ubuntu/#install-docker-ce>`_
 
-Install Java::
+3. Install Java::
                                          
  $ sudo add-apt-repository ppa:webupd8team/java
  $ sudo apt-get update
@@ -65,12 +64,12 @@ Install Java::
 
 Find detailed instructions on Java deployment in the `installation guide <https://tecadmin.net/install-oracle-java-8-ubuntu-via-ppa/>`_.
 
-Start Mesos-master, Mesos-slave and the services. 
+4. Start Mesos-master, Mesos-slave and the services. 
 
 After performing all the steps, make sure you have access to Mesos interface, Marathon interface. Zookeeper now should be active.
 
 
-2. Create json files and a configuration file (config.properties). Please, name them as it is specified here.
+5. Create json files and a configuration file (config.properties). Please, name them as it is specified here.
 
 **mongo.json**::
 
@@ -393,12 +392,12 @@ Then launch Elasticsearch::
 
 Via the Marathon interface make sure the services are deployed.
 
-4. Add the settings if running the framework on Mesos needs principal/secret:: 
+6. Add the settings if running the framework on Mesos needs principal/secret:: 
 
    $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"framework-principal\",\"value\": <principal>,\"domain\": \"configuration.system\"}" 
    $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"framework-secret\",\"value\": <secret>,\"domain\": \"configuration.system\"}" 
 
-5. Copy the project for the GitHub repository of the SJ-Platform::
+7. Copy the project for the GitHub repository of the SJ-Platform::
 
    $ git clone https://github.com/bwsw/sj-platform.git
 
@@ -524,9 +523,7 @@ Launch the created instances by sending GET request for each instance (please, r
  $ curl --request GET "http://$address/v1/modules/output-streaming/pingstation-output/1.0/instance/pingstation-output/start" 
 
  
-Start Flow
-""""""""""""""""""""""""
-Start the flow of data into the system. Now the data is delevered into the system. The instance(-s) starts data processing. 
+Now the data can be delevered into the system. The instance(-s) starts data processing. 
 
 View, monitor and manage instance performance via the UI.
 
@@ -534,12 +531,10 @@ View, monitor and manage instance performance via the UI.
 Minimesos Deployment
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. warning:: The section is under development!
-
-Requirements: 
+The following services are required before the platfrom deployment on minimesos: 
 
 - git,
-- sbt (downloading instructions `here <http://www.scala-sbt.org/download.html>`_),
+- sbt (find downloading instructions `here <http://www.scala-sbt.org/download.html>`_),
 - Docker,
 - cURL
 
