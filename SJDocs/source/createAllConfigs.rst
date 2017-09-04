@@ -1,3 +1,5 @@
+.. _createAllConfigs.sh:
+
 Script for Creating Service Configurations
 ========================================================
 
