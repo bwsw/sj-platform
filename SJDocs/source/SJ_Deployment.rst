@@ -57,12 +57,12 @@ Please, note, the deployment is described for one default Mesos-slave with avail
 
 3. Install Java::
                                          
- $ sudo add-apt-repository ppa:webupd8team/java
- $ sudo apt-get update
- $ sudo apt-get install oracle-java8-installer
- $ sudo apt-get install oracle-java8-set-default
+    $ sudo add-apt-repository ppa:webupd8team/java
+    $ sudo apt-get update
+    $ sudo apt-get install oracle-java8-installer
+    $ sudo apt-get install oracle-java8-set-default
 
-Find detailed instructions on Java deployment in the `installation guide <https://tecadmin.net/install-oracle-java-8-ubuntu-via-ppa/>`_.
+   Find detailed instructions on Java deployment in the `installation guide <https://tecadmin.net/install-oracle-java-8-ubuntu-via-ppa/>`_.
 
 4. Start Mesos-master, Mesos-slave and the services. 
 
