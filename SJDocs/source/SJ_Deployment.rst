@@ -52,7 +52,7 @@ Firstly, deploy Mesos and other services.
 
 1. Deploy Mesos, Marathon, Zookeeper. You can follow the instructions at the official `instalation guide <http://www.bogotobogo.com/DevOps/DevOps_Mesos_Install.php>`_ .
 
-Please, note, Docker container should be supported for Mesos-slave.
+Please, note, the deployment is described for one default Mesos-slave with available ports [31000-32000]. Docker container should be supported for Mesos-slave.
 
 For Docker deployment follow the instructions at the official `installation guide <https://docs.docker.com/engine/installation/linux/docker-ce/ubuntu/#install-docker-ce>`_
 
@@ -212,7 +212,7 @@ For sj-rest.json it is better to upload the docker image separately::
    "mem":256
  }
 
-**Configuration properties** (replace <zk_ip> with a valid ip)::
+**Configuration properties** (replace <zk_ip> with a valid zookeeper ip)::
 
  key=pingstation
  active.tokens.number=100
@@ -269,7 +269,7 @@ For sj-rest.json it is better to upload the docker image separately::
 
 
 
-**tts.json** (replace <path_to_conf_directory> with an appropriate path to the configuration directory on your computer and <external_host> with a valid host)::
+**tts.json** (replace <path_to_conf_directory> with an appropriate path to the configuration directory on your computer and replace <slave_advertise_ip> with slave advertise IP)::
 
  {
     "id": "tts",
@@ -277,7 +277,7 @@ For sj-rest.json it is better to upload the docker image separately::
         "type": "DOCKER",
         "volumes": [
             {
-                "containerPath": "/etc/conf",
+                "containerPath": "/etc/conf/config.properties",
                 "hostPath": "<path_to_conf_directory>",
                 "mode": "RO" 
             }
@@ -304,19 +304,19 @@ For sj-rest.json it is better to upload the docker image separately::
     "cpus": 0.1,
     "mem": 512,
     "env": {
-      "HOST":"<external_host>",
+      "HOST":"<slave_advertise_ip>",
       "PORT0":"31071" 
     }
 }
 
-**kibana.json**::
+**kibana.json** (<slave_advertise_ip> should be replaced with slave advertise IP)::
 
  {  
    "id":"kibana",
    "container":{  
       "type":"DOCKER",
       "docker":{  
-         "image":"kibana",
+         "image":"kibana:5.5.1",
          "network":"BRIDGE",
          "portMappings":[  
             {  
@@ -337,7 +337,7 @@ For sj-rest.json it is better to upload the docker image separately::
    "cpus":0.1,
    "mem":256,
    "env":{  
-      "ELASTICSEARCH_URL":"http://172.17.0.1:31920" 
+      "ELASTICSEARCH_URL":"https://<slave_advertise_ip>:31920" 
    }
  }
 
@@ -498,10 +498,10 @@ Requirements:
 
 - git,
 - sbt (downloading instructions `here <http://www.scala-sbt.org/download.html>`_),
-- docker,
-- curl
+- Docker,
+- cURL
 
-1) Pull and assemble the first project::
+1) Pull and assemble the SJ-Platform project::
 
     git clone https://github.com/bwsw/sj-platform.git
     cd sj-platform
@@ -514,7 +514,7 @@ Requirements:
 
     cd ..
 
-2) Pull and assemble the second project::
+2) Pull and assemble the demo project::
 
     git clone https://github.com/bwsw/sj-fping-demo.git
     cd sj-fping-demo
@@ -528,31 +528,41 @@ Requirements:
  
     curl -sSL https://minimesos.org/install | sh
 
- This command will display in terminal result like::
+   This command will be displayed in the terminal result::
 
-   Run the following command to add it to your executables path:
-   export PATH=$PATH:/root/.minimesos/bin
+    Run the following command to add it to your executables path:
+    export PATH=$PATH:/root/.minimesos/bin
 
- Create a directory to place all minimesos-related files::
+   You should execute this export command::
+  
+    export PATH=$PATH:/root/.minimesos/bin
 
-   mkdir ~/minimesos
-   cd ~/minimesos
+   Also, you can append this command to the end of file ~/.profile to have this instruction executed on each login. 
 
- Then you need to create minimesosFile::
+   Create a directory to place all minimesos-related files::
+
+    mkdir ~/minimesos
+    cd ~/minimesos
+
+   Then you need to create `minimesosFile`::
  
-   touch minimesosFile
+    touch minimesosFile
 
- and place into it all following settings::
+   Open the file to edit it::
+  
+    nano minimesosFile
+ 
+   Copy and paste all the following settings into it::
 
-   minimesos {
-    clusterName = "Minimesos Cluster"
-    loggingLevel = "INFO"
-    mapAgentSandboxVolume = false
-    mapPortsToHost = true
-    mesosVersion = "1.0.0"
-    timeout = 60
+    minimesos {
+     clusterName = "Minimesos Cluster"
+     loggingLevel = "INFO"
+     mapAgentSandboxVolume = false
+     mapPortsToHost = true
+     mesosVersion = "1.0.0"
+     timeout = 60
 
-    agent {
+      agent {
         imageName = "containersol/mesos-agent"
         imageTag = "1.0.0-0.1.0"
         loggingLevel = "# INHERIT FROM CLUSTER"
@@ -580,14 +590,14 @@ Requirements:
                 value = "[31000-32000]"
             }
         }
-    }
+      }
 
-    consul {
+      consul {
         imageName = "consul"
         imageTag = "0.7.1"
-    }
+     }
 
-    marathon {
+      marathon {
         cmd = "--master zk://minimesos-zookeeper:2181/mesos --zk zk://minimesos-zookeeper:2181/marathon"
         imageName = "mesosphere/marathon"
         imageTag = "v1.3.5"
@@ -596,112 +606,110 @@ Requirements:
         app {
             marathonJson = "https://raw.githubusercontent.com/ContainerSolutions/minimesos/e2a43362f4581122762c80d8780d09b567783f1a/apps/weave-scope.json"
         }
-    }
+     }
 
-    master {
+      master {
         aclJson = null
         authenticate = false
         imageName = "containersol/mesos-master"
         imageTag = "1.0.0-0.1.0"
         loggingLevel = "# INHERIT FROM CLUSTER"
-    }
+     }
 
-    mesosdns {
+      mesosdns {
         imageName = "xebia/mesos-dns"
         imageTag = "0.0.5"
-    }
+     }
 
 
-    registrator {
+      registrator {
         imageName = "gliderlabs/registrator"
         imageTag = "v6"
-    }
+     }
 
-    zookeeper {
+      zookeeper {
         imageName = "jplock/zookeeper"
         imageTag = "3.4.6"
-    }
-  }
+     }
+   }
 
 4) Deploy minimesos::
 
-    minimesos up
+    $ minimesos up
 
- Try to launch minimesos until you will see the following result (it can differ from the example because IPs can differ)::
+   Try to launch minimesos until you will see the following result (it can differ from the example because IPs can differ)::
 
-  export MINIMESOS_NETWORK_GATEWAY=172.17.0.1
-  export MINIMESOS_AGENT=http://172.17.0.7:5051; export  MINIMESOS_AGENT_IP=172.17.0.7
-  export MINIMESOS_ZOOKEEPER=zk://172.17.0.3:2181/mesos; export MINIMESOS_ZOOKEEPER_IP=172.17.0.3
-  export MINIMESOS_MARATHON=http://172.17.0.6:8080; export MINIMESOS_MARATHON_IP=172.17.0.6
-  export MINIMESOS_CONSUL=http://172.17.0.8:8500; export MINIMESOS_CONSUL_IP=172.17.0.8
-  export MINIMESOS_MESOSDNS=http://172.17.0.4:53; export MINIMESOS_MESOSDNS_IP=172.17.0.4
-  export MINIMESOS_MASTER=http://172.17.0.5:5050; export MINIMESOS_MASTER_IP=172.17.0.5
+    export MINIMESOS_NETWORK_GATEWAY=172.17.0.1
+    export MINIMESOS_AGENT=http://172.17.0.7:5051; export MINIMESOS_AGENT_IP=172.17.0.7
+    export MINIMESOS_ZOOKEEPER=zk://172.17.0.3:2181/mesos; export MINIMESOS_ZOOKEEPER_IP=172.17.0.3
+    export MINIMESOS_MARATHON=http://172.17.0.6:8080; export MINIMESOS_MARATHON_IP=172.17.0.6
+    export MINIMESOS_CONSUL=http://172.17.0.8:8500; export MINIMESOS_CONSUL_IP=172.17.0.8
+    export MINIMESOS_MESOSDNS=http://172.17.0.4:53; export MINIMESOS_MESOSDNS_IP=172.17.0.4
+    export MINIMESOS_MASTER=http://172.17.0.5:5050; export MINIMESOS_MASTER_IP=172.17.0.5
+    Running dnsmasq? Add 'server=/mm/172.17.0.4#53' to /etc/dnsmasq.d/10-minimesos to resolve master.mm, zookeeper.mm and Marathon apps on app.marathon.mm.
 
- Execute all mentioned lines (export all variables with corresponding values and execute the command from the last line).
+   If the result is not the same (absence of the last line or/and lack of some exports) you shall execute the following command::
 
- If the result is not the same (for the absence of the last line or/and lack of some exports) you shall execute the following command::
+    $ minimesos destroy
 
-  minimesos destroy
+   and try to launch minimesos again.
 
- and try to launch minimesos again.
-
- After running minimesos, install dnsmasq::
+   Execute all the lines from the respond. First, export all variables with corresponding values.
+ 
+   Then, execute the command from the last line. Open the file for editing::
+ 
+    $ nano /etc/dnsmasq.d/10-minimesos
+   
+   Paste the line below in it (make sure the IP is the dns IP)::
   
-  sudo apt-get install dnsmasq
+    server=/mm/172.17.0.4#53
+ 
+   After running minimesos, install dnsmasq::
+  
+    $ sudo apt-get install dnsmasq
 
- After launching you can see weavescope app (https://github.com/weaveworks/scope) on port 4040.
+   And launch it:: 
+  
+    $ sudo service dnsmasq restart
+ 
+   After launching you can see weavescope app (https://github.com/weaveworks/scope) on port 4040.
 
- This application is an instrument to visualize, monitor your docker containers. It generates the map that can look like at the picture below:
+   This application is an instrument to visualize, monitor your docker containers. It generates the map that can look like at the picture below: (image here)
 
- .. _static/wavescope4.png
+   Besides you can obtain access to Mesos on port 5050: (image here)
 
- Besides you can obtain access to Mesos on port 5050:
+   and also access to Marathon on port 8080: (image here)
 
- .. _static/
+   Check dns by ping master node::
 
- and also access to Marathon on port 8080:
+    $ ping -c 4 master.mm
 
- .. _static/
+   At the end you can see::
 
- Check dns by ping master node::
-
-  ping -c 4 master.mm
-
- At the end you can see::
-
-  4 packets transmitted, 4 received, 0% packet loss
+    4 packets transmitted, 4 received, 0% packet loss
 
 
 5) Deploy services
 
- Create the following files in the minimesos folder (mongo.json, sj-rest.json, etc.) and run services with the provided commands.
+   Create the following files in the minimesos folder (mongo.json, sj-rest.json, etc.) and run services with the provided commands.
 
- In each file you shall perform some replacements:
+   In each file you shall perform some replacements:
 
  - use value of the MINIMESOS_ZOOKEEPER_IP variable (can be found in the previous step) instead of <zk-ip>
 
  - use value of the MINIMESOS_MESOSDNS_IP variable (can be found in the previous step) instead of <dns-ip>
 
- Instead of creating each file with appropriate values by hand you may use the provided script (createAlLConfigs.sh) which shall be executed in the minimesos folder.
-
- After deploying each service you may see corresponding applications in Marathon UI (port 8080) and corresponding tasks in Mesos UI (port 5050). The graph structure provided by weavescope will surely change (port 4040).
-
- Marathon
-
- .. _static/
-
-
- Mesos
-
- .. _static
+   Instead of creating each file with appropriate values by hand you may use a script which shall be executed in the minimesos folder.
  
- Wavescope
+   Create a file named `createAlLConfigs.sh` with the following content. Then execute it::
+ 
+    $ ./createAlLConfigs.sh
+ 
+   The json files will be created in the minimesos folder. All you need now is to deploy them to the system. Use the commands provided below for each json file.
 
- .. _static/
+   After deploying each service you may see corresponding applications in Marathon UI (port 8080) and corresponding tasks in Mesos UI (port 5050). The graph structure provided by weavescope will surely change (port 4040).
 
-* mongo.json
-
-``minimesos install --marathonFile mongo.json`` ::
+**mongo.json**::
 
  {  
    "id":"mongo",
@@ -711,28 +719,28 @@ Requirements:
         {
           "containerPath": "/data/db",
           "hostPath": "mongo_data",
-          "mode": "RW"
+          "mode": "RW" 
         }
       ],
       "docker":{  
-         "image":"mongo",
+         "image":"mongo:3.4.7",
          "network":"BRIDGE",
          "portMappings":[  
             {  
                "containerPort":27017,
                "hostPort":0,
-               "protocol":"tcp"
+               "protocol":"tcp" 
             }
          ],
          "parameters":[  
             {  
                "key":"restart",
-               "value":"always"
+               "value":"always" 
             },
- 	    {
-		"key":"dns",
-		"value": <dns-ip>
-	    }
+         {
+        "key":"dns",
+        "value": "<dns-ip>" 
+        }
          ]
       }
    },
@@ -741,12 +749,12 @@ Requirements:
    "mem":512
  }
 
+And install it::
+ 
+ $ minimesos install --marathonFile mongo.json
 
 
-
-* sj-rest.json
-
-``minimesos install --marathonFile sj-rest.json`` ::
+**sj-rest.json** (replace <dns-ip> and <zk-ip> with valid IPs)::
 
  {  
    "id":"sj-rest",
@@ -784,41 +792,41 @@ Requirements:
    }
  }
 
+And install it::
 
+ $ minimesos install --marathonFile sj-rest.json
 
-* kafka.json
-
-``minimesos install --marathonFile kafka.json`` ::
+**kafka.json** (replace <dns-ip> and <zk-ip> with valid IPs)::
 
  {  
    "id":"kafka",
    "container":{  
       "type":"DOCKER",
       "docker":{  
-         "image":"ches/kafka",
+         "image":"ches/kafka:0.10.2.1",
          "network":"BRIDGE",
          "portMappings":[  
             {  
                "containerPort":9092,
                "hostPort":0,
                "servicePort":9092,
-               "protocol":"tcp"
+               "protocol":"tcp" 
             },
-		{  
+        {  
                "containerPort":7203,
                "hostPort":0,
                "servicePort":7203,
-               "protocol":"tcp"
+               "protocol":"tcp" 
             }
          ],
          "parameters":[  
             {  
                "key":"restart",
-               "value":"always"
+               "value":"always" 
             },
             {
-		"key":"dns",
-		"value": <dns-ip>
+        "key":"dns",
+        "value": "<dns-ip>" 
             }
          ]
       }
@@ -828,16 +836,15 @@ Requirements:
    "mem":512,
    "env":{  
       "ZOOKEEPER_IP":"<zk-ip>",
-      "KAFKA_ADVERTISED_HOST_NAME":"kafka"
+      "KAFKA_ADVERTISED_HOST_NAME":"kafka" 
    }
  }
 
+And install it::
 
+ $ minimesos install --marathonFile kafka.json
 
-* elasticsearch.json
-
-``sudo sysctl -w vm.max_map_count=262144``
-``minimesos install --marathonFile elasticsearch.json`` ::
+**elasticsearch.json** (replace <dns-ip> with a valid IP)::
 
  {   
    "id":"elasticsearch",
@@ -876,11 +883,12 @@ Requirements:
    "mem":2560
  }
 
+And install it::
 
-
-* kibana.json
-
-``minimesos install --marathonFile kibana.json`` ::
+ $ sudo sysctl -w vm.max_map_count=262144
+ $ minimesos install --marathonFile elasticsearch.json
+ 
+**kibana.json** (replace <dns-ip> with a valid IP)::
 
  {  
    "id":"kibana",
@@ -916,11 +924,14 @@ Requirements:
    }
  }
 
+And install it::
+
+ $ minimesos install --marathonFile kibana.json
 
 
-* config.properties
+**config.properties**
 
-In this file instead of <path_to_conf_directory> you shall specify path to directory with config.properties file ::
+In this file instead of <path_to_conf_directory> you shall specify path to directory with the `config.properties` file ::
 
  key=pingstation
  active.tokens.number=100
@@ -975,11 +986,9 @@ In this file instead of <path_to_conf_directory> you shall specify path to direc
  transaction-database.transaction-keeptime-min=70000
  subscribers.update.period-ms=500
 
-* tts.json
+**tts.json**::
 
-``minimesos install --marathonFile tts.json`` ::
-
- {
+  {
     "id": "tts",
     "container": {
         "type": "DOCKER",
@@ -1017,40 +1026,42 @@ In this file instead of <path_to_conf_directory> you shall specify path to direc
     }
  }
 
+And install it::
 
+ $ minimesos install --marathonFile tts.json
 
 6) Upload engine jars::
 
-    cd  sj-platform
+    $ cd  sj-platform
 
-    address=sj-rest.marathon.mm:8080
+    $ address=sj-rest.marathon.mm:8080
 
-    curl --form jar=@core/sj-mesos-framework/target/scala-2.12/sj-mesos-framework-1.0- SNAPSHOT.jar http://$address/v1/custom/jars
-    curl --form jar=@core/sj-input-streaming-engine/target/scala-2.12/sj-input-streaming-engine-1.0-SNAPSHOT.jar http://$address/v1/custom/jars
-    curl --form jar=@core/sj-regular-streaming-engine/target/scala-2.12/sj-regular-streaming-engine-1.0-SNAPSHOT.jar http://$address/v1/custom/jars
-    curl --form jar=@core/sj-output-streaming-engine/target/scala-2.12/sj-output-streaming-engine-1.0-SNAPSHOT.jar http://$address/v1/custom/jars
+    $ curl --form jar=@core/sj-mesos-framework/target/scala-2.12/sj-mesos-framework-1.0- SNAPSHOT.jar http://$address/v1/custom/jars
+    $ curl --form jar=@core/sj-input-streaming-engine/target/scala-2.12/sj-input-streaming-engine-1.0-SNAPSHOT.jar http://$address/v1/custom/jars
+    $ curl --form jar=@core/sj-regular-streaming-engine/target/scala-2.12/sj-regular-streaming-engine-1.0-SNAPSHOT.jar http://$address/v1/custom/jars
+    $ curl --form jar=@core/sj-output-streaming-engine/target/scala-2.12/sj-output-streaming-engine-1.0-SNAPSHOT.jar http://$address/v1/custom/jars
 
-7) Setup settings for engine::
+7) Set up settings for the engines::
 
-    curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"session-timeout\",\"value\": \"7000\",\"domain\": \"zk\"}"
-    curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"current-framework\",\"value\": \"com.bwsw.fw-1.0\",\"domain\": \"system\"}"
+    $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"session-timeout\",\"value\": \"7000\",\"domain\": \"zk\"}"
+    $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"current-framework\",\"value\": \"com.bwsw.fw-1.0\",\"domain\": \"system\"}"
 
-    curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"crud-rest-host\",\"value\": \"sj-rest.marathon.mm\",\"domain\": \"system\"}"
-    curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"crud-rest-port\",\"value\": \"8080\",\"domain\": \"system\"}"
+    $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"crud-rest-host\",\"value\": \"sj-rest.marathon.mm\",\"domain\": \"system\"}"
+    $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"crud-rest-port\",\"value\": \"8080\",\"domain\": \"system\"}"
 
-    curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"marathon-connect\",\"value\": \"http://marathon.mm:8080\",\"domain\": \"system\"}"
-    curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"marathon-connect-timeout\",\"value\": \"60000\",\"domain\": \"system\"}"
-    curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"kafka-subscriber-timeout\",\"value\": \"100\",\"domain\": \"system\"}"
-    curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"low-watermark\",\"value\": \"100\",\"domain\": \"system\"}" 
+    $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"marathon-connect\",\"value\": \"http://marathon.mm:8080\",\"domain\": \"system\"}"
+    $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"marathon-connect-timeout\",\"value\": \"60000\",\"domain\": \"system\"}"
+    $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"kafka-subscriber-timeout\",\"value\": \"100\",\"domain\": \"system\"}"
+    $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"low-watermark\",\"value\": \"100\",\"domain\": \"system\"}" 
 
-    curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"regular-streaming-validator-class\",\"value\": \"com.bwsw.sj.crud.rest.instance.validator.RegularInstanceValidator\",\"domain\": \"system\"}"
-    curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"input-streaming-validator-   class\",\"value\": \"com.bwsw.sj.crud.rest.instance.validator.InputInstanceValidator\",\"domain\": \"system\"}"
-    curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"output-streaming-validator-class\",\"value\": \"com.bwsw.sj.crud.rest.instance.validator.OutputInstanceValidator\",\"domain\": \"system\"}"
+    $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"regular-streaming-validator-class\",\"value\": \"com.bwsw.sj.crud.rest.instance.validator.RegularInstanceValidator\",\"domain\": \"system\"}"
+    $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"input-streaming-validator-   class\",\"value\": \"com.bwsw.sj.crud.rest.instance.validator.InputInstanceValidator\",\"domain\": \"system\"}"
+    $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"output-streaming-validator-class\",\"value\": \"com.bwsw.sj.crud.rest.instance.validator.OutputInstanceValidator\",\"domain\": \"system\"}"
 
 8) Now modules can be set up::
 
-    cd ..
-    cd sj-fping-demo
+    $ cd ..
+    $ cd sj-fping-demo
 
 .. _Create_Platform_Entites:
 

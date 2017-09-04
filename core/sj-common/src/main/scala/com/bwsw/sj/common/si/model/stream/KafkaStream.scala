@@ -24,7 +24,6 @@ import com.bwsw.common.KafkaClient
 import com.bwsw.sj.common.config.SettingsUtils
 import com.bwsw.sj.common.dal.model.service.KafkaServiceDomain
 import com.bwsw.sj.common.dal.model.stream.KafkaStreamDomain
-import com.bwsw.sj.common.utils.ServiceLiterals
 import kafka.common.TopicAlreadyMarkedForDeletionException
 import org.apache.kafka.common.errors.TopicExistsException
 import scaldi.Injectable.inject
@@ -49,7 +48,6 @@ class KafkaStream(name: String,
 
   private val settingsUtils = inject[SettingsUtils]
   private val timeout = settingsUtils.getZkSessionTimeout()
-  override protected val serviceType = ServiceLiterals.kafkaType
 
   override def to(): KafkaStreamDomain = {
     val serviceRepository = connectionRepository.getServiceRepository

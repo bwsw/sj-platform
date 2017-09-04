@@ -12,7 +12,7 @@ There are two kinds of streams in SJ-Platform:
 
 - An input stream - a stream which provides new events. There are two different input stream types in SJ-Platform: TCP, Apache Kafka and T-Streams.
 
-- An output stream - a stream which is a destination for results. There is one output stream type in SJ-Platform: T-Streams.
+- An output stream - a stream which is a destination for results. Within SJ-Platform the results are written in T-Streams. To export the processed data from T-streams additional output streams are required. They are created for an output module and correspond to the type of the external storage. For now, Elasticsearch, SQL database and RESTful output stream types are supported.
 
 Input Streams
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -84,9 +84,9 @@ The diagram of platform entities interconnections can be useful in selecting the
 
 .. figure:: _static/InstanceCorrelation1.png
 
-Firstly, decide what type of modules will be included into the pipeline. These modules will require instances of a particular type. So determine the type of instances that will be created.
+Firstly, decide what types of instances will perform processing in the pipeline. 
 
-That will help to clarify which streams are required for these particular instances.
+Determined instance types will help to clarify which streams are required for these particular instances.
 
 Secondly, find in the diagram what services are necessary for these types of streams. 
 

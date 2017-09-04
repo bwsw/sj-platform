@@ -19,7 +19,7 @@
       1
     ],
     "types": [
-      "stream.elasticsearch"
+      "stream.sql-database"
     ]
   },
   "module-type": "output-streaming",

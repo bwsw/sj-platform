@@ -102,6 +102,51 @@ And the first step is the system deployment.
 Step 1. Deployment 
 -----------------------------
 
+Though SJ-Platform is quite a complex system and it includes a range of necessary services, no special skills are required for its deployment. 
+
+There are three options to deploy the platform. Please, read the description for each option and choose the most convenient for you.
+
+**Option 1.** The easiest way is to deploy SJ-Platform on `a virtual machine <http://streamjuggler.readthedocs.io/en/develop/SJ_Demo_Deployment.html>`_. This is the most rapid way to get acquainted with the platform and assess its performance. 
+
+We suggest deploying the platform locally via Vagrant with VirtualBox as a provider. It takes up to 30 minutes. 
+
+The following technical requirements should be met:
+
+- At least 8 GB of free RAM;
+- VT-x must be enabled in BIOS;
+- Vagrant 1.9.1 installed;
+- VirtualBox 5.0.40 installed.
+
+These requirements are provided for deployment on Ubuntu 16.04 OS.
+
+The platform is deployed with all entities necessary to demonstrate the solution for the example task: providers, services, streams, configurations. So the instructions below for creating entities can be omitted. You may read about platform components here in the deployment step details and see the result in the UI.
+
+**Option 2.** Another option is to deploy the platform on a cluster. Currently, the deployment on `Mesos  <http://streamjuggler.readthedocs.io/en/develop/SJ_Deployment.html#mesos-deployment>`_ as a universal distributed computational engine is supported.
+
+The following technical requirements should be met:
+
+- working Linux host with 4-8 GB of RAM and 4 CPU cores; 
+- Docker installed;
+- cURL;
+- sbt.  
+
+The platform is deployed with no entities. Thus, the pipeline can be structured from scratch. 
+
+This tutorial provides step-by-step instructions for demo project deployment on Mesos. At first step, Mesos with all the services will be deployed. Then entities will be added to the platform. Finally, modules will be launched and results will be rendered in a diagram.
+
+**Option 3.** Also, you can run SJ-Platform locally deploying it on `minimesos <http://streamjuggler.readthedocs.io/en/develop/SJ_Deployment.html#minimesos-deployment>`_ as a testing environment.
+
+The following technical requirements should be met: 
+
+- git, 
+- sbt (http://www.scala-sbt.org/download.html), 
+- Docker, 
+- cURL.
+
+For the example task, the instructions are provided for the system deployment **on Mesos**.
+
+The deployment is performed via REST API.
+
 The system works on the basis of the following core technologies: Apache Mesos, Apache Zookeeper, Apache Kafka, Docker, MongoDB, Hazelcast, Elasticsearch, SQL database, REST.
 
 To solve the example task we need to deploy:
@@ -117,33 +162,7 @@ To solve the example task we need to deploy:
 9) Elasticsearch - as an external data storage;
 10) Kibana - to visualize Elasticsearch data.
 
-There are 2 ways of the platform deployment – on `a cluster (on Mesos) <http://streamjuggler.readthedocs.io/en/develop/SJ_Deployment.html#mesos-deployment>`_ and `locally (on minimesos) <http://streamjuggler.readthedocs.io/en/develop/SJ_Deployment.html#minimesos-deployment>`_. Choose which is more convenient for you. 
-
-The following technical requirements should be met:
-
-- working Linux host with 4-8 GB of RAM and 4 CPU cores; 
-- Docker installed;
-- cURL;
-- sbt.  
-
-Besides, SJ-Platform can be deployed on `a virtual machine <http://streamjuggler.readthedocs.io/en/develop/SJ_Demo_Deployment.html>`_. We suggest deploying the platform locally via Vagrant with VirtualBox as a provider.
-
-This is the most rapid way to get acquainted with the platform and assess its performance. It takes up to 30 minutes. The platform is deployed with all entities necessary to demonstrate the solution for the example task: providers, services, streams, configurations.
-
-The following technical requirements should be met:
-
-- At least 8 GB of free RAM;
-- VT-x must be enabled in BIOS;
-- Vagrant 1.9.1 installed;
-- VirtualBox 5.0.40 installed.
-
-These requirements are provided for deployment on Ubuntu 16.04 OS.
-
-For the example task, the instructions are provided for the system **deployment on Mesos**.
-
-The deployment is performed via REST API.
-
-So, as a first step deploy Mesos and other services.
+So, as a first step you should deploy Mesos and other services.
 
 1) Deploy Mesos, Marathon, Zookeeper. You can follow the instructions at the official `installation guide <http://www.bogotobogo.com/DevOps/DevOps_Mesos_Install.php>`_ .
 
@@ -598,19 +617,22 @@ Step 4. Creating Streaming Layer
 
 The raw data is fed to the platform from different sources. And within the platform, the data is passed to and from a module in streams. Thus, in the next step, the streams for data ingesting and exporting will be created.
 
-Prior to creating a stream, the infrastructure needs to be created for the streaming layer.
-
 Different modules require different stream types for input and output.
                    
-A module receives data from input streams from TCP or Kafka. Within the platform, the data is transported to and from modules via T-streams. It is a native streaming type for SJ-Platform that allows exactly-once data exchange between modules. 
+A module receives data from input streams from TCP or Kafka. 
 
+Within the platform, the data is transported to and from modules via T-streams. It is a native streaming type for SJ-Platform that allows exactly-once data exchange between modules. 
+
+A result data is exported from SJ-Plaform to an external storage with streams of types corresponding to the type of that storage: Elasticsearch, SQL database and RESTful.
 
 .. figure:: _static/ModuleStreams.png
    :scale: 80%
 
-Streams need infrastructure: **Providers** and **Services**. This is a required presetting without which streaming will not be so flexible. 
+Prior to creating a stream, the infrastructure needs to be created for the streaming layer.
 
-Streaming flexibility lies in the one-to-many connection between providers and services, services and streams. One provider works with many services (they can be of various types) as well as one service can provide several streams. These streams take necessary settings from the common infrastructure (providers and services). There is no need to duplicate the settings for each individual stream.
+The infrastructure for streams include **providers** and **services**. This is a required presetting without which streaming will not be so flexible. 
+
+Streaming flexibility lies in a one-to-many connection between providers and services, services and streams. One provider works with many services (they can be of various types) as well as one service can provide several streams. These streams take necessary settings from the common infrastructure (providers and services). There is no need to duplicate the settings for each individual stream.
 
 The type of Provider and Service is determined with the type of streams. Find more about types of platform entities at `the UI guide <http://streamjuggler.readthedocs.io/en/develop/SJ_UI_Guide.html#get-started>`_ .
 
@@ -644,8 +666,9 @@ Besides, the Apache Zookeeper provider is required for T-streams service that is
 The provider and the service of Elasticsearch type are required by the Elasticsearch output streams to put the result in the Elasticsearch data storage.
 
 As a result, the following infrastructure is to be created:
-Providers of Apache Zookeeper and Elasticsearch types;
-Services of  Apache Zookeeper, T-streams and Elasticsearch types.
+
+- Providers of Apache Zookeeper and Elasticsearch types;
+- Services of Apache Zookeeper, T-streams and Elasticsearch types.
 
 
 1) Set up providers.

@@ -8,7 +8,6 @@
 		"7dc34ab6-ba30-5cb7-99c9-0368ba9e1f51",
 		"d9273ec9-1252-aa0c-f92f-22eb86803020",
 		"170a5986-6181-6735-e5f0-5101ce3b7d5d",
-		"f7820f1e-3fbd-78bb-672f-f3296b2219c2",
 		"16a3e83b-faf7-4c08-d3e8-96929f822654"
 	],
 	"folders": [],
@@ -28,11 +27,12 @@
 				{
 					"key": "jar",
 					"type": "file",
+                    "value": "sj-batch-streaming-engine.jar",
 					"enabled": true
 				}
 			],
 			"dataMode": "params",
-			"name": "sj-batch-streaming-engine-1.0-SNAPSHOT",
+			"name": "sj-batch-streaming-engine",
 			"description": "",
 			"descriptionFormat": "html",
 			"time": 1491878282985,
@@ -52,7 +52,7 @@
 			"data": [
 				{
 					"key": "file",
-					"value": "mysql-connector-java-5.1.6-bin.jar",
+					"value": "mysql-connector-java-5.1.6.jar",
 					"type": "file",
 					"enabled": true
 				}
@@ -79,11 +79,12 @@
 				{
 					"key": "jar",
 					"type": "file",
+                    "value": "sj-regular-streaming-engine.jar",
 					"enabled": true
 				}
 			],
 			"dataMode": "params",
-			"name": "sj-regular-streaming-engine-1.0-SNAPSHOT",
+			"name": "sj-regular-streaming-engine",
 			"description": "",
 			"descriptionFormat": "html",
 			"time": 1491878371958,
@@ -105,11 +106,12 @@
 				{
 					"key": "jar",
 					"type": "file",
+                    "value": "sj-mesos-framework.jar",
 					"enabled": true
 				}
 			],
 			"dataMode": "params",
-			"name": "sj-mesos-framework-1.0-SNAPSHOT",
+			"name": "sj-mesos-framework",
 			"description": "",
 			"descriptionFormat": "html",
 			"time": 1491878320271,
@@ -131,11 +133,12 @@
 				{
 					"key": "jar",
 					"type": "file",
+                    "value": "sj-output-streaming-engine.jar",
 					"enabled": true
 				}
 			],
 			"dataMode": "params",
-			"name": "sj-output-streaming-engine-1.0-SNAPSHOT",
+			"name": "sj-output-streaming-engine",
 			"description": "",
 			"descriptionFormat": "html",
 			"time": 1491878336831,
@@ -157,40 +160,15 @@
 				{
 					"key": "jar",
 					"type": "file",
+                    "value": "sj-input-streaming-engine.jar",
 					"enabled": true
 				}
 			],
 			"dataMode": "params",
-			"name": "sj-input-streaming-engine-1.0-SNAPSHOT",
+			"name": "sj-input-streaming-engine",
 			"description": "",
 			"descriptionFormat": "html",
 			"time": 1491878305623,
-			"version": 2,
-			"responses": [],
-			"tests": "tests[\"Status code is 200\"] = responseCode.code === 200;",
-			"currentHelper": "normal",
-			"helperAttributes": {}
-		},
-		{
-			"id": "f7820f1e-3fbd-78bb-672f-f3296b2219c2",
-			"headers": "",
-			"url": "{{address}}/v1/custom/jars",
-			"pathVariables": {},
-			"preRequestScript": null,
-			"method": "POST",
-			"collectionId": "204bf86f-1ae2-7e79-953c-62004ed3c024",
-			"data": [
-				{
-					"key": "jar",
-					"type": "file",
-					"enabled": true
-				}
-			],
-			"dataMode": "params",
-			"name": "sj-transaction-generator-1.0-SNAPSHOT",
-			"description": "",
-			"descriptionFormat": "html",
-			"time": 1491878386251,
 			"version": 2,
 			"responses": [],
 			"tests": "tests[\"Status code is 200\"] = responseCode.code === 200;",

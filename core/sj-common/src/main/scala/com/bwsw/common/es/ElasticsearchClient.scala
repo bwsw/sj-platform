@@ -21,6 +21,7 @@ package com.bwsw.common.es
 import java.net.InetAddress
 import java.util.UUID
 
+import com.bwsw.sj.common.utils.ProviderLiterals
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse
 import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse
@@ -43,7 +44,11 @@ import org.slf4j.LoggerFactory
 class ElasticsearchClient(hosts: Set[(String, Int)]) {
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val typeName = "_type"
-  private val client = new PreBuiltTransportClient(Settings.EMPTY)
+  System.setProperty("es.set.netty.runtime.available.processors", "false")
+  private val settings = Settings.builder()
+    .put("transport.tcp.connect_timeout", ProviderLiterals.connectTimeoutMillis + "ms")
+    .build()
+  private val client = new PreBuiltTransportClient(settings)
   hosts.foreach(x => setTransportAddressToClient(x._1, x._2))
   private val deleteByQueryAction = DeleteByQueryAction.INSTANCE.newRequestBuilder(client)
 

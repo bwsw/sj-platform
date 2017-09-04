@@ -42,12 +42,13 @@
 				{
 					"key": "jar",
 					"type": "file",
-					"enabled": true
+					"enabled": true,
+					"value": "Upload_custom_jar.jar"
 				}
 			],
 			"dataMode": "params",
 			"version": 2,
-			"tests": "tests[\"Body matches string\"] = responseBody.has(\"Custom jar 'Upload_custom_jar.jar' already exists.\");\n\ntests[\"Status code is 200\"] = responseCode.code === 409;",
+			"tests": "tests[\"Body matches string\"] = responseBody.has(\"Custom jar 'Upload_custom_jar.jar' already exists.\");\n\ntests[\"Status code is 400\"] = responseCode.code === 400;",
 			"currentHelper": "normal",
 			"helperAttributes": {},
 			"time": 1488520536132,
@@ -64,13 +65,7 @@
 			"preRequestScript": null,
 			"method": "DELETE",
 			"collectionId": "37fa98c9-1129-8a38-5855-5f46b3c9fe8d",
-			"data": [
-				{
-					"key": "file",
-					"type": "file",
-					"enabled": true
-				}
-			],
+			"data": null,
 			"dataMode": "params",
 			"name": "Delete a custom file NOT found",
 			"description": "",
@@ -78,7 +73,7 @@
 			"time": 1488517190059,
 			"version": 2,
 			"responses": [],
-			"tests": "tests[\"Status code is 200\"] = responseCode.code === 404;\n\ntests[\"Body matches string\"] = responseBody.has(\"Custom file 'test_rest.webp142' has not been found.\");",
+			"tests": "tests[\"Status code is 404\"] = responseCode.code === 404;\n\ntests[\"Body matches string\"] = responseBody.has(\"Custom file 'test_rest.webp142' has not been found.\");",
 			"currentHelper": "normal",
 			"helperAttributes": {}
 		},
@@ -93,7 +88,8 @@
 				{
 					"key": "jar",
 					"type": "file",
-					"enabled": true
+					"enabled": true,
+					"value": "Specification_not_found.jar"
 				}
 			],
 			"dataMode": "params",
@@ -109,18 +105,12 @@
 		{
 			"id": "3970621a-c0b7-d620-b87d-11127a6ac5bb",
 			"headers": "",
-			"url": "{{address}}/v1/custom/jars/Masha.engine/1.0",
+			"url": "{{address}}/v1/custom/jars/Upload_custom_jar/2.9",
 			"pathVariables": {},
 			"preRequestScript": null,
 			"method": "GET",
 			"collectionId": "37fa98c9-1129-8a38-5855-5f46b3c9fe8d",
-			"data": [
-				{
-					"key": "jar",
-					"type": "file",
-					"enabled": true
-				}
-			],
+			"data": null,
 			"dataMode": "params",
 			"name": "Download a custom jar by file name and version",
 			"description": "",
@@ -135,7 +125,7 @@
 		{
 			"id": "4c86089a-7a0e-2dd5-9119-52c5fa732d2b",
 			"headers": "",
-			"url": "{{address}}/v1/custom/jars/Masha.engine/1.0",
+			"url": "{{address}}/v1/custom/jars/Upload_custom_jar/2.9",
 			"pathVariables": {},
 			"preRequestScript": null,
 			"method": "GET",
@@ -159,13 +149,7 @@
 			"preRequestScript": null,
 			"pathVariables": {},
 			"method": "DELETE",
-			"data": [
-				{
-					"key": "jar",
-					"type": "file",
-					"enabled": true
-				}
-			],
+			"data": null,
 			"dataMode": "params",
 			"version": 2,
 			"tests": "tests[\"Status code is 200\"] = responseCode.code === 200;\n\ntests[\"Body matches string\"] = responseBody.has(\"Jar named 'Upload_custom_jar.jar' has been deleted.\");",
@@ -180,20 +164,14 @@
 		{
 			"id": "74c8c2db-42f2-6a7e-5975-06960c7a9096",
 			"headers": "",
-			"url": "{{address}}/v1/custom/jars/Masha.engine/1.0",
+			"url": "{{address}}/v1/custom/jars/Upload_custom_jar_to_delete/1.2.3",
 			"pathVariables": {},
 			"preRequestScript": null,
 			"method": "DELETE",
 			"collectionId": "37fa98c9-1129-8a38-5855-5f46b3c9fe8d",
-			"data": [
-				{
-					"key": "jar",
-					"type": "file",
-					"enabled": true
-				}
-			],
+			"data": null,
 			"dataMode": "params",
-			"name": "Delete a custom jar by file name and version",
+			"name": "Delete a custom jar by file name and version (Upload_custom_jar_to_delete.jar)",
 			"description": "",
 			"descriptionFormat": "html",
 			"time": 1488513381704,
@@ -214,7 +192,8 @@
 				{
 					"key": "jar",
 					"type": "file",
-					"enabled": true
+					"enabled": true,
+					"value": "Invalid_specification.jar"
 				}
 			],
 			"dataMode": "params",
@@ -256,13 +235,7 @@
 			"preRequestScript": null,
 			"method": "DELETE",
 			"collectionId": "37fa98c9-1129-8a38-5855-5f46b3c9fe8d",
-			"data": [
-				{
-					"key": "file",
-					"type": "file",
-					"enabled": true
-				}
-			],
+			"data": null,
 			"dataMode": "params",
 			"name": "Delete a custom file",
 			"description": "",
@@ -277,18 +250,12 @@
 		{
 			"id": "99907572-5015-3ce6-b626-1ed150b05ea0",
 			"headers": "",
-			"url": "{{address}}/v1/custom/jars/Masha.engine123/1.0",
+			"url": "{{address}}/v1/custom/jars/Upload_custom_jar123/1.0",
 			"pathVariables": {},
 			"preRequestScript": null,
 			"method": "DELETE",
 			"collectionId": "37fa98c9-1129-8a38-5855-5f46b3c9fe8d",
-			"data": [
-				{
-					"key": "jar",
-					"type": "file",
-					"enabled": true
-				}
-			],
+			"data": null,
 			"dataMode": "params",
 			"name": "Delete a custom jar by file name and version NOT found",
 			"description": "",
@@ -311,7 +278,8 @@
 				{
 					"key": "jar",
 					"type": "file",
-					"enabled": true
+					"enabled": true,
+					"value": "Upload_custom_jar.jar"
 				}
 			],
 			"dataMode": "params",
@@ -336,7 +304,8 @@
 				{
 					"key": "file",
 					"type": "file",
-					"enabled": true
+					"enabled": true,
+					"value": "test_rest.webp"
 				}
 			],
 			"dataMode": "params",
@@ -356,13 +325,7 @@
 			"preRequestScript": null,
 			"pathVariables": {},
 			"method": "GET",
-			"data": [
-				{
-					"key": "jar",
-					"type": "file",
-					"enabled": true
-				}
-			],
+			"data": null,
 			"dataMode": "params",
 			"version": 2,
 			"tests": "tests[\"Status code is 200\"] = responseCode.code === 200;",
@@ -381,13 +344,7 @@
 			"preRequestScript": null,
 			"pathVariables": {},
 			"method": "GET",
-			"data": [
-				{
-					"key": "jar",
-					"type": "file",
-					"enabled": true
-				}
-			],
+			"data": null,
 			"dataMode": "params",
 			"version": 2,
 			"tests": "tests[\"Status code is 200\"] = responseCode.code === 200;\n\ntests[\"Body matches string\"] = responseBody.has(\"customJars\");\n\ntests[\"Body matches string\"] = responseBody.has(\"name\");\n\ntests[\"Body matches string\"] = responseBody.has(\"version\");\n\ntests[\"Body matches string\"] = responseBody.has(\"size\");",
@@ -410,12 +367,13 @@
 				{
 					"key": "jar",
 					"type": "file",
-					"enabled": true
+					"enabled": true,
+					"value": "Already_exists_name_version.jar"
 				}
 			],
 			"dataMode": "params",
 			"version": 2,
-			"tests": "tests[\"Body matches string\"] = responseBody.has(\"Cannot upload custom jar 'Already_exists_name_version.jar'. Custom jar with this name and version already exists.\");\n\ntests[\"Status code is 200\"] = responseCode.code === 409;",
+			"tests": "tests[\"Body matches string\"] = responseBody.has(\"Cannot upload custom jar. Errors: Custom jar with name 'Upload_custom_jar' and version '2.9' already exists.\");\n\ntests[\"Status code is 400\"] = responseCode.code === 400;",
 			"currentHelper": "normal",
 			"helperAttributes": {},
 			"time": 1488520686443,
@@ -431,13 +389,7 @@
 			"preRequestScript": null,
 			"pathVariables": {},
 			"method": "GET",
-			"data": [
-				{
-					"key": "file",
-					"type": "file",
-					"enabled": true
-				}
-			],
+			"data": null,
 			"dataMode": "params",
 			"tests": "tests[\"Status code is 200\"] = responseCode.code === 404;\n\ntests[\"Body matches string\"] = responseBody.has(\"Custom file 'test143_rest.webp' has not been found.\");",
 			"currentHelper": "normal",
@@ -455,13 +407,7 @@
 			"preRequestScript": null,
 			"pathVariables": {},
 			"method": "GET",
-			"data": [
-				{
-					"key": "file",
-					"type": "file",
-					"enabled": true
-				}
-			],
+			"data": null,
 			"dataMode": "params",
 			"tests": "\n\ntests[\"Status code is 200\"] = responseCode.code === 200;",
 			"currentHelper": "normal",
@@ -479,13 +425,7 @@
 			"preRequestScript": null,
 			"pathVariables": {},
 			"method": "DELETE",
-			"data": [
-				{
-					"key": "jar",
-					"type": "file",
-					"enabled": true
-				}
-			],
+			"data": null,
 			"dataMode": "params",
 			"version": 2,
 			"tests": "tests[\"Status code is 200\"] = responseCode.code === 404;\n",
@@ -504,13 +444,7 @@
 			"preRequestScript": null,
 			"pathVariables": {},
 			"method": "GET",
-			"data": [
-				{
-					"key": "file",
-					"type": "file",
-					"enabled": true
-				}
-			],
+			"data": null,
 			"dataMode": "params",
 			"version": 2,
 			"tests": "tests[\"Status code is 200\"] = responseCode.code === 200;\n\n\n\ntests[\"Body matches string\"] = responseBody.has(\"customFiles\");\n\ntests[\"Body matches string\"] = responseBody.has(\"name\");\n\ntests[\"Body matches string\"] = responseBody.has(\"upload-date\");\n\ntests[\"Body matches string\"] = responseBody.has(\"size\");",
@@ -533,7 +467,8 @@
 				{
 					"key": "jar",
 					"type": "file",
-					"enabled": true
+					"enabled": true,
+					"value": "Upload_custom_jar_to_delete.jar"
 				}
 			],
 			"dataMode": "params",
