@@ -410,14 +410,12 @@ Before uploading modules, compile and upload the engine jars for them.
 
 1. Please, upload the engine jars for the modules (input-streaming, regular-streaming, output-streaming) and a Mesos framework. Please,  replace <slave_advertise_ip> with slave advertise IP::
 
- cd sj-platform
-
- address=<slave_advertise_ip>:31080
-
- $ curl --form jar=@core/sj-mesos-framework/target/scala-2.12/sj-mesos-framework-1.0-SNAPSHOT.jar http://$address/v1/custom/jars
- $ curl --form jar=@core/sj-input-streaming-engine/target/scala-2.12/sj-input-streaming-engine-1.0-SNAPSHOT.jar http://$address/v1/custom/jars
- $ curl --form jar=@core/sj-regular-streaming-engine/target/scala-2.12/sj-regular-streaming-engine-1.0-SNAPSHOT.jar http://$address/v1/custom/jars
- $ curl --form jar=@core/sj-output-streaming-engine/target/scala-2.12/sj-output-streaming-engine-1.0-SNAPSHOT.jar http://$address/v1/custom/jars
+    $ cd sj-platform
+    $ address=<slave_advertise_ip>:31080
+    $ curl --form jar=@core/sj-mesos-framework/target/scala-2.12/sj-mesos-framework-1.0-SNAPSHOT.jar http://$address/v1/custom/jars
+   $ curl --form jar=@core/sj-input-streaming-engine/target/scala-2.12/sj-input-streaming-engine-1.0-SNAPSHOT.jar http://$address/v1/custom/jars
+   $ curl --form jar=@core/sj-regular-streaming-engine/target/scala-2.12/sj-regular-streaming-engine-1.0-SNAPSHOT.jar http://$address/v1/custom/jars
+   $ curl --form jar=@core/sj-output-streaming-engine/target/scala-2.12/sj-output-streaming-engine-1.0-SNAPSHOT.jar http://$address/v1/custom/jars
 
 2. Setup configurations for engines.
 
@@ -438,9 +436,9 @@ To set up configuration settings for the engines, run the following commands. Pl
 
 3. Send the next POST requests to upload configurations for module validators::
 
-   $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"regular-streaming-validator-class\",\"value\": \"com.bwsw.sj.crud.rest.instance.validator.RegularInstanceValidator\",\"domain\": \"configuration.system\"}" 
-   $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"input-streaming-validator-class\",\"value\": \"com.bwsw.sj.crud.rest.instance.validator.InputInstanceValidator\",\"domain\": \"configuration.system\"}" 
-   $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"output-streaming-validator-class\",\"value\": \"com.bwsw.sj.crud.rest.instance.validator.OutputInstanceValidator\",\"domain\": \"configuration.system\"}" 
+    $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"regular-streaming-validator-class\",\"value\": \"com.bwsw.sj.crud.rest.instance.validator.RegularInstanceValidator\",\"domain\": \"configuration.system\"}" 
+    $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"input-streaming-validator-class\",\"value\": \"com.bwsw.sj.crud.rest.instance.validator.InputInstanceValidator\",\"domain\": \"configuration.system\"}" 
+    $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"output-streaming-validator-class\",\"value\": \"com.bwsw.sj.crud.rest.instance.validator.OutputInstanceValidator\",\"domain\": \"configuration.system\"}" 
 
 In the UI you can see the uploaded configurations under the “Configuration” tab of the main navigation.
 
@@ -449,17 +447,17 @@ Module Uploading
 
 1. Copy demo project repository::
 
- $ cd ..
- $ git clone https://github.com/bwsw/sj-fping-demo.git
- $ cd sj-fping-demo
+   $ cd ..
+   $ git clone https://github.com/bwsw/sj-fping-demo.git
+   $ cd sj-fping-demo
 
 2. Compile and upload modules jars:: 
 
- $ sbt assembly
- $ curl "https://oss.sonatype.org/content/repositories/snapshots/com/bwsw/sj-regex-input_2.12/1.0-SNAPSHOT/sj-regex- input_2.12-1.0-SNAPSHOT.jar" -o sj-regex-input.jar
- $ curl --form jar=@sj-regex-input.jar http://$address/v1/modules
- $ curl --form jar=@ps-process/target/scala-2.12/ps-process-1.0-SNAPSHOT.jar http://$address/v1/modules
- $ curl --form jar=@ps-output/target/scala-2.12/ps-output-1.0-SNAPSHOT.jar http://$address/v1/modules
+    $ sbt assembly
+    $ curl "https://oss.sonatype.org/content/repositories/snapshots/com/bwsw/sj-regex-input_2.12/1.0-SNAPSHOT/sj-regex- input_2.12-1.0-SNAPSHOT.jar" -o sj-regex-input.jar
+    $ curl --form jar=@sj-regex-input.jar http://$address/v1/modules
+    $ curl --form jar=@ps-process/target/scala-2.12/ps-process-1.0-SNAPSHOT.jar http://$address/v1/modules
+    $ curl --form jar=@ps-output/target/scala-2.12/ps-output-1.0-SNAPSHOT.jar http://$address/v1/modules
 
 Stream Creation
 """"""""""""""""""""""""""""""
@@ -470,10 +468,8 @@ There is a default value of Elasticsearch, Apache Kafka and Apache Zookeeper IPs
 
  $ sed -i 's/176.120.25.19:9300/<slave_advertise_ip>:31930/g' api-json/providers/elasticsearch-ps-provider.json
 curl --request POST "http://$address/v1/providers" -H 'Content-Type: application/json' --data "@api-json/providers/elasticsearch-ps-provider.json" 
-
  $ sed -i 's/176.120.25.19:9092/<slave_advertise_ip>:31992/g' api-json/providers/kafka-ps-provider.json
 curl --request POST "http://$address/v1/providers" -H 'Content-Type: application/json' --data "@api-json/providers/kafka-ps-provider.json" 
-
  $ sed -i 's/176.120.25.19:2181/<slave_advertise_ip>/g' api-json/providers/zookeeper-ps-provider.json
 curl --request POST "http://$address/v1/providers" -H 'Content-Type: application/json' --data "@api-json/providers/zookeeper-ps-provider.json" 
 
