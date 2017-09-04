@@ -285,7 +285,7 @@ Replace <zk_ip> according to the zookeeper address::
 
 **tts.json** 
 
-Please, replace <path_to_conf_directory> with an appropriate path to the configuration file directory on your computer. Also replace <slave_advertise_ip> with slave advertise IP::
+This is a json file for T-streams. Please, replace <path_to_conf_directory> with an appropriate path to the configuration file directory on your computer. Also replace <slave_advertise_ip> with slave advertise IP::
 
  {
     "id": "tts",
@@ -357,41 +357,39 @@ Please, replace <path_to_conf_directory> with an appropriate path to the configu
    }
  }
 
-3. Run the services on Marathon:
+3. Run the services on Marathon.
+
+Replace <marathon_address> with a valid Marathon address.
 
 **Mongo**::
  
- $ curl -X POST http://172.17.0.1:8080/v2/apps -H "Content-type: application/json" -d @mongo.json 
-
-**Kafka**::
-
- $ curl -X POST http://172.17.0.1:8080/v2/apps -H "Content-type: application/json" -d @kafka.json 
-
-**Elasticsearch**:
-
-Please, note that `vm.max_map_count` should be slave::
-
- sudo sysctl -w vm.max_map_count=262144
-
-
-Then launch elasticsearch::
-
- $ curl -X POST http://172.17.0.1:8080/v2/apps -H "Content-type: application/json" -d @elasticsearch.json
-
+ $ curl -X POST http://<marathon_address>/v2/apps -H "Content-type: application/json" -d @mongo.json 
 
 **SJ-rest**::
 
- $ curl -X POST http://172.17.0.1:8080/v2/apps -H "Content-type: application/json" -d @sj-rest.json    
-    
-**T-Streams**::
- 
- $ curl -X POST http://172.17.0.1:8080/v2/apps -H "Content-type: application/json" -d @tts.json 
+ $ curl -X POST http://<marathon_address>/v2/apps -H "Content-type: application/json" -d @sj-rest.json  
 
+**Elasticsearch**:
+
+Please, note that `vm.max_map_count` should be specified for slave::
+
+ $ sudo sysctl -w vm.max_map_count=262144
+
+Then launch Elasticsearch::
+
+ $ curl -X POST http://<marathon_address>/v2/apps -H "Content-type: application/json" -d @elasticsearch.json
+
+**Kafka**::
+
+ $ curl -X POST http://<marathon_address>/v2/apps -H "Content-type: application/json" -d @kafka.json 
+
+**tts**::
+ 
+ $ curl -X POST http://<marathon_address>/v2/apps -H "Content-type: application/json" -d @tts.json 
 
 **Kibana**::
 
- $ curl -X POST http://172.17.0.1:8080/v2/apps -H "Content-type: application/json" -d @kibana.json
-
+ $ curl -X POST http://<marathon_address>/v2/apps -H "Content-type: application/json" -d @kibana.json
 
 Via the Marathon interface make sure the services are deployed.
 
@@ -400,7 +398,7 @@ Via the Marathon interface make sure the services are deployed.
    $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"framework-principal\",\"value\": <principal>,\"domain\": \"configuration.system\"}" 
    $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"framework-secret\",\"value\": <secret>,\"domain\": \"configuration.system\"}" 
 
-5. Copy the github repository of the SJ-Platform::
+5. Copy the project for the GitHub repository of the SJ-Platform::
 
    $ git clone https://github.com/bwsw/sj-platform.git
 
