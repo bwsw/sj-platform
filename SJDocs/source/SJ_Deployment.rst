@@ -50,11 +50,11 @@ The deployment is performed via REST API.
 
 Firstly, deploy Mesos and other services.
 
-1. Deploy Mesos, Marathon, Zookeeper. You can follow the instructions at the official `instalation guide <http://www.bogotobogo.com/DevOps/DevOps_Mesos_Install.php>`_ .
+1. Deploy Mesos, Marathon, Zookeeper. You can follow the instructions in the official `instalation guide <http://www.bogotobogo.com/DevOps/DevOps_Mesos_Install.php>`_ .
 
-Please, note, the deployment is described for one default Mesos-slave with available ports [31000-32000]. Docker container should be supported for Mesos-slave.
+Please, note, the deployment is described for one default Mesos-slave with available ports [31000-32000]. 
 
-For Docker deployment follow the instructions at the official `installation guide <https://docs.docker.com/engine/installation/linux/docker-ce/ubuntu/#install-docker-ce>`_
+Docker containers should be supported for Mesos-slave. For Docker deployment follow the instructions at the official `installation guide <https://docs.docker.com/engine/installation/linux/docker-ce/ubuntu/#install-docker-ce>`_
 
 Install Java::
                                          
@@ -63,9 +63,11 @@ Install Java::
  $ sudo apt-get install oracle-java8-installer
  $ sudo apt-get install oracle-java8-set-default
 
-Find detailed instructions in the `installation guide <https://tecadmin.net/install-oracle-java-8-ubuntu-via-ppa/>`_.
+Find detailed instructions on Java deployment in the `installation guide <https://tecadmin.net/install-oracle-java-8-ubuntu-via-ppa/>`_.
 
-Start Mesos and the services. Make sure you have access to Mesos interface, Marathon interface, and Zookeeper is running.
+Start Mesos-master, Mesos-slave and the services. 
+
+After performing all the steps, make sure you have access to Mesos interface, Marathon interface. Zookeeper now should be active.
 
 
 2. Create json files and a configuration file (config.properties). Please, name them as it is specified here.
