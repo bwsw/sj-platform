@@ -887,7 +887,7 @@ If you have a look in the UI, you will see the launched modules with the “star
 See the Results 
 ------------------------------
 
-To see the processing results saved in ElasticSearch, please, go to Kibana. There the aggregated data can be rendered in a diagram.
+To see the processing results saved in Elasticsearch, please, go to Kibana. There the aggregated data can be rendered in a diagram.
 
 The result can be viewed while the module is working. A necessary auto-refresh interval can be set for the diagram to update the graph.
 
