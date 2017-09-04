@@ -445,13 +445,19 @@ In the UI you can see the uploaded configurations under the “Configuration” 
 Module Uploading
 """"""""""""""""""""""""""
 
+The demo task needs three modules in the pipeline:
+
+ - regex input module, which is provided by the Stream Juggler Platform and can be downloaded from the Sonatype repository;
+ - regular processing module;
+ - output module to export results to Elasticsearch.
+
 1. Copy demo project repository::
 
    $ cd ..
    $ git clone https://github.com/bwsw/sj-fping-demo.git
    $ cd sj-fping-demo
 
-2. Compile and upload modules jars:: 
+2. Compile and upload module jars:: 
 
     $ sbt assembly
     $ curl "https://oss.sonatype.org/content/repositories/snapshots/com/bwsw/sj-regex-input_2.12/1.0-SNAPSHOT/sj-regex- input_2.12-1.0-SNAPSHOT.jar" -o sj-regex-input.jar
@@ -461,6 +467,9 @@ Module Uploading
 
 Stream Creation
 """"""""""""""""""""""""""""""
+Streams are necessary in the system to transport messages to and from the modules.
+
+For creating streams the infrastructure - providers and services - is required.
 
 1. Set up providers.
 
