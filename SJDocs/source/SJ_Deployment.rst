@@ -462,16 +462,16 @@ Module Uploading
 Stream Creation
 """"""""""""""""""""""""""""""
 
-1. Set up providers:
+1. Set up providers.
 
 There is a default value of Elasticsearch, Apache Kafka and Apache Zookeeper IPs (176.120.25.19) in json configuration files. So you shall change it appropriately via `sed` app before using (replace the <slave_advertise_ip> placeholder)::
 
  $ sed -i 's/176.120.25.19:9300/<slave_advertise_ip>:31930/g' api-json/providers/elasticsearch-ps-provider.json
-curl --request POST "http://$address/v1/providers" -H 'Content-Type: application/json' --data "@api-json/providers/elasticsearch-ps-provider.json" 
+ $ curl --request POST "http://$address/v1/providers" -H 'Content-Type: application/json' --data "@api-json/providers/elasticsearch-ps-provider.json" 
  $ sed -i 's/176.120.25.19:9092/<slave_advertise_ip>:31992/g' api-json/providers/kafka-ps-provider.json
-curl --request POST "http://$address/v1/providers" -H 'Content-Type: application/json' --data "@api-json/providers/kafka-ps-provider.json" 
+ $ curl --request POST "http://$address/v1/providers" -H 'Content-Type: application/json' --data "@api-json/providers/kafka-ps-provider.json" 
  $ sed -i 's/176.120.25.19:2181/<slave_advertise_ip>/g' api-json/providers/zookeeper-ps-provider.json
-curl --request POST "http://$address/v1/providers" -H 'Content-Type: application/json' --data "@api-json/providers/zookeeper-ps-provider.json" 
+ $ curl --request POST "http://$address/v1/providers" -H 'Content-Type: application/json' --data "@api-json/providers/zookeeper-ps-provider.json" 
 
 
 2. Next set up services::
