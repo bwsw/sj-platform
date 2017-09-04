@@ -77,6 +77,14 @@ At the end of deploying you can see urls of all services.
 Description
 """""""""""""""""""
 
+After launching Vagrant you will get the access to Mesos, Marathon, SJ-Platform REST and UI. In the UI you will see all the platform entities created for the `fping demo <http://streamjuggler.readthedocs.io/en/develop/Tutorial.html>`_ project:
+
+- configurations for modules;
+- modules;
+- streams with infrastructurte (providers, services);
+- instances;
+- data store as a result destination.
+
 Vagrant creates Ubuntu/Xenial64 virtual machines with specific parameters:
 
 - Master VM - 2 CPUs, 1GB memory
