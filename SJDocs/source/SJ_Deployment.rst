@@ -447,9 +447,9 @@ Module Uploading
 
 The demo task needs three modules in the pipeline:
 
- - regex input module, which is provided by the Stream Juggler Platform and can be downloaded from the Sonatype repository;
- - regular processing module;
- - output module to export results to Elasticsearch.
+- regex input module, which is provided by the Stream Juggler Platform and can be downloaded from the Sonatype repository;
+- regular processing module;
+- output module to export results to Elasticsearch.
 
 1. Copy demo project repository::
 
