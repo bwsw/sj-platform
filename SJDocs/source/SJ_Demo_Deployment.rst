@@ -1,8 +1,6 @@
 Demo Deployment on Virtual Machine
 ------------------------------------
 
-.. warning:: The section is under development!
-
 SJ-Platform can be deployed on a virtual machine. We suggest deploying the platform locally via Vagrant with VirtualBox as a provider.
  
 This is the most rapid way to get acquainted with the platform and assess its performance.
