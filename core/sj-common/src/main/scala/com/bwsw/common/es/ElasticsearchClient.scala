@@ -41,6 +41,9 @@ import org.slf4j.LoggerFactory
   * @param hosts es address
   */
 class ElasticsearchClient(hosts: Set[(String, Int)]) {
+  // TODO this line added due to Netty available.processors exception.
+  System.setProperty("es.set.netty.runtime.available.processors", "false")
+
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val typeName = "_type"
   private val client = new PreBuiltTransportClient(Settings.EMPTY)
@@ -113,7 +116,7 @@ class ElasticsearchClient(hosts: Set[(String, Int)]) {
       .actionGet()
   }
 
-  def isConnected(): Boolean = {
+  def isConnected: Boolean = {
     logger.debug(s"Check a connection to an elasticsearch database.")
     client.connectedNodes().size() > 0
   }

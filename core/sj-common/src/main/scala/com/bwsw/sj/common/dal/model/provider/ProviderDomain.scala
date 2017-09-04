@@ -118,7 +118,7 @@ class ProviderDomain(@IdField val name: String,
   protected def checkESConnection(address: String): ArrayBuffer[String] = {
     val errors = ArrayBuffer[String]()
     val client = new ElasticsearchClient(Set(getHostAndPort(address)))
-    if (!client.isConnected()) {
+    if (!client.isConnected) {
       errors += s"Can not establish connection to ElasticSearch on '$address'"
     }
     client.close()
@@ -146,8 +146,8 @@ class ProviderDomain(@IdField val name: String,
 
   private def getHostAndPort(address: String): (String, Int) = {
     val uri = new URI("dummy://" + address)
-    val host = uri.getHost()
-    val port = uri.getPort()
+    val host = uri.getHost
+    val port = uri.getPort
 
     (host, port)
   }
