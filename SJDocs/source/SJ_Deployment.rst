@@ -1223,8 +1223,6 @@ To stop instances in the example task the following requests should be sent::
 
 In the UI, you will see the suspended instances with the “stopped” status.
 
-.. figure:: _static/InstancesStopped.png
-
 Instance Deleting 
 """"""""""""""""""""""""""""
 
@@ -1238,6 +1236,6 @@ The instances of the modules can be deleted one by one::
 
  $ curl --request DELETE "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance/pingstation-process/"
 
-$ curl --request DELETE "http://$address/v1/modules/output-streaming/pingstation-output/1.0/instance/pingstation-output/"
+ $ curl --request DELETE "http://$address/v1/modules/output-streaming/pingstation-output/1.0/instance/pingstation-output/"
 
 Via the UI you can make sure the instances are deleted.
