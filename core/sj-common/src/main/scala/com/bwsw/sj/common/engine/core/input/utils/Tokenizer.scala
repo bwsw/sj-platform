@@ -38,7 +38,7 @@ class Tokenizer(separator: String, encoding: String) {
   require(separator.length > 0, "separator must be nonempty")
   require(Charset.isSupported(encoding), s"encoding '$encoding' does not supported")
 
-  private val byteProcessor = new ByteProcessor {
+  private class TokenizerByteProcessor extends ByteProcessor {
     private var bytes: Array[Byte] = Array.empty
 
     override def process(value: Byte): Boolean = {
@@ -56,7 +56,7 @@ class Tokenizer(separator: String, encoding: String) {
     */
   def tokenize(buffer: ByteBuf): Option[Interval] = {
     val startIndex = buffer.readerIndex()
-    val endIndex = buffer.forEachByte(byteProcessor)
+    val endIndex = buffer.forEachByte(new TokenizerByteProcessor)
 
     if (endIndex != -1) Some(Interval(startIndex, endIndex))
     else None
