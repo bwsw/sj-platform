@@ -10,7 +10,7 @@ export class AlertsComponent {
   @Output() alertsChange = new EventEmitter<NotificationModel[]>();
 
   public closeAlert(i: number): void {
-    this.alerts.splice(i,1);
+    this.alerts.splice(i, 1);
     this.alertsChange.emit(this.alerts);
   }
 
