@@ -48,7 +48,7 @@ export class StreamsComponent implements OnInit {
   }
 
   public keyDown(event: KeyboardEvent) {
-    if (event.keyCode === 13) {
+    if (event.keyCode === 13 && this.currentTag && this.currentTag !== '') {
       this.newStream.tags.push(this.currentTag);
       this.currentTag = '';
       event.preventDefault();
