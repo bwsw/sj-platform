@@ -98,6 +98,7 @@ Now having the general idea on the platform workflow, we can dive into solving a
 
 And the first step is the system deployment.
 
+.. _Tutorial.rst#step-1-deployment:
 
 Step 1. Deployment 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1005,7 +1006,7 @@ If the input module cannot parse an input line, then it puts data into the *'sfl
 Step 1. Deployment
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Perform the steps for platform deployment from the “Deployment” section. Make sure all the services are running:
+Perform the steps for platform deployment from the :ref:`Tutorial.rst#step-1-deployment` section. Make sure all the services are running:
 
 1. Apache Mesos - for all computations;
 2. Mesosphere Marathon - a framework for executing tasks on Mesos;
