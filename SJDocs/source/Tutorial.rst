@@ -40,8 +40,8 @@ Below an example of a real-life task solution will demonstrate the platform at w
 2. instructions on development, deployment and customization of your own code for your specific aims.
 
 
-Example task
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+fping Example task
+----------------------------
 
 Let’s introduce an example task which will illustrate the platform workflow in the real-world use.
 
@@ -100,7 +100,7 @@ And the first step is the system deployment.
 
 
 Step 1. Deployment 
------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Though SJ-Platform is quite a complex system and it includes a range of necessary services, no special skills are required for its deployment. 
 
@@ -466,7 +466,7 @@ At first, the infrastructure for the module performance can be created next.
 
 
 Step 2. Module Uploading 
----------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Now as the system is deployed, modules can be uploaded.
 
@@ -489,8 +489,8 @@ For the stated example task the following modules will be uploaded:
 Download the modules from the Sonatype repository and upload it to the system following the instructions for the example task.
 
 
-Example Task
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+For the Example Task
+"""""""""""""""""""""""""
 
 Please, follow these steps to build and upload the modules of pingstation demo.
 
@@ -500,8 +500,7 @@ To configure environment::
 
 <host>:<port> — SJ Rest host and port.
 
-Module Downloading from Sonatype Repository
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""
+**Module Downloading from Sonatype Repository**
 
 - To download the sj-regex-input module from the sonatype repository::
 
@@ -515,8 +514,7 @@ Module Downloading from Sonatype Repository
 
    $ curl “https://oss.sonatype.org/content/repositories/snapshots/com/bwsw/ps-output_2.12/1.0-SNAPSHOT/ps-output_2.12-1.0-SNAPSHOT.jar” -o ps-output-1.0.jar
 
-Module Uploading
-""""""""""""""""""""""""""""""""""""
+**Module Uploading**
 
 Upload modules to the system::
 
@@ -529,7 +527,7 @@ Now in UI you can see the uploaded modules under the ‘Modules’ tab.
 .. figure:: _static/ModulesUploaded.png
 
 Step 3. Configurations and Engine Jars Uploading 
-----------------------------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 An engine is required to start a module. A module can not process data without an engine (that is a .jar file containing required configuration settings). In fact, it is a framework that launches the module executor.
 
@@ -545,8 +543,8 @@ To implement the processing workflow for the example task resolution the followi
 
 Thus, engines should be compiled and uploaded in the next step.
  
-Upload engine jars
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Upload Engine Jars
+""""""""""""""""""""""""
 
 Please, upload the engine jars for the three modules (input-streaming, regular-streaming, output-streaming) and the Mesos framework. You can find them at our GitHub repository::
 
@@ -564,7 +562,7 @@ Now engine jars should appear in the UI under Custom Jars of the "Custom files" 
 .. figure:: _static/EnginesUploaded.png
 
 Setup configurations for engines
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+""""""""""""""""""""""""""""""""""""""""
 
 The configurations will be added to the system via REST. 
 
@@ -572,8 +570,8 @@ The range of configurations includes required and optional ones. The full list o
 
 To resolve the example task it is enough to upload the required configurations only.
 
-Example Task
-""""""""""""""""""
+For the Example Task
+""""""""""""""""""""""
 
 For solving an example task, we will upload the following configurations via REST:
 
@@ -613,7 +611,7 @@ In the UI you can see the uploaded configurations under the “Configuration” 
 .. figure:: _static/ConfigurationsUploaded.png
 
 Step 4. Creating Streaming Layer 
-------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The raw data is fed to the platform from different sources. And within the platform, the data is passed to and from a module in streams. Thus, in the next step, the streams for data ingesting and exporting will be created.
 
@@ -650,13 +648,12 @@ In the example task solution the following stream types are implemented:
 Below the steps for creating streaming infrastructure such as providers, services, and streams via REST API can be found.
 
 Set Up Streaming Infrastructure
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
+"""""""""""""""""""""""""""""""""""""""
 Prior to creating streams, it is necessary to provide the infrastructure: providers and services.
 
 They can be of different types. The types of platform entities in the pipeline determine the type of providers and services that are necessary in the particular case.
 
-Example Task
+for the Example Task
 """""""""""""""""""""""
 
 In the example task pipeline the modules of three types take place: the input-streaming, regular-streaming and output-streaming. For all types of modules, the Apache Zookeeper service is necessary. Thus, it requires the Apache Zookeeper provider.
@@ -708,10 +705,10 @@ Please, make sure the created services have appeared in UI under the “Services
 .. figure:: _static/ServicesCreated.png
 
 Creating Streams
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+""""""""""""""""""""""""""""""
 Once streaming infrastructure is created, it is high time to create streams. Please, use the “POST” API requests below to create streams that will be used in the instances of input-streaming, regular-streaming and output-streaming modules.
 
-Example task
+For the Example task
 """"""""""""""""""""""""
 
 For **sj-regex-input module**:
@@ -755,12 +752,12 @@ All the created streams should be available now in the UI under the “Streams�
 .. figure:: _static/StreamsCreated.png
 
 Step 5. Create Output Destination
----------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 At this step all necessary indexes, tables and mapping should be created for storing the processed result.
 
-Example task
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+For the Example task
+""""""""""""""""""""""""""""""""""""""
 In the provided example task the result data is stored to the Elasticsearch data storage.
 
 Thus, it is necessary to create the index and mapping for ES.
@@ -771,7 +768,7 @@ Create the index and the mapping for Elasticsearch sending the PUT request::
 
 
 Step 6. Creating Instances 
------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Once the system is deployed, configurations and modules are uploaded, the streaming layer with necessary infrastructure is created, an instance is to be created in the next step.
 
@@ -786,10 +783,10 @@ An instance is created with specific parameters and is set to particular streams
 For each module an instance should be created.
 
 Creating Instances
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""""""""""""""""""""""""""""
 For instance creation we will send the POST requests. See the instructions below for creating insatnces for the example task solution.
 
-Example task
+For the Example task
 """""""""""""""""""""""
 
 For creating an instance of the sj-regex-input module send the following POST request::
@@ -826,7 +823,7 @@ The created instances should be available now in UI under the “Instances” ta
 Ready! The module can be launched.
 
 Launching Instances
-----------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 After the streaming layer with its infrastructure and instances are created you can start a module. 
 
@@ -885,7 +882,7 @@ If you have a look in the UI, you will see the launched modules with the “star
 .. figure:: _static/InstancesStarted.png
 
 See the Results 
-------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To see the processing results saved in Elasticsearch, please, go to Kibana. There the aggregated data can be rendered in a diagram.
 
@@ -910,7 +907,7 @@ It illustrates average time of echo-responses by IPs per a selected period of ti
 Lots of other parameter combinations can be implemented to view the results.
 
 Instance Shutdown 
------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Once the task is resolved and necessary data is aggregated, the instance can be stopped. 
 
@@ -945,8 +942,7 @@ In the UI, you will see the suspended instances with the “stopped” status.
 .. figure:: _static/InstancesStopped.png
 
 Deleting Instance
----------------------------------
-
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 A stopped instance can be deleted if there is no need for it anymore. An instance of a specific module can be deleted via REST API by sending a DELETE request (as described below). Or instance deleting action is available in the UI under the “Instances” tab.
 
 Make sure the instances to be deleted are stopped and are not with one of the following statuses: «starting», «started», «stopping», «deleting».
@@ -974,6 +970,196 @@ For deleting the ps-output module instance send::
  $ curl --request DELETE "http://$address/v1/modules/output-streaming/pingstation-output/1.0/instance/pingstation-output-1h/"
 
 Via the UI you can make sure the instances are deleted.
+
+sFlow Example Task
+-------------------------
+
+There is another example of the platform performance. It represents the processing workflow of demo that is responsible for collecting sFlow information: 
+
+- computes traffic for the source IP; 
+- computes traffic between the source and the destination.
+
+The processing pipeline includes an input module, a batch processing module and an output module. Within the platform the data is transported with T-streams.
+
+As an external data source an sFlow reporter takes place. It sends data to the system in CSV format.
+
+The CSV data are transformed by the input module and are sent for processing to the batch processing module. The data that can not be parsed by the input module are sent to the output module for incorrect data without processing.
+
+The processed data is stored into the PostgreSQL database. It is exported from the platform via the output module with the streams of SQL-database type.
+
+In general the pipeline can be rendered as in the diagram below:
+
+*(diagram here)*
+
+Green, yellow, purple and red blocks are executed with SJ-Platform. These are the *'sflow-csv-input'* module, the *'sflow-process'* module, the *'sflow-src-ip-output'* and the *'sflow-src-dst-output'* modules and the *'sflow-fallback-output'* module, respectively.
+
+The data come to the CSV input module from the sFlow reporter. It sends sFlow records in CSV format to the input module. Then the input module parses CSV-lines into avro records and puts the parsed data into the *'sflow-avro'* stream of T-streams type. After that, the batch processing module parses avro records into sFlow records, and then:
+
+- computes traffic for the source IP and puts it in *'src-ip-stream'*;
+- computes traffic between the source and the destination and puts it in *'src-dst-stream'*.
+
+Finally the *'sflow-src-ip-output'* module just displaces data from *'src-ip-stream'*  to the *'srcipdata'* table in PostgreSQL. The *'sflow-src-dst-output'* module displaces data from *'src-dst-stream'*  to the *'srcdstdata'*  table.
+
+If the input module cannot parse an input line, then it puts data into the *'sflow-fallback'* stream. After that the *‘fallback-output’* module moves that incorrect line from *'sflow-fallback'* to the *'fallbackdata'* table in PostgreSQL.
+
+Step 1. Deployment
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Perform the steps for platform deployment from the “Deployment” section. Make sure all the services are running:
+
+1. Apache Mesos - for all computations;
+2. Mesosphere Marathon - a framework for executing tasks on Mesos;
+3. Apache Zookeeper - for coordination;
+4. Java
+5. Docker
+6. MongoDB - as a database;
+7. T-streams - as a message broker;
+8. REST - for access to the UI;
+9. PostgreSQL - as a destination.
+
+Step 2. Modules Uploading
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Firstly, configure the environment::
+
+ $ address=<host>:<port>
+ 
+where <host>:<port>  are SJ-Platform REST host and port.
+
+Then, upload the CSV-input module::
+
+ $ curl "https://oss.sonatype.org/content/repositories/snapshots/com/bwsw/sj-csv-input_2.12/1.0-SNAPSHOT/sj-csv-input_2.12-1.0-SNAPSHOT.jar" -o sj-csv-input.jar
+ $ curl --form jar=@sj-csv-input.jar http://$address/v1/modules
+
+Then, build and upload all modules of sFlow demo. To do this, copy the demo project from the SJ-Platform GitHub repository::
+
+ $ git clone https://github.com/bwsw/sj-sflow-demo.git
+
+And in this directory set up the batch processing module::
+ 
+ $ cd sj-sflow-demo
+ $ sbt assembly
+ $ curl --form jar=@sflow-process/target/scala-2.12/sflow-process-1.0.jar http://$address/v1/modules
+
+
+Next, set up the output modules::
+
+ $ curl --form jar=@sflow-output/src-ip/target/scala-2.12/sflow-src-ip-output-1.0.jar http://$address/v1/modules
+ $ curl --form jar=@sflow-output/src-dst/target/scala-2.12/sflow-src-dst-output-1.0.jar http://$address/v1/modules
+ $ curl --form jar=@sflow-fallback-output/target/scala-2.12/sflow-fallback-output-1.0.jar http://$address/v1/modules
+ 
+Now upload the GeoIP database which is required for the processing module::
+
+ $ curl "http://download.maxmind.com/download/geoip/database/asnum/GeoIPASNum.dat.gz" -O
+gunzip GeoIPASNum.dat.gz
+ $ curl --form file=@GeoIPASNum.dat http://$address/v1/custom/files
+Then, upload and configure JDBC driver (determine <driver_name>)
+ $ curl "https://jdbc.postgresql.org/download/postgresql-42.0.0.jar" -O
+ $ curl --form file=@postgresql-42.0.0.jar http://$address/v1/custom/files
+ $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"driver.<driver_name>\",\"value\": \"postgresql-42.0.0.jar\",\"domain\": \"configuration.sql-database\"}" 
+ $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"driver.<driver_name>.class\",\"value\": \"org.postgresql.Driver\",\"domain\": \"configuration.sql-database\"}" 
+ $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"driver.<driver_name>.prefix\",\"value\": \"jdbc:postgresql\",\"domain\": \"configuration.sql-database\"}"
+
+Replace <driver_name> in **api-json/providers/jdbc-sflow-provider.json** when creating providers.
+
+Step 3. Streaming Creation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Let’s create streams to transport data from and to the modules.
+
+Creating Infrastructure
+"""""""""""""""""""""""""""""""
+
+The streaming needs the infrastructure - providers and services. Two types of providers are necessary for the demo: Apache Zookeeper and SQL database. 
+
+Services of three types are required: T-streams, Apache Zookeeper and SQL-database.
+
+Providers creation
+'''''''''''''''''''''''''
+
+For creation of providers you should create json files with the following content:
+
+**jdbc-sflow-provider.json**::
+
+ { 
+
+
+   "name": "jdbc-sflow-provider",
+   "description": "JDBC provider for demo",
+   "type": "provider.sql-database",
+   "login": "<login>",
+   "password": "<password>",
+   "hosts": [
+     "<host>:<port>"
+   ],
+   "driver": "<driver_name>"
+  }
+
+**zookeeper-sflow-provider.json**::
+
+ {
+
+   "name": "zookeeper-sflow-provider",
+   "description": "Zookeeper provider for demo",
+   "type": "provider.apache-zookeeper",
+   "hosts": [
+     "<host>:<port>"
+   ]
+  }
+  
+.. note:: Please, replace the placeholders in the json files: <login>, <password>, <host> and <port>. Remove "login" and "password" fields if you do not need authentication to an appropriate server.
+
+Then create providers::
+
+ $ curl --request POST "http://$address/v1/providers" -H 'Content-Type: application/json' --data "@api-json/providers/jdbc-sflow-provider.json" 
+ $ curl --request POST "http://$address/v1/providers" -H 'Content-Type: application/json' --data "@api-json/providers/zookeeper-sflow-provider.json"
+
+See them in UI...
+
+Services creation
+'''''''''''''''''''''''''
+
+Once providers are created, we can create services. Services of three types are required: T-streams, Apache Zookeeper and SQL-database.
+
+To create services::
+
+ $ curl --request POST "http://$address/v1/services" -H 'Content-Type: application/json' --data "@api-json/services/jdbc-sflow-service.json"
+ $ curl --request POST "http://$address/v1/services" -H 'Content-Type: application/json' --data "@api-json/services/tstream-sflow-service.json"
+ $ curl --request POST "http://$address/v1/services" -H 'Content-Type: application/json' --data "@api-json/services/zookeeper-sflow-service.json"
+
+See them in UI...
+
+Streams creation
+''''''''''''''''''''''''''
+
+Now you can create streams that will be used by the instances of input, processing, output and fallback-output modules.
+
+To create output streams of the input module:
+
+- sflow-avro — the stream for correctly parsed sFlow records;
+- sflow-fallback — the stream for incorrect inputs.
+
+::
+
+ $ curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/sflow-avro.json"
+ $ curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/sflow-fallback.json"
+
+To create output streams of the processing module that will be used for keeping  information about source and destination IP addresses and traffic::
+
+ $ curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/src-ip-stream.json"
+ $ curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/src-dst-stream.json"
+
+To create output streams of the output modules that will be used for storing information to the database::
+
+ $ curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/src-ip-data.json"
+ $ curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/src-dst-data.json"
+
+To create an output stream of the fallback-output module that will be used for storing an incorrect inputs to database::
+
+ $ curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/fallback-data.js
+ 
+See them in UI...
+
 
 
 Find more information about SJ-platform and its entities at: 
