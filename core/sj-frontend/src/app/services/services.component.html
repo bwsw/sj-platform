@@ -360,7 +360,7 @@
       <div class="modal-body">
         <ul *ngIf="currentServiceProvider">
           <li><span class="title">Name:</span>{{currentServiceProvider.name}}</li>
-          <li><span class="title">Type:</span>{{currentServiceProvider.type}}</li>
+          <li><span class="title">Type:</span>{{providerTypes[currentServiceProvider.type]}}</li>
           <li><span class="title">Description:</span>{{currentServiceProvider.description}}</li>
           <li><span class="title">Hosts:</span>
             <ul>

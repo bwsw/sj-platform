@@ -242,7 +242,7 @@
             <span class="title">Name:</span>{{currentStreamService.name}}
           </li>
           <li>
-            <span class="title">Type:</span>{{currentStreamService.type}}
+            <span class="title">Type:</span>{{serviceTypes[currentStreamService.type]}}
           </li>
           <li *ngIf="currentStreamService.description">
             <span class="title">Description:</span>{{currentStreamService.description}}

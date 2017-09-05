@@ -24,6 +24,7 @@ export class StreamsComponent implements OnInit {
   public formAlerts: NotificationModel[] = [];
   public streamList: StreamModel[];
   public streamTypes: TypeModel[];
+  public serviceTypes: {};
   public serviceList: ServiceModel[] = [];
   public currentStream: StreamModel;
   public blockingInstances: string[] = [];
@@ -41,6 +42,7 @@ export class StreamsComponent implements OnInit {
     this.getStreamList();
     this.getServiceList();
     this.getStreamTypes();
+    this.getServiceTypes();
     this.newStream = new StreamModel();
     this.newStream.tags = [];
   }
@@ -86,6 +88,19 @@ export class StreamsComponent implements OnInit {
     this.streamsService.getTypes()
       .subscribe(
         response => this.streamTypes = response.types,
+        error => this.showAlert({ message: error, type: 'danger', closable: true, timeout: 0 })
+      );
+  }
+
+  public getServiceTypes() {
+    this.servicesService.getTypes()
+      .subscribe(
+        response => {
+          this.serviceTypes = response.types.reduce((memo, item: TypeModel) => {
+            memo[item.id] = item.name;
+            return memo;
+          }, {});
+        },
         error => this.showAlert({ message: error, type: 'danger', closable: true, timeout: 0 })
       );
   }

@@ -67,6 +67,7 @@ export abstract class BaseService<M extends BaseModel> {
   protected entity: string;
   protected entityModel: Type<M>;
   protected http: Http;
+  protected cache: Observable<IResponse<M>> = null;
 
   protected get requestUrl(): string {
     return `${this.endpoint}/${this.entity}`;
@@ -125,7 +126,10 @@ export abstract class BaseService<M extends BaseModel> {
   }
 
   public getTypes(): Observable<IResponse<M>> {
-    return this.getList('_types');
+    if (!this.cache) {
+      this.cache = this.getList('_types');
+    }
+    return this.cache;
   }
 
 }
