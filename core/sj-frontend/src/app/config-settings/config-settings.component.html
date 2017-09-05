@@ -7,18 +7,18 @@
       <!-- Title -->
       <div class="row">
         <div class="col col-xs-4"><h4 class="card-title">Configuration</h4></div>
-        <div class="col col-xs-8">
+        <div class="col col-xs-8 search-filter-create-box">
           <button type="button"
-                  class="btn btn-primary pull-right ml-1 mb-1"
+                  class="btn btn-primary pull-right ml-1 mb-1 btn-create"
                   (click)="AddSetting.show()">
             <i class="fa fa-plus mr-1"></i>Add settings
           </button>
-
-          <sj-search-box class="pull-right"
-                         (update)="term = $event"></sj-search-box>
-
-          <sj-filter class="pull-right" [filterList]="settingsDomains"
-                     (update)="domainterm = $event"></sj-filter>
+          <div>
+            <sj-search-box class="pull-right"
+                           (update)="term = $event"></sj-search-box>
+            <sj-filter class="pull-right" [filterList]="settingsDomains"
+                       (update)="domainterm = $event"></sj-filter>
+          </div>
 
         </div>
       </div>

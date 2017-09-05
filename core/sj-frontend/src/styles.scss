@@ -83,6 +83,11 @@ label.required::after {
     pointer-events: none;
   }
 }
+.btn-create {
+  width: 200px;
+  align-self: flex-end;
+  margin-right: 0.3rem;
+}
 
 
 .upload-progress {
@@ -131,6 +136,10 @@ li.tag {
 /*filter-box*/
 .right-inner-addon {
   margin: 0 5px 10px;
+}
+div.search-filter-create-box {
+  display: flex;
+  flex-direction: column;
 }
 
 /*mozila validated input style disable*/
