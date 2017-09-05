@@ -108,7 +108,7 @@ export abstract class BaseService<M extends BaseModel> {
       }
   }
   protected makeUserFriendly(msg: string): string {
-    return msg.replace(/([a-z])([A-Z])/g, '$1 $2');
+    return msg.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/([;])/g, '$1 ');
   }
 
   public get(name?: string): Observable<IResponse<M>> {
