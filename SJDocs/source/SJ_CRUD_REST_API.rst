@@ -2243,7 +2243,7 @@ Instance fields
   :header: "Field name", "Format",  "Description", "Example"
   :widths: 15, 10, 60, 20
 
-  "checkpointMode*", "String",  "Value must be 'time-interval'", "time-interval" 
+  "checkpointMode*", "String",  "Value must be 'every-nth'", "every-nth" 
   "checkpointInterval*", "Int", "Interval for creating checkpoint", 100 
   "input*", "String", "Names of input stream. Must be only 'stream.t-streams' type. Stream for this type of module is 'split' only.  Stream must be exists in database.", "s1" 
   "output*", "String", "Names of output stream (must be stream.elasticsearch, stream.sql-database or stream.restful)", "es1" 
@@ -2329,7 +2329,7 @@ Output-streaming module json format::
   "description" : String,
   "input" : String,
   "output" : String,
-  "checkpointMode" : "time-interval",
+  "checkpointMode" : "every-nth",
   "checkpointInterval" : Int,
   "parallelism" : Int,
   "options" : {},
