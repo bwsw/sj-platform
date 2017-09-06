@@ -40,7 +40,7 @@ The platform kernel is coded in Scala.
 
 The UI is presented via Node JS.
 
-Below, you will find necessary instructions to run the services. Two deployment options are described next - on cluster (Mesos) and locally (on minimesos). The steps to deploy services, SJ-Platform, entities for the platform are provided.
+Below, you will find necessary instructions to run the services. Two deployment options are described next - on cluster (Mesos) and locally (on minimesos). The steps to deploy services, SJ-Platform, entities for the platform are provided on the base of a demo task.
 
 Mesos Deployment
 ~~~~~~~~~~~~~~~~~~~~~~~~
