@@ -10,7 +10,7 @@ Introduction
 
 This tutorial is aimed to represent  SJ-Platform and give a quick start for a user to see the platform at work.
 
-The demo project presented below is an example code developed to demonstrate a user how to run his first SJ module. A step-by-step guidance will help to deploy the system in a local mode (minimesos) or at a cluster (Mesos) and to implement a module example to a real-life task. 
+The demo projects presented below are example tasks developed to demonstrate a user how to run his first SJ module. A step-by-step guidance will help to deploy the system in a local mode (minimesos) or at a cluster (Mesos) and to implement a module example to a real-life task. 
 
 Through an example project a user will get to know the system structure, its key components and general concepts of the platform workflow.
 
@@ -874,7 +874,7 @@ and look at the field named ‘tasks’, e.g. it may look as follows::
   }
  }
 
-And now you can **start a flow**. Please, replace nc with the host and port of your instance task::
+And now you can **start a flow**. Please, replace `nc` with the host and port of your instance task::
 
  fping -l -g 91.221.60.0/23 2>&1 | nc 176.120.25.19 31000
 
@@ -1006,7 +1006,7 @@ If the input module cannot parse an input line, then it puts data into the *'sfl
 Step 1. Deployment
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Perform the steps for platform deployment from the :ref:`Tutorial.rst#step-1-deployment` section. Make sure all the services are running:
+For this demo project the following core systems and services are required:
 
 1. Apache Mesos - for all computations;
 2. Mesosphere Marathon - a framework for executing tasks on Mesos;
@@ -1018,8 +1018,27 @@ Perform the steps for platform deployment from the :ref:`Tutorial.rst#step-1-dep
 8. REST - for access to the UI;
 9. PostgreSQL - as a destination.
 
+Perform the steps for platform deployment from the :ref:`Tutorial.rst#step-1-deployment` section.
+
+1) Deploy Mesos, Apache Zookeeper, Marathon.
+2) Create json files for the services and run them. Via the Marathon interface make sure the services are deployed.
+3) Download the SJ-Platform project from the GitHub repository.
+4) Download the demo proejct from the GitHub repository::
+     
+      cd ..
+      $ git clone https://github.com/bwsw/sj-sflow-demo.git
+      $ cd sj-sflow-demo
+
+
+Now look and make sure you have access to the Web UI. You will see the platform but it is not completed with any entities yet. They will be added in the next steps.
+
+At first, the infrastructure for the module performance can be created next.
+
+
 Step 2. Modules Uploading
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Now let's upload modules for data processing.
 
 Firstly, configure the environment::
 
