@@ -232,9 +232,15 @@ export class InstancesComponent implements OnInit, AfterViewChecked, OnDestroy {
   }
 
   public cloneInstance(instance: InstanceModel, modal: ModalDirective) {
+    this.clearInstance();
     this.isInstanceClone = true;
     this.createByClone(instance);
     modal.show();
+    modal.onHide.subscribe(() => {
+      if (this.isInstanceClone) {
+        this.clearInstance();
+      }
+    });
   }
 
   public createInstance(modal: ModalDirective) {
@@ -296,6 +302,7 @@ export class InstancesComponent implements OnInit, AfterViewChecked, OnDestroy {
   public clearInstance() {
     this.newInstance = new InstanceModel();
     this.cloningInstance = new InstanceModel();
+    this.isInstanceClone = false;
   }
 
   public startInstance(instance: InstanceModel) {
