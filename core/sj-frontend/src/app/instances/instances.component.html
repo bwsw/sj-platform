@@ -287,6 +287,7 @@
               <label class="col-form-label col-sm-2 required">Name</label>
               <div class="col col-sm-10">
                 <input [(ngModel)]="newInstance.name" name="instanceName" type="text" required
+                       title="Name of instance must contain digits, lowercase letters or hyphens; first symbol must be a letter"
                        pattern="[a-z][a-z0-9-]*"  class="form-control" placeholder="Enter instance name">
               </div>
             </fieldset>
@@ -416,8 +417,8 @@
               <div class="col col-sm-10">
                 <select [(ngModel)]="newInstance.checkpointMode" name="instanceCheckpointMode" required
                         class="form-control">
-                  <option>time-interval</option>
-                  <option *ngIf="newInstance.module.moduleType !== 'output-streaming'">every-nth</option>
+                  <option *ngIf="newInstance.module.moduleType !== 'output-streaming'">time-interval</option>
+                  <option>every-nth</option>
                 </select>
               </div>
             </fieldset>
