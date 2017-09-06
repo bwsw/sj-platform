@@ -1051,11 +1051,7 @@ Then, upload the CSV-input module::
  $ curl "https://oss.sonatype.org/content/repositories/snapshots/com/bwsw/sj-csv-input_2.12/1.0-SNAPSHOT/sj-csv-input_2.12-1.0-SNAPSHOT.jar" -o sj-csv-input.jar
  $ curl --form jar=@sj-csv-input.jar http://$address/v1/modules
 
-Then, build and upload all modules of sFlow demo. To do this, copy the demo project from the SJ-Platform GitHub repository::
-
- $ git clone https://github.com/bwsw/sj-sflow-demo.git
-
-And in this directory set up the batch processing module::
+Then, build and upload the processing and the output modules of the sFlow demo project. From the directory of the demo project set up the batch processing module::
  
  $ cd sj-sflow-demo
  $ sbt assembly
@@ -1071,16 +1067,18 @@ Next, set up the output modules::
 Now upload the GeoIP database which is required for the processing module::
 
  $ curl "http://download.maxmind.com/download/geoip/database/asnum/GeoIPASNum.dat.gz" -O
-gunzip GeoIPASNum.dat.gz
+ gunzip GeoIPASNum.dat.gz
  $ curl --form file=@GeoIPASNum.dat http://$address/v1/custom/files
-Then, upload and configure JDBC driver (determine <driver_name>)
+
+Then, upload and configure JDBC driver (determine <driver_name>)::
+
  $ curl "https://jdbc.postgresql.org/download/postgresql-42.0.0.jar" -O
  $ curl --form file=@postgresql-42.0.0.jar http://$address/v1/custom/files
  $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"driver.<driver_name>\",\"value\": \"postgresql-42.0.0.jar\",\"domain\": \"configuration.sql-database\"}" 
  $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"driver.<driver_name>.class\",\"value\": \"org.postgresql.Driver\",\"domain\": \"configuration.sql-database\"}" 
  $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"driver.<driver_name>.prefix\",\"value\": \"jdbc:postgresql\",\"domain\": \"configuration.sql-database\"}"
 
-Replace <driver_name> in **api-json/providers/jdbc-sflow-provider.json** when creating providers.
+Replace <driver_name> in :ref:`jdbc-sflow-provider.json` when creating providers.
 
 Step 3. Streaming Creation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1099,6 +1097,8 @@ Providers creation
 
 For creation of providers you should create json files with the following content:
 
+.. _jdbc-sflow-provider.json:
+
 **jdbc-sflow-provider.json**::
 
  { 
@@ -1113,7 +1113,7 @@ For creation of providers you should create json files with the following conten
      "<host>:<port>"
    ],
    "driver": "<driver_name>"
-  }
+ }
 
 **zookeeper-sflow-provider.json**::
 
@@ -1125,7 +1125,7 @@ For creation of providers you should create json files with the following conten
    "hosts": [
      "<host>:<port>"
    ]
-  }
+ }
   
 .. note:: Please, replace the placeholders in the json files: <login>, <password>, <host> and <port>. Remove "login" and "password" fields if you do not need authentication to an appropriate server.
 
@@ -1178,8 +1178,183 @@ To create an output stream of the fallback-output module that will be used for s
 
  $ curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/fallback-data.js
  
-See them in UI...
+See them in the UI...
 
+Step 4. Output SQL Tables Creation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+SQL tables for output must be created in database sflow. To create tables::
+
+ CREATE TABLE srcipdata (
+    id SERIAL PRIMARY KEY,
+    src_ip VARCHAR(32),
+    traffic INTEGER,
+    txn BIGINT
+ );
+
+ CREATE TABLE srcdstdata (
+    id SERIAL PRIMARY KEY,
+    src_as INTEGER,
+    dst_as INTEGER,
+    traffic INTEGER,
+    txn BIGINT
+ );
+
+ CREATE TABLE fallbackdata (
+    id SERIAL PRIMARY KEY,
+    line VARCHAR(255),
+    txn BIGINT
+ );
+
+Step 5. Creating Instances
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+An instance should be created for each module as its individual performance. 
+
+In the demo case there are three output modules. Thus, we will create three instances for the output.
+
+To create an instance of the input module::
+
+ $ curl --request POST "http://$address/v1/modules/input-streaming/com.bwsw.input.csv/1.0/instance" -H 'Content-Type: application/json' --data "@api-json/instances/sflow-csv-input.json"
+
+To create an instance of the processing module::
+
+ $ curl --request POST "http://$address/v1/modules/batch-streaming/sflow-process/1.0/instance" -H 'Content-Type: application/json' --data "@api-json/instances/sflow-process.json"
+
+To create instances of the output modules::
+
+ $ curl --request POST "http://$address/v1/modules/output-streaming/sflow-src-ip-output/1.0/instance" -H 'Content-Type: application/json' --data "@api-json/instances/sflow-src-ip-output.json"
+ $ curl --request POST "http://$address/v1/modules/output-streaming/sflow-src-dst-output/1.0/instance" -H 'Content-Type: application/json' --data "@api-json/instances/sflow-src-dst-output.json"
+
+To create an instance of the fallback output module::
+
+ $ curl --request POST "http://$address/v1/modules/output-streaming/sflow-fallback-output/1.0/instance" -H 'Content-Type: application
+ 
+See them in the UI...
+
+Launching Instances
+~~~~~~~~~~~~~~~~~~~~~~
+
+Now you can launch every instance.
+
+To launch the input module instance::
+
+ $ curl --request GET "http://$address/v1/modules/input-streaming/com.bwsw.input.csv/1.0/instance/sflow-csv-input/start"
+
+To launch the processing module instance::
+
+ $ curl --request GET "http://$address/v1/modules/batch-streaming/sflow-process/1.0/instance/sflow-process/start"
+
+To launch output module instances::
+
+ $ curl --request GET "http://$address/v1/modules/output-streaming/sflow-src-ip-output/1.0/instance/sflow-src-ip-output/start"
+ $ curl --request GET "http://$address/v1/modules/output-streaming/sflow-src-dst-output/1.0/instance/sflow-src-dst-output/start"
+
+To launch the fallback output module instance::
+
+ $ curl --request GET "http://$address/v1/modules/output-streaming/sflow-fallback-output/1.0/instance/sflow-fallback-output/start"
+
+To get the list of listening ports of the input module::
+
+ $ curl --request GET "http://$address/v1/modules/input-streaming/com.bwsw.input.csv/1.0/instance/sflow-csv-input"
+
+and look at field named tasks. It may look as follows::
+
+"tasks": {
+  "sflow-csv-input-task0": {
+    "host": "176.120.25.19",
+    "port": 31000
+  }
+}
+
+And now you can start the flow (replace <host> and <port> by values from the returned JSON)::
+
+ python send_sflow.py -p <port> -h <host> sflow_example.csv
+ 
+See the Results
+~~~~~~~~~~~~~~~~~~
+
+To see the results execute query in database::
+
+ SELECT * FROM srcipdata;
+ SELECT * FROM srcdstdata;
+ SELECT * FROM fallbackdata;
+
+You should see a table similar to the one below::
+
+ sflow=# SELECT * FROM srcipdata;
+                   id                  |    src_ip    | traffic |        txn        
+ --------------------------------------+--------------+---------+-------------------
+  84cf5fad-aa64-4081-a9bc-3ce51110953d | 66.77.88.99  | 1055750 | 14918948733750000
+  65dcbeb2-7a6c-4a2b-a622-b030e13ef546 | 11.22.33.44  |  588000 | 14918948733750000
+  6b26b6cf-f4a8-4334-839f-86e1404bca16 | 11.73.81.44  |  660500 | 14918948733750000
+  5492c762-b536-49b5-8088-1649cc09f0fb | 11.22.33.201 |  310500 | 14918948733750000
+ (4 rows)
+
+ sflow=# SELECT * FROM srcdstdata;
+                   id                  | src_as | dst_as | traffic |        txn        
+ --------------------------------------+--------+--------+---------+-------------------
+  4b18d026-de4c-43fa-a765-8b308c28f75b |      0 |      0 |  100000 | 14918948736400000
+  a43f0243-3ba7-4305-9664-3d0938bad394 |      0 |      0 | 1148500 | 14918948736400000
+  cc326d39-8de5-487b-bfff-87b3202ef645 |    209 |    209 |  293250 | 14918948736400000
+  236942d4-a334-4f4f-845f-c288bca6cebd |      0 |      0 |  310500 | 14918948736400000
+  afca82ab-5f30-4e09-886c-a689554621c7 |    209 |    209 |  172500 | 14918948736400000
+  d8a34274-db5b-480b-8b6c-bd36b991d131 |    209 |    209 |  590000 | 14918948736400000
+ (6 rows)
+
+ sflow=# SELECT * FROM fallbackdata;
+                   id                  |                      line                       |        txn        
+ --------------------------------------+-------------------------------------------------+-------------------
+  31652ea0-7437-4c48-990c-22ceab50d6af | 1490234369,sfr6,10.11.12.13,4444,5555,INCORRECT | 14911974375950000
+ (1 row)
+
+Instance Shutdown
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To stop the input module instance::
+
+ $ curl --request GET "http://$address/v1/modules/input-streaming/com.bwsw.input.csv/1.0/instance/sflow-csv-input/stop"
+
+To stop the process module instance::
+
+ $ curl --request GET "http://$address/v1/modules/batch-streaming/sflow-process/1.0/instance/sflow-process/stop"
+
+To stop the output module instances::
+ 
+ $ curl --request GET "http://$address/v1/modules/output-streaming/sflow-src-ip-output/1.0/instance/sflow-src-ip-output/stop"
+ $ curl --request GET "http://$address/v1/modules/output-streaming/sflow-src-dst-output/1.0/instance/sflow-src-dst-output/stop"
+ 
+To stop the fallback-output module instance::
+
+ $ curl --request GET "http://$address/v1/modules/output-streaming/sflow-fallback-output/1.0/instance/sflow-fallback-output/stop"
+ 
+Deleting Instances
+~~~~~~~~~~~~~~~~~~~~~~~
+
+A stopped instance can be deleted if there is no need for it anymore. An instance of a specific module can be deleted via REST API by sending a DELETE request (as described below). Or an instance deleting action is available in the UI under the “Instances” tab.
+
+Make sure the instances to be deleted are stopped and are not with one of the following statuses: «starting», «started», «stopping», «deleting».
+
+The instances of the modules can be deleted one by one. 
+
+To delete the input module instance::
+
+ $ curl --request DELETE "http://$address/v1/modules/input-streaming/com.bwsw.input.csv/1.0/instance/sflow-csv-input/"
+ 
+To delete the process module instance::
+
+ $ curl --request DELETE "http://$address/v1/modules/batch-streaming/sflow-process/1.0/instance/sflow-process/"
+
+To delete output module instances::
+
+ $ curl --request DELETE "http://$address/v1/modules/output-streaming/sflow-src-ip-output/1.0/instance/sflow-src-ip-output/"
+ $ curl --request DELETE "http://$address/v1/modules/output-streaming/sflow-src-dst-output/1.0/instance/sflow-src-dst-output/"
+
+To launch the fallback output module instance::
+
+ $ curl --request DELETE "http://$address/v1/modules/output-streaming/sflow-fallback-output/1.0/instance/sflow-fallback-output/"
+ 
+Via the UI you can make sure the instances are deleted.
 
 
 Find more information about SJ-platform and its entities at: 
