@@ -2180,7 +2180,7 @@ Instance fields
   "name*", "String", "Required field, uniq name of creating instance. Must contain only letters, digits or hyphens.", "stub-reg-instance-1"
   "description", "String", "Description of instance", "Test instance for regular module" 
   "parallelism", "Int or String", "Value may be integer or 'max' string. If 'max', then parallelims equals minimum count of partitions of streams (1 by default)", "max" 
-  "options", "Jobject", "Json with options for the module. It is validated by implementation of the Streaming Validator method in the module. That field can be set as a required according to the Validator. ", "{'opt1' : 10 }"
+  "options", "Jobject", "Json with options for the module. It is validated by implementation of the Streaming Validator method in the module. That field can be set as required according to the Validator. ", "{'opt1' : 10 }"
   "perTaskCores", "Double", "Quantity of cores for task (1 by default)", "0.5"
   "perTaskRam", "Long", "Amount of RAM for task (1024 by default)", "256"
   "jvmOptions", "Jobject", "Json with jvm-options. It is important to emphasize that mesos kill a task if it uses more memory than 'perTaskRam' parameter. There is no options by default. Defined options in the example fit the perTaskRam=192 and it's recommended to laucnh modules. In general, the sum of the following parameters: Xmx, XX:MaxDirectMemorySize and XX:MaxMetaspaceSize, should be less than perTaskRam; XX:MaxMetaspaceSize must be grater than Xmx by 32m or larger.",  "{'-Xmx': '32m', '-XX:MaxDirectMemorySize=': '4m', '-XX:MaxMetaspaceSize=': '96m' }"
