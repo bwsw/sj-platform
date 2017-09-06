@@ -1260,12 +1260,12 @@ To get the list of listening ports of the input module::
 
 and look at field named tasks. It may look as follows::
 
-"tasks": {
+ "tasks": {
   "sflow-csv-input-task0": {
     "host": "176.120.25.19",
     "port": 31000
   }
-}
+ }
 
 And now you can start the flow (replace <host> and <port> by values from the returned JSON)::
 
@@ -1362,8 +1362,6 @@ Find more information about SJ-platform and its entities at:
 :ref:`Modules` - more about module structure.
 
 :ref:`Custom_Module` - how to create a module.
-
-`sflow demo on GitHub repository <https://github.com/bwsw/sj-sflow-demo/tree/develop>`_ - another example task solved with the platform.
 
 :ref:`Architecture` - the structure of the platform.
 
