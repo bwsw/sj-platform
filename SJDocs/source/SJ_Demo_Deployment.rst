@@ -1,8 +1,6 @@
 Demo Deployment on Virtual Machine
 ------------------------------------
 
-.. warning:: The section is under development!
-
 SJ-Platform can be deployed on a virtual machine. We suggest deploying the platform locally via Vagrant with VirtualBox as a provider.
  
 This is the most rapid way to get acquainted with the platform and assess its performance.
@@ -76,6 +74,14 @@ At the end of deploying you can see urls of all services.
 
 Description
 """""""""""""""""""
+
+After launching Vagrant you will get the access to Mesos, Marathon, SJ-Platform REST and UI. In the UI you will see all the platform entities created for the `fping demo <http://streamjuggler.readthedocs.io/en/develop/Tutorial.html>`_ project:
+
+- configurations for modules;
+- modules;
+- streams with infrastructurte (providers, services);
+- instances;
+- data store as a result destination.
 
 Vagrant creates Ubuntu/Xenial64 virtual machines with specific parameters:
 

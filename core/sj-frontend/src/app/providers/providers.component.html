@@ -8,23 +8,23 @@
         <!-- Card title -->
         <div class="row">
           <div class="col col-xs-4"><h4 class="card-title">Providers list</h4></div>
-          <div class="col col-xs-8">
+          <div class="col col-xs-8 search-filter-create-box">
             <button type="button"
-                    class="btn btn-primary pull-right ml-1 mb-1"
+                    class="btn btn-primary pull-right ml-1 mb-1 btn-create"
                     (click)="CreateProvider.show()"><i class="fa fa-plus mr-1"></i>Create Provider
             </button>
-
-            <sj-search-box class="pull-right"
-                           (update)="nameterm = $event"></sj-search-box>
-
-            <sj-filter class="pull-right" [filterList]="providerTypes"
-                       (update)="typeterm = $event"></sj-filter>
+            <div>
+              <sj-search-box class="pull-right"
+                             (update)="nameterm = $event"></sj-search-box>
+              <sj-filter class="pull-right" [filterList]="providerTypes"
+                         (update)="typeterm = $event"></sj-filter>
+            </div>
 
           </div>
         </div>
 
         <!-- Alerts -->
-        <sj-alerts [alerts]="alerts"></sj-alerts>
+        <sj-alerts [(alerts)]="alerts"></sj-alerts>
 
         <!-- Providers list -->
         <div class="table-wrapper">
@@ -106,7 +106,7 @@
           <span aria-hidden="true">&times;</span>
         </button>
         <h4 class="modal-title">Create Provider</h4>
-        <sj-alerts [alerts]="formAlerts"></sj-alerts>
+        <sj-alerts [(alerts)]="formAlerts"></sj-alerts>
       </div>
 
       <div class="modal-body">

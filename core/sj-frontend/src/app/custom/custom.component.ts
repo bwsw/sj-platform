@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
 
 import { ModalDirective } from 'ngx-bootstrap';
 import { FileModel } from './custom.model';
@@ -15,7 +14,7 @@ import { CustomService } from './custom.service';
 })
 export class CustomComponent implements OnInit {
 
-  public path: string = 'files';
+  public path: string = 'jars';
   public fileList: FileModel[];
   public currentFile: FileModel;
   public newDescription: string;
@@ -28,17 +27,18 @@ export class CustomComponent implements OnInit {
 
 
   constructor(
-    private route: ActivatedRoute,
     private customService: CustomService
   ) {
     this.cusService = customService;
   }
 
   public ngOnInit() {
-    this.route.params.subscribe(params => {
-      this.path = params['path'];
-      this.getCustomList();
-    });
+    this.getCustomList();
+  }
+
+  onSelect(path: string): void {
+    this.path = path;
+    this.getCustomList();
   }
 
   public getCustomList() {

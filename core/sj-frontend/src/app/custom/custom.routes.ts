@@ -5,7 +5,6 @@ export const CustomRoutes: AppRoutes = [{
   path: 'custom',
   breadcrumbIgnore: true,
   children: [
-    { path: ':path', component: CustomComponent, breadcrumb: 'Custom files' },
-    { path: '', component: CustomComponent }
+    { path: '', component: CustomComponent, breadcrumb: 'Custom files' }
   ]
 }];

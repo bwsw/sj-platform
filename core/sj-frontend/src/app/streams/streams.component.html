@@ -8,21 +8,22 @@
         <!-- Card title -->
         <div class="row">
           <div class="col col-xs-4"><h4 class="card-title">Streams list</h4></div>
-          <div class="col col-xs-8">
+          <div class="col col-xs-8 search-filter-create-box">
             <button type="button"
-                    class="btn btn-primary pull-right ml-1 mb-1"
+                    class="btn btn-primary pull-right ml-1 mb-1 btn-create"
                     (click)="CreateStream.show()"><i class="fa fa-plus mr-1"></i>Create Stream
             </button>
-
-            <sj-search-box class="pull-right"
-                           (update)="term = $event"></sj-search-box>
-            <sj-filter class="pull-right" [filterList]="streamTypes"
-                       (update)="typeterm = $event"></sj-filter>
+            <div>
+              <sj-search-box class="pull-right"
+                             (update)="term = $event"></sj-search-box>
+              <sj-filter class="pull-right" [filterList]="streamTypes"
+                         (update)="typeterm = $event"></sj-filter>
+            </div>
           </div>
         </div>
 
         <!-- Alerts -->
-        <sj-alerts [alerts]="alerts"></sj-alerts>
+        <sj-alerts [(alerts)]="alerts"></sj-alerts>
 
         <!-- Steams list -->
         <div class="table-wrapper">
@@ -109,7 +110,7 @@
           <span aria-hidden="true">&times;</span>
         </button>
         <h4 class="modal-title">Create Stream</h4>
-        <sj-alerts [alerts]="formAlerts"></sj-alerts>
+        <sj-alerts [(alerts)]="formAlerts"></sj-alerts>
       </div>
 
       <div class="modal-body">
@@ -130,7 +131,7 @@
             <label class="col-sm-2 col-form-label required">Name</label>
             <div class="col-sm-10">
               <input [(ngModel)]="newStream.name" name="streamName" type="text"
-                     required class="form-control" pattern="[a-zA-z][a-zA-Z0-9-]*"
+                     required class="form-control" pattern="[a-zA-z][a-zA-Z0-9_-]*"
                      placeholder="Enter stream name">
             </div>
           </fieldset>
@@ -160,7 +161,7 @@
             <div class="col-sm-10">
               <select [(ngModel)]="newStream.service" name="streamService"
                       required class="form-control">
-                <option *ngFor="let service of serviceList | serviceFilter : newStream.type" value="{{service.name}}">{{service.name}}
+                <option *ngFor="let service of serviceList | orderBy: 'name' | serviceFilter : newStream.type" value="{{service.name}}">{{service.name}}
                 </option>
               </select>
             </div>
@@ -242,7 +243,7 @@
             <span class="title">Name:</span>{{currentStreamService.name}}
           </li>
           <li>
-            <span class="title">Type:</span>{{currentStreamService.type}}
+            <span class="title">Type:</span>{{serviceTypes[currentStreamService.type]}}
           </li>
           <li *ngIf="currentStreamService.description">
             <span class="title">Description:</span>{{currentStreamService.description}}

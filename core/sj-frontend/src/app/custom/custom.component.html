@@ -9,7 +9,7 @@
         <div class="row">
           <div class="col col-xs-4"><h4 class="card-title">Custom files</h4></div>
           <div class="col col-xs-8">
-            <label [ngClass]="{inProgress:isUploading}" class="btn btn-primary btn-upload pull-right ml-1 mb-1">
+            <label [ngClass]="{inProgress:isUploading}" class="btn btn-primary btn-upload pull-right ml-1 mb-1 btn-create">
               <span *ngIf="!isUploading"><i class="fa fa-upload mr-1"></i>{{path === 'files'?'Upload file':'Upload jar'}}</span>
               <i *ngIf="isUploading" class="fa fa-spinner fa-spin" aria-hidden="true"></i>
               <input *ngIf="path === 'jars'" type="file" (change)="uploadFile($event)">
@@ -23,14 +23,14 @@
         </div>
 
         <!-- Alerts -->
-        <sj-alerts [alerts]="alerts"></sj-alerts>
+        <sj-alerts [(alerts)]="alerts"></sj-alerts>
 
         <ul class="nav nav-tabs">
           <li class="nav-item">
-            <a class="nav-link" [routerLink]="['../jars']" [routerLinkActive]="['active']">Custom Jars</a>
+            <a class="nav-link" [class.active]="path === 'jars'" (click)="onSelect('jars')">Custom Jars</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" [routerLink]="['../files']" [routerLinkActive]="['active']">Custom files</a>
+            <a class="nav-link" [class.active]="path === 'files'" (click)="onSelect('files')">Custom files</a>
           </li>
         </ul>
 
