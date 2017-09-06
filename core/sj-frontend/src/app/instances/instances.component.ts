@@ -249,6 +249,7 @@ export class InstancesComponent implements OnInit, AfterViewChecked, OnDestroy {
     req.subscribe(
       response => {
         modal.hide();
+        this.isInstanceClone = false;
         this.newInstance = new InstanceModel();
         this.showSpinner = false;
         this.showAlert({message: response.message, type: 'success', closable: true, timeout: 3000});
@@ -260,7 +261,6 @@ export class InstancesComponent implements OnInit, AfterViewChecked, OnDestroy {
         this.showSpinner = false;
         this.formAlerts.push({message: error, type: 'danger', closable: true, timeout: 0});
       });
-    this.isInstanceClone = false;
   }
 
   public closeModal(modal: ModalDirective) {
