@@ -699,8 +699,12 @@ The following services are required before the platfrom deployment on minimesos:
    and try to launch minimesos again.
 
    Execute all the lines from the respond. First, export all variables with corresponding values.
+   
+   Then, install dnsmasq::
+  
+    $ sudo apt-get install dnsmasq
  
-   Then, execute the command from the last line. Open the file for editing::
+   And execute the command from the last line of the previous respond. Open the file for editing::
  
     $ nano /etc/dnsmasq.d/10-minimesos
    
@@ -708,10 +712,6 @@ The following services are required before the platfrom deployment on minimesos:
   
     server=/mm/172.17.0.4#53
  
-   After running minimesos, install dnsmasq::
-  
-    $ sudo apt-get install dnsmasq
-
    And launch it:: 
   
     $ sudo service dnsmasq restart
