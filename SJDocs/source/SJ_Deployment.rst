@@ -757,9 +757,9 @@ The following services are required before the platfrom deployment on minimesos:
  
    The json files will be created in the minimesos folder. All you need now is to deploy them to the system. Use the commands provided below for each json file.
 
-  **mongo.json**::
+ **mongo.json**::
 
- {  
+  {  
    "id":"mongo",
    "container":{  
       "type":"DOCKER",
@@ -795,7 +795,7 @@ The following services are required before the platfrom deployment on minimesos:
    "instances":1,
    "cpus":0.1,
    "mem":512
- }
+  }
 
 And install it::
  
@@ -1080,15 +1080,15 @@ And install it::
 
  After deploying each service you may see corresponding applications in Marathon UI (port 8080):
  
- .. figure:: _static/marathon2.png
+.. figure:: _static/marathon2.png
  
  and corresponding tasks in the Mesos UI (port 5050):
  
- .. figure:: _static/mesos2.png
+.. figure:: _static/mesos2.png
  
  The graph structure provided by weavescope will surely change (port 4040):
  
- .. figure:: _static/weavescope2.png
+.. figure:: _static/weavescope2.png
 
 Configurations Uploading
 """"""""""""""""""""""""
