@@ -720,7 +720,7 @@ The following services are required before the platfrom deployment on minimesos:
 
    This application is an instrument to visualize, monitor your docker containers. It generates the map that can look like at the picture below: 
    
-   .. figure:: _static/wavescope1.png
+   .. figure:: _static/weavescope1.png
    
    Besides you can obtain access to Mesos on port 5050: 
    
@@ -1078,7 +1078,17 @@ And install it::
 
  $ minimesos install --marathonFile tts.json
 
- After deploying each service you may see corresponding applications in Marathon UI (port 8080) and corresponding tasks in Mesos UI (port 5050). The graph structure provided by weavescope will surely change (port 4040).
+ After deploying each service you may see corresponding applications in Marathon UI (port 8080):
+ 
+ .. figure:: _static/marathon2.png
+ 
+ and corresponding tasks in the Mesos UI (port 5050):
+ 
+ .. figure:: _static/mesos2.png
+ 
+ The graph structure provided by weavescope will surely change (port 4040):
+ 
+ .. figure:: _static/weavescope2.png
 
 Configurations Uploading
 """"""""""""""""""""""""
