@@ -1044,7 +1044,7 @@ Firstly, configure the environment::
 
  $ address=<host>:<port>
  
-where <host>:<port>  are SJ-Platform REST host and port.
+where <host>:<port> are SJ-Platform REST host and port.
 
 Then, upload the CSV-input module::
 
@@ -1078,7 +1078,7 @@ Then, upload and configure JDBC driver (determine <driver_name>)::
  $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"driver.<driver_name>.class\",\"value\": \"org.postgresql.Driver\",\"domain\": \"configuration.sql-database\"}" 
  $ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"driver.<driver_name>.prefix\",\"value\": \"jdbc:postgresql\",\"domain\": \"configuration.sql-database\"}"
 
-Replace <driver_name> in :ref:`jdbc-sflow-provider.json` when creating providers.
+Replace <driver_name> in jdbc-sflow-provider.json_ when creating providers.
 
 Step 3. Streaming Creation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1102,7 +1102,6 @@ For creation of providers you should create json files with the following conten
 **jdbc-sflow-provider.json**::
 
  { 
-
 
    "name": "jdbc-sflow-provider",
    "description": "JDBC provider for demo",
@@ -1174,7 +1173,7 @@ To create output streams of the output modules that will be used for storing inf
  $ curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/src-ip-data.json"
  $ curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/src-dst-data.json"
 
-To create an output stream of the fallback-output module that will be used for storing an incorrect inputs to database::
+To create an output stream of the fallback-output module that will be used for storing incorrect inputs to the database::
 
  $ curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/fallback-data.js
  
@@ -1183,7 +1182,7 @@ See them in the UI...
 Step 4. Output SQL Tables Creation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-SQL tables for output must be created in database sflow. To create tables::
+SQL tables for output must be created in the sflow database. To create tables::
 
  CREATE TABLE srcipdata (
     id SERIAL PRIMARY KEY,
@@ -1226,7 +1225,7 @@ To create instances of the output modules::
  $ curl --request POST "http://$address/v1/modules/output-streaming/sflow-src-ip-output/1.0/instance" -H 'Content-Type: application/json' --data "@api-json/instances/sflow-src-ip-output.json"
  $ curl --request POST "http://$address/v1/modules/output-streaming/sflow-src-dst-output/1.0/instance" -H 'Content-Type: application/json' --data "@api-json/instances/sflow-src-dst-output.json"
 
-To create an instance of the fallback output module::
+To create an instance of the fallback-output module::
 
  $ curl --request POST "http://$address/v1/modules/output-streaming/sflow-fallback-output/1.0/instance" -H 'Content-Type: application
  
@@ -1250,7 +1249,7 @@ To launch output module instances::
  $ curl --request GET "http://$address/v1/modules/output-streaming/sflow-src-ip-output/1.0/instance/sflow-src-ip-output/start"
  $ curl --request GET "http://$address/v1/modules/output-streaming/sflow-src-dst-output/1.0/instance/sflow-src-dst-output/start"
 
-To launch the fallback output module instance::
+To launch the fallback-output module instance::
 
  $ curl --request GET "http://$address/v1/modules/output-streaming/sflow-fallback-output/1.0/instance/sflow-fallback-output/start"
 
@@ -1258,7 +1257,7 @@ To get the list of listening ports of the input module::
 
  $ curl --request GET "http://$address/v1/modules/input-streaming/com.bwsw.input.csv/1.0/instance/sflow-csv-input"
 
-and look at field named tasks. It may look as follows::
+and look at the field named `tasks`. It may look as follows::
 
  "tasks": {
   "sflow-csv-input-task0": {
@@ -1274,7 +1273,7 @@ And now you can start the flow (replace <host> and <port> by values from the ret
 See the Results
 ~~~~~~~~~~~~~~~~~~
 
-To see the results execute query in database::
+To see the results execute the query in the database::
 
  SELECT * FROM srcipdata;
  SELECT * FROM srcdstdata;
@@ -1315,7 +1314,7 @@ To stop the input module instance::
 
  $ curl --request GET "http://$address/v1/modules/input-streaming/com.bwsw.input.csv/1.0/instance/sflow-csv-input/stop"
 
-To stop the process module instance::
+To stop the processing module instance::
 
  $ curl --request GET "http://$address/v1/modules/batch-streaming/sflow-process/1.0/instance/sflow-process/stop"
 
