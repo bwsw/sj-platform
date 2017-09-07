@@ -1257,7 +1257,7 @@ To get the list of listening ports of the input module::
 
  $ curl --request GET "http://$address/v1/modules/input-streaming/com.bwsw.input.csv/1.0/instance/sflow-csv-input"
 
-and look at the field named `tasks`. It may look as follows::
+and look at the field named ``tasks``. It may look as follows::
 
  "tasks": {
   "sflow-csv-input-task0": {
