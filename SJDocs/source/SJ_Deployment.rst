@@ -675,7 +675,7 @@ The following services are required before the platfrom deployment on minimesos:
         imageName = "jplock/zookeeper"
         imageTag = "3.4.6"
      }
-   }
+    }
 
 4) Deploy minimesos::
 
