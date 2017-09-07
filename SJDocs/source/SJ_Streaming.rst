@@ -10,9 +10,9 @@ The streaming component is essential in SJ-Platform. The data is fed to the syst
 
 There are two kinds of streams in SJ-Platform:
 
-- An input stream - a stream which provides new events. There are two different input stream types in SJ-Platform: TCP, Apache Kafka and T-Stream.
+- An input stream - a stream which provides new events. There are two different input stream types in SJ-Platform: TCP, Apache Kafka and T-Streams.
 
-- An output stream - a stream which is a destination for results. There is one output stream type in SJ-Platform: T-Stream.
+- An output stream - a stream which is a destination for results. Within SJ-Platform the results are written in T-Streams. To export the processed data from T-streams additional output streams are required. They are created for an output module and correspond to the type of the external storage. For now, Elasticsearch, SQL database and RESTful output stream types are supported.
 
 Input Streams
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -43,7 +43,7 @@ Consumer iterates over transactions from earliest to the latest and reads data f
 
 Producers open transactions in a strictly ordered mode. Consumers and Subscribers always process transactions in the same order they have been opened. Producer can checkpoint or cancel transactions in an arbitrary way, but Subscriber will start handling them once the first (the earliest) one is checkpointed. 
 
-For the strictly ordered way of transaction opening a master producer is responsible. A master is registered in Apache Zookeeper per each transaction. The master generates a new transaction, registers it in Zookeeper, and returns the transaction ID to a Producer. Producer fills the transaction with data from the storage server. Then, it sends checkpoint or cancels to the server commit log and the transaction is checkpointed or canceled. 
+For the strictly ordered way of transaction opening a master producer is responsible. A master is registered in Apache Zookeeper per each transaction. The master generates a new transaction, registers it in Apache Zookeeper, and returns the transaction ID to a Producer. Producer fills the transaction with data from the storage server. Then, it sends checkpoint or cancels to the server commit log and the transaction is checkpointed or canceled. 
 
 Finally, storage server commit logs are played and results are stored to RocksDB. 
 
@@ -69,8 +69,6 @@ The following types of output streams are supported in SJ-Platform:
 - SQL database, to store data to JDBC-compatible databases;
 - RESTful, to store data to RESTful storage.
 
-
-
 Streaming Infrastructure
 -----------------------------------
 
@@ -86,17 +84,59 @@ The diagram of platform entities interconnections can be useful in selecting the
 
 .. figure:: _static/InstanceCorrelation1.png
 
-Firstly, decide what type of modules will be included into the pipeline. These modules will require instances of a particular type. So determine the type of instances that will be created.
+Firstly, decide what types of instances will perform processing in the pipeline. 
 
-That will help to clarify which streams are required for these particular instances.
+Determined instance types will help to clarify which streams are required for these particular instances.
 
 Secondly, find in the diagram what services are necessary for these types of streams. 
 
 Finally, when services are determined, it is easy to see what types of providers should be created. 
 
+The table below explains what types of streams may serve as input or output streams for particular instances:
+
+===============  ================================================  ===============================================
+Instance          Input stream                                     Output stream
+===============  ================================================  ===============================================
+*Input*            TCP                                               T-streams 
+
+                                                                      **Providers**: Apache Zookeeper
+                                       
+                                                                      **Services**: T-streams, Apache Zookeeper
+
+*Regular/Batch*    T-streams                                         T-streams
+               
+                    **Providers**: Apache Zookeeper                   **Providers**: Apache Zookeeper
+
+                    **Services**: T-streams, Apache Zookeeper         **Services**: T-streams, Apache Zookeeper
+               
+                   Apache Kafka
+              
+                    **Providers**: Apache Zookeeper, Apache Kafka
+ 
+                    **Services**: Apache Zookeeper, Apache Kafka
+
+*Output*           T-streams                                         Elasticsearch
+
+                    **Providers**: Apache Zookeeper                     **Providers**: Elasticsearch
+                 
+                    **Services**: T-streams, Apache Zookeeper           **Services**:  Elasticsearch, Apache Zookeeper
+
+                                                                     SQL database
+
+                                                                       **Providers**:  SQL database
+
+                                                                       **Services**: SQL database, Apache Zookeeper 
+                                                                   
+                                                                     RESTful
+                                                                   
+                                                                       **Providers**: RESTful
+
+                                                                       **Services**: RESTful,  Apache Zookeeper 
+===============  ================================================  ===============================================
+
 Start creating the infrastructure from providers, then proceed with services and then streams. 
 
-Detailed instructions can be found in the :ref:`Tutorial` (for creating infrastructure via REST API) or in the `UI Guide <http://streamjuggler.readthedocs.io/en/develop/SJ_UI_Guide.html>`_ for creating through the Web UI.
+Detailed instructions on stream creation can be found in the :ref:`Tutorial` (for creating infrastructure via REST API) or in the `UI Guide <http://streamjuggler.readthedocs.io/en/develop/SJ_UI_Guide.html>`_ for creating through the Web UI.
 
 
 

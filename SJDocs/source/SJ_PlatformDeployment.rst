@@ -5,12 +5,12 @@ This section provides the information on Stream Juggler Platform deployment.
 
 Below, two ways of deployment are described. Please, read the requirements for each of them and decide what option is more suitable for your aims.
 
-Deployment on Claster
+Deployment on Cluster
 ---------------------------
 
 The `deployment guide <http://streamjuggler.readthedocs.io/en/develop/SJ_Deployment.html>`_ provides a detailed step-by-step instruction on Stream Juggler Platform deployment on a cluster. 
 
-Currently, the deployment on `Mesos <http://mesos.apache.org/>`_ as a universal distributed computational engine is supported.
+Currently, the deployment on `Apache Mesos <http://mesos.apache.org/>`_ as a universal distributed computational engine is supported.
 
 Another option is to deploy SJ-Platform in a local mode using `minimesos <https://www.minimesos.org/>`_ as a testing environment.
 
