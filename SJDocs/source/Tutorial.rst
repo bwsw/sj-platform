@@ -993,7 +993,7 @@ The processed data is stored into the PostgreSQL database. It is exported from t
 
 In general the pipeline can be rendered as in the diagram below:
 
-*(diagram here)*
+.. figure:: _static/SflowDemo.png
 
 Green, yellow, purple and red blocks are executed with SJ-Platform. These are the *'sflow-csv-input'* module, the *'sflow-process'* module, the *'sflow-src-ip-output'* and the *'sflow-src-dst-output'* modules and the *'sflow-fallback-output'* module, respectively.
 
