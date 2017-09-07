@@ -64,12 +64,14 @@ Please, note, the deployment is described for one default Mesos-slave with avail
 
    Find detailed instructions on Java deployment in the `installation guide <https://tecadmin.net/install-oracle-java-8-ubuntu-via-ppa/>`_.
 
-4. Start Mesos-master, Mesos-slave and the services. 
+4. Install sbt following instructions in `the official documentation <http://www.scala-sbt.org/download.html>`_ .
+
+5. Start Mesos-master, Mesos-slave and the services. 
 
 After performing all the steps, make sure you have access to Mesos interface, Marathon interface. Zookeeper now should be active.
 
 
-5. Create json files and a configuration file (config.properties). Please, name them as it is specified here.
+6. Create json files and a configuration file (config.properties). Please, name them as it is specified here.
 
 **mongo.json**::
 
@@ -539,7 +541,7 @@ Minimesos Deployment
 The following services are required before the platfrom deployment on minimesos: 
 
 - git,
-- sbt (find downloading instructions `here <http://www.scala-sbt.org/download.html>`_),
+- sbt,
 - Docker,
 - cURL
 
@@ -1108,7 +1110,7 @@ Modules Uploading
 
 Now modules can be set up. 
 
-1. Firtly, it necessary to move to the demo project directory::
+1. Firstly, it is necessary to move to the demo project directory::
 
     $ cd ..
     $ cd sj-fping-demo
@@ -1146,7 +1148,7 @@ curl --request POST "http://$address/v1/providers" -H 'Content-Type: application
     $ curl --request POST "http://$address/v1/services" -H 'Content-Type: application/json' --data "@api-json/services/zookeeper-ps-service.json" 
     $ curl --request POST "http://$address/v1/services" -H 'Content-Type: application/json' --data "@api-json/services/tstream-ps-service.json" 
 
-3. Now sreate streams::
+3. Now create streams::
 
    $ curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/echo-response.json" 
    $ curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/unreachable-response.json" 
