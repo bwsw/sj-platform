@@ -547,30 +547,30 @@ The following services are required before the platfrom deployment on minimesos:
 
 1) Pull and assemble the SJ-Platform project::
 
-    git clone https://github.com/bwsw/sj-platform.git
-    cd sj-platform
-    git checkout develop
+    $ git clone https://github.com/bwsw/sj-platform.git
+    $ cd sj-platform
+    $ git checkout develop
 
-    sbt sj-mesos-framework/assembly
-    sbt sj-input-streaming-engine/assembly
-    sbt sj-regular-streaming-engine/assembly
-    sbt sj-output-streaming-engine/assembly
+    $ sbt sj-mesos-framework/assembly
+    $ sbt sj-input-streaming-engine/assembly
+    $ sbt sj-regular-streaming-engine/assembly
+    $ sbt sj-output-streaming-engine/assembly
 
-    cd ..
+    $ cd ..
 
 2) Pull and assemble the demo project::
 
-    git clone https://github.com/bwsw/sj-fping-demo.git
-    cd sj-fping-demo
-    git checkout develop
+    $ git clone https://github.com/bwsw/sj-fping-demo.git
+    $ cd sj-fping-demo
+    $ git checkout develop
 
-    sbt assembly
+    $ sbt assembly
 
-    cd ..
+    $ cd ..
 
 3) Install minimesos::
  
-    curl -sSL https://minimesos.org/install | sh
+    $ curl -sSL https://minimesos.org/install | sh
 
    This command will be displayed in the terminal result::
 
@@ -579,22 +579,22 @@ The following services are required before the platfrom deployment on minimesos:
 
    You should execute this export command::
   
-    export PATH=$PATH:/root/.minimesos/bin
+    $ export PATH=$PATH:/root/.minimesos/bin
 
    Also, you can append this command to the end of file ~/.profile to have this instruction executed on each login. 
 
    Create a directory to place all minimesos-related files::
 
-    mkdir ~/minimesos
-    cd ~/minimesos
+    $ mkdir ~/minimesos
+    $ cd ~/minimesos
 
    Then you need to create `minimesosFile`::
  
-    touch minimesosFile
+    $ touch minimesosFile
 
    Open the file to edit it::
   
-    nano minimesosFile
+    $ nano minimesosFile
  
    Copy and paste all the following settings into it::
 
@@ -716,7 +716,7 @@ The following services are required before the platfrom deployment on minimesos:
   
     $ sudo service dnsmasq restart
  
-   After launching you can see weavescope app (https://github.com/weaveworks/scope) on port 4040.
+   After launching you can see the Weavescope app (https://github.com/weaveworks/scope) on port 4040.
 
    This application is an instrument to visualize, monitor your docker containers. It generates the map that can look like at the picture below: 
    
@@ -1078,15 +1078,15 @@ And install it::
 
  $ minimesos install --marathonFile tts.json
 
- After deploying each service you may see corresponding applications in Marathon UI (port 8080):
+After deploying each service you may see corresponding applications in Marathon UI (port 8080):
  
 .. figure:: _static/marathon2.png
  
- and corresponding tasks in the Mesos UI (port 5050):
+and corresponding tasks in the Mesos UI (port 5050):
  
 .. figure:: _static/mesos2.png
  
- The graph structure provided by weavescope will surely change (port 4040):
+The graph structure provided by weavescope will surely change (port 4040):
  
 .. figure:: _static/weavescope2.png
 
@@ -1149,13 +1149,13 @@ The infrastructure for streams should be created first.
 There is a default value of Elasticsearch, Apache Kafka and Zookeeper IPs (176.120.25.19) in json configuration files, so we need to change it appropriately via sed app before using::
 
     $ sed -i 's/176.120.25.19/elasticsearch.marathon.mm/g' api-json/providers/elasticsearch-ps-provider.json
-curl --request POST "http://$address/v1/providers" -H 'Content-Type: application/json' --data "@api-json/providers/elasticsearch-ps-provider.json" 
+    $ curl --request POST "http://$address/v1/providers" -H 'Content-Type: application/json' --data "@api-json/providers/elasticsearch-ps-provider.json" 
 
     $ sed -i 's/176.120.25.19/kafka.marathon.mm/g' api-json/providers/kafka-ps-provider.json
-curl --request POST "http://$address/v1/providers" -H 'Content-Type: application/json' --data "@api-json/providers/kafka-ps-provider.json" 
+    $ curl --request POST "http://$address/v1/providers" -H 'Content-Type: application/json' --data "@api-json/providers/kafka-ps-provider.json" 
 
     $ sed -i "s/176.120.25.19/${MINIMESOS_ZOOKEEPER_IP}/g" api-json/providers/zookeeper-ps-provider.json
-curl --request POST "http://$address/v1/providers" -H 'Content-Type: application/json' --data "@api-json/providers/zookeeper-ps-provider.json" 
+    $ curl --request POST "http://$address/v1/providers" -H 'Content-Type: application/json' --data "@api-json/providers/zookeeper-ps-provider.json" 
 
 2. Then set up services::
 
@@ -1191,6 +1191,7 @@ Create an instance for each module::
 
 Instance Launching
 """""""""""""""""""""""""
+
 Launch each instance::
 
  $ curl --request GET "http://$address/v1/modules/input-streaming/com.bwsw.input.regex/1.0/instance/pingstation-input/start" 
@@ -1198,7 +1199,7 @@ Launch each instance::
  $ curl --request GET "http://$address/v1/modules/output-streaming/pingstation-output/1.0/instance/pingstation-output/start" 
 
 View Results
-""""""""""""""""""""""
+~~~~~~~~~~~~~~~~
 
 To see the processing results saved in Elasticsearch, please, go to Kibana. There the aggregated data can be rendered in a diagram.
 
@@ -1223,7 +1224,7 @@ It illustrates average time of echo-responses by IPs per a selected period of ti
 Lots of other parameter combinations can be implemented to view the results.
 
 Instance Shutdown 
-"""""""""""""""""""""""""
+~~~~~~~~~~~~~~~~~~~~~~
 
 Once the task is resolved and necessary data is aggregated, the instances can be stopped. 
 
@@ -1242,7 +1243,7 @@ To stop instances in the example task the following requests should be sent::
 In the UI, you will see the suspended instances with the “stopped” status.
 
 Instance Deleting 
-""""""""""""""""""""""""""""
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 A stopped instance can be deleted if there is no need for it anymore. An instance of a specific module can be deleted via REST API by sending a DELETE request (as described below). Or instance deleting action is available in the UI under the “Instances” tab.
 
