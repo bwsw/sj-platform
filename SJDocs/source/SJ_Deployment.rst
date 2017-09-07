@@ -757,7 +757,7 @@ The following services are required before the platfrom deployment on minimesos:
  
    The json files will be created in the minimesos folder. All you need now is to deploy them to the system. Use the commands provided below for each json file.
 
-**mongo.json**::
+**mongo.json** (replace <dns-ip> with a valid DNS IP)::
 
   {  
    "id":"mongo",
