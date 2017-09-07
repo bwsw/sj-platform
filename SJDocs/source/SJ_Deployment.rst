@@ -718,12 +718,18 @@ The following services are required before the platfrom deployment on minimesos:
  
    After launching you can see weavescope app (https://github.com/weaveworks/scope) on port 4040.
 
-   This application is an instrument to visualize, monitor your docker containers. It generates the map that can look like at the picture below: (image here)
+   This application is an instrument to visualize, monitor your docker containers. It generates the map that can look like at the picture below: 
+   
+   .. figure:: _static/wavescope1.png
+   
+   Besides you can obtain access to Mesos on port 5050: 
+   
+   .. figure:: _static/mesos1.png
 
-   Besides you can obtain access to Mesos on port 5050: (image here)
-
-   and also access to Marathon on port 8080: (image here)
-
+   and also access to Marathon on port 8080:
+   
+   .. figure:: _static/marathon1.png
+   
    Check dns by ping master node::
 
     $ ping -c 4 master.mm
