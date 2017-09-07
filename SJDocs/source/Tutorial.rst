@@ -40,7 +40,7 @@ Below an example of a real-life task solution will demonstrate the platform at w
 2. instructions on development, deployment and customization of your own code for your specific aims.
 
 
-fping Example task
+fping Example Task
 ----------------------------
 
 Let’s introduce an example task which will illustrate the platform workflow in the real-world use.
