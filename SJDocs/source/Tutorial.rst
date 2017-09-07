@@ -39,6 +39,7 @@ Below an example of a real-life task solution will demonstrate the platform at w
 
 2. instructions on development, deployment and customization of your own code for your specific aims.
 
+.. _fping-example-task:
 
 fping Example Task
 ----------------------------
@@ -971,6 +972,8 @@ For deleting the ps-output module instance send::
  $ curl --request DELETE "http://$address/v1/modules/output-streaming/pingstation-output/1.0/instance/pingstation-output-1h/"
 
 Via the UI you can make sure the instances are deleted.
+
+.. _sflow-example-task:
 
 sFlow Example Task
 -------------------------
