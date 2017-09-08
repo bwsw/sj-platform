@@ -1042,15 +1042,8 @@ For this demo project the following core systems and services are required:
 Perform the steps for platform deployment from the :ref:`Tutorial.rst#step-1-deployment` section.
 
 1) Deploy Mesos, Apache Zookeeper, Marathon.
-2) Download the SJ-Platform project from the GitHub repository.
-
-    git clone https://github.com/bwsw/sj-platform.git
-    cd sj-platform
-    git checkout develop
- 
-    cd ..
-    
-3) Download the demo proejct from the GitHub repository::
+   
+2) Download the demo proejct from the GitHub repository::
      
       git clone https://github.com/bwsw/sj-sflow-demo.git
       cd sj-sflow-demo
@@ -1066,7 +1059,7 @@ Now look and make sure you have access to the Web UI. You will see the platform 
 
 Next, the infrastructure for the module performance can be created.
 
-Step 2. Configurations and Engine Jar Uploading
+Step 2. Configurations and Engine Jars Uploading
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Now download the engine jars::
@@ -1090,7 +1083,7 @@ And upload them to the system. Please, replace <host>:<port> with the SJ-Platfor
 Setup settings for the engines::
 
  curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"session-timeout\",\"value\": \"7000\",\"domain\": \"configuration.apache-zookeeper\"}" 
-curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"current-framework\",\"value\": \"com.bwsw.fw-1.0\",\"domain\": \"configuration.system\"}" 
+ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"current-framework\",\"value\": \"com.bwsw.fw-1.0\",\"domain\": \"configuration.system\"}" 
 
  curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"crud-rest-host\",\"value\": \"sj-rest.marathon.mm\",\"domain\": \"configuration.system\"}" 
  curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"crud-rest-port\",\"value\": \"8080\",\"domain\": \"configuration.system\"}" 
@@ -1108,7 +1101,7 @@ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: appli
 Step 3. Modules Uploading
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Now let's upload modules for data processing.
+Now let's upload modules for data processing::
  
  cd ..
  cd sj-fping-demo
