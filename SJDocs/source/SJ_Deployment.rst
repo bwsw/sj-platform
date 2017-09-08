@@ -392,7 +392,7 @@ Via the Marathon interface make sure the services are deployed.
     curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"framework-principal\",\"value\": <principal>,\"domain\": \"configuration.system\"}" 
     curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"framework-secret\",\"value\": <secret>,\"domain\": \"configuration.system\"}" 
 
-7. Copy the project for the GitHub repository of the SJ-Platform::
+7. Copy the SJ-Platform project from the GitHub repository::
 
     git clone https://github.com/bwsw/sj-platform.git
 
@@ -403,19 +403,22 @@ Configurations Uploading
 """"""""""""""""""""""""""
 Before uploading modules, compile and upload the engine jars for them. 
 
-1. Please, upload the engine jars for the modules (input-streaming, regular-streaming, output-streaming) and a Mesos framework. Please,  replace <slave_advertise_ip> with slave advertise IP::
+1. Please, download the engine jars for the modules (input-streaming, regular-streaming, output-streaming) and a Mesos framework::
+
+    wget http://c1-ftp1.netpoint-dc.com/sj/1.0-SNAPSHOT/sj-mesos-framework.jar
+    wget http://c1-ftp1.netpoint-dc.com/sj/1.0-SNAPSHOT/sj-input-streaming-engine.jar
+    wget http://c1-ftp1.netpoint-dc.com/sj/1.0-SNAPSHOT/sj-regular-streaming-engine.jar
+    wget http://c1-ftp1.netpoint-dc.com/sj/1.0-SNAPSHOT/sj-output-streaming-engine.jar
+
+Now upload the engine jars into the platform. Please, replace <slave_advertise_ip> with the slave advertise IP::
 
     cd sj-platform
     address=<slave_advertise_ip>:31080
-    sbt sj-mesos-framework/assembly
-    sbt sj-input-streaming-engine/assembly
-    sbt sj-regular-streaming-engine/assembly
-    sbt sj-output-streaming-engine/assembly
-
-    curl --form jar=@core/sj-mesos-framework/target/scala-2.12/sj-mesos-framework-1.0-SNAPSHOT.jar http://$address/v1/custom/jars
-    curl --form jar=@core/sj-input-streaming-engine/target/scala-2.12/sj-input-streaming-engine-1.0-SNAPSHOT.jar http://$address/v1/custom/jars
-    curl --form jar=@core/sj-regular-streaming-engine/target/scala-2.12/sj-regular-streaming-engine-1.0-SNAPSHOT.jar http://$address/v1/custom/jars
-    curl --form jar=@core/sj-output-streaming-engine/target/scala-2.12/sj-output-streaming-engine-1.0-SNAPSHOT.jar http://$address/v1/custom/jars
+    
+    curl --form jar=@sj-mesos-framework.jar http://$address/v1/custom/jars
+    curl --form jar=@sj-input-streaming-engine.jar http://$address/v1/custom/jars
+    curl --form jar=@sj-regular-streaming-engine.jar http://$address/v1/custom/jars
+    curl --form jar=@sj-output-streaming-engine.jar http://$address/v1/custom/jars
 
 2. Setup configurations for engines.
 
@@ -423,11 +426,11 @@ The range of configurations includes required and optional ones.
 
 The list of all configurations can be viewed at the :ref:`Configuration` page.
 
-To set up configuration settings for the engines, run the following commands. Please, replace <rest_ip> with the IP of REST and <marathon_address> with the address of Marathon::
+To set up configuration settings for the engines, run the following commands. Please, replace <slave_advertise_ip> with the slave advertise IP and <marathon_address> with the address of Marathon::
 
    curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"session-timeout\",\"value\": \"7000\",\"domain\": \"configuration.apache-zookeeper\"}" 
    curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"current-framework\",\"value\": \"com.bwsw.fw-1.0\",\"domain\": \"configuration.system\"}" 
-   curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"crud-rest-host\",\"value\": \"<rest_ip>\",\"domain\": \"configuration.system\"}" 
+   curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"crud-rest-host\",\"value\": \"<slave_advertise_ip>\",\"domain\": \"configuration.system\"}" 
    curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"crud-rest-port\",\"value\": \"31080\",\"domain\": \"configuration.system\"}" 
    curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"marathon-connect\",\"value\": \"http://<marathon_address>\",\"domain\": \"configuration.system\"}" 
    curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"marathon-connect-timeout\",\"value\": \"60000\",\"domain\": \"configuration.system\"}" 
@@ -445,7 +448,6 @@ To set up configuration settings for the engines, run the following commands. Pl
     curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"framework-principal\",\"value\": <principal>,\"domain\": \"configuration.system\"}" 
     curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"framework-secret\",\"value\": <secret>,\"domain\": \"configuration.system\"}" 
 
-  
 In the UI you can see the uploaded configurations under the “Configuration” tab of the main navigation.
 
 Module Uploading
@@ -518,7 +520,7 @@ In our demo case the destination is of Elasticsearch type. Thus, the index and t
 Instance Creation
 """"""""""""""""""""""""""""
 
-Create instances for modules. Please, replace <module_name> with the name of the module the instance is created for, <instance_name> with a name of the instance::
+Create instances for modules. Please, replace <module_name> with the name of the module the instance is created for, <instance_name> with the name of the instance::
 
  curl --request POST "http://$address/v1/modules/input-streaming/com.bwsw.input.regex/1.0/instance" -H 'Content-Type: application/json' --data "@api-json/instances/pingstation-input.json" 
  curl --request POST "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance" -H 'Content-Type: application/json' --data "@api-json/instances/pingstation-echo-process.json" 
@@ -532,12 +534,12 @@ Launch the created instances by sending GET request for each instance (please, r
  curl --request GET "http://$address/v1/modules/input-streaming/com.bwsw.input.regex/1.0/instance/pingstation-input/start" 
  curl --request GET "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance/pingstation-echo-process/start" 
  curl --request GET "http://$address/v1/modules/output-streaming/pingstation-output/1.0/instance/pingstation-output/start" 
-
  
 Now the data can be delevered into the system. The instance(-s) starts data processing. 
 
-View, monitor and manage instance performance via the UI.
+You can view, monitor and manage instance performance via the UI.
 
+The processed data will be displayed through Kibana in a diagram. For more detail please refer to the View_ Results_ section below.
 
 Minimesos Deployment
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -554,11 +556,6 @@ The following services are required before the platfrom deployment on minimesos:
     git clone https://github.com/bwsw/sj-platform.git
     cd sj-platform
     git checkout develop
-
-    sbt sj-mesos-framework/assembly
-    sbt sj-input-streaming-engine/assembly
-    sbt sj-regular-streaming-engine/assembly
-    sbt sj-output-streaming-engine/assembly
 
     cd ..
 
@@ -1099,16 +1096,23 @@ The graph structure provided by weavescope will surely change (port 4040):
 Configurations Uploading
 """"""""""""""""""""""""
 
-1. Upload engine jars in the next step::
+1. Download the engine jars in the next step::
+
+    wget http://c1-ftp1.netpoint-dc.com/sj/1.0-SNAPSHOT/sj-mesos-framework.jar
+    wget http://c1-ftp1.netpoint-dc.com/sj/1.0-SNAPSHOT/sj-input-streaming-engine.jar
+    wget http://c1-ftp1.netpoint-dc.com/sj/1.0-SNAPSHOT/sj-regular-streaming-engine.jar
+    wget http://c1-ftp1.netpoint-dc.com/sj/1.0-SNAPSHOT/sj-output-streaming-engine.jar
+
+Now upload the engine jars into the platform::
 
     cd  sj-platform
 
     address=sj-rest.marathon.mm:8080
 
-    curl --form jar=@core/sj-mesos-framework/target/scala-2.12/sj-mesos-framework-1.0- SNAPSHOT.jar http://$address/v1/custom/jars
-    curl --form jar=@core/sj-input-streaming-engine/target/scala-2.12/sj-input-streaming-engine-1.0-SNAPSHOT.jar http://$address/v1/custom/jars
-    curl --form jar=@core/sj-regular-streaming-engine/target/scala-2.12/sj-regular-streaming-engine-1.0-SNAPSHOT.jar http://$address/v1/custom/jars
-    curl --form jar=@core/sj-output-streaming-engine/target/scala-2.12/sj-output-streaming-engine-1.0-SNAPSHOT.jar http://$address/v1/custom/jars
+    curl --form jar=@sj-mesos-framework.jar http://$address/v1/custom/jars
+    curl --form jar=@sj-input-streaming-engine.jar http://$address/v1/custom/jars
+    curl --form jar=@sj-regular-streaming-engine.jar http://$address/v1/custom/jars
+    curl --form jar=@sj-output-streaming-engine.jar http://$address/v1/custom/jars
 
 2. Set up configurations for the engines::
 
