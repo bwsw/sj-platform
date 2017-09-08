@@ -22,7 +22,6 @@ Contents:
 
    SJ_Overview
    Tutorial
-   Glossary
    SJ_Modules
    SJ_Engines
    SJ_CustomModule
@@ -32,7 +31,9 @@ Contents:
    SJ_PlatformDeployment
    SJ_UI_Guide
    SJ_CRUD_REST_API
-
+   Glossary
+   
+   
    
    
  
