@@ -1097,6 +1097,9 @@ Setup settings for the engines::
  curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"input-streaming-validator-class\",\"value\": \"com.bwsw.sj.crud.rest.instance.validator.InputInstanceValidator\",\"domain\": \"configuration.system\"}" 
  curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"output-streaming-validator-class\",\"value\": \"com.bwsw.sj.crud.rest.instance.validator.OutputInstanceValidator\",\"domain\": \"configuration.system\"}" 
 
+You can see in the UI the configurations are uploaded:
+
+(screenshot here)
 
 Step 3. Modules Uploading
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1104,7 +1107,7 @@ Step 3. Modules Uploading
 Now let's upload modules for data processing::
  
  cd ..
- cd sj-fping-demo
+ cd sj-sflow-demo
 
 Then, upload the CSV-input module::
 
@@ -1119,7 +1122,7 @@ Next, set up the output modules::
 
  curl --form jar=@sflow-output/src-ip/target/scala-2.12/sflow-src-ip-output-1.0.jar http://$address/v1/modules
  curl --form jar=@sflow-output/src-dst/target/scala-2.12/sflow-src-dst-output-1.0.jar http://$address/v1/modules
- сurl --form jar=@sflow-fallback-output/target/scala-2.12/sflow-fallback-output-1.0.jar http://$address/v1/modules
+ curl --form jar=@sflow-fallback-output/target/scala-2.12/sflow-fallback-output-1.0.jar http://$address/v1/modules
  
 Now upload the GeoIP database which is required for the processing module::
 
