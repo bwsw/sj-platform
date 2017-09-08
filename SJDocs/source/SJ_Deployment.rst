@@ -539,7 +539,7 @@ Now the data can be delevered into the system. The instance(-s) starts data proc
 
 You can view, monitor and manage instance performance via the UI.
 
-The processed data will be displayed through Kibana in a diagram. For more detail please refer to the View_ Results_ section below.
+The processed data will be displayed through Kibana in a diagram. For more detail please refer to the View_Results_ section below.
 
 Minimesos Deployment
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1207,6 +1207,8 @@ Launch each instance::
  curl --request GET "http://$address/v1/modules/input-streaming/com.bwsw.input.regex/1.0/instance/pingstation-input/start" 
  curl --request GET "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance/pingstation-echo-process/start" 
  curl --request GET "http://$address/v1/modules/output-streaming/pingstation-output/1.0/instance/pingstation-output/start" 
+
+.. _View_Results:
 
 View Results
 ~~~~~~~~~~~~~~~~
