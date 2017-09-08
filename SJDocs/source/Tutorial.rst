@@ -430,12 +430,10 @@ Please, note that `vm.max_map_count` should be slave::
 
  sudo sysctl -w vm.max_map_count=262144
 
-
 Then launch elasticsearch::
 
  curl -X POST http://172.17.0.1:8080/v2/apps -H "Content-type: application/json" -d 
  @elasticsearch.json
-
 
 **SJ-rest**::
 
@@ -455,7 +453,7 @@ Via the Marathon interface make sure the services are deployed.
 
 .. figure:: _static/ServicesOnMarathon.png
 
-4) Copy the GitHub repository of SJ-Platform::
+4) Copy the SJ-Platform project from the GitHub repository::
 
     git clone https://github.com/bwsw/sj-platform.git
 
@@ -473,71 +471,9 @@ Via the Marathon interface make sure the services are deployed.
 
 Now look and make sure you have access to the Web UI. You will see the platform but it is not completed with any entities yet. They will be added in the next steps.
 
-At first, the infrastructure for the module performance can be created next.
+Next, the infrastructure for the module performance can be created.
 
-
-Step 2. Module Uploading 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Now as the system is deployed, modules can be uploaded.
-
-A module is a .jar file, containing module specification and configurations.
-
-.. figure:: _static/ModuleExecutorAndValidator.png
-   :scale: 120%
-   :align: center
-   
-.. note:: Find more about modules at the :ref:`Modules` page.  A hello-world on a custom module can be found at the :ref:`Custom_Module` section.
-
-For the stated example task the following modules will be uploaded:
-
-- a TCP input module - sj-regex-input module that accepts TCP input streams and transforms raw data to put them to T-streams and pass for processing;
-
-- a processing module - ps-process module, which is a regular-streaming module that processes data element-by-element.
-
-- an output module - ps-output module that exports resulting data to Elasticsearch.
-
-Download the modules from the Sonatype repository and upload it to the system following the instructions for the example task.
-
-
-For the Example Task
-"""""""""""""""""""""""""
-
-Please, follow these steps to build and upload the modules of pingstation demo.
-
-To configure environment::
-
- address=<host>:<port>
-
-<host>:<port> — SJ Rest host and port.
-
-**Module Downloading from Sonatype Repository**
-
-- To download the sj-regex-input module from the sonatype repository::
-
-   curl "https://oss.sonatype.org/content/repositories/snapshots/com/bwsw/sj-regex-input_2.12/1.0-SNAPSHOT/sj-regex-input_2.12-1.0-SNAPSHOT.jar" -o sj-regex-input.jar 
-
-- To download the ps-process module from the sonatype repository::
-
-   curl “https://oss.sonatype.org/content/repositories/snapshots/com/bwsw/ps-process_2.12/1.0-SNAPSHOT/ps-process_2.12-1.0-SNAPSHOT.jar” -o ps-process-1.0.jar
-
-- To download the ps-output module from the sonatype repository::
-
-   curl “https://oss.sonatype.org/content/repositories/snapshots/com/bwsw/ps-output_2.12/1.0-SNAPSHOT/ps-output_2.12-1.0-SNAPSHOT.jar” -o ps-output-1.0.jar
-
-**Module Uploading**
-
-Upload modules to the system::
-
- curl --form jar=@sj-regex-input.jar http://$address/v1/modules
- curl --form jar=@ps-process/target/scala-2.11/ps-process-1.0.jar http://$address/v1/modules
- curl --form jar=@ps-output/target/scala-2.11/ps-output-1.0.jar http://$address/v1/modules
-
-Now in UI you can see the uploaded modules under the ‘Modules’ tab.
-
-.. figure:: _static/ModulesUploaded.png
-
-Step 3. Configurations and Engine Jars Uploading 
+Step 2. Configurations and Engine Jars Uploading 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 An engine is required to start a module. A module can not process data without an engine (that is a .jar file containing required configuration settings). In fact, it is a framework that launches the module executor.
@@ -557,16 +493,23 @@ Thus, engines should be compiled and uploaded in the next step.
 Upload Engine Jars
 """"""""""""""""""""""""
 
-Please, upload the engine jars for the three modules (input-streaming, regular-streaming, output-streaming) and the Mesos framework. You can find them at our GitHub repository::
+Please, download the engine jars for the three modules (input-streaming, regular-streaming, output-streaming) and the Mesos framework:: 
+
+ wget http://c1-ftp1.netpoint-dc.com/sj/1.0-SNAPSHOT/sj-mesos-framework.jar
+ wget http://c1-ftp1.netpoint-dc.com/sj/1.0-SNAPSHOT/sj-input-streaming-engine.jar
+ wget http://c1-ftp1.netpoint-dc.com/sj/1.0-SNAPSHOT/sj-regular-streaming-engine.jar
+ wget http://c1-ftp1.netpoint-dc.com/sj/1.0-SNAPSHOT/sj-output-streaming-engine.jar
+
+Now upload the engine jars. Please, change <slave_advertise_ip> to the slave advertise IP::
 
  cd sj-platform
 
- address=sj-rest.marathon.mm:8080
+ address=address=<slave_advertise_ip>:31080
 
- curl --form jar=@core/sj-mesos-framework/target/scala-2.12/sj-mesos-framework-1.0-SNAPSHOT.jar http://$address/v1/custom/jars
- curl --form jar=@core/sj-input-streaming-engine/target/scala-2.12/sj-input-streaming-engine-1.0-SNAPSHOT.jar http://$address/v1/custom/jars
- curl --form jar=@core/sj-regular-streaming-engine/target/scala-2.12/sj-regular-streaming-engine-1.0-SNAPSHOT.jar http://$address/v1/custom/jars
- curl --form jar=@core/sj-output-streaming-engine/target/scala-2.12/sj-output-streaming-engine-1.0-SNAPSHOT.jar http://$address/v1/custom/jars
+ curl --form jar=@sj-mesos-framework.jar http://$address/v1/custom/jars
+ curl --form jar=@sj-input-streaming-engine.jar http://$address/v1/custom/jars
+ curl --form jar=@sj-regular-streaming-engine.jar http://$address/v1/custom/jars
+ curl --form jar=@sj-output-streaming-engine.jar http://$address/v1/custom/jars
 
 Now engine jars should appear in the UI under Custom Jars of the "Custom files" navigation tab.
 
@@ -599,17 +542,18 @@ For solving an example task, we will upload the following configurations via RES
 - marathon-connect-timeout - Use when trying to connect by 'marathon-connect' (in milliseconds).
 
 
-Send the next POST requests to upload the configs::
+Send the next POST requests to upload the configs. Please, replace <slave_advertise_ip> with the slave advertise IP and <marathon_address> with the address of Marathon::
 
- curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"session-timeout\",\"value\": \"7000\",\"domain\": \"configuration.apache-zookeeper\"}"
- curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"current-framework\",\"value\": \"com.bwsw.fw-1.0\",\"domain\": \"configuration.system\"}"
+ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"session-timeout\",\"value\": \"7000\",\"domain\": \"configuration.apache-zookeeper\"}" 
+ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"current-framework\",\"value\": \"com.bwsw.fw-1.0\",\"domain\": \"configuration.system\"}" 
 
- curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"crud-rest-host\",\"value\": \"sj-rest.marathon.mm\",\"domain\": \"configuration.system\"}"
- curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"crud-rest-port\",\"value\": \"8080\",\"domain\": \"configuration.system\"}"
+ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"crud-rest-host\",\"value\": \"<slave_advertise_ip>\",\"domain\": \"configuration.system\"}" 
+ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"crud-rest-port\",\"value\": \"31080\",\"domain\": \"configuration.system\"}" 
 
- curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"marathon-connect\",\"value\": \"http://marathon.mm:8080\",\"domain\": \"configuration.system\"}"
- сurl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"marathon-connect-timeout\",\"value\": \"60000\",\"domain\": \"configuration.system\"}"
-
+ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"marathon-connect\",\"value\": \"http://<marathon_address>\",\"domain\": \"configuration.system\"}" 
+ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"marathon-connect-timeout\",\"value\": \"60000\",\"domain\": \"configuration.system\"}" 
+ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"kafka-subscriber-timeout\",\"value\": \"100\",\"domain\": \"configuration.system\"}" 
+ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"low-watermark\",\"value\": \"100\",\"domain\": \"configuration.system\"}" 
 
 Send the next POST requests to upload configurations for module validators::
 
@@ -620,6 +564,71 @@ Send the next POST requests to upload configurations for module validators::
 In the UI you can see the uploaded configurations under the “Configuration” tab of the main navigation.
 
 .. figure:: _static/ConfigurationsUploaded.png
+
+
+Step 3. Module Uploading 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Now as the system is deployed and necessary engines are added, modules can be uploaded to the system.
+
+A module is a .jar file, containing module specification and configurations.
+
+.. figure:: _static/ModuleExecutorAndValidator.png
+   :scale: 120%
+   :align: center
+   
+.. note:: Find more about modules at the :ref:`Modules` page.  A hello-world on a custom module can be found at the :ref:`Custom_Module` section.
+
+For the stated example task the following modules will be uploaded:
+
+- a TCP input module - sj-regex-input module that accepts TCP input streams and transforms raw data to put them to T-streams and pass for processing;
+
+- a processing module - ps-process module, which is a regular-streaming module that processes data element-by-element.
+
+- an output module - ps-output module that exports resulting data to Elasticsearch.
+
+Download the modules from the Sonatype repository and upload it to the system following the instructions for the example task.
+
+
+For the Example Task
+"""""""""""""""""""""""""
+
+Please, follow these steps to build and upload the modules of pingstation demo.
+
+To configure environment::
+ 
+ cd sj-fping-demo
+ 
+ address=<host>:<port>
+
+<host>:<port> — SJ REST host and port.
+
+**Module Downloading from Sonatype Repository**
+
+- To download the sj-regex-input module from the sonatype repository::
+
+   curl "https://oss.sonatype.org/content/repositories/snapshots/com/bwsw/sj-regex-input_2.12/1.0-SNAPSHOT/sj-regex-input_2.12-1.0-SNAPSHOT.jar" -o sj-regex-input.jar 
+
+- To download the ps-process module from the sonatype repository::
+
+   curl “https://oss.sonatype.org/content/repositories/snapshots/com/bwsw/ps-process_2.12/1.0-SNAPSHOT/ps-process_2.12-1.0-SNAPSHOT.jar” -o ps-process-1.0.jar
+
+- To download the ps-output module from the sonatype repository::
+
+   curl “https://oss.sonatype.org/content/repositories/snapshots/com/bwsw/ps-output_2.12/1.0-SNAPSHOT/ps-output_2.12-1.0-SNAPSHOT.jar” -o ps-output-1.0.jar
+
+**Module Uploading**
+
+Upload modules to the system::
+
+ curl --form jar=@sj-regex-input.jar http://$address/v1/modules
+ curl --form jar=@ps-process/target/scala-2.11/ps-process-1.0.jar http://$address/v1/modules
+ curl --form jar=@ps-output/target/scala-2.11/ps-output-1.0.jar http://$address/v1/modules
+
+Now in UI you can see the uploaded modules under the ‘Modules’ tab.
+
+.. figure:: _static/ModulesUploaded.png
+
 
 Step 4. Creating Streaming Layer 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -711,7 +720,7 @@ The created providers are available in the UI under the “Providers” tab.
 
    curl --request POST "http://$address/v1/services" -H 'Content-Type: application/json' --data "@api-json/services/elasticsearch-ps-service.json"
 
-Please, make sure the created services have appeared in UI under the “Services” tab.
+Please, make sure the created services have appeared in the UI under the “Services” tab.
 
 .. figure:: _static/ServicesCreated.png
 
@@ -1000,7 +1009,7 @@ The CSV data are transformed by the input module and are sent for processing to 
 
 The processed data is stored into the PostgreSQL database. It is exported from the platform via the output module with the streams of SQL-database type.
 
-In general the pipeline can be rendered as in the diagram below:
+In general, the pipeline can be rendered as in the diagram below:
 
 .. figure:: _static/SflowDemo.png
 
@@ -1033,42 +1042,85 @@ For this demo project the following core systems and services are required:
 Perform the steps for platform deployment from the :ref:`Tutorial.rst#step-1-deployment` section.
 
 1) Deploy Mesos, Apache Zookeeper, Marathon.
-2) Create json files for the services and run them. Via the Marathon interface make sure the services are deployed.
-3) Download the SJ-Platform project from the GitHub repository.
-4) Download the demo proejct from the GitHub repository::
+2) Download the SJ-Platform project from the GitHub repository.
+
+    git clone https://github.com/bwsw/sj-platform.git
+    cd sj-platform
+    git checkout develop
+ 
+    cd ..
+    
+3) Download the demo proejct from the GitHub repository::
      
-      cd ..
       git clone https://github.com/bwsw/sj-sflow-demo.git
       cd sj-sflow-demo
+      git checkout develop
+      
       sbt assembly
+      
+      cd ..
+      
+ 4) Create json files for the services and run them. Via the Marathon interface make sure the services are deployed.
 
 Now look and make sure you have access to the Web UI. You will see the platform but it is not completed with any entities yet. They will be added in the next steps.
 
-At first, the infrastructure for the module performance can be created next.
+Next, the infrastructure for the module performance can be created.
 
+Step 2. Configurations and Engine Jar Uploading
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Step 2. Modules Uploading
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Now download the engine jars::
 
-Now let's upload modules for data processing.
+ wget http://c1-ftp1.netpoint-dc.com/sj/1.0-SNAPSHOT/sj-mesos-framework.jar
+ wget http://c1-ftp1.netpoint-dc.com/sj/1.0-SNAPSHOT/sj-input-streaming-engine.jar
+ wget http://c1-ftp1.netpoint-dc.com/sj/1.0-SNAPSHOT/sj-batch-streaming-engine.jar
+ wget http://c1-ftp1.netpoint-dc.com/sj/1.0-SNAPSHOT/sj-output-streaming-engine.jar
 
-Firstly, configure the environment::
+And upload them to the system. Please, replace <host>:<port> with the SJ-Platform REST host and port::
+
+ cd sj-platform
 
  address=<host>:<port>
  
-where <host>:<port> are SJ-Platform REST host and port.
+ curl --form jar=@sj-mesos-framework.jar http://$address/v1/custom/jars
+ curl --form jar=@sj-input-streaming-engine.jar http://$address/v1/custom/jars
+ curl --form jar=@sj-batch-streaming-engine.jar http://$address/v1/custom/jars
+ curl --form jar=@sj-output-streaming-engine.jar http://$address/v1/custom/jars
+
+Setup settings for the engines::
+
+ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"session-timeout\",\"value\": \"7000\",\"domain\": \"configuration.apache-zookeeper\"}" 
+curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"current-framework\",\"value\": \"com.bwsw.fw-1.0\",\"domain\": \"configuration.system\"}" 
+
+ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"crud-rest-host\",\"value\": \"sj-rest.marathon.mm\",\"domain\": \"configuration.system\"}" 
+ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"crud-rest-port\",\"value\": \"8080\",\"domain\": \"configuration.system\"}" 
+
+ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"marathon-connect\",\"value\": \"http://marathon.mm:8080\",\"domain\": \"configuration.system\"}" 
+ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"marathon-connect-timeout\",\"value\": \"60000\",\"domain\": \"configuration.system\"}" 
+ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"kafka-subscriber-timeout\",\"value\": \"100\",\"domain\": \"configuration.system\"}" 
+ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"low-watermark\",\"value\": \"100\",\"domain\": \"configuration.system\"}" 
+
+ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"batch-streaming-validator-class\",\"value\": \"com.bwsw.sj.crud.rest.instance.validator.RegularInstanceValidator\",\"domain\": \"configuration.system\"}" 
+ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"input-streaming-validator-class\",\"value\": \"com.bwsw.sj.crud.rest.instance.validator.InputInstanceValidator\",\"domain\": \"configuration.system\"}" 
+ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"output-streaming-validator-class\",\"value\": \"com.bwsw.sj.crud.rest.instance.validator.OutputInstanceValidator\",\"domain\": \"configuration.system\"}" 
+
+
+Step 3. Modules Uploading
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Now let's upload modules for data processing.
+ 
+ cd ..
+ cd sj-fping-demo
 
 Then, upload the CSV-input module::
 
  curl "https://oss.sonatype.org/content/repositories/snapshots/com/bwsw/sj-csv-input_2.12/1.0-SNAPSHOT/sj-csv-input_2.12-1.0-SNAPSHOT.jar" -o sj-csv-input.jar
  curl --form jar=@sj-csv-input.jar http://$address/v1/modules
 
-Then, build and upload the processing and the output modules of the sFlow demo project. From the directory of the demo project set up the batch processing module::
+Then, build and upload the batch processing and the output modules of the sFlow demo project. From the directory of the demo project set up the batch processing module::
  
- cd sj-sflow-demo
- sbt assembly
  curl --form jar=@sflow-process/target/scala-2.12/sflow-process-1.0.jar http://$address/v1/modules
-
 
 Next, set up the output modules::
 
