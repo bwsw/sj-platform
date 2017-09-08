@@ -181,7 +181,11 @@ Install Java::
 
 Find detailed instructions `here <https://tecadmin.net/install-oracle-java-8-ubuntu-via-ppa/>`_.
 
-2) Create json files and a configuration file (config.properties) for tts. 
+2) Create json files and a configuration file. Please, name them as specified here.
+
+Replace <slave_advertise_ip> with the slave advertise IP.
+
+Replace <zk_ip> and <zk_port> according to the Apache Zookeeper address.
 
 **mongo.json**::
 
@@ -190,7 +194,7 @@ Find detailed instructions `here <https://tecadmin.net/install-oracle-java-8-ubu
    "container":{  
       "type":"DOCKER",
       "docker":{  
-         "image":"mongo",
+         "image":"mongo:3.4.7",
          "network":"BRIDGE",
          "portMappings":[  
             {  
@@ -214,7 +218,7 @@ Find detailed instructions `here <https://tecadmin.net/install-oracle-java-8-ubu
 
 **sj-rest.json**::
 
- {  
+{  
    "id":"sj-rest",
    "container":{  
       "type":"DOCKER",
@@ -240,11 +244,11 @@ Find detailed instructions `here <https://tecadmin.net/install-oracle-java-8-ubu
    "cpus":0.1,
    "mem":1024,
    "env":{
-      "MONGO_HOSTS":"172.17.0.1:31027",
-      "ZOOKEEPER_HOST":"172.17.0.1",
-      "ZOOKEEPER_PORT":"2181" 
+      "MONGO_HOSTS":"<slave_advertise_ip>:31027",
+      "ZOOKEEPER_HOST":"<zk_ip>",
+      "ZOOKEEPER_PORT":"<zk_port>" 
    }
- }
+}
 
 **elasticsearch.json**::
 
@@ -253,7 +257,7 @@ Find detailed instructions `here <https://tecadmin.net/install-oracle-java-8-ubu
    "container":{  
       "type":"DOCKER",
       "docker":{  
-         "image":"elasticsearch",
+         "image":"docker.elastic.co/elasticsearch/elasticsearch:5.5.1",
          "network":"BRIDGE",
          "portMappings":[  
             {  
@@ -275,13 +279,19 @@ Find detailed instructions `here <https://tecadmin.net/install-oracle-java-8-ubu
          ]
       }
    },
-   "args": ["-Etransport.host=0.0.0.0", "-Ediscovery.zen.minimum_master_nodes=1"],
+   "env":{  
+      "ES_JAVA_OPTS":"-Xms256m -Xmx256m", 
+      "http.host":"0.0.0.0",
+      "xpack.security.enabled":"false",
+      "transport.host":"0.0.0.0",
+      "cluster.name":"elasticsearch" 
+   },
    "instances":1,
    "cpus":0.2,
    "mem":256
- }
+ } 
 
-**Config.properties** (replace <zk_ip> with a valid ip)::
+**Config.properties**::
 
  key=pingstation
  active.tokens.number=100
@@ -331,7 +341,7 @@ Find detailed instructions `here <https://tecadmin.net/install-oracle-java-8-ubu
  commit.log.close.delay-ms = 200
  commit.log.file.ttl-sec = 86400
  stream.zookeeper.directory=/tts/tstreams
-
+ 
  ordered.execution.pool.size=2
  transaction-database.transaction-keeptime-min=70000
  subscribers.update.period-ms=500
@@ -344,7 +354,7 @@ Find detailed instructions `here <https://tecadmin.net/install-oracle-java-8-ubu
         "type": "DOCKER",
         "volumes": [
             {
-                "containerPath": "/etc/conf",
+                "containerPath": "/etc/conf/config.properties",
                 "hostPath": "<path_to_conf_directory>",
                 "mode": "RO" 
             }
@@ -371,10 +381,10 @@ Find detailed instructions `here <https://tecadmin.net/install-oracle-java-8-ubu
     "cpus": 0.1,
     "mem": 512,
     "env": {
-      "HOST":"<external_host>",
+      "HOST":"<slave_advertise_ip>",
       "PORT0":"31071" 
     }
-}
+ }
 
 **kibana.json**::
 
@@ -383,7 +393,7 @@ Find detailed instructions `here <https://tecadmin.net/install-oracle-java-8-ubu
    "container":{  
       "type":"DOCKER",
       "docker":{  
-         "image":"kibana",
+         "image":"kibana:5.5.1",
          "network":"BRIDGE",
          "portMappings":[  
             {  
@@ -404,7 +414,7 @@ Find detailed instructions `here <https://tecadmin.net/install-oracle-java-8-ubu
    "cpus":0.1,
    "mem":256,
    "env":{  
-      "ELASTICSEARCH_URL":"http://172.17.0.1:31920" 
+      "ELASTICSEARCH_URL":"https://<slave_advertise_ip>:31920" 
    }
  }
 
@@ -413,7 +423,6 @@ Find detailed instructions `here <https://tecadmin.net/install-oracle-java-8-ubu
 **Mongo**::
  
  curl -X POST http://172.17.0.1:8080/v2/apps -H "Content-type: application/json" -d @mongo.json 
-
 
 **Elasticsearch**:
 
