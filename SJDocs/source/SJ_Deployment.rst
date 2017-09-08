@@ -214,7 +214,8 @@ Please, replace <zk_ip> according to the zookeeper address::
          ]
       }
    },
-   "env":{  
+   "env":{
+      "ES_JAVA_OPTS":"-Xms256m -Xmx256m", 
       "http.host":"0.0.0.0", 
       "xpack.security.enabled":"false", 
       "transport.host":"0.0.0.0", 
@@ -388,12 +389,12 @@ Via the Marathon interface make sure the services are deployed.
 
 6. Add the settings if running the framework on Mesos needs principal/secret:: 
 
-   curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"framework-principal\",\"value\": <principal>,\"domain\": \"configuration.system\"}" 
-   curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"framework-secret\",\"value\": <secret>,\"domain\": \"configuration.system\"}" 
+    curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"framework-principal\",\"value\": <principal>,\"domain\": \"configuration.system\"}" 
+    curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"framework-secret\",\"value\": <secret>,\"domain\": \"configuration.system\"}" 
 
 7. Copy the project for the GitHub repository of the SJ-Platform::
 
-   git clone https://github.com/bwsw/sj-platform.git
+    git clone https://github.com/bwsw/sj-platform.git
 
 
 Now look and make sure you have access to the Web UI. You will see the platform but it is not completed with any entities yet. They will be added in the next steps.
@@ -406,6 +407,11 @@ Before uploading modules, compile and upload the engine jars for them.
 
     cd sj-platform
     address=<slave_advertise_ip>:31080
+    sbt sj-mesos-framework/assembly
+    sbt sj-input-streaming-engine/assembly
+    sbt sj-regular-streaming-engine/assembly
+    sbt sj-output-streaming-engine/assembly
+
     curl --form jar=@core/sj-mesos-framework/target/scala-2.12/sj-mesos-framework-1.0-SNAPSHOT.jar http://$address/v1/custom/jars
     curl --form jar=@core/sj-input-streaming-engine/target/scala-2.12/sj-input-streaming-engine-1.0-SNAPSHOT.jar http://$address/v1/custom/jars
     curl --form jar=@core/sj-regular-streaming-engine/target/scala-2.12/sj-regular-streaming-engine-1.0-SNAPSHOT.jar http://$address/v1/custom/jars
@@ -434,6 +440,12 @@ To set up configuration settings for the engines, run the following commands. Pl
     curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"input-streaming-validator-class\",\"value\": \"com.bwsw.sj.crud.rest.instance.validator.InputInstanceValidator\",\"domain\": \"configuration.system\"}" 
     curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"output-streaming-validator-class\",\"value\": \"com.bwsw.sj.crud.rest.instance.validator.OutputInstanceValidator\",\"domain\": \"configuration.system\"}" 
 
+4. When running the framework on the Mesos requires principal/secret, add the following settings::
+
+    curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"framework-principal\",\"value\": <principal>,\"domain\": \"configuration.system\"}" 
+    curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"framework-secret\",\"value\": <secret>,\"domain\": \"configuration.system\"}" 
+
+  
 In the UI you can see the uploaded configurations under the “Configuration” tab of the main navigation.
 
 Module Uploading
