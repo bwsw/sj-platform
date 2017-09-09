@@ -91,13 +91,13 @@ object Dependencies {
       .exclude("org.apache.kafka", "kafka_2.12")
       .exclude("org.eclipse.jetty", "jetty-webapp"),
     "org.eclipse.jetty" % "jetty-webapp" % "9.4.3.v20170317" % "test",
-    ("org.apache.storm" % "storm-core" % "1.1.0")
+    ("org.apache.storm" % "storm-core" % "1.1.0" % "test")
       .exclude("log4j", "log4j")
       .exclude("org.slf4j", "slf4j-log4j12")
       .exclude("org.slf4j", "log4j-over-slf4j")
       .exclude("org.slf4j", "slf4j-api")
       .exclude("org.apache.logging.log4j", "log4j-slf4j-impl"),
-    "org.apache.storm" % "storm-kafka" % "1.1.0"
+    "org.apache.storm" % "storm-kafka" % "1.1.0" % "test"
   ))
 
   lazy val sjOutputEngineDependencies = Def.setting(Seq(
