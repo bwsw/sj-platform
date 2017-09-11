@@ -73,9 +73,7 @@ object Dependencies {
     "org.apache.commons" % "commons-lang3" % "3.5",
     ("com.mockrunner" % "mockrunner-jdbc" % "1.1.2" % "test")
       .exclude("jakarta-regexp", "jakarta-regexp")
-      .exclude("xerces", "xerces"),
-    "org.mockito" % "mockito-core" % "2.8.9",
-    "com.hazelcast" % "hazelcast" % "3.7.3"
+      .exclude("xerces", "xerces")
   ))
 
   lazy val sjRestDependencies = Def.setting(Seq(
@@ -104,6 +102,10 @@ object Dependencies {
     "org.eclipse.jetty" % "jetty-server" % "9.4.3.v20170317" % "test"
   ))
 
+  lazy val sjInputEngineDependencies = Def.setting(Seq(
+    "com.hazelcast" % "hazelcast" % "3.7.3"
+  ))
+
   lazy val sjFrameworkDependencies = Def.setting(Seq(
     "org.apache.mesos" % "mesos" % "0.28.1",
     "org.eclipse.jetty" % "jetty-runner" % "9.4.3.v20170317",
@@ -114,6 +116,10 @@ object Dependencies {
   lazy val sjTestDependencies = Def.setting(Seq(
     "org.scalatest" % "scalatest_2.12" % "3.0.1" % "test",
     "org.mockito" % "mockito-core" % "2.8.9" % "test"
+  ))
+
+  lazy val sjEngineSimulatorsDependencies = Def.setting(Seq(
+    "org.mockito" % "mockito-core" % "2.8.9"
   ))
 
   lazy val flinkDependencies = Def.setting(Seq(

@@ -20,7 +20,7 @@ package com.bwsw.common.hazelcast
 
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.hazelcast.config._
-import com.hazelcast.core.{HazelcastInstance, IMap, Hazelcast => OriginalHazelcast}
+import com.hazelcast.core.{HazelcastInstance, IMap}
 import org.slf4j.{Logger, LoggerFactory}
 
 import scala.collection.JavaConverters._
@@ -36,7 +36,7 @@ class Hazelcast(mapName: String, configParams: HazelcastConfig) extends Hazelcas
 
   private val logger: Logger = LoggerFactory.getLogger(getClass)
   private val config = createConfig(mapName)
-  private val hazelcastInstance: HazelcastInstance = OriginalHazelcast.newHazelcastInstance(config)
+  private val hazelcastInstance: HazelcastInstance = com.hazelcast.core.Hazelcast.newHazelcastInstance(config)
 
   /**
     * @inheritdoc
