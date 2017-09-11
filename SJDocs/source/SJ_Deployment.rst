@@ -551,15 +551,7 @@ The following services are required before the platfrom deployment on minimesos:
 - Docker,
 - cURL
 
-1) Pull and assemble the SJ-Platform project::
-
-    git clone https://github.com/bwsw/sj-platform.git
-    cd sj-platform
-    git checkout develop
-
-    cd ..
-
-2) Pull and assemble the demo project::
+1) Pull and assemble the demo project::
 
     git clone https://github.com/bwsw/sj-fping-demo.git
     cd sj-fping-demo
@@ -567,9 +559,7 @@ The following services are required before the platfrom deployment on minimesos:
 
     sbt assembly
 
-    cd ..
-
-3) Install minimesos::
+2) Install minimesos::
  
     curl -sSL https://minimesos.org/install | sh
 
@@ -678,7 +668,7 @@ The following services are required before the platfrom deployment on minimesos:
      }
     }
 
-4) Deploy minimesos::
+3) Deploy minimesos::
 
     minimesos up
 
@@ -740,7 +730,7 @@ The following services are required before the platfrom deployment on minimesos:
     4 packets transmitted, 4 received, 0% packet loss
 
 
-5) Deploy services
+4) Deploy services
 
    Create the following files in the minimesos folder (mongo.json, sj-rest.json, etc.) and run services with the provided commands.
 
@@ -1104,8 +1094,6 @@ Configurations Uploading
     wget http://c1-ftp1.netpoint-dc.com/sj/1.0-SNAPSHOT/sj-output-streaming-engine.jar
 
 Now upload the engine jars into the platform::
-
-    cd  sj-platform
 
     address=sj-rest.marathon.mm:8080
 
