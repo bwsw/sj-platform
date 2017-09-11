@@ -1043,17 +1043,7 @@ Perform the steps for platform deployment from the :ref:`Tutorial.rst#step-1-dep
 
 1) Deploy Mesos, Apache Zookeeper, Marathon.
    
-2) Download the demo project from the GitHub repository::
-     
-      git clone https://github.com/bwsw/sj-sflow-demo.git
-      cd sj-sflow-demo
-      git checkout develop
-      
-      sbt assembly
-      
-      cd ..
-      
-3) Create json files for the services and run them. Via the Marathon interface make sure the services are deployed.
+2) Create json files for the services and run them. Via the Marathon interface make sure the services are deployed.
 
 Now look and make sure you have access to the Web UI. You will see the platform but it is not completed with any entities yet. They will be added in the next steps.
 
@@ -1071,9 +1061,7 @@ Download the engine jars::
 
 And upload them to the system. Please, replace <host>:<port> with the SJ-Platform REST host and port::
 
- cd sj-platform
-
- address=<host>:<port>
+ address=<slave_advertise_ip>:31080
  
  curl --form jar=@sj-mesos-framework.jar http://$address/v1/custom/jars
  curl --form jar=@sj-input-streaming-engine.jar http://$address/v1/custom/jars
@@ -1084,15 +1072,15 @@ Check out in the UI the engines are uploaded:
 
 .. figure:: _static/sFlow_EnginesUploaded.png
 
-Setup settings for the engines::
+Setup settings for the engines. Please, replace <slave_advertise_ip> with the IP of the REST and <marathon_address> with the address of Marathon::
 
  curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"session-timeout\",\"value\": \"7000\",\"domain\": \"configuration.apache-zookeeper\"}" 
  curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"current-framework\",\"value\": \"com.bwsw.fw-1.0\",\"domain\": \"configuration.system\"}" 
 
- curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"crud-rest-host\",\"value\": \"sj-rest.marathon.mm\",\"domain\": \"configuration.system\"}" 
+ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"crud-rest-host\",\"value\": \"<slave_advertise_ip>",\"domain\": \"configuration.system\"}" 
  curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"crud-rest-port\",\"value\": \"8080\",\"domain\": \"configuration.system\"}" 
 
- curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"marathon-connect\",\"value\": \"http://marathon.mm:8080\",\"domain\": \"configuration.system\"}" 
+ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"marathon-connect\",\"value\": \"<marathon_address>",\"domain\": \"configuration.system\"}" 
  curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"marathon-connect-timeout\",\"value\": \"60000\",\"domain\": \"configuration.system\"}" 
  curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"kafka-subscriber-timeout\",\"value\": \"100\",\"domain\": \"configuration.system\"}" 
  curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"low-watermark\",\"value\": \"100\",\"domain\": \"configuration.system\"}" 
@@ -1111,7 +1099,9 @@ Step 3. Modules Uploading
 Now let's upload modules for data processing::
  
  cd ..
+ git clone https://github.com/bwsw/sj-fping-demo.git
  cd sj-sflow-demo
+ sbt assembly
 
 Then, upload the ready-to-use CSV-input module from the sonatype repository::
 
