@@ -64,7 +64,7 @@ Green, yellow and purple blocks desplayed in a rectangular area are managed and 
 
 The input module receives raw data and transforms them into a data stream of a proper type compatible with the processing module type. 
 
-The processing module performs data aggregation,  transformations, filtering and enriching. and sends the result to the output module. In the provided example the data aggregation is performed with a regular-streaming module.
+The processing module performs data aggregation, transformations, filtering and enriching and sends the result to the output module. In the provided example the data aggregation is performed with a regular-streaming module.
 
 In the output module the processed data are transformed into entities appropriate for storing into an external storage of a specified type. In the fping demonstrational example the output module exports the result data into the Elasticsearch external data storage.
                 
@@ -221,7 +221,7 @@ Replace <zk_ip> and <zk_port> according to the Apache Zookeeper address.
 
 **sj-rest.json**::
 
-{  
+ {  
    "id":"sj-rest",
    "container":{  
       "type":"DOCKER",
@@ -251,7 +251,7 @@ Replace <zk_ip> and <zk_port> according to the Apache Zookeeper address.
       "ZOOKEEPER_HOST":"<zk_ip>",
       "ZOOKEEPER_PORT":"<zk_port>" 
    }
-}
+ }
 
 **elasticsearch.json**::
 
