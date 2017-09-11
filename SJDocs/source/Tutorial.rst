@@ -1043,7 +1043,7 @@ Perform the steps for platform deployment from the :ref:`Tutorial.rst#step-1-dep
 
 1) Deploy Mesos, Apache Zookeeper, Marathon.
    
-2) Download the demo proejct from the GitHub repository::
+2) Download the demo project from the GitHub repository::
      
       git clone https://github.com/bwsw/sj-sflow-demo.git
       cd sj-sflow-demo
@@ -1053,7 +1053,7 @@ Perform the steps for platform deployment from the :ref:`Tutorial.rst#step-1-dep
       
       cd ..
       
- 4) Create json files for the services and run them. Via the Marathon interface make sure the services are deployed.
+3) Create json files for the services and run them. Via the Marathon interface make sure the services are deployed.
 
 Now look and make sure you have access to the Web UI. You will see the platform but it is not completed with any entities yet. They will be added in the next steps.
 
@@ -1062,7 +1062,7 @@ Next, the infrastructure for the module performance can be created.
 Step 2. Configurations and Engine Jars Uploading
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Now download the engine jars::
+Download the engine jars::
 
  wget http://c1-ftp1.netpoint-dc.com/sj/1.0-SNAPSHOT/sj-mesos-framework.jar
  wget http://c1-ftp1.netpoint-dc.com/sj/1.0-SNAPSHOT/sj-input-streaming-engine.jar
@@ -1079,6 +1079,10 @@ And upload them to the system. Please, replace <host>:<port> with the SJ-Platfor
  curl --form jar=@sj-input-streaming-engine.jar http://$address/v1/custom/jars
  curl --form jar=@sj-batch-streaming-engine.jar http://$address/v1/custom/jars
  curl --form jar=@sj-output-streaming-engine.jar http://$address/v1/custom/jars
+
+Check out in the UI the engines are uploaded:
+
+.. figure:: _static/sFlow_EnginesUploaded.png
 
 Setup settings for the engines::
 
@@ -1099,7 +1103,7 @@ Setup settings for the engines::
 
 You can see in the UI the configurations are uploaded:
 
-(screenshot here)
+.. figure:: _static/sFlow_ConfigsUploaded.png
 
 Step 3. Modules Uploading
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1109,12 +1113,14 @@ Now let's upload modules for data processing::
  cd ..
  cd sj-sflow-demo
 
-Then, upload the CSV-input module::
+Then, upload the ready-to-use CSV-input module from the sonatype repository::
 
  curl "https://oss.sonatype.org/content/repositories/snapshots/com/bwsw/sj-csv-input_2.12/1.0-SNAPSHOT/sj-csv-input_2.12-1.0-SNAPSHOT.jar" -o sj-csv-input.jar
  curl --form jar=@sj-csv-input.jar http://$address/v1/modules
 
-Then, build and upload the batch processing and the output modules of the sFlow demo project. From the directory of the demo project set up the batch processing module::
+Then, build and upload the batch processing and the output modules of the sFlow demo project. 
+
+From the directory of the demo project set up the batch processing module::
  
  curl --form jar=@sflow-process/target/scala-2.12/sflow-process-1.0.jar http://$address/v1/modules
 
@@ -1124,6 +1130,10 @@ Next, set up the output modules::
  curl --form jar=@sflow-output/src-dst/target/scala-2.12/sflow-src-dst-output-1.0.jar http://$address/v1/modules
  curl --form jar=@sflow-fallback-output/target/scala-2.12/sflow-fallback-output-1.0.jar http://$address/v1/modules
  
+The uploaded modules have appeared in the UI:
+
+.. figure:: _static/sFlow_Modules.png
+
 Now upload the GeoIP database which is required for the processing module::
 
  curl "http://download.maxmind.com/download/geoip/database/asnum/GeoIPASNum.dat.gz" -O
@@ -1138,7 +1148,11 @@ Then, upload and configure JDBC driver (determine <driver_name>)::
  curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"driver.<driver_name>.class\",\"value\": \"org.postgresql.Driver\",\"domain\": \"configuration.sql-database\"}" 
  curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"driver.<driver_name>.prefix\",\"value\": \"jdbc:postgresql\",\"domain\": \"configuration.sql-database\"}"
 
-Replace <driver_name> in jdbc-sflow-provider.json_ when creating providers.
+Remember to replace <driver_name> in jdbc-sflow-provider.json_ when creating providers in the next step.
+
+Now you can see the settings are added to the configuration list:
+
+.. figure:: _static/sFlow_SQLsettings.png
 
 Step 3. Streaming Creation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1193,7 +1207,9 @@ Then create providers::
  curl --request POST "http://$address/v1/providers" -H 'Content-Type: application/json' --data "@api-json/providers/jdbc-sflow-provider.json" 
  curl --request POST "http://$address/v1/providers" -H 'Content-Type: application/json' --data "@api-json/providers/zookeeper-sflow-provider.json"
 
-See them in UI...
+Check out they have appeared in the UI:
+
+.. figure:: _static/sflow_Providers.png
 
 Services creation
 '''''''''''''''''''''''''
@@ -1206,7 +1222,9 @@ To create services::
  curl --request POST "http://$address/v1/services" -H 'Content-Type: application/json' --data "@api-json/services/tstream-sflow-service.json"
  curl --request POST "http://$address/v1/services" -H 'Content-Type: application/json' --data "@api-json/services/zookeeper-sflow-service.json"
 
-See them in UI...
+Check out the services have appeared in the UI:
+
+.. figure:: _static/sflow_Services.png
 
 Streams creation
 ''''''''''''''''''''''''''
