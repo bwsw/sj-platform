@@ -8,9 +8,9 @@ Tutorial
 Introduction 
 -----------------------
 
-This tutorial is aimed to represent  SJ-Platform and give a quick start for a user to see the platform at work.
+This tutorial is aimed to represent SJ-Platform and give a quick start for a user to see the platform at work.
 
-The demo projects presented below are example tasks developed to demonstrate a user how to run his first SJ module. A step-by-step guidance will help to deploy the system in a local mode (minimesos) or at a cluster (Mesos) and to implement a module example to a real-life task. 
+The demo projects presented below are example tasks developed to demonstrate a user how to run his/her first SJ module. A step-by-step guidance will help to deploy the system in a local mode (minimesos) or at a cluster (Mesos) and to implement a module example to a real-life task. 
 
 Through an example project a user will get to know the system structure, its key components and general concepts of the platform workflow.
 
@@ -18,18 +18,18 @@ Through an example project a user will get to know the system structure, its key
 SJ-Platform Overview
 ----------------------------------
 
-As a quick reminder,  SJ-Platform is a real-time processing system. The data are processed in modules where they are passed via streams. The result data are exported to an external storage.
+In SJ-Platform the data are processed in modules where they are passed via streams. The result data are exported to an external storage.
 
-A general structure of SJ-Platform can be presented as at the image below:
+A simplified structure of SJ-Platform can be presented as at the image below:
 
 .. figure:: _static/TutorialGeneral.png
    :align: center
 
-Processor represents a module pipeline where the data processing is performed.
+A **processor** represents a part of the pipeline where the data processing is performed.
 
-Configurations uploaded to the modules via REST determine the mode of data processing.
+Configurations uploaded to the system determine the mode of data processing in the modules.
 
-The processing result is exported to an external storage. It can be Elasticsearch, RESTful or JDBC-compatible data storages.
+The processing result is exported to an external storage. It can be Elasticsearch, RESTful endpoint or JDBC-compatible data storages.
 
 Besides, SJ-Platform provides a user with a comprehensive RESTful API instrumentation and Web UI.
 
@@ -41,37 +41,40 @@ Below an example of a real-life task solution will demonstrate the platform at w
 
 .. _fping-example-task:
 
-fping Example Task
+Fping Example Task
 ----------------------------
 
-Let’s introduce an example task which will illustrate the platform workflow in the real-world use.
+Let’s introduce an example task which illustrates the platform workflow in the real-world use.
 
-The demo code is responsible for collecting of aggregated information on the accessibility of nodes. The result data will render the nodes’ work. The number of accessible and inaccessible IPs per a period of time will be summed up. Besides, calculated average response time on each node will give the idea of the node efficiency. 
+The demonstrational code is responsible for collecting of aggregated information on the accessibility of nodes. 
 
-Before providing a solution to the task let’s have a quick look at a processing level of the platform.
+The fping utility checks the list of provided IPs for accessibility. It sends a 64-bytes packet to each IP and waits for a return packet. If the connections are good and the node can be accessed, a good return packet will be received. The amount of time is also returned for how long it takes for a packet to make the complete trip. On the basis of this information the processor calculates the average response time for each node. The amount of successful responces by IP per 1 minute is aggregated by the processing module as well. The result is exported to an external datastore.  
+
+Before providing a solution to the task, let’s have a look at the platform from the perspective of a processing pipeline.
 
 Processing
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The processing workflow in the platform can be generally illustrated as at the diagram below:
+A general processing workflow which system allows implementing is illustrated at the diagram below:
 
 .. figure:: _static/ModulePipeline.png
    :scale: 80%
 
-Green, yellow and purple blocks are executed with SJ-Platform and it is an input module, a processing module and an output module, respectively.
+Green, yellow and purple blocks desplayed in a rectangular area are managed and evaluated by SJ-Platform. They represent an input module, a processing module and an output module, respectively. The blocks ouside the rectangular area represent external systems.
 
 The input module receives raw data and transforms them into a data stream of a proper type compatible with the processing module type. 
 
-The processing module performs data aggregation and sends the result to the output module. In the provided example the data aggregation is performed with a regular-streaming module.
+The processing module performs data aggregation,  transformations, filtering and enriching. and sends the result to the output module. In the provided example the data aggregation is performed with a regular-streaming module.
 
-In the output module the processed data is transformed into a flow of entities appropriate for storing into an external storage of a specified type. In the provided example the output module will export the result data into the Elasticsearch external data storage.
+In the output module the processed data are transformed into entities appropriate for storing into an external storage of a specified type. In the fping demonstrational example the output module exports the result data into the Elasticsearch external data storage.
                 
-The illustrated pipeline is a general solution. It fits for most real-life problems.
-But the platform allows resolution of more complicated tasks. So the pipeline can be more expanded. More input streams can ingest raw data. Several Input modules can be included in the pipeline to accept the raw data and transform it for passing further to the processing stage.
+The illustrated pipeline  is a common scenario for a lot of different tasks.
 
-You can launch more than one processing module. The data streams can be distributed among them in various ways.
+But the platform allows implementation of more complicated processing pipelines. So the pipeline can be more expanded. More input streams can ingest raw data. Several Input modules can be included in the pipeline to accept the raw data and transform it for passing further to the processing stage.
 
-A few Output modules may receive the processed data and put them to a storage.
+You can launch more than a single processing module. The data streams can be distributed among them in various ways.
+
+A few output modules may receive the processed data and put them into a storage.
 
 In the example task solution the processing workflow is formed in the following way:
 
@@ -91,11 +94,11 @@ Finally, the output modules export aggregated data from echo-response streams to
 
 The data is fed to the system, passed from one module to another and exported from the system via streams. Read more about streams under the “Creating Streams” section.
 
-In the demo project, the entities are added to the system via REST API as it is less time-consuming. The platform entities can be also created via the UI filling in the forms for each entity with necessary settings.
+In the demonstrational project, the entities are added to the system via REST API as it is less time-consuming. The platform entities can be also created via the UI filling in the forms for each entity with necessary settings.
 
-The result is easy-to-see via Web UI.  Or send ‘GET’ API requests to return created entities in JSON.
+The result is easy-to-see via Web UI. Or send ‘GET’ API requests to return created entities in JSON.
 
-Now having the general idea on the platform workflow, we can dive into solving an example task on the base of SJ-Platform. 
+Now, having the general idea on the platform workflow, we can dive into solving an example task on the base of SJ-Platform. 
 
 And the first step is the system deployment.
 
@@ -128,9 +131,9 @@ The platform is deployed with all entities necessary to demonstrate the solution
 The following technical requirements should be met:
 
 - working Linux host with 4-8 GB of RAM and 4 CPU cores; 
-- Docker installed;
+- Docker installed (see `official documentation <https://docs.docker.com/engine/installation/linux/docker-ce/ubuntu/>`_);
 - cURL;
-- sbt.  
+- sbt installed (see `official documentation <http://www.scala-sbt.org/download.html>`_).  
 
 The platform is deployed with no entities. Thus, the pipeline can be structured from scratch. 
 
@@ -141,15 +144,15 @@ This tutorial provides step-by-step instructions for demo project deployment on 
 The following technical requirements should be met: 
 
 - git, 
-- sbt (http://www.scala-sbt.org/download.html), 
-- Docker, 
+- sbt (see `official documentation <http://www.scala-sbt.org/download.html>`_), 
+- Docker (see `official documentation <https://docs.docker.com/engine/installation/linux/docker-ce/ubuntu/>`_),
 - cURL.
 
 For the example task, the instructions are provided for the system deployment **on Mesos**.
 
 The deployment is performed via REST API.
 
-The system works on the basis of the following core technologies: Apache Mesos, Apache Zookeeper, Apache Kafka, Docker, MongoDB, Hazelcast, Elasticsearch, SQL database, REST.
+Alongside with Apache Mesos, the system works on the basis of the following core technologies: Apache Zookeeper, Apache Kafka, Docker, MongoDB, Hazelcast, Elasticsearch, SQL database, REST.
 
 To solve the example task we need to deploy:
 
@@ -426,11 +429,11 @@ Replace <zk_ip> and <zk_port> according to the Apache Zookeeper address.
 
 **Elasticsearch**:
 
-Please, note that `vm.max_map_count` should be slave::
+Please, note that `vm.max_map_count` should be a slave::
 
  sudo sysctl -w vm.max_map_count=262144
 
-Then launch elasticsearch::
+Then launch Elasticsearch::
 
  curl -X POST http://172.17.0.1:8080/v2/apps -H "Content-type: application/json" -d 
  @elasticsearch.json
@@ -442,7 +445,6 @@ Then launch elasticsearch::
 **T-Streams**::
  
  curl -X POST http://172.17.0.1:8080/v2/apps -H "Content-type: application/json" -d @tts.json 
-
 
 **Kibana**::
 
@@ -462,21 +464,21 @@ Via the Marathon interface make sure the services are deployed.
     curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"framework-principal\",\"value\": <principal>,\"domain\": \"configuration.system\"}" 
     curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"framework-secret\",\"value\": <secret>,\"domain\": \"configuration.system\"}" 
  
-6) Copy the demo project repository::
+6) Copy the demonstrational project repository::
 
     cd ..
     git clone https://github.com/bwsw/sj-fping-demo.git
     cd sj-fping-demo
 
 
-Now look and make sure you have access to the Web UI. You will see the platform but it is not completed with any entities yet. They will be added in the next steps.
+Now make sure you have access to the Web UI. You will see the platform is deployed but it is not completed with any entities yet. They will be added in the next steps.
 
-Next, the infrastructure for the module performance can be created.
+Next, the infrastructure for the modules can be created.
 
 Step 2. Configurations and Engine Jars Uploading 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-An engine is required to start a module. A module can not process data without an engine (that is a .jar file containing required configuration settings). In fact, it is a framework that launches the module executor.
+An **engine** is required to start a module. A module can not process data without an engine (that is a .jar file containing required configuration settings). In fact, it is a framework that launches the module executor.
 
 .. figure:: _static/Engine.png
    :scale: 110%
@@ -488,7 +490,7 @@ To implement the processing workflow for the example task resolution the followi
 
 2. a jar for Mesos framework that starts the engine.
 
-Thus, engines should be compiled and uploaded in the next step.
+Thus, engines should be compiled and uploaded next.
  
 Upload Engine Jars
 """"""""""""""""""""""""
@@ -501,8 +503,6 @@ Please, download the engine jars for the three modules (input-streaming, regular
  wget http://c1-ftp1.netpoint-dc.com/sj/1.0-SNAPSHOT/sj-output-streaming-engine.jar
 
 Now upload the engine jars. Please, change <slave_advertise_ip> to the slave advertise IP::
-
- cd sj-platform
 
  address=address=<slave_advertise_ip>:31080
 
@@ -527,7 +527,7 @@ To resolve the example task it is enough to upload the required configurations o
 For the Example Task
 """"""""""""""""""""""
 
-For solving an example task, we will upload the following configurations via REST:
+For solving the example task, we will upload the following configurations via REST:
 
 - session.timeout - Use when connecting to zookeeper in milliseconds (usually when we are dealing with t-streams consumers/producers and kafka streams)
 
@@ -541,7 +541,6 @@ For solving an example task, we will upload the following configurations via RES
 
 - marathon-connect-timeout - Use when trying to connect by 'marathon-connect' (in milliseconds).
 
-
 Send the next POST requests to upload the configs. Please, replace <slave_advertise_ip> with the slave advertise IP and <marathon_address> with the address of Marathon::
 
  curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"session-timeout\",\"value\": \"7000\",\"domain\": \"configuration.apache-zookeeper\"}" 
@@ -552,8 +551,7 @@ Send the next POST requests to upload the configs. Please, replace <slave_advert
 
  curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"marathon-connect\",\"value\": \"http://<marathon_address>\",\"domain\": \"configuration.system\"}" 
  curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"marathon-connect-timeout\",\"value\": \"60000\",\"domain\": \"configuration.system\"}" 
- curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"kafka-subscriber-timeout\",\"value\": \"100\",\"domain\": \"configuration.system\"}" 
- curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"low-watermark\",\"value\": \"100\",\"domain\": \"configuration.system\"}" 
+
 
 Send the next POST requests to upload configurations for module validators::
 
@@ -571,7 +569,7 @@ Step 3. Module Uploading
 
 Now as the system is deployed and necessary engines are added, modules can be uploaded to the system.
 
-A module is a .jar file, containing module specification and configurations.
+A **module** is a .jar file, containing a module specification and configurations.
 
 .. figure:: _static/ModuleExecutorAndValidator.png
    :scale: 120%
@@ -581,11 +579,11 @@ A module is a .jar file, containing module specification and configurations.
 
 For the stated example task the following modules will be uploaded:
 
-- a TCP input module - sj-regex-input module that accepts TCP input streams and transforms raw data to put them to T-streams and pass for processing;
+- a TCP input module - *sj-regex-input* module - that accepts TCP input streams and transforms raw data to put them to T-streams and pass for processing;
 
-- a processing module - ps-process module, which is a regular-streaming module that processes data element-by-element.
+- a processing module - *ps-process* module - which is a regular-streaming module that processes data element-by-element.
 
-- an output module - ps-output module that exports resulting data to Elasticsearch.
+- an output module - *ps-output* module - that exports resulting data to Elasticsearch.
 
 Download the modules from the Sonatype repository and upload it to the system following the instructions for the example task.
 
@@ -593,7 +591,7 @@ Download the modules from the Sonatype repository and upload it to the system fo
 For the Example Task
 """""""""""""""""""""""""
 
-Please, follow these steps to build and upload the modules of pingstation demo.
+Please, follow these steps to build and upload the modules of pingstation demonstrational problem.
 
 To configure environment::
  
@@ -601,19 +599,19 @@ To configure environment::
  
  address=<host>:<port>
 
-<host>:<port> — SJ REST host and port.
+<host>:<port> — SJ-Platform REST host and port.
 
 **Module Downloading from Sonatype Repository**
 
-- To download the sj-regex-input module from the sonatype repository::
+- To download the *sj-regex-input* module from the sonatype repository::
 
    curl "https://oss.sonatype.org/content/repositories/snapshots/com/bwsw/sj-regex-input_2.12/1.0-SNAPSHOT/sj-regex-input_2.12-1.0-SNAPSHOT.jar" -o sj-regex-input.jar 
 
-- To download the ps-process module from the sonatype repository::
+- To download the *ps-process* module from the sonatype repository::
 
    curl “https://oss.sonatype.org/content/repositories/snapshots/com/bwsw/ps-process_2.12/1.0-SNAPSHOT/ps-process_2.12-1.0-SNAPSHOT.jar” -o ps-process-1.0.jar
 
-- To download the ps-output module from the sonatype repository::
+- To download the *ps-output* module from the sonatype repository::
 
    curl “https://oss.sonatype.org/content/repositories/snapshots/com/bwsw/ps-output_2.12/1.0-SNAPSHOT/ps-output_2.12-1.0-SNAPSHOT.jar” -o ps-output-1.0.jar
 
@@ -1178,7 +1176,7 @@ For creation of providers you should create json files with the following conten
    "driver": "<driver_name>"
  }
 
-**zookeeper-sflow-provider.json**::
+**zookeeper-sflow-provider.json** (remember to replace <host>:<port> with a valid Apacche Zookeeper IP)::
 
  {
 
