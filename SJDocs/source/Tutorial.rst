@@ -190,6 +190,7 @@ Replace <slave_advertise_ip> with the slave advertise IP.
 
 Replace <zk_ip> and <zk_port> according to the Apache Zookeeper address.
 
+.. _mongo.json:
 **mongo.json**::
 
  {  
@@ -218,6 +219,8 @@ Replace <zk_ip> and <zk_port> according to the Apache Zookeeper address.
    "cpus":0.1,
    "mem":512
  }
+
+.. _sj-rest.json:
 
 **sj-rest.json**::
 
@@ -349,6 +352,7 @@ Replace <zk_ip> and <zk_port> according to the Apache Zookeeper address.
  transaction-database.transaction-keeptime-min=70000
  subscribers.update.period-ms=500
 
+.. _tts.json::
 **tts.json** (replace <path_to_conf_directory> with an appropriate path to the configuration directory on your computer and <external_host> with a valid host)::
 
  {
@@ -1041,7 +1045,70 @@ Perform the steps for platform deployment from the :ref:`Tutorial.rst#step-1-dep
 
 1) Deploy Mesos, Apache Zookeeper, Marathon.
    
-2) Create json files for the services and run them. Via the Marathon interface make sure the services are deployed.
+2) Create json files for the services and run them:
+
+- mongo.json_
+- sj-rest.json_
+- config.properties
+  
+  For the sFlow demostrational project the config.properties.json has the following content (remember to replace <zk_ip> with a valid Apache Zookeeper IP)::
+  
+   key=sflow
+   active.tokens.number=100
+   token.ttl=120
+
+   host=0.0.0.0
+   port=8080
+   thread.pool=4
+
+   path=/tmp
+   data.directory=transaction_data
+   metadata.directory=transaction_metadata
+   commit.log.directory=commit_log
+   commit.log.rocks.directory=commit_log_rocks
+
+   berkeley.read.thread.pool = 2
+
+   counter.path.file.id.gen=/server_counter/file_id_gen
+
+   auth.key=dummy
+   endpoints=127.0.0.1:31071
+   name=server
+   group=group
+
+   write.thread.pool=4
+   read.thread.pool=2
+   ttl.add-ms=50
+   create.if.missing=true
+   max.background.compactions=1
+   allow.os.buffer=true
+   compression=LZ4_COMPRESSION
+   use.fsync=true
+
+   zk.endpoints=172.17.0.3:2181
+   zk.prefix=/sflow
+   zk.session.timeout-ms=10000
+   zk.retry.delay-ms=500
+   zk.connection.timeout-ms=10000
+
+   max.metadata.package.size=100000000
+   max.data.package.size=100000000
+   transaction.cache.size=300
+
+   commit.log.write.sync.value = 1
+   commit.log.write.sync.policy = every-nth
+   incomplete.commit.log.read.policy = skip-log
+   commit.log.close.delay-ms = 200
+   commit.log.file.ttl-sec = 86400
+   stream.zookeeper.directory=/tts/tstreams
+
+   ordered.execution.pool.size=2
+   transaction-database.transaction-keeptime-min=70000
+   subscribers.update.period-ms=500
+
+- tts.json_
+
+Via the Marathon interface make sure the services are deployed.
 
 Now look and make sure you have access to the Web UI. You will see the platform but it is not completed with any entities yet. They will be added in the next steps.
 
@@ -1083,7 +1150,7 @@ Setup settings for the engines. Please, replace <slave_advertise_ip> with the IP
  curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"kafka-subscriber-timeout\",\"value\": \"100\",\"domain\": \"configuration.system\"}" 
  curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"low-watermark\",\"value\": \"100\",\"domain\": \"configuration.system\"}" 
 
- curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"batch-streaming-validator-class\",\"value\": \"com.bwsw.sj.crud.rest.instance.validator.RegularInstanceValidator\",\"domain\": \"configuration.system\"}" 
+ curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"batch-streaming-validator-class\",\"value\": \"com.bwsw.sj.crud.rest.instance.validator.BatchInstanceValidator\",\"domain\": \"configuration.system\"}" 
  curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"input-streaming-validator-class\",\"value\": \"com.bwsw.sj.crud.rest.instance.validator.InputInstanceValidator\",\"domain\": \"configuration.system\"}" 
  curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"output-streaming-validator-class\",\"value\": \"com.bwsw.sj.crud.rest.instance.validator.OutputInstanceValidator\",\"domain\": \"configuration.system\"}" 
 
@@ -1176,7 +1243,7 @@ For creation of providers you should create json files with the following conten
    "driver": "<driver_name>"
  }
 
-**zookeeper-sflow-provider.json** (remember to replace <host>:<port> with a valid Apacche Zookeeper IP)::
+**zookeeper-sflow-provider.json** (remember to replace <host>:<port> with a valid Apache Zookeeper IP)::
 
  {
 
@@ -1241,14 +1308,16 @@ To create output streams of the output modules that will be used for storing inf
 
 To create an output stream of the fallback-output module that will be used for storing incorrect inputs to the database::
 
- curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/fallback-data.js
+ curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/fallback-data.json
  
-See them in the UI...
+See they have appeared in the UI::
+
+.. figure:: _static/sflow_Streams.png
 
 Step 4. Output SQL Tables Creation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-SQL tables for output must be created in the sflow database. To create tables::
+SQL tables for the output data must be created in the sFlow database. To create tables::
 
  CREATE TABLE srcipdata (
     id SERIAL PRIMARY KEY,
@@ -1293,9 +1362,11 @@ To create instances of the output modules::
 
 To create an instance of the fallback-output module::
 
- curl --request POST "http://$address/v1/modules/output-streaming/sflow-fallback-output/1.0/instance" -H 'Content-Type: application
+ curl --request POST "http://$address/v1/modules/output-streaming/sflow-fallback-output/1.0/instance" -H 'Content-Type: application/json' --data "@api-json/instances/sflow-fallback-output.json"
  
-See them in the UI...
+View them in the UI:
+
+.. figure:: _static/sflow_Instances.png
 
 Launching Instances
 ~~~~~~~~~~~~~~~~~~~~~~
