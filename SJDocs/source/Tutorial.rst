@@ -353,7 +353,7 @@ Replace <zk_ip> and <zk_port> according to the Apache Zookeeper address.
  transaction-database.transaction-keeptime-min=70000
  subscribers.update.period-ms=500
 
-.. _tts.json::
+.. _tts.json:
 
 **tts.json** (replace <path_to_conf_directory> with an appropriate path to the configuration directory on your computer and <external_host> with a valid host)::
 
@@ -1043,7 +1043,7 @@ For this demo project the following core systems and services are required:
 8. REST - for access to the UI;
 9. PostgreSQL - as a destination.
 
-Perform the steps for platform deployment from the :ref:`Tutorial.rst#step-1-deployment` section.
+Perform the steps for platform deployment from the Tutorial.rst#step-1-deployment_ section.
 
 1) Deploy Mesos, Apache Zookeeper, Marathon.
    
