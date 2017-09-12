@@ -813,26 +813,26 @@ For instance creation we will send the POST requests. See the instructions below
 For the Example task
 """""""""""""""""""""""
 
-For creating an instance of the sj-regex-input module send the following POST request::
+For creating an instance of the *sj-regex-input* module send the following POST request::
 
  curl --request POST "http://$address/v1/modules/input-streaming/pingstation-input/1.0/instance" -H 'Content-Type: application/json' --data "@api-json/instances/pingstation-input.json"
 
-For creating an instance of the ps-process module send the following POST request::
+For creating an instance of the *ps-process* module send the following POST request::
 
  curl --request POST "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance" -H 'Content-Type: application/json' --data "@api-json/instances/pingstation-process.json"
 
-Create two more instances for the ps-process module with different checkpoint intervals to process data every 3 minute and every hour. Remember to create them with different names::
+Create two more instances for the *ps-process* module with different checkpoint intervals to process data every 3 minute and every hour. Remember to create them with different names::
 
  curl --request POST "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance" -H 'Content-Type: application/json' --data "@api-json/instances/pingstation-echo-process-3m.json"
 
  curl --request POST "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance" -H 'Content-Type: application/json' --data "@api-json/instances/pingstation-echo-process-1h.json"
 
 
-For creating an instance of the ps-output module send the following POST request::
+For creating an instance of the *ps-output* module send the following POST request::
 
  curl --request POST "http://$address/v1/modules/output-streaming/pingstation-output/1.0/instance" -H 'Content-Type: application/json' --data "@api-json/instances/pingstation-output.json"
  
-Create two more instances to receive data from the instances processing data every 3 minutes and every hour. Remember to create them with different names. Change the ‘input’ values to ‘echo-response-3m’ and ‘echo-response-1h’ respectively to receive data from these streams. 
+Create two more instances to receive data from the instances processing data every 3 minutes and every hour. Remember to create the JSON files with different names. Change the ‘input’ values to ‘echo-response-3m’ and ‘echo-response-1h’ respectively to receive data from these streams. 
 
 Change the ‘output’ values to ‘es-echo-response-3m’ and ‘es-echo-response-1h’ correspondingly to put the result data to these streams:: 
 
