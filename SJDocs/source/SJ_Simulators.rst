@@ -373,7 +373,7 @@ Accumulation of batches is implemented in ``BatchCollector``::
     countOfEnvelopesPerStream(streamName) = 0
  }
 
-For more complicated examples see `sj-sflow-process-test <https://github.com/bwsw/sj-sflow-demo/blob/develop/sflow-process/src/test/scala/com/bwsw/sj/examples/sflow/module/process/ExecutorTests.scala.>`_.
+For more complicated examples see `sj-sflow-process-test <https://github.com/bwsw/sj-sflow-demo/blob/develop/sflow-process/src/test/scala/com/bwsw/sj/examples/sflow/module/process/ExecutorTests.scala>`_.
 
 .. _Output_Engine_Simulator:
 
@@ -411,6 +411,7 @@ Simulator provides the following methods:
 Simulator has a ``beforeFirstCheckpoint`` flag that indicates that the first checkpoint has not been performed. Before the first checkpoint Simulator builds a delete request for each incoming transaction (in the ``process`` method). ``beforeFirstCheckpoint`` can be changed automatically, when Executor calls ``manager.initiateCheckpoint()``, or manually.
 
 .. _Output_Request_Builder:
+
 Output Request Builder
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -470,6 +471,7 @@ Objects For Simulators With States
 Under this section the class of objects used for Simulators with states is described. These Simulators are :ref:`Regular_Engine_Simulator` and :ref:`Batch_Engine_Simulator`.
 
 .. _Simulation-Result:
+
 Simulation Result
 ~~~~~~~~~~~~~~~~~~~~
 
@@ -480,6 +482,7 @@ Simulation Result
 ``case class SimulationResult(streamDataList: Seq[StreamData], state: Map[String, Any])`` - contains data elements for each output stream and a state at a certain time point.
 
 .. _Module-Environment-Manager-Mock:
+
 Module Environment Manager Mock
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -509,6 +512,7 @@ Provided methods:
 * ``clear()`` - removes all output elements from a buffer.
 
 .. _PartitionedOutputMock:
+
 Partitioned Output Mock
 """"""""""""""""""""""""""""""""
 
