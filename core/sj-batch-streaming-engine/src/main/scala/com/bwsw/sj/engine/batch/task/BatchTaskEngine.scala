@@ -29,15 +29,13 @@ import com.bwsw.sj.common.engine.core.state.CommonModuleService
 import com.bwsw.sj.common.si.model.instance.BatchInstance
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.batch.task.input.{EnvelopeFetcher, RetrievableCheckpointTaskInput}
-import org.apache.curator.framework.recipes.barriers.DistributedDoubleBarrier
-import org.apache.curator.framework.{CuratorFramework, CuratorFrameworkFactory}
-import org.apache.curator.retry.ExponentialBackoffRetry
 import org.slf4j.LoggerFactory
 import scaldi.Injectable.inject
 import scaldi.Injector
 
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
+import scala.util.Try
 
 /**
   * Class contains methods for running batch module
@@ -73,7 +71,7 @@ class BatchTaskEngine(manager: CommonTaskManager,
     ).asInstanceOf[RetrievableCheckpointTaskInput[Envelope]]
   private val envelopeFetcher = new EnvelopeFetcher(taskInputService, lowWatermark)
   private var retrievableStreams = instance.getInputsWithoutStreamMode
-  private var counterOfBatchesPerStream = createCountersOfBatches()
+  private val counterOfBatchesPerStream = createCountersOfBatches()
   private val currentWindowPerStream = createStorageOfWindows()
   private val collectedWindowPerStream = mutable.Map[String, Window]()
   private val windowRepository = new WindowRepository(instance)
@@ -84,9 +82,9 @@ class BatchTaskEngine(manager: CommonTaskManager,
     .get
     .asInstanceOf[ZKServiceDomain]
     .provider.hosts.toSet
-  private val curatorClient = createCuratorClient()
-  private val commonBarrier = new DistributedDoubleBarrier(
-    curatorClient,
+
+  private val commonBarrier = new TwoBarriers(
+    zkHosts,
     barrierMasterNode,
     instance.executionPlan.tasks.size())
   private val leaderLatch = new LeaderLatch(zkHosts, leaderMasterNode)
@@ -98,14 +96,6 @@ class BatchTaskEngine(manager: CommonTaskManager,
 
   private def createStorageOfWindows(): mutable.Map[String, Window] = {
     mutable.Map(inputs.map(x => (x, new Window(x))): _*)
-  }
-
-  private def createCuratorClient(): CuratorFramework = {
-    val curatorClient = CuratorFrameworkFactory.newClient(zkHosts.mkString(","), new ExponentialBackoffRetry(1000, 3))
-    curatorClient.start()
-    curatorClient.getZookeeperClient.blockUntilConnectedOrTimedOut()
-
-    curatorClient
   }
 
   /**
@@ -216,8 +206,9 @@ class BatchTaskEngine(manager: CommonTaskManager,
     prepareCollectedWindows()
     executor.onWindow(windowRepository)
     commonBarrier.enter()
-    executor.onEnter()
+    val onEnterResult = Try(executor.onEnter())
     commonBarrier.leave()
+    onEnterResult.get
     if (leaderLatch.hasLeadership()) executor.onLeaderEnter()
     retrievableStreams = inputs
     doCheckpoint()

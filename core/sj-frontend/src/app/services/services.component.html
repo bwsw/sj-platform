@@ -153,7 +153,7 @@
             <div class="col-sm-10">
               <select required [(ngModel)]="newService.type" name="serviceType"
                       class="form-control">
-                <option *ngFor="let type of serviceTypes" value="{{type.id}}">{{type.name}}</option>
+                <option *ngFor="let type of serviceTypes | orderBy: 'name'" value="{{type.id}}">{{type.name}}</option>
               </select>
             </div>
           </fieldset>
@@ -224,7 +224,7 @@
             <div class="col-sm-10">
               <select [(ngModel)]="newService.provider" name="streamService" required
                       class="form-control">
-                <option *ngFor="let provider of providerList | orderBy: 'name' | providerFilter : newService.type" value="{{provider.name}}">{{provider.name}}
+                <option *ngFor="let provider of providerList | providerFilter : newService.type | orderBy: 'name'" value="{{provider.name}}">{{provider.name}}
                 </option>
               </select>
             </div>
@@ -314,7 +314,7 @@
             <div class="col-sm-10">
               <select [(ngModel)]="newService.zkProvider" name="serviceZkProvider"
                       required class="form-control">
-                <option *ngFor="let provider of providerList | orderBy: 'name' | providerFilter : 'service.apache-zookeeper' " value="{{provider.name}}">{{provider.name}}
+                <option *ngFor="let provider of providerList | providerFilter : 'service.apache-zookeeper' | orderBy: 'name'" value="{{provider.name}}">{{provider.name}}
                 </option>
               </select>
             </div>

@@ -636,6 +636,6 @@ This file describes the module. Examples of description can be found at :ref:`Js
 More Code
 ------------------------
 
-The custom module example above represents one of custom implication of a `demo module <https://github.com/bwsw/sj-fping-demo>`_ available at out repository. 
+The custom module example above represents one of custom implications of a demo Regex module. It is described in the :ref:`fping-example-task` section of the Tutorial. You can download this module from the `GitHub repository <https://github.com/bwsw/sj-fping-demo>`_. 
 
-`Here <https://github.com/bwsw/sj-sflow-demo/tree/develop>`_ you can find another example of module workflow. This is a demo that performs the processing workflow for collecting of sflow information. 
+At the :ref:`sflow-example-task` of the Tutorial you can find another example of a custom module - a CSV input module. There a demo task is presented. It performs the data collecting for processing of sflow information. A demo CSV input module is available at the `GitHub repository <https://github.com/bwsw/sj-sflow-demo/tree/develop>`_

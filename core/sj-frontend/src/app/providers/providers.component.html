@@ -121,7 +121,7 @@
                       [(ngModel)]="newProvider.type"
                       name="providerType"
                       required>
-                <option *ngFor="let type of providerTypes" value="{{type.id}}">{{type.name}}</option>
+                <option *ngFor="let type of providerTypes | orderBy: 'name'" value="{{type.id}}">{{type.name}}</option>
               </select>
             </div>
           </fieldset>
