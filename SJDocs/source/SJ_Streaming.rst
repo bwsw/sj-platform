@@ -71,7 +71,7 @@ The following types of output streams are supported in SJ-Platform:
 - SQL database, to store data to JDBC-compatible databases;
 - RESTful, to store data to RESTful storage.
 
-.. _Streaming_Infrastructure::
+.. _Streaming_Infrastructure:
 
 Streaming Infrastructure
 -----------------------------------
