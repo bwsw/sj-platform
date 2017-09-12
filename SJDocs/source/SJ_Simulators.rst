@@ -1,7 +1,7 @@
 Testing Modules on Simulators
 ================================
 
-Stream Juggler Platform provides a user with a range of simulators for module testing purposes. A simulator is a ready-to-use environment that allows you to rapidly test modules during the development process.
+Stream Juggler Platform provides a user with a range of simulators for module testing purposes. A simulator is a ready-to-use environment that allows you to rapidly test modules in the development process.
 
 Four types of simulators are provided - one per each module type. Choose which you want to use in accordance with the type of a module you want to test. And follow the instructions below.
 
@@ -12,7 +12,11 @@ Input Engine Simulator
 
 It is a class for testing an implementation of an `input module <http://streamjuggler.readthedocs.io/en/develop/SJ_Modules.html#input-module>`_ (Executor).
 
-Simulator imitates the behavior of the :ref:`Input_Streaming_Engine`: it sends byte buffer to Executor, gets input envelopes from it, checks envelopes on duplicate (if it is necessary), and builds :ref:`Input_Engine_Simulator_Output_Data`.
+Simulator imitates the behavior of the :ref:`Input_Streaming_Engine`: it sends byte buffer to Executor, gets input envelopes from it, checks envelopes for duplicates (if it is necessary), and builds :ref:`Input_Engine_Simulator_Output_Data`.
+
+To use the simulator you need add the dependency in a ``build.sbt``::
+
+ libraryDependencies += "com.bwsw" %% "sj-engine-simulators" % "1.0-SNAPSHOT" % "test"
 
 Constructor arguments
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
