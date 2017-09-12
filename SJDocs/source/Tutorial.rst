@@ -677,7 +677,7 @@ Prior to creating streams, it is necessary to provide the infrastructure: provid
 
 They can be of different types. The types of platform entities in the pipeline determine the type of providers and services that are necessary in the particular case.
 
-for the Example Task
+For the Example Task
 """""""""""""""""""""""
 
 In the example task pipeline the modules of three types take place: the input-streaming, regular-streaming and output-streaming. For all types of modules, the Apache Zookeeper service is necessary. Thus, it requires the Apache Zookeeper provider.
