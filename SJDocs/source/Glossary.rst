@@ -7,6 +7,9 @@ Glossary
 Batch 
   A minimum time interval during which a handler collect events in a stream.
 
+Configurations 
+  Settings required for the module performance. 
+
 Checkpoint
   Completeness check of the data received after the stream processing.
   
@@ -34,9 +37,6 @@ Exactly once processing
 Executor
   A part of a module that performs data processing.
 
-Handler 
-  A program module processing streams.
-
 Instance 
   A full range of settings to perform an exact executor type.
  
@@ -52,6 +52,9 @@ Locks service
 Metric 
   A numeric value received as a result of aggregation.
 
+Module 
+  A program module processing streams.
+
 Output 
   A stream that goes out of the system.
 
@@ -61,6 +64,9 @@ Partition
 Provider 
   The service provider for input data transformation into a stream. 
 
+Service 
+  A service to perform an input data into a stream of an exact type. 
+
 Shift 
   Window sliding in a period of time (multiple of a batch). It can be less than a window size, and in this case the data will be duplicated.
 
@@ -69,9 +75,6 @@ Storage state service
 
 Stream  
   A sequence of events happening randomly at irregular intervals.
-
-Streams service 
-  A service to perform an input data into a stream of an exact type. 
 
 Task
   The actual data processing.

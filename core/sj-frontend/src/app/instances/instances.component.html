@@ -8,21 +8,22 @@
         <!-- Card title -->
         <div class="row">
           <div class="col col-xs-4"><h4 class="card-title">Instances list</h4></div>
-          <div class="col col-xs-8">
+          <div class="col col-xs-8 search-filter-create-box">
             <button type="button"
-                    class="btn btn-primary pull-right ml-1 mb-1"
+                    class="btn btn-primary pull-right ml-1 mb-1 btn-create"
                     (click)="CreateInstance.show()"><i class="fa fa-plus mr-1"></i>Create Instance
             </button>
-
-            <sj-search-box class="pull-right"
-                           (update)="term = $event"></sj-search-box>
-            <sj-filter class="pull-right" [filterList]="moduleTypes"
-                       (update)="typeterm = $event"></sj-filter>
+            <div>
+              <sj-search-box class="pull-right"
+                             (update)="term = $event"></sj-search-box>
+              <sj-filter class="pull-right" [filterList]="moduleTypes"
+                         (update)="typeterm = $event"></sj-filter>
+            </div>
           </div>
         </div>
 
         <!-- Alerts -->
-        <sj-alerts [alerts]="alerts"></sj-alerts>
+        <sj-alerts [(alerts)]="alerts"></sj-alerts>
 
         <!-- Instances list -->
         <div class="table-wrapper">
@@ -246,7 +247,7 @@
           <span aria-hidden="true">&times;</span>
         </button>
         <h4 class="modal-title">Create instance</h4>
-        <sj-alerts [alerts]="formAlerts"></sj-alerts>
+        <sj-alerts [(alerts)]="formAlerts"></sj-alerts>
       </div>
 
       <div class="modal-body">
@@ -260,7 +261,7 @@
             <div class="col col-sm-10">
               <select [(ngModel)]="newInstance.module" name="instanceModule" required
                       class="form-control">
-                <option *ngFor="let module of modulesList" [ngValue]="module">{{module.moduleName}}
+                <option *ngFor="let module of modulesList | orderBy: 'moduleName'" [ngValue]="module">{{module.moduleName}}
                   {{module.moduleType}} {{module.moduleVersion}}
                 </option>
               </select>
@@ -286,7 +287,8 @@
               <label class="col-form-label col-sm-2 required">Name</label>
               <div class="col col-sm-10">
                 <input [(ngModel)]="newInstance.name" name="instanceName" type="text" required
-                       pattern="[a-zA-z][a-zA-Z0-9-]*"  class="form-control" placeholder="Enter instance name">
+                       title="Name of instance must contain digits, lowercase letters or hyphens; first symbol must be a letter"
+                       pattern="[a-z][a-z0-9-]*"  class="form-control" placeholder="Enter instance name">
               </div>
             </fieldset>
 
@@ -311,7 +313,7 @@
                     <select [(ngModel)]="newInstance.inputs[i]"
                             (change)="checkTimestampAcceptable()"
                             name="instanceInputs{{i}}" required class="form-control">
-                      <option *ngFor="let stream of streamsList | streamFilter: 'stream.t-streams, stream.apache-kafka'"  value="{{stream.name}}">
+                      <option *ngFor="let stream of streamsList | streamFilter: 'stream.t-streams, stream.apache-kafka' | orderBy: 'name' "  value="{{stream.name}}">
                         {{stream.name}} ({{stream.service}}, {{providerList[stream.service]}})
                       </option>
                     </select>
@@ -344,7 +346,7 @@
               <div class="col col-sm-10">
                 <select [(ngModel)]="newInstance.input" name="instanceInput" required
                         class="form-control">
-                  <option *ngFor="let stream of streamsList | streamFilter: 'stream.t-streams'" value="{{stream.name}}">
+                  <option *ngFor="let stream of streamsList | streamFilter: 'stream.t-streams' | orderBy: 'name' " value="{{stream.name}}">
                     {{stream.name}} ({{stream.service}}, {{providerList[stream.service]}})
                   </option>
                 </select>
@@ -357,7 +359,7 @@
               <div class="col col-sm-10">
                 <select [(ngModel)]="newInstance.output" name="instanceOutput" required
                         class="form-control">
-                  <option *ngFor="let stream of streamsList | streamFilter: 'stream.sql-database,stream.elasticsearch'" value="{{stream.name}}">
+                  <option *ngFor="let stream of streamsList | streamFilter: 'stream.sql-database,stream.elasticsearch' | orderBy: 'name'" value="{{stream.name}}">
                     {{stream.name}} ({{stream.service}}, {{providerList[stream.service]}})
                   </option>
                 </select>
@@ -375,7 +377,7 @@
                      class="input-group mb-1">
                   <select [(ngModel)]="newInstance.outputs[i]"
                           name="instanceOutputs{{i}}" required class="form-control">
-                    <option *ngFor="let stream of streamsList | streamFilter: 'stream.t-streams'" value="{{stream.name}}">
+                    <option *ngFor="let stream of streamsList  | streamFilter: 'stream.t-streams' | orderBy: 'name'" value="{{stream.name}}">
                       {{stream.name}} ({{stream.service}}, {{providerList[stream.service]}}) </option>
                   </select>
                   <span class="input-group-btn" *ngIf="i!==0">
@@ -551,7 +553,7 @@
               <div class="col col-sm-10">
                 <select [(ngModel)]="newInstance.coordinationService" name="instanceCoordinationService"
                         required class="form-control">
-                  <option *ngFor="let service of servicesList | serviceFilter : 'service.apache-zookeeper' " value={{service.name}}>
+                  <option *ngFor="let service of servicesList | serviceFilter : 'service.apache-zookeeper' | orderBy: 'name'" value={{service.name}}>
                     {{service.name}}
                   </option>
                 </select>

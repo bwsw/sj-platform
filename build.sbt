@@ -37,6 +37,7 @@ val commonSettings = Seq(
     case PathList("org", "apache", "commons", "logging", xs@_*) => MergeStrategy.first
     case PathList("io", "netty", xs@_*) => MergeStrategy.first
     case PathList("javax", "servlet", xs@_*) => MergeStrategy.first
+    case PathList("com", "sun", "jna", xs@_*) => MergeStrategy.first
     case x if x.endsWith("io.netty.versions.properties") => MergeStrategy.concat
     case "log4j.properties" => MergeStrategy.concat
     case "application.conf" => MergeStrategy.concat
@@ -78,6 +79,7 @@ lazy val sj = (project in file(".")).settings(publish := {})
     engineCore, crudRest,
     inputStreamingEngine, regularStreamingEngine, batchStreamingEngine, outputStreamingEngine,
     framework,
+    engineSimulators,
     stubInput, stubRegular, stubBatch, stubESOutput, stubJDBCOutput, stubRestOutput,
     pmOutput, csvInput, regexInput,
     sumBatch
@@ -113,6 +115,7 @@ lazy val inputStreamingEngine = Project(id = "sj-input-streaming-engine",
   base = file("./core/sj-input-streaming-engine"))
   .settings(commonSettings: _*)
   .settings(
+    libraryDependencies ++= Dependencies.sjInputEngineDependencies.value,
     libraryDependencies ++= Dependencies.sjTestDependencies.value
   )
   .dependsOn(engineCore)
@@ -146,6 +149,15 @@ lazy val framework = Project(id = "sj-mesos-framework",
     libraryDependencies ++= Dependencies.sjFrameworkDependencies.value
   )
   .dependsOn(common)
+
+lazy val engineSimulators = Project(id = "sj-engine-simulators",
+  base = file("./core/sj-engine-simulators"))
+  .settings(commonSettings: _*)
+  .settings(
+    libraryDependencies ++= Dependencies.sjEngineSimulatorsDependencies.value
+  )
+  .dependsOn(inputStreamingEngine)
+
 
 lazy val stubInput = Project(id = "sj-stub-input-streaming",
   base = file("./contrib/stubs/sj-stub-input-streaming"))
@@ -194,6 +206,7 @@ lazy val csvInput = Project(id = "sj-csv-input",
     libraryDependencies ++= Dependencies.sjTestDependencies.value
   )
   .dependsOn(engineCore % "provided")
+  .dependsOn(engineSimulators % "test")
 
 lazy val regexInput = Project(id = "sj-regex-input",
   base = file("./contrib/sj-platform/sj-regex-input"))
@@ -202,6 +215,7 @@ lazy val regexInput = Project(id = "sj-regex-input",
     libraryDependencies ++= Dependencies.sjTestDependencies.value
   )
   .dependsOn(engineCore % "provided")
+  .dependsOn(engineSimulators % "test")
 
 lazy val regularPerformanceBenchmark = Project(id = "sj-regular-performance-benchmark",
   base = file("./contrib/benchmarks/sj-regular-performance-benchmark"))

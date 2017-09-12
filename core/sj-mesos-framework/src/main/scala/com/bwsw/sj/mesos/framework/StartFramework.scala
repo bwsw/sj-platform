@@ -18,8 +18,6 @@
  */
 package com.bwsw.sj.mesos.framework
 
-import java.net.URI
-
 import com.bwsw.common.LeaderLatch
 import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.common.dal.model.ConfigurationSettingDomain
@@ -61,7 +59,7 @@ object StartFramework {
     */
   def main(args: Array[String]): Unit = {
     val port = if (args.nonEmpty) args(0).toInt else 8080
-    val restThread = Rest.start(port)
+    Rest.start(port)
 
     val frameworkInfo = FrameworkInfo.newBuilder.
       setName(frameworkName).
@@ -95,10 +93,8 @@ object StartFramework {
     leader.start()
     leader.acquireLeadership(5)
 
-
     driver.start()
     driver.join()
-    restThread.join()
 
     leader.close()
     System.exit(0)

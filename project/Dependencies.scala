@@ -49,10 +49,10 @@ object Dependencies {
       .exclude("org.slf4j", "slf4j-api")
       .exclude("log4j", "log4j")
       .exclude("io.netty", "netty"),
-    ("org.elasticsearch.client" % "transport" % "5.1.1")
+    ("org.elasticsearch.client" % "transport" % "5.5.1")
       .exclude("com.fasterxml.jackson.core", "jackson-core"),
-    "org.apache.logging.log4j" % "log4j-core" % "2.7",
-    "org.apache.logging.log4j" % "log4j-api" % "2.7",
+    "org.apache.logging.log4j" % "log4j-core" % "2.8.2",
+    "org.apache.logging.log4j" % "log4j-api" % "2.8.2",
     "com.maxmind.geoip" % "geoip-api" % "1.3.1",
     "io.netty" % "netty-all" % "4.1.7.Final",
     "com.opencsv" % "opencsv" % "3.9",
@@ -73,9 +73,7 @@ object Dependencies {
     "org.apache.commons" % "commons-lang3" % "3.5",
     ("com.mockrunner" % "mockrunner-jdbc" % "1.1.2" % "test")
       .exclude("jakarta-regexp", "jakarta-regexp")
-      .exclude("xerces", "xerces"),
-    "org.mockito" % "mockito-core" % "2.8.9",
-    "com.hazelcast" % "hazelcast" % "3.7.3"
+      .exclude("xerces", "xerces")
   ))
 
   lazy val sjRestDependencies = Def.setting(Seq(
@@ -91,17 +89,21 @@ object Dependencies {
       .exclude("org.apache.kafka", "kafka_2.12")
       .exclude("org.eclipse.jetty", "jetty-webapp"),
     "org.eclipse.jetty" % "jetty-webapp" % "9.4.3.v20170317" % "test",
-    ("org.apache.storm" % "storm-core" % "1.1.0")
+    ("org.apache.storm" % "storm-core" % "1.1.0" % "test")
       .exclude("log4j", "log4j")
       .exclude("org.slf4j", "slf4j-log4j12")
       .exclude("org.slf4j", "log4j-over-slf4j")
       .exclude("org.slf4j", "slf4j-api")
       .exclude("org.apache.logging.log4j", "log4j-slf4j-impl"),
-    "org.apache.storm" % "storm-kafka" % "1.1.0"
+    "org.apache.storm" % "storm-kafka" % "1.1.0" % "test"
   ))
 
   lazy val sjOutputEngineDependencies = Def.setting(Seq(
     "org.eclipse.jetty" % "jetty-server" % "9.4.3.v20170317" % "test"
+  ))
+
+  lazy val sjInputEngineDependencies = Def.setting(Seq(
+    "com.hazelcast" % "hazelcast" % "3.7.3"
   ))
 
   lazy val sjFrameworkDependencies = Def.setting(Seq(
@@ -114,6 +116,10 @@ object Dependencies {
   lazy val sjTestDependencies = Def.setting(Seq(
     "org.scalatest" % "scalatest_2.12" % "3.0.1" % "test",
     "org.mockito" % "mockito-core" % "2.8.9" % "test"
+  ))
+
+  lazy val sjEngineSimulatorsDependencies = Def.setting(Seq(
+    "org.mockito" % "mockito-core" % "2.8.9"
   ))
 
   lazy val flinkDependencies = Def.setting(Seq(

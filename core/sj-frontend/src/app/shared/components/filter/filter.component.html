@@ -3,6 +3,6 @@
           (input)="valueChange(select.value)"
           name="providerType">
     <option value="">All</option>
-    <option *ngFor="let type of filterList" value="{{type.id}}">{{type.name}}</option>
+    <option *ngFor="let type of filterList | orderBy: 'name'" value="{{type.id}}">{{type.name}}</option>
   </select>
 </div>

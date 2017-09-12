@@ -23,7 +23,6 @@ import java.util.Date
 import com.bwsw.common.es.ElasticsearchClient
 import com.bwsw.sj.common.dal.model.service.ESServiceDomain
 import com.bwsw.sj.common.dal.model.stream.ESStreamDomain
-import com.bwsw.sj.common.utils.ServiceLiterals
 import scaldi.Injector
 
 class ESStream(name: String,
@@ -35,8 +34,6 @@ class ESStream(name: String,
                creationDate: String)
               (implicit injector: Injector)
   extends SjStream(streamType, name, service, tags, force, description, creationDate) {
-
-  override protected val serviceType = ServiceLiterals.elasticsearchType
 
   override def to(): ESStreamDomain = {
     val serviceRepository = connectionRepository.getServiceRepository
