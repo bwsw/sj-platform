@@ -109,7 +109,7 @@ Constructor arguments
  :widths: 25, 25, 50 
 
  "executor", "RegularStreamingExecutor[T]", "Implementation of a :ref:`regular-module` under testing"   
- "manager", "ModuleEnvironmentManagerMock", "Mock for StatefulModuleEnvironmentManager (see :ref:`Module-Environment-Manager-Mock`)"
+ "manager", "ModuleEnvironmentManagerMock", "Mock for StatefulModuleEnvironmentManager (see Module-Environment-Manager-Mock_)"
 
 .. important:: T - the type of data received by Executor.
 
@@ -217,7 +217,7 @@ Constructor arguments
  :widths: 25, 25, 50 
 
  "executor", "BatchStreamingExecutor[T]", "Implementation of :ref:`batch-module` under test"
- "manager", "ModuleEnvironmentManagerMock", "Mock for StatefulModuleEnvironmentManager (see :ref:`Module-Environment-Manager-Mock`)"
+ "manager", "ModuleEnvironmentManagerMock", "Mock for StatefulModuleEnvironmentManager (see Module-Environment-Manager-Mock_)"
  "batchCollector", "BatchCollector", "Implementation of :ref:`Batch-Collector`"
 
 .. important:: T - the type of data received by Executor
@@ -504,7 +504,7 @@ Constructor arguments:
 Module Output Mocks
 ~~~~~~~~~~~~~~~~~~~~~~
 
-Module Output Mocks have a buffer that contains output elements (see :ref:`Simulation-Result`).
+Module Output Mocks have a buffer that contains output elements (see Simulation-Result_).
 
 Provided methods:
 
