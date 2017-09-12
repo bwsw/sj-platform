@@ -14,7 +14,7 @@ It is a class for testing an implementation of an `input module <http://streamju
 
 Simulator imitates the behavior of the :ref:`Input_Streaming_Engine`: it sends byte buffer to Executor, gets input envelopes from it, checks envelopes for duplicates (if it is necessary), and builds :ref:`Input_Engine_Simulator_Output_Data`.
 
-To use the simulator you need add the dependency in a ``build.sbt``::
+To use the simulator you need add the dependency to the ``build.sbt``::
 
  libraryDependencies += "com.bwsw" %% "sj-engine-simulators" % "1.0-SNAPSHOT" % "test"
 
@@ -96,6 +96,10 @@ Regular Engine Simulator
 It is a class for testing implementation of :ref:`regular-module` (Executor).
 
 The simulator imitates the behavior of the :ref:`Regular_Streaming_Engine` (stateful mode): it sends envelopes to Executor, allows for invoking checkpoint's handlers, gets data from output streams and state.
+
+To use the simulator you need add the dependency to the ``build.sbt``::
+ 
+ libraryDependencies += "com.bwsw" %% "sj-engine-simulators" % "1.0-SNAPSHOT" % "test"
 
 Constructor arguments
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -201,6 +205,10 @@ Batch Engine Simulator
 It is a class for testing implementation of :ref:`batch-module` (Executor).
 
 Simulator imitates the behavior of the :ref:`Batch_Streaming_Engine` (stateful mode): it sends envelopes to the Executor, allows invoking checkpoint's handlers, gets data from output streams and state.
+
+To use simulator you need add this dependency to the ``build.sbt``::
+
+ libraryDependencies += "com.bwsw" %% "sj-engine-simulators" % "1.0-SNAPSHOT" % "test"
 
 Constructor arguments
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -375,6 +383,10 @@ Output Engine Simulator
 It is a class for testing an implementation of :ref:`output-module` (Executor). 
 
 Simulator imitates the behavior of the :ref:`Output_Streaming_Engine`: it sends transactions to the Executor, gets output envelopes from it and builds requests for loading data to an output service. Simulator uses :ref:`Output_Request_Builder` to build requests.
+
+To use the simulator you need add the dependency to the ``build.sbt``::
+ 
+ libraryDependencies += "com.bwsw" %% "sj-engine-simulators" % "1.0-SNAPSHOT" % "test"
 
 Constructor arguments
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
