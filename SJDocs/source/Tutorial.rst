@@ -102,7 +102,7 @@ Now, having the general idea on the platform workflow, we can dive into solving 
 
 And the first step is the system deployment.
 
-.. _Tutorial.rst#step-1-deployment:
+.. _Tutorial_step1_deployment:
 
 Step 1. Deployment 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1043,7 +1043,7 @@ For this demo project the following core systems and services are required:
 8. REST - for access to the UI;
 9. PostgreSQL - as a destination.
 
-Perform the steps for platform deployment from the Tutorial.rst#step-1-deployment_ section.
+Perform the steps for platform deployment from the Tutorial_step1_deployment_ section.
 
 1) Deploy Mesos, Apache Zookeeper, Marathon.
    
