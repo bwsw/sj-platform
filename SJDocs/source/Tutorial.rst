@@ -1205,6 +1205,10 @@ Then, upload and configure JDBC driver (determine <driver_name>)::
  curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"driver.<driver_name>.class\",\"value\": \"org.postgresql.Driver\",\"domain\": \"configuration.sql-database\"}" 
  curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"driver.<driver_name>.prefix\",\"value\": \"jdbc:postgresql\",\"domain\": \"configuration.sql-database\"}"
 
+These configurations are added to the list of configurations::
+
+.. figure:: _static/sflow_SQLsettings.png
+
 Remember to replace <driver_name> in jdbc-sflow-provider.json_ when creating providers in the next step.
 
 Now you can see the settings are added to the configuration list:
@@ -1411,7 +1415,7 @@ Or in the UI click at the input module in the "Modules" section and unfold the *
 
 .. figure:: _static/sflow_InstancesStarted.png
 
-And now you can start the flow (replace <host> and <port> by values from the returned JSON)::
+And now you can start the flow (replace <host> and <port> by values for the input module task host and port)::
 
  python send_sflow.py -p <port> -h <host> sflow_example.csv
  
