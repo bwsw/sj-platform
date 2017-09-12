@@ -1205,15 +1205,12 @@ Then, upload and configure JDBC driver (determine <driver_name>)::
  curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"driver.<driver_name>.class\",\"value\": \"org.postgresql.Driver\",\"domain\": \"configuration.sql-database\"}" 
  curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"driver.<driver_name>.prefix\",\"value\": \"jdbc:postgresql\",\"domain\": \"configuration.sql-database\"}"
 
-These configurations are added to the list of configurations::
+Now you can see the settings are added to the configuration list:
 
 .. figure:: _static/sFlow_SQLsettings.png
 
 Remember to replace <driver_name> in jdbc-sflow-provider.json_ when creating providers in the next step.
 
-Now you can see the settings are added to the configuration list:
-
-.. figure:: _static/sFlow_SQLsettings.png
 
 Step 3. Streaming Creation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
