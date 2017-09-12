@@ -14,6 +14,8 @@ Simulation Result
 
 ``case class SimulationResult(streamDataList: Seq[StreamData], state: Map[String, Any])`` - contains data elements for each output stream and a state at a certain point in time.
 
+.. _Module-Environment-Manager-Mock:
+
 Module Environment Manager Mock
 --------------------------------------
 
