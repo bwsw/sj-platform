@@ -12,7 +12,7 @@ This tutorial is aimed to represent SJ-Platform and give a quick start for a use
 
 The demo projects presented below are example tasks developed to demonstrate a user how to run his/her first SJ module. A step-by-step guidance will help to deploy the system in a local mode (minimesos) or at a cluster (Mesos) and to implement a module example to a real-life task. 
 
-Through an example project a user will get to know the system structure, its key components and general concepts of the platform workflow.
+Through an example project, a user will get to know the system structure, its key components and general concepts of the platform workflow.
 
 
 SJ-Platform Overview
@@ -33,7 +33,7 @@ The processing result is exported to an external storage. It can be Elasticsearc
 
 Besides, SJ-Platform provides a user with a comprehensive RESTful API instrumentation and Web UI.
 
-Below an example of a real-life task solution will demonstrate the platform at work for better understanding of how the data processing can be performed in the platform. Thus, the tutorial will provide you with:
+Below an example of a real-life task solution will demonstrate the platform at work for better understanding of how the data processing can be performed on the platform. Thus, the tutorial will provide you with:
 
 1. a ready-to-use problem resolution of an example task on SJ-Platform base;
 
@@ -46,29 +46,29 @@ Fping Example Task
 
 Let’s introduce an example task which illustrates the platform workflow in the real-world use.
 
-The demonstrational code is responsible for collecting of aggregated information on the accessibility of nodes. 
+The demonstration code is responsible for collecting of aggregated information on the accessibility of nodes. 
 
-The fping utility checks the list of provided IPs for accessibility. It sends a 64-bytes packet to each IP and waits for a return packet. If the connections are good and the node can be accessed, a good return packet will be received. The amount of time is also returned for how long it takes for a packet to make the complete trip. On the basis of this information the processor calculates the average response time for each node. The amount of successful responces by IP per 1 minute is aggregated by the processing module as well. The result is exported to an external datastore.  
+The fping utility checks the list of provided IPs for accessibility. It sends a 64-bytes packet to each IP and waits for a return packet. If the connections are good and the node can be accessed, a good return packet will be received. The amount of time is also returned for how long it takes for a packet to make the complete trip. On the basis of this information the processor calculates the average response time for each node per 1 minute. The amount of successful responses by IP per 1 minute is calculated by the processing module as well. The result is exported to an external data store.  
 
 Before providing a solution to the task, let’s have a look at the platform from the perspective of a processing pipeline.
 
 Processing
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-A general processing workflow which system allows implementing is illustrated at the diagram below:
+A general processing workflow which system allows implementing is illustrated in the diagram below:
 
 .. figure:: _static/ModulePipeline.png
    :scale: 80%
 
-Green, yellow and purple blocks desplayed in a rectangular area are managed and evaluated by SJ-Platform. They represent an input module, a processing module and an output module, respectively. The blocks ouside the rectangular area represent external systems.
+Green, yellow and purple blocks displayed in a rectangular area are managed and evaluated by SJ-Platform. They represent an input module, a processing module and an output module, respectively. The blocks outside the rectangular area represent external systems.
 
 The input module receives raw data and transforms them into a data stream of a proper type compatible with the processing module type. 
 
 The processing module performs data aggregation, transformations, filtering and enriching and sends the result to the output module. In the provided example the data aggregation is performed with a regular-streaming module.
 
-In the output module the processed data are transformed into entities appropriate for storing into an external storage of a specified type. In the fping demonstrational example the output module exports the result data into the Elasticsearch external data storage.
+In the output module, the processed data are transformed into entities appropriate for storing into an external storage of a specified type. In the fping demonstration example the output module exports the result data into the Elasticsearch external data storage.
                 
-The illustrated pipeline  is a common scenario for a lot of different tasks.
+The illustrated pipeline is a common scenario for a lot of different tasks.
 
 But the platform allows implementation of more complicated processing pipelines. So the pipeline can be more expanded. More input streams can ingest raw data. Several Input modules can be included in the pipeline to accept the raw data and transform it for passing further to the processing stage.
 
@@ -94,7 +94,7 @@ Finally, the output modules export aggregated data from echo-response streams to
 
 The data is fed to the system, passed from one module to another and exported from the system via streams. Read more about streams under the “Creating Streams” section.
 
-In the demonstrational project, the entities are added to the system via REST API as it is less time-consuming. The platform entities can be also created via the UI filling in the forms for each entity with necessary settings.
+In the demonstration project, the entities are added to the system via REST API as it is less time-consuming. The platform entities can be also created via the UI filling in the forms for each entity with necessary settings.
 
 The result is easy-to-see via Web UI. Or send ‘GET’ API requests to return created entities in JSON.
 
@@ -167,7 +167,7 @@ To solve the example task we need to deploy:
 9) Elasticsearch - as an external data storage;
 10) Kibana - to visualize Elasticsearch data.
 
-So, as a first step you should deploy Mesos and other services.
+So, as a first step, you should deploy Mesos and other services.
 
 1) Deploy Mesos, Marathon, Zookeeper. You can follow the instructions at the official `installation guide <http://www.bogotobogo.com/DevOps/DevOps_Mesos_Install.php>`_ .
 
@@ -184,13 +184,14 @@ Install Java::
 
 Find detailed instructions `here <https://tecadmin.net/install-oracle-java-8-ubuntu-via-ppa/>`_.
 
-2) Create json files and a configuration file. Please, name them as specified here.
+2) Create JSON files and a configuration file. Please, name them as specified here.
 
 Replace <slave_advertise_ip> with the slave advertise IP.
 
 Replace <zk_ip> and <zk_port> according to the Apache Zookeeper address.
 
 .. _mongo.json:
+
 **mongo.json**::
 
  {  
@@ -353,6 +354,7 @@ Replace <zk_ip> and <zk_port> according to the Apache Zookeeper address.
  subscribers.update.period-ms=500
 
 .. _tts.json::
+
 **tts.json** (replace <path_to_conf_directory> with an appropriate path to the configuration directory on your computer and <external_host> with a valid host)::
 
  {
@@ -455,7 +457,7 @@ Then launch Elasticsearch::
  curl -X POST http://172.17.0.1:8080/v2/apps -H "Content-type: application/json" -d @kibana.json
 
 
-Via the Marathon interface make sure the services are deployed.
+Via the Marathon interface, make sure the services are deployed.
 
 .. figure:: _static/ServicesOnMarathon.png
 
@@ -533,9 +535,9 @@ For the Example Task
 
 For solving the example task, we will upload the following configurations via REST:
 
-- session.timeout - Use when connecting to zookeeper in milliseconds (usually when we are dealing with t-streams consumers/producers and kafka streams)
+- session.timeout - Use when connecting to Apache Zookeeper in milliseconds (usually when we are dealing with T-streams consumers/producers and Kafka streams)
 
-- current-framework - Indicates what file is used to run a framework. By this value you can get a setting that contains a file name of framework jar.
+- current-framework - Indicates what file is used to run a framework. By this value, you can get a setting that contains a file name of framework jar.
 
 - crud-rest-host - For the host on the which the rest has launched.
 
@@ -595,7 +597,7 @@ Download the modules from the Sonatype repository and upload it to the system fo
 For the Example Task
 """""""""""""""""""""""""
 
-Please, follow these steps to build and upload the modules of pingstation demonstrational problem.
+Please, follow these steps to build and upload the modules of pingstation demonstration task.
 
 To configure environment::
  
@@ -627,7 +629,7 @@ Upload modules to the system::
  curl --form jar=@ps-process/target/scala-2.11/ps-process-1.0.jar http://$address/v1/modules
  curl --form jar=@ps-output/target/scala-2.11/ps-output-1.0.jar http://$address/v1/modules
 
-Now in UI you can see the uploaded modules under the ‘Modules’ tab.
+Now in the UI, you can see the uploaded modules under the ‘Modules’ tab.
 
 .. figure:: _static/ModulesUploaded.png
 
@@ -643,18 +645,18 @@ A module receives data from input streams from TCP or Kafka.
 
 Within the platform, the data is transported to and from modules via T-streams. It is a native streaming type for SJ-Platform that allows exactly-once data exchange between modules. 
 
-A result data is exported from SJ-Plaform to an external storage with streams of types corresponding to the type of that storage: Elasticsearch, SQL database and RESTful.
+The result data is exported from SJ-Platform to an external storage with streams of types corresponding to the type of that storage: Elasticsearch, SQL database and RESTful.
 
 .. figure:: _static/ModuleStreams.png
    :scale: 80%
 
 Prior to creating a stream, the infrastructure needs to be created for the streaming layer.
 
-The infrastructure for streams include **providers** and **services**. This is a required presetting without which streaming will not be so flexible. 
+The infrastructure for streams includes **providers** and **services**. This is a required presetting without which streaming will not be so flexible. 
 
 Streaming flexibility lies in a one-to-many connection between providers and services, services and streams. One provider works with many services (they can be of various types) as well as one service can provide several streams. These streams take necessary settings from the common infrastructure (providers and services). There is no need to duplicate the settings for each individual stream.
 
-The type of Provider and Service is determined with the type of streams. Find more about types of platform entities at `the UI guide <http://streamjuggler.readthedocs.io/en/develop/SJ_UI_Guide.html#get-started>`_ .
+The types of providers and services are determined by the type of streams. Find more about types of platform entities at the Streaming_Infrastructure_ section.
 
 In the example task solution the following stream types are implemented:
 
@@ -662,7 +664,7 @@ In the example task solution the following stream types are implemented:
 
 2. T-streams streaming passes the data to and from the processing module;
 
-3. output modules export aggregated data in streams to Elasticsearch.
+3. output modules export aggregated data and pass them in streams to Elasticsearch.
 
 .. figure:: _static/StreamsInPlatform.png
    :scale: 80%
@@ -747,7 +749,7 @@ These streams are of T-streams type.
 
 For **ps-process module**:
 
-Create output streams of the ps-process module (consequently, an input stream of the output module) named ‘echo-response-1m’, ‘echo-response-3m’ and ‘echo-response-1h’. They will be used for keeping the aggregated information about average time of echo responses, total amount of echo responses, total amount of unreachable responses and the timestamp for each IP (per 1 minute, per 3 minutes and per 1 hour)::
+Create output streams of the ps-process module (consequently, an input stream of the output module) named ‘echo-response-1m’, ‘echo-response-3m’ and ‘echo-response-1h’. They will be used for keeping the aggregated information about the average time of echo responses, the total amount of echo responses, the total amount of unreachable responses and the timestamp for each IP (per 1 minute, per 3 minutes and per 1 hour)::
 
  curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data   "@api-json/streams/echo-response-1m.json"
 
@@ -802,7 +804,7 @@ A module uses a specific instance to personalize its work. An instance is a full
    
 An instance is created with specific parameters and is set to particular streams.
  
-For each module an instance should be created.
+For each module, an instance should be created.
 
 Creating Instances
 """""""""""""""""""""""""""""
@@ -922,7 +924,7 @@ Select the parameters to show in the graph at the left-hand panel.
 
 The example below is compiled in Kibana v.5.5.1.
 
-It illustrates average time of echo-responses by IPs per a selected period of time (e.g. 1 min). As you can see, different nodes have the different average time of response. Some nodes respond faster than others. 
+It illustrates the average time of echo-responses by IPs per a selected period of time (e.g. 1 min). As you can see, different nodes have the different average time of response. Some nodes respond faster than others. 
 
 .. figure:: _static/Kibana.png
 
@@ -998,18 +1000,18 @@ Via the UI you can make sure the instances are deleted.
 sFlow Example Task
 -------------------------
 
-There is another example of the platform performance. It represents the processing workflow of demo that is responsible for collecting sFlow information: 
+There is another example of the platform performance. It represents the processing workflow of demonstration task that is responsible for collecting sFlow information: 
 
 - computes traffic for the source IP; 
 - computes traffic between the source and the destination.
 
-The processing pipeline includes an input module, a batch processing module and an output module. Within the platform the data is transported with T-streams.
+The processing pipeline includes an input module, a batch processing module and an output module. Within the platform, the data is transported with T-streams.
 
-As an external data source an sFlow reporter takes place. It sends data to the system in CSV format.
+As an external data source, an sFlow reporter takes place. It sends data to the system in CSV format.
 
 The CSV data are transformed by the input module and are sent for processing to the batch processing module. The data that can not be parsed by the input module are sent to the output module for incorrect data without processing.
 
-The processed data is stored into the PostgreSQL database. It is exported from the platform via the output module with the streams of SQL-database type.
+The processed data is stored in the PostgreSQL database. It is exported from the platform via the output module with the streams of SQL-database type.
 
 In general, the pipeline can be rendered as in the diagram below:
 
@@ -1108,7 +1110,7 @@ Perform the steps for platform deployment from the :ref:`Tutorial.rst#step-1-dep
 
 - tts.json_
 
-Via the Marathon interface make sure the services are deployed.
+Via the Marathon interface, make sure the services are deployed.
 
 Now look and make sure you have access to the Web UI. You will see the platform but it is not completed with any entities yet. They will be added in the next steps.
 
@@ -1345,7 +1347,7 @@ Step 5. Creating Instances
 
 An instance should be created for each module as its individual performance. 
 
-In the demo case there are three output modules. Thus, we will create three instances for the output.
+In the demo case, there are three output modules. Thus, we will create three instances for the output.
 
 To create an instance of the input module::
 
