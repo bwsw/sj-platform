@@ -1,3 +1,5 @@
+.. _Streaming::
+
 Streams in SJ-Platform
 =============================
 
@@ -69,14 +71,16 @@ The following types of output streams are supported in SJ-Platform:
 - SQL database, to store data to JDBC-compatible databases;
 - RESTful, to store data to RESTful storage.
 
+.. _Streaming_Infrastructure::
+
 Streaming Infrastructure
 -----------------------------------
 
-Streams need infrastructure: Providers and Services. This is a required presetting without which streaming will not be so flexible. Streaming flexibility lies in the one-to-many connection between providers and services, services and streams. One provider works with many services (they can be of various types) as well as one service can provide several streams. These streams take necessary settings from the common infrastructure (providers and services). There is no need to duplicate the settings for each individual stream.
+Streams need infrastructure: providers and services. This is a required presetting without which streaming will not be so flexible. Streaming flexibility lies in the one-to-many connection between providers and services, services and streams. One provider works with many services (they can be of various types) as well as one service can provide several streams. These streams take necessary settings from the common infrastructure (providers and services). There is no need to duplicate the settings for each individual stream.
 
-Provider is the service provider for data transformation into a stream.
+A **provider** is a service provider for data transformation into a stream.
 
-Service is a service to transform data into a stream of an exact type.
+A **service** is a service to transform data into a stream of an exact type.
 
 They can be of different types. The types of platform entities in the pipeline determine the type of providers and services that are necessary in the particular case.
 
