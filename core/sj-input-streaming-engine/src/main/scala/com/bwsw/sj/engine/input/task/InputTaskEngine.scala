@@ -38,6 +38,8 @@ import io.netty.buffer.ByteBuf
 import io.netty.channel.{ChannelFuture, ChannelHandlerContext}
 import org.slf4j.{Logger, LoggerFactory}
 
+import scala.util.Try
+
 
 /**
   * Class contains methods for running input module
@@ -174,6 +176,8 @@ abstract class InputTaskEngine(manager: InputTaskManager,
       logger.debug(s"Task name: ${manager.taskName}. Invoke parse() method of executor.")
       val inputEnvelope = executor.parse(buffer, interval)
       clearBufferAfterParse(buffer, interval.finalValue)
+      if (buffer.isReadable)
+        Try(channelContextQueue.add(channelContext))
       val isNotDuplicateOrEmpty = processEnvelope(inputEnvelope)
       sendClientResponse(inputEnvelope, isNotDuplicateOrEmpty, channelContext)
     } else {

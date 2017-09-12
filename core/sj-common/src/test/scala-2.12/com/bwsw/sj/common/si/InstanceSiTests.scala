@@ -190,7 +190,7 @@ class InstanceSiTests extends FlatSpec with Matchers with BeforeAndAfterEach wit
     }
   }
 
-  it should "not delete instance if it have status that does not allow deletion" in {
+  it should "not delete instance if it has status that does not allow deletion" in {
     Seq(startedInstance, deletedInstance).foreach {
       case InstanceInfo(instance, _, _) =>
         val error = "rest.modules.instances.instance.cannot.delete:" + instance.name

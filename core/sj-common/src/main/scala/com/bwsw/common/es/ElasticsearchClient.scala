@@ -21,6 +21,7 @@ package com.bwsw.common.es
 import java.net.InetAddress
 import java.util.UUID
 
+import com.bwsw.sj.common.utils.ProviderLiterals
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse
 import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse
@@ -28,9 +29,9 @@ import org.elasticsearch.action.index.IndexResponse
 import org.elasticsearch.client.transport.TransportClient
 import org.elasticsearch.common.settings.Settings
 import org.elasticsearch.common.transport.InetSocketTransportAddress
-import org.elasticsearch.common.xcontent.XContentBuilder
+import org.elasticsearch.common.xcontent.{XContentBuilder, XContentType}
 import org.elasticsearch.index.query.{BoolQueryBuilder, QueryBuilder, QueryBuilders}
-import org.elasticsearch.index.reindex.{BulkIndexByScrollResponse, DeleteByQueryAction}
+import org.elasticsearch.index.reindex.{BulkByScrollResponse, DeleteByQueryAction}
 import org.elasticsearch.search.SearchHits
 import org.elasticsearch.xpack.client.PreBuiltXPackTransportClient
 import org.slf4j.LoggerFactory
@@ -47,8 +48,9 @@ class ElasticsearchClient(hosts: Set[(String, Int)],
                           password: Option[String] = None) {
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val typeName = "_type"
-
+  System.setProperty("es.set.netty.runtime.available.processors", "false")
   private val settingsBuilder = Settings.builder()
+  settingsBuilder.put("transport.tcp.connect_timeout", ProviderLiterals.connectTimeoutMillis + "ms")
   username.zip(password).foreach {
     case (u, p) => settingsBuilder.put("xpack.security.user", s"$u:$p")
   }
@@ -77,7 +79,7 @@ class ElasticsearchClient(hosts: Set[(String, Int)],
 
   def deleteDocuments(index: String,
                       documentType: String,
-                      query: String = QueryBuilders.matchAllQuery().toString): BulkIndexByScrollResponse = {
+                      query: String = QueryBuilders.matchAllQuery().toString): BulkByScrollResponse = {
     val queryWithType = new BoolQueryBuilder()
       .must(QueryBuilders.wrapperQuery(query))
       .must(QueryBuilders.matchQuery(typeName, documentType))
@@ -118,7 +120,7 @@ class ElasticsearchClient(hosts: Set[(String, Int)],
     logger.debug(s"Write a data: '$data' to an elasticsearch index: '$index'.")
     client
       .prepareIndex(index, documentType, documentId)
-      .setSource(data)
+      .setSource(data, XContentType.JSON)
       .execute()
       .actionGet()
   }

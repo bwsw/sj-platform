@@ -18,7 +18,7 @@
  */
 package com.bwsw.sj.common.dal.model.provider
 
-import java.net.{Socket, URI}
+import java.net.{InetSocketAddress, Socket, URI}
 import java.nio.channels.ClosedChannelException
 import java.util.{Collections, Date}
 
@@ -117,25 +117,25 @@ class ProviderDomain(@IdField val name: String,
   protected def checkJdbcConnection(address: String): ArrayBuffer[String] = ArrayBuffer()
 
   protected def checkRestConnection(address: String): ArrayBuffer[String] = {
-    val errors = ArrayBuffer[String]()
     val (host, port) = getHostAndPort(address)
-    var socket: Option[Socket] = None
-    Try {
-      socket = Some(new Socket(host, port))
+    val socket = new Socket()
+    val errors = Try {
+      socket.connect(new InetSocketAddress(host, port), ProviderLiterals.connectTimeoutMillis)
     } match {
       case Success(_) =>
-      case Failure(a) =>
-        errors += s"Can not establish connection to Rest on '$address'"
+        ArrayBuffer[String]()
+      case Failure(_) =>
+        ArrayBuffer[String](s"Can not establish connection to Rest on '$address'")
     }
-    socket.foreach(_.close())
+    if (!socket.isClosed) socket.close()
 
     errors
   }
 
   protected def getHostAndPort(address: String): (String, Int) = {
     val uri = new URI("dummy://" + address)
-    val host = uri.getHost()
-    val port = uri.getPort()
+    val host = uri.getHost
+    val port = uri.getPort
 
     (host, port)
   }

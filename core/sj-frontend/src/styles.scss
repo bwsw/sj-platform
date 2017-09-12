@@ -70,6 +70,9 @@ label.required::after {
     border-bottom: 1px dashed #167495;
   }
 }
+a.nav-link {
+  cursor: pointer;
+}
 
 /* Button upload */
 .btn-upload {
@@ -82,6 +85,11 @@ label.required::after {
   &.inProgress {
     pointer-events: none;
   }
+}
+.btn-create {
+  width: 200px;
+  align-self: flex-end;
+  margin-right: 0.3rem;
 }
 
 
@@ -131,6 +139,10 @@ li.tag {
 /*filter-box*/
 .right-inner-addon {
   margin: 0 5px 10px;
+}
+div.search-filter-create-box {
+  display: flex;
+  flex-direction: column;
 }
 
 /*mozila validated input style disable*/
