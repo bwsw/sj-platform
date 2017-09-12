@@ -88,7 +88,7 @@ The diagram of platform entities interconnections can be useful in selecting the
 
 .. figure:: _static/InstanceCorrelation1.png
 
-Firstly, decide what types of instances will perform processing in the pipeline. 
+Firstly, decide what types of instances will perform data transformation and processing in the pipeline. 
 
 Determined instance types will help to clarify which streams are required for these particular instances.
 
