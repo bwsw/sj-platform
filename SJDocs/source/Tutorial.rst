@@ -1312,14 +1312,14 @@ To create an output stream of the fallback-output module that will be used for s
 
  curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/fallback-data.json
  
-See they have appeared in the UI::
+See they have appeared in the UI:
 
 .. figure:: _static/sflow_Streams.png
 
 Step 4. Output SQL Tables Creation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-SQL tables for the output data must be created in the sFlow database. To create tables::
+SQL tables for the output data should be created in the *sflow* database. To create tables::
 
  CREATE TABLE srcipdata (
     id SERIAL PRIMARY KEY,
@@ -1392,7 +1392,9 @@ To launch the fallback-output module instance::
 
  curl --request GET "http://$address/v1/modules/output-streaming/sflow-fallback-output/1.0/instance/sflow-fallback-output/start"
 
-To get the list of listening ports of the input module::
+Pay attention to the host and port of the input module. This host and port should be specified when starting the flow of data. 
+
+To get the list of listening ports of the input module send the following command::
 
  curl --request GET "http://$address/v1/modules/input-streaming/com.bwsw.input.csv/1.0/instance/sflow-csv-input"
 
@@ -1404,6 +1406,10 @@ and look at the field named ``tasks``. It may look as follows::
     "port": 31000
   }
  }
+
+Or in the UI click at the input module in the "Modules" section and unfold the **Tasks** section of the *Instance Details* panel:
+
+.. figure:: _static/sflow_InstancesStarted.png
 
 And now you can start the flow (replace <host> and <port> by values from the returned JSON)::
 
