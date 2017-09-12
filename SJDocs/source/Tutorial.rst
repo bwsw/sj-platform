@@ -1108,7 +1108,7 @@ Perform the steps for platform deployment from the :ref:`Tutorial.rst#step-1-dep
    transaction-database.transaction-keeptime-min=70000
    subscribers.update.period-ms=500
 
-- tts.json_
+- tts.json_ 
 
 Via the Marathon interface, make sure the services are deployed.
 
