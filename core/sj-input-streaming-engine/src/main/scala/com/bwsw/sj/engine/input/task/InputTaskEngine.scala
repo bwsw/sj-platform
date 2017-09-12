@@ -35,12 +35,10 @@ import com.bwsw.sj.engine.input.eviction_policy.InputInstanceEvictionPolicy
 import com.bwsw.sj.engine.input.task.reporting.InputStreamingPerformanceMetrics
 import com.bwsw.tstreams.agents.producer.{NewProducerTransactionPolicy, ProducerTransaction}
 import com.typesafe.config.ConfigFactory
-import io.netty.buffer.ByteBuf
 import io.netty.channel.{ChannelFuture, ChannelHandlerContext}
 import org.slf4j.{Logger, LoggerFactory}
 
 import scala.collection.mutable
-import scala.util.Try
 import scala.util.Try
 
 
