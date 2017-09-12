@@ -102,7 +102,7 @@ Now, having the general idea on the platform workflow, we can dive into solving 
 
 And the first step is the system deployment.
 
-.. _Tutorial_step1_deployment:
+.. _Step1-Deployment:
 
 Step 1. Deployment 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -997,7 +997,7 @@ Via the UI you can make sure the instances are deleted.
 
 .. _sflow-example-task:
 
-sFlow Example Task
+Sflow Example Task
 -------------------------
 
 There is another example of the platform performance. It represents the processing workflow of demonstration task that is responsible for collecting sFlow information: 
@@ -1043,7 +1043,7 @@ For this demo project the following core systems and services are required:
 8. REST - for access to the UI;
 9. PostgreSQL - as a destination.
 
-Perform the steps for platform deployment from the Tutorial_step1_deployment_ section.
+Perform the steps for platform deployment from the Step1-Deployment_ section.
 
 1) Deploy Mesos, Apache Zookeeper, Marathon.
    
