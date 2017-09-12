@@ -1207,7 +1207,7 @@ Then, upload and configure JDBC driver (determine <driver_name>)::
 
 These configurations are added to the list of configurations::
 
-.. figure:: _static/sflow_SQLsettings.png
+.. figure:: _static/sFlow_SQLsettings.png
 
 Remember to replace <driver_name> in jdbc-sflow-provider.json_ when creating providers in the next step.
 
@@ -1411,7 +1411,7 @@ and look at the field named ``tasks``. It may look as follows::
   }
  }
 
-Or in the UI click at the input module in the "Modules" section and unfold the **Tasks** section of the *Instance Details* panel:
+Or, in the UI, click at the input module instance in the "Instances" section and unfold the **Tasks** section of the *Instance Details* panel:
 
 .. figure:: _static/sflow_InstancesStarted.png
 
