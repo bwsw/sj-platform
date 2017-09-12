@@ -18,7 +18,7 @@
  */
 package com.bwsw.sj.common.dal.model.provider
 
-import java.net.{Socket, URI}
+import java.net.{InetSocketAddress, Socket, URI}
 import java.nio.channels.ClosedChannelException
 import java.util.{Collections, Date}
 
@@ -131,17 +131,17 @@ class ProviderDomain(@IdField val name: String,
   protected def checkJdbcConnection(address: String): ArrayBuffer[String] = ArrayBuffer()
 
   protected def checkRestConnection(address: String): ArrayBuffer[String] = {
-    val errors = ArrayBuffer[String]()
     val (host, port) = getHostAndPort(address)
-    var socket: Option[Socket] = None
-    Try {
-      socket = Some(new Socket(host, port))
+    val socket = new Socket()
+    val errors = Try {
+      socket.connect(new InetSocketAddress(host, port), ProviderLiterals.connectTimeoutMillis)
     } match {
       case Success(_) =>
+        ArrayBuffer[String]()
       case Failure(_) =>
-        errors += messageResourceUtils.createMessage("rest.providers.provider.cannot.connect.rest", address)
+        ArrayBuffer[String](messageResourceUtils.createMessage("rest.providers.provider.cannot.connect.rest", address))
     }
-    socket.foreach(_.close())
+    if (!socket.isClosed) socket.close()
 
     errors
   }

@@ -1,48 +1,97 @@
 Glossary
 ================
 
-:Batch: A minimum time interval during which a handler collect events in a stream.
+.. glossary::
+  :sorted:
+  
+Batch 
+  A minimum time interval during which a handler collect events in a stream.
 
-:Check-every policy: 
+Configurations 
+  Settings required for the module performance. 
 
-:Check point: Completeness check of the data received after the stream processing.
+Checkpoint
+  Completeness check of the data received after the stream processing.
+  
+Checkpoint Group
+  A special entity which allows a developer to do atomic checkpoint for a group of producers and consumers. 
 
-:Custom handler: A handler specified by a user.
+Custom handler 
+  A handler specified by a user.
 
-:Database service: The database provided by an exact provider.
+Database service 
+  The database provided by an exact provider.
 
-:Event: Minimal data unit in a stream.
+Engine
+  Uses module settings to handle data flow making it into streams.
 
-:Exactly once processing: The system processes events in a stream only once
+Envelope
+  A container for messages or events with data records.
 
-:Handler: A programm module processing streams.
+Event 
+  Minimal data unit in a stream.
 
-:Instance:  A full range of settings to perform an exact executor type.
+Exactly once processing 
+  The system processes events in a stream only once
+
+Executor
+  A part of a module that performs data processing.
+
+Instance 
+  A full range of settings to perform an exact executor type.
  
-:Input: A stream that is fed to the system input.
+Input 
+  A stream that is fed to the system input.
 
-:Life-cycle of the events in the stream: The time period for events in a stream.
+Life-cycle of events in the stream 
+  The time period for events in a stream.
 
-:Locks service: The service aborting an operation till receiving necessary events. 
+Locks service 
+  The service aborting an operation till receiving necessary events. 
 
-:Metric: A numeric value received as a result of aggregation.
+Metric 
+  A numeric value received as a result of aggregation.
 
-:Output: A stream that goes out of the system.
+Module 
+  A program module processing streams.
 
-:Partition: A part of a data stream allocated for convenience in operation.
+Output 
+  A stream that goes out of the system.
 
-:Provider: The service provider for input data transformation into a stream. 
+Partition 
+  A part of a data stream allocated for convenience in operation.
 
-:Shift: Window sliding in a period of time (multiple of a batch). It can be less than a window size, and in this case the data will be duplicated.
+Provider 
+  The service provider for input data transformation into a stream. 
 
-:Storage state service: A service storing data state in a stream; is performed together with the checkpoint.
+Service 
+  A service to perform an input data into a stream of an exact type. 
 
-:Stream: A sequence of events happening randomly at irregular intervals.
+Shift 
+  Window sliding in a period of time (multiple of a batch). It can be less than a window size, and in this case the data will be duplicated.
 
-:Streams service: A service to perform an input data into a stream of an exact type. 
+Storage state service  
+  A service storing data state in a stream; is performed together with the checkpoint.
 
-:Transaction: A separate atomic operations with events.
+Stream  
+  A sequence of events happening randomly at irregular intervals.
 
-:Typed stream: A stream the avro schema for which is specified.
+Task
+  The actual data processing.
 
-:Window: A time period multiple of a batch during which the event collecting takes place.
+Transaction 
+  A separate atomic operations with events.
+
+T-streams
+  (transactional streams); a Scala library and infrastructure components which implement transactional messaging.
+
+Typed stream 
+  A stream the avro schema for which is specified.
+
+Window 
+  A time period multiple of a batch during which the event collecting takes place.
+  
+
+
+
+

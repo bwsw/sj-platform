@@ -37,6 +37,7 @@ val commonSettings = Seq(
     case PathList("org", "apache", "commons", "logging", xs@_*) => MergeStrategy.first
     case PathList("io", "netty", xs@_*) => MergeStrategy.first
     case PathList("javax", "servlet", xs@_*) => MergeStrategy.first
+    case PathList("com", "sun", "jna", xs@_*) => MergeStrategy.first
     case x if x.endsWith("io.netty.versions.properties") => MergeStrategy.concat
     case "log4j.properties" => MergeStrategy.concat
     case "application.conf" => MergeStrategy.concat
@@ -78,6 +79,7 @@ lazy val sj = (project in file(".")).settings(publish := {})
     engineCore, crudRest,
     inputStreamingEngine, regularStreamingEngine, batchStreamingEngine, outputStreamingEngine,
     framework,
+    engineSimulators,
     stubInput, stubRegular, stubBatch, stubESOutput, stubJDBCOutput, stubRestOutput,
     pmOutput, csvInput, regexInput,
     sumBatch
@@ -113,6 +115,7 @@ lazy val inputStreamingEngine = Project(id = "sj-input-streaming-engine",
   base = file("./core/sj-input-streaming-engine"))
   .settings(commonSettings: _*)
   .settings(
+    libraryDependencies ++= Dependencies.sjInputEngineDependencies.value,
     libraryDependencies ++= Dependencies.sjTestDependencies.value
   )
   .dependsOn(engineCore)
@@ -147,45 +150,54 @@ lazy val framework = Project(id = "sj-mesos-framework",
   )
   .dependsOn(common)
 
+lazy val engineSimulators = Project(id = "sj-engine-simulators",
+  base = file("./core/sj-engine-simulators"))
+  .settings(commonSettings: _*)
+  .settings(
+    libraryDependencies ++= Dependencies.sjEngineSimulatorsDependencies.value
+  )
+  .dependsOn(inputStreamingEngine)
+
+
 lazy val stubInput = Project(id = "sj-stub-input-streaming",
   base = file("./contrib/stubs/sj-stub-input-streaming"))
   .settings(commonSettings: _*)
-  .dependsOn(engineCore)
+  .dependsOn(engineCore % "provided")
 
 lazy val stubRegular = Project(id = "sj-stub-regular-streaming",
   base = file("./contrib/stubs/sj-stub-regular-streaming"))
   .settings(commonSettings: _*)
-  .dependsOn(engineCore)
+  .dependsOn(engineCore % "provided")
 
 lazy val stubBatch = Project(id = "sj-stub-batch-streaming",
   base = file("./contrib/stubs/sj-stub-batch-streaming"))
   .settings(commonSettings: _*)
-  .dependsOn(engineCore)
+  .dependsOn(engineCore % "provided")
 
 lazy val stubESOutput = Project(id = "sj-stub-es-output-streaming",
   base = file("./contrib/stubs/sj-stub-es-output-streaming"))
   .settings(commonSettings: _*)
-  .dependsOn(engineCore)
+  .dependsOn(engineCore % "provided")
 
 lazy val stubJDBCOutput = Project(id = "sj-stub-jdbc-output-streaming",
   base = file("./contrib/stubs/sj-stub-jdbc-output-streaming"))
   .settings(commonSettings: _*)
-  .dependsOn(engineCore)
+  .dependsOn(engineCore % "provided")
 
 lazy val stubRestOutput = Project(id = "sj-stub-rest-output-streaming",
   base = file("./contrib/stubs/sj-stub-rest-output-streaming"))
   .settings(commonSettings: _*)
-  .dependsOn(engineCore)
+  .dependsOn(engineCore % "provided")
 
 lazy val pmOutput = Project(id = "sj-performance-metrics-output-es",
   base = file("./contrib/sj-platform/sj-performance-metrics-output-es"))
   .settings(commonSettings: _*)
-  .dependsOn(engineCore)
+  .dependsOn(engineCore % "provided")
 
 lazy val sumBatch = Project(id = "sj-batch-sum",
   base = file("./contrib/examples/sj-batch-sum"))
   .settings(commonSettings: _*)
-  .dependsOn(engineCore)
+  .dependsOn(engineCore % "provided")
 
 lazy val csvInput = Project(id = "sj-csv-input",
   base = file("./contrib/sj-platform/sj-csv-input"))
@@ -193,7 +205,8 @@ lazy val csvInput = Project(id = "sj-csv-input",
   .settings(
     libraryDependencies ++= Dependencies.sjTestDependencies.value
   )
-  .dependsOn(engineCore)
+  .dependsOn(engineCore % "provided")
+  .dependsOn(engineSimulators % "test")
 
 lazy val regexInput = Project(id = "sj-regex-input",
   base = file("./contrib/sj-platform/sj-regex-input"))
@@ -201,7 +214,8 @@ lazy val regexInput = Project(id = "sj-regex-input",
   .settings(
     libraryDependencies ++= Dependencies.sjTestDependencies.value
   )
-  .dependsOn(engineCore)
+  .dependsOn(engineCore % "provided")
+  .dependsOn(engineSimulators % "test")
 
 lazy val regularPerformanceBenchmark = Project(id = "sj-regular-performance-benchmark",
   base = file("./contrib/benchmarks/sj-regular-performance-benchmark"))
