@@ -33,11 +33,9 @@ An executor of the module utilizes an instance/instances. An instance is a full 
 
 An engine is required to start a module. A module can not process data streams without an engine (that is a .jar file containing required configuration settings) that launches the module ingesting raw data and sends the processed data further in the stream.
 
+.. figure:: _static/ModuleExecutorAndValidator.png
+
 The engine is getting started via a Mesos framework. The framework then renders the statistics on task execution for a started instance.
-
-A general structure of a module can be rendered as at the scheme below:
-
-.. figure:: _static/ModuleGeneralStructure2.png
 
 A module handles data flow making it into streams. Raw data are transformed to objects referred to as an envelope. 
 
