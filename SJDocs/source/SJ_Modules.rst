@@ -33,7 +33,9 @@ An executor of the module utilizes an instance/instances. An instance is a full 
 
 An engine is required to start a module. A module can not process data streams without an engine (that is a .jar file containing required configuration settings) that launches the module ingesting raw data and sends the processed data further in the stream.
 
-.. figure:: _static/ModuleExecutorAndValidator.png
+.. figure:: _static/moduleExecutorAndValidator.png
+   :scale: 120%
+   :align: center
 
 The engine is getting started via a Mesos framework. The framework then renders the statistics on task execution for a started instance.
 
