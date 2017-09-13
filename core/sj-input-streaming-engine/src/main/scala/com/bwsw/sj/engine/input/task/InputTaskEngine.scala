@@ -171,7 +171,7 @@ abstract class InputTaskEngine(manager: InputTaskManager,
 
   private def tryToRead(channelContext: ChannelHandlerContext, interval: Interval): ChannelFuture = {
     val buffer = bufferForEachContext(channelContext)
-    if (buffer.isReadable(interval.finalValue)) {
+    if (buffer.isReadable(interval.finalValue - interval.initialValue)) {
       logger.debug(s"Task name: ${manager.taskName}. The end index of interval is valid.")
       logger.debug(s"Task name: ${manager.taskName}. Invoke parse() method of executor.")
       val inputEnvelope = executor.parse(buffer, interval)
@@ -198,7 +198,7 @@ abstract class InputTaskEngine(manager: InputTaskManager,
     */
   private def clearBufferAfterParse(buffer: ByteBuf, endReadingIndex: Int): ByteBuf = {
     buffer.readerIndex(endReadingIndex + 1)
-    buffer.discardReadBytes()
+    buffer.discardSomeReadBytes()
   }
 
   /**
