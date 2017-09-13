@@ -22,7 +22,7 @@ In SJ-Platform the data are processed in modules where they are passed via strea
 
 A simplified structure of SJ-Platform can be presented as at the image below:
 
-.. figure:: _static/TutorialGeneral.png
+.. figure:: _static/tutorialGeneral.png
    :align: center
 
 A **processor** represents a part of the pipeline where the data processing is performed.
@@ -486,7 +486,7 @@ Step 2. Configurations and Engine Jars Uploading
 
 An **engine** is required to start a module. A module can not process data without an engine (that is a .jar file containing required configuration settings). In fact, it is a framework that launches the module executor.
 
-.. figure:: _static/Engine.png
+.. figure:: _static/engine.png
    :scale: 110%
    :align: center
    
@@ -577,7 +577,7 @@ Now as the system is deployed and necessary engines are added, modules can be up
 
 A **module** is a .jar file, containing a module specification and configurations.
 
-.. figure:: _static/ModuleExecutorAndValidator.png
+.. figure:: _static/moduleExecutorAndValidator.png
    :scale: 120%
    :align: center
    
@@ -798,7 +798,7 @@ Once the system is deployed, configurations and modules are uploaded, the stream
 
 A module uses a specific instance to personalize its work. An instance is a full range of settings to perform a specific executor type.
 
-.. figure:: _static/Instance.png
+.. figure:: _static/instance.png
    :scale: 120%
    :align: center
    
