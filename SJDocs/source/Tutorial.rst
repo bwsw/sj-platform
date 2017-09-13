@@ -8,7 +8,7 @@ Tutorial
 Introduction 
 -----------------------
 
-This tutorial is aimed to represent SJ-Platform and give a quick start for a user to see the platform at work.
+This tutorial is aimed to present SJ-Platform and give a quick start for a user to see the platform at work.
 
 The demo projects presented below are example tasks developed to demonstrate a user how to run his/her first SJ module. A step-by-step guidance will help to deploy the system in a local mode (minimesos) or at a cluster (Mesos) and to implement a module example to a real-life task. 
 
