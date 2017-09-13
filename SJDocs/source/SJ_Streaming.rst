@@ -31,7 +31,7 @@ Within the platform, the data is transported to and from modules via *transactio
 About T-Streams
 """"""""""""""""""""""""
 
-The easiest way to try T-streams and dive into basic operation with T-streams is to download `T-streams-hello <http://t-streams.com/getting-started/>`_ . The demo shows the basic operation mode between producer and subscriber.
+The easiest way to try T-streams and dive into basic operation with T-streams is to download `T-streams-hello <http://t-streams.com/getting-started/>`_. The demo shows the basic operation mode between a producer and a subscriber.
 
 T-streams architecture is not complicated. T-streams consist of partitions. Each partition holds a number of transactions with data elements inside. 
 
@@ -47,12 +47,12 @@ Producers open transactions in a strictly ordered mode. Consumers and Subscriber
 
 For the strictly ordered way of transaction opening a master producer is responsible. A master is registered in Apache Zookeeper per each transaction. The master generates a new transaction, registers it in Apache Zookeeper, and returns the transaction ID to a Producer. Producer fills the transaction with data from the storage server. Then, it sends checkpoint or cancels to the server commit log and the transaction is checkpointed or canceled. 
 
-Finally, storage server commit logs are played and results are stored to RocksDB. 
+Finally, storage server commit logs are played, and the results are stored to RocksDB. 
 
 Checkpoint Group
 """""""""""""""""""""
 
-**CheckpointGroup** is the special entity which allows a developer to do atomic checkpoint for a group of producers and consumers. 
+**CheckpointGroup** is a special entity which allows a developer to do atomic checkpoint for a group of producers and consumers. 
 
 Several producers and consumers can be bunched up into a group, which can do a checkpoint atomically. This means  all producers and consumers in that group fix the current state. This is the key component of exactly-once data processing in SJ-Platform. 
 
