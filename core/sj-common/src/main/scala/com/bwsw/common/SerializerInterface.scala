@@ -18,7 +18,6 @@
  */
 package com.bwsw.common
 
-import java.io.{ByteArrayInputStream, ByteArrayOutputStream, ObjectInputStream, ObjectOutputStream}
 import scala.language.implicitConversions
 
 /**
@@ -28,16 +27,9 @@ import scala.language.implicitConversions
   */
 trait SerializerInterface {
 
-  implicit def serialize(obj: AnyRef): Array[Byte] = {
-    val byteArrayOutputStream = new ByteArrayOutputStream()
-    val objectOutputStream = new ObjectOutputStream(byteArrayOutputStream)
-    objectOutputStream.writeObject(obj)
-    byteArrayOutputStream.toByteArray
-  }
+  private val serializer = new ObjectSerializer(getClass.getClassLoader)
 
-  def deserialize(bytes: Array[Byte]): AnyRef = {
-    val byteArrayInputStream = new ByteArrayInputStream(bytes)
-    val objectInputStream = new ObjectInputStream(byteArrayInputStream)
-    objectInputStream.readObject()
-  }
+  implicit def serialize(obj: AnyRef): Array[Byte] = serializer.serialize(obj)
+
+  def deserialize(bytes: Array[Byte]): AnyRef = serializer.deserialize(bytes)
 }
