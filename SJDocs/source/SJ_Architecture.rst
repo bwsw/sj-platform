@@ -21,7 +21,7 @@ Architecture Overview
 
 The platform features presented above have conditioned the architecture developed for SJ-Platform. The diagram below represents the overview of the platform components:
 
-.. figure:: _static/GenCon.png
+.. figure:: _static/genCon.png
     :align: center
 
 1) **Processing** component for data computation,
