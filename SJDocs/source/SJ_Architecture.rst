@@ -39,7 +39,7 @@ The events enter the processor in streams from a list of supported interfaces - 
 
 SJ-Platform provides a developer with the comprehensive **API** and **UI** that allow him to develop, customize and manage the event processing pipeline.
 
-The core component is presented with Mesos and other services that simplify the deployment and operation and support best industrial practices. 
+The core component is presented with Apache Mesos and other services that simplify the deployment and operation and support best industrial practices. 
 
 Platform Components
 ------------------------
