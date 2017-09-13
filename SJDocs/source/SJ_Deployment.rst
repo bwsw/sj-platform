@@ -16,23 +16,23 @@ Overall Deployment Infrastructure
 
 The Stream Juggler platform needs the following services to be preliminarily deployed:
 
-- `Apache Mesos <http://mesos.apache.org/>`_  for resource management that allows to run the system at scale and to support different types of workloads.
+- `Apache Mesos <http://mesos.apache.org/>`_  for resource management that allows to run the system at scale and to support different types of workloads. Deployment on Apache Mesos 1.3.1 is currently supported.
 
 - `Docker <http://mesos.apache.org/documentation/latest/docker-containerizer/>`_ to start applicable services in Mesos cloud. 
 
-- `Marathon <https://mesosphere.github.io/marathon/>`_ that provides support for Mesos containers and Docker and allows to run long-life tasks as well.
+- `Marathon <https://mesosphere.github.io/marathon/>`_ that provides support for Mesos containers and Docker and allows to run long-life tasks as well. Marathon v1.4.7 is currently used for deployment.
 
-- `Chronos <https://mesos.github.io/chronos/>`_ is used for starting periodic tasks
+- `Chronos <https://mesos.github.io/chronos/>`_ is used for starting periodic tasks.
 
-- `ZooKeeper <https://zookeeper.apache.org/>`_ is used to perform leader election in the event that the currently leading Marathon instance fails. ZooKeeper is also responsible for instance task synchronization for a Batch module.
+- `Apache ZooKeeper <https://zookeeper.apache.org/>`_ is used to perform leader election in the event that the currently leading Marathon instance fails. ZooKeeper is also responsible for instance task synchronization for a Batch module. Currently Apache Zookeeper 3.4.10 is supported for the platform.
 
 - `Mesos+Consul <https://github.com/CiscoCloud/mesos-consul>`_ is used for base service search.
 
-- Data sources for the platform are `Netty <https://netty.io/>`_ and `T-streams <https://t-streams.com>`_ libraries and `Kafka <https://kafka.apache.org/>`_. For starting Kafka `Kafka on Mesos <https://github.com/mesos/kafka>`_ is used.
+- Data sources for the platform are `Netty <https://netty.io/>`_ and `T-streams <https://t-streams.com>`_ libraries and `Kafka <https://kafka.apache.org/>`_ Version 0.10.2.1. For starting Kafka `Kafka on Mesos <https://github.com/mesos/kafka>`_ is used.
 
-- Elasticsearch, JDBC or REST are external storages the output data is stored to.
+- Elasticsearch 5.5.2, JDBC or REST are external storages the output data is stored to.
 
-- We use `MongoDB <https://www.mongodb.com/>`_ as a document database that provides high performance and availability. To start MongoDB in Mesos we use `MongoDB-Marathon Docker <https://hub.docker.com/r/tobilg/mongodb-marathon/>`_
+- We use `MongoDB <https://www.mongodb.com/>`_3.4.7 as a document database that provides high performance and availability. To start MongoDB in Mesos we use `MongoDB-Marathon Docker <https://hub.docker.com/r/tobilg/mongodb-marathon/>`_.
 
 - A custom-container on `NGINX <https://www.nginx.com>`_ is used for external access. 
 
