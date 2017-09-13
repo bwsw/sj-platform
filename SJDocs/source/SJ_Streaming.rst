@@ -12,7 +12,7 @@ The streaming component is essential in SJ-Platform. The data is fed to the syst
 
 There are two kinds of streams in SJ-Platform:
 
-- An input stream - a stream which provides new events. There are two different input stream types in SJ-Platform: TCP, Apache Kafka and T-Streams.
+- An input stream - a stream which provides new events. The following input stream types are supported in SJ-Platform: TCP, Apache Kafka and T-Streams.
 
 - An output stream - a stream which is a destination for results. Within SJ-Platform the results are written in T-Streams. To export the processed data from T-streams additional output streams are required. They are created for an output module and correspond to the type of the external storage. For now, Elasticsearch, SQL database and RESTful output stream types are supported.
 
@@ -33,15 +33,15 @@ About T-Streams
 
 The easiest way to try T-streams and dive into basic operation with T-streams is to download `T-streams-hello <http://t-streams.com/getting-started/>`_. The demo shows the basic operation mode between a producer and a subscriber.
 
-T-streams architecture is not complicated. T-streams consist of partitions. Each partition holds a number of transactions with data elements inside. 
+The T-streams architecture is not complicated. T-streams consist of partitions. Each partition holds a number of transactions with data elements inside. 
 
 .. figure:: _static/t-streams-organization.png
 
-Data elements are time-sorted in a transaction. 
+Data elements are time-sorted within a transaction. 
 
-Consumers and Producers use transactions to write or read data from T-streams.  The transaction is also a basic recovery element. This means, that in a case of a crash, Consumers and Producers can recover from a transaction.
+Consumers and Producers use transactions to write or read data from T-streams. The transaction is also a basic recovery element. This means, that in a case of a crash, Consumers and Producers can recover from a transaction.
 
-Consumer iterates over transactions from earliest to the latest and reads data from every transaction. Every Consumer works in a specific T-stream and specific partitions. Consumer implements polling approach of processing.  After a transaction (or transaction set) was handled properly, the consumer does checkpoint which means that even in a case of a crash or for another reason that consumer will start processing the transaction which is the next to the processed one.
+Consumer iterates over transactions from earliest to the latest and reads data from every transaction. Every Consumer works in a specific T-stream and specific partitions. Consumer implements polling approach of processing.  After a transaction (or transaction set) is handled properly, the consumer does checkpoint which means that even in a case of a crash or for another reason that consumer will start processing the transaction which is the next to the processed one.
 
 Producers open transactions in a strictly ordered mode. Consumers and Subscribers always process transactions in the same order they have been opened. Producer can checkpoint or cancel transactions in an arbitrary way, but Subscriber will start handling them once the first (the earliest) one is checkpointed. 
 
