@@ -32,7 +32,7 @@ The Stream Juggler platform needs the following services to be preliminarily dep
 
 - Elasticsearch 5.5.2, JDBC or REST are external storages the output data is stored to.
 
-- We use `MongoDB <https://www.mongodb.com/>`_3.4.7 as a document database that provides high performance and availability. To start MongoDB in Mesos we use `MongoDB-Marathon Docker <https://hub.docker.com/r/tobilg/mongodb-marathon/>`_.
+- We use `MongoDB <https://www.mongodb.com/>`_ 3.4.7 as a document database that provides high performance and availability. To start MongoDB in Mesos we use `MongoDB-Marathon Docker <https://hub.docker.com/r/tobilg/mongodb-marathon/>`_.
 
 - A custom-container on `NGINX <https://www.nginx.com>`_ is used for external access. 
 
