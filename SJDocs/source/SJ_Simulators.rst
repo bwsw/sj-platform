@@ -395,7 +395,7 @@ Constructor arguments
  :widths: 25, 25, 50 
 
  "executor", "OutputStreamingExecutor[IT]", "Implementation of :ref:`output-module` under testing"
- "outputRequestBuilder", " :ref:`Output_Request_Builder` [OT]", "Builder of requests for output service"
+ "outputRequestBuilder", ":ref:`Output_Request_Builder` [OT]", "Builder of requests for output service"
  "manager", "OutputEnvironmentManager", "Instance of the OutputEnvironmentManager used by Executor"
 
 .. important:: * IT - the type of data received by Executor
@@ -499,6 +499,7 @@ Constructor arguments:
  "stateStorage", "StateStorage", "A storage of state"
  "options", "String", "User defined options from instance"
  "outputs", "Array[TStreamStreamDomain]", "The list of output streams from an instance"
+ "fileStorage", 	"FileStorage", 	"file storage (mocked by default)"
 
 
 Module Output Mocks
