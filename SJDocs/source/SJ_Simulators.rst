@@ -499,7 +499,7 @@ Constructor arguments:
  "stateStorage", "StateStorage", "A storage of state"
  "options", "String", "User defined options from instance"
  "outputs", "Array[TStreamStreamDomain]", "The list of output streams from an instance"
- "fileStorage", 	"FileStorage", 	"file storage (mocked by default)"
+ "fileStorage", 	"FileStorage", 	"A file storage (mocked by default)"
 
 
 Module Output Mocks
