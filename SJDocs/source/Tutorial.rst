@@ -62,15 +62,15 @@ A general processing workflow which system allows implementing is illustrated in
 
 Green, yellow and purple blocks displayed in a rectangular area are managed and evaluated by SJ-Platform. They represent an input module, a processing module and an output module, respectively. The blocks outside the rectangular area represent external systems.
 
-The input module receives raw data and transforms them into a data stream of a proper type compatible with the processing module type. 
+The input module receives raw data and transforms them into a data stream of a proper type compatible with the processing module type. In the fping demonstration example the input module is a regex input module. It processes input streams of strings using RegExp rules and convert them in Avro records.
 
-The processing module performs data aggregation, transformations, filtering and enriching and sends the result to the output module. In the provided example the data aggregation is performed with a regular-streaming module.
+The processing module performs data aggregation, transformations, filtering and enriching and sends the result to the output module. In the fping demonstration example the data aggregation is performed with a regular-streaming module. 
 
 In the output module, the processed data are transformed into entities appropriate for storing into an external storage of a specified type. In the fping demonstration example the output module exports the result data into the Elasticsearch external data storage.
-                
+           
 The illustrated pipeline is a common scenario for a lot of different tasks.
 
-But the platform allows implementation of more complicated processing pipelines. So the pipeline can be more expanded. More input streams can ingest raw data. Several Input modules can be included in the pipeline to accept the raw data and transform it for passing further to the processing stage.
+But the platform allows implementation of more complicated processing pipelines. So the pipeline can be expanded. More input streams can ingest raw data. Several input modules can be included in the pipeline to accept the raw data and transform it for passing further to the processing stage.
 
 You can launch more than a single processing module. The data streams can be distributed among them in various ways.
 
