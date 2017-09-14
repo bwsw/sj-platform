@@ -1,3 +1,5 @@
+.. _Streaming::
+
 Streams in SJ-Platform
 =============================
 
@@ -10,7 +12,7 @@ The streaming component is essential in SJ-Platform. The data is fed to the syst
 
 There are two kinds of streams in SJ-Platform:
 
-- An input stream - a stream which provides new events. There are two different input stream types in SJ-Platform: TCP, Apache Kafka and T-Streams.
+- An input stream - a stream which provides new events. The following input stream types are supported in SJ-Platform: TCP, Apache Kafka and T-Streams.
 
 - An output stream - a stream which is a destination for results. Within SJ-Platform the results are written in T-Streams. To export the processed data from T-streams additional output streams are required. They are created for an output module and correspond to the type of the external storage. For now, Elasticsearch, SQL database and RESTful output stream types are supported.
 
@@ -29,28 +31,28 @@ Within the platform, the data is transported to and from modules via *transactio
 About T-Streams
 """"""""""""""""""""""""
 
-The easiest way to try T-streams and dive into basic operation with T-streams is to download `T-streams-hello <http://t-streams.com/getting-started/>`_ . The demo shows the basic operation mode between producer and subscriber.
+The easiest way to try T-streams and dive into basic operation with T-streams is to download `T-streams-hello <http://t-streams.com/getting-started/>`_. The demo shows the basic operation mode between a producer and a subscriber.
 
-T-streams architecture is not complicated. T-streams consist of partitions. Each partition holds a number of transactions with data elements inside. 
+The T-streams architecture is not complicated. T-streams consist of partitions. Each partition holds a number of transactions with data elements inside. 
 
 .. figure:: _static/t-streams-organization.png
 
-Data elements are time-sorted in a transaction. 
+Data elements are time-sorted within a transaction. 
 
-Consumers and Producers use transactions to write or read data from T-streams.  The transaction is also a basic recovery element. This means, that in a case of a crash, Consumers and Producers can recover from a transaction.
+Consumers and Producers use transactions to write or read data from T-streams. The transaction is also a basic recovery element. This means, that in a case of a crash, Consumers and Producers can recover from a transaction.
 
-Consumer iterates over transactions from earliest to the latest and reads data from every transaction. Every Consumer works in a specific T-stream and specific partitions. Consumer implements polling approach of processing.  After a transaction (or transaction set) was handled properly, the consumer does checkpoint which means that even in a case of a crash or for another reason that consumer will start processing the transaction which is the next to the processed one.
+Consumer iterates over transactions from earliest to the latest and reads data from every transaction. Every Consumer works in a specific T-stream and specific partitions. Consumer implements polling approach of processing.  After a transaction (or transaction set) is handled properly, the consumer does checkpoint which means that even in a case of a crash or for another reason that consumer will start processing the transaction which is the next to the processed one.
 
 Producers open transactions in a strictly ordered mode. Consumers and Subscribers always process transactions in the same order they have been opened. Producer can checkpoint or cancel transactions in an arbitrary way, but Subscriber will start handling them once the first (the earliest) one is checkpointed. 
 
 For the strictly ordered way of transaction opening a master producer is responsible. A master is registered in Apache Zookeeper per each transaction. The master generates a new transaction, registers it in Apache Zookeeper, and returns the transaction ID to a Producer. Producer fills the transaction with data from the storage server. Then, it sends checkpoint or cancels to the server commit log and the transaction is checkpointed or canceled. 
 
-Finally, storage server commit logs are played and results are stored to RocksDB. 
+Finally, storage server commit logs are played, and the results are stored to RocksDB. 
 
 Checkpoint Group
 """""""""""""""""""""
 
-**CheckpointGroup** is the special entity which allows a developer to do atomic checkpoint for a group of producers and consumers. 
+**CheckpointGroup** is a special entity which allows a developer to do atomic checkpoint for a group of producers and consumers. 
 
 Several producers and consumers can be bunched up into a group, which can do a checkpoint atomically. This means  all producers and consumers in that group fix the current state. This is the key component of exactly-once data processing in SJ-Platform. 
 
@@ -69,14 +71,16 @@ The following types of output streams are supported in SJ-Platform:
 - SQL database, to store data to JDBC-compatible databases;
 - RESTful, to store data to RESTful storage.
 
+.. _Streaming_Infrastructure:
+
 Streaming Infrastructure
 -----------------------------------
 
-Streams need infrastructure: Providers and Services. This is a required presetting without which streaming will not be so flexible. Streaming flexibility lies in the one-to-many connection between providers and services, services and streams. One provider works with many services (they can be of various types) as well as one service can provide several streams. These streams take necessary settings from the common infrastructure (providers and services). There is no need to duplicate the settings for each individual stream.
+Streams need infrastructure: providers and services. This is a required presetting without which streaming will not be so flexible. Streaming flexibility lies in the one-to-many connection between providers and services, services and streams. One provider works with many services (they can be of various types) as well as one service can provide several streams. These streams take necessary settings from the common infrastructure (providers and services). There is no need to duplicate the settings for each individual stream.
 
-Provider is the service provider for data transformation into a stream.
+A **provider** is a service provider for data transformation into a stream.
 
-Service is a service to transform data into a stream of an exact type.
+A **service** is a service to transform data into a stream of an exact type.
 
 They can be of different types. The types of platform entities in the pipeline determine the type of providers and services that are necessary in the particular case.
 
@@ -84,7 +88,7 @@ The diagram of platform entities interconnections can be useful in selecting the
 
 .. figure:: _static/InstanceCorrelation1.png
 
-Firstly, decide what types of instances will perform processing in the pipeline. 
+Firstly, decide what types of instances will perform data transformation and processing in the pipeline. 
 
 Determined instance types will help to clarify which streams are required for these particular instances.
 

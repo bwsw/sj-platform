@@ -6,22 +6,25 @@ Modules: types, structure, pipeline
 
 .. contents:: Contents
    
-Module is a processor that handles events in data streams.
+A **module** is a processor that handles events in data streams.
 
-It includes an executor that processes data streams and a validator.
+It includes:
+
+- an executor that processes data streams,
+- a validator.
 
 .. _validator:
 
 Streaming validator
 -------------------------
 
-It provides a method to validate ``options`` or ``InstanceMetadata`` parameter of run module specification.
+It provides a method to validate ``options`` or ``InstanceMetadata`` parameter of running module specification.
 
 This method returns a tuple that contains two values. 
 
-The first value indicates whether ``options`` or ``InstanceMetadata`` is proper or not (true value by default). 
+The first value indicates whether ``options`` or ``InstanceMetadata`` is proper or not (the "true" value is set by default). 
 
-The second value is a list of errors in case of the validation failure (empty list by default). It is used when you try to create a new instance of a specific module, and if the validation method returns false value the instance will not be created.
+The second value is a list of errors in case of the validation failure (it is an empty list by default). It is used when you try to create a new instance of a specific module, and if the validation method returns false value the instance will not be created.
 
 Executor
 ---------------------
@@ -30,15 +33,15 @@ An executor of the module utilizes an instance/instances. An instance is a full 
 
 An engine is required to start a module. A module can not process data streams without an engine (that is a .jar file containing required configuration settings) that launches the module ingesting raw data and sends the processed data further in the stream.
 
+.. figure:: _static/moduleExecutorAndValidator.png
+   :scale: 120%
+   :align: center
+
 The engine is getting started via a Mesos framework. The framework then renders the statistics on task execution for a started instance.
-
-A general structure of a module can be rendered as at the scheme below:
-
-.. figure:: _static/ModuleGeneralStructure2.png
 
 A module handles data flow making it into streams. Raw data are transformed to objects referred to as an envelope. 
 
-An envelope is a container for messages or events with data records.
+An **envelope** is a container for messages or events with data records.
 
 Module types
 --------------
@@ -57,7 +60,7 @@ The modules can be strung in a pipeline as illustrated below:
 
 .. figure:: _static/ModulePipeline1.png
 
-In this document each module is described in detail.
+At this page each module is described in detail. You will find more information on the methods provided by module executors as well as entities' description.
 
 .. _input-module:
 
@@ -67,7 +70,7 @@ An input type of modules handles external input streams, does data deduplication
 
 .. figure:: _static/InputModuleStructure1.png
   :scale: 80 %
-It performs the transformation of the streams incoming from TCP to T-streams. T-streams are persistent streams designed for exactly-once processing (so it includes transactional producer, consumer and subscriber). Find more information about T-streams at `the site <http://t-streams.com>`_ .
+It performs the transformation of the streams incoming from TCP to T-streams. T-streams are persistent streams designed for exactly-once processing (so it includes a transactional producer, a consumer and a subscriber). Find more information about T-streams at `the site <http://t-streams.com>`_ .
 
 In the diagram below you can see the illustrated dataflow for an input module.
 
@@ -87,7 +90,7 @@ An Input module executor provides the following methods with default implementat
      This method is invoked once the "tokenize" method returns an Interval. It processes both a buffer with incoming data (a flow of bytes) and an Interval (an output of "tokenize" method). Its purpose is to define whether the Interval contains a message or meaningless data. Default return value is None. The same value should be returned if Interval contains meaningless data. If Interval contains a message, the "InputEnvelope" value should be returned.
 
 3) ``createProcessedMessageResponse``:
-      It is invoked after each call of parse method. Its purpose is to create response to the source of data - instance of InputStreamingResponse.
+      It is invoked after each call of parsing method. Its purpose is to create response to the source of data - the instance of InputStreamingResponse.
 
 The parameters of the method are:
 
