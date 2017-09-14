@@ -38,19 +38,21 @@ class Tokenizer(separator: String, encoding: String) {
   require(separator.length > 0, "separator must be nonempty")
   require(Charset.isSupported(encoding), s"encoding '$encoding' does not supported")
 
-  private val byteProcessor = new ByteProcessor {
+  private class TokenizerByteProcessor extends ByteProcessor {
     private var bytes: Array[Byte] = Array.emptyByteArray
 
     override def process(value: Byte): Boolean = {
-      bytes = bytes :+ value
-      val line = Source.fromBytes(bytes, encoding).mkString
+      bytes :+= value
+      val line = new String(bytes, encoding)
 
-      val result = !line.endsWith(separator)
-      if (result) bytes = Array.emptyByteArray
-
-      result
+      !line.endsWith(separator)
     }
+
+    def clear(): Unit =
+      bytes = Array.emptyByteArray
   }
+
+  private val byteProcessor = new TokenizerByteProcessor
 
   /**
     * Splits buffer by separator
@@ -61,6 +63,7 @@ class Tokenizer(separator: String, encoding: String) {
   def tokenize(buffer: ByteBuf): Option[Interval] = {
     val startIndex = buffer.readerIndex()
     val endIndex = buffer.forEachByte(byteProcessor)
+    byteProcessor.clear()
 
     if (endIndex != -1) Some(Interval(startIndex, endIndex))
     else None
