@@ -16,7 +16,7 @@ Thus, the SJ-Platform is a platform that allows high-throughput, fault-tolerant 
 
 The documentation presented here is for SJ-Platform Release 1.1.1. It gives a complete understanding of the platform, its components, basic features fulfilled in it. A detailed :ref:`Tutorial` provides a real-life example task  resolved with SJ-Platform as well as detailed platform deployment instructions. A custom module development guide explains how to write a module using a simple hello-world example. The guides for the Web UI and the CRUD REST API may be of utmost importance for platform administrators. 
 
-**SJ-Platform 1.1.1** Documentation structure:
+**SJ-Platform 1.1.1** documentation structure:
 
 .. toctree::
    :maxdepth: 2
