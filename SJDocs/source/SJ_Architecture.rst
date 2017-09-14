@@ -80,7 +80,7 @@ The major one is the **Pipeline Stream Processor** (PSP) that handles data proce
 
 - Windowed (Batch) – the processor which organizes incoming data into batches and processing is done with a sliding window. Windowed PSP may be used to implement streaming joins and processing where algorithm must observe a range of input messages rather than current one.
 
-PSP receives data from Kafka and T-streams. 
+PSP receives data from Apache Kafka and T-streams. 
 
 If data can be passed from other sources, there is the need in an input module. The **Input Stream Processor** (ISP) handles external inputs, does data deduplication, transforms raw data into objects for T-streams. Currently, the platform supports the TCP Input Stream Processor.
 
@@ -107,7 +107,9 @@ Within the platform, the data is transported to and from modules via *transactio
 
 .. tip:: More information on T-streams as well as streaming infrastructure in SJ-Platform can be found at the :ref:`Streaming` page. 
 
-*Administration* of the platform is performed through the :ref:`UI_Guide` It is presented via Node JS. The platform  provides `REST API <http://streamjuggler.readthedocs.io/en/develop/SJ_CRUD_REST_API.html>`_ instrumentation that allows interacting with the platform, monitoring the module performance, retrieving metrics data and configuration information as well as managing operations such as modul starting or stopping.
+*Administration* of the platform is performed through the Web UI. It is presented via Node JS. The platform  provides REST API instrumentation that allows interacting with the platform, monitoring the module performance, retrieving metrics data and configuration information as well as managing operations such as modul starting or stopping.
+
+.. tip:: More information about the UI in the platform can be found in the :ref:`UI_Guide` and the :ref:`REST_API` .
 
 Platform Features
 -----------------------
