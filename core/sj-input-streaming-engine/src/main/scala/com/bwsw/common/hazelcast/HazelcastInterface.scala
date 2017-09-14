@@ -28,7 +28,7 @@ trait HazelcastInterface {
   /**
     * Returns the hazelcast map
     */
-  def getMap: IMap[String, String]
+  def getMap: IMap[String, Unit]
 
   /**
     * Shuts down the hazelcast instance

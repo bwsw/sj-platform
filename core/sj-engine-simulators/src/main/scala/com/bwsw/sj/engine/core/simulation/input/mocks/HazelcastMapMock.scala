@@ -19,13 +19,14 @@
 package com.bwsw.sj.engine.core.simulation.input.mocks
 
 import java.util
+import java.util.Map
 import java.util.concurrent.TimeUnit
 
 import com.bwsw.common.hazelcast.HazelcastConfig
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.hazelcast.core._
-import com.hazelcast.map.listener.{MapListener, MapPartitionLostListener}
 import com.hazelcast.map.{EntryProcessor, MapInterceptor}
+import com.hazelcast.map.listener.{MapListener, MapPartitionLostListener}
 import com.hazelcast.mapreduce.JobTracker
 import com.hazelcast.mapreduce.aggregation.{Aggregation, Supplier}
 import com.hazelcast.monitor.LocalMapStats
@@ -39,9 +40,9 @@ import scala.collection.mutable
   * @param config configuration parameters for hazelcast cluster
   * @author Pavel Tomskikh
   */
-abstract class HazelcastMapMock(config: HazelcastConfig) extends IMap[String, String] {
+abstract class HazelcastMapMock(config: HazelcastConfig) extends IMap[String, Unit] {
 
-  val map: mutable.Map[String, HazelcastMapValue] = mutable.Map()
+  private val map: mutable.Map[String, HazelcastMapValue] = mutable.Map()
 
   protected val evictionComparator: Option[(HazelcastMapValue, HazelcastMapValue) => Boolean]
   private val ttlMillis: Long = config.ttlSeconds * 1000
@@ -51,9 +52,9 @@ abstract class HazelcastMapMock(config: HazelcastConfig) extends IMap[String, St
     map.contains(key.asInstanceOf[String])
   }
 
-  override def set(key: String, value: String): Unit = {
+  override def set(key: String, value: Unit): Unit = {
     val hits = map.get(key).map(_.hits).getOrElse(0)
-    map.put(key, HazelcastMapValue(value, hits + 1, System.currentTimeMillis))
+    map.put(key, HazelcastMapValue(hits + 1, System.currentTimeMillis))
     evict()
   }
 
@@ -92,17 +93,19 @@ abstract class HazelcastMapMock(config: HazelcastConfig) extends IMap[String, St
     case _ => super.equals(obj)
   }
 
-  override def removeAsync(key: String): ICompletableFuture[String] = ???
+  override def removeAsync(key: String): ICompletableFuture[Unit] = ???
 
-  override def setAsync(key: String, value: String): ICompletableFuture[Void] = ???
+  override def setAsync(key: String, value: Unit): ICompletableFuture[Void] = ???
 
-  override def setAsync(key: String, value: String, ttl: Long, timeunit: TimeUnit): ICompletableFuture[Void] = ???
+  override def setAsync(key: String, value: Unit, ttl: Long, timeunit: TimeUnit): ICompletableFuture[Void] = ???
 
-  override def putTransient(key: String, value: String, ttl: Long, timeunit: TimeUnit): Unit = ???
+  override def putTransient(key: String, value: Unit, ttl: Long, timeunit: TimeUnit): Unit = ???
 
-  override def containsValue(value: Any): Boolean = ???
+  override def containsValue(value: scala.Any): Boolean = ???
 
-  override def put(key: String, value: String, ttl: Long, timeunit: TimeUnit): String = ???
+  override def put(key: String, value: Unit): Unit = ???
+
+  override def put(key: String, value: Unit, ttl: Long, timeunit: TimeUnit): Unit = ???
 
   override def evict(key: String): Boolean = ???
 
@@ -116,7 +119,7 @@ abstract class HazelcastMapMock(config: HazelcastConfig) extends IMap[String, St
 
   override def unlock(key: String): Unit = ???
 
-  override def tryPut(key: String, value: String, timeout: Long, timeunit: TimeUnit): Boolean = ???
+  override def tryPut(key: String, value: Unit, timeout: Long, timeunit: TimeUnit): Boolean = ???
 
   override def executeOnEntries(entryProcessor: EntryProcessor[_, _]): util.Map[String, AnyRef] = ???
 
@@ -126,17 +129,17 @@ abstract class HazelcastMapMock(config: HazelcastConfig) extends IMap[String, St
 
   override def addLocalEntryListener(listener: EntryListener[_, _]): String = ???
 
-  override def addLocalEntryListener(listener: MapListener, predicate: Predicate[String, String], includeValue: Boolean): String = ???
+  override def addLocalEntryListener(listener: MapListener, predicate: Predicate[String, Unit], includeValue: Boolean): String = ???
 
-  override def addLocalEntryListener(listener: EntryListener[_, _], predicate: Predicate[String, String], includeValue: Boolean): String = ???
+  override def addLocalEntryListener(listener: EntryListener[_, _], predicate: Predicate[String, Unit], includeValue: Boolean): String = ???
 
-  override def addLocalEntryListener(listener: MapListener, predicate: Predicate[String, String], key: String, includeValue: Boolean): String = ???
+  override def addLocalEntryListener(listener: MapListener, predicate: Predicate[String, Unit], key: String, includeValue: Boolean): String = ???
 
-  override def addLocalEntryListener(listener: EntryListener[_, _], predicate: Predicate[String, String], key: String, includeValue: Boolean): String = ???
+  override def addLocalEntryListener(listener: EntryListener[_, _], predicate: Predicate[String, Unit], key: String, includeValue: Boolean): String = ???
 
-  override def entrySet(): util.Set[util.Map.Entry[String, String]] = ???
+  override def entrySet(): util.Set[Map.Entry[String, Unit]] = ???
 
-  override def entrySet(predicate: Predicate[_, _]): util.Set[util.Map.Entry[String, String]] = ???
+  override def entrySet(predicate: Predicate[_, _]): util.Set[Map.Entry[String, Unit]] = ???
 
   override def forceUnlock(key: String): Unit = ???
 
@@ -152,13 +155,13 @@ abstract class HazelcastMapMock(config: HazelcastConfig) extends IMap[String, St
 
   override def addEntryListener(listener: EntryListener[_, _], key: String, includeValue: Boolean): String = ???
 
-  override def addEntryListener(listener: MapListener, predicate: Predicate[String, String], includeValue: Boolean): String = ???
+  override def addEntryListener(listener: MapListener, predicate: Predicate[String, Unit], includeValue: Boolean): String = ???
 
-  override def addEntryListener(listener: EntryListener[_, _], predicate: Predicate[String, String], includeValue: Boolean): String = ???
+  override def addEntryListener(listener: EntryListener[_, _], predicate: Predicate[String, Unit], includeValue: Boolean): String = ???
 
-  override def addEntryListener(listener: MapListener, predicate: Predicate[String, String], key: String, includeValue: Boolean): String = ???
+  override def addEntryListener(listener: MapListener, predicate: Predicate[String, Unit], key: String, includeValue: Boolean): String = ???
 
-  override def addEntryListener(listener: EntryListener[_, _], predicate: Predicate[String, String], key: String, includeValue: Boolean): String = ???
+  override def addEntryListener(listener: EntryListener[_, _], predicate: Predicate[String, Unit], key: String, includeValue: Boolean): String = ???
 
   override def tryLock(key: String): Boolean = ???
 
@@ -172,45 +175,45 @@ abstract class HazelcastMapMock(config: HazelcastConfig) extends IMap[String, St
 
   override def submitToKey(key: String, entryProcessor: EntryProcessor[_, _]): ICompletableFuture[_] = ???
 
-  override def values(): util.Collection[String] = ???
+  override def values(): util.Collection[Unit] = ???
 
-  override def values(predicate: Predicate[_, _]): util.Collection[String] = ???
+  override def values(predicate: Predicate[_, _]): util.Collection[Unit] = ???
 
   override def loadAll(replaceExistingValues: Boolean): Unit = ???
 
   override def loadAll(keys: util.Set[String], replaceExistingValues: Boolean): Unit = ???
 
-  override def delete(key: Any): Unit = ???
+  override def delete(key: scala.Any): Unit = ???
 
   override def localKeySet(): util.Set[String] = ???
 
   override def localKeySet(predicate: Predicate[_, _]): util.Set[String] = ???
 
-  override def remove(key: Any): String = ???
+  override def remove(key: scala.Any): Unit = ???
 
-  override def aggregate[SuppliedValue, Result](supplier: Supplier[String, String, SuppliedValue], aggregation: Aggregation[String, SuppliedValue, Result]): Result = ???
+  override def aggregate[SuppliedValue, Result](supplier: Supplier[String, Unit, SuppliedValue], aggregation: Aggregation[String, SuppliedValue, Result]): Result = ???
 
-  override def aggregate[SuppliedValue, Result](supplier: Supplier[String, String, SuppliedValue], aggregation: Aggregation[String, SuppliedValue, Result], jobTracker: JobTracker): Result = ???
+  override def aggregate[SuppliedValue, Result](supplier: Supplier[String, Unit, SuppliedValue], aggregation: Aggregation[String, SuppliedValue, Result], jobTracker: JobTracker): Result = ???
 
   override def evictAll(): Unit = ???
 
   override def flush(): Unit = ???
 
-  override def putAsync(key: String, value: String): ICompletableFuture[String] = ???
+  override def putAsync(key: String, value: Unit): ICompletableFuture[Unit] = ???
 
-  override def putAsync(key: String, value: String, ttl: Long, timeunit: TimeUnit): ICompletableFuture[String] = ???
+  override def putAsync(key: String, value: Unit, ttl: Long, timeunit: TimeUnit): ICompletableFuture[Unit] = ???
 
   override def tryRemove(key: String, timeout: Long, timeunit: TimeUnit): Boolean = ???
 
   override def getLocalMapStats: LocalMapStats = ???
 
-  override def putAll(m: util.Map[_ <: String, _ <: String]): Unit = ???
+  override def putAll(m: util.Map[_ <: String, _ <: Unit]): Unit = ???
 
   override def executeOnKey(key: String, entryProcessor: EntryProcessor[_, _]): AnyRef = ???
 
-  override def get(key: Any): String = ???
+  override def get(key: scala.Any): Unit = ???
 
-  override def getEntryView(key: String): EntryView[String, String] = ???
+  override def getEntryView(key: String): EntryView[String, Unit] = ???
 
   override def removePartitionLostListener(id: String): Boolean = ???
 
@@ -218,19 +221,19 @@ abstract class HazelcastMapMock(config: HazelcastConfig) extends IMap[String, St
 
   override def keySet(predicate: Predicate[_, _]): util.Set[String] = ???
 
-  override def set(key: String, value: String, ttl: Long, timeunit: TimeUnit): Unit = ???
+  override def set(key: String, value: Unit, ttl: Long, timeunit: TimeUnit): Unit = ???
 
-  override def getAll(keys: util.Set[String]): util.Map[String, String] = ???
+  override def getAll(keys: util.Set[String]): util.Map[String, Unit] = ???
 
   override def addPartitionLostListener(listener: MapPartitionLostListener): String = ???
 
   override def clear(): Unit = ???
 
-  override def getAsync(key: String): ICompletableFuture[String] = ???
+  override def getAsync(key: String): ICompletableFuture[Unit] = ???
 
   override def executeOnKeys(keys: util.Set[String], entryProcessor: EntryProcessor[_, _]): util.Map[String, AnyRef] = ???
 
-  override def putIfAbsent(key: String, value: String, ttl: Long, timeunit: TimeUnit): String = ???
+  override def putIfAbsent(key: String, value: Unit, ttl: Long, timeunit: TimeUnit): Unit = ???
 
   override def size(): Int = ???
 
@@ -243,8 +246,6 @@ abstract class HazelcastMapMock(config: HazelcastConfig) extends IMap[String, St
   override def getPartitionKey: String = ???
 
   override def getServiceName: String = ???
-
-  override def put(key: String, value: String): String = ???
 }
 
 object HazelcastMapMock {
@@ -257,10 +258,10 @@ object HazelcastMapMock {
   }
 }
 
-case class HazelcastMapValue(value: String, hits: Int, lastAccessTime: Long) {
+case class HazelcastMapValue(hits: Int, lastAccessTime: Long) {
   override def equals(obj: Any): Boolean = obj match {
     case hazelcastMapValue: HazelcastMapValue =>
-      value == hazelcastMapValue.value && hits == hazelcastMapValue.hits
+      hits == hazelcastMapValue.hits
     case _ => super.equals(obj)
   }
 }

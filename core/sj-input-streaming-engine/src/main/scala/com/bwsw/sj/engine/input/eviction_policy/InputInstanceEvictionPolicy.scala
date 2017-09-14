@@ -32,8 +32,7 @@ import org.slf4j.{Logger, LoggerFactory}
 
 abstract class InputInstanceEvictionPolicy(hazelcast: HazelcastInterface) {
   protected val logger: Logger = LoggerFactory.getLogger(this.getClass)
-  protected val stubValue: String = "stub"
-  protected val uniqueEnvelopes: IMap[String, String] = getUniqueEnvelopes
+  protected val uniqueEnvelopes: IMap[String, Unit] = getUniqueEnvelopes
 
   /**
     * Checks whether a specific key is duplicate or not
@@ -48,7 +47,7 @@ abstract class InputInstanceEvictionPolicy(hazelcast: HazelcastInterface) {
     *
     * @return Storage of keys (Hazelcast map)
     */
-  def getUniqueEnvelopes: IMap[String, String] = {
+  protected def getUniqueEnvelopes: IMap[String, Unit] = {
     logger.debug(s"Get a hazelcast map for checking of there are duplicates (input envelopes) or not.")
 
     hazelcast.getMap

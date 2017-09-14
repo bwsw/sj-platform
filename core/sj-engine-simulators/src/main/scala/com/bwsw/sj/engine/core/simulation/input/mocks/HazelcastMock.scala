@@ -29,10 +29,10 @@ import com.hazelcast.core.IMap
   */
 class HazelcastMock(config: HazelcastConfig) extends HazelcastInterface {
 
-  val map = HazelcastMapMock(config)
+  private val map = HazelcastMapMock(config)
 
   /**
     * @inheritdoc
     */
-  override def getMap: IMap[String, String] = map
+  override def getMap: IMap[String, Unit] = map
 }

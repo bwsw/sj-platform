@@ -41,7 +41,7 @@ class Hazelcast(mapName: String, configParams: HazelcastConfig) extends Hazelcas
   /**
     * @inheritdoc
     */
-  override def getMap: IMap[String, String] =
+  override def getMap: IMap[String, Unit] =
     hazelcastInstance.getMap(mapName)
 
   /**

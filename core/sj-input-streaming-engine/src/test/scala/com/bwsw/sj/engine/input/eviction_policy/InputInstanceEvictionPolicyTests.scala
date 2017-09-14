@@ -35,14 +35,12 @@ class InputInstanceEvictionPolicyTests extends FlatSpec with Matchers with Mocki
     val evictionPolicy = InputInstanceEvictionPolicy(fixTimeEvictionPolicy, hazelcast)
 
     evictionPolicy shouldBe a[FixTimeEvictionPolicy]
-    evictionPolicy.getUniqueEnvelopes shouldBe hazelcastMap
   }
 
   it should "create ExpandedTimeEvictionPolicy properly" in new HazelcastMock {
     val evictionPolicy = InputInstanceEvictionPolicy(expandedTimeEvictionPolicy, hazelcast)
 
     evictionPolicy shouldBe an[ExpandedTimeEvictionPolicy]
-    evictionPolicy.getUniqueEnvelopes shouldBe hazelcastMap
   }
 
   it should "throw RuntimeException for unknown value of the evictionPolicy" in new HazelcastMock {
@@ -52,7 +50,7 @@ class InputInstanceEvictionPolicyTests extends FlatSpec with Matchers with Mocki
   }
 
   trait HazelcastMock {
-    val hazelcastMap = mock[IMap[String, String]]
+    val hazelcastMap = mock[IMap[String, Unit]]
     val hazelcast = mock[HazelcastInterface]
     when(hazelcast.getMap).thenReturn(hazelcastMap)
   }
