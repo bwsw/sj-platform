@@ -23,11 +23,11 @@ The documentation presented here is for SJ-Platform Release 1.1.1. It gives a co
 
    SJ_Overview
    Tutorial
+   SJ_Architecture
    SJ_Modules
    SJ_Engines
    SJ_CustomModule
    SJ_Simulators
-   SJ_Architecture
    SJ_Streaming
    SJ_PlatformDeployment
    SJ_UI_Guide
