@@ -63,7 +63,7 @@ abstract class InputTaskEngine(manager: InputTaskManager,
   private val currentThread: Thread = Thread.currentThread()
   currentThread.setName(s"input-task-${manager.taskName}-engine")
   private val producers = manager.outputProducers
-  private var transactionsByStreamPartitions = createTransactionsStorage()
+  private val transactionsByStreamPartitions = createTransactionsStorage()
   private val checkpointGroup = manager.createCheckpointGroup()
   private val instance = manager.instance.asInstanceOf[InputInstance]
   private val environmentManager = createModuleEnvironmentManager()
@@ -110,30 +110,18 @@ abstract class InputTaskEngine(manager: InputTaskManager,
     */
   private def sendData(stream: String, partition: Int, data: AnyRef): Unit = {
     logger.info(s"Task name: ${manager.taskName}. Send envelope to each output stream..")
-    val maybeTransaction = getTransaction(stream, partition)
     val bytes = executor.serialize(data)
-    val producerTransaction = maybeTransaction match {
-      case Some(transaction) =>
-        logger.debug(s"Task name: ${manager.taskName}. Txn for stream/partition: '$stream/$partition' is defined.")
-        transaction.send(bytes)
 
-        transaction
-      case None =>
-        logger.debug(s"Task name: ${manager.taskName}. Txn for stream/partition: '$stream/$partition' is not defined " +
-          s"so create new txn.")
-        val transaction = producers(stream).newTransaction(NewProducerTransactionPolicy.ErrorIfOpened, partition)
-        transaction.send(bytes)
-        putTransaction(stream, partition, transaction)
-
-        transaction
-    }
+    val transaction = transactionsByStreamPartitions(stream).getOrElseUpdate(
+      partition,
+      producers(stream).newTransaction(NewProducerTransactionPolicy.ErrorIfOpened, partition))
+    transaction.send(bytes)
 
     logger.debug(s"Task name: ${manager.taskName}. Add envelope to output stream in performance metrics .")
     performanceMetrics.addElementToOutputEnvelope(
       stream,
-      producerTransaction.getTransactionID.toString,
-      bytes.length
-    )
+      transaction.getTransactionID.toString,
+      bytes.length)
   }
 
   /**
@@ -268,7 +256,7 @@ abstract class InputTaskEngine(manager: InputTaskManager,
     logger.debug(s"Task: ${manager.taskName}. Do group checkpoint.")
     checkpointGroup.checkpoint()
     checkpointInitiated()
-    transactionsByStreamPartitions = createTransactionsStorage()
+    clearTransactionStorage()
     prepareForNextCheckpoint()
   }
 
@@ -292,27 +280,6 @@ abstract class InputTaskEngine(manager: InputTaskManager,
   protected def isItTimeToCheckpoint(isCheckpointInitiated: Boolean): Boolean
 
   /**
-    * Retrieves a txn for specific stream and partition
-    *
-    * @param stream    output stream name
-    * @param partition partition of the stream
-    * @return current open transaction
-    */
-  private def getTransaction(stream: String, partition: Int): Option[ProducerTransaction] = {
-    logger.debug(s"Task name: ${manager.taskName}. " +
-      s"Try to get txn by stream: $stream, partition: $partition.")
-    if (transactionsByStreamPartitions(stream).isDefinedAt(partition)) {
-      Some(transactionsByStreamPartitions(stream)(partition))
-    } else None
-  }
-
-  private def putTransaction(stream: String, partition: Int, transaction: ProducerTransaction): Unit = {
-    logger.debug(s"Task name: ${manager.taskName}. " +
-      s"Put txn for stream: $stream, partition: $partition.")
-    transactionsByStreamPartitions(stream) += ((partition, transaction))
-  }
-
-  /**
     * Creates a map that keeps current open txn for each partition of output stream
     *
     * @return map where a key is output stream name, a value is a map
@@ -320,9 +287,17 @@ abstract class InputTaskEngine(manager: InputTaskManager,
     */
   private def createTransactionsStorage(): Map[String, scala.collection.mutable.Map[Int, ProducerTransaction]] = {
     val streams = producers.keySet
-    logger.debug(s"Task name: ${manager.taskName}. " +
-      s"Create a storage for keeping txns for each partition of output streams.")
+    logger.debug(s"Task name: ${manager.taskName}. Create a storage for keeping txns for each partition of output streams.")
+
     streams.map(x => (x, scala.collection.mutable.Map[Int, ProducerTransaction]())).toMap
+  }
+
+  /**
+    * Clears a map that keeps current open txn for each partition of output stream
+    */
+  private def clearTransactionStorage(): Unit = {
+    logger.debug(s"Task name: ${manager.taskName}. Clear a storage for keeping txns for each partition of output streams.")
+    transactionsByStreamPartitions.values.foreach(_.clear())
   }
 }
 
