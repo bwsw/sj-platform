@@ -86,24 +86,26 @@ If data can be passed from other sources, there is the need in an input module. 
 
 To receive the result of processing an output module is required. The **Output Stream Processor** (OSP) handles external output from event processing pipeline to external data destinations (Elasticsearch, SQL database, REST).
 
-So the pipeline may look like at the scheme:
+So the pipeline may look like at the following scheme:
 
 .. figure:: _static/ModuleStructure3.png
    :scale: 80%
 
 At the Processing platform component, the ingested data is transformed into streams, processed and sent to an external storage.  Data transformation and computation are the two major tasks of this component.
 
-.. tip:: More information on module workflow you can find at the :ref:`Modules` page.
+.. tip:: More information on modules you can find at the :ref:`Modules` page.
 
 The *Streaming component* is essential in SJ-Platform. The data is fed to the system, transported between modules and exported to an external storage via streams. It is streaming that makes possible such platform features as exactly-once processing, parallelism, fault-tolerance, horizontal scalability.
 
-The data can be received from different sources. Currently, the platform supports obtaining data from TCP sockets and Kafka.
+The data can be received from different sources. Currently, the platform supports obtaining data from TCP sockets and Apache Kafka.
 
 Using **TCP** as an input source a custom protocol can be applied for receiving events, deduplicating them and putting into the processing pipeline.
 
 SJ-Platform supports **Apache Kafka** as a standard streaming platform providing a common interface for integration for most applications.
 
-Within the platform, the data is transported to and from modules via *transactional streams* or **T-streams**. It is a message broker and a Scala library native to SJ-Platform and designed primarily for exactly-once processing  (so it includes a transactional producer, a consumer and a subscriber). More information on T-streams can be found at `the project site <http://t-streams.com/>`_. 
+Within the platform, the data is transported to and from modules via *transactional streams* or **T-streams**. It is a message broker and a Scala library native to SJ-Platform and designed primarily for exactly-once processing  (so it includes a transactional producer, a consumer and a subscriber). 
+
+.. tip:: More information on T-streams as well as streaming infrastructure in SJ-Platform can be found at the :ref:`Streaming` page. 
 
 *Administration* of the platform is performed through `the UI <http://streamjuggler.readthedocs.io/en/develop/SJ_UI_Guide.html>`_. It is presented via Node JS. The platform UI provides `REST API <http://streamjuggler.readthedocs.io/en/develop/SJ_CRUD_REST_API.html>`_ instrumentation that allows interacting with the platform, monitoring the module performance, retrieving metrics data and configuration information as well as managing operations such as modul starting or stopping.
 
