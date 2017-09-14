@@ -107,7 +107,7 @@ Within the platform, the data is transported to and from modules via *transactio
 
 .. tip:: More information on T-streams as well as streaming infrastructure in SJ-Platform can be found at the :ref:`Streaming` page. 
 
-*Administration* of the platform is performed through `the UI <http://streamjuggler.readthedocs.io/en/develop/SJ_UI_Guide.html>`_. It is presented via Node JS. The platform UI provides `REST API <http://streamjuggler.readthedocs.io/en/develop/SJ_CRUD_REST_API.html>`_ instrumentation that allows interacting with the platform, monitoring the module performance, retrieving metrics data and configuration information as well as managing operations such as modul starting or stopping.
+*Administration* of the platform is performed through the :ref:`UI_Guide` It is presented via Node JS. The platform  provides `REST API <http://streamjuggler.readthedocs.io/en/develop/SJ_CRUD_REST_API.html>`_ instrumentation that allows interacting with the platform, monitoring the module performance, retrieving metrics data and configuration information as well as managing operations such as modul starting or stopping.
 
 Platform Features
 -----------------------
