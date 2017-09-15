@@ -1000,9 +1000,9 @@ Via the UI you can make sure the instances are deleted.
 Sflow Example Task
 -------------------------
 
-There is another example of the platform performance. It represents the processing workflow developed for the demonstration task that is responsible for collecting `sFlow <https://sflow.org/>`_ information. The aggregated information can be valuable for monitoring of the current traffic and predicting of possible problems. 
+There is another example of the platform performance. It represents the processing workflow developed for the demonstration task that is responsible for collecting `sFlow <https://sflow.org/>`_ information. The aggregated information can be valuable for monitoring of the current traffic and predicting of possible problems. The solution represents a scalable system for aggregation and analysis of big data in continous streams. That is extreamly important for large computer systems and platforms.
 
-The processing pipeline includes an input module, a batch processing module and an output module. Within the platform, the data is transported with T-streams.
+The suggested processing pipeline includes an input module, a batch processing module and an output module. Within the platform, the data is transported with T-streams.
 
 As an external data source, an sFlow reporter takes place. It sends data to the system in CSV format.
 
@@ -1107,7 +1107,7 @@ For a start, perform the steps for platform deployment from the Step1-Deployment
 
 - tts.json_
 
-Via the Marathon interface, make sure the services are deployed.
+Via the Marathon interface, make sure the services are deployed and run properly.
 
 Now look and make sure you have access to the Web UI. You will see the platform but it is not completed with any entities yet. They will be added in the next steps.
 
