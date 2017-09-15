@@ -62,15 +62,15 @@ A general processing workflow which system allows implementing is illustrated in
 
 Green, yellow and purple blocks displayed in a rectangular area are managed and evaluated by SJ-Platform. They represent an input module, a processing module and an output module, respectively. The blocks outside the rectangular area represent external systems.
 
-The input module receives raw data and transforms them into a data stream of a proper type compatible with the processing module type. 
+The input module receives raw data and transforms them into a data stream of a proper type compatible with the processing module type. In the fping demonstration example the input module is a regex input module. It processes input streams of strings using RegExp rules and convert them in Avro records.
 
-The processing module performs data aggregation, transformations, filtering and enriching and sends the result to the output module. In the provided example the data aggregation is performed with a regular-streaming module.
+The processing module performs data aggregation, transformations, filtering and enriching and sends the result to the output module. In the fping demonstration example the data aggregation is performed with a regular-streaming module. 
 
 In the output module, the processed data are transformed into entities appropriate for storing into an external storage of a specified type. In the fping demonstration example the output module exports the result data into the Elasticsearch external data storage.
-                
+           
 The illustrated pipeline is a common scenario for a lot of different tasks.
 
-But the platform allows implementation of more complicated processing pipelines. So the pipeline can be more expanded. More input streams can ingest raw data. Several Input modules can be included in the pipeline to accept the raw data and transform it for passing further to the processing stage.
+But the platform allows implementation of more complicated processing pipelines. So the pipeline can be expanded. More input streams can ingest raw data. Several input modules can be included in the pipeline to accept the raw data and transform it for passing further to the processing stage.
 
 You can launch more than a single processing module. The data streams can be distributed among them in various ways.
 
@@ -973,11 +973,11 @@ Make sure the instances to be deleted are stopped and are not with one of the fo
 
 The instances of the modules can be deleted one by one. 
 
-For deleting the sj-regex-input module instance send::
+For deleting the *sj-regex-input* module instance send::
 
  curl --request DELETE "http://$address/v1/modules/input-streaming/pingstation-input/1.0/instance/pingstation-input/"
 
-For deleting the ps-process module instance send::
+For deleting the *ps-process* module instance send::
 
  curl --request DELETE "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance/pingstation-process/"
 
@@ -985,7 +985,7 @@ For deleting the ps-process module instance send::
 
  curl --request DELETE "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance/pingstation-process-1h/"
 
-For deleting the ps-output module instance send::
+For deleting the *ps-output* module instance send::
 
  curl --request DELETE "http://$address/v1/modules/output-streaming/pingstation-output/1.0/instance/pingstation-output/"
 
@@ -1002,8 +1002,8 @@ Sflow Example Task
 
 There is another example of the platform performance. It represents the processing workflow of demonstration task that is responsible for collecting sFlow information: 
 
-- computes traffic for the source IP; 
-- computes traffic between the source and the destination.
+- computing traffic for the source IP; 
+- computing traffic between the source and the destination.
 
 The processing pipeline includes an input module, a batch processing module and an output module. Within the platform, the data is transported with T-streams.
 
@@ -1013,13 +1013,13 @@ The CSV data are transformed by the input module and are sent for processing to 
 
 The processed data is stored in the PostgreSQL database. It is exported from the platform via the output module with the streams of SQL-database type.
 
-In general, the pipeline can be rendered as in the diagram below:
+A complete pipeline can be rendered as in the diagram below:
 
 .. figure:: _static/SflowDemo.png
 
-Green, yellow, purple and red blocks are executed with SJ-Platform. These are the *'sflow-csv-input'* module, the *'sflow-process'* module, the *'sflow-src-ip-output'* and the *'sflow-src-dst-output'* modules and the *'sflow-fallback-output'* module, respectively.
+Green, yellow, purple and red blocks are managed and evaluated by SJ-Platform. These are the *'sflow-csv-input'* module, the *'sflow-process'* module, the *'sflow-src-ip-output'* and the *'sflow-src-dst-output'* modules and the *'sflow-fallback-output'* module, respectively.
 
-The data come to the CSV input module from the sFlow reporter. It sends sFlow records in CSV format to the input module. Then the input module parses CSV-lines into avro records and puts the parsed data into the *'sflow-avro'* stream of T-streams type. After that, the batch processing module parses avro records into sFlow records, and then:
+The blocks beyond the SJ-Platform area represent external systems. The data come to the CSV input module from the sFlow reporter. It sends sFlow records in CSV format to the input module. Then the input module parses CSV-lines into avro records and puts the parsed data into the *'sflow-avro'* stream of T-streams type. After that, the batch processing module parses avro records into sFlow records, and then:
 
 - computes traffic for the source IP and puts it in *'src-ip-stream'*;
 - computes traffic between the source and the destination and puts it in *'src-dst-stream'*.
