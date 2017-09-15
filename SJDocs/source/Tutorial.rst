@@ -48,7 +48,7 @@ Let’s introduce an example task which illustrates the platform workflow in the
 
 The demonstration code is responsible for collecting of aggregated information on the accessibility of nodes. 
 
-The fping utility checks the list of provided IPs for accessibility. It sends a 64-bytes packet to each IP and waits for a return packet. If the connections are good and the node can be accessed, a good return packet will be received. The amount of time is also returned for how long it takes for a packet to make the complete trip. On the basis of this information the processor calculates the average response time for each node per 1 minute. The amount of successful responses by IP per 1 minute is calculated by the processing module as well. The result is exported to an external data store.  
+The `fping <https://fping.org/>`_ utility checks the list of provided IPs for accessibility. It sends a 64-bytes packet to each IP and waits for a return packet. If the connections are good and the node can be accessed, a good return packet will be received. The amount of time is also returned for how long it takes for a packet to make the complete trip. On the basis of this information the processor calculates the average response time for each node per 1 minute. The amount of successful responses by IP per 1 minute is calculated by the processing module as well. The result is exported to an external data store.  
 
 Before providing a solution to the task, let’s have a look at the platform from the perspective of a processing pipeline.
 
@@ -1000,16 +1000,13 @@ Via the UI you can make sure the instances are deleted.
 Sflow Example Task
 -------------------------
 
-There is another example of the platform performance. It represents the processing workflow of demonstration task that is responsible for collecting sFlow information: 
-
-- computing traffic for the source IP; 
-- computing traffic between the source and the destination.
+There is another example of the platform performance. It represents the processing workflow developed for the demonstration task that is responsible for collecting `sFlow <https://sflow.org/>`_ information. The aggregated information can be valuable for monitoring of the current traffic and predicting of possible problems. 
 
 The processing pipeline includes an input module, a batch processing module and an output module. Within the platform, the data is transported with T-streams.
 
 As an external data source, an sFlow reporter takes place. It sends data to the system in CSV format.
 
-The CSV data are transformed by the input module and are sent for processing to the batch processing module. The data that can not be parsed by the input module are sent to the output module for incorrect data without processing.
+The CSV data are transformed by the input module and sent for processing to the batch processing module. The data that can not be parsed by the input module are sent to the output module for incorrect data without processing.
 
 The processed data is stored in the PostgreSQL database. It is exported from the platform via the output module with the streams of SQL-database type.
 
@@ -1024,7 +1021,7 @@ The blocks beyond the SJ-Platform area represent external systems. The data come
 - computes traffic for the source IP and puts it in *'src-ip-stream'*;
 - computes traffic between the source and the destination and puts it in *'src-dst-stream'*.
 
-Finally the *'sflow-src-ip-output'* module just displaces data from *'src-ip-stream'*  to the *'srcipdata'* table in PostgreSQL. The *'sflow-src-dst-output'* module displaces data from *'src-dst-stream'*  to the *'srcdstdata'*  table.
+Finally, the *'sflow-src-ip-output'* module just displaces data from *'src-ip-stream'*  to the *'srcipdata'* table in PostgreSQL. The *'sflow-src-dst-output'* module displaces data from *'src-dst-stream'*  to the *'srcdstdata'*  table.
 
 If the input module cannot parse an input line, then it puts data into the *'sflow-fallback'* stream. After that the *‘fallback-output’* module moves that incorrect line from *'sflow-fallback'* to the *'fallbackdata'* table in PostgreSQL.
 
@@ -1033,17 +1030,17 @@ Step 1. Deployment
 
 For this demo project the following core systems and services are required:
 
-1. Apache Mesos - for all computations;
+1. Apache Mesos - a cluster for all computations;
 2. Mesosphere Marathon - a framework for executing tasks on Mesos;
-3. Apache Zookeeper - for coordination;
-4. Java
-5. Docker
+3. Apache Zookeeper - for coordination of task execution;
+4. Java - a computer software that provides a system for developing application software and deploying it in a cross-platform computing environment;
+5. Docker - a software container platform that allows a flexible system configuration;
 6. MongoDB - as a database;
-7. T-streams - as a message broker;
-8. REST - for access to the UI;
-9. PostgreSQL - as a destination.
+7. T-streams - as a message broker ensuringe exactly-once data processing;
+8. REST API instrumentation - for accessing and monitoring the platform;
+9. PostgreSQL - as a destination data store.
 
-Perform the steps for platform deployment from the Step1-Deployment_ section.
+For a start, perform the steps for platform deployment from the Step1-Deployment_ section.
 
 1) Deploy Mesos, Apache Zookeeper, Marathon.
    
