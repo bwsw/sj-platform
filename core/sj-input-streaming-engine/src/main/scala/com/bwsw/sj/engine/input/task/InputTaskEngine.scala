@@ -32,7 +32,6 @@ import com.bwsw.sj.engine.core.engine.{NumericalCheckpointTaskEngine, TimeCheckp
 import com.bwsw.sj.engine.input.config.InputEngineConfigNames
 import com.bwsw.sj.engine.input.eviction_policy.InputInstanceEvictionPolicy
 import com.bwsw.sj.engine.input.task.reporting.InputStreamingPerformanceMetrics
-import com.bwsw.tstreams.agents.producer.{NewProducerTransactionPolicy, ProducerTransaction}
 import com.typesafe.config.ConfigFactory
 import io.netty.buffer.ByteBuf
 import io.netty.channel.{ChannelFuture, ChannelHandlerContext}
@@ -62,9 +61,6 @@ abstract class InputTaskEngine(manager: InputTaskManager,
 
   private val currentThread: Thread = Thread.currentThread()
   currentThread.setName(s"input-task-${manager.taskName}-engine")
-  private val producers = manager.outputProducers
-  private val transactionsByStreamPartitions = createTransactionsStorage()
-  private val checkpointGroup = manager.createCheckpointGroup()
   private val instance = manager.instance.asInstanceOf[InputInstance]
   private val environmentManager = createModuleEnvironmentManager()
   private val executor: InputStreamingExecutor[AnyRef] = manager.getExecutor(environmentManager)
@@ -90,38 +86,14 @@ abstract class InputTaskEngine(manager: InputTaskManager,
     */
   private val contextsToSendCheckpointResponse: scala.collection.mutable.Set[ChannelHandlerContext] = collection.mutable.Set[ChannelHandlerContext]()
 
-  addProducersToCheckpointGroup()
+  private val senderThread = new SenderThread(manager, performanceMetrics)
+  senderThread.start()
 
   private def createModuleEnvironmentManager(): InputEnvironmentManager = {
     val streamService = connectionRepository.getStreamRepository
     val taggedOutputs = instance.outputs.flatMap(x => streamService.get(x))
 
     new InputEnvironmentManager(instance.options, taggedOutputs, connectionRepository.getFileStorage)
-  }
-
-  private def addProducersToCheckpointGroup(): Unit = {
-    logger.debug(s"Task: ${manager.taskName}. Start adding t-stream producers to checkpoint group.")
-    producers.foreach(x => checkpointGroup.add(x._2))
-    logger.debug(s"Task: ${manager.taskName}. The t-stream producers are added to checkpoint group.")
-  }
-
-  /**
-    * Sends an input envelope data to output stream
-    */
-  private def sendData(stream: String, partition: Int, data: AnyRef): Unit = {
-    logger.info(s"Task name: ${manager.taskName}. Send envelope to each output stream..")
-    val bytes = executor.serialize(data)
-
-    val transaction = transactionsByStreamPartitions(stream).getOrElseUpdate(
-      partition,
-      producers(stream).newTransaction(NewProducerTransactionPolicy.ErrorIfOpened, partition))
-    transaction.send(bytes)
-
-    logger.debug(s"Task name: ${manager.taskName}. Add envelope to output stream in performance metrics .")
-    performanceMetrics.addElementToOutputEnvelope(
-      stream,
-      transaction.getTransactionID.toString,
-      bytes.length)
   }
 
   /**
@@ -204,10 +176,10 @@ abstract class InputTaskEngine(manager: InputTaskManager,
         performanceMetrics.addEnvelopeToInputStream(inputEnvelope)
         if (!isDuplicate(inputEnvelope.key, inputEnvelope.duplicateCheck)) {
           logger.debug(s"Task name: ${manager.taskName}. Envelope is not duplicate so send it.")
-          inputEnvelope.outputMetadata.foreach(x => {
-            sendData(x._1, x._2, inputEnvelope.data)
-          })
+          val bytes = executor.serialize(inputEnvelope.data)
+          senderThread.send(SerializedEnvelope(bytes, inputEnvelope.outputMetadata))
           afterReceivingEnvelope()
+
           true
         } else false
       case None => false
@@ -253,10 +225,8 @@ abstract class InputTaskEngine(manager: InputTaskManager,
     */
   private def doCheckpoint(): Unit = {
     logger.info(s"Task: ${manager.taskName}. It's time to checkpoint.")
-    logger.debug(s"Task: ${manager.taskName}. Do group checkpoint.")
-    checkpointGroup.checkpoint()
+    senderThread.checkpoint()
     checkpointInitiated()
-    clearTransactionStorage()
     prepareForNextCheckpoint()
   }
 
@@ -278,27 +248,6 @@ abstract class InputTaskEngine(manager: InputTaskManager,
     * @param isCheckpointInitiated flag points whether checkpoint was initiated inside input module (not on the schedule) or not.
     */
   protected def isItTimeToCheckpoint(isCheckpointInitiated: Boolean): Boolean
-
-  /**
-    * Creates a map that keeps current open txn for each partition of output stream
-    *
-    * @return map where a key is output stream name, a value is a map
-    *         in which key is a number of partition and value is a txn
-    */
-  private def createTransactionsStorage(): Map[String, scala.collection.mutable.Map[Int, ProducerTransaction]] = {
-    val streams = producers.keySet
-    logger.debug(s"Task name: ${manager.taskName}. Create a storage for keeping txns for each partition of output streams.")
-
-    streams.map(x => (x, scala.collection.mutable.Map[Int, ProducerTransaction]())).toMap
-  }
-
-  /**
-    * Clears a map that keeps current open txn for each partition of output stream
-    */
-  private def clearTransactionStorage(): Unit = {
-    logger.debug(s"Task name: ${manager.taskName}. Clear a storage for keeping txns for each partition of output streams.")
-    transactionsByStreamPartitions.values.foreach(_.clear())
-  }
 }
 
 object InputTaskEngine {
