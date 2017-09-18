@@ -667,7 +667,7 @@ The infrastructure for streams includes **providers** and **services**. This is 
 
 Streaming flexibility lies in a one-to-many connection between providers and services, services and streams. One provider works with many services (they can be of various types) as well as one service can provide several streams. These streams take necessary settings from the common infrastructure (providers and services). There is no need to duplicate the settings for each individual stream.
 
-The types of providers and services are determined by the type of streams. Find more about types of platform entities at the Streaming_Infrastructure_ section.
+The types of providers and services are determined by the type of streams. Find more about types of platform entities at the :ref:`Streaming_Infrastructure` section.
 
 In the example task solution the following stream types are implemented:
 
@@ -1228,7 +1228,7 @@ Let’s create streams to transport data from and to the modules.
 Creating Infrastructure
 """""""""""""""""""""""""""""""
 
-The streaming needs the infrastructure - providers and services. Two types of providers are necessary for the demo: Apache Zookeeper and SQL database. 
+The streaming needs the infrastructure - providers and services. Two types of providers are necessary for the demonstration task: Apache Zookeeper and SQL database. 
 
 Services of three types are required: T-streams, Apache Zookeeper and SQL-database.
 
@@ -1297,27 +1297,27 @@ Streams creation
 
 Now you can create streams that will be used by the instances of input, processing, output and fallback-output modules.
 
-To create output streams of the input module:
+First, we will create output streams of the input module:
 
 - sflow-avro — the stream for correctly parsed sFlow records;
 - sflow-fallback — the stream for incorrect inputs.
 
-::
+Run the following commands::
 
  curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/sflow-avro.json"
  curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/sflow-fallback.json"
 
-To create output streams of the processing module that will be used for keeping  information about source and destination IP addresses and traffic::
+To create output streams of the processing module that will be used for keeping information about the source and the destination IP addresses and traffic run the following commands::
 
  curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/src-ip-stream.json"
  curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/src-dst-stream.json"
 
-To create output streams of the output modules that will be used for storing information to the database::
+To create output streams of the output modules that will be used for storing information to the database run the following commands::
 
  curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/src-ip-data.json"
  curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/src-dst-data.json"
 
-To create an output stream of the fallback-output module that will be used for storing incorrect inputs to the database::
+To create an output stream of the fallback-output module that will be used for storing incorrect inputs to the database run the command below::
 
  curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/fallback-data.json
  
@@ -1509,14 +1509,20 @@ To launch the fallback-output module instance::
  
 Via the UI you can make sure the instances are deleted.
 
+More Information
+-------------------
 
-Find more information about SJ-platform and its entities at: 
+Find more information about SJ-Platform and its entities at: 
 
 :ref:`Modules` - more about module structure.
 
 :ref:`Custom_Module` - how to create a module.
 
 :ref:`Architecture` - the structure of the platform.
+
+:ref:`UI_Guide` - the instructions on platform monitoring via the Web UI.
+
+:ref:`REST_API` - the RESTful API instrumentation to configure and monitor the platform.
 
 
 
