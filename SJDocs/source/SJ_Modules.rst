@@ -31,9 +31,13 @@ Executor
 
 An executor of the module utilizes an instance/instances. An instance is a full range of settings for an exact module.
 
+.. figure:: _static/moduleExecutorAndValidator.png
+   :scale: 120%
+   :align: center
+
 An engine is required to start a module. A module can not process data streams without an engine (that is a .jar file containing required configuration settings) that launches the module ingesting raw data and sends the processed data further in the stream.
 
-.. figure:: _static/moduleExecutorAndValidator.png
+.. figure:: _static/engine.png
    :scale: 120%
    :align: center
 
