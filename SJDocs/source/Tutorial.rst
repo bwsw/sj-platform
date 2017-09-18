@@ -70,7 +70,7 @@ In the output module, the processed data are transformed into entities appropria
            
 The illustrated pipeline is a common scenario for a lot of different tasks.
 
-But the platform allows implementation of more complicated processing pipelines. So the pipeline can be expanded. More input streams can ingest raw data. Several input modules can be included in the pipeline to accept the raw data and transform it for passing further to the processing stage.
+But the platform allows implementation of more complicated processing pipelines. So the pipeline can be expanded. More input streams can ingest raw data. Several input modules can be included in the pipeline to accept the raw data and transform them for passing further to the processing stage.
 
 You can launch more than a single processing module. The data streams can be distributed among them in various ways.
 
