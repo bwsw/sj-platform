@@ -171,9 +171,20 @@ So, as a first step, you should deploy Mesos and other services.
 
 1) Deploy Mesos, Marathon, Zookeeper. You can follow the instructions at the official `installation guide <http://www.bogotobogo.com/DevOps/DevOps_Mesos_Install.php>`_ .
 
-Start Mesos and the services. Make sure you have access to Mesos interface, Marathon interface, and Zookeeper is running. 
+Please, note, the deployment is described for one default Mesos-slave with available ports [31000-32000]. 
+
+If you are planning to launch an instance with greater value of "parallelizm", i.e. to run tasks on more than 1 nodes, you need to increase the "executor_registration_timeout" parameter for Mesos-slave.
+
+The requirements to Mesos-slave: 
+
+- 2 CPUs, 
+- 4096 memory.
+
+Mesos-slave must support Docker containerizer.
 
 For Docker deployment follow the instructions at the official `installation guide <https://docs.docker.com/engine/installation/linux/docker-ce/ubuntu/#install-docker-ce>`_ .
+
+Start Mesos and the services. Make sure you have access to Mesos interface, Marathon interface, and Zookeeper is running. 
 
 Install Java::
                                          
