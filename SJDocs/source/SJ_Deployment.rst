@@ -53,6 +53,15 @@ Firstly, deploy Mesos and other services.
 
 Please, note, the deployment is described for one default Mesos-slave with available ports [31000-32000]. 
 
+If you are planning to launch an instance with greater value of "parallelizm", i.e. to run tasks on more than 1 nodes, you need to increase the "executor_registration_timeout" parameter for Mesos-slave.
+
+The requirements to Mesos-slave: 
+
+- 2 CPUs, 
+- 4096 memory.
+
+Mesos-slave must support Docker containerizer.
+
 2. Docker containers should be supported for Mesos-slave. For Docker deployment follow the instructions at the official `installation guide <https://docs.docker.com/engine/installation/linux/docker-ce/ubuntu/#install-docker-ce>`_
 
 3. Install Java::
