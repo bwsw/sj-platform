@@ -35,7 +35,7 @@ An executor of the module utilizes an instance/instances. An instance is a full 
    :scale: 120%
    :align: center
 
-An engine is required to start a module. A module can not process data streams without an engine (that is a .jar file containing required configuration settings) that launches the module ingesting raw data and sends the processed data further in the stream.
+An engine is required to start a module. This is a .jar file containing required configuration settings. A module is uploaded to the engine, and it is the engine that starts the module to process data streams. It launches the module ingesting raw data and then sends the processed data further in the stream.
 
 .. figure:: _static/engine.png
    :scale: 120%
@@ -74,6 +74,7 @@ An input type of modules handles external input streams, does data deduplication
 
 .. figure:: _static/InputModuleStructure1.png
   :scale: 80 %
+
 It performs the transformation of the streams incoming from TCP to T-streams. T-streams are persistent streams designed for exactly-once processing (so it includes a transactional producer, a consumer and a subscriber). Find more information about T-streams at `the site <http://t-streams.com>`_ .
 
 In the diagram below you can see the illustrated dataflow for an input module.
