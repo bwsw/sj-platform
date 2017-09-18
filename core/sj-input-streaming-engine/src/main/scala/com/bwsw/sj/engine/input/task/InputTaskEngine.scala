@@ -31,7 +31,7 @@ import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.core.engine.{NumericalCheckpointTaskEngine, TimeCheckpointTaskEngine}
 import com.bwsw.sj.engine.input.config.InputEngineConfigNames
 import com.bwsw.sj.engine.input.eviction_policy.InputInstanceEvictionPolicy
-import com.bwsw.sj.engine.input.task.reporting.InputStreamingPerformanceMetrics
+import com.bwsw.sj.engine.input.task.reporting.{InputStreamingPerformanceMetrics, InputStreamingPerformanceMetricsThread}
 import com.typesafe.config.ConfigFactory
 import io.netty.buffer.ByteBuf
 import io.netty.channel.{ChannelFuture, ChannelHandlerContext}
@@ -86,7 +86,10 @@ abstract class InputTaskEngine(manager: InputTaskManager,
     */
   private val contextsToSendCheckpointResponse: scala.collection.mutable.Set[ChannelHandlerContext] = collection.mutable.Set[ChannelHandlerContext]()
 
-  private val senderThread = new SenderThread(manager, performanceMetrics)
+  private val performanceMetricsThread = new InputStreamingPerformanceMetricsThread(performanceMetrics)
+  performanceMetricsThread.start()
+
+  private val senderThread = new SenderThread(manager, performanceMetricsThread)
   senderThread.start()
 
   private def createModuleEnvironmentManager(): InputEnvironmentManager = {
@@ -173,7 +176,7 @@ abstract class InputTaskEngine(manager: InputTaskManager,
     envelope match {
       case Some(inputEnvelope) =>
         logger.info(s"Task name: ${manager.taskName}. Envelope is defined. Process it.")
-        performanceMetrics.addEnvelopeToInputStream(inputEnvelope)
+        performanceMetricsThread.addEnvelopeToInputStream(inputEnvelope)
         if (!isDuplicate(inputEnvelope.key, inputEnvelope.duplicateCheck)) {
           logger.debug(s"Task name: ${manager.taskName}. Envelope is not duplicate so send it.")
           val bytes = executor.serialize(inputEnvelope.data)

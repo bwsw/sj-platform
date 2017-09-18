@@ -21,7 +21,7 @@ package com.bwsw.sj.engine.input.task
 import java.util.concurrent.{ArrayBlockingQueue, TimeUnit}
 
 import com.bwsw.sj.common.utils.EngineLiterals
-import com.bwsw.sj.engine.input.task.reporting.InputStreamingPerformanceMetrics
+import com.bwsw.sj.engine.input.task.reporting.InputStreamingPerformanceMetricsThread
 import com.bwsw.tstreams.agents.producer.{NewProducerTransactionPolicy, ProducerTransaction}
 import org.slf4j.{Logger, LoggerFactory}
 
@@ -35,7 +35,7 @@ import scala.collection.mutable
   * @author Pavel Tomskikh
   */
 class SenderThread(manager: InputTaskManager,
-                   performanceMetrics: InputStreamingPerformanceMetrics)
+                   performanceMetrics: InputStreamingPerformanceMetricsThread)
   extends Thread(s"input-task-${manager.taskName}-sender") {
 
   private val logger: Logger = LoggerFactory.getLogger(this.getClass)
