@@ -1196,6 +1196,8 @@ Create an instance for each module::
  curl --request POST "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance" -H 'Content-Type: application/json' --data "@api-json/instances/pingstation-echo-process.json" 
  curl --request POST "http://$address/v1/modules/output-streaming/pingstation-output/1.0/instance" -H 'Content-Type: application/json' --data "@api-json/instances/pingstation-output.json" 
 
+.. tip:: To process a large amount of input data you need to increase maximum direct memory size in ``jvmOptions`` in pingstation-input.json. Example: ``"-XX:MaxDirectMemorySize=": "256m"``
+
 Instance Launching
 """""""""""""""""""""""""
 
