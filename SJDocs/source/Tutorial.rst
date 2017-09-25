@@ -156,16 +156,16 @@ Alongside with Apache Mesos, the system works on the basis of the following core
 
 To solve the example task we need to deploy:
 
-1) Apache Mesos - for all computations;
-2) Mesosphere Marathon - a framework for executing tasks on Mesos;
-3) Apache Zookeeper -  for coordination;
-4) Java
-5) Docker
-6) MongoDB - as a database;
-7) T-streams - as a message broker; 
-8) REST - for access to the UI;
-9) Elasticsearch - as an external data storage;
-10) Kibana - to visualize Elasticsearch data.
+1. Apache Mesos - a cluster for all computations;
+2. Mesosphere Marathon - a framework for executing tasks on Mesos;
+3. Apache Zookeeper - for coordination of task execution;
+4. Java - a computer software that provides a system for developing application software and deploying it in a cross-platform computing environment;
+5. Docker - a software container platform that allows a flexible system configuration;
+6. MongoDB - as a database;
+7. T-streams - as a message broker ensuringe exactly-once data processing;
+8. REST API instrumentation - for accessing and monitoring the platform;
+9. Elasticsearch - as an external data storage;
+10. Kibana - to visualize Elasticsearch data.
 
 So, as a first step, you should deploy Mesos and other services.
 
@@ -652,7 +652,7 @@ The raw data is fed to the platform from different sources. And within the platf
 
 Different modules require different stream types for input and output.
                    
-A module receives data from input streams from TCP or Kafka. 
+A module receives data from input streams from TCP sockets or Apache Kafka. 
 
 Within the platform, the data is transported to and from modules via T-streams. It is a native streaming type for SJ-Platform that allows exactly-once data exchange between modules. 
 
@@ -667,11 +667,11 @@ The infrastructure for streams includes **providers** and **services**. This is 
 
 Streaming flexibility lies in a one-to-many connection between providers and services, services and streams. One provider works with many services (they can be of various types) as well as one service can provide several streams. These streams take necessary settings from the common infrastructure (providers and services). There is no need to duplicate the settings for each individual stream.
 
-The types of providers and services are determined by the type of streams. Find more about types of platform entities at the :ref:`Streaming_Infrastructure` section.
+The types of providers and services are determined by the type of streams. Find more about types of providers and services at the :ref:`Streaming_Infrastructure` section.
 
 In the example task solution the following stream types are implemented:
 
-1. TCP input stream ingests the raw data into the system;
+1. TCP input stream feed the raw data into the system;
 
 2. T-streams streaming passes the data to and from the processing module;
 
@@ -680,22 +680,22 @@ In the example task solution the following stream types are implemented:
 .. figure:: _static/StreamsInPlatform.png
    :scale: 80%
 
-Below the steps for creating streaming infrastructure such as providers, services, and streams via REST API can be found.
+Below the steps for creating streaming infrastructure such as providers, services, and streams, via REST API can be found.
 
 Set Up Streaming Infrastructure
 """""""""""""""""""""""""""""""""""""""
-Prior to creating streams, it is necessary to provide the infrastructure: providers and services.
+At first, let's create the infrastructure: providers and services.
 
-They can be of different types. The types of platform entities in the pipeline determine the type of providers and services that are necessary in the particular case.
+They can be of different types. The types of instances and streams in the pipeline determine the type of providers and services that are necessary in the particular case.
 
 For the Example Task
 """""""""""""""""""""""
 
-In the example task pipeline the modules of three types take place: the input-streaming, regular-streaming and output-streaming. For all types of modules, the Apache Zookeeper service is necessary. Thus, it requires the Apache Zookeeper provider.
+In the example task pipeline the modules of three types take place: the input-streaming, regular-streaming and output-streaming. For all types of modules, the Apache Zookeeper service is necessary. Thus, it is required to create the Apache Zookeeper provider.
 
-Besides, the Apache Zookeeper provider is required for T-streams service that is in its turn needed for streams of T-streams type within the platform, and instances of the input-streaming and the regular-streaming modules.
+Besides, the Apache Zookeeper provider is required for T-streams service that is in its turn needed for streams of T-streams type within the system, and for instances of the input-streaming and the regular-streaming modules.
 
-The provider and the service of Elasticsearch type are required by the Elasticsearch output streams to put the result in the Elasticsearch data storage.
+The provider and the service of Elasticsearch type are required by the Elasticsearch output streams to put the result into the Elasticsearch data storage.
 
 As a result, the following infrastructure is to be created:
 
@@ -705,7 +705,7 @@ As a result, the following infrastructure is to be created:
 
 1) Set up providers.
 
-- Apache Zookeeper for T-streams streaming (‘echo-response’ and ‘unreachable-response’ streams) within the platform, for Zookeeper service necessary for all types of  instances::
+- Apache Zookeeper for T-streams (‘echo-response’ and ‘unreachable-response’ streams) within the platform, for Zookeeper service necessary for all types of  instances::
 
    sed -i 's/176.120.25.19:2181/<zookeeper_address>/g' api-json/providers/zookeeper-ps-provider.json
    curl --request POST "http://$address/v1/providers" -H 'Content-Type: application/json' --data "@api-json/providers/zookeeper-ps-provider.json"
@@ -721,13 +721,13 @@ The created providers are available in the UI under the “Providers” tab.
 
 .. figure:: _static/ProvidersCreated.png
 
-2) Next set up services:
+2) Next, we will set up services:
 
 - Apache Zookeeper service for all modules::
 
    curl --request POST "http://$address/v1/services" -H 'Content-Type: application/json' --data "@api-json/services/zookeeper-ps-service.json"
 
-- T-streams service for T-streams streaming (all ‘echo-response’ streams and the ‘unreachable-response’ stream) within the platform and the instances of the input-streaming and the regular-streaming modules::
+- T-streams service for T-streams (all ‘echo-response’ streams and the ‘unreachable-response’ stream) within the system and for the instances of the input-streaming and the regular-streaming modules::
 
    curl --request POST "http://$address/v1/services" -H 'Content-Type: application/json' --data "@api-json/services/tstream-ps-service.json"
 
@@ -795,7 +795,7 @@ For the Example task
 """"""""""""""""""""""""""""""""""""""
 In the provided example task the result data is stored to the Elasticsearch data storage.
 
-Thus, it is necessary to create the index and mapping for ES.
+Thus, it is necessary to create the index and mapping for Elasticsearch.
 
 Create the index and the mapping for Elasticsearch sending the PUT request::
 
@@ -819,7 +819,7 @@ For each module, an instance should be created.
 
 Creating Instances
 """""""""""""""""""""""""""""
-For instance creation we will send the POST requests. See the instructions below for creating insatnces for the example task solution.
+For instance creation we will send the POST requests. See the instructions below for creating instances for the example task solution.
 
 For the Example task
 """""""""""""""""""""""
@@ -855,24 +855,22 @@ The created instances should be available now in UI under the “Instances” ta
 
 .. figure:: _static/InstancesCreated.png
 
-Ready! The module can be launched.
+Ready! The modules can be launched.
 
 Launching Instances
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 After the streaming layer with its infrastructure and instances are created you can start a module. 
 
-The module starts working after it is launched. The input module starts receiving data, transform the data for T-streams to pass to the processing module. The processing module starts processing them and put to T-streams to pass to the output module. The output module starts storing the result in a data storage. 
+The module starts working after it is launched. The input module starts receiving data, transforms the data for T-streams to pass them to the processing module. The processing module starts processing them and put to T-streams to pass them to the output module. The output module starts storing the result in a data storage. 
 
 In fact, it is not a module that is started. It is an instance of the module.
 
 In the example case, there are three modules (input-streaming, regular-streaming and output-streaming modules) and each of them has its own instances. Thus, these instances should be launched one by one. 
 
-
 For launching the **input module instance** send::
 
  curl --request GET "http://$address/v1/modules/input-streaming/pingstation-input/1.0/instance/pingstation-input/start"
-
 
 For launching the **processing module instances** send::
 
@@ -890,8 +888,11 @@ For launching the **output module instances** send::
 
  curl --request GET "http://$address/v1/modules/output-streaming/pingstation-output/1.0/instance/pingstation-output-1h/start" 
 
+If you have a look in the UI, you will see the launched instances with the “started” status.
 
-To get a list of listening ports of input module instance::
+.. figure:: _static/InstancesStarted.png
+
+To get a list of listening ports of input module instance send the request::
 
  curl --request GET "http://$address/v1/modules/input-streaming/pingstation-input/1.0/instance/pingstation-input"
 
@@ -912,10 +913,6 @@ And now you can **start a flow**. Please, replace `nc` with the host and port of
 
  fping -l -g 91.221.60.0/23 2>&1 | nc 176.120.25.19 31000
 
-If you have a look in the UI, you will see the launched modules with the “started” status.
-
-.. figure:: _static/InstancesStarted.png
-
 See the Results 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -925,7 +922,7 @@ The result can be viewed while the module is working. A necessary auto-refresh i
 
 Firstly, click the Settings tab and fill in the data entry field '*' instead of 'logstash-*'. 
 
-Then there will appear another data entry field called 'Time-field name'. You should choose 'ts' from the combobox and press the create button. 
+Then there will appear another data entry field called 'Time-field name'. You should choose 'ts' from the combobox and press the "Create" button. 
 
 After that, click the Discover tab. 
 
@@ -935,16 +932,16 @@ Select the parameters to show in the graph at the left-hand panel.
 
 The example below is compiled in Kibana v.5.5.1.
 
-It illustrates the average time of echo-responses by IPs per a selected period of time (e.g. 1 min). As you can see, different nodes have the different average time of response. Some nodes respond faster than others. 
+It illustrates the average time of echo-responses by IPs per a selected period of time (e.g. 1 min). As you can see, different nodes have different average time of response. Some nodes respond faster than others. 
 
 .. figure:: _static/Kibana.png
 
-Lots of other parameter combinations can be implemented to view the results.
+Many other parameter combinations can be implemented to view the results.
 
 Instance Shutdown 
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Once the task is resolved and necessary data is aggregated, the instance can be stopped. 
+Once the task is resolved and necessary data is aggregated, the instances can be stopped. 
 
 A stopped instance can be restarted again if it is necessary.
 
@@ -1011,7 +1008,7 @@ Via the UI you can make sure the instances are deleted.
 Sflow Example Task
 -------------------------
 
-There is another example of the platform performance. It represents the processing workflow developed for the demonstration task that is responsible for collecting `sFlow <https://sflow.org/>`_ information. The aggregated information can be valuable for monitoring of the current traffic and predicting of possible problems. The solution represents a scalable system for aggregation and analysis of big data in continous streams. That is extreamly important for large computer systems and platforms.
+There is another example of the platform performance. It represents the processing workflow developed for the demonstration task that is responsible for collecting `sFlow <https://sflow.org/>`_ information. The aggregated information can be valuable for monitoring of the current traffic and predicting of possible problems. The solution represents a scalable system for aggregation and analysis of big data in continuous streams. That is extreamly important for large computer systems and platforms.
 
 The suggested processing pipeline includes an input module, a batch processing module and an output module. Within the platform, the data is transported with T-streams.
 
