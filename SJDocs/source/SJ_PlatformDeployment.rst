@@ -8,7 +8,7 @@ Below, two ways of deployment are described. Please, read the requirements for e
 Deployment on Cluster
 ---------------------------
 
-The `deployment guide <http://streamjuggler.readthedocs.io/en/develop/SJ_Deployment.html>`_ provides a detailed step-by-step instruction on Stream Juggler Platform deployment on a cluster. 
+The first option is to deloy SJ-Platform on a cluster. The `deployment guide <http://streamjuggler.readthedocs.io/en/develop/SJ_Deployment.html>`_ provides a detailed step-by-step instruction on Stream Juggler Platform deployment on a cluster. 
 
 Currently, the deployment on `Apache Mesos <http://mesos.apache.org/>`_ as a universal distributed computational engine is supported.
 
