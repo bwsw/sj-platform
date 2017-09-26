@@ -100,7 +100,7 @@ Please, find the required config settings in the table below and make sure they 
   "system", "marathon-connect-timeout", "Use when trying to connect by marathon-connect (in milliseconds).", "60000"
   "system", "current-framework", "Indicates what file is used to run a framework. By this value you can get a setting that contains a file name of framework jar.", "com.bwsw.fw-0.1"
   "system", "low-watermark", "A number of preloaded messages for batch engine processing.", "1000"
-  "kafka", "subscriber-timeout", "The time, in milliseconds, spent waiting in poll if data is not available. Must not be negative", "100"
+  "kafka", "subscriber-timeout", "The time, in milliseconds, spent waiting in poll if data are not available. Must not be negative", "100"
   "zk", "session.timeout", "Use when connecting to zookeeper in milliseconds (usually when we are dealing with t-streams consumers/producers)", "3000"
 .. "system", "current-transaction-generator", "Indicates what jar is used for running transaction generators. By this value you can get configuration setting that contains file name of transaction generator jar.", "com.bwsw.tg-0.1"
   "system", "transaction-generator-client-retry-period", "Time for connecting attempt to TG-server", "500"
