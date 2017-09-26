@@ -92,7 +92,7 @@ Two more processing modules are embedded into the pipeline to calculate response
 
 Finally, the output modules export aggregated data from echo-response streams to Elasticsearch. The result then can be visualized in a diagram using Kibana.
 
-The data are fed to the system, passed from one module to another and exported from the system via streams. Read more about streams under the “Creating Streams” section.
+The data are fed to the system, passed from one module to another and exported from the system via streams. Read more about streams under the :ref:`Creating_Streams` section.
 
 In the demonstration project, the entities are added to the system via REST API as it is less time-consuming. The platform entities can be also created via the UI filling in the forms for each entity with necessary settings.
 
@@ -644,7 +644,6 @@ Now in the UI, you can see the uploaded modules under the ‘Modules’ tab.
 
 .. figure:: _static/ModulesUploaded.png
 
-.. _Creating_Streams:
 
 Step 4. Creating Streaming Layer 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
