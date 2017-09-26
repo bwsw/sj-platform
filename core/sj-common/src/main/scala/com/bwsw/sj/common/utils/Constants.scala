@@ -184,6 +184,8 @@ object ProviderLiterals {
     jdbcType -> "SQL database",
     restType -> "RESTful"
   )
+
+  val connectTimeoutMillis = 10000
 }
 
 object RestLiterals {

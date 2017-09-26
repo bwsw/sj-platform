@@ -94,7 +94,7 @@ class StreamSiTests extends FlatSpec with Matchers {
     streamStorage.toSet shouldBe initStreamStorage
   }
 
-  it should "not delete stream when it have related instances" in new StreamMocksWithRelated {
+  it should "not delete stream when it has related instances" in new StreamMocksWithRelated {
     val deletionError = s"rest.streams.stream.cannot.delete:$streamWithRelatedName"
 
     streamSI.delete(streamWithRelatedName) shouldBe DeletionError(deletionError)

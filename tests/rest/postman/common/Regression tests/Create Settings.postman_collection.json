@@ -301,7 +301,7 @@
 			"description": "",
 			"collectionId": "0228ed14-1c01-e820-5a06-362b58e96e2e",
 			"responses": [],
-			"rawModeData": "{\"name\": \"driver.mysql\",\"value\": \"mysql-connector-java-5.1.6-bin.jar\",\"domain\": \"configuration.sql-database\"}"
+			"rawModeData": "{\"name\": \"driver.mysql\",\"value\": \"mysql-connector-java-5.1.6.jar\",\"domain\": \"configuration.sql-database\"}"
 		},
 		{
 			"id": "b4d17b03-e4dd-018f-2080-a1dae2e4dec9",

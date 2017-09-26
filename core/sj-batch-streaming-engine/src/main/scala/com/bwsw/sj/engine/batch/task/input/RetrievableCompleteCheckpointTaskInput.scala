@@ -79,6 +79,7 @@ class RetrievableCompleteCheckpointTaskInput[T <: AnyRef](manager: CommonTaskMan
 
   override def setConsumerOffsetToLastEnvelope(): Unit = {
     retrievableKafkaTaskInput.setConsumerOffsetToLastEnvelope()
+    retrievableTStreamTaskInput.setConsumerOffsetToLastEnvelope()
   }
 
   override def close(): Unit = {
