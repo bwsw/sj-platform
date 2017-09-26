@@ -7,7 +7,7 @@ A good real-time data processing architecture needs to be fault-tolerant and sca
 
 The Stream Juggler Platform is an integrated processing system. It means the system includes all the parts required to achieve goals: parts for computation, administration, components for processing pipeline building. These ready-to-use components can be rearranged in different pipelines. That allows building sophisticated processing graphs to customize the system.
 
-SJ-Platform's architecture is designed so that exactly-once processing is performed not only within a single processing block but throughout the entire platform, starting from the moment streams of events are fed to the system and up to the moment the output data is stored in conventional data storage.
+SJ-Platform's architecture is designed so that exactly-once processing is performed not only within a single processing block but throughout the entire platform, starting from the moment streams of events are fed to the system and up to the moment the output data are stored in conventional data storage.
 
 The approach based on loosely coupled blocks with exactly-once processing support throughout the entire pipeline allows for decomposing data processing in order to provide better modularity, performance management and simplicity in development.
 
@@ -61,7 +61,7 @@ The *Core* is composed of prerequisites for the platform. These are the services
 
 - Data sources for the platform are `Netty <https://netty.io/>`_ and `T-streams <https://t-streams.com>`_ libraries and `Kafka <https://kafka.apache.org/>`_. For starting Kafka we use `Kafka on Mesos <https://github.com/mesos/kafka>`_.
 
-- The outcoming data is stored to Elasticsearch, JDBC or REST external storages.
+- The outcoming data are stored to Elasticsearch, JDBC or REST external storages.
 
 - We use `MongoDB <https://www.mongodb.com/>`_ as a document database that provides high performance and availability. All created platform entities (Providers, Services, Streams, Instances, etc.), as well as configurations are stored here. To start MongoDB in Mesos we use `MongoDB-Marathon Docker <https://hub.docker.com/r/tobilg/mongodb-marathon/>`_
 
@@ -91,11 +91,11 @@ So the pipeline may look like at the following scheme:
 .. figure:: _static/ModuleStructure3.png
    :scale: 80%
 
-At the Processing platform component, the ingested data is transformed into streams, processed and sent to an external storage.  Data transformation and computation are the two major tasks of this component.
+At the Processing platform component, the ingested data are transformed into streams, processed and sent to an external storage.  Data transformation and computation are the two major tasks of this component.
 
 .. tip:: More information on modules you can find at the :ref:`Modules` page.
 
-The *Streaming component* is essential in SJ-Platform. The data is fed to the system, transported between modules and exported to an external storage via streams. It is streaming that makes possible such platform features as exactly-once processing, parallelism, fault-tolerance, horizontal scalability.
+The *Streaming component* is essential in SJ-Platform. The data are fed to the system, transported between modules and exported to an external storage via streams. It is streaming that makes possible such platform features as exactly-once processing, parallelism, fault-tolerance, horizontal scalability.
 
 The data can be received from different sources. Currently, the platform supports obtaining data from TCP sockets and Apache Kafka.
 
@@ -103,7 +103,7 @@ Using **TCP** as an input source a custom protocol can be applied for receiving 
 
 SJ-Platform supports **Apache Kafka** as a standard streaming platform providing a common interface for integration for most applications.
 
-Within the platform, the data is transported to and from modules via *transactional streams* or **T-streams**. It is a message broker and a Scala library native to SJ-Platform and designed primarily for exactly-once processing  (so it includes a transactional producer, a consumer and a subscriber). 
+Within the platform, the data are transported to and from modules via *transactional streams* or **T-streams**. It is a message broker and a Scala library native to SJ-Platform and designed primarily for exactly-once processing  (so it includes a transactional producer, a consumer and a subscriber). 
 
 .. tip:: More information on T-streams as well as streaming infrastructure in SJ-Platform can be found at the :ref:`Streaming` page. 
 

@@ -1,4 +1,4 @@
-.. _Streaming::
+.. _Streaming:
 
 Streams in SJ-Platform
 =============================

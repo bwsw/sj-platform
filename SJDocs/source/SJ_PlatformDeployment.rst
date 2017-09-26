@@ -8,7 +8,7 @@ Below, two ways of deployment are described. Please, read the requirements for e
 Deployment on Cluster
 ---------------------------
 
-The first option is to deloy SJ-Platform on a cluster. The `deployment guide <http://streamjuggler.readthedocs.io/en/develop/SJ_Deployment.html>`_ provides a detailed step-by-step instruction on Stream Juggler Platform deployment on a cluster. 
+The first option is to deploy SJ-Platform on a cluster. The `deployment guide <http://streamjuggler.readthedocs.io/en/develop/SJ_Deployment.html>`_ provides a detailed step-by-step instruction on Stream Juggler Platform deployment on a cluster. 
 
 Currently, the deployment on `Apache Mesos <http://mesos.apache.org/>`_ as a universal distributed computational engine is supported.
 
@@ -26,7 +26,7 @@ Deployment on Virtual Machine
 
 SJ-Platform can be deployed on a virtual machine. We suggest deploying the platform locally via Vagrant with VirtualBox as a provider.
 
-This is the most rapid way to get acquainted with the platform and assess its performance. It takes up to 30 minutes. The platform is deployed with all entities necessary to demonstrate the solution for the example task: providers, services, streams, configurations.
+This is the most rapid way to get acquainted with the platform and assess its performance. It takes up to 30 minutes. The platform is deployed with all entities necessary to demonstrate the solution for the example task: providers, services, streams, configurations. 
 
 All that's needed is:
 
