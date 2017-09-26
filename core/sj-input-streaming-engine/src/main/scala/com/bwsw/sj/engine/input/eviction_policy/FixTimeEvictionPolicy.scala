@@ -36,10 +36,7 @@ class FixTimeEvictionPolicy(hazelcast: HazelcastInterface) extends InputInstance
     */
   def isDuplicate(key: String): Boolean = {
     logger.debug(s"Check for duplicate a key: $key.")
-    val isDuplicate = uniqueEnvelopes.containsKey(key)
-    if (!isDuplicate) uniqueEnvelopes.set(key, ())
-    logger.debug(s"Duplication check result: $isDuplicate")
 
-    isDuplicate
+    uniqueEnvelopes.putIfAbsent(key, "") != null
   }
 }

@@ -50,7 +50,7 @@ class InputInstanceEvictionPolicyTests extends FlatSpec with Matchers with Mocki
   }
 
   trait HazelcastMock {
-    val hazelcastMap = mock[IMap[String, Unit]]
+    val hazelcastMap = mock[IMap[String, String]]
     val hazelcast = mock[HazelcastInterface]
     when(hazelcast.getMap).thenReturn(hazelcastMap)
   }

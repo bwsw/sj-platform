@@ -34,5 +34,5 @@ class HazelcastMock(config: HazelcastConfig) extends HazelcastInterface {
   /**
     * @inheritdoc
     */
-  override def getMap: IMap[String, Unit] = map
+  override def getMap: IMap[String, String] = map
 }

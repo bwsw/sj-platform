@@ -40,7 +40,7 @@ import scala.collection.mutable
   * @param config configuration parameters for hazelcast cluster
   * @author Pavel Tomskikh
   */
-abstract class HazelcastMapMock(config: HazelcastConfig) extends IMap[String, Unit] {
+abstract class HazelcastMapMock(config: HazelcastConfig) extends IMap[String, String] {
 
   private val map: mutable.Map[String, HazelcastMapValue] = mutable.Map()
 
@@ -52,7 +52,7 @@ abstract class HazelcastMapMock(config: HazelcastConfig) extends IMap[String, Un
     map.contains(key.asInstanceOf[String])
   }
 
-  override def set(key: String, value: Unit): Unit = {
+  override def set(key: String, value: String): Unit = {
     val hits = map.get(key).map(_.hits).getOrElse(0)
     map.put(key, HazelcastMapValue(hits + 1, System.currentTimeMillis))
     evict()
@@ -93,147 +93,147 @@ abstract class HazelcastMapMock(config: HazelcastConfig) extends IMap[String, Un
     case _ => super.equals(obj)
   }
 
-  override def removeAsync(key: String): ICompletableFuture[Unit] = ???
+  override def removeAsync(k: String): ICompletableFuture[String] = ???
 
-  override def setAsync(key: String, value: Unit): ICompletableFuture[Void] = ???
+  override def setAsync(k: String, v: String): ICompletableFuture[Void] = ???
 
-  override def setAsync(key: String, value: Unit, ttl: Long, timeunit: TimeUnit): ICompletableFuture[Void] = ???
+  override def setAsync(k: String, v: String, l: Long, timeUnit: TimeUnit): ICompletableFuture[Void] = ???
 
-  override def putTransient(key: String, value: Unit, ttl: Long, timeunit: TimeUnit): Unit = ???
+  override def putTransient(k: String, v: String, l: Long, timeUnit: TimeUnit): Unit = ???
 
-  override def containsValue(value: scala.Any): Boolean = ???
+  override def containsValue(o: scala.Any): Boolean = ???
 
-  override def put(key: String, value: Unit): Unit = ???
+  override def put(k: String, v: String): String = ???
 
-  override def put(key: String, value: Unit, ttl: Long, timeunit: TimeUnit): Unit = ???
+  override def put(k: String, v: String, l: Long, timeUnit: TimeUnit): String = ???
 
-  override def evict(key: String): Boolean = ???
+  override def evict(k: String): Boolean = ???
 
-  override def isLocked(key: String): Boolean = ???
+  override def isLocked(k: String): Boolean = ???
 
-  override def lock(key: String): Unit = ???
+  override def lock(k: String): Unit = ???
 
-  override def lock(key: String, leaseTime: Long, timeUnit: TimeUnit): Unit = ???
+  override def lock(k: String, l: Long, timeUnit: TimeUnit): Unit = ???
 
-  override def removeInterceptor(id: String): Unit = ???
+  override def removeInterceptor(s: String): Unit = ???
 
-  override def unlock(key: String): Unit = ???
+  override def unlock(k: String): Unit = ???
 
-  override def tryPut(key: String, value: Unit, timeout: Long, timeunit: TimeUnit): Boolean = ???
+  override def tryPut(k: String, v: String, l: Long, timeUnit: TimeUnit): Boolean = ???
 
   override def executeOnEntries(entryProcessor: EntryProcessor[_, _]): util.Map[String, AnyRef] = ???
 
   override def executeOnEntries(entryProcessor: EntryProcessor[_, _], predicate: Predicate[_, _]): util.Map[String, AnyRef] = ???
 
-  override def addLocalEntryListener(listener: MapListener): String = ???
+  override def addLocalEntryListener(mapListener: MapListener): String = ???
 
-  override def addLocalEntryListener(listener: EntryListener[_, _]): String = ???
+  override def addLocalEntryListener(entryListener: EntryListener[_, _]): String = ???
 
-  override def addLocalEntryListener(listener: MapListener, predicate: Predicate[String, Unit], includeValue: Boolean): String = ???
+  override def addLocalEntryListener(mapListener: MapListener, predicate: Predicate[String, String], b: Boolean): String = ???
 
-  override def addLocalEntryListener(listener: EntryListener[_, _], predicate: Predicate[String, Unit], includeValue: Boolean): String = ???
+  override def addLocalEntryListener(entryListener: EntryListener[_, _], predicate: Predicate[String, String], b: Boolean): String = ???
 
-  override def addLocalEntryListener(listener: MapListener, predicate: Predicate[String, Unit], key: String, includeValue: Boolean): String = ???
+  override def addLocalEntryListener(mapListener: MapListener, predicate: Predicate[String, String], k: String, b: Boolean): String = ???
 
-  override def addLocalEntryListener(listener: EntryListener[_, _], predicate: Predicate[String, Unit], key: String, includeValue: Boolean): String = ???
+  override def addLocalEntryListener(entryListener: EntryListener[_, _], predicate: Predicate[String, String], k: String, b: Boolean): String = ???
 
-  override def entrySet(): util.Set[Map.Entry[String, Unit]] = ???
+  override def entrySet(): util.Set[Map.Entry[String, String]] = ???
 
-  override def entrySet(predicate: Predicate[_, _]): util.Set[Map.Entry[String, Unit]] = ???
+  override def entrySet(predicate: Predicate[_, _]): util.Set[Map.Entry[String, String]] = ???
 
-  override def forceUnlock(key: String): Unit = ???
+  override def forceUnlock(k: String): Unit = ???
 
-  override def removeEntryListener(id: String): Boolean = ???
+  override def removeEntryListener(s: String): Boolean = ???
 
-  override def addIndex(attribute: String, ordered: Boolean): Unit = ???
+  override def addIndex(s: String, b: Boolean): Unit = ???
 
-  override def addEntryListener(listener: MapListener, includeValue: Boolean): String = ???
+  override def addEntryListener(mapListener: MapListener, b: Boolean): String = ???
 
-  override def addEntryListener(listener: EntryListener[_, _], includeValue: Boolean): String = ???
+  override def addEntryListener(entryListener: EntryListener[_, _], b: Boolean): String = ???
 
-  override def addEntryListener(listener: MapListener, key: String, includeValue: Boolean): String = ???
+  override def addEntryListener(mapListener: MapListener, k: String, b: Boolean): String = ???
 
-  override def addEntryListener(listener: EntryListener[_, _], key: String, includeValue: Boolean): String = ???
+  override def addEntryListener(entryListener: EntryListener[_, _], k: String, b: Boolean): String = ???
 
-  override def addEntryListener(listener: MapListener, predicate: Predicate[String, Unit], includeValue: Boolean): String = ???
+  override def addEntryListener(mapListener: MapListener, predicate: Predicate[String, String], b: Boolean): String = ???
 
-  override def addEntryListener(listener: EntryListener[_, _], predicate: Predicate[String, Unit], includeValue: Boolean): String = ???
+  override def addEntryListener(entryListener: EntryListener[_, _], predicate: Predicate[String, String], b: Boolean): String = ???
 
-  override def addEntryListener(listener: MapListener, predicate: Predicate[String, Unit], key: String, includeValue: Boolean): String = ???
+  override def addEntryListener(mapListener: MapListener, predicate: Predicate[String, String], k: String, b: Boolean): String = ???
 
-  override def addEntryListener(listener: EntryListener[_, _], predicate: Predicate[String, Unit], key: String, includeValue: Boolean): String = ???
+  override def addEntryListener(entryListener: EntryListener[_, _], predicate: Predicate[String, String], k: String, b: Boolean): String = ???
 
-  override def tryLock(key: String): Boolean = ???
+  override def tryLock(k: String): Boolean = ???
 
-  override def tryLock(key: String, time: Long, timeunit: TimeUnit): Boolean = ???
+  override def tryLock(k: String, l: Long, timeUnit: TimeUnit): Boolean = ???
 
-  override def tryLock(key: String, time: Long, timeunit: TimeUnit, leaseTime: Long, leaseTimeunit: TimeUnit): Boolean = ???
+  override def tryLock(k: String, l: Long, timeUnit: TimeUnit, l1: Long, timeUnit1: TimeUnit): Boolean = ???
 
-  override def addInterceptor(interceptor: MapInterceptor): String = ???
+  override def addInterceptor(mapInterceptor: MapInterceptor): String = ???
 
-  override def submitToKey(key: String, entryProcessor: EntryProcessor[_, _], callback: ExecutionCallback[_]): Unit = ???
+  override def submitToKey(k: String, entryProcessor: EntryProcessor[_, _], executionCallback: ExecutionCallback[_]): Unit = ???
 
-  override def submitToKey(key: String, entryProcessor: EntryProcessor[_, _]): ICompletableFuture[_] = ???
+  override def submitToKey(k: String, entryProcessor: EntryProcessor[_, _]): ICompletableFuture[_] = ???
 
-  override def values(): util.Collection[Unit] = ???
+  override def values(): util.Collection[String] = ???
 
-  override def values(predicate: Predicate[_, _]): util.Collection[Unit] = ???
+  override def values(predicate: Predicate[_, _]): util.Collection[String] = ???
 
-  override def loadAll(replaceExistingValues: Boolean): Unit = ???
+  override def loadAll(b: Boolean): Unit = ???
 
-  override def loadAll(keys: util.Set[String], replaceExistingValues: Boolean): Unit = ???
+  override def loadAll(set: util.Set[String], b: Boolean): Unit = ???
 
-  override def delete(key: scala.Any): Unit = ???
+  override def delete(o: scala.Any): Unit = ???
 
   override def localKeySet(): util.Set[String] = ???
 
   override def localKeySet(predicate: Predicate[_, _]): util.Set[String] = ???
 
-  override def remove(key: scala.Any): Unit = ???
+  override def remove(o: scala.Any): String = ???
 
-  override def aggregate[SuppliedValue, Result](supplier: Supplier[String, Unit, SuppliedValue], aggregation: Aggregation[String, SuppliedValue, Result]): Result = ???
+  override def aggregate[SuppliedValue, Result](supplier: Supplier[String, String, SuppliedValue], aggregation: Aggregation[String, SuppliedValue, Result]): Result = ???
 
-  override def aggregate[SuppliedValue, Result](supplier: Supplier[String, Unit, SuppliedValue], aggregation: Aggregation[String, SuppliedValue, Result], jobTracker: JobTracker): Result = ???
+  override def aggregate[SuppliedValue, Result](supplier: Supplier[String, String, SuppliedValue], aggregation: Aggregation[String, SuppliedValue, Result], jobTracker: JobTracker): Result = ???
 
   override def evictAll(): Unit = ???
 
   override def flush(): Unit = ???
 
-  override def putAsync(key: String, value: Unit): ICompletableFuture[Unit] = ???
+  override def putAsync(k: String, v: String): ICompletableFuture[String] = ???
 
-  override def putAsync(key: String, value: Unit, ttl: Long, timeunit: TimeUnit): ICompletableFuture[Unit] = ???
+  override def putAsync(k: String, v: String, l: Long, timeUnit: TimeUnit): ICompletableFuture[String] = ???
 
-  override def tryRemove(key: String, timeout: Long, timeunit: TimeUnit): Boolean = ???
+  override def tryRemove(k: String, l: Long, timeUnit: TimeUnit): Boolean = ???
 
   override def getLocalMapStats: LocalMapStats = ???
 
-  override def putAll(m: util.Map[_ <: String, _ <: Unit]): Unit = ???
+  override def putAll(map: util.Map[_ <: String, _ <: String]): Unit = ???
 
-  override def executeOnKey(key: String, entryProcessor: EntryProcessor[_, _]): AnyRef = ???
+  override def executeOnKey(k: String, entryProcessor: EntryProcessor[_, _]): AnyRef = ???
 
-  override def get(key: scala.Any): Unit = ???
+  override def get(o: scala.Any): String = ???
 
-  override def getEntryView(key: String): EntryView[String, Unit] = ???
+  override def getEntryView(k: String): EntryView[String, String] = ???
 
-  override def removePartitionLostListener(id: String): Boolean = ???
+  override def removePartitionLostListener(s: String): Boolean = ???
 
   override def keySet(): util.Set[String] = ???
 
   override def keySet(predicate: Predicate[_, _]): util.Set[String] = ???
 
-  override def set(key: String, value: Unit, ttl: Long, timeunit: TimeUnit): Unit = ???
+  override def set(k: String, v: String, l: Long, timeUnit: TimeUnit): Unit = ???
 
-  override def getAll(keys: util.Set[String]): util.Map[String, Unit] = ???
+  override def getAll(set: util.Set[String]): util.Map[String, String] = ???
 
-  override def addPartitionLostListener(listener: MapPartitionLostListener): String = ???
+  override def addPartitionLostListener(mapPartitionLostListener: MapPartitionLostListener): String = ???
 
   override def clear(): Unit = ???
 
-  override def getAsync(key: String): ICompletableFuture[Unit] = ???
+  override def getAsync(k: String): ICompletableFuture[String] = ???
 
-  override def executeOnKeys(keys: util.Set[String], entryProcessor: EntryProcessor[_, _]): util.Map[String, AnyRef] = ???
+  override def executeOnKeys(set: util.Set[String], entryProcessor: EntryProcessor[_, _]): util.Map[String, AnyRef] = ???
 
-  override def putIfAbsent(key: String, value: Unit, ttl: Long, timeunit: TimeUnit): Unit = ???
+  override def putIfAbsent(k: String, v: String, l: Long, timeUnit: TimeUnit): String = ???
 
   override def size(): Int = ???
 
