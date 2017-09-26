@@ -92,7 +92,7 @@ Two more processing modules are embedded into the pipeline to calculate response
 
 Finally, the output modules export aggregated data from echo-response streams to Elasticsearch. The result then can be visualized in a diagram using Kibana.
 
-The data is fed to the system, passed from one module to another and exported from the system via streams. Read more about streams under the “Creating Streams” section.
+The data are fed to the system, passed from one module to another and exported from the system via streams. Read more about streams under the “Creating Streams” section.
 
 In the demonstration project, the entities are added to the system via REST API as it is less time-consuming. The platform entities can be also created via the UI filling in the forms for each entity with necessary settings.
 
@@ -648,15 +648,15 @@ Now in the UI, you can see the uploaded modules under the ‘Modules’ tab.
 Step 4. Creating Streaming Layer 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The raw data is fed to the platform from different sources. And within the platform, the data is passed to and from a module in streams. Thus, in the next step, the streams for data ingesting and exporting will be created.
+The raw data are fed to the platform from different sources. And within the platform, the data are passed to and from a module in streams. Thus, in the next step, the streams for data ingesting and exporting will be created.
 
 Different modules require different stream types for input and output.
                    
 A module receives data from input streams from TCP sockets or Apache Kafka. 
 
-Within the platform, the data is transported to and from modules via T-streams. It is a native streaming type for SJ-Platform that allows exactly-once data exchange between modules. 
+Within the platform, the data are transported to and from modules via T-streams. It is a native streaming type for SJ-Platform that allows exactly-once data exchange between modules. 
 
-The result data is exported from SJ-Platform to an external storage with streams of types corresponding to the type of that storage: Elasticsearch, SQL database and RESTful.
+The result data are exported from SJ-Platform to an external storage with streams of types corresponding to the type of that storage: Elasticsearch, SQL database and RESTful.
 
 .. figure:: _static/ModuleStreams.png
    :scale: 80%
@@ -793,7 +793,7 @@ At this step all necessary indexes, tables and mapping should be created for sto
 
 For the Example task
 """"""""""""""""""""""""""""""""""""""
-In the provided example task the result data is stored to the Elasticsearch data storage.
+In the provided example task the result data are stored to the Elasticsearch data storage.
 
 Thus, it is necessary to create the index and mapping for Elasticsearch.
 
@@ -941,7 +941,7 @@ Many other parameter combinations can be implemented to view the results.
 Instance Shutdown 
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Once the task is resolved and necessary data is aggregated, the instances can be stopped. 
+Once the task is resolved and necessary data are aggregated, the instances can be stopped. 
 
 A stopped instance can be restarted again if it is necessary.
 
@@ -1010,13 +1010,13 @@ Sflow Example Task
 
 There is another example of the platform performance. It represents the processing workflow developed for the demonstration task that is responsible for collecting `sFlow <https://sflow.org/>`_ information. The aggregated information can be valuable for monitoring of the current traffic and predicting of possible problems. The solution represents a scalable system for aggregation and analysis of big data in continuous streams. That is extreamly important for large computer systems and platforms.
 
-The suggested processing pipeline includes an input module, a batch processing module and an output module. Within the platform, the data is transported with T-streams.
+The suggested processing pipeline includes an input module, a batch processing module and an output module. Within the platform, the data are transported with T-streams.
 
 As an external data source, an sFlow reporter takes place. It sends data to the system in CSV format.
 
 The CSV data are transformed by the input module and sent for processing to the batch processing module. The data that can not be parsed by the input module are sent to the output module for incorrect data without processing.
 
-The processed data is stored in the PostgreSQL database. It is exported from the platform via the output module with the streams of SQL-database type.
+The processed data are stored in the PostgreSQL database. It is exported from the platform via the output module with the streams of SQL-database type.
 
 A complete pipeline can be rendered as in the diagram below:
 
