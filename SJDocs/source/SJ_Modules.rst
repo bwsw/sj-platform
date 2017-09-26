@@ -211,9 +211,9 @@ This module is provided via Sonatype repository and it extends *InputStreamingEx
 Regex input module uses the following policies:
 
 1. first-match-win
-       To each data the regular expressions from list of rules are applied until the first match is found; then this data is converted into Avro Record and put into the output stream. Matching process for this data is stopped. 
+       To each data the regular expressions from the list of rules are applied until the first match is found; then these data are converted into avro record and put into the output stream. The matching process for these data is stopped. 
 
-If none of the rules is matched, data is converted to unified fallback avro record and put into the fallback stream.
+       If none of the rules is matched, the data are converted to unified fallback avro record and put into the fallback stream.
 
 2. check-every
       To each data portion the regular expressions from the list of rules are applied. When matched, the data are converted to Avro Record and put into the output stream. Matching process will continue using the next rule.
