@@ -36,7 +36,6 @@ import org.apache.avro.{Schema, SchemaBuilder}
 import org.slf4j.LoggerFactory
 
 import scala.annotation.tailrec
-import scala.io.Source
 import scala.util.{Failure, Success, Try}
 
 /**
@@ -91,11 +90,10 @@ class RegexInputExecutor(manager: InputEnvironmentManager) extends InputStreamin
     val data = new Array[Byte](length)
 
     dataBuffer.getBytes(0, data)
-    buffer.readerIndex(interval.finalValue + 1)
 
-    val line = Source.fromBytes(data, regexInputOptions.encoding).mkString
+    val line = new String(data, regexInputOptions.encoding)
 
-    logger.info(s"Received data $line")
+    logger.debug(s"Received data $line")
 
     policyHandler(line)
   }
