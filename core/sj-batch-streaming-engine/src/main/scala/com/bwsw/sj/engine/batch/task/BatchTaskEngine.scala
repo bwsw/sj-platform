@@ -114,7 +114,11 @@ class BatchTaskEngine(manager: CommonTaskManager,
   private def retrieveAndProcessEnvelopes(): Unit = {
     retrievableStreams.foreach(stream => {
       logger.debug(s"Retrieve an available envelope from '$stream' stream.")
-      envelopeFetcher.get(stream).foreach(batchCollector.onReceive)
+      envelopeFetcher.get(stream) match {
+        case Some(envelope) => batchCollector.onReceive(envelope)
+        case None => onIdle()
+      }
+
       processBatches()
 
       moduleService.onTimer()
@@ -128,9 +132,7 @@ class BatchTaskEngine(manager: CommonTaskManager,
   private def processBatches(): Unit = {
     logger.debug(s"Check whether there are batches to collect or not.")
     val batches = batchCollector.getBatchesToCollect().map(batchCollector.collectBatch)
-    if (batches.isEmpty) {
-      onIdle()
-    } else {
+    if (batches.nonEmpty) {
       batches.foreach(batch => {
         registerBatch(batch)
 
@@ -143,9 +145,10 @@ class BatchTaskEngine(manager: CommonTaskManager,
   }
 
   private def onIdle(): Unit = {
-    logger.debug(s"An envelope has been received but no batches have been collected.")
+    logger.debug(s"An envelope has not been received.")
     performanceMetrics.increaseTotalIdleTime(instance.eventWaitIdleTime)
     executor.onIdle()
+    Thread.sleep(instance.eventWaitIdleTime)
   }
 
   private def registerBatch(batch: Batch): ListBuffer[Int] = {
