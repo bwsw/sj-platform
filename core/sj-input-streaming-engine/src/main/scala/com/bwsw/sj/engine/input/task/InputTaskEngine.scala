@@ -59,6 +59,7 @@ abstract class InputTaskEngine(manager: InputTaskManager,
 
   import InputTaskEngine.logger
 
+  private val logPrefix = s"Task name: ${manager.taskName}. "
   private val currentThread: Thread = Thread.currentThread()
   currentThread.setName(s"input-task-${manager.taskName}-engine")
   private val instance = manager.instance.asInstanceOf[InputInstance]
@@ -86,7 +87,8 @@ abstract class InputTaskEngine(manager: InputTaskManager,
     */
   private val contextsToSendCheckpointResponse: scala.collection.mutable.Set[ChannelHandlerContext] = collection.mutable.Set[ChannelHandlerContext]()
 
-  private val performanceMetricsThread = new InputStreamingPerformanceMetricsThread(performanceMetrics)
+  private val performanceMetricsThread = new InputStreamingPerformanceMetricsThread(
+    performanceMetrics, s"input-task-${manager.taskName}-performance-metrics")
   performanceMetricsThread.start()
 
   private val senderThread = new SenderThread(manager, performanceMetricsThread)
@@ -103,16 +105,15 @@ abstract class InputTaskEngine(manager: InputTaskManager,
     * It is in charge of running the basic execution logic of [[InputTaskEngine]]
     */
   def call(): Unit = {
-    logger.info(s"Task name: ${manager.taskName}. " +
-      s"Run input task engine in a separate thread of execution service.")
+    logInfo("Run input task engine in a separate thread of execution service.")
     while (true) {
       getChannelContext() match {
         case Some(channelContext) =>
           contextsToSendCheckpointResponse.add(channelContext)
-          logger.debug(s"Task name: ${manager.taskName}. Invoke tokenize() method of executor.")
+          logDebug("Invoke tokenize() method of executor.")
           val maybeInterval = executor.tokenize(bufferForEachContext(channelContext))
           if (maybeInterval.isDefined) {
-            logger.debug(s"Task name: ${manager.taskName}. Tokenize() method returned a defined interval.")
+            logDebug("Tokenize() method returned a defined interval.")
             tryToRead(channelContext, maybeInterval.get)
           }
         case None =>
@@ -135,8 +136,8 @@ abstract class InputTaskEngine(manager: InputTaskManager,
   private def tryToRead(channelContext: ChannelHandlerContext, interval: Interval): ChannelFuture = {
     val buffer = bufferForEachContext(channelContext)
     if (buffer.isReadable(interval.finalValue - interval.initialValue)) {
-      logger.debug(s"Task name: ${manager.taskName}. The end index of interval is valid.")
-      logger.debug(s"Task name: ${manager.taskName}. Invoke parse() method of executor.")
+      logDebug("The end index of interval is valid.")
+      logDebug("Invoke parse() method of executor.")
       val inputEnvelope = executor.parse(buffer, interval)
       clearBufferAfterParse(buffer, interval.finalValue)
       if (buffer.isReadable)
@@ -144,10 +145,9 @@ abstract class InputTaskEngine(manager: InputTaskManager,
       val isNotDuplicateOrEmpty = processEnvelope(inputEnvelope)
       sendClientResponse(inputEnvelope, isNotDuplicateOrEmpty, channelContext)
     } else {
-      logger.error(s"Task name: ${manager.taskName}. " +
-        s"Method tokenize() returned an interval with a final value: ${interval.finalValue} " +
+      logError(s"Method tokenize() returned an interval with a final value: ${interval.finalValue} " +
         s"that an input stream is not defined at (buffer write index: ${buffer.writerIndex()}).")
-      throw new IndexOutOfBoundsException(s"Task name: ${manager.taskName}. " +
+      throw new IndexOutOfBoundsException(s"$logPrefix " +
         s"Method tokenize() returned an interval with a final value: ${interval.finalValue} " +
         s"that an input stream is not defined at (buffer write index: ${buffer.writerIndex()})")
     }
@@ -175,10 +175,10 @@ abstract class InputTaskEngine(manager: InputTaskManager,
   private def processEnvelope(envelope: Option[InputEnvelope[AnyRef]]): Boolean = {
     envelope match {
       case Some(inputEnvelope) =>
-        logger.info(s"Task name: ${manager.taskName}. Envelope is defined. Process it.")
+        logDebug("Envelope is defined. Process it.")
         performanceMetricsThread.addEnvelopeToInputStream(inputEnvelope)
         if (!isDuplicate(inputEnvelope.key, inputEnvelope.duplicateCheck)) {
-          logger.debug(s"Task name: ${manager.taskName}. Envelope is not duplicate so send it.")
+          logDebug("Envelope is not duplicate so send it.")
           val bytes = executor.serialize(inputEnvelope.data)
           senderThread.send(SerializedEnvelope(bytes, inputEnvelope.outputMetadata))
           afterReceivingEnvelope()
@@ -197,8 +197,7 @@ abstract class InputTaskEngine(manager: InputTaskManager,
     * @return True if a processed envelope is a duplicate and false otherwise
     */
   private def isDuplicate(key: String, duplicateCheck: Option[Boolean]): Boolean = {
-    logger.info(s"Task name: ${manager.taskName}. " +
-      s"Try to check key: '$key' for duplication with a setting duplicateCheck = '$duplicateCheck' " +
+    logDebug(s"Try to check key: '$key' for duplication with a setting duplicateCheck = '$duplicateCheck' " +
       s"and an instance setting - 'duplicate-check' : '${instance.duplicateCheck}'.")
     if (duplicateCheck.isDefined) {
       if (duplicateCheck.get) evictionPolicy.isDuplicate(key) else false
@@ -227,7 +226,7 @@ abstract class InputTaskEngine(manager: InputTaskManager,
     * Does group checkpoint of t-streams consumers/producers
     */
   private def doCheckpoint(): Unit = {
-    logger.info(s"Task: ${manager.taskName}. It's time to checkpoint.")
+    logInfo("It's time to checkpoint.")
     senderThread.checkpoint()
     checkpointInitiated()
     prepareForNextCheckpoint()
@@ -251,6 +250,13 @@ abstract class InputTaskEngine(manager: InputTaskManager,
     * @param isCheckpointInitiated flag points whether checkpoint was initiated inside input module (not on the schedule) or not.
     */
   protected def isItTimeToCheckpoint(isCheckpointInitiated: Boolean): Boolean
+
+
+  private def logInfo(message: String): Unit = logger.info(logPrefix + message)
+
+  private def logDebug(message: String): Unit = logger.debug(logPrefix + message)
+
+  private def logError(message: String): Unit = logger.error(logPrefix + message)
 }
 
 object InputTaskEngine {
@@ -269,11 +275,16 @@ object InputTaskEngine {
 
     manager.inputInstance.checkpointMode match {
       case EngineLiterals.`timeIntervalMode` =>
-        logger.info(s"Task: ${manager.taskName}. Input module has a '${EngineLiterals.timeIntervalMode}' checkpoint mode, create an appropriate task engine.")
-        new InputTaskEngine(manager, performanceMetrics, channelContextQueue, bufferForEachContext, connectionRepository) with TimeCheckpointTaskEngine
+        logger.info(s"Task: ${manager.taskName}. " +
+          s"Input module has a '${EngineLiterals.timeIntervalMode}' checkpoint mode, create an appropriate task engine.")
+        new InputTaskEngine(manager, performanceMetrics, channelContextQueue, bufferForEachContext, connectionRepository)
+          with TimeCheckpointTaskEngine
+
       case EngineLiterals.`everyNthMode` =>
-        logger.info(s"Task: ${manager.taskName}. Input module has an '${EngineLiterals.everyNthMode}' checkpoint mode, create an appropriate task engine.")
-        new InputTaskEngine(manager, performanceMetrics, channelContextQueue, bufferForEachContext, connectionRepository) with NumericalCheckpointTaskEngine
+        logger.info(s"Task: ${manager.taskName}. " +
+          s"Input module has an '${EngineLiterals.everyNthMode}' checkpoint mode, create an appropriate task engine.")
+        new InputTaskEngine(manager, performanceMetrics, channelContextQueue, bufferForEachContext, connectionRepository)
+          with NumericalCheckpointTaskEngine
     }
   }
 }

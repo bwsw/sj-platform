@@ -26,7 +26,8 @@ import com.bwsw.sj.common.utils.EngineLiterals
 /**
   * @author Pavel Tomskikh
   */
-class InputStreamingPerformanceMetricsThread(performanceMetrics: InputStreamingPerformanceMetrics) extends Thread {
+class InputStreamingPerformanceMetricsThread(performanceMetrics: InputStreamingPerformanceMetrics, threadName: String)
+  extends Thread(threadName) {
 
   private val envelopesQueue =
     new ArrayBlockingQueue[Either[InputEnvelope[AnyRef], (String, String, Long)]](EngineLiterals.queueSize)
