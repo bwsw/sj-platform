@@ -33,9 +33,9 @@ import com.bwsw.sj.engine.input.config.InputEngineConfigNames
 import com.bwsw.sj.engine.input.eviction_policy.InputInstanceEvictionPolicy
 import com.bwsw.sj.engine.input.task.reporting.{InputStreamingPerformanceMetrics, InputStreamingPerformanceMetricsThread}
 import com.typesafe.config.ConfigFactory
+import com.typesafe.scalalogging.Logger
 import io.netty.buffer.ByteBuf
 import io.netty.channel.{ChannelFuture, ChannelHandlerContext}
-import org.slf4j.{Logger, LoggerFactory}
 
 import scala.util.Try
 
@@ -260,7 +260,7 @@ abstract class InputTaskEngine(manager: InputTaskManager,
 }
 
 object InputTaskEngine {
-  private val logger: Logger = LoggerFactory.getLogger(this.getClass)
+  private val logger: Logger = Logger(this.getClass)
 
   /**
     * Creates InputTaskEngine is in charge of a basic execution logic of task of input module

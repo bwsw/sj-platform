@@ -20,7 +20,7 @@ package com.bwsw.sj.common.engine.core.environment
 
 import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
 import com.bwsw.tstreams.agents.producer.ProducerTransaction
-import org.slf4j.{Logger, LoggerFactory}
+import com.typesafe.scalalogging.Logger
 
 /**
   * Common class that is a wrapper for output stream
@@ -30,7 +30,7 @@ import org.slf4j.{Logger, LoggerFactory}
   *                           or [[com.bwsw.sj.common.utils.EngineLiterals.batchStreamingType]] module
   */
 abstract class ModuleOutput(private val performanceMetrics: PerformanceMetrics) {
-  protected val logger: Logger = LoggerFactory.getLogger(this.getClass)
+  protected val logger: Logger = Logger(this.getClass)
 
   protected def updatePerformanceMetrics(streamName: String, txn: ProducerTransaction, bytes: Array[Byte]): Unit = {
     logger.debug(s"Add an element to output envelope of output stream:  '$streamName'.")

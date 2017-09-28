@@ -22,7 +22,7 @@ import java.io.File
 import java.net.{Inet4Address, Inet6Address, InetAddress}
 
 import com.maxmind.geoip.LookupService
-import org.slf4j.LoggerFactory
+import com.typesafe.scalalogging.Logger
 
 import scala.util.{Failure, Success, Try}
 
@@ -33,7 +33,7 @@ import scala.util.{Failure, Success, Try}
   * @param ipv6DatabaseFile geoip database file for IPv4
   */
 class GeoIp(ipv4DatabaseFile: Option[File] = None, ipv6DatabaseFile: Option[File] = None) {
-  private val logger = LoggerFactory.getLogger(this.getClass)
+  private val logger = Logger(this.getClass)
   private lazy val ipv4AsNumLookup = getAsLookupServiceIpv4
   private lazy val ipv6AsNumLookup = getAsLookupServiceIpv6
 

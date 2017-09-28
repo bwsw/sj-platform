@@ -28,12 +28,12 @@ import com.bwsw.sj.common.engine.core.input.utils.Tokenizer
 import com.bwsw.sj.common.engine.core.input.{InputStreamingExecutor, Interval}
 import com.bwsw.sj.common.utils.stream_distributor.{ByHash, StreamDistributor}
 import com.bwsw.sj.common.utils.{AvroRecordUtils, StreamLiterals}
+import com.typesafe.scalalogging.Logger
 import io.netty.buffer.ByteBuf
 import org.apache.avro.SchemaBuilder.FieldAssembler
 import org.apache.avro.generic.GenericData.Record
 import org.apache.avro.generic.GenericRecord
 import org.apache.avro.{Schema, SchemaBuilder}
-import org.slf4j.LoggerFactory
 
 import scala.annotation.tailrec
 import scala.util.{Failure, Success, Try}
@@ -45,7 +45,7 @@ import scala.util.{Failure, Success, Try}
   * @author Ruslan Komarov
   */
 class RegexInputExecutor(manager: InputEnvironmentManager) extends InputStreamingExecutor[Record](manager) {
-  private val logger = LoggerFactory.getLogger(this.getClass)
+  private val logger = Logger(this.getClass)
   private val jsonSerializer = new JsonSerializer
   private val avroSerializer = new AvroSerializer
   private val regexInputOptions = jsonSerializer.deserialize[RegexInputOptions](manager.options)

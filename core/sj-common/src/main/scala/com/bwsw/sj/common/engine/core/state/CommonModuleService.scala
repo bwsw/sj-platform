@@ -26,7 +26,7 @@ import com.bwsw.sj.common.engine.core.managment.CommonTaskManager
 import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import com.bwsw.tstreams.agents.producer.Producer
-import org.slf4j.{Logger, LoggerFactory}
+import com.typesafe.scalalogging.Logger
 import scaldi.Injector
 
 import scala.collection.mutable
@@ -40,7 +40,7 @@ abstract class CommonModuleService(protected val instance: Instance,
                                    protected val outputProducers: Map[String, Producer],
                                    checkpointGroup: CheckpointGroup) {
 
-  protected val logger: Logger = LoggerFactory.getLogger(this.getClass)
+  protected val logger: Logger = Logger(this.getClass)
   protected val moduleTimer: SjTimer = new SjTimer()
   protected val producerPolicyByOutput: mutable.Map[String, (String, ModuleOutput)] = mutable.Map[String, (String, ModuleOutput)]()
 
@@ -73,7 +73,7 @@ abstract class CommonModuleService(protected val instance: Instance,
 }
 
 object CommonModuleService {
-  private val logger = LoggerFactory.getLogger(this.getClass)
+  private val logger = Logger(this.getClass)
 
   def apply(manager: CommonTaskManager,
             checkpointGroup: CheckpointGroup,

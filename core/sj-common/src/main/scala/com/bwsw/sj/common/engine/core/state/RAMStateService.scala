@@ -19,7 +19,7 @@
 package com.bwsw.sj.common.engine.core.state
 
 import com.bwsw.sj.common.engine.core.state.StateLiterals.{deleteLiteral, setLiteral}
-import org.slf4j.LoggerFactory
+import com.typesafe.scalalogging.Logger
 
 import scala.collection.mutable
 
@@ -34,7 +34,7 @@ class RAMStateService(stateSaver: StateSaverInterface,
                       stateLoader: StateLoaderInterface)
   extends IStateService {
 
-  private val logger = LoggerFactory.getLogger(this.getClass)
+  private val logger = Logger(this.getClass)
 
   /**
     * Provides key/value storage to keep state changes. It's used to do checkpoint of partial changes of state

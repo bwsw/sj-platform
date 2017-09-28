@@ -29,7 +29,7 @@ import com.bwsw.sj.common.engine.core.state.CommonModuleService
 import com.bwsw.sj.common.si.model.instance.BatchInstance
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.batch.task.input.{EnvelopeFetcher, RetrievableCheckpointTaskInput}
-import org.slf4j.LoggerFactory
+import com.typesafe.scalalogging.Logger
 import scaldi.Injectable.inject
 import scaldi.Injector
 
@@ -56,7 +56,7 @@ class BatchTaskEngine(manager: CommonTaskManager,
 
   private val currentThread = Thread.currentThread()
   currentThread.setName(s"batch-task-engine")
-  private val logger = LoggerFactory.getLogger(this.getClass)
+  private val logger = Logger(this.getClass)
   private val instance = manager.instance.asInstanceOf[BatchInstance]
   private val inputs = instance.getInputsWithoutStreamMode
   private val batchCollector = manager.getBatchCollector(instance.to, performanceMetrics, inputs)

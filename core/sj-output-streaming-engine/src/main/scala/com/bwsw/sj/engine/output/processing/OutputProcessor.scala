@@ -25,7 +25,7 @@ import com.bwsw.sj.common.engine.core.output.Entity
 import com.bwsw.sj.engine.core.output.types.CommandBuilder
 import com.bwsw.sj.engine.output.task.OutputTaskManager
 import com.bwsw.sj.engine.output.task.reporting.OutputStreamingPerformanceMetrics
-import org.slf4j.{Logger, LoggerFactory}
+import com.typesafe.scalalogging.Logger
 import scaldi.Injector
 
 /**
@@ -37,7 +37,7 @@ import scaldi.Injector
   */
 abstract class OutputProcessor[T <: AnyRef](outputStream: StreamDomain,
                                             performanceMetrics: OutputStreamingPerformanceMetrics) {
-  protected val logger: Logger = LoggerFactory.getLogger(this.getClass)
+  protected val logger: Logger = Logger(this.getClass)
   protected val commandBuilder: CommandBuilder[_]
 
   protected def transactionFieldName: String = "txn"

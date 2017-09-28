@@ -21,7 +21,7 @@ package com.bwsw.sj.common.engine.core.state
 import com.bwsw.common.ObjectSerializer
 import com.bwsw.sj.common.engine.core.state.StateLiterals.{deleteLiteral, setLiteral}
 import com.bwsw.tstreams.agents.consumer.{Consumer, ConsumerTransaction}
-import org.slf4j.LoggerFactory
+import com.typesafe.scalalogging.Logger
 
 import scala.collection.mutable
 
@@ -32,7 +32,7 @@ import scala.collection.mutable
   * @author Pavel Tomskikh
   */
 class StateLoader(stateConsumer: Consumer) extends StateLoaderInterface {
-  private val logger = LoggerFactory.getLogger(this.getClass)
+  private val logger = Logger(this.getClass)
 
   /**
     * Provides a serialization from a transaction data to state variables or state changes

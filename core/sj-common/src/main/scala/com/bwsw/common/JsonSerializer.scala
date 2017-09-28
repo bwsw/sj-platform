@@ -28,7 +28,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature.{FAIL_ON_NULL_FOR_P
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException
 import com.fasterxml.jackson.databind.{JsonMappingException, ObjectMapper}
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
-import org.slf4j.LoggerFactory
+import com.typesafe.scalalogging.Logger
 
 import scala.collection.JavaConverters._
 import scala.util.{Failure, Success, Try}
@@ -41,7 +41,7 @@ import scala.util.{Failure, Success, Try}
   * @param enableNullForPrimitives indicates that value of field with primitive type could contain null
   */
 class JsonSerializer(ignoreUnknown: Boolean = false, enableNullForPrimitives: Boolean = true) {
-  private val logger = LoggerFactory.getLogger(this.getClass)
+  private val logger = Logger(this.getClass)
 
   private val mapper = new ObjectMapper()
   mapper.registerModule(DefaultScalaModule)

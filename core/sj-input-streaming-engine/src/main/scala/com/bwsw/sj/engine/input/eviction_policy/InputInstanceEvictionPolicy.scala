@@ -21,7 +21,7 @@ package com.bwsw.sj.engine.input.eviction_policy
 import com.bwsw.common.hazelcast.HazelcastInterface
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.hazelcast.core.IMap
-import org.slf4j.{Logger, LoggerFactory}
+import com.typesafe.scalalogging.Logger
 
 /**
   * Provides methods are responsible for an eviction policy of input envelope duplicates
@@ -31,7 +31,7 @@ import org.slf4j.{Logger, LoggerFactory}
   */
 
 abstract class InputInstanceEvictionPolicy(hazelcast: HazelcastInterface) {
-  protected val logger: Logger = LoggerFactory.getLogger(this.getClass)
+  protected val logger: Logger = Logger(this.getClass)
   protected val uniqueEnvelopes: IMap[String, String] = getUniqueEnvelopes
 
   /**

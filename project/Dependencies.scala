@@ -66,7 +66,8 @@ object Dependencies {
     "org.mock-server" % "mockserver-netty" % "3.10.8" % "test",
     "com.carrotsearch" % "java-sizeof" % "0.0.5",
     ("de.flapdoodle.embed" % "de.flapdoodle.embed.mongo" % "2.0.0")
-      .exclude("org.slf4j", "slf4j-api")
+      .exclude("org.slf4j", "slf4j-api"),
+    "com.typesafe.scala-logging" %% "scala-logging" % "3.7.2"
   ))
 
   lazy val sjEngineCoreDependencies = Def.setting(Seq(

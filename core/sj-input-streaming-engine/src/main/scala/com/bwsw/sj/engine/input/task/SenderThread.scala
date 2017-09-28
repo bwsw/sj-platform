@@ -23,7 +23,7 @@ import java.util.concurrent.{ArrayBlockingQueue, TimeUnit}
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.input.task.reporting.InputStreamingPerformanceMetricsThread
 import com.bwsw.tstreams.agents.producer.{NewProducerTransactionPolicy, ProducerTransaction}
-import org.slf4j.{Logger, LoggerFactory}
+import com.typesafe.scalalogging.Logger
 
 import scala.collection.mutable
 
@@ -38,7 +38,7 @@ class SenderThread(manager: InputTaskManager,
                    performanceMetrics: InputStreamingPerformanceMetricsThread)
   extends Thread(s"input-task-${manager.taskName}-sender") {
 
-  private val logger: Logger = LoggerFactory.getLogger(this.getClass)
+  private val logger: Logger = Logger(this.getClass)
   private val producers = manager.outputProducers
   private val checkpointGroup = manager.createCheckpointGroup()
   private val transactionsByStreamPartitions = createTransactionsStorage()

@@ -27,7 +27,7 @@ import com.bwsw.sj.common.si.model.instance.Instance
 import com.bwsw.sj.common.engine.core.entities.{Envelope, KafkaEnvelope, TStreamEnvelope}
 import com.bwsw.sj.common.engine.core.managment.TaskManager
 import com.bwsw.tstreams.agents.producer.{NewProducerTransactionPolicy, Producer}
-import org.slf4j.{Logger, LoggerFactory}
+import com.typesafe.scalalogging.Logger
 
 import scala.collection._
 import scala.collection.mutable.ListBuffer
@@ -41,7 +41,7 @@ import scala.collection.mutable.ListBuffer
 abstract class PerformanceMetrics(manager: TaskManager) extends Callable[Unit] {
 
   protected val currentThread: Thread = Thread.currentThread()
-  protected val logger: Logger = LoggerFactory.getLogger(this.getClass)
+  protected val logger: Logger = Logger(this.getClass)
   protected val mutex: ReentrantLock = new ReentrantLock(true)
   protected val reportSerializer: JsonSerializer = new JsonSerializer()
   protected val startTime: Long = System.currentTimeMillis()
