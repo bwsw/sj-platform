@@ -51,27 +51,27 @@ class RAMStateService(stateSaver: StateSaverInterface,
   }
 
   override def isExist(key: String): Boolean = {
-    logger.info(s"Check whether a state variable: $key  exists or not.")
+    logger.debug(s"Check whether a state variable: $key  exists or not.")
     stateVariables.contains(key)
   }
 
   override def get(key: String): Any = {
-    logger.info(s"Get a state variable: $key.")
+    logger.debug(s"Get a state variable: $key.")
     stateVariables(key)
   }
 
   override def set(key: String, value: Any): Unit = {
-    logger.info(s"Set a state variable: $key to $value.")
+    logger.debug(s"Set a state variable: $key to $value.")
     stateVariables(key) = value
   }
 
   override def delete(key: String): Unit = {
-    logger.info(s"Remove a state variable: $key.")
+    logger.debug(s"Remove a state variable: $key.")
     stateVariables.remove(key)
   }
 
   override def clear(): Unit = {
-    logger.info(s"Remove all state variables.")
+    logger.debug(s"Remove all state variables.")
     stateVariables.clear()
   }
 
@@ -82,7 +82,7 @@ class RAMStateService(stateSaver: StateSaverInterface,
     * @param value Value of the state variable
     */
   override def setChange(key: String, value: Any): Unit = {
-    logger.info(s"Indicate that a state variable: $key value changed to $value.")
+    logger.debug(s"Indicate that a state variable: $key value changed to $value.")
     stateChanges(key) = (setLiteral, value)
   }
 
@@ -92,7 +92,7 @@ class RAMStateService(stateSaver: StateSaverInterface,
     * @param key State variable name
     */
   override def deleteChange(key: String): Unit = {
-    logger.info(s"Indicate that a state variable: $key with value: ${stateVariables(key)} deleted.")
+    logger.debug(s"Indicate that a state variable: $key with value: ${stateVariables(key)} deleted.")
     stateChanges(key) = (deleteLiteral, stateVariables(key))
   }
 
@@ -100,7 +100,7 @@ class RAMStateService(stateSaver: StateSaverInterface,
     * Indicates that all state variables have been deleted
     */
   override def clearChange(): Unit = {
-    logger.info(s"Indicate that all state variables deleted.")
+    logger.debug(s"Indicate that all state variables deleted.")
     stateVariables.foreach(x => deleteChange(x._1))
   }
 
