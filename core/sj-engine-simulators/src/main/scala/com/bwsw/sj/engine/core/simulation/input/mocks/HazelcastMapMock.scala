@@ -54,8 +54,20 @@ abstract class HazelcastMapMock(config: HazelcastConfig) extends IMap[String, St
 
   override def set(key: String, value: String): Unit = {
     val hits = map.get(key).map(_.hits).getOrElse(0)
-    map.put(key, HazelcastMapValue(hits + 1, System.currentTimeMillis))
+    map.put(key, HazelcastMapValue(hits + 1, System.currentTimeMillis, value))
     evict()
+  }
+
+  override def put(key: String, value: String): String = {
+    val previousValue = map.get(key).map(_.value).orNull
+    set(key, value)
+
+    previousValue
+  }
+
+  override def putIfAbsent(key: String, value: String): String = {
+    if (containsKey(key)) map(key).value
+    else put(key, value)
   }
 
   /**
@@ -93,6 +105,7 @@ abstract class HazelcastMapMock(config: HazelcastConfig) extends IMap[String, St
     case _ => super.equals(obj)
   }
 
+
   override def removeAsync(k: String): ICompletableFuture[String] = ???
 
   override def setAsync(k: String, v: String): ICompletableFuture[Void] = ???
@@ -102,8 +115,6 @@ abstract class HazelcastMapMock(config: HazelcastConfig) extends IMap[String, St
   override def putTransient(k: String, v: String, l: Long, timeUnit: TimeUnit): Unit = ???
 
   override def containsValue(o: scala.Any): Boolean = ???
-
-  override def put(k: String, v: String): String = ???
 
   override def put(k: String, v: String, l: Long, timeUnit: TimeUnit): String = ???
 
@@ -258,10 +269,11 @@ object HazelcastMapMock {
   }
 }
 
-case class HazelcastMapValue(hits: Int, lastAccessTime: Long) {
+case class HazelcastMapValue(hits: Int, lastAccessTime: Long, value: String) {
   override def equals(obj: Any): Boolean = obj match {
     case hazelcastMapValue: HazelcastMapValue =>
-      hits == hazelcastMapValue.hits
+      hits == hazelcastMapValue.hits &&
+        value == hazelcastMapValue.value
     case _ => super.equals(obj)
   }
 }
