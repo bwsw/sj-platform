@@ -173,7 +173,7 @@ So, as a first step, you should deploy Mesos and other services.
 
 Please, note, the deployment is described for one default Mesos-slave with available ports [31000-32000]. 
 
-If you are planning to launch an instance with greater value of "parallelizm", i.e. to run tasks on more than 1 nodes, you need to increase the "executor_registration_timeout" parameter for Mesos-slave.
+If you are planning to launch a module with greater value of the "parallelizm" parameter, i.e. to run tasks on more than 1 nodes, you need to increase the "executor_registration_timeout" parameter for Mesos-slave.
 
 The requirements to Mesos-slave: 
 
