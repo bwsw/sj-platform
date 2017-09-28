@@ -24,7 +24,7 @@ import java.util.concurrent.{Callable, ExecutorCompletionService}
 import com.bwsw.sj.common.engine.TaskEngine
 import com.bwsw.sj.common.engine.core.config.EngineConfigNames
 import com.bwsw.sj.common.engine.core.managment.TaskManager
-import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
+import com.bwsw.sj.common.engine.core.reporting.{PerformanceMetrics, PerformanceMetricsProxy}
 import com.bwsw.sj.common.si.model.instance.Instance
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.typesafe.config.Config
@@ -42,8 +42,9 @@ class TaskRunnerTestSuit extends FlatSpec with Matchers with TaskRunnerMocks {
     //assert
     verify(executorServiceMock, times(1)).submit(taskEngine)
     verify(executorServiceMock, times(1)).submit(performanceMetrics)
+    verify(executorServiceMock, times(1)).submit(performanceMetricsProxy)
     verify(executorServiceMock, times(1)).submit(taskInputService)
-    verify(executorServiceMock, times(4)).submit(any())
+    verify(executorServiceMock, times(5)).submit(any())
   }
 }
 
@@ -69,12 +70,14 @@ trait TaskRunnerMocks extends MockitoSugar {
   when(manager.instance).thenReturn(instance)
 
   val performanceMetrics: PerformanceMetrics = mock[PerformanceMetrics]
+  val performanceMetricsProxy: PerformanceMetricsProxy = mock[PerformanceMetricsProxy]
   val taskEngine: TaskEngine = mock[TaskEngine]
   val taskInputService: TaskInputServiceMock = mock[TaskInputServiceMock]
 
   val taskRunner: TaskRunnerMock = new TaskRunnerMock(executorServiceMock,
     manager,
     performanceMetrics,
+    performanceMetricsProxy,
     taskEngine,
     taskInputService,
     injector)
@@ -83,6 +86,7 @@ trait TaskRunnerMocks extends MockitoSugar {
 class TaskRunnerMock(_executorService: ExecutorCompletionService[Unit],
                      _taskManager: TaskManager,
                      _performanceMetrics: PerformanceMetrics,
+                     _performanceMetricsProxy: PerformanceMetricsProxy,
                      _taskEngine: TaskEngine,
                      _taskInputService: Closeable,
                      injector: Injector) extends {
@@ -96,9 +100,14 @@ class TaskRunnerMock(_executorService: ExecutorCompletionService[Unit],
 
   override def createPerformanceMetrics(manager: TaskManager): PerformanceMetrics = _performanceMetrics
 
-  override def createTaskEngine(manager: TaskManager, performanceMetrics: PerformanceMetrics): TaskEngine = _taskEngine
+  override def createTaskEngine(manager: TaskManager, performanceMetrics: PerformanceMetricsProxy): TaskEngine =
+    _taskEngine
 
   override protected def waitForCompletion(closeableTaskInput: Closeable): Unit = {}
+
+  override def createPerformanceMetricsThread(taskName: String,
+                                              performanceMetrics: PerformanceMetrics): PerformanceMetricsProxy =
+    _performanceMetricsProxy
 }
 
 class TaskInputServiceMock extends Callable[Unit] with Closeable {

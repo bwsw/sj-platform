@@ -20,8 +20,8 @@ package com.bwsw.sj.engine.input.task
 
 import java.util.concurrent.{ArrayBlockingQueue, TimeUnit}
 
+import com.bwsw.sj.common.engine.core.reporting.PerformanceMetricsProxy
 import com.bwsw.sj.common.utils.EngineLiterals
-import com.bwsw.sj.engine.input.task.reporting.InputStreamingPerformanceMetricsThread
 import com.bwsw.tstreams.agents.producer.{NewProducerTransactionPolicy, ProducerTransaction}
 import com.typesafe.scalalogging.Logger
 
@@ -35,7 +35,7 @@ import scala.collection.mutable
   * @author Pavel Tomskikh
   */
 class SenderThread(manager: InputTaskManager,
-                   performanceMetrics: InputStreamingPerformanceMetricsThread)
+                   performanceMetrics: PerformanceMetricsProxy)
   extends Thread(s"input-task-${manager.taskName}-sender") {
 
   private val logger: Logger = Logger(this.getClass)

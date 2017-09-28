@@ -22,7 +22,7 @@ import com.bwsw.sj.common.dal.model.stream.{StreamDomain, TStreamStreamDomain}
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
 import com.bwsw.sj.common.engine.core.environment.StatefulModuleEnvironmentManager
 import com.bwsw.sj.common.engine.core.managment.CommonTaskManager
-import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
+import com.bwsw.sj.common.engine.core.reporting.PerformanceMetricsProxy
 import com.bwsw.sj.common.engine.{StateHandlers, StreamingExecutor, TimerHandlers}
 import com.bwsw.sj.common.si.model.instance.{BatchInstance, RegularInstance}
 import com.bwsw.tstreams.agents.consumer.Consumer
@@ -46,7 +46,7 @@ import scaldi.Injector
   */
 class StatefulCommonModuleService(manager: CommonTaskManager,
                                   checkpointGroup: CheckpointGroup,
-                                  performanceMetrics: PerformanceMetrics)
+                                  performanceMetrics: PerformanceMetricsProxy)
                                  (implicit injector: Injector)
   extends CommonModuleService(manager.instance, manager.outputProducers, checkpointGroup) {
 

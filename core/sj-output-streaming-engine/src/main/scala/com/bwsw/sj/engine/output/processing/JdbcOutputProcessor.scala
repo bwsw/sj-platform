@@ -25,16 +25,16 @@ import com.bwsw.sj.common.dal.model.service.JDBCServiceDomain
 import com.bwsw.sj.common.dal.model.stream.{JDBCStreamDomain, StreamDomain}
 import com.bwsw.sj.common.engine.core.entities._
 import com.bwsw.sj.common.engine.core.output.Entity
+import com.bwsw.sj.common.engine.core.reporting.PerformanceMetricsProxy
 import com.bwsw.sj.engine.core.output.types.jdbc.JdbcCommandBuilder
 import com.bwsw.sj.engine.output.task.OutputTaskManager
-import com.bwsw.sj.engine.output.task.reporting.OutputStreamingPerformanceMetrics
 import scaldi.Injector
 
 /**
   * ref. [[OutputProcessor]] object
   */
 class JdbcOutputProcessor[T <: AnyRef](outputStream: StreamDomain,
-                                       performanceMetrics: OutputStreamingPerformanceMetrics,
+                                       performanceMetrics: PerformanceMetricsProxy,
                                        manager: OutputTaskManager,
                                        entity: Entity[_])
                                       (implicit injector: Injector)

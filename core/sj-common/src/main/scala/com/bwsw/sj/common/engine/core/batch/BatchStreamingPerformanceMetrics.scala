@@ -121,7 +121,7 @@ class BatchStreamingPerformanceMetrics(manager: CommonTaskManager)
     reportSerializer.serialize(report)
   }
 
-  override def clear(): Unit = {
+  override protected def clear(): Unit = {
     logger.debug(s"Reset variables for performance report for next reporting.")
     inputEnvelopesPerStream = mutable.Map(inputStreamNames.map(x => (x, mutable.ListBuffer[List[Long]]())): _*)
     outputEnvelopesPerStream = mutable.Map(outputStreamNames.map(x => (x, mutable.Map[String, mutable.ListBuffer[Long]]())): _*)

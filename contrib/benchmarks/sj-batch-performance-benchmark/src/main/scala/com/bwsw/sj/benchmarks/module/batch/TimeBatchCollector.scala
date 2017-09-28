@@ -22,7 +22,7 @@ import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.benchmark.BatchExecutorOptions
 import com.bwsw.sj.common.dal.model.instance.BatchInstanceDomain
 import com.bwsw.sj.common.dal.model.stream.StreamDomain
-import com.bwsw.sj.common.engine.core.batch.{BatchCollector, BatchStreamingPerformanceMetrics}
+import com.bwsw.sj.common.engine.core.batch.{BatchCollector, BatchStreamingPerformanceMetricsProxy}
 import com.bwsw.sj.common.engine.core.entities.Envelope
 
 import scala.collection.mutable
@@ -31,7 +31,7 @@ import scala.collection.mutable
   * @author Pavel Tomskikh
   */
 class TimeBatchCollector(instance: BatchInstanceDomain,
-                         performanceMetrics: BatchStreamingPerformanceMetrics,
+                         performanceMetrics: BatchStreamingPerformanceMetricsProxy,
                          inputs: Array[StreamDomain])
   extends BatchCollector(instance, performanceMetrics, inputs) {
 

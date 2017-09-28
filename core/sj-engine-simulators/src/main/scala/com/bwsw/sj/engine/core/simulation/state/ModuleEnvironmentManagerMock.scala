@@ -21,7 +21,7 @@ package com.bwsw.sj.engine.core.simulation.state
 import com.bwsw.common.file.utils.FileStorage
 import com.bwsw.sj.common.dal.model.stream.{StreamDomain, TStreamStreamDomain}
 import com.bwsw.sj.common.engine.core.environment.{ModuleOutput, StatefulModuleEnvironmentManager}
-import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
+import com.bwsw.sj.common.engine.core.reporting.PerformanceMetricsProxy
 import com.bwsw.sj.common.engine.core.state.StateStorage
 import com.bwsw.sj.common.utils.SjTimer
 import com.bwsw.tstreams.agents.producer.Producer
@@ -59,7 +59,7 @@ class ModuleEnvironmentManagerMock(stateStorage: StateStorage,
 
     val producerPolicyByOutput = mutable.Map.empty[String, (String, ModuleOutput)]
     val moduleTimer = mock(classOf[SjTimer])
-    val performanceMetrics = mock(classOf[PerformanceMetrics])
+    val performanceMetrics = mock(classOf[PerformanceMetricsProxy])
   } with StatefulModuleEnvironmentManager(
     stateStorage,
     options,

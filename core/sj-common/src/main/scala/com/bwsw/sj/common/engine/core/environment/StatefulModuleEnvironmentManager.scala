@@ -20,7 +20,7 @@ package com.bwsw.sj.common.engine.core.environment
 
 import com.bwsw.common.file.utils.FileStorage
 import com.bwsw.sj.common.dal.model.stream.StreamDomain
-import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
+import com.bwsw.sj.common.engine.core.reporting.PerformanceMetricsProxy
 import com.bwsw.sj.common.engine.core.state.StateStorage
 import com.bwsw.sj.common.utils.SjTimer
 import com.bwsw.tstreams.agents.producer.Producer
@@ -53,7 +53,7 @@ class StatefulModuleEnvironmentManager(stateStorage: StateStorage,
                                        outputs: Array[StreamDomain],
                                        producerPolicyByOutput: mutable.Map[String, (String, ModuleOutput)],
                                        moduleTimer: SjTimer,
-                                       performanceMetrics: PerformanceMetrics,
+                                       performanceMetrics: PerformanceMetricsProxy,
                                        fileStorage: FileStorage)
   extends ModuleEnvironmentManager(
     options,

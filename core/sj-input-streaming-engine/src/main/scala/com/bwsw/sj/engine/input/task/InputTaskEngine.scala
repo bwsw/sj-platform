@@ -26,12 +26,12 @@ import com.bwsw.sj.common.engine.TaskEngine
 import com.bwsw.sj.common.engine.core.entities.InputEnvelope
 import com.bwsw.sj.common.engine.core.environment.InputEnvironmentManager
 import com.bwsw.sj.common.engine.core.input.{InputStreamingExecutor, Interval}
+import com.bwsw.sj.common.engine.core.reporting.PerformanceMetricsProxy
 import com.bwsw.sj.common.si.model.instance.InputInstance
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.core.engine.{NumericalCheckpointTaskEngine, TimeCheckpointTaskEngine}
 import com.bwsw.sj.engine.input.config.InputEngineConfigNames
 import com.bwsw.sj.engine.input.eviction_policy.InputInstanceEvictionPolicy
-import com.bwsw.sj.engine.input.task.reporting.{InputStreamingPerformanceMetrics, InputStreamingPerformanceMetricsThread}
 import com.typesafe.config.ConfigFactory
 import com.typesafe.scalalogging.Logger
 import io.netty.buffer.ByteBuf
@@ -52,7 +52,7 @@ import scala.util.Try
   * @author Kseniya Mikhaleva
   */
 abstract class InputTaskEngine(manager: InputTaskManager,
-                               performanceMetrics: InputStreamingPerformanceMetrics,
+                               performanceMetrics: PerformanceMetricsProxy,
                                channelContextQueue: ArrayBlockingQueue[ChannelHandlerContext],
                                bufferForEachContext: scala.collection.concurrent.Map[ChannelHandlerContext, ByteBuf],
                                connectionRepository: ConnectionRepository) extends TaskEngine {
@@ -87,11 +87,7 @@ abstract class InputTaskEngine(manager: InputTaskManager,
     */
   private val contextsToSendCheckpointResponse: scala.collection.mutable.Set[ChannelHandlerContext] = collection.mutable.Set[ChannelHandlerContext]()
 
-  private val performanceMetricsThread = new InputStreamingPerformanceMetricsThread(
-    performanceMetrics, s"input-task-${manager.taskName}-performance-metrics")
-  performanceMetricsThread.start()
-
-  private val senderThread = new SenderThread(manager, performanceMetricsThread)
+  private val senderThread = new SenderThread(manager, performanceMetrics)
   senderThread.start()
 
   private def createModuleEnvironmentManager(): InputEnvironmentManager = {
@@ -176,7 +172,7 @@ abstract class InputTaskEngine(manager: InputTaskManager,
     envelope match {
       case Some(inputEnvelope) =>
         logDebug("Envelope is defined. Process it.")
-        performanceMetricsThread.addEnvelopeToInputStream(inputEnvelope)
+        performanceMetrics.addEnvelopeToInputStream(inputEnvelope)
         if (!isDuplicate(inputEnvelope.key, inputEnvelope.duplicateCheck)) {
           logDebug("Envelope is not duplicate so send it.")
           val bytes = executor.serialize(inputEnvelope.data)
@@ -268,7 +264,7 @@ object InputTaskEngine {
     * @return Engine of input task
     */
   def apply(manager: InputTaskManager,
-            performanceMetrics: InputStreamingPerformanceMetrics,
+            performanceMetrics: PerformanceMetricsProxy,
             channelContextQueue: ArrayBlockingQueue[ChannelHandlerContext],
             bufferForEachContext: scala.collection.concurrent.Map[ChannelHandlerContext, ByteBuf],
             connectionRepository: ConnectionRepository): InputTaskEngine = {

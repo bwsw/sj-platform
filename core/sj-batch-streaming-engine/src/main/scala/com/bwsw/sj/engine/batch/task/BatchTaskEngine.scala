@@ -22,7 +22,7 @@ import com.bwsw.common.LeaderLatch
 import com.bwsw.sj.common.dal.model.service.ZKServiceDomain
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.engine.TaskEngine
-import com.bwsw.sj.common.engine.core.batch.{BatchStreamingExecutor, BatchStreamingPerformanceMetrics, WindowRepository}
+import com.bwsw.sj.common.engine.core.batch.{BatchStreamingExecutor, BatchStreamingPerformanceMetricsProxy, WindowRepository}
 import com.bwsw.sj.common.engine.core.entities._
 import com.bwsw.sj.common.engine.core.managment.CommonTaskManager
 import com.bwsw.sj.common.engine.core.state.CommonModuleService
@@ -34,7 +34,6 @@ import scaldi.Injectable.inject
 import scaldi.Injector
 
 import scala.collection.mutable
-import scala.collection.mutable.ListBuffer
 import scala.util.Try
 
 /**
@@ -49,7 +48,7 @@ import scala.util.Try
   * @param performanceMetrics set of metrics that characterize performance of a batch streaming module
   */
 class BatchTaskEngine(manager: CommonTaskManager,
-                      performanceMetrics: BatchStreamingPerformanceMetrics,
+                      performanceMetrics: BatchStreamingPerformanceMetricsProxy,
                       lowWatermark: Int)
                      (implicit injector: Injector)
   extends TaskEngine {
@@ -151,7 +150,7 @@ class BatchTaskEngine(manager: CommonTaskManager,
     Thread.sleep(instance.eventWaitIdleTime)
   }
 
-  private def registerBatch(batch: Batch): ListBuffer[Int] = {
+  private def registerBatch(batch: Batch): Unit = {
     addBatchToWindow(batch)
     performanceMetrics.addBatch(batch)
   }

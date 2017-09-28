@@ -24,7 +24,7 @@ import java.util.concurrent._
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.engine.TaskEngine
 import com.bwsw.sj.common.engine.core.managment.TaskManager
-import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
+import com.bwsw.sj.common.engine.core.reporting.{PerformanceMetrics, PerformanceMetricsProxy}
 import com.bwsw.sj.engine.core.engine.TaskRunner
 import com.bwsw.sj.engine.input.connection.tcp.server.InputStreamingServer
 import com.bwsw.sj.engine.input.task.reporting.InputStreamingPerformanceMetrics
@@ -57,10 +57,11 @@ object InputTaskRunner extends {
     new InputStreamingPerformanceMetrics(manager.asInstanceOf[InputTaskManager])
   }
 
-  override protected def createTaskEngine(manager: TaskManager, performanceMetrics: PerformanceMetrics): TaskEngine = {
+  override protected def createTaskEngine(manager: TaskManager,
+                                          performanceMetrics: PerformanceMetricsProxy): TaskEngine = {
     InputTaskEngine(
       manager.asInstanceOf[InputTaskManager],
-      performanceMetrics.asInstanceOf[InputStreamingPerformanceMetrics],
+      performanceMetrics,
       channelContextQueue,
       bufferForEachContext,
       inject[ConnectionRepository])

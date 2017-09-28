@@ -19,7 +19,7 @@
 package com.bwsw.sj.engine.core.simulation.state
 
 import com.bwsw.sj.common.engine.core.environment.{PartitionedOutput, RoundRobinOutput}
-import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
+import com.bwsw.sj.common.engine.core.reporting.PerformanceMetricsProxy
 import com.bwsw.tstreams.agents.producer.Producer
 import com.bwsw.tstreams.common.RoundRobinPartitionIterationPolicy
 
@@ -60,7 +60,7 @@ trait ModuleOutputMockHelper {
   *                           [[com.bwsw.sj.common.utils.EngineLiterals.batchStreamingType]] module
   */
 class PartitionedOutputMock(producer: Producer,
-                            performanceMetrics: PerformanceMetrics)
+                            performanceMetrics: PerformanceMetricsProxy)
                            (implicit serialize: AnyRef => Array[Byte])
   extends PartitionedOutput(producer, performanceMetrics) with ModuleOutputMockHelper {
 
@@ -88,7 +88,7 @@ class PartitionedOutputMock(producer: Producer,
   *                           [[com.bwsw.sj.common.utils.EngineLiterals.batchStreamingType]] module
   */
 class RoundRobinOutputMock(producer: Producer,
-                           performanceMetrics: PerformanceMetrics)
+                           performanceMetrics: PerformanceMetricsProxy)
                           (implicit serialize: AnyRef => Array[Byte])
   extends RoundRobinOutput(producer, performanceMetrics) with ModuleOutputMockHelper {
 

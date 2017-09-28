@@ -20,14 +20,14 @@ package com.bwsw.sj.stubs.module.batch_streaming
 
 import com.bwsw.sj.common.dal.model.instance.BatchInstanceDomain
 import com.bwsw.sj.common.dal.model.stream.StreamDomain
-import com.bwsw.sj.common.engine.core.batch.{BatchCollector, BatchStreamingPerformanceMetrics}
+import com.bwsw.sj.common.engine.core.batch.{BatchCollector, BatchStreamingPerformanceMetricsProxy}
 import com.bwsw.sj.common.engine.core.entities.Envelope
 import com.typesafe.scalalogging.Logger
 
 import scala.collection.mutable
 
 class NumericalBatchCollector(instance: BatchInstanceDomain,
-                              performanceMetrics: BatchStreamingPerformanceMetrics,
+                              performanceMetrics: BatchStreamingPerformanceMetricsProxy,
                               inputs: Array[StreamDomain])
   extends BatchCollector(instance, performanceMetrics, inputs) {
 

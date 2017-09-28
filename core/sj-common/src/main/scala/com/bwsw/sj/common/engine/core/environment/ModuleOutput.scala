@@ -18,7 +18,7 @@
  */
 package com.bwsw.sj.common.engine.core.environment
 
-import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
+import com.bwsw.sj.common.engine.core.reporting.PerformanceMetricsProxy
 import com.bwsw.tstreams.agents.producer.ProducerTransaction
 import com.typesafe.scalalogging.Logger
 
@@ -29,7 +29,7 @@ import com.typesafe.scalalogging.Logger
   *                           of [[com.bwsw.sj.common.utils.EngineLiterals.regularStreamingType]]
   *                           or [[com.bwsw.sj.common.utils.EngineLiterals.batchStreamingType]] module
   */
-abstract class ModuleOutput(private val performanceMetrics: PerformanceMetrics) {
+abstract class ModuleOutput(private val performanceMetrics: PerformanceMetricsProxy) {
   protected val logger: Logger = Logger(this.getClass)
 
   protected def updatePerformanceMetrics(streamName: String, txn: ProducerTransaction, bytes: Array[Byte]): Unit = {

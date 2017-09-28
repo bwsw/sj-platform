@@ -23,7 +23,7 @@ import java.util.concurrent._
 
 import com.bwsw.sj.common.engine.TaskEngine
 import com.bwsw.sj.common.engine.core.managment.TaskManager
-import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
+import com.bwsw.sj.common.engine.core.reporting.{PerformanceMetrics, PerformanceMetricsProxy}
 import com.google.common.util.concurrent.ThreadFactoryBuilder
 import com.typesafe.scalalogging.Logger
 import scaldi.Injector
@@ -92,7 +92,9 @@ abstract class TaskRunner(implicit val injector: Injector = com.bwsw.sj.common.S
 
     val performanceMetrics = createPerformanceMetrics(manager)
 
-    val taskEngine = createTaskEngine(manager, performanceMetrics)
+    val performanceMetricsProxy = createPerformanceMetricsThread(manager.taskName, performanceMetrics)
+
+    val taskEngine = createTaskEngine(manager, performanceMetricsProxy)
 
     val taskInputService = createTaskInputService(manager, taskEngine)
 
@@ -107,6 +109,7 @@ abstract class TaskRunner(implicit val injector: Injector = com.bwsw.sj.common.S
     }
     executorService.submit(taskEngine)
     executorService.submit(performanceMetrics)
+    executorService.submit(performanceMetricsProxy)
     executorService.submit(instanceStatusObserver)
 
     waitForCompletion(taskInputService)
@@ -116,7 +119,11 @@ abstract class TaskRunner(implicit val injector: Injector = com.bwsw.sj.common.S
 
   protected def createPerformanceMetrics(manager: TaskManager): PerformanceMetrics
 
-  protected def createTaskEngine(manager: TaskManager, performanceMetrics: PerformanceMetrics): TaskEngine
+  protected def createTaskEngine(manager: TaskManager, performanceMetrics: PerformanceMetricsProxy): TaskEngine
 
   protected def createTaskInputService(manager: TaskManager, taskEngine: TaskEngine): Closeable
+
+  protected def createPerformanceMetricsThread(taskName: String,
+                                               performanceMetrics: PerformanceMetrics): PerformanceMetricsProxy =
+    new PerformanceMetricsProxy(performanceMetrics, s"performance-metrics-$taskName")
 }

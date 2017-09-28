@@ -18,7 +18,7 @@
  */
 package com.bwsw.sj.common.engine.core.environment
 
-import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
+import com.bwsw.sj.common.engine.core.reporting.PerformanceMetricsProxy
 import com.bwsw.tstreams.agents.producer.{NewProducerTransactionPolicy, Producer, ProducerTransaction}
 
 import scala.collection._
@@ -34,7 +34,7 @@ import scala.collection._
   */
 
 class PartitionedOutput(producer: Producer,
-                        performanceMetrics: PerformanceMetrics)
+                        performanceMetrics: PerformanceMetricsProxy)
                        (implicit serialize: AnyRef => Array[Byte])
   extends ModuleOutput(performanceMetrics) {
 
