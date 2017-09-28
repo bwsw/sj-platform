@@ -22,17 +22,16 @@ import java.io.Closeable
 import java.util.concurrent.{Callable, ExecutorCompletionService}
 
 import com.bwsw.sj.common.engine.TaskEngine
-import com.bwsw.sj.common.si.model.instance.Instance
-import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.common.engine.core.config.EngineConfigNames
 import com.bwsw.sj.common.engine.core.managment.TaskManager
 import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
+import com.bwsw.sj.common.si.model.instance.Instance
+import com.bwsw.sj.common.utils.EngineLiterals
 import com.typesafe.config.Config
-import org.mockito.ArgumentMatchers._
-import org.mockito.Mockito._
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.{times, verify, when}
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FlatSpec, Matchers}
-import org.slf4j.Logger
 import scaldi.{Injector, Module}
 
 class TaskRunnerTestSuit extends FlatSpec with Matchers with TaskRunnerMocks {
@@ -62,8 +61,6 @@ trait TaskRunnerMocks extends MockitoSugar {
   val executorServiceMock: ExecutorCompletionService[Unit] = mock[ExecutorCompletionService[Unit]]
   when(executorServiceMock.submit(any())).thenReturn(null)
 
-  private val logger = mock[Logger]
-
   private val instance = mock[Instance]
   when(instance.moduleType).thenReturn(EngineLiterals.regularStreamingType)
 
@@ -76,7 +73,6 @@ trait TaskRunnerMocks extends MockitoSugar {
   val taskInputService: TaskInputServiceMock = mock[TaskInputServiceMock]
 
   val taskRunner: TaskRunnerMock = new TaskRunnerMock(executorServiceMock,
-    logger,
     manager,
     performanceMetrics,
     taskEngine,
@@ -85,7 +81,6 @@ trait TaskRunnerMocks extends MockitoSugar {
 }
 
 class TaskRunnerMock(_executorService: ExecutorCompletionService[Unit],
-                     _logger: Logger,
                      _taskManager: TaskManager,
                      _performanceMetrics: PerformanceMetrics,
                      _taskEngine: TaskEngine,
@@ -93,7 +88,6 @@ class TaskRunnerMock(_executorService: ExecutorCompletionService[Unit],
                      injector: Injector) extends {
   override protected val threadName: String = "name"
   override protected val executorService: ExecutorCompletionService[Unit] = _executorService
-  override protected val logger: Logger = _logger
 } with TaskRunner()(injector) with MockitoSugar {
 
   override def createTaskManager(): TaskManager = _taskManager
