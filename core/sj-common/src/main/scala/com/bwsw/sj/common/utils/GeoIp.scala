@@ -39,14 +39,14 @@ class GeoIp(ipv4DatabaseFile: Option[File] = None, ipv6DatabaseFile: Option[File
 
   def resolveAs(ip: String): Int = Try {
     InetAddress.getByName(ip) match {
-      case _: Inet4Address =>
-        if (ipv4AsNumLookup.getID(ip) != 0)
-          ipv4AsNumLookup.getOrg(ip).split(" ")(0).substring(2).toInt
+      case address: Inet4Address =>
+        if (ipv4AsNumLookup.getID(address) != 0)
+          ipv4AsNumLookup.getOrg(address).split(" ")(0).substring(2).toInt
         else 0
 
-      case _: Inet6Address =>
-        if (ipv6AsNumLookup.getID(ip) != 0)
-          ipv6AsNumLookup.getOrgV6(ip).split(" ")(0).substring(2).toInt
+      case address: Inet6Address =>
+        if (ipv6AsNumLookup.getID(address) != 0)
+          ipv6AsNumLookup.getOrgV6(address).split(" ")(0).substring(2).toInt
         else 0
     }
   } match {
@@ -66,12 +66,12 @@ class GeoIp(ipv4DatabaseFile: Option[File] = None, ipv6DatabaseFile: Option[File
   private def getAsLookupServiceIpv4: LookupService = {
     logger.debug("Create a geo ip lookup service of ipv4")
 
-    new LookupService(ipv4DatabaseFile.get)
+    new LookupService(ipv4DatabaseFile.get, LookupService.GEOIP_INDEX_CACHE)
   }
 
   private def getAsLookupServiceIpv6: LookupService = {
     logger.debug("Create a geo ip lookup service of ipv6")
 
-    new LookupService(ipv6DatabaseFile.get)
+    new LookupService(ipv6DatabaseFile.get, LookupService.GEOIP_INDEX_CACHE)
   }
 }
