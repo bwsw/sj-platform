@@ -12,9 +12,7 @@ A complete list of requirements and the deployment procedure description can be 
 Overall Deployment Infrastructure
 --------------------------------------------
 
-.. warning:: The section is under development!
-
-The Stream Juggler platform needs the following services to be preliminarily deployed:
+The Stream Juggler platform works on the base of the following services:
 
 - `Apache Mesos <http://mesos.apache.org/>`_  for resource management that allows to run the system at scale and to support different types of workloads. Deployment on Apache Mesos 1.3.1 is currently supported.
 
@@ -40,7 +38,7 @@ The platform kernel is coded in Scala.
 
 The UI is presented via Node JS.
 
-Below, you will find necessary instructions to run the services. Two deployment options are described next - on cluster (Mesos) and locally (on minimesos). The steps to deploy services, SJ-Platform, entities for the platform are provided on the base of a demo task.
+Below, you will find necessary instructions to run the services. Two ways of deployment are described next - on cluster (Mesos) and locally (on minimesos). The steps to deploy services, SJ-Platform, entities for the platform are provided on the base of a demo task.
 
 Mesos Deployment
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -53,7 +51,7 @@ Firstly, deploy Mesos and other services.
 
 Please, note, the deployment is described for one default Mesos-slave with available ports [31000-32000]. 
 
-If you are planning to launch an instance with greater value of "parallelizm", i.e. to run tasks on more than 1 nodes, you need to increase the "executor_registration_timeout" parameter for Mesos-slave.
+If you are planning to launch an instance with greater value of the "parallelizm" parameter, i.e. to run tasks on more than 1 nodes, you need to increase the "executor_registration_timeout" parameter for Mesos-slave.
 
 The requirements to Mesos-slave: 
 
@@ -73,11 +71,11 @@ Mesos-slave must support Docker containerizer.
 
    Find detailed instructions on Java deployment in the `installation guide <https://tecadmin.net/install-oracle-java-8-ubuntu-via-ppa/>`_.
 
-4. Install sbt following instructions in `the official documentation <http://www.scala-sbt.org/download.html>`_ .
+4. Install sbt following the instructions in `the official documentation <http://www.scala-sbt.org/download.html>`_ .
 
 5. Start Mesos-master, Mesos-slave and the services. 
 
-After performing all the steps, make sure you have access to Mesos interface, Marathon interface. Zookeeper now should be active.
+After performing all the steps, make sure you have access to Mesos interface, Marathon interface. Apache Zookeeper now should be active.
 
 
 6. Create json files and a configuration file (config.properties). Please, name them as it is specified here.
@@ -521,7 +519,7 @@ There is a default value of Elasticsearch, Apache Kafka and Apache Zookeeper IPs
 
 At this step all necessary indexes, tables and mapping should be created for storing the processed result.
 
-In our demo case the destination is of Elasticsearch type. Thus, the index and the mapping should be created. Please, run the command below. Do not forget to replace <slave_advertise_ip> with the advertise IP of Mesos-slave::
+In our demo case the destination storage is of Elasticsearch type. Thus, the index and the mapping should be created. Please, run the command below. Please, remember to replace <slave_advertise_ip> with the advertise IP of Mesos-slave::
 
  curl --request PUT "http://<slave_advertise_ip>:31920/pingstation" -H 'Content-Type: application/json' --data "@api-json/elasticsearch-index.json" 
 

@@ -68,7 +68,7 @@ The following types of output streams are supported in SJ-Platform:
 
 - Elasticsearch, to store data to Elasticsearch;
 - SQL database, to store data to JDBC-compatible databases;
-- RESTful, to store data to RESTful storage.
+- RESTful, to store data to a RESTful storage.
 
 .. _Streaming_Infrastructure:
 
