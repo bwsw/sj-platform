@@ -586,7 +586,7 @@ Step 3. Module Uploading
 
 Now as the system is deployed and necessary engines are added, modules can be uploaded to the system.
 
-A **module** is a .jar file, containing a module specification and configurations.
+A **module** is a JAR file, containing a module specification and configurations.
 
 .. figure:: _static/moduleExecutorAndValidator.png
    :scale: 120%
