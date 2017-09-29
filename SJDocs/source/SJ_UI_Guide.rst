@@ -42,7 +42,7 @@ The diagram below may help you to understand the dependency of entity types in t
 
 For example, if you want to create a regular module that will process Apache Kafka input data streams you have to create an Apache Kafka service with a Kafka and a ZooKeeper providers for it.
 
-A module can not process data streams without uploading an engine (that is a .jar file) that launches the module and contains required configuration settings. More information about these settings can be found in the `Configuration`_ and the `Custom Files`_ sections of this document.
+A module can not process data streams without uploading an engine (that is a .jar file) that launches the module and contains required configuration settings. More information about these settings can be found in the `Configuration`_ and the :ref:`Custom Files` sections of this document.
 
 An executor of the module utilizes an instance/instances, i.e. a full range of settings for an exact handler/executor.
 
