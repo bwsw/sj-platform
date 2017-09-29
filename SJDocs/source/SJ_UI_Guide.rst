@@ -128,7 +128,7 @@ The range of optional settings is presented below. They have default values in t
 
 .. note:: You must not define properties such as 'bootstrap.servers', 'enable.auto.commit', 'key.deserializer' and 'value.deserializer' to avoid a crashing of system
 
-Сonfig domain named 't-streams' contains properties used for a T-streams consumer/producer. 
+Сonfiguration domain named 't-streams' contains properties used for a T-streams consumer/producer. 
 
 .. note:: You must not define properties such as 'producer.bind-host', 'producer.bind-port', 'consumer.subscriber.bind-host' and 'consumer.subscriber.bind-port' to avoid a crashing of system. 
 
@@ -155,7 +155,7 @@ Please, in the *Providers* section, press the «Create provider» button and fil
 
 .. figure:: _static/CreateProvider_Type1.png
 
-  Select from the drop-down a type of the provider you are aimed to create. The following options are available:
+   Select from the drop-down a type of the provider you are aimed to create. The following options are available:
 
   - Elasticsearch;
   
