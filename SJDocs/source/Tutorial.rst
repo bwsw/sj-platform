@@ -685,14 +685,14 @@ Below the steps for creating streaming infrastructure such as providers, service
 
 Set Up Streaming Infrastructure
 """""""""""""""""""""""""""""""""""""""
-At first, let's create the infrastructure: providers and services.
+At this step we will create the infrastructure: providers and services.
 
-They can be of different types. The types of instances and streams in the pipeline determine the type of providers and services that are necessary in the particular case.
+They can be of different types. The types of instances and streams in the pipeline determine the type of providers and services that are necessary for the particular case.
 
 For the Example Task
 """""""""""""""""""""""
 
-In the example task pipeline the modules of three types take place: the input-streaming, regular-streaming and output-streaming. For all types of modules, the Apache Zookeeper service is necessary. Thus, it is required to create the Apache Zookeeper provider.
+In the example task pipeline the modules of three types take place - input-streaming, regular-streaming and output-streaming. For all types of modules, the Apache Zookeeper service is necessary. Thus, it is required to create the Apache Zookeeper provider.
 
 Besides, the Apache Zookeeper provider is required for T-streams service that is in its turn needed for streams of T-streams type within the system, and for instances of the input-streaming and the regular-streaming modules.
 
@@ -706,7 +706,7 @@ As a result, the following infrastructure is to be created:
 
 1) Set up providers.
 
-- Apache Zookeeper for T-streams (‘echo-response’ and ‘unreachable-response’ streams) within the platform, for Zookeeper service necessary for all types of  instances::
+- Apache Zookeeper for T-streams (‘echo-response’ and ‘unreachable-response’ streams) within the platform, as well as for Zookeeper service required for all types of instances::
 
    sed -i 's/176.120.25.19:2181/<zookeeper_address>/g' api-json/providers/zookeeper-ps-provider.json
    curl --request POST "http://$address/v1/providers" -H 'Content-Type: application/json' --data "@api-json/providers/zookeeper-ps-provider.json"
