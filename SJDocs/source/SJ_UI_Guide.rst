@@ -28,9 +28,9 @@ If you are a developer and are willing to use the platform you need to know of s
 
 .. tip:: Find more about SJ-Platform architecture at :ref:`Architecture`.
 
-There are required configurations and engines for launching a module. Find more information about that in the `Configuration`_ and the `Custom Files`_ sections of this document. 
+There are required configurations and engines for launching a module. Find more information about that in the `Configuration`_ and the :ref:`Custom_Files` sections of this document. 
 
-Once everything is ready you can move to the Stream Juggler Platform.
+Once everything is ready, you can move to the Stream Juggler Platform.
 
 The SJ-Platform allows to upload your custom module for data stream processing with prerequisite engines and configuration settings. 
 
@@ -616,6 +616,7 @@ The following actions can be performed with the files in the list:
 
 The list of jars can be filtered by its name using the search tool above the list.
 
+.. _Custom_Files:
 Custom Files
 ~~~~~~~~~~~~
 
