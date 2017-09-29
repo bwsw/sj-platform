@@ -84,7 +84,7 @@ This diagram demonstrates the processing workflow of the demo. As a quick remind
 
 As you can see, the data come to a TCP input module through a pipeline of fping and netcat.
 
-Then the input module parses ICMP echo responses (select IP and response time) and ICMP unreachable responses (select only IP) and puts parsed data into 'echo-response' stream and 'unreachable-response' stream, respectively.
+Then the input module parses ICMP echo responses (IP and response time are selected) and ICMP unreachable responses (IPs only are selected) and puts the parsed data into 'echo-response' stream and 'unreachable-response' stream, respectively.
 
 After that, the processing module aggregates response time and a total amount of echo/unreachable responses by IP per 1 minute and sends aggregated data to 'echo-response-1m' stream.
 
@@ -94,7 +94,7 @@ Finally, the output modules export aggregated data from echo-response streams to
 
 The data are fed to the system, passed from one module to another and exported from the system via streams. Read more about streams under the :ref:`Creating_Streams` section.
 
-In the demonstration project, the entities are added to the system via REST API as it is less time-consuming. The platform entities can be also created via the UI filling in the forms for each entity with necessary settings.
+In the demonstration project, the entities are added to the system via REST API as it is less time-consuming. The platform entities can be also created via the UI filling in the creation forms for each entity with necessary settings.
 
 The result is easy-to-see via Web UI. Or send ‘GET’ API requests to return created entities in JSON.
 
@@ -141,14 +141,14 @@ This tutorial provides step-by-step instructions for demo project deployment on 
 
 **Option 3.** Also, you can run SJ-Platform locally deploying it on `minimesos <http://streamjuggler.readthedocs.io/en/develop/SJ_Deployment.html#minimesos-deployment>`_ as a testing environment.
 
-The following technical requirements should be met: 
+The following systems are required on your computer: 
 
 - git, 
 - sbt (see `official documentation <http://www.scala-sbt.org/download.html>`_), 
 - Docker (see `official documentation <https://docs.docker.com/engine/installation/linux/docker-ce/ubuntu/>`_),
 - cURL.
 
-For the example task, the instructions are provided for the system deployment **on Mesos**.
+For the example task, the instructions are provided for the platform deployment **on Mesos**.
 
 The deployment is performed via REST API.
 
@@ -173,7 +173,7 @@ So, as a first step, you should deploy Mesos and other services.
 
 Please, note, the deployment is described for one default Mesos-slave with available ports [31000-32000]. 
 
-If you are planning to launch a module with greater value of the "parallelizm" parameter, i.e. to run tasks on more than 1 nodes, you need to increase the "executor_registration_timeout" parameter for Mesos-slave.
+If you are planning to launch a module with a greater value of the "parallelizm" parameter, i.e. to run tasks on more than 1 nodes, you need to increase the "executor_registration_timeout" parameter for Mesos-slave.
 
 The requirements to Mesos-slave: 
 
@@ -495,31 +495,31 @@ Next, the infrastructure for the modules can be created.
 Step 2. Configurations and Engine Jars Uploading 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-An **engine** is required to start a module. A module can not process data without an engine (that is a .jar file containing required configuration settings). In fact, it is a framework that launches the module executor.
+An **engine** is required to start a module. A module can not process data without an engine (that is a .jar file containing required configuration settings). In fact, this is a framework that launches the module executor.
 
 .. figure:: _static/engine.png
    :scale: 110%
    :align: center
    
-To implement the processing workflow for the example task resolution the following jars should be uploaded:
+To implement the processing workflow for the example task resolution the following JAR files should be uploaded:
 
-1. a jar per each module type  - input-streaming, regular-streaming, output-streaming;
+1. a JAR file per each module type  - input-streaming, regular-streaming, output-streaming;
 
-2. a jar for Mesos framework that starts the engine.
+2. a JAR file for Mesos framework that starts the engine.
 
 Thus, engines should be compiled and uploaded next.
  
 Upload Engine Jars
 """"""""""""""""""""""""
 
-Please, download the engine jars for the three modules (input-streaming, regular-streaming, output-streaming) and the Mesos framework:: 
+Please, download the engine JARs for the three modules (input-streaming, regular-streaming, output-streaming) and the Mesos framework:: 
 
  wget http://c1-ftp1.netpoint-dc.com/sj/1.0-SNAPSHOT/sj-mesos-framework.jar
  wget http://c1-ftp1.netpoint-dc.com/sj/1.0-SNAPSHOT/sj-input-streaming-engine.jar
  wget http://c1-ftp1.netpoint-dc.com/sj/1.0-SNAPSHOT/sj-regular-streaming-engine.jar
  wget http://c1-ftp1.netpoint-dc.com/sj/1.0-SNAPSHOT/sj-output-streaming-engine.jar
 
-Now upload the engine jars. Please, change <slave_advertise_ip> to the slave advertise IP::
+Now upload the engine JARs. Please, change <slave_advertise_ip> to the slave advertise IP::
 
  address=address=<slave_advertise_ip>:31080
 
@@ -528,7 +528,7 @@ Now upload the engine jars. Please, change <slave_advertise_ip> to the slave adv
  curl --form jar=@sj-regular-streaming-engine.jar http://$address/v1/custom/jars
  curl --form jar=@sj-output-streaming-engine.jar http://$address/v1/custom/jars
 
-Now engine jars should appear in the UI under Custom Jars of the "Custom files" navigation tab.
+Now engine JARs should appear in the UI under Custom Jars of the "Custom files" navigation tab.
 
 .. figure:: _static/EnginesUploaded.png
 
@@ -558,7 +558,7 @@ For solving the example task, we will upload the following configurations via RE
 
 - marathon-connect-timeout - Use when trying to connect by 'marathon-connect' (in milliseconds).
 
-Send the next POST requests to upload the configs. Please, replace <slave_advertise_ip> with the slave advertise IP and <marathon_address> with the address of Marathon::
+Send the next POST requests to upload the configurations. Please, replace <slave_advertise_ip> with the slave advertise IP and <marathon_address> with the address of Marathon::
 
  curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"session-timeout\",\"value\": \"7000\",\"domain\": \"configuration.apache-zookeeper\"}" 
  curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"current-framework\",\"value\": \"com.bwsw.fw-1.0\",\"domain\": \"configuration.system\"}" 
