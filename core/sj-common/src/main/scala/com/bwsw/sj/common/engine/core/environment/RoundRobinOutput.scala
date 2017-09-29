@@ -18,43 +18,26 @@
  */
 package com.bwsw.sj.common.engine.core.environment
 
-import com.bwsw.sj.common.engine.core.reporting.PerformanceMetricsProxy
-import com.bwsw.tstreams.agents.producer.{NewProducerTransactionPolicy, Producer, ProducerTransaction}
+import com.typesafe.scalalogging.Logger
 
 /**
   * Provides an output stream that defined for stream in whole.
   * Recording of transaction goes with the use of round-robin policy
   *
-  * @param producer           producer of specific output
-  * @param performanceMetrics set of metrics that characterize performance
-  *                           of [[com.bwsw.sj.common.utils.EngineLiterals.regularStreamingType]]
-  *                           or [[com.bwsw.sj.common.utils.EngineLiterals.batchStreamingType]] module
+  * @param stream       output stream name
+  * @param senderThread thread for sending data to the T-Streams service
   * @author Kseniya Mikhaleva
   */
-
-class RoundRobinOutput(producer: Producer,
-                       performanceMetrics: PerformanceMetricsProxy)
+class RoundRobinOutput(stream: String,
+                       senderThread: TStreamsSenderThread)
                       (implicit serialize: AnyRef => Array[Byte])
-  extends ModuleOutput(performanceMetrics) {
+  extends ModuleOutput {
 
-  private var maybeTransaction: Option[ProducerTransaction] = None
-  private val streamName = producer.stream.name
+  private val logger: Logger = Logger(this.getClass)
 
   def put(data: AnyRef): Unit = {
     val bytes = serialize(data)
-    logger.debug(s"Send a portion of data to stream: '$streamName'.")
-    if (maybeTransaction.isDefined) {
-      maybeTransaction.get.send(bytes)
-    }
-    else {
-      maybeTransaction = Some(producer.newTransaction(NewProducerTransactionPolicy.ErrorIfOpened))
-      maybeTransaction.get.send(bytes)
-    }
-
-    updatePerformanceMetrics(streamName, maybeTransaction.get, bytes)
-  }
-
-  override def clear(): Unit = {
-    maybeTransaction = None
+    logger.debug(s"Send a portion of data to stream: '$stream'.")
+    senderThread.send(bytes, stream)
   }
 }

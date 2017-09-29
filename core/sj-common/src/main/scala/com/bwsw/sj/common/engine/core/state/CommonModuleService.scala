@@ -18,7 +18,7 @@
  */
 package com.bwsw.sj.common.engine.core.state
 
-import com.bwsw.sj.common.engine.core.environment.{ModuleEnvironmentManager, ModuleOutput}
+import com.bwsw.sj.common.engine.core.environment.{ModuleEnvironmentManager, ModuleOutput, TStreamsSenderThread}
 import com.bwsw.sj.common.engine.core.managment.CommonTaskManager
 import com.bwsw.sj.common.engine.core.reporting.PerformanceMetricsProxy
 import com.bwsw.sj.common.engine.{StreamingExecutor, TimerHandlers}
@@ -33,8 +33,8 @@ import scala.collection.mutable
 
 /**
   * Class is in charge of creating a specific ModuleEnvironmentManager (and executor)
-  * depending on an instance parameter [[com.bwsw.sj.common.dal.model.instance.BatchInstanceDomain.stateManagement]] and performing the appropriate actions related with checkpoint
-  *
+  * depending on an instance parameter [[com.bwsw.sj.common.dal.model.instance.BatchInstanceDomain.stateManagement]]
+  * and performing the appropriate actions related with checkpoint
   */
 abstract class CommonModuleService(protected val instance: Instance,
                                    protected val outputProducers: Map[String, Producer],
@@ -42,9 +42,9 @@ abstract class CommonModuleService(protected val instance: Instance,
 
   protected val logger: Logger = Logger(this.getClass)
   protected val moduleTimer: SjTimer = new SjTimer()
-  protected val producerPolicyByOutput: mutable.Map[String, (String, ModuleOutput)] = mutable.Map[String, (String, ModuleOutput)]()
-
+  protected val producerPolicyByOutput: mutable.Map[String, ModuleOutput] = mutable.Map.empty
   addProducersToCheckpointGroup()
+  protected val senderThread: TStreamsSenderThread
 
   protected val environmentManager: ModuleEnvironmentManager
   val executor: StreamingExecutor with TimerHandlers
@@ -57,9 +57,8 @@ abstract class CommonModuleService(protected val instance: Instance,
     logger.debug(s"The t-stream producers are added to checkpoint group.")
   }
 
-  def doCheckpoint(): Unit = {
-    producerPolicyByOutput.foreach(_._2._2.clear())
-  }
+  def doCheckpoint(): Unit =
+    senderThread.checkpoint()
 
   def isCheckpointInitiated: Boolean = environmentManager.isCheckpointInitiated
 
@@ -86,8 +85,10 @@ object CommonModuleService {
       case batchInstance: BatchInstance =>
         batchInstance.stateManagement
       case _ =>
-        logger.error(s"CommonModuleService can be used only for ${EngineLiterals.regularStreamingType} or ${EngineLiterals.batchStreamingType} engine.")
-        throw new RuntimeException(s"CommonModuleService can be used only for ${EngineLiterals.regularStreamingType} or ${EngineLiterals.batchStreamingType} engine.")
+        val message = s"CommonModuleService can be used only for ${EngineLiterals.regularStreamingType}" +
+          s" or ${EngineLiterals.batchStreamingType} engine."
+        logger.error(message)
+        throw new RuntimeException(message)
     }
 
     stateManagement match {

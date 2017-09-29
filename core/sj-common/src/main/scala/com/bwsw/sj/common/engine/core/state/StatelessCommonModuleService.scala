@@ -19,7 +19,7 @@
 package com.bwsw.sj.common.engine.core.state
 
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
-import com.bwsw.sj.common.engine.core.environment.ModuleEnvironmentManager
+import com.bwsw.sj.common.engine.core.environment.{ModuleEnvironmentManager, TStreamsSenderThread}
 import com.bwsw.sj.common.engine.core.managment.CommonTaskManager
 import com.bwsw.sj.common.engine.core.reporting.PerformanceMetricsProxy
 import com.bwsw.sj.common.engine.{StreamingExecutor, TimerHandlers}
@@ -45,15 +45,18 @@ class StatelessCommonModuleService(manager: CommonTaskManager,
 
   private val connectionRepository = inject[ConnectionRepository]
   private val streamService = connectionRepository.getStreamRepository
+  protected val senderThread = new TStreamsSenderThread(
+    manager.outputProducers, checkpointGroup, performanceMetrics, s"batch-task-${manager.taskName}-sender")
+  senderThread.start()
 
   val environmentManager: ModuleEnvironmentManager = new ModuleEnvironmentManager(
     instance.options,
-    outputProducers,
     instance.outputs.flatMap(x => streamService.get(x)),
     producerPolicyByOutput,
     moduleTimer,
     performanceMetrics,
-    connectionRepository.getFileStorage)
+    connectionRepository.getFileStorage,
+    senderThread)
 
   val executor: StreamingExecutor with TimerHandlers = manager.getExecutor(environmentManager).asInstanceOf[StreamingExecutor with TimerHandlers]
 }

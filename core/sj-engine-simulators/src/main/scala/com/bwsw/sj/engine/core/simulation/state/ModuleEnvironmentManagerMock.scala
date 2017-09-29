@@ -24,11 +24,9 @@ import com.bwsw.sj.common.engine.core.environment.{ModuleOutput, StatefulModuleE
 import com.bwsw.sj.common.engine.core.reporting.PerformanceMetricsProxy
 import com.bwsw.sj.common.engine.core.state.StateStorage
 import com.bwsw.sj.common.utils.SjTimer
-import com.bwsw.tstreams.agents.producer.Producer
-import com.bwsw.tstreams.streams
-import org.mockito.Mockito.{mock, when}
+import org.mockito.Mockito.mock
 
-import scala.collection.{Map, mutable}
+import scala.collection.mutable
 
 /**
   * Mock for [[com.bwsw.sj.common.engine.core.environment.StatefulModuleEnvironmentManager]].
@@ -39,36 +37,27 @@ import scala.collection.{Map, mutable}
   * @param options      user defined options from instance
   * @param outputs      set of output streams from instance
   * @param fileStorage  file storage
+  * @param senderThread mock for thread for sending data to the T-Streams service
   * @author Pavel Tomskikh
   */
 class ModuleEnvironmentManagerMock(stateStorage: StateStorage,
                                    options: String,
                                    outputs: Array[TStreamStreamDomain],
+                                   val senderThread: TStreamsSenderThreadMock,
                                    fileStorage: FileStorage = mock(classOf[FileStorage]))
   extends {
-    val producers: Map[String, Producer] = outputs.map { s =>
-      val stream = mock(classOf[streams.Stream])
-      when(stream.partitionsCount).thenReturn(s.partitions)
-      when(stream.name).thenReturn(s.name)
-
-      val producer = mock(classOf[Producer])
-      when(producer.stream).thenReturn(stream)
-
-      s.name -> producer
-    }.toMap
-
-    val producerPolicyByOutput = mutable.Map.empty[String, (String, ModuleOutput)]
+    val producerPolicyByOutput = mutable.Map.empty[String, ModuleOutput]
     val moduleTimer = mock(classOf[SjTimer])
     val performanceMetrics = mock(classOf[PerformanceMetricsProxy])
   } with StatefulModuleEnvironmentManager(
     stateStorage,
     options,
-    producers,
     outputs.asInstanceOf[Array[StreamDomain]],
     producerPolicyByOutput,
     moduleTimer,
     performanceMetrics,
-    fileStorage) {
+    fileStorage,
+    senderThread) {
 
   /**
     * Allows getting partitioned output for specific output stream
@@ -78,7 +67,7 @@ class ModuleEnvironmentManagerMock(stateStorage: StateStorage,
     */
   override def getPartitionedOutput(streamName: String)
                                    (implicit serialize: (AnyRef) => Array[Byte]): PartitionedOutputMock =
-    super.getPartitionedOutput(streamName).asInstanceOf[PartitionedOutputMock]
+    getOutput(streamName, () => new PartitionedOutputMock(outputs.find(_.name == streamName).get, senderThread))
 
   /**
     * Allows getting round-robin output for specific output stream
@@ -88,13 +77,5 @@ class ModuleEnvironmentManagerMock(stateStorage: StateStorage,
     */
   override def getRoundRobinOutput(streamName: String)
                                   (implicit serialize: (AnyRef) => Array[Byte]): RoundRobinOutputMock =
-    super.getRoundRobinOutput(streamName).asInstanceOf[RoundRobinOutputMock]
-
-  override protected def createPartitionedOutput(producer: Producer)
-                                                (implicit serialize: AnyRef => Array[Byte]): PartitionedOutputMock =
-    new PartitionedOutputMock(producer, performanceMetrics)
-
-  override protected def createRoundRobinOutput(producer: Producer)
-                                               (implicit serialize: AnyRef => Array[Byte]): RoundRobinOutputMock =
-    new RoundRobinOutputMock(producer, performanceMetrics)
+    getOutput(streamName, () => new RoundRobinOutputMock(outputs.find(_.name == streamName).get, senderThread))
 }

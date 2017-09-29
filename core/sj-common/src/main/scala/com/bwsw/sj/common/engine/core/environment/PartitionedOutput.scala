@@ -18,44 +18,25 @@
  */
 package com.bwsw.sj.common.engine.core.environment
 
-import com.bwsw.sj.common.engine.core.reporting.PerformanceMetricsProxy
-import com.bwsw.tstreams.agents.producer.{NewProducerTransactionPolicy, Producer, ProducerTransaction}
-
-import scala.collection._
+import com.typesafe.scalalogging.Logger
 
 /**
   * Provides an output stream that defined for each partition
   *
-  * @param producer           producer of specific output
-  * @param performanceMetrics set of metrics that characterize performance
-  *                           of [[com.bwsw.sj.common.utils.EngineLiterals.regularStreamingType]]
-  *                           or [[com.bwsw.sj.common.utils.EngineLiterals.batchStreamingType]] module
+  * @param stream       output stream name
+  * @param senderThread thread for sending data to the T-Streams service
   * @author Kseniya Mikhaleva
   */
-
-class PartitionedOutput(producer: Producer,
-                        performanceMetrics: PerformanceMetricsProxy)
+class PartitionedOutput(stream: String,
+                        senderThread: TStreamsSenderThread)
                        (implicit serialize: AnyRef => Array[Byte])
-  extends ModuleOutput(performanceMetrics) {
+  extends ModuleOutput {
 
-  private val transactions = mutable.Map[Int, ProducerTransaction]()
-  private val streamName = producer.stream.name
+  private val logger: Logger = Logger(this.getClass)
 
   def put(data: AnyRef, partition: Int): Unit = {
     val bytes = serialize(data)
-    logger.debug(s"Send a portion of data to stream: '$streamName' partition with number: '$partition'.")
-    if (transactions.contains(partition)) {
-      transactions(partition).send(bytes)
-    }
-    else {
-      transactions(partition) = producer.newTransaction(NewProducerTransactionPolicy.ErrorIfOpened, partition)
-      transactions(partition).send(bytes)
-    }
-
-    updatePerformanceMetrics(streamName, transactions(partition), bytes)
-  }
-
-  override def clear(): Unit = {
-    transactions.clear()
+    logger.debug(s"Send a portion of data to stream: '$stream' partition with number: '$partition'.")
+    senderThread.send(bytes, stream, partition)
   }
 }
