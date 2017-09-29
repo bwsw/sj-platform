@@ -155,7 +155,8 @@ Please, in the *Providers* section, press the «Create provider» button and fil
 
 .. figure:: _static/CreateProvider_Type1.png
 
-   Select from the drop-down a type of the provider you are aimed to create. The following options are available:
+
+Select from the drop-down a type of the provider you are aimed to create. The following options are available:
 
   - Elasticsearch;
   
