@@ -158,15 +158,15 @@ Please, in the *Providers* section, press the «Create provider» button and fil
 
 Select from the drop-down a type of the provider you are aimed to create. The following options are available:
 
-  - Elasticsearch;
+ - Elasticsearch;
   
-  - Apache Zookeeper;
+ - Apache Zookeeper;
 
-  - Apache Kafka;
+ - Apache Kafka;
 
-  - RESTful;
+ - RESTful;
 
-  - SQL database.
+ - SQL database.
 
 The type of the provider is determined with the type of the instance you want to create and work with at the end.
 
