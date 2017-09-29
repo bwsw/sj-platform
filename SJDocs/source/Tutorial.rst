@@ -644,6 +644,7 @@ Now in the UI, you can see the uploaded modules under the ‘Modules’ tab.
 
 .. figure:: _static/ModulesUploaded.png
 
+.. _Creating_Streams:
 
 Step 4. Creating Streaming Layer 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
