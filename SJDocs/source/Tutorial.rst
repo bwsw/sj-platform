@@ -749,11 +749,11 @@ For the Example task
 
 For **sj-regex-input module**:
 
-Create an ‘echo-response’ output stream of the sj-regex-input module (consequently, an input stream of ps-process module). It will be used for keeping an IP and average time from ICMP echo-response and also a timestamp of the event::
+Create an ‘echo-response’ output stream of the *sj-regex-input* module (consequently, an input stream of ps-process module). It will be used for keeping an IP and average time from ICMP echo-response and also a timestamp of the event::
 
  curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/echo-response.json"
 
-Create an ‘unreachable response’ output stream of the sj-regex-input module (consequently, an input stream of the processing module). It will be used for keeping an IP from ICMP unreachable response and also a timestamp of the event::
+Create an ‘unreachable response’ output stream of the *sj-regex-input* module (consequently, an input stream of the processing module). It will be used for keeping an IP from ICMP unreachable response and also a timestamp of the event::
 
  curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/unreachable-response.json"
 
@@ -761,7 +761,7 @@ These streams are of T-streams type.
 
 For **ps-process module**:
 
-Create output streams of the ps-process module (consequently, an input stream of the output module) named ‘echo-response-1m’, ‘echo-response-3m’ and ‘echo-response-1h’. They will be used for keeping the aggregated information about the average time of echo responses, the total amount of echo responses, the total amount of unreachable responses and the timestamp for each IP (per 1 minute, per 3 minutes and per 1 hour)::
+Create output streams of the *ps-process* module (consequently, an input stream of the output module) named ‘echo-response-1m’, ‘echo-response-3m’ and ‘echo-response-1h’. They will be used for keeping the aggregated information about the average time of echo responses, the total amount of echo responses, the total amount of unreachable responses and the timestamp for each IP (per 1 minute, per 3 minutes and per 1 hour)::
 
  curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data   "@api-json/streams/echo-response-1m.json"
 
@@ -773,7 +773,7 @@ These streams are of T-streams type.
 
 For **ps-output module**:
 
-Create output streams of the ps-output module named ‘es-echo-response-1m’, ‘es-echo-response-3m’, ‘es-echo-response-1h’. They will be used for keeping the aggregated information (per 1 minute, per 3 minutes and per 1 hour) from the previous stream including total amount of responses::
+Create output streams of the *ps-output* module named ‘es-echo-response-1m’, ‘es-echo-response-3m’, ‘es-echo-response-1h’. They will be used for keeping the aggregated information (per 1 minute, per 3 minutes and per 1 hour) from the previous stream including total amount of responses::
 
  curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/es-echo-response-1m.json"
 
@@ -1009,7 +1009,7 @@ Via the UI you can make sure the instances are deleted.
 Sflow Example Task
 -------------------------
 
-There is another example of the platform performance. It represents the processing workflow developed for the demonstration task that is responsible for collecting `sFlow <https://sflow.org/>`_ information. The aggregated information can be valuable for monitoring of the current traffic and predicting of possible problems. The solution represents a scalable system for aggregation and analysis of big data in continuous streams. That is extreamly important for large computer systems and platforms.
+There is another example of the platform performance. It represents the processing workflow developed for the demonstration task that is responsible for collecting `sFlow <https://sflow.org/>`_ information. The aggregated information can be valuable for monitoring the current traffic and predicting of possible problems. The solution represents a scalable system for aggregation and analysis of big data in continuous streams. That is extreamly important for large computer systems and platforms.
 
 The suggested processing pipeline includes an input module, a batch processing module and an output module. Within the platform, the data are transported with T-streams.
 
