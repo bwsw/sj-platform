@@ -142,7 +142,7 @@ Every component deployed to the Stream Juggler Platform contributes to the main 
     The system is scalable and perfectly fits for large data processing.
     
 - Velocity 
-    The Stream Juggler Platform is the solution for real-time processing that means the system can handle events as soon as they are available inside the system without specific delay.
+    The Stream Juggler Platform is the solution for real-time processing that means the system can handle events as soon as they are available inside the system without specific delay. Alongside with the real-time processing, the micro-batch processing is supported in the system.
     
 - Variety 
     The SJ-Platform components are ready-to-use and can be reorganized in various pipelines. Besides, the system is compatible with different types of data sources, data storages, services and systems. 
