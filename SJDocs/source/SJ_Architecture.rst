@@ -55,11 +55,11 @@ The *Core* is composed of prerequisites for the platform. These are the services
 
 - For starting periodic tasks `Chronos <https://mesos.github.io/chronos/>`_ is used.
 
-- To perform leader election in case the currently leading Marathon instance fails `ZooKeeper <https://zookeeper.apache.org/>`_ is used. ZooKeeper is also responsible for instance task synchronization for a Batch module.
+- To perform leader election in case the currently leading Marathon instance fails `Apache Zookeeper <https://zookeeper.apache.org/>`_ is used. Zookeeper is also responsible for instance task synchronization for a Batch module.
 
 - For base service search `Mesos+Consul <https://github.com/CiscoCloud/mesos-consul>`_ is used.
 
-- Data sources for the platform are `Netty <https://netty.io/>`_ and `T-streams <https://t-streams.com>`_ libraries and `Kafka <https://kafka.apache.org/>`_. For starting Kafka we use `Kafka on Mesos <https://github.com/mesos/kafka>`_.
+- Data sources for the platform are `Netty <https://netty.io/>`_ and `T-streams <https://t-streams.com>`_ libraries and `Apache Kafka <https://kafka.apache.org/>`_. For starting Kafka we use `Kafka on Mesos <https://github.com/mesos/kafka>`_.
 
 - The outcoming data are stored to Elasticsearch, JDBC or REST external storages.
 
