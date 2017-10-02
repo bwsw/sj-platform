@@ -31,7 +31,7 @@ import com.bwsw.sj.engine.core.engine.input.CallableCheckpointTaskInput
 import com.bwsw.sj.engine.core.engine.{NumericalCheckpointTaskEngine, TimeCheckpointTaskEngine}
 import com.bwsw.sj.engine.regular.task.reporting.RegularStreamingPerformanceMetrics
 import com.bwsw.tstreams.agents.group.CheckpointGroup
-import org.slf4j.{Logger, LoggerFactory}
+import com.typesafe.scalalogging.Logger
 import scaldi.Injector
 
 /**
@@ -132,7 +132,7 @@ abstract class RegularTaskEngine(manager: CommonTaskManager,
 }
 
 object RegularTaskEngine {
-  private val logger: Logger = LoggerFactory.getLogger(this.getClass)
+  private val logger: Logger = Logger(this.getClass)
 
   /**
     * Creates RegularTaskEngine is in charge of a basic execution logic of task of regular module

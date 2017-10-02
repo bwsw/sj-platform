@@ -43,7 +43,7 @@ import com.bwsw.tstreams.agents.producer.Producer
 import com.bwsw.tstreams.env.{ConfigurationOptions, TStreamsFactory}
 import com.bwsw.tstreams.storage.StorageClient
 import com.typesafe.config.ConfigFactory
-import org.slf4j.{Logger, LoggerFactory}
+import com.typesafe.scalalogging.Logger
 import scaldi.Injectable.inject
 import scaldi.Injector
 
@@ -62,7 +62,7 @@ import scala.util.Try
   */
 abstract class TaskManager(implicit injector: Injector) {
   protected val connectionRepository: ConnectionRepository = inject[ConnectionRepository]
-  protected val logger: Logger = LoggerFactory.getLogger(this.getClass)
+  protected val logger: Logger = Logger(this.getClass)
   protected val streamRepository: GenericMongoRepository[StreamDomain] = connectionRepository.getStreamRepository
 
   private val config = ConfigFactory.load()

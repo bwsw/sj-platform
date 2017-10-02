@@ -22,9 +22,9 @@ import java.io.Closeable
 
 import com.bwsw.sj.common.config.SettingsUtils
 import com.bwsw.sj.common.engine.TaskEngine
-import com.bwsw.sj.common.engine.core.batch.BatchStreamingPerformanceMetrics
+import com.bwsw.sj.common.engine.core.batch.{BatchStreamingPerformanceMetricsReporter, BatchStreamingPerformanceMetrics}
 import com.bwsw.sj.common.engine.core.managment.{CommonTaskManager, TaskManager}
-import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
+import com.bwsw.sj.common.engine.core.reporting.{PerformanceMetricsReporter, PerformanceMetrics}
 import com.bwsw.sj.engine.batch.task.BatchTaskEngine
 import com.bwsw.sj.engine.core.engine.TaskRunner
 import scaldi.Injectable.inject
@@ -43,18 +43,28 @@ object BatchTaskRunner extends {
 
   override protected def createTaskManager(): TaskManager = new CommonTaskManager()
 
-  override protected def createPerformanceMetrics(manager: TaskManager): PerformanceMetrics = {
-    new BatchStreamingPerformanceMetrics(manager.asInstanceOf[CommonTaskManager])
+  override protected def createPerformanceMetricsReporter(manager: TaskManager): PerformanceMetricsReporter = {
+    new BatchStreamingPerformanceMetricsReporter(manager.asInstanceOf[CommonTaskManager])
   }
 
   override protected def createTaskEngine(manager: TaskManager, performanceMetrics: PerformanceMetrics): TaskEngine = {
     val lowWatermark = inject[SettingsUtils].getLowWatermark()
-    new BatchTaskEngine(manager.asInstanceOf[CommonTaskManager], performanceMetrics.asInstanceOf[BatchStreamingPerformanceMetrics], lowWatermark)
+    new BatchTaskEngine(
+      manager.asInstanceOf[CommonTaskManager],
+      performanceMetrics.asInstanceOf[BatchStreamingPerformanceMetrics],
+      lowWatermark)
   }
 
   override protected def createTaskInputService(manager: TaskManager, taskEngine: TaskEngine): Closeable = {
     taskEngine.asInstanceOf[BatchTaskEngine].taskInputService
   }
+
+  override def createPerformanceMetrics(taskName: String,
+                                        performanceMetricsReporter: PerformanceMetricsReporter): PerformanceMetrics =
+
+    new BatchStreamingPerformanceMetrics(
+      performanceMetricsReporter.asInstanceOf[BatchStreamingPerformanceMetricsReporter],
+      s"performance-metrics-$taskName")
 }
 
 class BatchTaskRunner

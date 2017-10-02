@@ -24,7 +24,7 @@ import com.bwsw.sj.common.engine.core.entities.Envelope
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import com.google.common.util.concurrent.ThreadFactoryBuilder
-import org.slf4j.{Logger, LoggerFactory}
+import com.typesafe.scalalogging.Logger
 
 import scala.collection.mutable
 
@@ -35,7 +35,7 @@ import scala.collection.mutable
   * @param taskInput handling an input streams of specific type(types)
   */
 class EnvelopeFetcher(taskInput: RetrievableCheckpointTaskInput[Envelope], lowWatermark: Int) {
-  private val logger: Logger = LoggerFactory.getLogger(this.getClass)
+  private val logger: Logger = Logger(this.getClass)
   private val scheduledExecutor: ScheduledExecutorService =
     Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder().setNameFormat("EnvelopeFetcher-%d").build())
   private val envelopesByStream: mutable.Map[String, BlockingQueue[Envelope]] =

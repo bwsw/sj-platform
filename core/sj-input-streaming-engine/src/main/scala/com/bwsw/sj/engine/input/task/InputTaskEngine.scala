@@ -24,18 +24,18 @@ import com.bwsw.common.hazelcast.{Hazelcast, HazelcastConfig}
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.engine.TaskEngine
 import com.bwsw.sj.common.engine.core.entities.InputEnvelope
-import com.bwsw.sj.common.engine.core.environment.InputEnvironmentManager
+import com.bwsw.sj.common.engine.core.environment.{InputEnvironmentManager, TStreamsSenderThread}
 import com.bwsw.sj.common.engine.core.input.{InputStreamingExecutor, Interval}
+import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
 import com.bwsw.sj.common.si.model.instance.InputInstance
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.core.engine.{NumericalCheckpointTaskEngine, TimeCheckpointTaskEngine}
 import com.bwsw.sj.engine.input.config.InputEngineConfigNames
 import com.bwsw.sj.engine.input.eviction_policy.InputInstanceEvictionPolicy
-import com.bwsw.sj.engine.input.task.reporting.{InputStreamingPerformanceMetrics, InputStreamingPerformanceMetricsThread}
 import com.typesafe.config.ConfigFactory
+import com.typesafe.scalalogging.Logger
 import io.netty.buffer.ByteBuf
 import io.netty.channel.{ChannelFuture, ChannelHandlerContext}
-import org.slf4j.{Logger, LoggerFactory}
 
 import scala.util.Try
 
@@ -52,7 +52,7 @@ import scala.util.Try
   * @author Kseniya Mikhaleva
   */
 abstract class InputTaskEngine(manager: InputTaskManager,
-                               performanceMetrics: InputStreamingPerformanceMetrics,
+                               performanceMetrics: PerformanceMetrics,
                                channelContextQueue: ArrayBlockingQueue[ChannelHandlerContext],
                                bufferForEachContext: scala.collection.concurrent.Map[ChannelHandlerContext, ByteBuf],
                                connectionRepository: ConnectionRepository) extends TaskEngine {
@@ -86,12 +86,12 @@ abstract class InputTaskEngine(manager: InputTaskManager,
     * that a checkpoint has been initiated
     */
   private val contextsToSendCheckpointResponse: scala.collection.mutable.Set[ChannelHandlerContext] = collection.mutable.Set[ChannelHandlerContext]()
+  private val producers = manager.outputProducers
+  private val checkpointGroup = manager.createCheckpointGroup()
+  addProducersToCheckpointGroup()
 
-  private val performanceMetricsThread = new InputStreamingPerformanceMetricsThread(
-    performanceMetrics, s"input-task-${manager.taskName}-performance-metrics")
-  performanceMetricsThread.start()
-
-  private val senderThread = new SenderThread(manager, performanceMetricsThread)
+  private val senderThread = new TStreamsSenderThread(
+    producers, checkpointGroup, performanceMetrics, s"input-task-${manager.taskName}-sender")
   senderThread.start()
 
   private def createModuleEnvironmentManager(): InputEnvironmentManager = {
@@ -176,11 +176,13 @@ abstract class InputTaskEngine(manager: InputTaskManager,
     envelope match {
       case Some(inputEnvelope) =>
         logDebug("Envelope is defined. Process it.")
-        performanceMetricsThread.addEnvelopeToInputStream(inputEnvelope)
+        performanceMetrics.addEnvelopeToInputStream(inputEnvelope)
         if (!isDuplicate(inputEnvelope.key, inputEnvelope.duplicateCheck)) {
           logDebug("Envelope is not duplicate so send it.")
           val bytes = executor.serialize(inputEnvelope.data)
-          senderThread.send(SerializedEnvelope(bytes, inputEnvelope.outputMetadata))
+          inputEnvelope.outputMetadata.foreach {
+            case (stream, partition) => senderThread.send(bytes, stream, partition)
+          }
           afterReceivingEnvelope()
 
           true
@@ -257,10 +259,16 @@ abstract class InputTaskEngine(manager: InputTaskManager,
   private def logDebug(message: String): Unit = logger.debug(logPrefix + message)
 
   private def logError(message: String): Unit = logger.error(logPrefix + message)
+
+  private def addProducersToCheckpointGroup(): Unit = {
+    logger.debug(s"Task: ${manager.taskName}. Start adding t-stream producers to checkpoint group.")
+    producers.foreach(x => checkpointGroup.add(x._2))
+    logger.debug(s"Task: ${manager.taskName}. The t-stream producers are added to checkpoint group.")
+  }
 }
 
 object InputTaskEngine {
-  private val logger: Logger = LoggerFactory.getLogger(this.getClass)
+  private val logger: Logger = Logger(this.getClass)
 
   /**
     * Creates InputTaskEngine is in charge of a basic execution logic of task of input module
@@ -268,7 +276,7 @@ object InputTaskEngine {
     * @return Engine of input task
     */
   def apply(manager: InputTaskManager,
-            performanceMetrics: InputStreamingPerformanceMetrics,
+            performanceMetrics: PerformanceMetrics,
             channelContextQueue: ArrayBlockingQueue[ChannelHandlerContext],
             bufferForEachContext: scala.collection.concurrent.Map[ChannelHandlerContext, ByteBuf],
             connectionRepository: ConnectionRepository): InputTaskEngine = {

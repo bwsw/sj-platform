@@ -31,7 +31,7 @@ import com.bwsw.tstreams.agents.consumer.Offset.{DateTime, IOffset, Newest, Olde
 import com.bwsw.tstreams.agents.consumer.{Consumer, ConsumerTransaction}
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import com.bwsw.tstreamstransactionserver.rpc.TransactionStates
-import org.slf4j.LoggerFactory
+import com.typesafe.scalalogging.Logger
 import scaldi.Injectable.inject
 import scaldi.Injector
 
@@ -55,7 +55,7 @@ class RetrievableTStreamCheckpointTaskInput[T <: AnyRef](manager: CommonTaskMana
                                                         (implicit injector: Injector)
   extends RetrievableCheckpointTaskInput[TStreamEnvelope[T]](manager.inputs) {
 
-  private val logger = LoggerFactory.getLogger(this.getClass)
+  private val logger = Logger(this.getClass)
   private val instance = manager.instance.asInstanceOf[BatchInstance]
   private val tstreamOffsetsStorage = mutable.Map[(String, Int), Long]()
   private val consumers = createConsumers()

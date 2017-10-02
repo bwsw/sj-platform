@@ -16,50 +16,62 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.sj.engine.output.task.reporting
+package com.bwsw.sj.engine.input.task.reporting
 
 import java.util.Calendar
 
-import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
-import com.bwsw.sj.engine.output.task.OutputTaskManager
+import com.bwsw.common.ObjectSizeFetcher
+import com.bwsw.sj.common.engine.core.entities.{Envelope, InputEnvelope}
+import com.bwsw.sj.common.engine.core.reporting.PerformanceMetricsReporter
+import com.bwsw.sj.engine.input.task.InputTaskManager
 
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
 /**
-  * Class represents a set of metrics that characterize performance of an output streaming module
+  * Class represents a set of metrics that characterize performance of an input streaming module
   *
-  * @param manager allows to manage an environment of output streaming task
+  * @param manager allows to manage an environment of input streaming task
   * @author Kseniya Mikhaleva
   */
 
-class OutputStreamingPerformanceMetrics(manager: OutputTaskManager)
-  extends PerformanceMetrics(manager) {
+class InputStreamingPerformanceMetricsReporter(manager: InputTaskManager)
+  extends PerformanceMetricsReporter(manager) {
 
-  currentThread.setName(s"output-task-${manager.taskName}-performance-metrics")
-  private val inputStreamNames: Array[String] = instance.getInputsWithoutStreamMode
+  currentThread.setName(s"input-task-${manager.taskName}-performance-metrics")
+  private val inputStreamName: String = manager.agentsHost + ":" + manager.entryPort
   private val outputStreamNames: Array[String] = instance.outputs
 
-  override protected var inputEnvelopesPerStream: mutable.Map[String, ListBuffer[List[Long]]] = createStorageForInputEnvelopes(inputStreamNames)
+  override protected var inputEnvelopesPerStream: mutable.Map[String, ListBuffer[List[Long]]] = createStorageForInputEnvelopes(Array(inputStreamName))
   override protected var outputEnvelopesPerStream: mutable.Map[String, mutable.Map[String, ListBuffer[Long]]] = createStorageForOutputEnvelopes(outputStreamNames)
+
+  /**
+    * Invokes when a new envelope from the input stream is received
+    */
+  override def addEnvelopeToInputStream(envelope: Envelope): Unit = {
+    val inputEnvelope = envelope.asInstanceOf[InputEnvelope[AnyRef]]
+    super.addEnvelopeToInputStream(inputStreamName, List(ObjectSizeFetcher.getObjectSize(inputEnvelope.data)))
+  }
 
   /**
     * Constructs a report of performance metrics of task work (one module could have multiple tasks)
     */
   override def getReport(): String = {
-    logger.info(s"Start preparing a report of performance for task: $taskName of output module.")
+    logger.info(s"Start preparing a report of performance for task: $taskName of an input module.")
     mutex.lock()
     val bytesOfInputEnvelopes = inputEnvelopesPerStream.map(x => (x._1, x._2.map(_.sum).sum)).head._2
-    val bytesOfOutputEnvelopes = outputEnvelopesPerStream.map(x => (x._1, x._2.map(_._2.sum).sum)).head._2
     val inputEnvelopesTotalNumber = inputEnvelopesPerStream.map(x => (x._1, x._2.size)).head._2
     val inputElementsTotalNumber = inputEnvelopesPerStream.map(x => (x._1, x._2.map(_.size).sum)).head._2
-    val outputEnvelopesTotalNumber = outputEnvelopesPerStream.map(x => (x._1, x._2.size)).head._2
-    val outputElementsTotalNumber = outputEnvelopesPerStream.map(x => (x._1, x._2.map(_._2.size).sum)).head._2
     val inputEnvelopesSize = inputEnvelopesPerStream.flatMap(x => x._2.map(_.size))
+    val numberOfOutputEnvelopesPerStream = outputEnvelopesPerStream.map(x => (x._1, x._2.size))
+    val numberOfOutputElementsPerStream = outputEnvelopesPerStream.map(x => (x._1, x._2.map(_._2.size).sum))
+    val bytesOfOutputEnvelopesPerStream = outputEnvelopesPerStream.map(x => (x._1, x._2.map(_._2.sum).sum))
+    val outputEnvelopesTotalNumber = numberOfOutputEnvelopesPerStream.values.sum
+    val outputElementsTotalNumber = numberOfOutputElementsPerStream.values.sum
     val outputEnvelopesSize = outputEnvelopesPerStream.flatMap(x => x._2.map(_._2.size))
 
     report.pmDatetime = Calendar.getInstance().getTime
-    report.inputStreamName = inputStreamNames.head
+    report.entryPointPort = manager.entryPort
     report.totalInputEnvelopes = inputEnvelopesTotalNumber
     report.totalInputElements = inputElementsTotalNumber
     report.totalInputBytes = bytesOfInputEnvelopes
@@ -67,14 +79,16 @@ class OutputStreamingPerformanceMetrics(manager: OutputTaskManager)
     report.maxSizeInputEnvelope = if (inputEnvelopesSize.nonEmpty) inputEnvelopesSize.max else 0
     report.minSizeInputEnvelope = if (inputEnvelopesSize.nonEmpty) inputEnvelopesSize.min else 0
     report.averageSizeInputElement = if (inputElementsTotalNumber != 0) bytesOfInputEnvelopes / inputElementsTotalNumber else 0
-    report.outputStreamName = outputStreamNames.head
     report.totalOutputEnvelopes = outputEnvelopesTotalNumber
     report.totalOutputElements = outputElementsTotalNumber
-    report.totalOutputBytes = bytesOfOutputEnvelopes
+    report.outputEnvelopesPerStream = numberOfOutputEnvelopesPerStream.toMap
+    report.outputElementsPerStream = numberOfOutputElementsPerStream.toMap
+    report.outputBytesPerStream = bytesOfOutputEnvelopesPerStream.toMap
+    report.totalOutputBytes = bytesOfOutputEnvelopesPerStream.values.sum
     report.averageSizeOutputEnvelope = if (outputEnvelopesTotalNumber != 0) outputElementsTotalNumber / outputEnvelopesTotalNumber else 0
     report.maxSizeOutputEnvelope = if (outputEnvelopesSize.nonEmpty) outputEnvelopesSize.max else 0
     report.minSizeOutputEnvelope = if (outputEnvelopesSize.nonEmpty) outputEnvelopesSize.min else 0
-    report.averageSizeOutputElement = if (outputEnvelopesTotalNumber != 0) bytesOfOutputEnvelopes / outputElementsTotalNumber else 0
+    report.averageSizeOutputElement = if (outputEnvelopesTotalNumber != 0) bytesOfOutputEnvelopesPerStream.values.sum / outputElementsTotalNumber else 0
     report.uptime = (System.currentTimeMillis() - startTime) / 1000
 
     clear()
@@ -85,8 +99,8 @@ class OutputStreamingPerformanceMetrics(manager: OutputTaskManager)
   }
 
   override def clear(): Unit = {
-    logger.debug(s"Reset variables for performance report for next reporting.")
-    inputEnvelopesPerStream = mutable.Map(inputStreamNames.head -> mutable.ListBuffer[List[Long]]())
-    outputEnvelopesPerStream = mutable.Map(outputStreamNames.head -> mutable.Map[String, mutable.ListBuffer[Long]]())
+    logger.debug(s"Reset variables of performance report for next reporting.")
+    inputEnvelopesPerStream = mutable.Map(inputStreamName -> mutable.ListBuffer[List[Long]]())
+    outputEnvelopesPerStream = mutable.Map(outputStreamNames.map(x => (x, mutable.Map[String, mutable.ListBuffer[Long]]())): _*)
   }
 }

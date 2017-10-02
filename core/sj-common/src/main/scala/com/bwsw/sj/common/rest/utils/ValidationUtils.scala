@@ -18,8 +18,8 @@
  */
 package com.bwsw.sj.common.rest.utils
 
+import com.typesafe.scalalogging.Logger
 import org.apache.curator.utils.PathUtils
-import org.slf4j.LoggerFactory
 
 import scala.util.{Failure, Success, Try}
 
@@ -27,7 +27,7 @@ import scala.util.{Failure, Success, Try}
   * Provides helping methods for validation some fields of entities that belong to SI layer
   */
 object ValidationUtils {
-  private val logger = LoggerFactory.getLogger(this.getClass)
+  private val logger = Logger(this.getClass)
 
   def validateName(name: String): Boolean = {
     logger.debug(s"Validate a name: '$name'.")
