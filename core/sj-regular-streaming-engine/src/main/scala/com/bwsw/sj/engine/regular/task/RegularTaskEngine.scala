@@ -29,7 +29,7 @@ import com.bwsw.sj.common.si.model.instance.RegularInstance
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.core.engine.input.CallableCheckpointTaskInput
 import com.bwsw.sj.engine.core.engine.{NumericalCheckpointTaskEngine, TimeCheckpointTaskEngine}
-import com.bwsw.sj.engine.regular.task.reporting.RegularStreamingPerformanceMetricsProxy
+import com.bwsw.sj.engine.regular.task.reporting.RegularStreamingPerformanceMetrics
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import com.typesafe.scalalogging.Logger
 import scaldi.Injector
@@ -42,7 +42,7 @@ import scaldi.Injector
   * @author Kseniya Mikhaleva
   */
 abstract class RegularTaskEngine(manager: CommonTaskManager,
-                                 performanceMetrics: RegularStreamingPerformanceMetricsProxy)
+                                 performanceMetrics: RegularStreamingPerformanceMetrics)
                                 (implicit injector: Injector) extends TaskEngine {
 
   import RegularTaskEngine.logger
@@ -140,7 +140,7 @@ object RegularTaskEngine {
     * @return Engine of regular task
     */
   def apply(manager: CommonTaskManager,
-            performanceMetrics: RegularStreamingPerformanceMetricsProxy)
+            performanceMetrics: RegularStreamingPerformanceMetrics)
            (implicit injector: Injector): RegularTaskEngine = {
     val regularInstance = manager.instance.asInstanceOf[RegularInstance]
 

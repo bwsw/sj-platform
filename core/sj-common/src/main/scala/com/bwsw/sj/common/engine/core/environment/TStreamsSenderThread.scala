@@ -20,7 +20,7 @@ package com.bwsw.sj.common.engine.core.environment
 
 import java.util.concurrent.{ArrayBlockingQueue, TimeUnit}
 
-import com.bwsw.sj.common.engine.core.reporting.PerformanceMetricsProxy
+import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import com.bwsw.tstreams.agents.producer.{NewProducerTransactionPolicy, Producer, ProducerTransaction}
@@ -39,7 +39,7 @@ import scala.collection.mutable
   */
 class TStreamsSenderThread(producers: Map[String, Producer],
                            checkpointGroup: CheckpointGroup,
-                           performanceMetrics: PerformanceMetricsProxy,
+                           performanceMetrics: PerformanceMetrics,
                            threadName: String)
   extends Thread(threadName) {
 

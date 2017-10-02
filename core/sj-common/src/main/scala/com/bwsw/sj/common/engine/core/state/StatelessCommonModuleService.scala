@@ -21,7 +21,7 @@ package com.bwsw.sj.common.engine.core.state
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.engine.core.environment.{ModuleEnvironmentManager, TStreamsSenderThread}
 import com.bwsw.sj.common.engine.core.managment.CommonTaskManager
-import com.bwsw.sj.common.engine.core.reporting.PerformanceMetricsProxy
+import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
 import com.bwsw.sj.common.engine.{StreamingExecutor, TimerHandlers}
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import scaldi.Injectable.inject
@@ -39,7 +39,7 @@ import scaldi.Injector
   */
 class StatelessCommonModuleService(manager: CommonTaskManager,
                                    checkpointGroup: CheckpointGroup,
-                                   performanceMetrics: PerformanceMetricsProxy)
+                                   performanceMetrics: PerformanceMetrics)
                                   (implicit injector: Injector)
   extends CommonModuleService(manager.instance, manager.outputProducers, checkpointGroup) {
 

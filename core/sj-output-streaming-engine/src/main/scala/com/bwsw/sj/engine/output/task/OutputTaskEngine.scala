@@ -26,7 +26,7 @@ import com.bwsw.sj.common.engine.TaskEngine
 import com.bwsw.sj.common.engine.core.entities._
 import com.bwsw.sj.common.engine.core.environment.OutputEnvironmentManager
 import com.bwsw.sj.common.engine.core.output.{Entity, OutputStreamingExecutor}
-import com.bwsw.sj.common.engine.core.reporting.PerformanceMetricsProxy
+import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
 import com.bwsw.sj.common.si.model.instance.OutputInstance
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.core.engine.NumericalCheckpointTaskEngine
@@ -45,7 +45,7 @@ import scaldi.Injector
   * @author Kseniya Mikhaleva
   */
 abstract class OutputTaskEngine(manager: OutputTaskManager,
-                                performanceMetrics: PerformanceMetricsProxy)
+                                performanceMetrics: PerformanceMetrics)
                                (implicit injector: Injector) extends TaskEngine {
 
   import OutputTaskEngine.logger
@@ -163,7 +163,7 @@ object OutputTaskEngine {
     * Creates OutputTaskEngine is in charge of a basic execution logic of task of output module
     */
   def apply(manager: OutputTaskManager,
-            performanceMetrics: PerformanceMetricsProxy)
+            performanceMetrics: PerformanceMetrics)
            (implicit injector: Injector): OutputTaskEngine = {
     manager.outputInstance.checkpointMode match {
       case EngineLiterals.`timeIntervalMode` =>

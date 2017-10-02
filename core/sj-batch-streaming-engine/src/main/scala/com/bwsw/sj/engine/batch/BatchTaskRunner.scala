@@ -22,9 +22,9 @@ import java.io.Closeable
 
 import com.bwsw.sj.common.config.SettingsUtils
 import com.bwsw.sj.common.engine.TaskEngine
-import com.bwsw.sj.common.engine.core.batch.{BatchStreamingPerformanceMetrics, BatchStreamingPerformanceMetricsProxy}
+import com.bwsw.sj.common.engine.core.batch.{BatchStreamingPerformanceMetricsReporter, BatchStreamingPerformanceMetrics}
 import com.bwsw.sj.common.engine.core.managment.{CommonTaskManager, TaskManager}
-import com.bwsw.sj.common.engine.core.reporting.{PerformanceMetrics, PerformanceMetricsProxy}
+import com.bwsw.sj.common.engine.core.reporting.{PerformanceMetricsReporter, PerformanceMetrics}
 import com.bwsw.sj.engine.batch.task.BatchTaskEngine
 import com.bwsw.sj.engine.core.engine.TaskRunner
 import scaldi.Injectable.inject
@@ -43,15 +43,15 @@ object BatchTaskRunner extends {
 
   override protected def createTaskManager(): TaskManager = new CommonTaskManager()
 
-  override protected def createPerformanceMetrics(manager: TaskManager): PerformanceMetrics = {
-    new BatchStreamingPerformanceMetrics(manager.asInstanceOf[CommonTaskManager])
+  override protected def createPerformanceMetricsReporter(manager: TaskManager): PerformanceMetricsReporter = {
+    new BatchStreamingPerformanceMetricsReporter(manager.asInstanceOf[CommonTaskManager])
   }
 
-  override protected def createTaskEngine(manager: TaskManager, performanceMetrics: PerformanceMetricsProxy): TaskEngine = {
+  override protected def createTaskEngine(manager: TaskManager, performanceMetrics: PerformanceMetrics): TaskEngine = {
     val lowWatermark = inject[SettingsUtils].getLowWatermark()
     new BatchTaskEngine(
       manager.asInstanceOf[CommonTaskManager],
-      performanceMetrics.asInstanceOf[BatchStreamingPerformanceMetricsProxy],
+      performanceMetrics.asInstanceOf[BatchStreamingPerformanceMetrics],
       lowWatermark)
   }
 
@@ -59,11 +59,11 @@ object BatchTaskRunner extends {
     taskEngine.asInstanceOf[BatchTaskEngine].taskInputService
   }
 
-  override def createPerformanceMetricsThread(taskName: String,
-                                              performanceMetrics: PerformanceMetrics): PerformanceMetricsProxy =
+  override def createPerformanceMetrics(taskName: String,
+                                        performanceMetricsReporter: PerformanceMetricsReporter): PerformanceMetrics =
 
-    new BatchStreamingPerformanceMetricsProxy(
-      performanceMetrics.asInstanceOf[BatchStreamingPerformanceMetrics],
+    new BatchStreamingPerformanceMetrics(
+      performanceMetricsReporter.asInstanceOf[BatchStreamingPerformanceMetricsReporter],
       s"performance-metrics-$taskName")
 }
 

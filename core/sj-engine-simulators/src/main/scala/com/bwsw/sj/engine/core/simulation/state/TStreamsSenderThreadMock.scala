@@ -19,7 +19,7 @@
 package com.bwsw.sj.engine.core.simulation.state
 
 import com.bwsw.sj.common.engine.core.environment.TStreamsSenderThread
-import com.bwsw.sj.common.engine.core.reporting.PerformanceMetricsProxy
+import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import org.mockito.Mockito.mock
 
@@ -35,7 +35,7 @@ class TStreamsSenderThreadMock(streams: Set[String])
   extends TStreamsSenderThread(
     Map.empty,
     mock(classOf[CheckpointGroup]),
-    mock(classOf[PerformanceMetricsProxy]),
+    mock(classOf[PerformanceMetrics]),
     "TStreamsSenderThreadMock") {
 
   private val streamDataList: mutable.Map[String, StreamData] = mutable.Map.empty

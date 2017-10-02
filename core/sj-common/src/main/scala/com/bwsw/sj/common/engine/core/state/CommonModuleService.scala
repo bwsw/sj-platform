@@ -20,7 +20,7 @@ package com.bwsw.sj.common.engine.core.state
 
 import com.bwsw.sj.common.engine.core.environment.{ModuleEnvironmentManager, ModuleOutput, TStreamsSenderThread}
 import com.bwsw.sj.common.engine.core.managment.CommonTaskManager
-import com.bwsw.sj.common.engine.core.reporting.PerformanceMetricsProxy
+import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
 import com.bwsw.sj.common.engine.{StreamingExecutor, TimerHandlers}
 import com.bwsw.sj.common.si.model.instance.{BatchInstance, Instance, RegularInstance}
 import com.bwsw.sj.common.utils.{EngineLiterals, SjTimer}
@@ -76,7 +76,7 @@ object CommonModuleService {
 
   def apply(manager: CommonTaskManager,
             checkpointGroup: CheckpointGroup,
-            performanceMetrics: PerformanceMetricsProxy)
+            performanceMetrics: PerformanceMetrics)
            (implicit injector: Injector): CommonModuleService = {
 
     val stateManagement = manager.instance match {

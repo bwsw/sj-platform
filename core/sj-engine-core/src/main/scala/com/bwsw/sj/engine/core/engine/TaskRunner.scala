@@ -23,7 +23,7 @@ import java.util.concurrent._
 
 import com.bwsw.sj.common.engine.TaskEngine
 import com.bwsw.sj.common.engine.core.managment.TaskManager
-import com.bwsw.sj.common.engine.core.reporting.{PerformanceMetrics, PerformanceMetricsProxy}
+import com.bwsw.sj.common.engine.core.reporting.{PerformanceMetricsReporter, PerformanceMetrics}
 import com.google.common.util.concurrent.ThreadFactoryBuilder
 import com.typesafe.scalalogging.Logger
 import scaldi.Injector
@@ -90,11 +90,11 @@ abstract class TaskRunner(implicit val injector: Injector = com.bwsw.sj.common.S
 
     logger.info(s"Task: ${manager.taskName}. Start preparing of task runner for '${manager.instance.moduleType}' module\n")
 
-    val performanceMetrics = createPerformanceMetrics(manager)
+    val performanceMetricsReporter = createPerformanceMetricsReporter(manager)
 
-    val performanceMetricsProxy = createPerformanceMetricsThread(manager.taskName, performanceMetrics)
+    val performanceMetrics = createPerformanceMetrics(manager.taskName, performanceMetricsReporter)
 
-    val taskEngine = createTaskEngine(manager, performanceMetricsProxy)
+    val taskEngine = createTaskEngine(manager, performanceMetrics)
 
     val taskInputService = createTaskInputService(manager, taskEngine)
 
@@ -108,8 +108,8 @@ abstract class TaskRunner(implicit val injector: Injector = com.bwsw.sj.common.S
       case _ =>
     }
     executorService.submit(taskEngine)
+    executorService.submit(performanceMetricsReporter)
     executorService.submit(performanceMetrics)
-    executorService.submit(performanceMetricsProxy)
     executorService.submit(instanceStatusObserver)
 
     waitForCompletion(taskInputService)
@@ -117,13 +117,13 @@ abstract class TaskRunner(implicit val injector: Injector = com.bwsw.sj.common.S
 
   protected def createTaskManager(): TaskManager
 
-  protected def createPerformanceMetrics(manager: TaskManager): PerformanceMetrics
+  protected def createPerformanceMetricsReporter(manager: TaskManager): PerformanceMetricsReporter
 
-  protected def createTaskEngine(manager: TaskManager, performanceMetrics: PerformanceMetricsProxy): TaskEngine
+  protected def createTaskEngine(manager: TaskManager, performanceMetrics: PerformanceMetrics): TaskEngine
 
   protected def createTaskInputService(manager: TaskManager, taskEngine: TaskEngine): Closeable
 
-  protected def createPerformanceMetricsThread(taskName: String,
-                                               performanceMetrics: PerformanceMetrics): PerformanceMetricsProxy =
-    new PerformanceMetricsProxy(performanceMetrics, s"performance-metrics-$taskName")
+  protected def createPerformanceMetrics(taskName: String,
+                                         performanceMetricsReporter: PerformanceMetricsReporter): PerformanceMetrics =
+    new PerformanceMetrics(performanceMetricsReporter, s"performance-metrics-$taskName")
 }

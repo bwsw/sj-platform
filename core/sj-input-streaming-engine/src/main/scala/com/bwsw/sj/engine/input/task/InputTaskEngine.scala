@@ -26,7 +26,7 @@ import com.bwsw.sj.common.engine.TaskEngine
 import com.bwsw.sj.common.engine.core.entities.InputEnvelope
 import com.bwsw.sj.common.engine.core.environment.{InputEnvironmentManager, TStreamsSenderThread}
 import com.bwsw.sj.common.engine.core.input.{InputStreamingExecutor, Interval}
-import com.bwsw.sj.common.engine.core.reporting.PerformanceMetricsProxy
+import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
 import com.bwsw.sj.common.si.model.instance.InputInstance
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.core.engine.{NumericalCheckpointTaskEngine, TimeCheckpointTaskEngine}
@@ -52,7 +52,7 @@ import scala.util.Try
   * @author Kseniya Mikhaleva
   */
 abstract class InputTaskEngine(manager: InputTaskManager,
-                               performanceMetrics: PerformanceMetricsProxy,
+                               performanceMetrics: PerformanceMetrics,
                                channelContextQueue: ArrayBlockingQueue[ChannelHandlerContext],
                                bufferForEachContext: scala.collection.concurrent.Map[ChannelHandlerContext, ByteBuf],
                                connectionRepository: ConnectionRepository) extends TaskEngine {
@@ -276,7 +276,7 @@ object InputTaskEngine {
     * @return Engine of input task
     */
   def apply(manager: InputTaskManager,
-            performanceMetrics: PerformanceMetricsProxy,
+            performanceMetrics: PerformanceMetrics,
             channelContextQueue: ArrayBlockingQueue[ChannelHandlerContext],
             bufferForEachContext: scala.collection.concurrent.Map[ChannelHandlerContext, ByteBuf],
             connectionRepository: ConnectionRepository): InputTaskEngine = {

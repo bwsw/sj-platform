@@ -23,7 +23,7 @@ import com.bwsw.common.rest.RestClient
 import com.bwsw.sj.common.dal.model.stream.RestStreamDomain
 import com.bwsw.sj.common.engine.core.entities.{OutputEnvelope, TStreamEnvelope}
 import com.bwsw.sj.common.engine.core.output.Entity
-import com.bwsw.sj.common.engine.core.reporting.PerformanceMetricsProxy
+import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
 import com.bwsw.sj.engine.core.output.types.rest.RestCommandBuilder
 import com.bwsw.sj.engine.output.task.OutputTaskManager
 
@@ -37,7 +37,7 @@ import scala.collection.JavaConverters._
   * @author Pavel Tomskikh
   */
 class RestOutputProcessor[T <: AnyRef](restOutputStream: RestStreamDomain,
-                                       performanceMetrics: PerformanceMetricsProxy,
+                                       performanceMetrics: PerformanceMetrics,
                                        manager: OutputTaskManager,
                                        entity: Entity[_])
   extends OutputProcessor[T](restOutputStream, performanceMetrics) {

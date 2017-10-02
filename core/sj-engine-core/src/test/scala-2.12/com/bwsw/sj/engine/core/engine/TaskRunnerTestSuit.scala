@@ -24,7 +24,7 @@ import java.util.concurrent.{Callable, ExecutorCompletionService}
 import com.bwsw.sj.common.engine.TaskEngine
 import com.bwsw.sj.common.engine.core.config.EngineConfigNames
 import com.bwsw.sj.common.engine.core.managment.TaskManager
-import com.bwsw.sj.common.engine.core.reporting.{PerformanceMetrics, PerformanceMetricsProxy}
+import com.bwsw.sj.common.engine.core.reporting.{PerformanceMetricsReporter, PerformanceMetrics}
 import com.bwsw.sj.common.si.model.instance.Instance
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.typesafe.config.Config
@@ -69,8 +69,8 @@ trait TaskRunnerMocks extends MockitoSugar {
   when(manager.taskName).thenReturn("task-name")
   when(manager.instance).thenReturn(instance)
 
-  val performanceMetrics: PerformanceMetrics = mock[PerformanceMetrics]
-  val performanceMetricsProxy: PerformanceMetricsProxy = mock[PerformanceMetricsProxy]
+  val performanceMetrics: PerformanceMetricsReporter = mock[PerformanceMetricsReporter]
+  val performanceMetricsProxy: PerformanceMetrics = mock[PerformanceMetrics]
   val taskEngine: TaskEngine = mock[TaskEngine]
   val taskInputService: TaskInputServiceMock = mock[TaskInputServiceMock]
 
@@ -85,8 +85,8 @@ trait TaskRunnerMocks extends MockitoSugar {
 
 class TaskRunnerMock(_executorService: ExecutorCompletionService[Unit],
                      _taskManager: TaskManager,
-                     _performanceMetrics: PerformanceMetrics,
-                     _performanceMetricsProxy: PerformanceMetricsProxy,
+                     _performanceMetrics: PerformanceMetricsReporter,
+                     _performanceMetricsProxy: PerformanceMetrics,
                      _taskEngine: TaskEngine,
                      _taskInputService: Closeable,
                      injector: Injector) extends {
@@ -98,15 +98,15 @@ class TaskRunnerMock(_executorService: ExecutorCompletionService[Unit],
 
   override def createTaskInputService(manager: TaskManager, taskEngine: TaskEngine): Closeable = _taskInputService
 
-  override def createPerformanceMetrics(manager: TaskManager): PerformanceMetrics = _performanceMetrics
+  override def createPerformanceMetricsReporter(manager: TaskManager): PerformanceMetricsReporter = _performanceMetrics
 
-  override def createTaskEngine(manager: TaskManager, performanceMetrics: PerformanceMetricsProxy): TaskEngine =
+  override def createTaskEngine(manager: TaskManager, performanceMetrics: PerformanceMetrics): TaskEngine =
     _taskEngine
 
   override protected def waitForCompletion(closeableTaskInput: Closeable): Unit = {}
 
-  override def createPerformanceMetricsThread(taskName: String,
-                                              performanceMetrics: PerformanceMetrics): PerformanceMetricsProxy =
+  override def createPerformanceMetrics(taskName: String,
+                                        performanceMetrics: PerformanceMetricsReporter): PerformanceMetrics =
     _performanceMetricsProxy
 }
 

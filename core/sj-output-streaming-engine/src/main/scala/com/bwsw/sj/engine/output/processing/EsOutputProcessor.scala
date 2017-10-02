@@ -22,7 +22,7 @@ import com.bwsw.common.es.ElasticsearchClient
 import com.bwsw.sj.common.dal.model.stream.ESStreamDomain
 import com.bwsw.sj.common.engine.core.entities.{OutputEnvelope, TStreamEnvelope}
 import com.bwsw.sj.common.engine.core.output.Entity
-import com.bwsw.sj.common.engine.core.reporting.PerformanceMetricsProxy
+import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
 import com.bwsw.sj.engine.core.output.types.es.ElasticsearchCommandBuilder
 import com.bwsw.sj.engine.output.task.OutputTaskManager
 
@@ -30,7 +30,7 @@ import com.bwsw.sj.engine.output.task.OutputTaskManager
   * ref. [[OutputProcessor]] object
   */
 class EsOutputProcessor[T <: AnyRef](esStream: ESStreamDomain,
-                                     performanceMetrics: PerformanceMetricsProxy,
+                                     performanceMetrics: PerformanceMetrics,
                                      manager: OutputTaskManager,
                                      entity: Entity[_])
   extends OutputProcessor[T](esStream, performanceMetrics) {

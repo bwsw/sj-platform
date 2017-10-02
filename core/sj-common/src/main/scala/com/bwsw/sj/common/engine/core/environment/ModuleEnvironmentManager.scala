@@ -20,7 +20,7 @@ package com.bwsw.sj.common.engine.core.environment
 
 import com.bwsw.common.file.utils.FileStorage
 import com.bwsw.sj.common.dal.model.stream.StreamDomain
-import com.bwsw.sj.common.engine.core.reporting.PerformanceMetricsProxy
+import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
 import com.bwsw.sj.common.engine.core.state.StateStorage
 import com.bwsw.sj.common.utils.SjTimer
 
@@ -49,7 +49,7 @@ class ModuleEnvironmentManager(options: String,
                                outputs: Array[StreamDomain],
                                producerPolicyByOutput: mutable.Map[String, ModuleOutput],
                                moduleTimer: SjTimer,
-                               performanceMetrics: PerformanceMetricsProxy,
+                               performanceMetrics: PerformanceMetrics,
                                fileStorage: FileStorage,
                                senderThread: TStreamsSenderThread)
   extends EnvironmentManager(options, outputs, fileStorage) {

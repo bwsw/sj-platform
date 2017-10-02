@@ -33,7 +33,7 @@ import scala.collection.Map
   * @author Kseniya Mikhaleva
   */
 abstract class BatchCollector(protected val instance: BatchInstanceDomain,
-                              performanceMetrics: BatchStreamingPerformanceMetricsProxy,
+                              performanceMetrics: BatchStreamingPerformanceMetrics,
                               inputs: Array[StreamDomain]) {
 
   private val logger: Logger = Logger(this.getClass)

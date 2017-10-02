@@ -22,9 +22,9 @@ import java.io.Closeable
 
 import com.bwsw.sj.common.engine.TaskEngine
 import com.bwsw.sj.common.engine.core.managment.TaskManager
-import com.bwsw.sj.common.engine.core.reporting.{PerformanceMetrics, PerformanceMetricsProxy}
+import com.bwsw.sj.common.engine.core.reporting.{PerformanceMetricsReporter, PerformanceMetrics}
 import com.bwsw.sj.engine.core.engine.TaskRunner
-import com.bwsw.sj.engine.output.task.reporting.OutputStreamingPerformanceMetrics
+import com.bwsw.sj.engine.output.task.reporting.OutputStreamingPerformanceMetricsReporter
 import com.bwsw.sj.engine.output.task.{OutputTaskEngine, OutputTaskManager}
 
 /**
@@ -41,11 +41,11 @@ object OutputTaskRunner extends {
 
   override protected def createTaskManager(): TaskManager = new OutputTaskManager()
 
-  override protected def createPerformanceMetrics(manager: TaskManager): PerformanceMetrics = {
-    new OutputStreamingPerformanceMetrics(manager.asInstanceOf[OutputTaskManager])
+  override protected def createPerformanceMetricsReporter(manager: TaskManager): PerformanceMetricsReporter = {
+    new OutputStreamingPerformanceMetricsReporter(manager.asInstanceOf[OutputTaskManager])
   }
 
-  override protected def createTaskEngine(manager: TaskManager, performanceMetrics: PerformanceMetricsProxy): TaskEngine =
+  override protected def createTaskEngine(manager: TaskManager, performanceMetrics: PerformanceMetrics): TaskEngine =
     OutputTaskEngine(manager.asInstanceOf[OutputTaskManager], performanceMetrics)
 
   override protected def createTaskInputService(manager: TaskManager, taskEngine: TaskEngine): Closeable = {

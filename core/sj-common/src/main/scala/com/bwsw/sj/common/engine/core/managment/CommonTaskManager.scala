@@ -22,7 +22,7 @@ import com.bwsw.sj.common.dal.model.instance.{BatchInstanceDomain, ExecutionPlan
 import com.bwsw.sj.common.dal.model.module.BatchSpecificationDomain
 import com.bwsw.sj.common.dal.model.stream.StreamDomain
 import com.bwsw.sj.common.engine.StreamingExecutor
-import com.bwsw.sj.common.engine.core.batch.{BatchCollector, BatchStreamingPerformanceMetricsProxy}
+import com.bwsw.sj.common.engine.core.batch.{BatchCollector, BatchStreamingPerformanceMetrics}
 import com.bwsw.sj.common.engine.core.environment.{EnvironmentManager, ModuleEnvironmentManager}
 import com.bwsw.sj.common.si.model.instance.{BatchInstance, RegularInstance}
 import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
@@ -58,7 +58,7 @@ class CommonTaskManager(implicit injector: Injector) extends TaskManager {
   }
 
   def getBatchCollector(instance: BatchInstanceDomain,
-                        performanceMetrics: BatchStreamingPerformanceMetricsProxy,
+                        performanceMetrics: BatchStreamingPerformanceMetrics,
                         inputStreams: Array[String]): BatchCollector = {
     instance match {
       case _: BatchInstanceDomain =>
@@ -70,7 +70,7 @@ class CommonTaskManager(implicit injector: Injector) extends TaskManager {
           .loadClass(batchCollectorClassName)
           .getConstructor(
             classOf[BatchInstanceDomain],
-            classOf[BatchStreamingPerformanceMetricsProxy],
+            classOf[BatchStreamingPerformanceMetrics],
             classOf[Array[StreamDomain]])
           .newInstance(instance, performanceMetrics, inputs)
           .asInstanceOf[BatchCollector]
