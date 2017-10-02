@@ -18,8 +18,6 @@
  */
 package com.bwsw.sj.common.engine.core.input
 
-import com.bwsw.sj.common.engine.core.entities.InputEnvelope
-
 /**
   * Class represents an interval of buffer, which contains incoming data of input module,
   * that defines the boundaries of [[com.bwsw.sj.common.engine.core.entities.InputEnvelope]]

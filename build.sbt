@@ -97,6 +97,7 @@ lazy val engineCore = Project(id = "sj-engine-core",
   base = file("./core/sj-engine-core"))
   .settings(commonSettings: _*)
   .settings(
+    resolvers += "Clojars Repository" at "http://clojars.org/repo/",
     libraryDependencies ++= Dependencies.sjEngineCoreDependencies.value,
     libraryDependencies ++= Dependencies.sjTestDependencies.value
   )
@@ -123,10 +124,6 @@ lazy val inputStreamingEngine = Project(id = "sj-input-streaming-engine",
 lazy val regularStreamingEngine = Project(id = "sj-regular-streaming-engine",
   base = file("./core/sj-regular-streaming-engine"))
   .settings(commonSettings: _*)
-  .settings(
-    resolvers += "Clojars Repository" at "http://clojars.org/repo/",
-    libraryDependencies ++= Dependencies.sjRegularEngineDependencies.value
-  )
   .dependsOn(engineCore)
 
 lazy val batchStreamingEngine = Project(id = "sj-batch-streaming-engine",
@@ -222,8 +219,21 @@ lazy val regularPerformanceBenchmark = Project(id = "sj-regular-performance-benc
   .settings(commonSettings: _*)
   .dependsOn(engineCore % "provided")
 
+lazy val batchPerformanceBenchmark = Project(id = "sj-batch-performance-benchmark",
+  base = file("./contrib/benchmarks/sj-batch-performance-benchmark"))
+  .settings(commonSettings: _*)
+  .dependsOn(engineCore % "provided")
+
 lazy val flinkBenchmarkTask = Project(id = "flink-benchmark-task",
   base = file("./contrib/benchmarks/flink-benchmark-task"))
+  .settings(commonSettings: _*)
+  .settings(
+    scalaVersion := "2.11.8",
+    libraryDependencies ++= Dependencies.flinkDependencies.value
+  )
+
+lazy val flinkBatchBenchmarkTask = Project(id = "flink-batch-benchmark-task",
+  base = file("./contrib/benchmarks/flink-batch-benchmark-task"))
   .settings(commonSettings: _*)
   .settings(
     scalaVersion := "2.11.8",

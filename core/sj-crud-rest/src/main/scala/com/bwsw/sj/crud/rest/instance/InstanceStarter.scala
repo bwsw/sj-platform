@@ -30,7 +30,7 @@ import com.bwsw.sj.common.si.model.instance.Instance
 import com.bwsw.sj.common.utils.FrameworkLiterals._
 import com.bwsw.sj.common.utils._
 import com.bwsw.sj.crud.rest.utils.RestLiterals
-import org.slf4j.LoggerFactory
+import com.typesafe.scalalogging.Logger
 import scaldi.Injectable.inject
 import scaldi.Injector
 
@@ -53,7 +53,7 @@ class InstanceStarter(instance: Instance,
 
   import EngineLiterals._
 
-  private val logger = LoggerFactory.getLogger(getClass.getName)
+  private val logger = Logger(getClass.getName)
   private val settingsUtils = inject[SettingsUtils]
   private lazy val restHost = settingsUtils.getCrudRestHost()
   private lazy val restPort = settingsUtils.getCrudRestPort()

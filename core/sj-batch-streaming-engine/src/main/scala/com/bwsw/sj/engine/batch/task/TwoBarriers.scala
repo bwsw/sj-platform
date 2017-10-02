@@ -18,10 +18,10 @@
  */
 package com.bwsw.sj.engine.batch.task
 
-import org.apache.curator.framework.{CuratorFramework, CuratorFrameworkFactory}
+import com.typesafe.scalalogging.Logger
 import org.apache.curator.framework.recipes.barriers.DistributedDoubleBarrier
+import org.apache.curator.framework.{CuratorFramework, CuratorFrameworkFactory}
 import org.apache.curator.retry.ExponentialBackoffRetry
-import org.slf4j.LoggerFactory
 
 import scala.util.{Failure, Success, Try}
 
@@ -38,7 +38,7 @@ class TwoBarriers(zooKeeperHosts: Set[String],
                   barrierPathPrefix: String,
                   memberQty: Int) {
 
-  private val logger = LoggerFactory.getLogger(this.getClass)
+  private val logger = Logger(this.getClass)
   private val barrierPaths = Array(0, 1).map(i => barrierPathPrefix + "-" + i)
   private val currentBarrierIndexPath = barrierPathPrefix + "-current"
   private val curatorClient = createCuratorClient()

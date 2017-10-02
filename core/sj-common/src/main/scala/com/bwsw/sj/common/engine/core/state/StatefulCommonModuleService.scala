@@ -20,7 +20,7 @@ package com.bwsw.sj.common.engine.core.state
 
 import com.bwsw.sj.common.dal.model.stream.{StreamDomain, TStreamStreamDomain}
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
-import com.bwsw.sj.common.engine.core.environment.StatefulModuleEnvironmentManager
+import com.bwsw.sj.common.engine.core.environment.{StatefulModuleEnvironmentManager, TStreamsSenderThread}
 import com.bwsw.sj.common.engine.core.managment.CommonTaskManager
 import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
 import com.bwsw.sj.common.engine.{StateHandlers, StreamingExecutor, TimerHandlers}
@@ -60,6 +60,9 @@ class StatefulCommonModuleService(manager: CommonTaskManager,
       case batchInstance: BatchInstance => batchInstance.stateFullCheckpoint
     }
   }
+  protected val senderThread = new TStreamsSenderThread(
+    manager.outputProducers, checkpointGroup, performanceMetrics, s"batch-task-${manager.taskName}-sender")
+  senderThread.start()
 
   private def createStateService() = {
     val stateStream = createStateStream()
@@ -74,12 +77,12 @@ class StatefulCommonModuleService(manager: CommonTaskManager,
   val environmentManager = new StatefulModuleEnvironmentManager(
     new StateStorage(stateService),
     instance.options,
-    outputProducers,
     instance.outputs.flatMap(x => streamService.get(x)),
     producerPolicyByOutput,
     moduleTimer,
     performanceMetrics,
-    connectionRepository.getFileStorage)
+    connectionRepository.getFileStorage,
+    senderThread)
 
   val executor: StreamingExecutor with TimerHandlers = manager.getExecutor(environmentManager).asInstanceOf[StreamingExecutor with TimerHandlers]
 
@@ -89,12 +92,12 @@ class StatefulCommonModuleService(manager: CommonTaskManager,
     * Does group checkpoint of t-streams state consumers/producers
     */
   override def doCheckpoint(): Unit = {
+    super.doCheckpoint()
     if (countOfCheckpoints != stateFullCheckpoint) {
       doCheckpointOfPartOfState()
     } else {
       doCheckpointOfFullState()
     }
-    super.doCheckpoint()
   }
 
   /**

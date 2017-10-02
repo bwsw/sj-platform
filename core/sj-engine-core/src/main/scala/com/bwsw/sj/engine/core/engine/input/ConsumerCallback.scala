@@ -18,14 +18,12 @@
  */
 package com.bwsw.sj.engine.core.engine.input
 
-import java.util.concurrent.ArrayBlockingQueue
-
 import com.bwsw.common.SerializerInterface
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
-import com.bwsw.sj.common.engine.core.entities.{Envelope, TStreamEnvelope}
+import com.bwsw.sj.common.engine.core.entities.{EnvelopeInterface, WeightedBlockingQueue, TStreamEnvelope}
 import com.bwsw.tstreams.agents.consumer.subscriber.Callback
 import com.bwsw.tstreams.agents.consumer.{Consumer, ConsumerTransaction, TransactionOperator}
-import org.slf4j.LoggerFactory
+import com.typesafe.scalalogging.Logger
 import scaldi.Injectable.inject
 import scaldi.Injector
 
@@ -37,9 +35,9 @@ import scaldi.Injector
   */
 
 class ConsumerCallback[T <: AnyRef](envelopeDataSerializer: SerializerInterface,
-                                    blockingQueue: ArrayBlockingQueue[Envelope])
+                                    blockingQueue: WeightedBlockingQueue[EnvelopeInterface])
                                    (implicit injector: Injector) extends Callback {
-  private val logger = LoggerFactory.getLogger(this.getClass)
+  private val logger = Logger(this.getClass)
 
   override def onTransaction(operator: TransactionOperator, transaction: ConsumerTransaction): Unit = {
     val consumer = operator.asInstanceOf[Consumer]

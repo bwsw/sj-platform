@@ -34,6 +34,7 @@ import scala.collection.mutable
 
 class TStreamEnvelope[T <: AnyRef](var data: mutable.Queue[T], var consumerName: String) extends Envelope {
   streamType = StreamLiterals.tstreamsType
+  override val weight: Int = data.size
 
   @JsonIgnore
   override def equals(obj: Any): Boolean = obj match {

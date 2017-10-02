@@ -20,20 +20,17 @@ package com.bwsw.sj.common.engine.core.environment
 
 import com.bwsw.common.file.utils.FileStorage
 import com.bwsw.sj.common.dal.model.stream.StreamDomain
-import com.bwsw.sj.common.engine.core.environment.EnvironmentLiterals.{partitionedOutput, roundRobinOutput}
 import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
 import com.bwsw.sj.common.engine.core.state.StateStorage
 import com.bwsw.sj.common.utils.SjTimer
-import com.bwsw.tstreams.agents.producer.Producer
 
-import scala.collection._
+import scala.collection.mutable
+import scala.reflect.ClassTag
 
 /**
   * Provides for user methods that can be used in [[com.bwsw.sj.common.utils.EngineLiterals.regularStreamingType]]
   * or [[com.bwsw.sj.common.utils.EngineLiterals.batchStreamingType]] module
   *
-  * @param producers              t-streams producers for each output stream from instance
-  *                               [[com.bwsw.sj.common.dal.model.instance.InstanceDomain.outputs]]
   * @param options                user defined options from instance
   *                               [[com.bwsw.sj.common.dal.model.instance.InstanceDomain.options]]
   * @param outputs                set of output streams [[com.bwsw.sj.common.dal.model.stream.StreamDomain]] from instance
@@ -45,17 +42,19 @@ import scala.collection._
   *                               [[com.bwsw.sj.common.utils.EngineLiterals.regularStreamingType]] or
   *                               [[com.bwsw.sj.common.utils.EngineLiterals.batchStreamingType]] module
   * @param fileStorage            file storage
+  * @param senderThread           thread for sending data to the T-Streams service
   * @author Kseniya Mikhaleva
   */
-
 class ModuleEnvironmentManager(options: String,
-                               producers: Map[String, Producer],
                                outputs: Array[StreamDomain],
-                               producerPolicyByOutput: mutable.Map[String, (String, ModuleOutput)],
+                               producerPolicyByOutput: mutable.Map[String, ModuleOutput],
                                moduleTimer: SjTimer,
                                performanceMetrics: PerformanceMetrics,
-                               fileStorage: FileStorage)
+                               fileStorage: FileStorage,
+                               senderThread: TStreamsSenderThread)
   extends EnvironmentManager(options, outputs, fileStorage) {
+
+  private val streamNames = outputs.map(_.name).toSet
 
   /**
     * Allows getting partitioned output for specific output stream
@@ -64,28 +63,10 @@ class ModuleEnvironmentManager(options: String,
     * @return Partitioned output that wrapping output stream
     */
   def getPartitionedOutput(streamName: String)(implicit serialize: AnyRef => Array[Byte]): PartitionedOutput = {
-    logger.info(s"Get partitioned output for stream: $streamName\n")
-    producers.get(streamName) match {
-      case Some(producer) =>
-        producerPolicyByOutput.get(streamName) match {
-          case Some((`partitionedOutput`, moduleOutput: PartitionedOutput)) =>
-            moduleOutput
+    logger.debug(s"Get partitioned output for stream: $streamName\n")
 
-          case Some(_) =>
-            logger.error(s"For output stream: $streamName partitioned output is set")
-            throw new Exception(s"For output stream: $streamName partitioned output is set")
-
-          case None =>
-            producerPolicyByOutput(streamName) = (partitionedOutput, createPartitionedOutput(producer))
-
-            producerPolicyByOutput(streamName)._2.asInstanceOf[PartitionedOutput]
-        }
-
-      case None =>
-        logger.error(s"There is no output for name $streamName")
-        throw new IllegalArgumentException(s"There is no output for name $streamName")
-
-    }
+    getOutput(streamName, () => new PartitionedOutput(streamName, senderThread)
+    )
   }
 
   /**
@@ -95,27 +76,34 @@ class ModuleEnvironmentManager(options: String,
     * @return Round-robin output that wrapping output stream
     */
   def getRoundRobinOutput(streamName: String)(implicit serialize: AnyRef => Array[Byte]): RoundRobinOutput = {
-    logger.info(s"Get round-robin output for stream: $streamName\n")
-    producers.get(streamName) match {
-      case Some(producer) =>
-        producerPolicyByOutput.get(streamName) match {
-          case Some((`roundRobinOutput`, moduleOutput: RoundRobinOutput)) =>
-            moduleOutput
+    logger.debug(s"Get round-robin output for stream: $streamName\n")
 
-          case Some(_) =>
-            logger.error(s"For output stream: $streamName partitioned output is set")
-            throw new Exception(s"For output stream: $streamName partitioned output is set")
+    getOutput(streamName, () => new RoundRobinOutput(streamName, senderThread))
+  }
 
-          case None =>
-            producerPolicyByOutput(streamName) = (roundRobinOutput, createRoundRobinOutput(producer))
 
-            producerPolicyByOutput(streamName)._2.asInstanceOf[RoundRobinOutput]
-        }
+  protected def getOutput[T <: ModuleOutput : ClassTag](streamName: String,
+                                                        createOutput: () => T)
+                                                       (implicit serialize: AnyRef => Array[Byte]): T = {
+    if (streamNames.contains(streamName)) {
+      producerPolicyByOutput.get(streamName) match {
+        case Some(output: T) =>
+          output.asInstanceOf[T]
 
-      case None =>
-        logger.error(s"There is no output for name $streamName")
-        throw new IllegalArgumentException(s"There is no output for name $streamName")
+        case Some(_) =>
+          val message = s"For output stream '$streamName' other type of output already is set"
+          logger.error(message)
+          throw new Exception(message)
 
+        case None =>
+          val output = createOutput()
+          producerPolicyByOutput(streamName) = output
+
+          output
+      }
+    } else {
+      logger.error(s"There is no output for name $streamName")
+      throw new IllegalArgumentException(s"There is no output for name $streamName")
     }
   }
 
@@ -132,15 +120,8 @@ class ModuleEnvironmentManager(options: String,
     * @return Module state
     */
   def getState: StateStorage = {
-    logger.error("Module has no state")
-    throw new Exception("Module has no state")
+    val message = "Module has no state"
+    logger.error(message)
+    throw new Exception(message)
   }
-
-  protected def createPartitionedOutput(producer: Producer)
-                                       (implicit serialize: AnyRef => Array[Byte]): PartitionedOutput =
-    new PartitionedOutput(producer, performanceMetrics)
-
-  protected def createRoundRobinOutput(producer: Producer)
-                                      (implicit serialize: AnyRef => Array[Byte]): RoundRobinOutput =
-    new RoundRobinOutput(producer, performanceMetrics)
 }

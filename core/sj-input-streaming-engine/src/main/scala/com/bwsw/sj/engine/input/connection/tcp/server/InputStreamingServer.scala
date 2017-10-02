@@ -21,13 +21,13 @@ package com.bwsw.sj.engine.input.connection.tcp.server
 import java.io.Closeable
 import java.util.concurrent.{ArrayBlockingQueue, Callable}
 
+import com.typesafe.scalalogging.Logger
 import io.netty.bootstrap.ServerBootstrap
 import io.netty.buffer.{ByteBuf, PooledByteBufAllocator}
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.nio.NioServerSocketChannel
 import io.netty.channel.{ChannelHandlerContext, ChannelOption, EventLoopGroup}
 import io.netty.handler.logging.{LogLevel, LoggingHandler}
-import org.slf4j.LoggerFactory
 
 import scala.collection.concurrent
 import scala.util.{Failure, Success, Try}
@@ -50,7 +50,7 @@ class InputStreamingServer(host: String,
                            channelContextQueue: ArrayBlockingQueue[ChannelHandlerContext],
                            bufferForEachContext: concurrent.Map[ChannelHandlerContext, ByteBuf]) extends Callable[Unit] with Closeable {
 
-  private val logger = LoggerFactory.getLogger(this.getClass)
+  private val logger = Logger(this.getClass)
   private val bossGroup: EventLoopGroup = new NioEventLoopGroup(1)
   private val workerGroup = new NioEventLoopGroup()
 

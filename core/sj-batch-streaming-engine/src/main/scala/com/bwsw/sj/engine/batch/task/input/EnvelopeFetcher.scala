@@ -18,13 +18,13 @@
  */
 package com.bwsw.sj.engine.batch.task.input
 
-import java.util.concurrent.{Executors, ScheduledExecutorService}
+import java.util.concurrent.{BlockingQueue, Executors, LinkedBlockingQueue, ScheduledExecutorService}
 
 import com.bwsw.sj.common.engine.core.entities.Envelope
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import com.google.common.util.concurrent.ThreadFactoryBuilder
-import org.slf4j.{Logger, LoggerFactory}
+import com.typesafe.scalalogging.Logger
 
 import scala.collection.mutable
 
@@ -35,18 +35,17 @@ import scala.collection.mutable
   * @param taskInput handling an input streams of specific type(types)
   */
 class EnvelopeFetcher(taskInput: RetrievableCheckpointTaskInput[Envelope], lowWatermark: Int) {
-  private val logger: Logger = LoggerFactory.getLogger(this.getClass)
-  private val scheduledExecutor: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder().setNameFormat("EnvelopeFetcher-%d").build())
-  private val envelopesByStream: mutable.Map[String, mutable.Queue[Envelope]] = taskInput.inputs.map(x => (x._1.name, new mutable.Queue[Envelope]()))
+  private val logger: Logger = Logger(this.getClass)
+  private val scheduledExecutor: ScheduledExecutorService =
+    Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder().setNameFormat("EnvelopeFetcher-%d").build())
+  private val envelopesByStream: mutable.Map[String, BlockingQueue[Envelope]] =
+    taskInput.inputs.map(x => (x._1.name, new LinkedBlockingQueue[Envelope]()))
 
-  scheduledExecutor.scheduleWithFixedDelay(fillQueue(), 0, EngineLiterals.eventWaitTimeout, java.util.concurrent.TimeUnit.MILLISECONDS)
+  scheduledExecutor.scheduleWithFixedDelay(fillQueue(), 0, 1, java.util.concurrent.TimeUnit.MILLISECONDS)
 
   def get(stream: String): Option[Envelope] = {
     logger.debug(s"Get an envelope from queue of stream: $stream.")
-    synchronized {
-      if (envelopesByStream(stream).isEmpty) None
-      else Some(envelopesByStream(stream).dequeue())
-    }
+    Option(envelopesByStream(stream).poll())
   }
 
   private def fillQueue() = new Runnable {
@@ -55,9 +54,10 @@ class EnvelopeFetcher(taskInput: RetrievableCheckpointTaskInput[Envelope], lowWa
         logger.debug(s"An envelope queue has got less than $lowWatermark elements so it needs to be filled.")
         val unarrangedEnvelopes = taskInput.get()
 
-        unarrangedEnvelopes.foreach(x => synchronized {
-          envelopesByStream(x.stream) += x
-        })
+        if (unarrangedEnvelopes.nonEmpty)
+          unarrangedEnvelopes.foreach(x => envelopesByStream(x.stream).add(x))
+        else
+          Thread.sleep(EngineLiterals.eventWaitTimeout)
       }
     }
   }

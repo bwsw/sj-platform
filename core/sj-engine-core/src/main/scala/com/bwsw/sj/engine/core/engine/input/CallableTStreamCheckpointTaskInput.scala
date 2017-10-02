@@ -19,11 +19,10 @@
 package com.bwsw.sj.engine.core.engine.input
 
 import java.util.Date
-import java.util.concurrent.ArrayBlockingQueue
 
 import com.bwsw.common.SerializerInterface
 import com.bwsw.sj.common.dal.model.stream.TStreamStreamDomain
-import com.bwsw.sj.common.engine.core.entities.{Envelope, TStreamEnvelope}
+import com.bwsw.sj.common.engine.core.entities.{EnvelopeInterface, WeightedBlockingQueue, TStreamEnvelope}
 import com.bwsw.sj.common.engine.core.managment.TaskManager
 import com.bwsw.sj.common.si.model.instance.{BatchInstance, OutputInstance, RegularInstance}
 import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
@@ -31,7 +30,7 @@ import com.bwsw.tstreams.agents.consumer.Consumer
 import com.bwsw.tstreams.agents.consumer.Offset.{DateTime, IOffset, Newest, Oldest}
 import com.bwsw.tstreams.agents.consumer.subscriber.Subscriber
 import com.bwsw.tstreams.agents.group.CheckpointGroup
-import org.slf4j.LoggerFactory
+import com.typesafe.scalalogging.Logger
 import scaldi.Injector
 
 import scala.collection.mutable
@@ -48,13 +47,13 @@ import scala.collection.mutable
   *
   */
 class CallableTStreamCheckpointTaskInput[T <: AnyRef](manager: TaskManager,
-                                                      blockingQueue: ArrayBlockingQueue[Envelope],
+                                                      blockingQueue: WeightedBlockingQueue[EnvelopeInterface],
                                                       override val checkpointGroup: CheckpointGroup,
                                                       envelopeDataSerializer: SerializerInterface)
                                                      (implicit injector: Injector)
   extends CallableCheckpointTaskInput[TStreamEnvelope[T]](manager.inputs) {
 
-  private val logger = LoggerFactory.getLogger(this.getClass)
+  private val logger = Logger(this.getClass)
   private val (subscribingConsumers, consumerClones) = createConsumers()
 
   private def createConsumers(): (Seq[Subscriber], mutable.Map[String, Consumer]) = {

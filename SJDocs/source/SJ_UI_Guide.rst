@@ -28,9 +28,9 @@ If you are a developer and are willing to use the platform you need to know of s
 
 .. tip:: Find more about SJ-Platform architecture at :ref:`Architecture`.
 
-There are required configurations and engines for launching a module. Find more information about that in the `Configuration`_ and the `Custom Files`_ sections of this document. 
+There are required configurations and engines for launching a module. Find more information about that in the `Configuration`_ and the :ref:`Custom_Files` sections of this document. 
 
-Once everything is ready you can move to the Stream Juggler Platform.
+Once everything is ready, you can move to the Stream Juggler Platform.
 
 The SJ-Platform allows to upload your custom module for data stream processing with prerequisite engines and configuration settings. 
 
@@ -42,7 +42,7 @@ The diagram below may help you to understand the dependency of entity types in t
 
 For example, if you want to create a regular module that will process Apache Kafka input data streams you have to create an Apache Kafka service with a Kafka and a ZooKeeper providers for it.
 
-A module can not process data streams without uploading an engine (that is a .jar file) that launches the module and contains required configuration settings. More information about these settings can be found in the `Configuration`_ and the `Custom Files`_ sections of this document.
+A module can not process data streams without uploading an engine (that is a .jar file) that launches the module and contains required configuration settings. More information about these settings can be found in the `Configuration`_ and the :ref:`Custom Files` sections of this document.
 
 An executor of the module utilizes an instance/instances, i.e. a full range of settings for an exact handler/executor.
 
@@ -100,7 +100,7 @@ Please, find the required config settings in the table below and make sure they 
   "system", "marathon-connect-timeout", "Use when trying to connect by marathon-connect (in milliseconds).", "60000"
   "system", "current-framework", "Indicates what file is used to run a framework. By this value you can get a setting that contains a file name of framework jar.", "com.bwsw.fw-0.1"
   "system", "low-watermark", "A number of preloaded messages for batch engine processing.", "1000"
-  "kafka", "subscriber-timeout", "The time, in milliseconds, spent waiting in poll if data is not available. Must not be negative", "100"
+  "kafka", "subscriber-timeout", "The time, in milliseconds, spent waiting in poll if data are not available. Must not be negative", "100"
   "zk", "session.timeout", "Use when connecting to zookeeper in milliseconds (usually when we are dealing with t-streams consumers/producers)", "3000"
 .. "system", "current-transaction-generator", "Indicates what jar is used for running transaction generators. By this value you can get configuration setting that contains file name of transaction generator jar.", "com.bwsw.tg-0.1"
   "system", "transaction-generator-client-retry-period", "Time for connecting attempt to TG-server", "500"
@@ -128,7 +128,7 @@ The range of optional settings is presented below. They have default values in t
 
 .. note:: You must not define properties such as 'bootstrap.servers', 'enable.auto.commit', 'key.deserializer' and 'value.deserializer' to avoid a crashing of system
 
-Сonfig domain named 't-streams' contains properties used for a T-streams consumer/producer. 
+Сonfiguration domain named 't-streams' contains properties used for a T-streams consumer/producer. 
 
 .. note:: You must not define properties such as 'producer.bind-host', 'producer.bind-port', 'consumer.subscriber.bind-host' and 'consumer.subscriber.bind-port' to avoid a crashing of system. 
 
@@ -155,17 +155,18 @@ Please, in the *Providers* section, press the «Create provider» button and fil
 
 .. figure:: _static/CreateProvider_Type1.png
 
-  Select from the drop-down a type of the provider you are aimed to create. The following options are available:
 
-  - Elasticsearch;
+Select from the drop-down a type of the provider you are aimed to create. The following options are available:
+
+ - Elasticsearch;
   
-  - Apache Zookeeper;
+ - Apache Zookeeper;
 
-  - Apache Kafka;
+ - Apache Kafka;
 
-  - RESTful;
+ - RESTful;
 
-  - SQL database.
+ - SQL database.
 
 The type of the provider is determined with the type of the instance you want to create and work with at the end.
 
@@ -616,6 +617,7 @@ The following actions can be performed with the files in the list:
 
 The list of jars can be filtered by its name using the search tool above the list.
 
+.. _Custom_Files:
 Custom Files
 ~~~~~~~~~~~~
 

@@ -22,10 +22,10 @@ import com.bwsw.common.ObjectSizeFetcher
 import com.bwsw.sj.common.dal.model.stream.{ESStreamDomain, JDBCStreamDomain, RestStreamDomain, StreamDomain}
 import com.bwsw.sj.common.engine.core.entities.{OutputEnvelope, TStreamEnvelope}
 import com.bwsw.sj.common.engine.core.output.Entity
+import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
 import com.bwsw.sj.engine.core.output.types.CommandBuilder
 import com.bwsw.sj.engine.output.task.OutputTaskManager
-import com.bwsw.sj.engine.output.task.reporting.OutputStreamingPerformanceMetrics
-import org.slf4j.{Logger, LoggerFactory}
+import com.typesafe.scalalogging.Logger
 import scaldi.Injector
 
 /**
@@ -36,8 +36,8 @@ import scaldi.Injector
   * @param performanceMetrics set of metrics that characterize performance of an output streaming module
   */
 abstract class OutputProcessor[T <: AnyRef](outputStream: StreamDomain,
-                                            performanceMetrics: OutputStreamingPerformanceMetrics) {
-  protected val logger: Logger = LoggerFactory.getLogger(this.getClass)
+                                            performanceMetrics: PerformanceMetrics) {
+  protected val logger: Logger = Logger(this.getClass)
   protected val commandBuilder: CommandBuilder[_]
 
   protected def transactionFieldName: String = "txn"
@@ -109,7 +109,7 @@ object OutputProcessor {
     * @tparam T type of elements that will be processed
     */
   def apply[T <: AnyRef](outputStream: StreamDomain,
-                         performanceMetrics: OutputStreamingPerformanceMetrics,
+                         performanceMetrics: PerformanceMetrics,
                          manager: OutputTaskManager,
                          entity: Entity[_])
                         (implicit injector: Injector): OutputProcessor[T] = {
