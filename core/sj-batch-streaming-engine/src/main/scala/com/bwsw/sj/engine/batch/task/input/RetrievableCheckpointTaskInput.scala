@@ -25,7 +25,7 @@ import com.bwsw.sj.common.engine.core.managment.CommonTaskManager
 import com.bwsw.sj.common.utils.StreamLiterals
 import com.bwsw.sj.engine.core.engine.input.CheckpointTaskInput
 import com.bwsw.tstreams.agents.group.CheckpointGroup
-import org.slf4j.LoggerFactory
+import com.typesafe.scalalogging.Logger
 import scaldi.Injector
 
 import scala.collection.mutable
@@ -42,7 +42,7 @@ abstract class RetrievableCheckpointTaskInput[T <: Envelope](val inputs: mutable
 }
 
 object RetrievableCheckpointTaskInput {
-  private val logger = LoggerFactory.getLogger(this.getClass)
+  private val logger = Logger(this.getClass)
 
   def apply[T <: AnyRef](manager: CommonTaskManager,
                          checkpointGroup: CheckpointGroup,

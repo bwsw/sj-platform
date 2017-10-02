@@ -22,7 +22,7 @@ import com.bwsw.sj.common.dal.model.instance.BatchInstanceDomain
 import com.bwsw.sj.common.dal.model.stream.StreamDomain
 import com.bwsw.sj.common.engine.core.batch.{BatchCollector, BatchStreamingPerformanceMetrics}
 import com.bwsw.sj.common.engine.core.entities.Envelope
-import org.slf4j.LoggerFactory
+import com.typesafe.scalalogging.Logger
 
 import scala.collection.mutable
 
@@ -31,7 +31,7 @@ class NumericalBatchCollector(instance: BatchInstanceDomain,
                               inputs: Array[StreamDomain])
   extends BatchCollector(instance, performanceMetrics, inputs) {
 
-  private val logger = LoggerFactory.getLogger(this.getClass)
+  private val logger = Logger(this.getClass)
   private val countOfEnvelopesPerStream = mutable.Map(instance.getInputsWithoutStreamMode.map(x => (x, 0)): _*)
   private val everyNthCount = 2
 

@@ -20,7 +20,7 @@ package com.bwsw.sj.common.utils
 
 import java.util.{Timer, TimerTask}
 
-import org.slf4j.LoggerFactory
+import com.typesafe.scalalogging.Logger
 
 /**
   * Class representing a wrapper for [[java.util.Timer]]
@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory
 
 class SjTimer {
 
-  private val logger = LoggerFactory.getLogger(this.getClass)
+  private val logger = Logger(this.getClass)
   /**
     * Flag defines the timer went out or not
     */

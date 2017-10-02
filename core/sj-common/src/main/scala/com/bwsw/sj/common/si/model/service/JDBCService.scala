@@ -20,13 +20,11 @@ package com.bwsw.sj.common.si.model.service
 
 import java.util.Date
 
-import com.bwsw.common.jdbc.JdbcClientBuilder
 import com.bwsw.sj.common.dal.model.provider.JDBCProviderDomain
 import com.bwsw.sj.common.dal.model.service.JDBCServiceDomain
 import scaldi.Injector
 
 import scala.collection.mutable.ArrayBuffer
-import scala.util.{Failure, Success, Try}
 
 class JDBCService(name: String,
                   val database: String,
@@ -65,40 +63,9 @@ class JDBCService(name: String,
 
     // 'database' field
     Option(this.database) match {
-      case None =>
+      case Some(dbName) if dbName.nonEmpty =>
+      case _ =>
         errors += createMessage("entity.error.attribute.required", "Database")
-      case Some(dbName) =>
-        if (dbName.isEmpty) {
-          errors += createMessage("entity.error.attribute.required", "Database")
-        } else if (errors.isEmpty) {
-          //provider should exist in the following test
-          val providerRepository = connectionRepository.getProviderRepository
-          var database_exists: Boolean = false
-          val provider = providerRepository.get(this.provider).get.asInstanceOf[JDBCProviderDomain]
-          Try {
-            val client = JdbcClientBuilder.
-              setDriver(provider.driver).
-              setDatabase(dbName).
-              setHosts(provider.hosts).
-              setUsername(provider.login).
-              setPassword(provider.password).
-              build()
-
-            client.start()
-            database_exists = true
-            client.close()
-          } match {
-            case Success(_) =>
-            case Failure(e: RuntimeException) =>
-              errors += createMessage("error.cannot.create.client", e.getMessage)
-            case Failure(e) =>
-              e.printStackTrace()
-          }
-
-          if (!database_exists) {
-            errors += createMessage("entity.error.doesnot.exist", "Database", dbName)
-          }
-        }
     }
 
     errors

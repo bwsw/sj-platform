@@ -18,7 +18,7 @@
  */
 package com.bwsw.sj.common.dal.repository
 
-import org.slf4j.{Logger, LoggerFactory}
+import com.typesafe.scalalogging.Logger
 
 import scala.collection.mutable
 
@@ -29,7 +29,7 @@ import scala.collection.mutable
   */
 trait Repository[T] {
 
-  protected val logger: Logger = LoggerFactory.getLogger(this.getClass)
+  protected val logger: Logger = Logger(this.getClass)
 
   /**
     * Allows adding new element or updating an element

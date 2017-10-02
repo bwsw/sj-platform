@@ -33,9 +33,9 @@ import com.bwsw.sj.common.engine.core.managment.CommonTaskManager
 import com.bwsw.tstreams.agents.consumer.Offset.Oldest
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import com.bwsw.tstreams.agents.producer.Producer
+import com.typesafe.scalalogging.Logger
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.common.TopicPartition
-import org.slf4j.{Logger, LoggerFactory}
 import scaldi.Injectable.inject
 
 import scala.collection.JavaConverters._
@@ -45,7 +45,7 @@ trait KafkaTaskInput[T <: AnyRef] extends SjInjector {
   protected val manager: CommonTaskManager
   protected val checkpointGroup: CheckpointGroup
   protected val currentThread: Thread = Thread.currentThread()
-  protected val logger: Logger = LoggerFactory.getLogger(this.getClass)
+  protected val logger: Logger = Logger(this.getClass)
   protected val offsetSerializer = new ObjectSerializer()
   protected val settingsUtils: SettingsUtils = inject[SettingsUtils]
   protected val kafkaSubscriberTimeout: Int = settingsUtils.getKafkaSubscriberTimeout()

@@ -18,10 +18,10 @@
  */
 package com.bwsw.common.http
 
+import com.typesafe.scalalogging.Logger
 import org.apache.http.client.config.RequestConfig
 import org.apache.http.client.methods.{CloseableHttpResponse, HttpUriRequest}
 import org.apache.http.impl.client.{CloseableHttpClient, HttpClientBuilder => ApacheHttpClientBuilder}
-import org.slf4j.LoggerFactory
 
 /**
   * Synchronous simple http client
@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory
   * @author Kseniya Tomskikh
   */
 class HttpClient(timeout: Int) {
-  private val logger = LoggerFactory.getLogger(getClass.getName)
+  private val logger = Logger(getClass.getName)
   private val requestBuilder = RequestConfig
     .custom()
     .setConnectTimeout(timeout)

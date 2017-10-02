@@ -21,7 +21,7 @@ package com.bwsw.sj.common.engine.core.batch
 import com.bwsw.sj.common.dal.model.instance.BatchInstanceDomain
 import com.bwsw.sj.common.dal.model.stream.StreamDomain
 import com.bwsw.sj.common.engine.core.entities.{Batch, Envelope}
-import org.slf4j.{Logger, LoggerFactory}
+import com.typesafe.scalalogging.Logger
 
 import scala.collection.Map
 
@@ -36,7 +36,7 @@ abstract class BatchCollector(protected val instance: BatchInstanceDomain,
                               performanceMetrics: BatchStreamingPerformanceMetrics,
                               inputs: Array[StreamDomain]) {
 
-  private val logger: Logger = LoggerFactory.getLogger(this.getClass)
+  private val logger: Logger = Logger(this.getClass)
   private val currentBatchPerStream: Map[String, Batch] = createStorageOfBatches()
 
   private def createStorageOfBatches(): Map[String, Batch] = {

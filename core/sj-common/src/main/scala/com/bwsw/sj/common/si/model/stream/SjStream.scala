@@ -45,8 +45,6 @@ class SjStream(val streamType: String,
 
   protected var serviceDomain: ServiceDomain = _
 
-  protected val serviceType: String = StreamLiterals.typeToServiceType(streamType)
-
   def to(): StreamDomain = ???
 
   /**
@@ -59,12 +57,15 @@ class SjStream(val streamType: String,
 
     errors ++= validateGeneralFields()
 
-    val (serviceDomain, extractedErrors) = extractServiceByName(service, serviceType)
-    if (serviceDomain.isEmpty)
-      errors ++= extractedErrors
-    else {
-      this.serviceDomain = serviceDomain.get
-      errors ++= validateSpecificFields()
+    if (errors.isEmpty) {
+      val serviceType = StreamLiterals.typeToServiceType(streamType)
+      val (serviceDomain, extractedErrors) = extractServiceByName(service, serviceType)
+      if (serviceDomain.isEmpty)
+        errors ++= extractedErrors
+      else {
+        this.serviceDomain = serviceDomain.get
+        errors ++= validateSpecificFields()
+      }
     }
 
     errors
@@ -132,7 +133,7 @@ class SjStream(val streamType: String,
           case Some(someService) =>
             if (someService.serviceType != serviceType) {
               errors += createMessage("entity.error.must.one.type.other.given",
-                s"Service for '$serviceType' stream",
+                s"Service for '$streamType' stream",
                 serviceType,
                 someService.serviceType)
             } else {

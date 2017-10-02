@@ -20,7 +20,7 @@ package com.bwsw.sj.common.engine.core.state
 
 import com.bwsw.common.ObjectSerializer
 import com.bwsw.tstreams.agents.producer.{NewProducerTransactionPolicy, Producer}
-import org.slf4j.LoggerFactory
+import com.typesafe.scalalogging.Logger
 
 import scala.collection.mutable
 
@@ -34,7 +34,7 @@ class StateSaver(stateProducer: Producer) extends StateSaverInterface {
 
   override var lastFullStateID: Option[Long] = None
 
-  private val logger = LoggerFactory.getLogger(this.getClass)
+  private val logger = Logger(this.getClass)
 
   /**
     * Provides a serialization from a transaction data to state variables or state changes

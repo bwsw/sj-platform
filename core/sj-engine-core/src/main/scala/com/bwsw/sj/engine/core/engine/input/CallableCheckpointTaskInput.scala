@@ -22,18 +22,19 @@ import java.util.concurrent.Callable
 
 import com.bwsw.common.SerializerInterface
 import com.bwsw.sj.common.dal.model.stream.StreamDomain
+import com.bwsw.sj.common.engine.core.entities.Envelope
 import com.bwsw.sj.common.engine.core.entities.{Envelope, EnvelopeInterface, WeightedBlockingQueue}
 import com.bwsw.sj.common.engine.core.managment.CommonTaskManager
 import com.bwsw.sj.common.utils.StreamLiterals
 import com.bwsw.tstreams.agents.group.CheckpointGroup
-import org.slf4j.LoggerFactory
+import com.typesafe.scalalogging.Logger
 import scaldi.Injector
 
 abstract class CallableCheckpointTaskInput[T <: Envelope](inputs: scala.collection.mutable.Map[StreamDomain, Array[Int]])
   extends CheckpointTaskInput[T](inputs) with Callable[Unit]
 
 object CallableCheckpointTaskInput {
-  private val logger = LoggerFactory.getLogger(this.getClass)
+  private val logger = Logger(this.getClass)
 
   def apply[T <: AnyRef](manager: CommonTaskManager,
                          blockingQueue: WeightedBlockingQueue[EnvelopeInterface],

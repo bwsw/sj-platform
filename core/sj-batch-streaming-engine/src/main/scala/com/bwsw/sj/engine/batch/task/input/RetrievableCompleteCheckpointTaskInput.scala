@@ -22,7 +22,7 @@ import com.bwsw.common.SerializerInterface
 import com.bwsw.sj.common.engine.core.entities.{Envelope, KafkaEnvelope, TStreamEnvelope}
 import com.bwsw.sj.common.engine.core.managment.CommonTaskManager
 import com.bwsw.tstreams.agents.group.CheckpointGroup
-import org.slf4j.LoggerFactory
+import com.typesafe.scalalogging.Logger
 import scaldi.Injector
 
 /**
@@ -39,7 +39,7 @@ class RetrievableCompleteCheckpointTaskInput[T <: AnyRef](manager: CommonTaskMan
                                                          (implicit injector: Injector)
   extends RetrievableCheckpointTaskInput[Envelope](manager.inputs) {
 
-  private val logger = LoggerFactory.getLogger(this.getClass)
+  private val logger = Logger(this.getClass)
   private val retrievableKafkaTaskInput = new RetrievableKafkaCheckpointTaskInput[T](
     manager,
     checkpointGroup,
@@ -79,6 +79,7 @@ class RetrievableCompleteCheckpointTaskInput[T <: AnyRef](manager: CommonTaskMan
 
   override def setConsumerOffsetToLastEnvelope(): Unit = {
     retrievableKafkaTaskInput.setConsumerOffsetToLastEnvelope()
+    retrievableTStreamTaskInput.setConsumerOffsetToLastEnvelope()
   }
 
   override def close(): Unit = {
