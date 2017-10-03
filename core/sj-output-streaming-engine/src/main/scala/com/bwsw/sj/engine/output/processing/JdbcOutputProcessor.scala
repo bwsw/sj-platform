@@ -77,11 +77,9 @@ class JdbcOutputProcessor[T <: AnyRef](outputStream: StreamDomain,
 
   def send(envelope: OutputEnvelope, inputEnvelope: TStreamEnvelope[T]): Unit = {
     logger.debug(s"Send an envelope: '${inputEnvelope.id}' to a JDBC stream: '${jdbcStream.name}'.")
-    if (jdbcClient.tableExists()) {
-      val preparedStatement = commandBuilder.buildInsert(inputEnvelope.id, envelope.getFieldsValue)
-      preparedStatement.executeUpdate()
-      preparedStatement.close()
-    } else throw new RuntimeException(s"A table: '${jdbcStream.name}' doesn't exist so it is impossible to write data.")
+    val preparedStatement = commandBuilder.buildInsert(inputEnvelope.id, envelope.getFieldsValue)
+    preparedStatement.executeUpdate()
+    preparedStatement.close()
   }
 
   override def close(): Unit = {
