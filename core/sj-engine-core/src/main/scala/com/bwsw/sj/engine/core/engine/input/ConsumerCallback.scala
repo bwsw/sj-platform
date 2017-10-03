@@ -19,30 +19,28 @@
 package com.bwsw.sj.engine.core.engine.input
 
 import com.bwsw.common.SerializerInterface
-import com.bwsw.sj.common.dal.repository.ConnectionRepository
-import com.bwsw.sj.common.engine.core.entities.{EnvelopeInterface, WeightedBlockingQueue, TStreamEnvelope}
+import com.bwsw.sj.common.dal.model.stream.TStreamStreamDomain
+import com.bwsw.sj.common.engine.core.entities.{EnvelopeInterface, TStreamEnvelope, WeightedBlockingQueue}
 import com.bwsw.tstreams.agents.consumer.subscriber.Callback
 import com.bwsw.tstreams.agents.consumer.{Consumer, ConsumerTransaction, TransactionOperator}
 import com.typesafe.scalalogging.Logger
-import scaldi.Injectable.inject
-import scaldi.Injector
 
 /**
   * Provides a handler for sub. consumer that puts a t-stream envelope in a persistent blocking queue
   *
   * @author Kseniya Mikhaleva
-  * @param blockingQueue Persistent blocking queue for storing transactions
+  * @param envelopeDataSerializer input data serializer
+  * @param blockingQueue          persistent blocking queue for storing transactions
+  * @param stream                 input stream
   */
-
 class ConsumerCallback[T <: AnyRef](envelopeDataSerializer: SerializerInterface,
-                                    blockingQueue: WeightedBlockingQueue[EnvelopeInterface])
-                                   (implicit injector: Injector) extends Callback {
+                                    blockingQueue: WeightedBlockingQueue[EnvelopeInterface],
+                                    stream: TStreamStreamDomain) extends Callback {
   private val logger = Logger(this.getClass)
 
   override def onTransaction(operator: TransactionOperator, transaction: ConsumerTransaction): Unit = {
     val consumer = operator.asInstanceOf[Consumer]
     logger.debug(s"onTransaction handler was invoked by subscriber: ${consumer.name}.")
-    val stream = inject[ConnectionRepository].getStreamRepository.get(consumer.stream.name).get
 
     val data = transaction.getAll.map(envelopeDataSerializer.deserialize(_).asInstanceOf[T])
     val envelope = new TStreamEnvelope(data, consumer.name)

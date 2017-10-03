@@ -22,7 +22,7 @@ import java.util.Date
 
 import com.bwsw.common.SerializerInterface
 import com.bwsw.sj.common.dal.model.stream.TStreamStreamDomain
-import com.bwsw.sj.common.engine.core.entities.{EnvelopeInterface, WeightedBlockingQueue, TStreamEnvelope}
+import com.bwsw.sj.common.engine.core.entities.{EnvelopeInterface, TStreamEnvelope, WeightedBlockingQueue}
 import com.bwsw.sj.common.engine.core.managment.TaskManager
 import com.bwsw.sj.common.si.model.instance.{BatchInstance, OutputInstance, RegularInstance}
 import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
@@ -31,7 +31,6 @@ import com.bwsw.tstreams.agents.consumer.Offset.{DateTime, IOffset, Newest, Olde
 import com.bwsw.tstreams.agents.consumer.subscriber.Subscriber
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import com.typesafe.scalalogging.Logger
-import scaldi.Injector
 
 import scala.collection.mutable
 
@@ -50,7 +49,6 @@ class CallableTStreamCheckpointTaskInput[T <: AnyRef](manager: TaskManager,
                                                       blockingQueue: WeightedBlockingQueue[EnvelopeInterface],
                                                       override val checkpointGroup: CheckpointGroup,
                                                       envelopeDataSerializer: SerializerInterface)
-                                                     (implicit injector: Injector)
   extends CallableCheckpointTaskInput[TStreamEnvelope[T]](manager.inputs) {
 
   private val logger = Logger(this.getClass)
@@ -61,17 +59,19 @@ class CallableTStreamCheckpointTaskInput[T <: AnyRef](manager: TaskManager,
     val consumerClones = mutable.Map[String, Consumer]()
     val inputs = manager.inputs
     val offset = getOffset()
-    val callback = new ConsumerCallback[T](envelopeDataSerializer, blockingQueue)
 
-    val consumers = inputs.filter(x => x._1.streamType == StreamLiterals.tstreamsType)
-      .map(x => (x._1.asInstanceOf[TStreamStreamDomain], x._2.toList))
-      .map(x => {
-        val consumer = manager.createSubscribingConsumer(x._1, x._2, offset, callback)
-        val clone = manager.createConsumer(x._1, x._2, offset, Some(consumer.name))
+    val consumers = inputs
+      .filter { case (stream, _) => stream.streamType == StreamLiterals.tstreamsType }
+      .map { case (stream, partitions) => (stream.asInstanceOf[TStreamStreamDomain], partitions.toList) }
+      .map {
+        case (stream, partitions) =>
+          val callback = new ConsumerCallback[T](envelopeDataSerializer, blockingQueue, stream)
+          val consumer = manager.createSubscribingConsumer(stream, partitions, offset, callback)
+          val clone = manager.createConsumer(stream, partitions, offset, Some(consumer.name))
 
-        consumerClones += (clone.name -> clone)
-        consumer
-      }).toSeq
+          consumerClones += (clone.name -> clone)
+          consumer
+      }.toSeq
     logger.debug(s"Task: ${manager.taskName}. Creation of subscribing consumers is finished.")
 
     (consumers, consumerClones)

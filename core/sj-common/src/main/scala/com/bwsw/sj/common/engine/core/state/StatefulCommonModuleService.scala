@@ -61,7 +61,7 @@ class StatefulCommonModuleService(manager: CommonTaskManager,
     }
   }
   protected val senderThread = new TStreamsSenderThread(
-    manager.outputProducers, checkpointGroup, performanceMetrics, s"batch-task-${manager.taskName}-sender")
+    manager.outputProducers, checkpointGroup, performanceMetrics, s"${manager.instance.moduleType}-${manager.taskName}-sender")
   senderThread.start()
 
   private def createStateService() = {
