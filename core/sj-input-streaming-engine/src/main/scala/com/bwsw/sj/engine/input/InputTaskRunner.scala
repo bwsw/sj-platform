@@ -24,10 +24,10 @@ import java.util.concurrent._
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.engine.TaskEngine
 import com.bwsw.sj.common.engine.core.managment.TaskManager
-import com.bwsw.sj.common.engine.core.reporting.{PerformanceMetricsReporter, PerformanceMetrics}
+import com.bwsw.sj.common.engine.core.reporting.{PerformanceMetrics, PerformanceMetricsReporter}
 import com.bwsw.sj.engine.core.engine.TaskRunner
 import com.bwsw.sj.engine.input.connection.tcp.server.InputStreamingServer
-import com.bwsw.sj.engine.input.task.reporting.InputStreamingPerformanceMetricsReporter
+import com.bwsw.sj.engine.input.task.reporting.{InputStreamingPerformanceMetrics, InputStreamingPerformanceMetricsReporter}
 import com.bwsw.sj.engine.input.task.{InputTaskEngine, InputTaskManager}
 import io.netty.buffer.ByteBuf
 import io.netty.channel.ChannelHandlerContext
@@ -53,9 +53,8 @@ object InputTaskRunner extends {
 
   override protected def createTaskManager(): TaskManager = new InputTaskManager()
 
-  override protected def createPerformanceMetricsReporter(manager: TaskManager): PerformanceMetricsReporter = {
+  override protected def createPerformanceMetricsReporter(manager: TaskManager): PerformanceMetricsReporter =
     new InputStreamingPerformanceMetricsReporter(manager.asInstanceOf[InputTaskManager])
-  }
 
   override protected def createTaskEngine(manager: TaskManager,
                                           performanceMetrics: PerformanceMetrics): TaskEngine = {
@@ -72,7 +71,13 @@ object InputTaskRunner extends {
       manager.agentsHost,
       manager.asInstanceOf[InputTaskManager].entryPort,
       channelContextQueue,
-      bufferForEachContext
-    )
+      bufferForEachContext)
+  }
+
+  override protected def createPerformanceMetrics(taskName: String,
+                                                  performanceMetricsReporter: PerformanceMetricsReporter): PerformanceMetrics = {
+    new InputStreamingPerformanceMetrics(
+      performanceMetricsReporter.asInstanceOf[InputStreamingPerformanceMetricsReporter],
+      s"performance-metrics-$taskName")
   }
 }
