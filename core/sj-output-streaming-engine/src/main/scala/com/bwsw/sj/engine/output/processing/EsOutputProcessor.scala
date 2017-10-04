@@ -33,7 +33,7 @@ class EsOutputProcessor[T <: AnyRef](esStream: ESStreamDomain,
                                      performanceMetrics: PerformanceMetrics,
                                      manager: OutputTaskManager,
                                      entity: Entity[_])
-  extends OutputProcessor[T](esStream, performanceMetrics) {
+  extends AsyncOutputProcessor[T](esStream, performanceMetrics) {
 
   private val esService = esStream.service
   private val esClient = openConnection()
@@ -63,7 +63,7 @@ class EsOutputProcessor[T <: AnyRef](esStream: ESStreamDomain,
   }
 
 
-  def send(envelope: OutputEnvelope, inputEnvelope: TStreamEnvelope[T]): Unit = {
+  override protected def asyncSend(envelope: OutputEnvelope, inputEnvelope: TStreamEnvelope[T]): Unit = {
     val esFieldsValue = envelope.getFieldsValue
     val data = commandBuilder.buildInsert(inputEnvelope.id, esFieldsValue)
     logger.debug(s"Task: ${manager.taskName}. Write an output envelope to elasticsearch stream.")

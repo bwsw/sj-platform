@@ -141,6 +141,7 @@ abstract class OutputTaskEngine(manager: OutputTaskManager,
     */
   protected def doCheckpoint(): Unit = {
     logger.info(s"Task: ${manager.taskName}. It's time to checkpoint.")
+    outputProcessor.checkpoint()
     taskInputService.doCheckpoint()
     logger.debug(s"Task: ${manager.taskName}. Do group checkpoint.")
     prepareForNextCheckpoint()

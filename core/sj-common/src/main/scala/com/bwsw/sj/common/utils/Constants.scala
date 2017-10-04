@@ -92,6 +92,8 @@ object EngineLiterals {
   final val splitStreamMode = "split"
   final val fullStreamMode = "full"
   val streamModes: Array[String] = Array(splitStreamMode, fullStreamMode)
+
+  final val outputProcessorExecutionContextSize = 32
 }
 
 object StreamLiterals {

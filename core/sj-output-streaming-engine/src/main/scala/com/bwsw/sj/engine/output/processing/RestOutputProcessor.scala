@@ -40,7 +40,7 @@ class RestOutputProcessor[T <: AnyRef](restOutputStream: RestStreamDomain,
                                        performanceMetrics: PerformanceMetrics,
                                        manager: OutputTaskManager,
                                        entity: Entity[_])
-  extends OutputProcessor[T](restOutputStream, performanceMetrics) {
+  extends AsyncOutputProcessor[T](restOutputStream, performanceMetrics) {
 
   private val jsonSerializer = new JsonSerializer(ignoreUnknown = true)
   override protected val commandBuilder: RestCommandBuilder = new RestCommandBuilder(
@@ -56,7 +56,7 @@ class RestOutputProcessor[T <: AnyRef](restOutputStream: RestStreamDomain,
     Map(service.headers.asScala.toList: _*)
   )
 
-  override def send(envelope: OutputEnvelope, inputEnvelope: TStreamEnvelope[T]): Unit = {
+  override protected def asyncSend(envelope: OutputEnvelope, inputEnvelope: TStreamEnvelope[T]): Unit = {
     logger.debug(createLogMessage("Write an output envelope to RESTful stream."))
 
     val posted = client.execute(commandBuilder.buildInsert(inputEnvelope.id, envelope.getFieldsValue))
