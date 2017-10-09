@@ -46,15 +46,19 @@ object RetrievableCheckpointTaskInput {
 
   def apply[T <: AnyRef](manager: CommonTaskManager,
                          checkpointGroup: CheckpointGroup,
-                         envelopeDataSerializer: SerializerInterface)
+                         envelopeDataSerializer: SerializerInterface,
+                         lowWatermark: Int)
                         (implicit injector: Injector): RetrievableCheckpointTaskInput[_ <: Envelope] = {
     val kafkaInputExists = manager.inputs.exists(x => x._1.streamType == StreamLiterals.kafkaType)
     val tstreamInputExists = manager.inputs.exists(x => x._1.streamType == StreamLiterals.tstreamsType)
 
     (kafkaInputExists, tstreamInputExists) match {
-      case (true, true) => new RetrievableCompleteCheckpointTaskInput[T](manager, checkpointGroup, envelopeDataSerializer)
-      case (false, true) => new RetrievableTStreamCheckpointTaskInput[T](manager, checkpointGroup, envelopeDataSerializer)
-      case (true, false) => new RetrievableKafkaCheckpointTaskInput[T](manager, checkpointGroup, envelopeDataSerializer)
+      case (true, true) =>
+        new RetrievableCompleteCheckpointTaskInput[T](manager, checkpointGroup, envelopeDataSerializer, lowWatermark)
+      case (false, true) =>
+        new RetrievableTStreamCheckpointTaskInput[T](manager, checkpointGroup, envelopeDataSerializer, lowWatermark)
+      case (true, false) =>
+        new RetrievableKafkaCheckpointTaskInput[T](manager, checkpointGroup, envelopeDataSerializer, lowWatermark)
       case _ =>
         logger.error("Type of input stream is not 'kafka' or 't-stream'")
         throw new RuntimeException("Type of input stream is not 'kafka' or 't-stream'")

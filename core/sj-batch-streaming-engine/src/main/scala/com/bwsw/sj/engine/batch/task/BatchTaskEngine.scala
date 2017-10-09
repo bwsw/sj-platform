@@ -66,7 +66,8 @@ class BatchTaskEngine(manager: CommonTaskManager,
     RetrievableCheckpointTaskInput[AnyRef](
       manager.asInstanceOf[CommonTaskManager],
       checkpointGroup,
-      executor
+      executor,
+      lowWatermark
     ).asInstanceOf[RetrievableCheckpointTaskInput[Envelope]]
   private val envelopeFetcher = new EnvelopeFetcher(taskInputService, lowWatermark)
   private var retrievableStreams = instance.getInputsWithoutStreamMode
@@ -111,11 +112,14 @@ class BatchTaskEngine(manager: CommonTaskManager,
   }
 
   private def retrieveAndProcessEnvelopes(): Unit = {
+    var gotEnvelope = false
     retrievableStreams.foreach(stream => {
       logger.debug(s"Retrieve an available envelope from '$stream' stream.")
       envelopeFetcher.get(stream) match {
-        case Some(envelope) => batchCollector.onReceive(envelope)
-        case None => onIdle()
+        case Some(envelope) =>
+          batchCollector.onReceive(envelope)
+          gotEnvelope = true
+        case None =>
       }
 
       processBatches()
@@ -126,6 +130,8 @@ class BatchTaskEngine(manager: CommonTaskManager,
         onWindow()
       }
     })
+
+    if (!gotEnvelope) onIdle()
   }
 
   private def processBatches(): Unit = {

@@ -51,7 +51,8 @@ import scala.collection.mutable
   */
 class RetrievableTStreamCheckpointTaskInput[T <: AnyRef](manager: CommonTaskManager,
                                                          override val checkpointGroup: CheckpointGroup,
-                                                         envelopeDataSerializer: SerializerInterface)
+                                                         envelopeDataSerializer: SerializerInterface,
+                                                         lowWatermark: Int)
                                                         (implicit injector: Injector)
   extends RetrievableCheckpointTaskInput[TStreamEnvelope[T]](manager.inputs) {
 
@@ -59,6 +60,9 @@ class RetrievableTStreamCheckpointTaskInput[T <: AnyRef](manager: CommonTaskMana
   private val instance = manager.instance.asInstanceOf[BatchInstance]
   private val tstreamOffsetsStorage = mutable.Map[(String, Int), Long]()
   private val consumers = createConsumers()
+  private val lowWatermarksPerPartition = consumers.map {
+    case (_, consumer) => consumer -> (lowWatermark / consumer.getPartitions.size)
+  }
   addConsumersToCheckpointGroup()
   launchConsumers()
 
@@ -103,7 +107,7 @@ class RetrievableTStreamCheckpointTaskInput[T <: AnyRef](manager: CommonTaskMana
       val fromOffset = getFromOffset(consumer, partition)
       val lastTransaction = consumer.getLastTransaction(partition)
       val toOffset = if (lastTransaction.isDefined) lastTransaction.get.getTransactionID else fromOffset
-      consumer.getTransactionsFromTo(partition, fromOffset, toOffset)
+      consumer.getTransactionsFromTo(partition, fromOffset, toOffset).take(lowWatermarksPerPartition(consumer))
     })
   }
 

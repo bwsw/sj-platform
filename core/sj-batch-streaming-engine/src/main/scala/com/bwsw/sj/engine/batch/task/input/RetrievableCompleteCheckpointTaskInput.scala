@@ -35,7 +35,8 @@ import scaldi.Injector
   */
 class RetrievableCompleteCheckpointTaskInput[T <: AnyRef](manager: CommonTaskManager,
                                                           override val checkpointGroup: CheckpointGroup,
-                                                          envelopeDataSerializer: SerializerInterface)
+                                                          envelopeDataSerializer: SerializerInterface,
+                                                          lowWatermark: Int)
                                                          (implicit injector: Injector)
   extends RetrievableCheckpointTaskInput[Envelope](manager.inputs) {
 
@@ -43,11 +44,13 @@ class RetrievableCompleteCheckpointTaskInput[T <: AnyRef](manager: CommonTaskMan
   private val retrievableKafkaTaskInput = new RetrievableKafkaCheckpointTaskInput[T](
     manager,
     checkpointGroup,
-    envelopeDataSerializer)
+    envelopeDataSerializer,
+    lowWatermark)
   private val retrievableTStreamTaskInput = new RetrievableTStreamCheckpointTaskInput[T](
     manager,
     checkpointGroup,
-    envelopeDataSerializer)
+    envelopeDataSerializer,
+    lowWatermark)
 
   override def registerEnvelope(envelope: Envelope): Unit = {
     envelope match {

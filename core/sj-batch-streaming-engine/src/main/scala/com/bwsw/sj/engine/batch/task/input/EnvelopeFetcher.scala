@@ -58,7 +58,8 @@ class EnvelopeFetcher(taskInput: RetrievableCheckpointTaskInput[Envelope], lowWa
           unarrangedEnvelopes.foreach(x => envelopesByStream(x.stream).add(x))
         else
           Thread.sleep(EngineLiterals.eventWaitTimeout)
-      }
+      } else
+        Thread.sleep(EngineLiterals.eventWaitTimeout)
     }
   }
 
