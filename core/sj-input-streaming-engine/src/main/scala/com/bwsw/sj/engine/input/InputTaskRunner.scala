@@ -26,7 +26,7 @@ import com.bwsw.sj.common.engine.TaskEngine
 import com.bwsw.sj.common.engine.core.managment.TaskManager
 import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
 import com.bwsw.sj.engine.core.engine.TaskRunner
-import com.bwsw.sj.engine.input.connection.tcp.server.{ChannelContextState, InputStreamingServer}
+import com.bwsw.sj.engine.input.connection.tcp.server.{ChannelHandlerContextState, InputStreamingServer}
 import com.bwsw.sj.engine.input.task.reporting.InputStreamingPerformanceMetrics
 import com.bwsw.sj.engine.input.task.{InputTaskEngine, InputTaskManager}
 import io.netty.channel.ChannelHandlerContext
@@ -47,7 +47,7 @@ object InputTaskRunner extends {
 } with TaskRunner {
 
   private val queueSize = 5000
-  private val bufferForEachContext = new ConcurrentHashMap[ChannelHandlerContext, ChannelContextState]().asScala
+  private val stateByContext = new ConcurrentHashMap[ChannelHandlerContext, ChannelHandlerContextState]().asScala
   private val channelContextQueue = new ArrayBlockingQueue[ChannelHandlerContext](queueSize)
 
   override protected def createTaskManager(): TaskManager = new InputTaskManager()
@@ -61,7 +61,7 @@ object InputTaskRunner extends {
       manager.asInstanceOf[InputTaskManager],
       performanceMetrics.asInstanceOf[InputStreamingPerformanceMetrics],
       channelContextQueue,
-      bufferForEachContext,
+      stateByContext,
       inject[ConnectionRepository])
   }
 
@@ -70,7 +70,6 @@ object InputTaskRunner extends {
       manager.agentsHost,
       manager.asInstanceOf[InputTaskManager].entryPort,
       channelContextQueue,
-      bufferForEachContext
-    )
+      stateByContext)
   }
 }

@@ -29,13 +29,14 @@ import scala.collection.concurrent
 /**
   * A special ChannelInboundHandler which offers an easy way to initialize [[io.netty.channel.socket.SocketChannel]] once.
   *
-  * @param channelContextQueue  queue for keeping a channel context [[io.netty.channel.ChannelHandlerContext]] to process
-  *                             messages ([[io.netty.buffer.ByteBuf]]) in their turn
-  * @param bufferForEachContext map for keeping a buffer containing incoming bytes [[io.netty.buffer.ByteBuf]]
-  *                             with the appropriate channel context [[io.netty.channel.ChannelHandlerContext]]
+  * @param channelContextQueue queue for keeping a channel context [[io.netty.channel.ChannelHandlerContext]] to process
+  *                            messages ([[io.netty.buffer.ByteBuf]]) in their turn
+  * @param stateByContext      map for keeping a state of a channel context
+  *                            [[com.bwsw.sj.engine.input.connection.tcp.server.ChannelHandlerContextState]]
+  *                            with the appropriate channel context [[io.netty.channel.ChannelHandlerContext]]
   */
 class InputStreamingChannelInitializer(channelContextQueue: ArrayBlockingQueue[ChannelHandlerContext],
-                                       bufferForEachContext: concurrent.Map[ChannelHandlerContext, ChannelContextState])
+                                       stateByContext: concurrent.Map[ChannelHandlerContext, ChannelHandlerContextState])
   extends ChannelInitializer[SocketChannel] {
 
   def initChannel(channel: SocketChannel): Unit = {
@@ -47,6 +48,6 @@ class InputStreamingChannelInitializer(channelContextQueue: ArrayBlockingQueue[C
     val pipeline = channel.pipeline()
 
     pipeline.addLast("encoder", new StringEncoder())
-    pipeline.addLast("handler", new InputStreamingServerHandler(channelContextQueue, bufferForEachContext))
+    pipeline.addLast("handler", new InputStreamingServerHandler(channelContextQueue, stateByContext))
   }
 }

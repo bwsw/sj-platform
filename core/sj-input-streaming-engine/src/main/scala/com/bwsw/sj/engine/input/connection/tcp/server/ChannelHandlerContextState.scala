@@ -23,6 +23,6 @@ import io.netty.buffer.ByteBuf
 /**
   * @author Pavel Tomskikh
   */
-case class ChannelContextState(buffer: ByteBuf,
-                               var isActive: Boolean = true,
-                               var isQueued: Boolean = false)
+case class ChannelHandlerContextState(buffer: ByteBuf,
+                                      var isActive: Boolean = true,
+                                      var isQueued: Boolean = false)

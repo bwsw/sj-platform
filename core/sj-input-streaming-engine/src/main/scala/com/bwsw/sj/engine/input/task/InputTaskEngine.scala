@@ -30,7 +30,7 @@ import com.bwsw.sj.common.si.model.instance.InputInstance
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.core.engine.{NumericalCheckpointTaskEngine, TimeCheckpointTaskEngine}
 import com.bwsw.sj.engine.input.config.InputEngineConfigNames
-import com.bwsw.sj.engine.input.connection.tcp.server.ChannelContextState
+import com.bwsw.sj.engine.input.connection.tcp.server.ChannelHandlerContextState
 import com.bwsw.sj.engine.input.eviction_policy.InputInstanceEvictionPolicy
 import com.bwsw.sj.engine.input.task.reporting.InputStreamingPerformanceMetrics
 import com.bwsw.tstreams.agents.producer.{NewProducerTransactionPolicy, ProducerTransaction}
@@ -39,24 +39,25 @@ import io.netty.channel.{ChannelFuture, ChannelHandlerContext}
 import org.slf4j.{Logger, LoggerFactory}
 
 import scala.collection.mutable
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 
 /**
   * Class contains methods for running input module
   *
-  * @param manager              allows to manage an environment of input streaming task
-  * @param performanceMetrics   set of metrics that characterize performance of an input streaming module
-  * @param channelContextQueue  queue for keeping a channel context [[io.netty.channel.ChannelHandlerContext]]
-  *                             to process messages ([[io.netty.buffer.ByteBuf]]) in their turn
-  * @param bufferForEachContext map for keeping a buffer containing incoming bytes [[io.netty.buffer.ByteBuf]]
-  *                             with the appropriate channel context [[io.netty.channel.ChannelHandlerContext]]
+  * @param manager             allows to manage an environment of input streaming task
+  * @param performanceMetrics  set of metrics that characterize performance of an input streaming module
+  * @param channelContextQueue queue for keeping a channel context [[io.netty.channel.ChannelHandlerContext]]
+  *                            to process messages ([[io.netty.buffer.ByteBuf]]) in their turn
+  * @param stateByContext      map for keeping a state of a channel context
+  *                            [[com.bwsw.sj.engine.input.connection.tcp.server.ChannelHandlerContextState]]
+  *                            with the appropriate channel context [[io.netty.channel.ChannelHandlerContext]]
   * @author Kseniya Mikhaleva
   */
 abstract class InputTaskEngine(manager: InputTaskManager,
                                performanceMetrics: InputStreamingPerformanceMetrics,
                                channelContextQueue: ArrayBlockingQueue[ChannelHandlerContext],
-                               bufferForEachContext: scala.collection.concurrent.Map[ChannelHandlerContext, ChannelContextState],
+                               stateByContext: scala.collection.concurrent.Map[ChannelHandlerContext, ChannelHandlerContextState],
                                connectionRepository: ConnectionRepository) extends TaskEngine {
 
   import InputTaskEngine.logger
@@ -163,14 +164,14 @@ abstract class InputTaskEngine(manager: InputTaskManager,
     }
   }
 
-  private def getChannelContext(): Option[(ChannelHandlerContext, ChannelContextState)] = {
+  private def getChannelContext(): Option[(ChannelHandlerContext, ChannelHandlerContextState)] = {
     val maybeChannelContext = Option(channelContextQueue.poll(EngineLiterals.eventWaitTimeout, TimeUnit.MILLISECONDS))
 
     if (maybeChannelContext.isEmpty)
-      bufferForEachContext.find(_._2.buffer.isReadable)
+      stateByContext.find(_._2.buffer.isReadable)
     else
       maybeChannelContext.map { channelContext =>
-        val state = bufferForEachContext(channelContext)
+        val state = stateByContext(channelContext)
         state.isQueued = false
 
         (channelContext, state)
@@ -178,15 +179,19 @@ abstract class InputTaskEngine(manager: InputTaskManager,
   }
 
   private def tryToRead(channelContext: ChannelHandlerContext,
-                        state: ChannelContextState,
+                        state: ChannelHandlerContextState,
                         interval: Interval): Unit = {
     if (state.buffer.isReadable(interval.finalValue)) {
       logger.debug(s"Task name: ${manager.taskName}. The end index of interval is valid.")
       logger.debug(s"Task name: ${manager.taskName}. Invoke parse() method of executor.")
       val inputEnvelope = executor.parse(state.buffer, interval)
       clearBufferAfterParse(channelContext, state, interval.finalValue)
-      if (state.buffer.isReadable)
-        Try(channelContextQueue.add(channelContext))
+      if (state.buffer.isReadable) {
+        Try(channelContextQueue.add(channelContext)) match {
+          case Success(_) => state.isQueued = true
+          case Failure(_) =>
+        }
+      }
       val isNotDuplicateOrEmpty = processEnvelope(inputEnvelope)
       if (state.isActive)
         sendClientResponse(inputEnvelope, isNotDuplicateOrEmpty, channelContext)
@@ -207,12 +212,12 @@ abstract class InputTaskEngine(manager: InputTaskManager,
     * @param endReadingIndex index that was last at reading
     */
   private def clearBufferAfterParse(channelContext: ChannelHandlerContext,
-                                    state: ChannelContextState,
+                                    state: ChannelHandlerContextState,
                                     endReadingIndex: Int): Unit = {
     state.buffer.readerIndex(endReadingIndex + 1)
     state.buffer.discardReadBytes()
     if (!state.isActive && !state.buffer.isReadable)
-      bufferForEachContext -= channelContext
+      stateByContext -= channelContext
   }
 
   /**
@@ -294,7 +299,7 @@ abstract class InputTaskEngine(manager: InputTaskManager,
     */
   private def checkpointInitiated(): Unit = {
     val inputStreamingResponse = executor.createCheckpointResponse()
-    contextsToSendCheckpointResponse.retain(c => bufferForEachContext.get(c).exists(_.isActive))
+    contextsToSendCheckpointResponse.retain(c => stateByContext.get(c).exists(_.isActive))
     if (inputStreamingResponse.sendResponsesNow)
       contextsToSendCheckpointResponse.foreach(x => x.write(inputStreamingResponse.message))
     else
@@ -356,20 +361,20 @@ object InputTaskEngine {
   def apply(manager: InputTaskManager,
             performanceMetrics: InputStreamingPerformanceMetrics,
             channelContextQueue: ArrayBlockingQueue[ChannelHandlerContext],
-            bufferForEachContext: scala.collection.concurrent.Map[ChannelHandlerContext, ChannelContextState],
+            stateByContext: scala.collection.concurrent.Map[ChannelHandlerContext, ChannelHandlerContextState],
             connectionRepository: ConnectionRepository): InputTaskEngine = {
 
     manager.inputInstance.checkpointMode match {
       case EngineLiterals.`timeIntervalMode` =>
         logger.info(s"Task: ${manager.taskName}." +
           s" Input module has a '${EngineLiterals.timeIntervalMode}' checkpoint mode, create an appropriate task engine.")
-        new InputTaskEngine(manager, performanceMetrics, channelContextQueue, bufferForEachContext, connectionRepository)
+        new InputTaskEngine(manager, performanceMetrics, channelContextQueue, stateByContext, connectionRepository)
           with TimeCheckpointTaskEngine
 
       case EngineLiterals.`everyNthMode` =>
         logger.info(s"Task: ${manager.taskName}." +
           s" Input module has an '${EngineLiterals.everyNthMode}' checkpoint mode, create an appropriate task engine.")
-        new InputTaskEngine(manager, performanceMetrics, channelContextQueue, bufferForEachContext, connectionRepository)
+        new InputTaskEngine(manager, performanceMetrics, channelContextQueue, stateByContext, connectionRepository)
           with NumericalCheckpointTaskEngine
     }
   }
