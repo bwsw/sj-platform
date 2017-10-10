@@ -28,7 +28,7 @@ import com.bwsw.sj.common.si.model.instance.Instance
 import com.bwsw.sj.common.si.model.module.Specification
 import com.bwsw.sj.common.utils.{MessageResourceUtils, ServiceLiterals, StreamLiterals}
 import com.bwsw.sj.crud.rest.utils.CompletionUtils
-import org.slf4j.{Logger, LoggerFactory}
+import com.typesafe.scalalogging.Logger
 import scaldi.Injectable.inject
 import scaldi.Injector
 
@@ -47,7 +47,7 @@ abstract class InstanceValidator(implicit val injector: Injector) extends Comple
 
   type T <: Instance
   protected val connectionRepository: ConnectionRepository = inject[ConnectionRepository]
-  private val logger: Logger = LoggerFactory.getLogger(getClass.getName)
+  private val logger: Logger = Logger(getClass.getName)
   var serviceRepository: GenericMongoRepository[ServiceDomain] = connectionRepository.getServiceRepository
   var instanceRepository: GenericMongoRepository[InstanceDomain] = connectionRepository.getInstanceRepository
   val serializer: JsonSerializer = new JsonSerializer

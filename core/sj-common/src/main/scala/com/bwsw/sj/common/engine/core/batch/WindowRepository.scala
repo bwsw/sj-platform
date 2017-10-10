@@ -20,7 +20,7 @@ package com.bwsw.sj.common.engine.core.batch
 
 import com.bwsw.sj.common.si.model.instance.BatchInstance
 import com.bwsw.sj.common.engine.core.entities.Window
-import org.slf4j.{Logger, LoggerFactory}
+import com.typesafe.scalalogging.Logger
 
 import scala.collection.mutable
 
@@ -31,7 +31,7 @@ import scala.collection.mutable
   * @param instance set of settings of a batch streaming module
   */
 class WindowRepository(instance: BatchInstance) {
-  private val logger: Logger = LoggerFactory.getLogger(this.getClass)
+  private val logger: Logger = Logger(this.getClass)
   private val windowPerStream: mutable.Map[String, Window] = createStorageOfWindows()
   val window: Int = instance.window
   val slidingInterval: Int = instance.slidingInterval

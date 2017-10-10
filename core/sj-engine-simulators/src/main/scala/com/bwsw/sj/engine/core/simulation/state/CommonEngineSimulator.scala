@@ -104,12 +104,7 @@ class CommonEngineSimulator[T <: AnyRef](executor: StreamingExecutor with StateH
     executor.onBeforeStateSave(isFullState)
 
     val result = simulationResult
-    manager.producerPolicyByOutput.values.foreach {
-      case (_, moduleOutput: ModuleOutputMockHelper) =>
-        moduleOutput.clear()
-      case _ =>
-        throw new IllegalStateException("Incorrect outputs")
-    }
+    manager.senderThread.checkpoint()
 
     result
   }
@@ -133,14 +128,6 @@ class CommonEngineSimulator[T <: AnyRef](executor: StreamingExecutor with StateH
     inputEnvelopes.clear()
 
 
-  protected def simulationResult: SimulationResult = {
-    val streamData = manager.producerPolicyByOutput.map {
-      case (stream, (_, moduleOutput: ModuleOutputMockHelper)) =>
-        StreamData(stream, moduleOutput.getPartitionDataList)
-      case _ =>
-        throw new IllegalStateException("Incorrect outputs")
-    }.filter(_.partitionDataList.nonEmpty).toSeq
-
-    SimulationResult(streamData, manager.getState.getAll)
-  }
+  protected def simulationResult: SimulationResult =
+    SimulationResult(manager.senderThread.getStreamDataList, manager.getState.getAll)
 }

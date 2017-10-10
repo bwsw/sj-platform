@@ -20,7 +20,7 @@ package com.bwsw.common.jdbc
 
 import com.bwsw.sj.common.config.SettingsUtils
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
-import org.slf4j.LoggerFactory
+import com.typesafe.scalalogging.Logger
 import scaldi.Injectable.inject
 import scaldi.Injector
 
@@ -29,7 +29,7 @@ import scaldi.Injector
   */
 
 object JdbcClientBuilder {
-  private val logger = LoggerFactory.getLogger(this.getClass)
+  private val logger = Logger(this.getClass)
 
   private var hosts: Option[Array[String]] = None
   private var driver: Option[String] = None

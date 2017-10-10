@@ -12,27 +12,25 @@ A complete list of requirements and the deployment procedure description can be 
 Overall Deployment Infrastructure
 --------------------------------------------
 
-.. warning:: The section is under development!
+The Stream Juggler platform works on the base of the following services:
 
-The Stream Juggler platform needs the following services to be preliminarily deployed:
-
-- `Apache Mesos <http://mesos.apache.org/>`_  for resource management that allows to run the system at scale and to support different types of workloads.
+- `Apache Mesos <http://mesos.apache.org/>`_  for resource management that allows to run the system at scale and to support different types of workloads. Deployment on Apache Mesos 1.3.1 is currently supported.
 
 - `Docker <http://mesos.apache.org/documentation/latest/docker-containerizer/>`_ to start applicable services in Mesos cloud. 
 
-- `Marathon <https://mesosphere.github.io/marathon/>`_ that provides support for Mesos containers and Docker and allows to run long-life tasks as well.
+- `Marathon <https://mesosphere.github.io/marathon/>`_ that provides support for Mesos containers and Docker and allows to run long-life tasks as well. Marathon v1.4.7 is currently used for deployment.
 
-- `Chronos <https://mesos.github.io/chronos/>`_ is used for starting periodic tasks
+- `Chronos <https://mesos.github.io/chronos/>`_ is used for starting periodic tasks.
 
-- `ZooKeeper <https://zookeeper.apache.org/>`_ is used to perform leader election in the event that the currently leading Marathon instance fails. ZooKeeper is also responsible for instance task synchronization for a Batch module.
+- `Apache ZooKeeper <https://zookeeper.apache.org/>`_ is used to perform leader election in the event that the currently leading Marathon instance fails. ZooKeeper is also responsible for instance task synchronization for a Batch module. Currently Apache Zookeeper 3.4.10 is supported for the platform.
 
 - `Mesos+Consul <https://github.com/CiscoCloud/mesos-consul>`_ is used for base service search.
 
-- Data sources for the platform are `Netty <https://netty.io/>`_ and `T-streams <https://t-streams.com>`_ libraries and `Kafka <https://kafka.apache.org/>`_. For starting Kafka `Kafka on Mesos <https://github.com/mesos/kafka>`_ is used.
+- Data sources for the platform are `Netty <https://netty.io/>`_ and `T-streams <https://t-streams.com>`_ libraries and `Kafka <https://kafka.apache.org/>`_ Version 0.10.2.1. For starting Kafka `Kafka on Mesos <https://github.com/mesos/kafka>`_ is used.
 
-- Elasticsearch, JDBC or REST are external storages the output data is stored to.
+- Elasticsearch 5.5.2, JDBC or REST are external storages the output data is stored to.
 
-- We use `MongoDB <https://www.mongodb.com/>`_ as a document database that provides high performance and availability. To start MongoDB in Mesos we use `MongoDB-Marathon Docker <https://hub.docker.com/r/tobilg/mongodb-marathon/>`_
+- We use `MongoDB <https://www.mongodb.com/>`_ 3.4.7 as a document database that provides high performance and availability. To start MongoDB in Mesos we use `MongoDB-Marathon Docker <https://hub.docker.com/r/tobilg/mongodb-marathon/>`_.
 
 - A custom-container on `NGINX <https://www.nginx.com>`_ is used for external access. 
 
@@ -40,7 +38,7 @@ The platform kernel is coded in Scala.
 
 The UI is presented via Node JS.
 
-Below, you will find necessary instructions to run the services. Two deployment options are described next - on cluster (Mesos) and locally (on minimesos). The steps to deploy services, SJ-Platform, entities for the platform are provided on the base of a demo task.
+Below, you will find necessary instructions to run the services. Two ways of deployment are described next - on cluster (Mesos) and locally (on minimesos). The steps to deploy services, SJ-Platform, entities for the platform are provided on the base of a demo task.
 
 Mesos Deployment
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -53,6 +51,15 @@ Firstly, deploy Mesos and other services.
 
 Please, note, the deployment is described for one default Mesos-slave with available ports [31000-32000]. 
 
+If you are planning to launch an instance with greater value of the "parallelizm" parameter, i.e. to run tasks on more than 1 nodes, you need to increase the "executor_registration_timeout" parameter for Mesos-slave.
+
+The requirements to Mesos-slave: 
+
+- 2 CPUs, 
+- 4096 memory.
+
+Mesos-slave must support Docker containerizer.
+
 2. Docker containers should be supported for Mesos-slave. For Docker deployment follow the instructions at the official `installation guide <https://docs.docker.com/engine/installation/linux/docker-ce/ubuntu/#install-docker-ce>`_
 
 3. Install Java::
@@ -64,11 +71,11 @@ Please, note, the deployment is described for one default Mesos-slave with avail
 
    Find detailed instructions on Java deployment in the `installation guide <https://tecadmin.net/install-oracle-java-8-ubuntu-via-ppa/>`_.
 
-4. Install sbt following instructions in `the official documentation <http://www.scala-sbt.org/download.html>`_ .
+4. Install sbt following the instructions in `the official documentation <http://www.scala-sbt.org/download.html>`_ .
 
 5. Start Mesos-master, Mesos-slave and the services. 
 
-After performing all the steps, make sure you have access to Mesos interface, Marathon interface. Zookeeper now should be active.
+After performing all the steps, make sure you have access to Mesos interface, Marathon interface. Apache Zookeeper now should be active.
 
 
 6. Create json files and a configuration file (config.properties). Please, name them as it is specified here.
@@ -512,7 +519,7 @@ There is a default value of Elasticsearch, Apache Kafka and Apache Zookeeper IPs
 
 At this step all necessary indexes, tables and mapping should be created for storing the processed result.
 
-In our demo case the destination is of Elasticsearch type. Thus, the index and the mapping should be created. Please, run the command below. Do not forget to replace <slave_advertise_ip> with the advertise IP of Mesos-slave::
+In our demo case the destination storage is of Elasticsearch type. Thus, the index and the mapping should be created. Please, run the command below. Please, remember to replace <slave_advertise_ip> with the advertise IP of Mesos-slave::
 
  curl --request PUT "http://<slave_advertise_ip>:31920/pingstation" -H 'Content-Type: application/json' --data "@api-json/elasticsearch-index.json" 
 
@@ -1186,6 +1193,8 @@ Create an instance for each module::
  curl --request POST "http://$address/v1/modules/input-streaming/com.bwsw.input.regex/1.0/instance" -H 'Content-Type: application/json' --data "@api-json/instances/pingstation-input.json" 
  curl --request POST "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance" -H 'Content-Type: application/json' --data "@api-json/instances/pingstation-echo-process.json" 
  curl --request POST "http://$address/v1/modules/output-streaming/pingstation-output/1.0/instance" -H 'Content-Type: application/json' --data "@api-json/instances/pingstation-output.json" 
+
+.. tip:: To process a large amount of input data you need to increase maximum direct memory size in ``jvmOptions`` in pingstation-input.json. Example: ``"-XX:MaxDirectMemorySize=": "256m"``
 
 Instance Launching
 """""""""""""""""""""""""

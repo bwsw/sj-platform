@@ -25,7 +25,7 @@ import com.bwsw.sj.common.si.model.module.Specification
 import com.bwsw.sj.common.utils.EngineLiterals._
 import com.bwsw.sj.common.utils.StreamLiterals._
 import com.bwsw.sj.common.utils.StreamUtils._
-import org.slf4j.{Logger, LoggerFactory}
+import com.typesafe.scalalogging.Logger
 import scaldi.Injector
 
 import scala.collection.mutable.ArrayBuffer
@@ -40,7 +40,7 @@ class BatchInstanceValidator(implicit injector: Injector) extends InstanceValida
 
   import messageResourceUtils.createMessage
 
-  private val logger: Logger = LoggerFactory.getLogger(getClass.getName)
+  private val logger: Logger = Logger(getClass.getName)
   override type T = BatchInstance
 
   override def validate(instance: T, specification: Specification): Seq[String] = {

@@ -50,16 +50,16 @@ The processing flow for Regular Engine is presented below.
 
 The diagram represents two types of processing:
 
-- for a stateless mode of processing (the left schema). The module does not have a state that means it does not aggregate the incoming data via state mechanism. On each checkpoint the data is sent to Output module.
+- for a stateless mode of processing (the left schema). The module does not have a state that means it does not aggregate the incoming data via state mechanism. On each checkpoint the data are sent to the Output module.
 
 - for a statefull mode of processing (the right schema). For stateful processing the state is saved at the same moment the checkpoint is performed. Regular module gets data from Input module element by element and aggregate it via state mechanism. On each checkpoint all aggregated data will be sent to Output module and the state will be cleared.
 
 Once a module is launched the ‘onInit’ method performs some preparations for the module, for example initializes some auxiliary variables, or checks the state variables on existence.
-Then a new message is received. The incoming data is ingested via T-streams or Kafka. The messages are processed by two methods appropriate for T-streams or Kafka messages.
+Then a new message is received. The incoming data are ingested via T-streams or Apache Kafka. The messages are processed by two methods appropriate for T-streams or Apache Kafka messages.
 
 A checkpoint is performed after a set period of time or after a set number of messages is received.
 
-If the module has a state the data is stored at the moment of checkpoint. In case of a failure the stored data from the state will be recovered and the module will be restarted.
+If the module has a state the data are stored at the moment of checkpoint. In case of a failure the stored data from the state will be recovered and the module will be restarted.
 
 If there is no state the checkpoint is performed and the cycle starts again from receiving a new message.
 
@@ -77,13 +77,13 @@ The processing flow for Batch engine is presented below.
 
 The diagram represents two types of processing:
 
-- for a stateless mode of processing (the left schema): The module does not have a state that means it does not aggregate the incoming data via state mechanism. On each checkpoint the data is sent to Output module.
+- for a stateless mode of processing (the left schema): The module does not have a state that means it does not aggregate the incoming data via state mechanism. On each checkpoint the data are sent to the Output module.
 
 - for a statefull mode of processing (the right schema). For stateful processing the state is saved at the same moment the checkpoint is performed. Batch module gets data from Input module batch by batch and aggregate it via state mechanism. On each checkpoint all aggregated data will be sent to Output module and the state will be cleared.
 
 Once a module is launched the ‘onInit’ method performs some preparations for the module, for example, initializes some auxiliary variables, or checks the state variables on existence.
 
-Then a new message is received. The incoming data is ingested via T-streams or Kafka. The messages are processed by two methods appropriate for T-streams or Kafka messages.
+Then a new message is received. The incoming data are ingested via T-streams or Apache Kafka. The messages are processed by two methods appropriate for T-streams or Apache Kafka messages.
 
 Input data are collected in batches. A batch is a minimum data set for a handler to collect the events in the stream. In the module it is a :ref:`Batch-Collector` that is responsible for the logic of collecting batches. 
 
@@ -94,7 +94,7 @@ The Batch module allows for intercommunication between tasks that process incomi
 1. “onEnter”: The system awaits for every task to finish the “onWindow” method and then the “onEnter” method of all tasks is invoked. 
 2. “onLeaderEnter”: The system awaits for every task to finish the “onEnter” method and then the “onLeaderEnter” method of a leader task is invoked. 
 
-After the data is processed the checkpoint is performed and the result of processing is sent further into T-streams.
+After the data are processed the checkpoint is performed and the result of processing is sent further into T-streams.
 
 If the module has a state the data are stored at the moment of checkpoint. In case of a failure the stored data from the state will be recovered and the module will be restarted.
 
@@ -114,7 +114,7 @@ The processing flow for Output Engine is presented below.
 
 It waits for an event (message) in T-streams outcoming from a Regular/Batch module. A wait time period (‘event-wait-time’) is 1000 ms by default. When receiving an envelope of T-streams type, it processes the data transforming it into a data type appropriate for an external datastorage. 
 
-The data is passed to the external storage (Elasticsearch, JDBC, REST, etc.) right after the processing. 
+The data are passed to the external storage (Elasticsearch, SQL database, REST, etc.) right after the processing. 
 
 To avoid data duplication in the storage, in case of module failure prior to a checkpoint the engine is restarted and incoming messages are written instead of the previously received data. The messages will be written again up to the checkpoint.
 

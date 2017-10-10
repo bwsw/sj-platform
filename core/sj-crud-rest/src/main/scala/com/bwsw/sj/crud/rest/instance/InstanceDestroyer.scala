@@ -23,7 +23,7 @@ import com.bwsw.common.http.HttpStatusChecker._
 import com.bwsw.common.marathon.MarathonApi
 import com.bwsw.sj.common.si.model.instance.Instance
 import com.bwsw.sj.common.utils.EngineLiterals
-import org.slf4j.LoggerFactory
+import com.typesafe.scalalogging.Logger
 import scaldi.Injector
 
 import scala.util.{Failure, Success, Try}
@@ -42,7 +42,7 @@ class InstanceDestroyer(instance: Instance,
                         marathonTimeout: Int = 60000)
                        (implicit val injector: Injector) extends Runnable {
 
-  private val logger = LoggerFactory.getLogger(getClass.getName)
+  private val logger = Logger(getClass.getName)
   protected val instanceManager = new InstanceDomainRenewer()
   protected val client = new HttpClient(marathonTimeout)
   protected val marathonManager = new MarathonApi(client, marathonAddress)
