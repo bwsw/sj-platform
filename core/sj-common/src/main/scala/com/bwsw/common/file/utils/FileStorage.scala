@@ -21,14 +21,14 @@ package com.bwsw.common.file.utils
 import java.io.{File, InputStream}
 
 import com.bwsw.sj.common.dal.model.module.SpecificationDomain
-import org.slf4j.{Logger, LoggerFactory}
+import com.typesafe.scalalogging.Logger
 
 /**
   * Provides methods to CRUD files using a specific storage
   */
 trait FileStorage {
 
-  protected val logger: Logger = LoggerFactory.getLogger(this.getClass)
+  protected val logger: Logger = Logger(this.getClass)
 
   def put(file: File, fileName: String): Unit
 

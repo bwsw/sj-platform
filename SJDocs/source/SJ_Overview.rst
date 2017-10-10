@@ -27,7 +27,7 @@ Further, in the documentation, we explain how, why and when technologies mention
 
 Documentation Structure
 -------------------------------
-The documentation is organized in two big parts. The first one is a tutorial part which guides a reader through the system in a way which motivates him/her to observe, try and explain every step in practice. The second part is a referential one, which explains specific topics and lists system specifications for administrative and programming API, RESTful interface and Web UI.
+The documentation corresponds to the Stream Juggler Platform Release 1.1.1. It is organized in two big parts. The first one is a tutorial part which guides a reader through the system in a way which motivates him/her to observe, try and explain every step in practice. The second part is a referential one, which explains specific topics and lists system specifications for administrative and programming API, RESTful interface and Web UI.
 
 Preliminary Requirements to The Reader
 -------------------------------

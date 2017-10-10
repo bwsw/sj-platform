@@ -20,7 +20,6 @@ package com.bwsw.sj.engine.regular.benchmark.read_kafka.sj
 
 import java.io._
 import java.net.ServerSocket
-import java.util.UUID
 
 import com.bwsw.common.embedded.EmbeddedMongo
 import com.bwsw.sj.common.MongoAuthChecker
@@ -28,10 +27,9 @@ import com.bwsw.sj.common.config.TempHelperForConfigSetup
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.CommonAppConfigNames
 import com.bwsw.sj.common.utils.benchmark.ClassRunner
+import com.bwsw.sj.engine.core.testutils.benchmark.read_kafka.regular.RegularKafkaReaderBenchmark
 import com.bwsw.sj.engine.core.testutils.{Server, TestStorageServer}
 import com.bwsw.sj.engine.regular.RegularTaskRunner
-import com.bwsw.sj.engine.regular.benchmark.read_kafka.KafkaReaderBenchmark
-import com.bwsw.sj.engine.regular.benchmark.utils.BenchmarkUtils.retrieveResultFromFile
 import com.typesafe.config.ConfigFactory
 
 /**
@@ -52,7 +50,7 @@ class SjBenchmark(zkHost: String,
                   kafkaAddress: String,
                   words: Array[String]) extends {
   private val zooKeeperAddress = zkHost + ":" + zkPort
-} with KafkaReaderBenchmark(zooKeeperAddress, kafkaAddress, words) {
+} with RegularKafkaReaderBenchmark(zooKeeperAddress, kafkaAddress, words) {
 
   private val moduleFilename = "../../contrib/benchmarks/sj-regular-performance-benchmark/target/scala-2.12/" +
     "sj-regular-performance-benchmark-1.0-SNAPSHOT.jar"
@@ -62,8 +60,6 @@ class SjBenchmark(zkHost: String,
   private val mongoServer = new EmbeddedMongo(mongoPort)
   private val instanceName = "sj-benchmark-instance"
   private val taskName = instanceName + "-task"
-  private val outputFilename = "benchmark-output-" + UUID.randomUUID().toString
-  private val outputFile = new File(outputFilename)
 
   private val mongoAddress = "localhost:" + mongoPort
   private val config = ConfigFactory.load()
@@ -114,7 +110,7 @@ class SjBenchmark(zkHost: String,
     */
   def prepare(): Unit = {
     val tempHelperForConfigSetup = new TempHelperForConfigSetup(connectionRepository)
-    tempHelperForConfigSetup.setupConfigs()
+    tempHelperForConfigSetup.setupConfigs(lowWatermark = 5000)
     println("Config settings loaded")
 
     benchmarkPreparation.prepare(connectionRepository)
@@ -132,14 +128,11 @@ class SjBenchmark(zkHost: String,
   }
 
 
-  override protected def runProcess(messageSize: Long, messagesCount: Long): Process = {
+  override protected def runProcess(messagesCount: Long): Process = {
     benchmarkPreparation.loadInstance(outputFile.getAbsolutePath, messagesCount, connectionRepository.getInstanceRepository)
 
     new ClassRunner(classOf[RegularTaskRunner], environment = environment).start()
   }
-
-  override protected def retrieveResult(messageSize: Long, messagesCount: Long): Option[Long] =
-    retrieveResultFromFile(outputFile).map(_.toLong)
 
   private def findFreePort(): Int = {
     val randomSocket = new ServerSocket(0)

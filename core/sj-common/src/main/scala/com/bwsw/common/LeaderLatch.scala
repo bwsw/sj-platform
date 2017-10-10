@@ -18,11 +18,11 @@
  */
 package com.bwsw.common
 
+import com.typesafe.scalalogging.Logger
 import org.apache.curator.framework.recipes.leader
 import org.apache.curator.framework.{CuratorFramework, CuratorFrameworkFactory}
 import org.apache.curator.retry.ExponentialBackoffRetry
 import org.apache.zookeeper.KeeperException
-import org.slf4j.LoggerFactory
 
 import scala.annotation.tailrec
 import scala.util.{Failure, Success, Try}
@@ -39,7 +39,7 @@ import scala.util.{Failure, Success, Try}
   * @param id         unique id
   */
 class LeaderLatch(zkServers: Set[String], masterNode: String, id: String = "") {
-  private val logger = LoggerFactory.getLogger(this.getClass)
+  private val logger = Logger(this.getClass)
   private val servers = zkServers.mkString(",")
   private val curatorClient = createCuratorClient()
   createMasterNode()

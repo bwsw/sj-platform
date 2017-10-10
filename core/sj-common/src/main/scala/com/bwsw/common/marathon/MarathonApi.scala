@@ -24,10 +24,10 @@ import com.bwsw.common.JsonSerializer
 import com.bwsw.common.http.HttpClient
 import com.bwsw.common.http.HttpStatusChecker._
 import com.bwsw.sj.common.utils.FrameworkLiterals._
+import com.typesafe.scalalogging.Logger
 import org.apache.http.client.methods._
 import org.apache.http.entity.StringEntity
 import org.apache.http.util.EntityUtils
-import org.slf4j.LoggerFactory
 
 /**
   * Instance methods provide marathon api
@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory
   * @author Kseniya Tomskikh
   */
 class MarathonApi(private val client: HttpClient, marathonAddress: String) {
-  private val logger = LoggerFactory.getLogger(getClass.getName)
+  private val logger = Logger(getClass.getName)
   private val marathonEntitySerializer = new JsonSerializer(true)
 
   def getApplicationEntity(response: CloseableHttpResponse): MarathonApplication = {

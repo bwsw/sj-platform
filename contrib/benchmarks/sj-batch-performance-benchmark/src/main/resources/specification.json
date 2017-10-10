@@ -1,0 +1,33 @@
+{
+  "name": "com.bwsw.sj.benchmarks.module.batch",
+  "description": "Batch module for performance benchmark by BW",
+  "version": "1.0",
+  "author": "Pavel Tomskikh",
+  "license": "Apache 2.0",
+  "inputs": {
+    "cardinality": [
+      1,
+      1
+    ],
+    "types": [
+      "stream.apache-kafka",
+      "stream.t-streams"
+    ]
+  },
+  "outputs": {
+    "cardinality": [
+      0,
+      1
+    ],
+    "types": [
+      "stream.apache-kafka",
+      "stream.t-streams"
+    ]
+  },
+  "module-type": "batch-streaming",
+  "engine-name": "com.bwsw.batch.streaming.engine",
+  "engine-version": "1.0",
+  "validator-class": "com.bwsw.sj.benchmarks.module.batch.Validator",
+  "executor-class": "com.bwsw.sj.benchmarks.module.batch.Executor",
+  "batch-collector-class": "com.bwsw.sj.benchmarks.module.batch.TimeBatchCollector"
+}

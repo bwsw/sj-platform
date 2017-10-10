@@ -79,6 +79,7 @@ lazy val sj = (project in file(".")).settings(publish := {})
     engineCore, crudRest,
     inputStreamingEngine, regularStreamingEngine, batchStreamingEngine, outputStreamingEngine,
     framework,
+    engineSimulators,
     stubInput, stubRegular, stubBatch, stubESOutput, stubJDBCOutput, stubRestOutput,
     pmOutput, csvInput, regexInput,
     sumBatch
@@ -96,6 +97,7 @@ lazy val engineCore = Project(id = "sj-engine-core",
   base = file("./core/sj-engine-core"))
   .settings(commonSettings: _*)
   .settings(
+    resolvers += "Clojars Repository" at "http://clojars.org/repo/",
     libraryDependencies ++= Dependencies.sjEngineCoreDependencies.value,
     libraryDependencies ++= Dependencies.sjTestDependencies.value
   )
@@ -114,6 +116,7 @@ lazy val inputStreamingEngine = Project(id = "sj-input-streaming-engine",
   base = file("./core/sj-input-streaming-engine"))
   .settings(commonSettings: _*)
   .settings(
+    libraryDependencies ++= Dependencies.sjInputEngineDependencies.value,
     libraryDependencies ++= Dependencies.sjTestDependencies.value
   )
   .dependsOn(engineCore)
@@ -121,10 +124,6 @@ lazy val inputStreamingEngine = Project(id = "sj-input-streaming-engine",
 lazy val regularStreamingEngine = Project(id = "sj-regular-streaming-engine",
   base = file("./core/sj-regular-streaming-engine"))
   .settings(commonSettings: _*)
-  .settings(
-    resolvers += "Clojars Repository" at "http://clojars.org/repo/",
-    libraryDependencies ++= Dependencies.sjRegularEngineDependencies.value
-  )
   .dependsOn(engineCore)
 
 lazy val batchStreamingEngine = Project(id = "sj-batch-streaming-engine",
@@ -147,6 +146,15 @@ lazy val framework = Project(id = "sj-mesos-framework",
     libraryDependencies ++= Dependencies.sjFrameworkDependencies.value
   )
   .dependsOn(common)
+
+lazy val engineSimulators = Project(id = "sj-engine-simulators",
+  base = file("./core/sj-engine-simulators"))
+  .settings(commonSettings: _*)
+  .settings(
+    libraryDependencies ++= Dependencies.sjEngineSimulatorsDependencies.value
+  )
+  .dependsOn(inputStreamingEngine)
+
 
 lazy val stubInput = Project(id = "sj-stub-input-streaming",
   base = file("./contrib/stubs/sj-stub-input-streaming"))
@@ -195,6 +203,7 @@ lazy val csvInput = Project(id = "sj-csv-input",
     libraryDependencies ++= Dependencies.sjTestDependencies.value
   )
   .dependsOn(engineCore % "provided")
+  .dependsOn(engineSimulators % "test")
 
 lazy val regexInput = Project(id = "sj-regex-input",
   base = file("./contrib/sj-platform/sj-regex-input"))
@@ -203,14 +212,28 @@ lazy val regexInput = Project(id = "sj-regex-input",
     libraryDependencies ++= Dependencies.sjTestDependencies.value
   )
   .dependsOn(engineCore % "provided")
+  .dependsOn(engineSimulators % "test")
 
 lazy val regularPerformanceBenchmark = Project(id = "sj-regular-performance-benchmark",
   base = file("./contrib/benchmarks/sj-regular-performance-benchmark"))
   .settings(commonSettings: _*)
   .dependsOn(engineCore % "provided")
 
+lazy val batchPerformanceBenchmark = Project(id = "sj-batch-performance-benchmark",
+  base = file("./contrib/benchmarks/sj-batch-performance-benchmark"))
+  .settings(commonSettings: _*)
+  .dependsOn(engineCore % "provided")
+
 lazy val flinkBenchmarkTask = Project(id = "flink-benchmark-task",
   base = file("./contrib/benchmarks/flink-benchmark-task"))
+  .settings(commonSettings: _*)
+  .settings(
+    scalaVersion := "2.11.8",
+    libraryDependencies ++= Dependencies.flinkDependencies.value
+  )
+
+lazy val flinkBatchBenchmarkTask = Project(id = "flink-batch-benchmark-task",
+  base = file("./contrib/benchmarks/flink-batch-benchmark-task"))
   .settings(commonSettings: _*)
   .settings(
     scalaVersion := "2.11.8",
