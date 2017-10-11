@@ -20,8 +20,9 @@ package com.bwsw.sj.common.engine.core.reporting
 
 import java.util.concurrent.{ArrayBlockingQueue, Callable, TimeUnit}
 
-import com.bwsw.sj.common.engine.core.entities.EnvelopeInterface
+import com.bwsw.sj.common.engine.core.entities.{EnvelopeInterface, KafkaEnvelope, TStreamEnvelope}
 import com.bwsw.sj.common.utils.EngineLiterals
+import com.typesafe.scalalogging.Logger
 
 /**
   * Handles data for [[PerformanceMetricsReporter]] in separate thread
@@ -32,10 +33,23 @@ class PerformanceMetrics(performanceMetrics: PerformanceMetricsReporter, threadN
 
   import PerformanceMetrics._
 
+  protected val logger: Logger = Logger(this.getClass)
   protected val envelopesQueue = new ArrayBlockingQueue[Message](EngineLiterals.queueSize)
 
-  def addEnvelopeToInputStream(envelope: EnvelopeInterface): Unit =
-    envelopesQueue.put(InputEnvelope(envelope))
+  def addEnvelopeToInputStream(envelope: EnvelopeInterface): Unit = {
+    envelope match {
+      case tStreamEnvelope: TStreamEnvelope[_] =>
+        addEnvelopeToInputStream(tStreamEnvelope.stream, tStreamEnvelope.data.toList)
+      case kafkaEnvelope: KafkaEnvelope[_] =>
+        addEnvelopeToInputStream(kafkaEnvelope.stream, List(kafkaEnvelope.data))
+      case wrongEnvelope =>
+        logger.error(s"Incoming envelope with type: ${wrongEnvelope.getClass} is not defined")
+        throw new Exception(s"Incoming envelope with type: ${wrongEnvelope.getClass} is not defined")
+    }
+  }
+
+  protected def addEnvelopeToInputStream(name: String, elements: List[AnyRef]): Unit =
+    envelopesQueue.put(InputEnvelope(name, elements))
 
   /**
     * Invokes when a new element is sent to txn of some output stream
@@ -50,8 +64,8 @@ class PerformanceMetrics(performanceMetrics: PerformanceMetricsReporter, threadN
   override def call(): Unit = {
     while (true) {
       envelopesQueue.poll(EngineLiterals.eventWaitTimeout, TimeUnit.MILLISECONDS) match {
-        case InputEnvelope(envelope) =>
-          performanceMetrics.addEnvelopeToInputStream(envelope)
+        case InputEnvelope(name, elements) =>
+          performanceMetrics.addEnvelopeToInputStream(elements, name)
         case OutputEnvelope(name, envelopeID, elementSize) =>
           performanceMetrics.addElementToOutputEnvelope(name, envelopeID, elementSize)
         case null =>
@@ -72,7 +86,7 @@ object PerformanceMetrics {
 
   trait Message
 
-  case class InputEnvelope(envelope: EnvelopeInterface) extends Message
+  case class InputEnvelope(name: String, elements: List[AnyRef]) extends Message
 
   case class OutputEnvelope(name: String, envelopeID: String, elementSize: Long) extends Message
 

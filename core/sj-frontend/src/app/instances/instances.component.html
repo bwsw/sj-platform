@@ -359,7 +359,7 @@
               <div class="col col-sm-10">
                 <select [(ngModel)]="newInstance.output" name="instanceOutput" required
                         class="form-control">
-                  <option *ngFor="let stream of streamsList | streamFilter: 'stream.sql-database,stream.elasticsearch' | orderBy: 'name'" value="{{stream.name}}">
+                  <option *ngFor="let stream of streamsList | streamFilter: 'stream.sql-database,stream.elasticsearch,stream.restful' | orderBy: 'name'" value="{{stream.name}}">
                     {{stream.name}} ({{stream.service}}, {{providerList[stream.service]}})
                   </option>
                 </select>

@@ -23,7 +23,6 @@ import java.util.concurrent.{Callable, TimeUnit}
 
 import com.bwsw.common.{JsonSerializer, ObjectSerializer, ObjectSizeFetcher}
 import com.bwsw.sj.common.dal.model.stream.TStreamStreamDomain
-import com.bwsw.sj.common.engine.core.entities.{EnvelopeInterface, KafkaEnvelope, TStreamEnvelope}
 import com.bwsw.sj.common.engine.core.managment.TaskManager
 import com.bwsw.sj.common.si.model.instance.Instance
 import com.bwsw.tstreams.agents.producer.{NewProducerTransactionPolicy, Producer}
@@ -99,17 +98,8 @@ abstract class PerformanceMetricsReporter(manager: TaskManager) extends Callable
     */
   protected def clear(): Unit
 
-  def addEnvelopeToInputStream(envelope: EnvelopeInterface): Unit = {
-    envelope match {
-      case tStreamEnvelope: TStreamEnvelope[_] =>
-        addEnvelopeToInputStream(tStreamEnvelope.stream, tStreamEnvelope.data.map(ObjectSizeFetcher.getObjectSize).toList)
-      case kafkaEnvelope: KafkaEnvelope[_] =>
-        addEnvelopeToInputStream(kafkaEnvelope.stream, List(ObjectSizeFetcher.getObjectSize(kafkaEnvelope.data)))
-      case wrongEnvelope =>
-        logger.error(s"Incoming envelope with type: ${wrongEnvelope.getClass} is not defined")
-        throw new Exception(s"Incoming envelope with type: ${wrongEnvelope.getClass} is not defined")
-    }
-  }
+  def addEnvelopeToInputStream(elements: List[AnyRef], name: String): Unit =
+    addEnvelopeToInputStream(name, elements.map(ObjectSizeFetcher.getObjectSize))
 
   protected def addEnvelopeToInputStream(name: String, elementsSize: List[Long]): Unit = {
     mutex.lock()

@@ -65,6 +65,8 @@ abstract class OutputProcessor[T <: AnyRef](outputStream: StreamDomain,
     */
   def delete(envelope: TStreamEnvelope[T]): Unit
 
+  def checkpoint(): Unit = {}
+
   def close(): Unit
 
   /**

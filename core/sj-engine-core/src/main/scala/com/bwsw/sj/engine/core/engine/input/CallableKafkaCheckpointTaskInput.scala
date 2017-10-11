@@ -19,7 +19,7 @@
 package com.bwsw.sj.engine.core.engine.input
 
 
-import com.bwsw.sj.common.engine.core.entities.{EnvelopeInterface, WeightedBlockingQueue, KafkaEnvelope, KafkaRecords}
+import com.bwsw.sj.common.engine.core.entities.{EnvelopeInterface, KafkaEnvelope, KafkaRecords, WeightedBlockingQueue}
 import com.bwsw.sj.common.engine.core.managment.CommonTaskManager
 import com.bwsw.sj.common.si.model.instance.RegularInstance
 import com.bwsw.sj.common.utils.EngineLiterals
@@ -72,9 +72,5 @@ class CallableKafkaCheckpointTaskInput[T <: AnyRef](override val manager: Common
     super.setConsumerOffsetToLastEnvelope()
     offsetProducer.newTransaction(NewProducerTransactionPolicy.ErrorIfOpened)
       .send(offsetSerializer.serialize(kafkaOffsetsStorage))
-  }
-
-  override def close(): Unit = {
-    kafkaConsumer.close()
   }
 }

@@ -20,8 +20,6 @@ package com.bwsw.sj.engine.input.task.reporting
 
 import java.util.Calendar
 
-import com.bwsw.common.ObjectSizeFetcher
-import com.bwsw.sj.common.engine.core.entities.{EnvelopeInterface, InputEnvelope}
 import com.bwsw.sj.common.engine.core.reporting.PerformanceMetricsReporter
 import com.bwsw.sj.engine.input.task.InputTaskManager
 
@@ -39,19 +37,11 @@ class InputStreamingPerformanceMetricsReporter(manager: InputTaskManager)
   extends PerformanceMetricsReporter(manager) {
 
   currentThread.setName(s"input-task-${manager.taskName}-performance-metrics")
-  private val inputStreamName: String = manager.agentsHost + ":" + manager.entryPort
+  val inputStreamName: String = manager.agentsHost + ":" + manager.entryPort
   private val outputStreamNames: Array[String] = instance.outputs
 
   override protected var inputEnvelopesPerStream: mutable.Map[String, ListBuffer[List[Long]]] = createStorageForInputEnvelopes(Array(inputStreamName))
   override protected var outputEnvelopesPerStream: mutable.Map[String, mutable.Map[String, ListBuffer[Long]]] = createStorageForOutputEnvelopes(outputStreamNames)
-
-  /**
-    * Invokes when a new envelope from the input stream is received
-    */
-  override def addEnvelopeToInputStream(envelope: EnvelopeInterface): Unit = {
-    val inputEnvelope = envelope.asInstanceOf[InputEnvelope[AnyRef]]
-    super.addEnvelopeToInputStream(inputStreamName, List(ObjectSizeFetcher.getObjectSize(inputEnvelope.data)))
-  }
 
   /**
     * Constructs a report of performance metrics of task work (one module could have multiple tasks)

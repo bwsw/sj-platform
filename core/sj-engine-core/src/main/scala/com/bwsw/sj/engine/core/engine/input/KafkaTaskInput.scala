@@ -26,10 +26,10 @@ import com.bwsw.sj.common.config.{ConfigLiterals, SettingsUtils}
 import com.bwsw.sj.common.dal.model.service.KafkaServiceDomain
 import com.bwsw.sj.common.dal.model.stream.{StreamDomain, TStreamStreamDomain}
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
-import com.bwsw.sj.common.si.model.config.ConfigurationSetting
-import com.bwsw.sj.common.utils.StreamLiterals
 import com.bwsw.sj.common.engine.core.entities.KafkaEnvelope
 import com.bwsw.sj.common.engine.core.managment.CommonTaskManager
+import com.bwsw.sj.common.si.model.config.ConfigurationSetting
+import com.bwsw.sj.common.utils.StreamLiterals
 import com.bwsw.tstreams.agents.consumer.Offset.Oldest
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import com.bwsw.tstreams.agents.producer.Producer
@@ -44,6 +44,7 @@ import scala.collection.mutable
 trait KafkaTaskInput[T <: AnyRef] extends SjInjector {
   protected val manager: CommonTaskManager
   protected val checkpointGroup: CheckpointGroup
+  protected val maxPollRecords: Int = 500
   protected val currentThread: Thread = Thread.currentThread()
   protected val logger: Logger = Logger(this.getClass)
   protected val offsetSerializer = new ObjectSerializer()
@@ -132,6 +133,7 @@ trait KafkaTaskInput[T <: AnyRef] extends SjInjector {
     properties.put("auto.offset.reset", offset)
     properties.put("key.deserializer", "org.apache.kafka.common.serialization.ByteArrayDeserializer")
     properties.put("value.deserializer", "org.apache.kafka.common.serialization.ByteArrayDeserializer")
+    properties.put("max.poll.records", Int.box(maxPollRecords))
     applyConfigurationSettings(properties)
 
     val consumer = new KafkaConsumer[Array[Byte], Array[Byte]](properties)

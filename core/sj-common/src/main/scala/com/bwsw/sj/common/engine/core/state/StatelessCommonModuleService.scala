@@ -46,7 +46,7 @@ class StatelessCommonModuleService(manager: CommonTaskManager,
   private val connectionRepository = inject[ConnectionRepository]
   private val streamService = connectionRepository.getStreamRepository
   protected val senderThread = new TStreamsSenderThread(
-    manager.outputProducers, checkpointGroup, performanceMetrics, s"batch-task-${manager.taskName}-sender")
+    manager.outputProducers, checkpointGroup, performanceMetrics, s"${manager.instance.moduleType}-${manager.taskName}-sender")
   senderThread.start()
 
   val environmentManager: ModuleEnvironmentManager = new ModuleEnvironmentManager(
