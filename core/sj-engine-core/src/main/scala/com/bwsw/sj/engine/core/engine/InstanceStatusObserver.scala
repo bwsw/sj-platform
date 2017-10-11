@@ -22,7 +22,7 @@ import java.util.concurrent.Callable
 
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.EngineLiterals
-import org.slf4j.LoggerFactory
+import com.typesafe.scalalogging.Logger
 import scaldi.Injectable.inject
 import scaldi.Injector
 
@@ -34,7 +34,7 @@ import scaldi.Injector
   * @param instanceName name of instance that contains the running task name
   */
 class InstanceStatusObserver(instanceName: String)(implicit injector: Injector) extends Callable[Unit] {
-  private val logger = LoggerFactory.getLogger(this.getClass)
+  private val logger = Logger(this.getClass)
 
   override def call(): Unit = {
     while (true) {

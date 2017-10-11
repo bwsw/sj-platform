@@ -19,7 +19,7 @@
 package com.bwsw.sj.engine.regular.benchmark.read_tstream
 
 import com.bwsw.sj.common.utils.BenchmarkConfigNames._
-import com.bwsw.sj.engine.regular.benchmark.ReaderBenchmarkConfig
+import com.bwsw.sj.engine.core.testutils.benchmark.ReaderBenchmarkConfig
 import com.typesafe.config.Config
 
 /**
@@ -29,10 +29,11 @@ import com.typesafe.config.Config
   * @param outputFilenamePrefix prefix for default name of output file
   * @author Pavel Tomskikh
   */
-class TStreamReaderBenchmarkConfig(config: Config, outputFilenamePrefix: String)
-  extends ReaderBenchmarkConfig(config, outputFilenamePrefix) {
+class TStreamReaderBenchmarkConfig(override protected val config: Config,
+                                   override protected val outputFilenamePrefix: String)
+  extends ReaderBenchmarkConfig {
 
-  val zooKeeperAddress = config.getString(zooKeeperAddressConfig)
   val tStreamPrefix = config.getString(tStreamPrefixConfig)
   val tStreamToken = config.getString(tStreamTokenConfig)
+  val sizesPerTransaction = config.getString(tStreamSizePerTransaction)
 }

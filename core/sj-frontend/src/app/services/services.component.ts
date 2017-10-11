@@ -23,6 +23,7 @@ export class ServicesComponent implements OnInit {
   public formAlerts: NotificationModel[] = [];
   public serviceList: ServiceModel[];
   public serviceTypes: TypeModel[];
+  public providerTypes: {};
   public providerList: ProviderModel[];
   public blockingStreams: string[] = [];
   public blockingInstances: string[] = [];
@@ -40,6 +41,7 @@ export class ServicesComponent implements OnInit {
     this.getServiceList();
     this.getProviderList();
     this.getServiceTypes();
+    this.getProviderTypes();
     this.newService = new ServiceModel();
   }
 
@@ -59,6 +61,19 @@ export class ServicesComponent implements OnInit {
     this.servicesService.getTypes()
       .subscribe(
         response => this.serviceTypes = response.types,
+        error => this.showAlert({ message: error, type: 'danger', closable: true, timeout: 0 })
+      );
+  }
+
+  public getProviderTypes() {
+    this.providersService.getTypes()
+      .subscribe(
+        response => {
+          this.providerTypes = response.types.reduce((memo, item: TypeModel) => {
+            memo[item.id] = item.name;
+            return memo;
+          }, {});
+        },
         error => this.showAlert({ message: error, type: 'danger', closable: true, timeout: 0 })
       );
   }

@@ -28,7 +28,7 @@ import com.bwsw.sj.mesos.framework.task.status._
   */
 object StatusHandler {
   val logger = Logger.getLogger(getClass)
-  val serializer = new JsonSerializer()
+  val serializer = new JsonSerializer(ignoreUnknown = true)
 
   /**
     * Determines type of status and restarts task, if status "failed" or "error"

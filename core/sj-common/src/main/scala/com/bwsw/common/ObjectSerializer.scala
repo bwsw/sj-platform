@@ -20,7 +20,7 @@ package com.bwsw.common
 
 import java.io._
 
-import org.slf4j.LoggerFactory
+import com.typesafe.scalalogging.Logger
 
 /**
  * Class represents a serializer from object to byte array and vice versa
@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory
  */
 
 class ObjectSerializer(classLoader: ClassLoader = ClassLoader.getSystemClassLoader) {
-  private val logger = LoggerFactory.getLogger(this.getClass)
+  private val logger = Logger(this.getClass)
 
   def serialize(obj: Object): Array[Byte] = {
     logger.debug(s"Serialize an object of class: '${obj.getClass}' to a byte array.")

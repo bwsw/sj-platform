@@ -1,18 +1,22 @@
 Testing Modules on Simulators
 ================================
 
-Stream Juggler provides a user with a range of simulators for module testing purposes. A simulator is a ready-to-use environment that allows you to rapidly test modules during the development process.
+Stream Juggler Platform provides a user with a range of simulators for module testing purposes. A simulator is a ready-to-use environment that allows you to rapidly test modules in the development process.
 
-Four types of simulators is provided - one per each module type. Choose that you want to use in accordance with the type of a module you want to test. And follow the instructions below.
+Four types of simulators are provided - one per each module type. Choose which you want to use in accordance with the type of a module you want to test. And follow the instructions below.
 
 .. _Input_Engine_Simulator:
 
 Input Engine Simulator
 -----------------------------
 
-It is a class for testing an implementation of an :ref:`input_module` (Executor).
+It is a class for testing an implementation of an `input module <http://streamjuggler.readthedocs.io/en/develop/SJ_Modules.html#input-module>`_ (Executor).
 
-Simulator imitates the behavior of the :ref:`Input_Streaming_Engine`: it sends byte buffer to Executor, gets input envelopes from it, checks envelopes on duplicate (if it is necessary), and builds :ref:`Input_Engine_Simulator_Output_Data`.
+Simulator imitates the behavior of the :ref:`Input_Streaming_Engine`: it sends byte buffer to Executor, gets input envelopes from it, checks envelopes for duplicates (if it is necessary), and builds :ref:`Input_Engine_Simulator_Output_Data`.
+
+To use the simulator you need add the dependency to the ``build.sbt``::
+
+ libraryDependencies += "com.bwsw" %% "sj-engine-simulators" % "1.0-SNAPSHOT" % "test"
 
 Constructor arguments
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -20,7 +24,7 @@ Constructor arguments
  :header: "Argument", "Type", "Description"
  :widths: 25, 25, 50  
 
- "executor*", "InputStreamingExecutor[T]", "Implementation of :ref:`input_module` under testing"
+ "executor*", "InputStreamingExecutor[T]", "Implementation of `input module <http://streamjuggler.readthedocs.io/en/develop/SJ_Modules.html#input-module>`_ under testing"
  "evictionPolicy*", "InputInstanceEvictionPolicy", "A field of an instance (:ref:`REST_API_Instance_Create`)"
  "separator", "String", "Delimeter between data records (empty string by default)"
  "charset", "Charset", "Encoding of incoming data (UTF-8 by default)"
@@ -30,7 +34,7 @@ Constructor arguments
 
 The data record is a string that will be parsed by ``executor.parse()`` to some entity.
 
-Simulator provides the following methods:
+The simulator provides the following methods:
 
 * ``prepare(record: String)`` - writes one data record to a byte buffer.
 * ``prepare(records: Seq[String])`` - writes a collection of data records to a byte buffer.
@@ -42,7 +46,7 @@ Simulator provides the following methods:
 Output Data
 ~~~~~~~~~~~~~~~~~
 
-Provides information on the processing of incoming data by the :ref:`input_module`.
+This simulator provides information on the processing of incoming data by the  `input module <http://streamjuggler.readthedocs.io/en/develop/SJ_Modules.html#input-module>`_.
 
 .. csv-table:: 
  :header: "Field", "Format", "Description"
@@ -66,7 +70,7 @@ E.g. you implement your own Executor that splits byte buffer by a comma and trie
  }
 
 
-If you want to see what Executor returns after processing, Input Engine Simulator can be used in the following way::
+If you want to see what is returned by Executor after processing, Input Engine Simulator can be used in the following way::
  
  val manager: InputEnvironmentManager
  val executor = new SomeExecutor(manager)
@@ -89,9 +93,13 @@ For more complicated examples see: `sj-csv-input-test <https://github.com/bwsw/s
 Regular Engine Simulator
 ------------------------------
 
-It is a class for testing implementation of :ref:`regular_module` (Executor).
+It is a class for testing implementation of :ref:`regular-module` (Executor).
 
 The simulator imitates the behavior of the :ref:`Regular_Streaming_Engine` (stateful mode): it sends envelopes to Executor, allows for invoking checkpoint's handlers, gets data from output streams and state.
+
+To use the simulator you need add the dependency to the ``build.sbt``::
+ 
+ libraryDependencies += "com.bwsw" %% "sj-engine-simulators" % "1.0-SNAPSHOT" % "test"
 
 Constructor arguments
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -100,8 +108,8 @@ Constructor arguments
  :header: "Argument", "Type", "Description"
  :widths: 25, 25, 50 
 
- "executor", "RegularStreamingExecutor[T]", "Implementation of a :ref:`regular_module` under testing"   
- "manager", "ModuleEnvironmentManagerMock", "Mock for StatefulModuleEnvironmentManager (see :ref:`Module-Environment-Manager-Mock`)"
+ "executor", "RegularStreamingExecutor[T]", "Implementation of a :ref:`regular-module` under testing"   
+ "manager", "ModuleEnvironmentManagerMock", "Mock for StatefulModuleEnvironmentManager (see Module-Environment-Manager-Mock_)"
 
 .. important:: T - the type of data received by Executor.
 
@@ -198,6 +206,10 @@ It is a class for testing implementation of :ref:`batch-module` (Executor).
 
 Simulator imitates the behavior of the :ref:`Batch_Streaming_Engine` (stateful mode): it sends envelopes to the Executor, allows invoking checkpoint's handlers, gets data from output streams and state.
 
+To use simulator you need add this dependency to the ``build.sbt``::
+
+ libraryDependencies += "com.bwsw" %% "sj-engine-simulators" % "1.0-SNAPSHOT" % "test"
+
 Constructor arguments
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. csv-table:: 
@@ -205,7 +217,7 @@ Constructor arguments
  :widths: 25, 25, 50 
 
  "executor", "BatchStreamingExecutor[T]", "Implementation of :ref:`batch-module` under test"
- "manager", "ModuleEnvironmentManagerMock", "Mock for StatefulModuleEnvironmentManager (see :ref:`Module-Environment-Manager-Mock`)"
+ "manager", "ModuleEnvironmentManagerMock", "Mock for StatefulModuleEnvironmentManager (see Module-Environment-Manager-Mock_)"
  "batchCollector", "BatchCollector", "Implementation of :ref:`Batch-Collector`"
 
 .. important:: T - the type of data received by Executor
@@ -361,16 +373,20 @@ Accumulation of batches is implemented in ``BatchCollector``::
     countOfEnvelopesPerStream(streamName) = 0
  }
 
-For more complicated examples see `sj-sflow-process-test <https://github.com/bwsw/sj-sflow-demo/blob/develop/sflow-process/src/test/scala/com/bwsw/sj/examples/sflow/module/process/ExecutorTests.scala.>`_.
+For more complicated examples see `sj-sflow-process-test <https://github.com/bwsw/sj-sflow-demo/blob/develop/sflow-process/src/test/scala/com/bwsw/sj/examples/sflow/module/process/ExecutorTests.scala>`_.
 
 .. _Output_Engine_Simulator:
 
 Output Engine Simulator
 ----------------------------
 
-It is a class for testing an implementation of :ref:`output-modlue` (Executor). 
+It is a class for testing an implementation of :ref:`output-module` (Executor). 
 
 Simulator imitates the behavior of the :ref:`Output_Streaming_Engine`: it sends transactions to the Executor, gets output envelopes from it and builds requests for loading data to an output service. Simulator uses :ref:`Output_Request_Builder` to build requests.
+
+To use the simulator you need add the dependency to the ``build.sbt``::
+ 
+ libraryDependencies += "com.bwsw" %% "sj-engine-simulators" % "1.0-SNAPSHOT" % "test"
 
 Constructor arguments
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -379,7 +395,7 @@ Constructor arguments
  :widths: 25, 25, 50 
 
  "executor", "OutputStreamingExecutor[IT]", "Implementation of :ref:`output-module` under testing"
- "outputRequestBuilder", " :ref:`Output_Request_Builder` [OT]", "Builder of requests for output service"
+ "outputRequestBuilder", ":ref:`Output_Request_Builder` [OT]", "Builder of requests for output service"
  "manager", "OutputEnvironmentManager", "Instance of the OutputEnvironmentManager used by Executor"
 
 .. important:: * IT - the type of data received by Executor
@@ -395,6 +411,7 @@ Simulator provides the following methods:
 Simulator has a ``beforeFirstCheckpoint`` flag that indicates that the first checkpoint has not been performed. Before the first checkpoint Simulator builds a delete request for each incoming transaction (in the ``process`` method). ``beforeFirstCheckpoint`` can be changed automatically, when Executor calls ``manager.initiateCheckpoint()``, or manually.
 
 .. _Output_Request_Builder:
+
 Output Request Builder
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -454,6 +471,7 @@ Objects For Simulators With States
 Under this section the class of objects used for Simulators with states is described. These Simulators are :ref:`Regular_Engine_Simulator` and :ref:`Batch_Engine_Simulator`.
 
 .. _Simulation-Result:
+
 Simulation Result
 ~~~~~~~~~~~~~~~~~~~~
 
@@ -464,6 +482,7 @@ Simulation Result
 ``case class SimulationResult(streamDataList: Seq[StreamData], state: Map[String, Any])`` - contains data elements for each output stream and a state at a certain time point.
 
 .. _Module-Environment-Manager-Mock:
+
 Module Environment Manager Mock
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -480,12 +499,13 @@ Constructor arguments:
  "stateStorage", "StateStorage", "A storage of state"
  "options", "String", "User defined options from instance"
  "outputs", "Array[TStreamStreamDomain]", "The list of output streams from an instance"
+ "fileStorage", 	"FileStorage", 	"A file storage (mocked by default)"
 
 
 Module Output Mocks
 ~~~~~~~~~~~~~~~~~~~~~~
 
-Module Output Mocks have a buffer that contains output elements (see :ref:`Simulation-Result`).
+Module Output Mocks have a buffer that contains output elements (see Simulation-Result_).
 
 Provided methods:
 
@@ -493,6 +513,7 @@ Provided methods:
 * ``clear()`` - removes all output elements from a buffer.
 
 .. _PartitionedOutputMock:
+
 Partitioned Output Mock
 """"""""""""""""""""""""""""""""
 

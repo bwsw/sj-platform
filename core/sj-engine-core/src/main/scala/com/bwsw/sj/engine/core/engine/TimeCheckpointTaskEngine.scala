@@ -19,7 +19,7 @@
 package com.bwsw.sj.engine.core.engine
 
 import com.bwsw.sj.common.utils.SjTimer
-import org.slf4j.LoggerFactory
+import com.typesafe.scalalogging.Logger
 
 /**
   * Provides methods for a basic execution logic of task engine
@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory
   */
 
 trait TimeCheckpointTaskEngine {
-  private val logger = LoggerFactory.getLogger(this.getClass)
+  private val logger = Logger(this.getClass)
   protected val checkpointInterval: Long
   private val checkpointTimer: Option[SjTimer] = createTimer()
   private val isNotOnlyCustomCheckpoint = checkpointTimer.isDefined

@@ -18,13 +18,13 @@
  */
 package com.bwsw.sj.engine.regular.benchmark.read_tstream
 
-import java.util.Calendar
+import java.util.{Calendar, Date}
 
 import com.bwsw.sj.common.utils.BenchmarkConfigNames._
-import com.bwsw.sj.common.utils.BenchmarkLiterals.sjDefaultOutputFile
+import com.bwsw.sj.common.utils.BenchmarkLiterals.Regular.sjTStreamsDefaultOutputFile
 import com.bwsw.sj.common.utils.CommonAppConfigNames.{zooKeeperHost, zooKeeperPort}
-import com.bwsw.sj.engine.regular.benchmark.ReaderBenchmarkRunner
-import com.bwsw.sj.engine.regular.benchmark.read_kafka.KafkaReaderBenchmarkConfig
+import com.bwsw.sj.engine.core.testutils.benchmark.ReaderBenchmarkRunner
+import com.bwsw.sj.engine.core.testutils.benchmark.regular.RegularReaderBenchmarkRunner
 import com.typesafe.config.{Config, ConfigFactory, ConfigValueFactory}
 
 /**
@@ -34,19 +34,27 @@ import com.typesafe.config.{Config, ConfigFactory, ConfigValueFactory}
   *
   * sj-benchmark.performance.message.sizes - list of messages' sizes that separated by a comma (',').
   * Environment variable MESSAGES_SIZE_PER_TEST.
+  *
   * sj-benchmark.performance.message.counts - list of counts of messages per test (1000000 by default).
   * Counts separated by a comma (','). Environment variable MESSAGES_COUNT_PER_TEST.
+  *
   * sj-benchmark.performance.output-file - file to output results in csv format (message size, milliseconds)
   * (sj-benchmark-output-`<`date-time`>` by default). Environment variable OUTPUT_FILE.
+  *
   * sj-benchmark.performance.words - list of words that sends to the Kafka server ("lorem,ipsum,dolor,sit,amet" by default).
   * Environment variable WORDS.
+  *
   * sj-benchmark.performance.repetitions - count of repetitions of same test configuration (messages count and message size)
   * (1 by default). Environment variable REPETITIONS.
+  *
   * sj-benchmark.performance.tstreams.prefix - ZooKeeper root node which holds coordination tree. Environment variable PREFIX.
+  *
   * sj-benchmark.performance.tstreams.token - T-Streams authentication token. Environment variable TOKEN.
   *
   * sj-common.zookeeper.host - ZooKeeper server's host. Environment variable ZOOKEEPER_HOST.
+  *
   * sj-common.zookeeper.port - ZooKeeper server's port. Environment variable ZOOKEEPER_PORT.
+  *
   * Host and port must point to the ZooKeeper server that used by the T-Streams server.
   *
   * @author Pavel Tomskikh
@@ -60,7 +68,7 @@ object TStreamReaderBenchmarkRunner extends App {
 
   private val benchmarkConfig = new TStreamReaderBenchmarkConfig(
     config = config.withValue(zooKeeperAddressConfig, ConfigValueFactory.fromAnyRef(s"$zkHost:$zkPort")),
-    sjDefaultOutputFile)
+    sjTStreamsDefaultOutputFile)
 
   private val benchmark = new TStreamReaderBenchmark(
     zkHost,
@@ -72,7 +80,7 @@ object TStreamReaderBenchmarkRunner extends App {
   benchmark.startServices()
   benchmark.prepare()
 
-  private val benchmarkRunner = new ReaderBenchmarkRunner(benchmark, benchmarkConfig)
+  private val benchmarkRunner = new RegularReaderBenchmarkRunner(benchmark, benchmarkConfig)
   private val results = benchmarkRunner.run()
   benchmarkRunner.writeResult(results)
 
@@ -86,3 +94,44 @@ object TStreamReaderBenchmarkRunner extends App {
 
   System.exit(0)
 }
+
+class TStreamReaderBenchmarkRunner(benchmark: TStreamReaderBenchmark,
+                                   config: TStreamReaderBenchmarkConfig)
+  extends ReaderBenchmarkRunner(config) {
+  override def run(): Seq[TStreamsReaderBenchmarkResult] = {
+    benchmark.warmUp()
+
+    val benchmarkResults = config.messageSizes.flatMap { messageSize =>
+      println(s"Message size: $messageSize")
+
+      config.sizesPerTransaction.flatMap { sizePerTransaction =>
+        println(s"Transaction size: $sizePerTransaction")
+        benchmark.clearStorage()
+        var streamSize: Long = 0
+
+        config.messagesCounts.map { messagesCount =>
+          println(s"Messages count: $messagesCount")
+          if (messagesCount > streamSize) {
+            benchmark.sendData(messageSize, messagesCount - streamSize, sizePerTransaction)
+            streamSize = messagesCount
+          }
+
+          val result = (0 until config.repetitions).map { _ =>
+            val millis = benchmark.runTest(messagesCount)
+            println(s"[${new Date()}] $millis")
+
+            millis
+          }
+
+          TStreamsReaderBenchmarkResult(messageSize, messagesCount, sizePerTransaction, result)
+        }
+      }
+    }
+
+    benchmark.close()
+
+    benchmarkResults
+  }
+}
+
+

@@ -18,13 +18,11 @@
  */
 package com.bwsw.sj.engine.core.engine.input
 
-import java.util.concurrent.ArrayBlockingQueue
-
 import com.bwsw.common.SerializerInterface
-import com.bwsw.sj.common.engine.core.entities.{Envelope, KafkaEnvelope, TStreamEnvelope}
+import com.bwsw.sj.common.engine.core.entities._
 import com.bwsw.sj.common.engine.core.managment.CommonTaskManager
 import com.bwsw.tstreams.agents.group.CheckpointGroup
-import org.slf4j.LoggerFactory
+import com.typesafe.scalalogging.Logger
 import scaldi.Injector
 
 /**
@@ -36,18 +34,17 @@ import scaldi.Injector
   *                      which will be retrieved into a module
   */
 class CallableCompleteCheckpointTaskInput[T <: AnyRef](manager: CommonTaskManager,
-                                                       blockingQueue: ArrayBlockingQueue[Envelope],
+                                                       blockingQueue: WeightedBlockingQueue[EnvelopeInterface],
                                                        override val checkpointGroup: CheckpointGroup,
                                                        envelopeDataSerializer: SerializerInterface)
                                                       (implicit injector: Injector)
   extends CallableCheckpointTaskInput[Envelope](manager.inputs) {
 
-  private val logger = LoggerFactory.getLogger(this.getClass)
+  private val logger = Logger(this.getClass)
   private val kafkaCheckpointTaskInput = new CallableKafkaCheckpointTaskInput[T](
     manager,
     blockingQueue,
-    checkpointGroup,
-    envelopeDataSerializer)
+    checkpointGroup)
   private val tStreamCheckpointTaskInput = new CallableTStreamCheckpointTaskInput[T](
     manager,
     blockingQueue,

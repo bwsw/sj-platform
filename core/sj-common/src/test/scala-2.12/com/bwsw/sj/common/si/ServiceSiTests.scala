@@ -110,21 +110,21 @@ class ServiceSiTests extends FlatSpec with Matchers {
     serviceStorage.toSet shouldBe initServiceStorage
   }
 
-  it should "not delete service when it have related streams" in new ServiceMocksWithRelated {
+  it should "not delete service when it has related streams" in new ServiceMocksWithRelated {
     val deletionError = s"rest.services.service.cannot.delete.due.to.streams:$serviceWithRelatedOnlyStreamsName"
 
     serviceSI.delete(serviceWithRelatedOnlyStreamsName) shouldBe DeletionError(deletionError)
     serviceStorage.toSet shouldBe initServiceStorage
   }
 
-  it should "not delete service when it have related instances" in new ServiceMocksWithRelated {
+  it should "not delete service when it has related instances" in new ServiceMocksWithRelated {
     val deletionError = s"rest.services.service.cannot.delete.due.to.instances:$serviceWithRelatedOnlyInstancesName"
 
     serviceSI.delete(serviceWithRelatedOnlyInstancesName) shouldBe DeletionError(deletionError)
     serviceStorage.toSet shouldBe initServiceStorage
   }
 
-  it should "not delete service when it have related streams and instances" in new ServiceMocksWithRelated {
+  it should "not delete service when it has related streams and instances" in new ServiceMocksWithRelated {
     val deletionError = s"rest.services.service.cannot.delete.due.to.streams:$serviceWithRelatedBothName"
 
     serviceSI.delete(serviceWithRelatedBothName) shouldBe DeletionError(deletionError)

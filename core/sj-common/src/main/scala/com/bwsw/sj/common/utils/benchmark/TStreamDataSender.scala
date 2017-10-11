@@ -49,15 +49,14 @@ class TStreamDataSender(address: String,
   tStreamsFactory.setProperty(ConfigurationOptions.Stream.partitionsCount, 1)
   tStreamsFactory.setProperty(ConfigurationOptions.Coordination.path, prefix)
 
-  private val checkpointInterval = 1000
-
   /**
     * Generates data and send it to a tstream server
     *
-    * @param messageSize size of one message
-    * @param messages    count of messages
+    * @param messageSize        size of one message
+    * @param messages           count of messages
+    * @param sizePerTransaction count of messages per transaction
     */
-  def send(messageSize: Long, messages: Long): Unit = {
+  def send(messageSize: Long, messages: Long, sizePerTransaction: Long): Unit = {
     val client = tStreamsFactory.getStorageClient()
     if (!client.checkStreamExists(streamName)) {
       client.createStream(streamName, 1, StreamLiterals.ttl, "")
@@ -73,7 +72,7 @@ class TStreamDataSender(address: String,
 
       transaction.send(message)
 
-      if (i % checkpointInterval == 0) {
+      if (i % sizePerTransaction == 0) {
         transaction.checkpoint()
         transaction = producer.newTransaction(NewProducerTransactionPolicy.CheckpointIfOpened, 0)
       }

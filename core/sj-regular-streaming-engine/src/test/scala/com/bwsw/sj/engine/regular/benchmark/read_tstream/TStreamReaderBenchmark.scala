@@ -27,9 +27,8 @@ import com.bwsw.sj.common.config.TempHelperForConfigSetup
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.CommonAppConfigNames
 import com.bwsw.sj.common.utils.benchmark.{ClassRunner, TStreamDataSender}
+import com.bwsw.sj.engine.core.testutils.benchmark.regular.RegularReaderBenchmark
 import com.bwsw.sj.engine.regular.RegularTaskRunner
-import com.bwsw.sj.engine.regular.benchmark.ReaderBenchmark
-import com.bwsw.sj.engine.regular.benchmark.utils.BenchmarkUtils.{findFreePort, retrieveResultFromFile}
 import com.bwsw.tstreams.env.{ConfigurationOptions, TStreamsFactory}
 import com.typesafe.config.ConfigFactory
 
@@ -48,7 +47,7 @@ class TStreamReaderBenchmark(zkHost: String,
                              tStreamToken: String,
                              tStreamPrefix: String,
                              words: Array[String])
-  extends ReaderBenchmark {
+  extends RegularReaderBenchmark {
   private val zooKeeperAddress = zkHost + ":" + zkPort
   private val streamName: String = "performance-benchmark-" + UUID.randomUUID().toString
   private val tStreamDataSender: TStreamDataSender = new TStreamDataSender(
@@ -59,7 +58,6 @@ class TStreamReaderBenchmark(zkHost: String,
     words,
     " ")
 
-  private val lookupResultTimeout: Long = 5000
   private val moduleFilename = "../../contrib/benchmarks/sj-regular-performance-benchmark/target/scala-2.12/" +
     "sj-regular-performance-benchmark-1.0-SNAPSHOT.jar"
 
@@ -69,8 +67,6 @@ class TStreamReaderBenchmark(zkHost: String,
   private val mongoServer = new EmbeddedMongo(mongoPort)
   private val instanceName = "sj-benchmark-instance"
   private val taskName = instanceName + "-task"
-  private val outputFilename = "benchmark-output-" + UUID.randomUUID().toString
-  private val outputFile = new File(outputFilename)
 
   private val mongoAddress = "localhost:" + mongoPort
   private val config = ConfigFactory.load()
@@ -129,50 +125,39 @@ class TStreamReaderBenchmark(zkHost: String,
 
 
   /**
-    * Sends data into the Kafka server and runs an application under test
+    * Generates data and send it to a storage
     *
-    * @param messageSize   size of one message that is sent to the T-Streams server
-    * @param messagesCount count of messages
-    * @return time in milliseconds within which an application under test reads messages from Kafka
+    * @param messageSize     size of one message
+    * @param messagesCount   count of messages
+    * @param transactionSize count of messages per transaction
     */
-  def runTest(messageSize: Long, messagesCount: Long): Long = {
-    println(s"$messagesCount messages of $messageSize bytes")
+  def sendData(messageSize: Long, messagesCount: Long, transactionSize: Long): Unit =
+    tStreamDataSender.send(messageSize, messagesCount, transactionSize)
 
-    tStreamDataSender.send(messageSize, messagesCount)
-    println("Data sent to the TStreams")
-
-    benchmarkPreparation.loadInstance(outputFile.getAbsolutePath, messagesCount, connectionRepository.getInstanceRepository)
-    val process: Process = new ClassRunner(classOf[RegularTaskRunner], environment = environment).start()
-
-    var maybeResult: Option[Long] = retrieveResult(messageSize, messagesCount)
-    while (maybeResult.isEmpty) {
-      Thread.sleep(lookupResultTimeout)
-      maybeResult = retrieveResult(messageSize, messagesCount)
-    }
-
-    process.destroy()
-
+  override def clearStorage(): Unit = {
     client.deleteStream(benchmarkPreparation.inputStream.name)
-
-    maybeResult.get
   }
 
   /**
     * Closes opened connections, deletes temporary files
     */
-  def close(): Unit = {
+  override def close(): Unit = {
     tStreamDataSender.close()
     tStreamsFactory.close()
   }
 
+
   /**
-    * Is invoked every [[lookupResultTimeout]] milliseconds until result retrieved.
-    * A result is a time in milliseconds within which an application under test reads messages from Kafka.
+    * Used to run an application under test in a separate process
     *
-    * @param messageSize   size of one message that is sent to the Kafka server
     * @param messagesCount count of messages
-    * @return result if a test has done or None otherwise
+    * @return process of an application under test
     */
-  private def retrieveResult(messageSize: Long, messagesCount: Long): Option[Long] =
-    retrieveResultFromFile(outputFile).map(_.toLong)
+  override protected def runProcess(messagesCount: Long): Process = {
+    benchmarkPreparation.loadInstance(outputFile.getAbsolutePath, messagesCount, connectionRepository.getInstanceRepository)
+
+    new ClassRunner(classOf[RegularTaskRunner], environment = environment).start()
+  }
+
+  override def sendData(messageSize: Long, messagesCount: Long): Unit = {}
 }
