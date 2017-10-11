@@ -18,21 +18,22 @@
  */
 package com.bwsw.sj.engine.regular.task
 
-import java.util.concurrent.{ArrayBlockingQueue, TimeUnit}
-
 import com.bwsw.sj.common.engine.TaskEngine
-import com.bwsw.sj.common.engine.core.entities.{Envelope, KafkaEnvelope, TStreamEnvelope}
+import com.bwsw.sj.common.engine.core.entities._
 import com.bwsw.sj.common.engine.core.managment.CommonTaskManager
 import com.bwsw.sj.common.engine.core.regular.RegularStreamingExecutor
 import com.bwsw.sj.common.engine.core.state.CommonModuleService
 import com.bwsw.sj.common.si.model.instance.RegularInstance
 import com.bwsw.sj.common.utils.EngineLiterals
-import com.bwsw.sj.engine.core.engine.input.CallableCheckpointTaskInput
+import com.bwsw.sj.engine.core.engine.input.{CallableCheckpointTaskInput, KafkaTaskInput}
 import com.bwsw.sj.engine.core.engine.{NumericalCheckpointTaskEngine, TimeCheckpointTaskEngine}
 import com.bwsw.sj.engine.regular.task.reporting.RegularStreamingPerformanceMetrics
 import com.bwsw.tstreams.agents.group.CheckpointGroup
-import org.slf4j.{Logger, LoggerFactory}
+import com.typesafe.scalalogging.Logger
+import org.apache.kafka.clients.consumer.ConsumerRecord
 import scaldi.Injector
+
+import scala.collection.JavaConverters._
 
 /**
   * Class contains methods for running regular module
@@ -49,7 +50,7 @@ abstract class RegularTaskEngine(manager: CommonTaskManager,
 
   private val currentThread: Thread = Thread.currentThread()
   currentThread.setName(s"regular-task-${manager.taskName}-engine")
-  private val blockingQueue: ArrayBlockingQueue[Envelope] = new ArrayBlockingQueue[Envelope](EngineLiterals.queueSize)
+  private val blockingQueue: WeightedBlockingQueue[EnvelopeInterface] = new WeightedBlockingQueue[EnvelopeInterface](EngineLiterals.queueSize)
   private val instance: RegularInstance = manager.instance.asInstanceOf[RegularInstance]
   private val checkpointGroup: CheckpointGroup = manager.createCheckpointGroup()
   private val moduleService: CommonModuleService = CommonModuleService(manager, checkpointGroup, performanceMetrics)
@@ -69,17 +70,27 @@ abstract class RegularTaskEngine(manager: CommonTaskManager,
     executor.onInit()
 
     while (true) {
-      val maybeEnvelope = blockingQueue.poll(instance.eventWaitIdleTime, TimeUnit.MILLISECONDS)
+      val maybeEnvelope = blockingQueue.poll(instance.eventWaitIdleTime)
 
-      Option(maybeEnvelope) match {
+      maybeEnvelope match {
         case Some(envelope) =>
-          registerEnvelope(envelope)
           logger.debug(s"Task: ${manager.taskName}. Invoke onMessage() handler.")
           envelope match {
+            case KafkaRecords(records) =>
+              records.asScala.foreach { record =>
+                val kafkaEnvelope = consumerRecordToEnvelope(record)
+                registerEnvelope(kafkaEnvelope)
+                executor.onMessage(kafkaEnvelope)
+              }
+
             case kafkaEnvelope: KafkaEnvelope[AnyRef@unchecked] =>
+              registerEnvelope(kafkaEnvelope)
               executor.onMessage(kafkaEnvelope)
+
             case tstreamEnvelope: TStreamEnvelope[AnyRef@unchecked] =>
+              registerEnvelope(tstreamEnvelope)
               executor.onMessage(tstreamEnvelope)
+
             case wrongEnvelope =>
               logger.error(s"Incoming envelope with type: ${wrongEnvelope.getClass} is not defined for regular/batch" +
                 s" streaming engine")
@@ -128,11 +139,24 @@ abstract class RegularTaskEngine(manager: CommonTaskManager,
     prepareForNextCheckpoint()
   }
 
+
+  private def consumerRecordToEnvelope(consumerRecord: ConsumerRecord[Array[Byte], Array[Byte]]): KafkaEnvelope[AnyRef] = {
+    logger.debug(s"Task name: ${manager.taskName}. Convert a consumed kafka record to kafka envelope.")
+    val data = executor.deserialize(consumerRecord.value())
+    val envelope = new KafkaEnvelope(data)
+    envelope.stream = consumerRecord.topic()
+    envelope.partition = consumerRecord.partition()
+    envelope.tags = taskInputService.asInstanceOf[KafkaTaskInput[AnyRef@unchecked]].streamNamesToTags(consumerRecord.topic())
+    envelope.id = consumerRecord.offset()
+
+    envelope
+  }
+
   protected def prepareForNextCheckpoint(): Unit
 }
 
 object RegularTaskEngine {
-  private val logger: Logger = LoggerFactory.getLogger(this.getClass)
+  private val logger: Logger = Logger(this.getClass)
 
   /**
     * Creates RegularTaskEngine is in charge of a basic execution logic of task of regular module

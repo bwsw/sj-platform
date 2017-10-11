@@ -22,6 +22,7 @@ import java.net.InetAddress
 import java.util.UUID
 
 import com.bwsw.sj.common.utils.ProviderLiterals
+import com.typesafe.scalalogging.Logger
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse
 import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse
@@ -34,7 +35,6 @@ import org.elasticsearch.index.query.{BoolQueryBuilder, QueryBuilder, QueryBuild
 import org.elasticsearch.index.reindex.{BulkByScrollResponse, DeleteByQueryAction}
 import org.elasticsearch.search.SearchHits
 import org.elasticsearch.xpack.client.PreBuiltXPackTransportClient
-import org.slf4j.LoggerFactory
 
 /**
   * Wrapper for [[org.elasticsearch.client.transport.TransportClient]]
@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory
 class ElasticsearchClient(hosts: Set[(String, Int)],
                           username: Option[String] = None,
                           password: Option[String] = None) {
-  private val logger = LoggerFactory.getLogger(this.getClass)
+  private val logger = Logger(this.getClass)
   private val typeName = "_type"
   System.setProperty("es.set.netty.runtime.available.processors", "false")
   private val settingsBuilder = Settings.builder()

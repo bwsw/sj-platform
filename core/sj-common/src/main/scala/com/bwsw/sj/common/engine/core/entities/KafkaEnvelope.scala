@@ -31,6 +31,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 class KafkaEnvelope[T <: AnyRef](var data: T) extends Envelope {
   streamType = StreamLiterals.kafkaType
 
+  override val weight: Int = 1
+
   @JsonIgnore
   override def equals(obj: Any): Boolean = obj match {
     case k: KafkaEnvelope[_] =>

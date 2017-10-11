@@ -67,24 +67,15 @@ object Dependencies {
     "org.mock-server" % "mockserver-netty" % "3.10.8" % "test",
     "com.carrotsearch" % "java-sizeof" % "0.0.5",
     ("de.flapdoodle.embed" % "de.flapdoodle.embed.mongo" % "2.0.0")
-      .exclude("org.slf4j", "slf4j-api")
+      .exclude("org.slf4j", "slf4j-api"),
+    "com.typesafe.scala-logging" %% "scala-logging" % "3.7.2"
   ))
 
   lazy val sjEngineCoreDependencies = Def.setting(Seq(
     "org.apache.commons" % "commons-lang3" % "3.5",
     ("com.mockrunner" % "mockrunner-jdbc" % "1.1.2" % "test")
       .exclude("jakarta-regexp", "jakarta-regexp")
-      .exclude("xerces", "xerces")
-  ))
-
-  lazy val sjRestDependencies = Def.setting(Seq(
-    "com.typesafe.akka" %% "akka-http" % "10.0.3",
-    ("org.apache.httpcomponents" % "httpclient" % "4.5.2")
-      .exclude("commons-logging", "commons-logging"),
-    "com.typesafe.akka" %% "akka-slf4j" % "2.4.16"
-  ))
-
-  lazy val sjRegularEngineDependencies = Def.setting(Seq(
+      .exclude("xerces", "xerces"),
     ("org.apache.samza" % "samza-kafka_2.12" % "0.13.0" % "test")
       .exclude("org.apache.kafka", "kafka-clients")
       .exclude("org.apache.kafka", "kafka_2.12")
@@ -97,6 +88,13 @@ object Dependencies {
       .exclude("org.slf4j", "slf4j-api")
       .exclude("org.apache.logging.log4j", "log4j-slf4j-impl"),
     "org.apache.storm" % "storm-kafka" % "1.1.0" % "test"
+  ))
+
+  lazy val sjRestDependencies = Def.setting(Seq(
+    "com.typesafe.akka" %% "akka-http" % "10.0.3",
+    ("org.apache.httpcomponents" % "httpclient" % "4.5.2")
+      .exclude("commons-logging", "commons-logging"),
+    "com.typesafe.akka" %% "akka-slf4j" % "2.4.16"
   ))
 
   lazy val sjOutputEngineDependencies = Def.setting(Seq(

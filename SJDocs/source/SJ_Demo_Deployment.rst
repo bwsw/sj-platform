@@ -48,7 +48,7 @@ You can do it following the instructions in the official documentation:
 - `for Vagrant <https://www.vagrantup.com/docs/installation/>`_
 - `for VirtualBox <https://www.virtualbox.org/wiki/Downloads>`_
 
-Please, make sure the service versions are as specified below:
+Please, make sure to install the service of the versions specified below:
 
 - Vagrant 1.9.1
 - VirtualBox 5.0.40
@@ -75,7 +75,7 @@ At the end of deploying you can see urls of all services.
 Description
 """""""""""""""""""
 
-After launching Vagrant you will get the access to Mesos, Marathon, SJ-Platform REST and UI. In the UI you will see all the platform entities created for the `fping demo <http://streamjuggler.readthedocs.io/en/develop/Tutorial.html>`_ project:
+After launching Vagrant you will get the access to Mesos, Marathon, the SJ-Platform REST API and UI. In the UI you will see all the platform entities created for the `fping demo <http://streamjuggler.readthedocs.io/en/develop/Tutorial.html>`_ project:
 
 - configurations for modules;
 - modules;
@@ -126,14 +126,14 @@ VM hostname = master
 Description:
     After VM is launched, Vagrant installs Docker engine and firstly runs Apache Zookeeper in Docker.
     
-    Next, Mesos-Master service is launched with the following configurations: 
+    Next, the Mesos-Master service is launched with the following configurations: 
     
     - ip=0.0.0.0, 
     - advertise_ip=192.168.50.51, 
     - hostname=192.168.50.51, 
     - zk=zk://192.168.50.51:2181/mesos.
     
-    Next, Marathon service is launched with the following configurations: 
+    Next, the Marathon service is launched with the following configurations: 
     
     - hostname=192.168.50.51, 
     - master=zk://192.168.50.51:2181/mesos, 

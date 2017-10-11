@@ -18,21 +18,19 @@
  */
 package com.bwsw.sj.engine.output.task
 
-import java.util.concurrent.{ArrayBlockingQueue, TimeUnit}
-
 import com.bwsw.sj.common.dal.model.stream.StreamDomain
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.engine.TaskEngine
 import com.bwsw.sj.common.engine.core.entities._
 import com.bwsw.sj.common.engine.core.environment.OutputEnvironmentManager
 import com.bwsw.sj.common.engine.core.output.{Entity, OutputStreamingExecutor}
+import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
 import com.bwsw.sj.common.si.model.instance.OutputInstance
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.core.engine.NumericalCheckpointTaskEngine
 import com.bwsw.sj.engine.core.engine.input.CallableTStreamCheckpointTaskInput
 import com.bwsw.sj.engine.output.processing.OutputProcessor
-import com.bwsw.sj.engine.output.task.reporting.OutputStreamingPerformanceMetrics
-import org.slf4j.{Logger, LoggerFactory}
+import com.typesafe.scalalogging.Logger
 import scaldi.Injectable.inject
 import scaldi.Injector
 
@@ -45,14 +43,14 @@ import scaldi.Injector
   * @author Kseniya Mikhaleva
   */
 abstract class OutputTaskEngine(manager: OutputTaskManager,
-                                performanceMetrics: OutputStreamingPerformanceMetrics)
+                                performanceMetrics: PerformanceMetrics)
                                (implicit injector: Injector) extends TaskEngine {
 
   import OutputTaskEngine.logger
 
   private val currentThread: Thread = Thread.currentThread()
   currentThread.setName(s"output-task-${manager.taskName}-engine")
-  private val blockingQueue: ArrayBlockingQueue[Envelope] = new ArrayBlockingQueue[Envelope](EngineLiterals.queueSize)
+  private val blockingQueue: WeightedBlockingQueue[Envelope] = new WeightedBlockingQueue[Envelope](EngineLiterals.queueSize)
   private val instance: OutputInstance = manager.instance.asInstanceOf[OutputInstance]
   private val connectionRepository = inject[ConnectionRepository]
   private val streamService = connectionRepository.getStreamRepository
@@ -100,11 +98,11 @@ abstract class OutputTaskEngine(manager: OutputTaskManager,
       s"Run output task engine in a separate thread of execution service.")
 
     while (true) {
-      val maybeEnvelope = blockingQueue.poll(EngineLiterals.eventWaitTimeout, TimeUnit.MILLISECONDS)
+      val maybeEnvelope = blockingQueue.poll(EngineLiterals.eventWaitTimeout)
 
-      Option(maybeEnvelope) match {
+      maybeEnvelope match {
         case Some(envelope) =>
-          processOutputEnvelope(envelope)
+          processOutputEnvelope(envelope.asInstanceOf[Envelope])
         case _ =>
       }
       if (isItTimeToCheckpoint(environmentManager.isCheckpointInitiated)) doCheckpoint()
@@ -143,6 +141,7 @@ abstract class OutputTaskEngine(manager: OutputTaskManager,
     */
   protected def doCheckpoint(): Unit = {
     logger.info(s"Task: ${manager.taskName}. It's time to checkpoint.")
+    outputProcessor.checkpoint()
     taskInputService.doCheckpoint()
     logger.debug(s"Task: ${manager.taskName}. Do group checkpoint.")
     prepareForNextCheckpoint()
@@ -157,13 +156,13 @@ abstract class OutputTaskEngine(manager: OutputTaskManager,
 }
 
 object OutputTaskEngine {
-  private val logger: Logger = LoggerFactory.getLogger(this.getClass)
+  private val logger: Logger = Logger(this.getClass)
 
   /**
     * Creates OutputTaskEngine is in charge of a basic execution logic of task of output module
     */
   def apply(manager: OutputTaskManager,
-            performanceMetrics: OutputStreamingPerformanceMetrics)
+            performanceMetrics: PerformanceMetrics)
            (implicit injector: Injector): OutputTaskEngine = {
     manager.outputInstance.checkpointMode match {
       case EngineLiterals.`timeIntervalMode` =>

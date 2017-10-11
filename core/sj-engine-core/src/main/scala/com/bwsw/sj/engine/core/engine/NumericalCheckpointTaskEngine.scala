@@ -18,7 +18,7 @@
  */
 package com.bwsw.sj.engine.core.engine
 
-import org.slf4j.LoggerFactory
+import com.typesafe.scalalogging.Logger
 
 /**
   * Provides methods for a basic execution logic of task engine
@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory
   */
 
 trait NumericalCheckpointTaskEngine {
-  private val logger = LoggerFactory.getLogger(this.getClass)
+  private val logger = Logger(this.getClass)
   private var countOfEnvelopes = 0
   protected val checkpointInterval: Long
   private val isNotOnlyCustomCheckpoint = checkpointInterval > 0

@@ -32,7 +32,6 @@ import org.apache.avro.SchemaBuilder
 import org.apache.avro.generic.GenericData.Record
 import org.apache.avro.generic.GenericRecord
 
-import scala.io.Source
 import scala.util.{Failure, Success, Try}
 
 /**
@@ -94,8 +93,7 @@ class CSVInputExecutor(manager: InputEnvironmentManager) extends InputStreamingE
     val dataBuffer = buffer.slice(interval.initialValue, length)
     val data = new Array[Byte](length)
     dataBuffer.getBytes(0, data)
-    buffer.readerIndex(interval.finalValue + 1)
-    val line = Source.fromBytes(data, csvInputOptions.encoding).mkString
+    val line = new String(data, csvInputOptions.encoding)
     Try(csvParser.parseLine(line)) match {
       case Success(values) =>
         if (values.length == fieldsNumber) {

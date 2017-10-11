@@ -22,7 +22,7 @@ import java.io.File
 import java.net.{Inet4Address, Inet6Address, InetAddress}
 
 import com.maxmind.geoip.LookupService
-import org.slf4j.LoggerFactory
+import com.typesafe.scalalogging.Logger
 
 import scala.util.{Failure, Success, Try}
 
@@ -33,20 +33,20 @@ import scala.util.{Failure, Success, Try}
   * @param ipv6DatabaseFile geoip database file for IPv4
   */
 class GeoIp(ipv4DatabaseFile: Option[File] = None, ipv6DatabaseFile: Option[File] = None) {
-  private val logger = LoggerFactory.getLogger(this.getClass)
+  private val logger = Logger(this.getClass)
   private lazy val ipv4AsNumLookup = getAsLookupServiceIpv4
   private lazy val ipv6AsNumLookup = getAsLookupServiceIpv6
 
   def resolveAs(ip: String): Int = Try {
     InetAddress.getByName(ip) match {
-      case _: Inet4Address =>
-        if (ipv4AsNumLookup.getID(ip) != 0)
-          ipv4AsNumLookup.getOrg(ip).split(" ")(0).substring(2).toInt
+      case address: Inet4Address =>
+        if (ipv4AsNumLookup.getID(address) != 0)
+          ipv4AsNumLookup.getOrg(address).split(" ")(0).substring(2).toInt
         else 0
 
-      case _: Inet6Address =>
-        if (ipv6AsNumLookup.getID(ip) != 0)
-          ipv6AsNumLookup.getOrgV6(ip).split(" ")(0).substring(2).toInt
+      case address: Inet6Address =>
+        if (ipv6AsNumLookup.getID(address) != 0)
+          ipv6AsNumLookup.getOrgV6(address).split(" ")(0).substring(2).toInt
         else 0
     }
   } match {
@@ -66,12 +66,12 @@ class GeoIp(ipv4DatabaseFile: Option[File] = None, ipv6DatabaseFile: Option[File
   private def getAsLookupServiceIpv4: LookupService = {
     logger.debug("Create a geo ip lookup service of ipv4")
 
-    new LookupService(ipv4DatabaseFile.get)
+    new LookupService(ipv4DatabaseFile.get, LookupService.GEOIP_INDEX_CACHE)
   }
 
   private def getAsLookupServiceIpv6: LookupService = {
     logger.debug("Create a geo ip lookup service of ipv6")
 
-    new LookupService(ipv6DatabaseFile.get)
+    new LookupService(ipv6DatabaseFile.get, LookupService.GEOIP_INDEX_CACHE)
   }
 }

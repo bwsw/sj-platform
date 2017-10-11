@@ -29,7 +29,7 @@ import com.hazelcast.core.IMap
   */
 class HazelcastMock(config: HazelcastConfig) extends HazelcastInterface {
 
-  val map = HazelcastMapMock(config)
+  private val map = HazelcastMapMock(config)
 
   /**
     * @inheritdoc

@@ -23,9 +23,9 @@ import com.bwsw.common.rest.RestClient
 import com.bwsw.sj.common.dal.model.stream.RestStreamDomain
 import com.bwsw.sj.common.engine.core.entities.{OutputEnvelope, TStreamEnvelope}
 import com.bwsw.sj.common.engine.core.output.Entity
+import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
 import com.bwsw.sj.engine.core.output.types.rest.RestCommandBuilder
 import com.bwsw.sj.engine.output.task.OutputTaskManager
-import com.bwsw.sj.engine.output.task.reporting.OutputStreamingPerformanceMetrics
 
 import scala.collection.JavaConverters._
 
@@ -37,10 +37,10 @@ import scala.collection.JavaConverters._
   * @author Pavel Tomskikh
   */
 class RestOutputProcessor[T <: AnyRef](restOutputStream: RestStreamDomain,
-                                       performanceMetrics: OutputStreamingPerformanceMetrics,
+                                       performanceMetrics: PerformanceMetrics,
                                        manager: OutputTaskManager,
                                        entity: Entity[_])
-  extends OutputProcessor[T](restOutputStream, performanceMetrics) {
+  extends AsyncOutputProcessor[T](restOutputStream, performanceMetrics) {
 
   private val jsonSerializer = new JsonSerializer(ignoreUnknown = true)
   override protected val commandBuilder: RestCommandBuilder = new RestCommandBuilder(
@@ -56,7 +56,7 @@ class RestOutputProcessor[T <: AnyRef](restOutputStream: RestStreamDomain,
     Map(service.headers.asScala.toList: _*)
   )
 
-  override def send(envelope: OutputEnvelope, inputEnvelope: TStreamEnvelope[T]): Unit = {
+  override protected def asyncSend(envelope: OutputEnvelope, inputEnvelope: TStreamEnvelope[T]): Unit = {
     logger.debug(createLogMessage("Write an output envelope to RESTful stream."))
 
     val posted = client.execute(commandBuilder.buildInsert(inputEnvelope.id, envelope.getFieldsValue))
