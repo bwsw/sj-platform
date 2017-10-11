@@ -53,6 +53,7 @@ object FrameworkUtil {
   var driver: Option[SchedulerDriver] = None
   var jarName: Option[String] = None
   var instance: Option[Instance] = None
+  var instancePort: Option[Int] = None
   val connectionRepository: ConnectionRepository = inject[ConnectionRepository]
   val configRepository: GenericMongoRepository[ConfigurationSettingDomain] = connectionRepository.getConfigRepository
   private val logger = Logger.getLogger(this.getClass)
