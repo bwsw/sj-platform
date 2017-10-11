@@ -39,6 +39,7 @@ object StartFramework {
   import com.bwsw.sj.common.SjModule._
 
   private val config = ConfigFactory.load()
+  FrameworkUtil.config = Option(config)
   val frameworkName = "JugglerFramework"
   val frameworkUser = Try(config.getString(FrameworkConfigNames.user)).getOrElse("root")
   val frameworkCheckpoint = false
