@@ -724,13 +724,17 @@
   <div class="modal-dialog modal-md">
     <div class="modal-content">
       <div class="modal-header">
-        <button type="button" class="close" aria-label="Close" (click)="ShowInstanceTasks.hide()">
+        <button type="button" class="close" aria-label="Close" (click)="hideTaskModal(ShowInstanceTasks)">
           <span aria-hidden="true">&times;</span>
         </button>
         <h4 class="modal-title">Mesos framework tasks</h4>
       </div>
       <div class="modal-body" *ngIf="!tasks">
         <p>The rest-address is not available. Try later.</p>
+      </div>
+
+      <div class="modal-body" *ngIf="tasks && tasks.length === 0">
+        <p>Instance tasks are empty. Try later.</p>
       </div>
 
       <div class="modal-body" *ngIf="tasks">
@@ -764,7 +768,7 @@
       </div>
 
       <div class="modal-footer">
-         <button type="button" class="btn btn-primary" (click)="ShowInstanceTasks.hide()">OK</button>
+         <button type="button" class="btn btn-primary" (click)="hideTaskModal(ShowInstanceTasks)">OK</button>
       </div>
     </div>
   </div>
