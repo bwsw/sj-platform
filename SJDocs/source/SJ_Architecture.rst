@@ -31,7 +31,7 @@ The platform features presented above have conditioned the architecture develope
 
 The Stream Juggler Platform performs data processing that is fulfilled in modules. A module is a processor. The mode of processing in it is determined by a set of configurations uploaded to the system via the UI.
 
-The events enter the processor in streams from a list of supported interfaces - TCP, Kafka and T-streams. A result data are put into an external data storage.
+The events enter the processor in streams from a list of supported interfaces - TCP, Apache Kafka and T-streams. A result data are put into an external data storage.
 
 .. figure:: _static/Overview2.png
     :align: center
