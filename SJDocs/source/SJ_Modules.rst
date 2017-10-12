@@ -42,13 +42,13 @@ In general, data-flow processing in modules can be described in a simple scheme.
 
 A module is started at the moment it gets data from an engine. The engine is a .jar file containing required configuration settings. It serializes/deserializes the flow of data into a proper format suitable for processing/storing. The engine is started via a Mesos framework. The framework then renders the statistics on task execution for a started instance.
 
-A module is uploaded into the engine. It launches the module ingesting raw data and then sends the processed data further in the stream.
+A module is uploaded into the engine. 
 
 .. figure:: _static/engine.png
    :scale: 120%
    :align: center
-
-A module executor handles the data flow. It processes the raw data and transforms them into objects referred to as  envelopes. 
+   
+The engine receives raw data and sends them to the module executor. The executor starts data processing and tansforms the resulting data into objects referred to as envelopes. 
 
 An **envelope** is a container for messages or events with data records. The envelopes with the resulting data go back to the engine where they are deserialized to be put in the stream or a storage.
 
