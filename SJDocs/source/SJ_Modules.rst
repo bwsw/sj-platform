@@ -3,15 +3,20 @@
 Modules: types, structure, pipeline
 ===================================
 
-
 .. contents:: Contents
    
-A **module** is a processor that handles events in data streams.
+A **module** is a processor that handles events in data streams. In fact, it is a JAR file, containing a module specification and configurations.
 
 It includes:
 
 - an executor that processes data streams,
 - a validator.
+
+.. figure:: _static/moduleExecutorAndValidator.png
+   :scale: 120%
+   :align: center
+
+Below you will find more information on each of these two components.
 
 .. _validator:
 
@@ -29,23 +34,23 @@ This method returns a tuple of values that contains:
 Executor
 ---------------------
 
-An executor of the module utilizes an instance/instances. An instance is a full range of settings for an exact module.
+An executor is a key module component that performs the data processing. It receives the data flow and process it in correspondence with the parameters of module specification. It utilizes an instance/instances for processing. An instance is a full range of settings for an exact module. 
 
-.. figure:: _static/moduleExecutorAndValidator.png
-   :scale: 120%
-   :align: center
+Data-Flow Processing in Modules
+---------------------------------
+In general, data-flow processing in modules can be described in a simple scheme.
 
-An engine is required to start a module. This is a .jar file containing required configuration settings. A module is uploaded to the engine, and it is the engine that starts the module to process data streams. It launches the module ingesting raw data and then sends the processed data further in the stream.
+A module is started at the moment it gets data from an engine. The engine is a .jar file containing required configuration settings. It serializes/deserializes the flow of data into a proper format suitable for processing/storing. The engine is started via a Mesos framework. The framework then renders the statistics on task execution for a started instance.
+
+A module is uploaded into the engine. It launches the module ingesting raw data and then sends the processed data further in the stream.
 
 .. figure:: _static/engine.png
    :scale: 120%
    :align: center
 
-The engine is getting started via a Mesos framework. The framework then renders the statistics on task execution for a started instance.
+A module executor handles the data flow. It processes the raw data and transforms them into objects referred to as  envelopes. 
 
-A module handles data flow making it into streams. Raw data are transformed to objects referred to as an envelope. 
-
-An **envelope** is a container for messages or events with data records.
+An **envelope** is a container for messages or events with data records. The envelopes with the resulting data go back to the engine where they are deserialized to be put in the stream or a storage.
 
 Module types
 --------------
