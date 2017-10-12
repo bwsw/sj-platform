@@ -19,12 +19,4 @@
 
 package com.bwsw.sj.mesos.framework.mesos_api
 
-
-import com.bwsw.sj.mesos.framework.mesos_api.Framework
-
-
-class Frameworks (
-                 var frameworks: Array[Framework],
-                 var completed_frameworks: Array[Framework],
-                 var unregistered_frameworks: Array[String]
-                 )
+class Frameworks(var frameworks: Array[Framework])
