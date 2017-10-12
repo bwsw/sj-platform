@@ -50,7 +50,7 @@ A module is uploaded into the engine.
    
 The engine receives raw data and sends them to the module executor. The executor starts data processing and tansforms the resulting data into objects referred to as envelopes. 
 
-An **envelope** is a container for messages or events with data records. The envelopes with the resulting data go back to the engine where they are deserialized to be put in the stream or a storage.
+An **envelope** is a container for messages or events with data records. The envelopes with the resulting data go back to the engine where they are deserialized to be put into the stream or a storage.
 
 Module types
 --------------
