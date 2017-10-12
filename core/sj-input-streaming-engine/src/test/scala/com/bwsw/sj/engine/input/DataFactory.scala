@@ -60,8 +60,8 @@ object DataFactory {
   tasks.put(s"$instanceName-task0", new InputTask(SjInputServices.host, SjInputServices.port))
   private val partitions = 1
   private val serializer = new JsonSerializer()
-  private val zookeeperProvider = new ProviderDomain(zookeeperProviderName, zookeeperProviderName, zookeeperHosts.split(","),
-    "", "", ProviderLiterals.zookeeperType, new Date())
+  private val zookeeperProvider = new ProviderDomain(
+    zookeeperProviderName, zookeeperProviderName, zookeeperHosts.split(","), ProviderLiterals.zookeeperType, new Date())
   private val tstrqService = new TStreamServiceDomain(tstreamServiceName, tstreamServiceName, zookeeperProvider,
     TestStorageServer.defaultPrefix, TestStorageServer.defaultToken, creationDate = new Date())
   private val tstreamFactory = new TStreamsFactory()
