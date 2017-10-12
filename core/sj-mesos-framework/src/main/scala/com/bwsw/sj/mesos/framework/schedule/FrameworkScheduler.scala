@@ -22,7 +22,7 @@ import java.util
 
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.mesos.framework.config.FrameworkConfigNames
-import com.bwsw.sj.mesos.framework.mesos_api.Frameworks
+import com.bwsw.sj.mesos.framework.mesos_api.{Framework, Frameworks}
 import com.bwsw.sj.mesos.framework.task.{StatusHandler, TasksList}
 import com.typesafe.config.ConfigFactory
 import org.apache.log4j.Logger
@@ -196,7 +196,7 @@ class FrameworkScheduler(implicit injector: Injector) extends Scheduler {
     val frameworksUrl = s"http://${frameworkAddress.getIp}:${frameworkAddress.getPort}/frameworks"
     val frameworksResponse = scala.io.Source.fromURL(frameworksUrl).mkString
     val frameworksData = StatusHandler.serializer.deserialize[Frameworks](frameworksResponse)
-    val framework = frameworksData.frameworks.filter(framework => FrameworkUtil.frameworkId.get.contains(framework.id)).head
+    val framework = frameworksData.frameworks.find((framework: Framework) => framework.id == FrameworkUtil.frameworkId.get).head
     val frameworkHostname = framework.hostname
     val address = s"http://$frameworkHostname:${FrameworkUtil.instancePort.get}"
     FrameworkUtil.instance.get.restAddress = Option(address)
