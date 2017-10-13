@@ -125,7 +125,7 @@ class ElasticsearchClient(hosts: Set[(String, Int)],
       .actionGet()
   }
 
-  def isConnected: Boolean = {
+  def isConnected(): Boolean = {
     logger.debug(s"Check a connection to an elasticsearch database.")
     client.connectedNodes().size() > 0
   }
