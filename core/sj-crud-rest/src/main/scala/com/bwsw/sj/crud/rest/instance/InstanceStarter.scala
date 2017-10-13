@@ -214,9 +214,6 @@ class InstanceStarter(instance: Instance,
         if (hasFrameworkStarted(applicationParsedEntity)) {
           instanceManager.updateFrameworkStage(instance, started)
           instanceManager.updateInstanceStatus(instance, started)
-          var fwRest = InstanceAdditionalFieldCreator.getRestAddress(marathonManager.getLeaderTask(marathonManager.getApplicationInfo(frameworkName)))
-          while (fwRest.isEmpty) fwRest = InstanceAdditionalFieldCreator.getRestAddress(marathonManager.getLeaderTask(marathonManager.getApplicationInfo(frameworkName)))
-          instanceManager.updateInstanceRestAddress(instance, fwRest)
           isStarted = true
         } else {
           Option(applicationParsedEntity.app.lastTaskFailure) match {

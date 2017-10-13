@@ -56,10 +56,7 @@ class TwoBarriers(zooKeeperHosts: Set[String],
     doubleBarriers(currentBarrierIndex).leave()
     logger.debug(s"Left from barrier $currentBarrierIndex")
 
-    if (currentBarrierIndex == 0)
-      currentBarrierIndex = 1
-    else
-      currentBarrierIndex = 0
+    currentBarrierIndex ^= 1
 
     updateCurrentBarrierIndex()
   }

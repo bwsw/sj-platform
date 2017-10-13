@@ -1,21 +1,26 @@
 .. _Modules:
 
-Modules: types, structure, pipeline
+Modules: Types, Structure, Pipeline
 ===================================
-
 
 .. contents:: Contents
    
-A **module** is a processor that handles events in data streams.
+A **module** is a processor that handles events in data streams. In fact, it is a JAR file, containing a module specification and configurations.
 
 It includes:
 
 - an executor that processes data streams,
 - a validator.
 
+.. figure:: _static/moduleExecutorAndValidator.png
+   :scale: 120%
+   :align: center
+
+Below you will find more information on each of these two components.
+
 .. _validator:
 
-Streaming validator
+Streaming Validator
 -------------------------
 
 It provides a method to validate ``options`` or ``InstanceMetadata`` parameter of the running module specification.
@@ -29,25 +34,23 @@ This method returns a tuple of values that contains:
 Executor
 ---------------------
 
-An executor of the module utilizes an instance/instances. An instance is a full range of settings for an exact module.
+An executor is a key component that performs the data processing. It receives the data flow and processes it in correspondence with the parameters of module specification. It utilizes an instance/instances for processing. An instance is a full range of settings for an exact module. 
 
-.. figure:: _static/moduleExecutorAndValidator.png
-   :scale: 120%
-   :align: center
+Data-Flow Processing in Modules
+---------------------------------
+In general, data-flow processing in modules can be described in a simple scheme.
 
-An engine is required to start a module. This is a .jar file containing required configuration settings. A module is uploaded to the engine, and it is the engine that starts the module to process data streams. It launches the module ingesting raw data and then sends the processed data further in the stream.
+A module is started at the moment it gets data from an engine. The engine is a .jar file containing required configuration settings. It serializes/deserializes the flow of data into a proper format suitable for processing/storing. The engine is started via a Mesos framework. The framework then renders the statistics on task execution for a started instance.
+
+A module is uploaded into the engine. 
 
 .. figure:: _static/engine.png
    :scale: 120%
    :align: center
+   
+The engine receives raw data and sends them to the module executor. The executor starts data processing and returns the resulting data back to the engine where they are deserialized to be put into the stream or a storage.
 
-The engine is getting started via a Mesos framework. The framework then renders the statistics on task execution for a started instance.
-
-A module handles data flow making it into streams. Raw data are transformed to objects referred to as an envelope. 
-
-An **envelope** is a container for messages or events with data records.
-
-Module types
+Module Types
 --------------
 
 The platform supports 4 types of modules:
@@ -68,7 +71,7 @@ At this page each module is described in detail. You will find more information 
 
 .. _input-module:
 
-Input module
+Input Module
 ~~~~~~~~~~~~~~~~~~~
 An input type of modules handles external input streams, does data deduplication, transforms raw data to objects. 
 
@@ -79,16 +82,18 @@ In the SJ-Platform the TCP Input Stream processor is currently implemented in th
 
 It performs the transformation of the streams incoming from TCP into T-streams. T-streams are persistent streams designed for exactly-once processing (so they include a transactional producer, a consumer and a subscriber). Find more information about T-streams at `the site <http://t-streams.com>`_ .
 
-In the diagram below you can see the illustrated dataflow for the input module.
+In the diagram below you can see the illustrated data flow for the input module.
 
 .. figure:: _static/InputModuleDataflow1.png
   :scale: 80 %
 
-All input data elements are going as a flow of bytes to particular interface provided by Task Engine. That flow is going straight to Streaming Executor and is converted to an Input Envelope instance.
+All input data elements are going as a flow of bytes to particular interface provided by Task Engine. That flow is going straight to Streaming Executor and is converted to an object called an Input Envelope. 
 
-The Input Envelope instance then goes to Task Engine which serializes it to a stream of bytes and then sends to T-Streams. 
+An **envelope** is a container for messages or events with data records.
 
-An Input module executor provides the following methods with default implementation but they can be overridden.
+The Input Envelope then goes to Task Engine which serializes it to a stream of bytes and then sends to T-Streams. 
+
+An input module executor provides the following methods with default implementation but they can be overridden.
 
 1) ``tokenize``: 
       It is invoked every time when a new portion of data is received. It processes a flow of bytes to determine the beginning and the end of the Interval (significant set of bytes in incoming flow of bytes). By default it returns None value (meaning that it is impossible to determine an Interval). If Interval detected, method should return it (the first and the last indexes of Interval elements in the flow of bytes). The resulting interval can either contain message or not.
@@ -306,7 +311,7 @@ Configuration example::
 
 .. _regular-module:
 
-Regular module
+Regular Module
 ~~~~~~~~~~~~~~~~~~~~~~~
 A simplified definition of a Regular module is a handler that performs data transformation and put the processed data into T-streams.
 
@@ -375,7 +380,7 @@ To see a flow chart on how these methods intercommunicate see the :ref:`Regular_
 
 .. _batch-module:
 
-Batch module
+Batch Module
 ~~~~~~~~~~~~~~~~~
 A batch is a minimum data set for a handler to collect the events in the stream. The size of a batch is defined by a user. It can be a period of time or a quantity of events or a specific type of the event after receiving which the batch is considered closed.  Then, the queue of batches is sent further in the flow for the next stage of processing. 
 
@@ -532,7 +537,7 @@ The state is performed alongside with the checkpoint. At a checkpoint the data r
 
 .. _output-module:
 
-Output module
+Output Module
 ~~~~~~~~~~~~~~~~~~~~
 
 An output module handles external output from event processing pipeline to external data destinations (Elasticsearch, JDBC, etc.)
