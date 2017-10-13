@@ -34,7 +34,7 @@ import scaldi.Injectable.inject
 import scaldi.Injector
 
 import scala.collection.mutable
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 /**
   * Class contains methods for running batch module
@@ -210,7 +210,10 @@ class BatchTaskEngine(manager: CommonTaskManager,
     commonBarrier.enter()
     val onEnterResult = Try(executor.onEnter())
     commonBarrier.leave()
-    onEnterResult.get
+    onEnterResult match {
+      case Failure(e) => throw e
+      case Success(_) =>
+    }
     if (leaderLatch.hasLeadership()) executor.onLeaderEnter()
     retrievableStreams = inputs
     doCheckpoint()
