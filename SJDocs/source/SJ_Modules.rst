@@ -82,16 +82,18 @@ In the SJ-Platform the TCP Input Stream processor is currently implemented in th
 
 It performs the transformation of the streams incoming from TCP into T-streams. T-streams are persistent streams designed for exactly-once processing (so they include a transactional producer, a consumer and a subscriber). Find more information about T-streams at `the site <http://t-streams.com>`_ .
 
-In the diagram below you can see the illustrated dataflow for the input module.
+In the diagram below you can see the illustrated data flow for the input module.
 
 .. figure:: _static/InputModuleDataflow1.png
   :scale: 80 %
 
-All input data elements are going as a flow of bytes to particular interface provided by Task Engine. That flow is going straight to Streaming Executor and is converted to an Input Envelope instance.
+All input data elements are going as a flow of bytes to particular interface provided by Task Engine. That flow is going straight to Streaming Executor and is converted to an object called an Input Envelope. 
 
-The Input Envelope instance then goes to Task Engine which serializes it to a stream of bytes and then sends to T-Streams. 
+An **envelope** is a container for messages or events with data records.
 
-An Input module executor provides the following methods with default implementation but they can be overridden.
+The Input Envelope then goes to Task Engine which serializes it to a stream of bytes and then sends to T-Streams. 
+
+An input module executor provides the following methods with default implementation but they can be overridden.
 
 1) ``tokenize``: 
       It is invoked every time when a new portion of data is received. It processes a flow of bytes to determine the beginning and the end of the Interval (significant set of bytes in incoming flow of bytes). By default it returns None value (meaning that it is impossible to determine an Interval). If Interval detected, method should return it (the first and the last indexes of Interval elements in the flow of bytes). The resulting interval can either contain message or not.
