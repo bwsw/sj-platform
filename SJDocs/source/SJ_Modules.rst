@@ -34,7 +34,7 @@ This method returns a tuple of values that contains:
 Executor
 ---------------------
 
-An executor is a key module component that performs the data processing. It receives the data flow and process it in correspondence with the parameters of module specification. It utilizes an instance/instances for processing. An instance is a full range of settings for an exact module. 
+An executor is a key component that performs the data processing. It receives the data flow and processes it in correspondence with the parameters of module specification. It utilizes an instance/instances for processing. An instance is a full range of settings for an exact module. 
 
 Data-Flow Processing in Modules
 ---------------------------------
