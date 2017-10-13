@@ -1,6 +1,6 @@
 .. _Modules:
 
-Modules: types, structure, pipeline
+Modules: Types, Structure, Pipeline
 ===================================
 
 .. contents:: Contents
@@ -20,7 +20,7 @@ Below you will find more information on each of these two components.
 
 .. _validator:
 
-Streaming validator
+Streaming Validator
 -------------------------
 
 It provides a method to validate ``options`` or ``InstanceMetadata`` parameter of the running module specification.
@@ -52,7 +52,7 @@ The engine receives raw data and sends them to the module executor. The executor
 
 An **envelope** is a container for messages or events with data records. The envelopes with the resulting data go back to the engine where they are deserialized to be put into the stream or a storage.
 
-Module types
+Module Types
 --------------
 
 The platform supports 4 types of modules:
@@ -73,7 +73,7 @@ At this page each module is described in detail. You will find more information 
 
 .. _input-module:
 
-Input module
+Input Module
 ~~~~~~~~~~~~~~~~~~~
 An input type of modules handles external input streams, does data deduplication, transforms raw data to objects. 
 
@@ -311,7 +311,7 @@ Configuration example::
 
 .. _regular-module:
 
-Regular module
+Regular Module
 ~~~~~~~~~~~~~~~~~~~~~~~
 A simplified definition of a Regular module is a handler that performs data transformation and put the processed data into T-streams.
 
@@ -380,7 +380,7 @@ To see a flow chart on how these methods intercommunicate see the :ref:`Regular_
 
 .. _batch-module:
 
-Batch module
+Batch Module
 ~~~~~~~~~~~~~~~~~
 A batch is a minimum data set for a handler to collect the events in the stream. The size of a batch is defined by a user. It can be a period of time or a quantity of events or a specific type of the event after receiving which the batch is considered closed.  Then, the queue of batches is sent further in the flow for the next stage of processing. 
 
@@ -537,7 +537,7 @@ The state is performed alongside with the checkpoint. At a checkpoint the data r
 
 .. _output-module:
 
-Output module
+Output Module
 ~~~~~~~~~~~~~~~~~~~~
 
 An output module handles external output from event processing pipeline to external data destinations (Elasticsearch, JDBC, etc.)
