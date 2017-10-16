@@ -19,7 +19,7 @@
 package com.bwsw.sj.common.engine.core.reporting
 
 import java.util.concurrent.locks.ReentrantLock
-import java.util.concurrent.{Callable, TimeUnit}
+import java.util.concurrent.{Callable, Executors, TimeUnit}
 
 import com.bwsw.common.{JsonSerializer, ObjectSerializer, ObjectSizeFetcher}
 import com.bwsw.sj.common.dal.model.stream.TStreamStreamDomain
@@ -30,6 +30,8 @@ import com.typesafe.scalalogging.Logger
 
 import scala.collection._
 import scala.collection.mutable.ListBuffer
+import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
 
 
 /**
@@ -38,6 +40,8 @@ import scala.collection.mutable.ListBuffer
   * @author Kseniya Mikhaleva
   */
 abstract class PerformanceMetricsReporter(manager: TaskManager) extends Callable[Unit] {
+
+  private implicit val executionContext = ExecutionContext.fromExecutorService(Executors.newFixedThreadPool(16))
 
   protected val currentThread: Thread = Thread.currentThread()
   protected val logger: Logger = Logger(this.getClass)
@@ -98,8 +102,12 @@ abstract class PerformanceMetricsReporter(manager: TaskManager) extends Callable
     */
   protected def clear(): Unit
 
-  def addEnvelopeToInputStream(elements: List[AnyRef], name: String): Unit =
-    addEnvelopeToInputStream(name, elements.map(ObjectSizeFetcher.getObjectSize))
+  def addEnvelopeToInputStream(elements: List[AnyRef], name: String): Unit = {
+    Future(elements.map(ObjectSizeFetcher.getObjectSize)).onComplete {
+      case Success(elementsSize) => addEnvelopeToInputStream(name, elementsSize)
+      case Failure(exception) => throw exception
+    }
+  }
 
   protected def addEnvelopeToInputStream(name: String, elementsSize: List[Long]): Unit = {
     mutex.lock()

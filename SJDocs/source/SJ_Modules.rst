@@ -10,7 +10,7 @@ A **module** is a processor that handles events in data streams. In fact, it is 
 It includes:
 
 - an executor that processes data streams,
-- a validator.
+- a validator to check an instance.
 
 .. figure:: _static/moduleExecutorAndValidator.png
    :scale: 120%

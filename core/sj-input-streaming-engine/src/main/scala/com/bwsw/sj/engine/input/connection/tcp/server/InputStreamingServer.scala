@@ -23,7 +23,7 @@ import java.util.concurrent.{ArrayBlockingQueue, Callable}
 
 import com.typesafe.scalalogging.Logger
 import io.netty.bootstrap.ServerBootstrap
-import io.netty.buffer.{ByteBuf, PooledByteBufAllocator}
+import io.netty.buffer.PooledByteBufAllocator
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.nio.NioServerSocketChannel
 import io.netty.channel.{ChannelHandlerContext, ChannelOption, EventLoopGroup}
@@ -38,17 +38,19 @@ import scala.util.{Failure, Success, Try}
   * Bind and start to accept incoming connections.
   * Than wait until the server socket is closed gracefully shut down the server.
   *
-  * @param host                 host of server
-  * @param port                 port of server
-  * @param channelContextQueue  queue for keeping a channel context [[io.netty.channel.ChannelHandlerContext]]
-  *                             to process messages ([[io.netty.buffer.ByteBuf]]) in their turn
-  * @param bufferForEachContext map for keeping a buffer containing incoming bytes [[io.netty.buffer.ByteBuf]]
-  *                             with the appropriate channel context [[io.netty.channel.ChannelHandlerContext]]
+  * @param host                host of server
+  * @param port                port of server
+  * @param channelContextQueue queue for keeping a channel context [[io.netty.channel.ChannelHandlerContext]]
+  *                            to process messages ([[io.netty.buffer.ByteBuf]]) in their turn
+  * @param stateByContext      map for keeping a state of a channel context
+  *                            [[com.bwsw.sj.engine.input.connection.tcp.server.ChannelHandlerContextState]]
+  *                            with the appropriate channel context [[io.netty.channel.ChannelHandlerContext]]
   */
 class InputStreamingServer(host: String,
                            port: Int,
                            channelContextQueue: ArrayBlockingQueue[ChannelHandlerContext],
-                           bufferForEachContext: concurrent.Map[ChannelHandlerContext, ByteBuf]) extends Callable[Unit] with Closeable {
+                           stateByContext: concurrent.Map[ChannelHandlerContext, ChannelHandlerContextState])
+  extends Callable[Unit] with Closeable {
 
   private val logger = Logger(this.getClass)
   private val bossGroup: EventLoopGroup = new NioEventLoopGroup(1)
@@ -63,7 +65,7 @@ class InputStreamingServer(host: String,
       bootstrapServer.group(bossGroup, workerGroup)
         .channel(classOf[NioServerSocketChannel])
         .handler(new LoggingHandler(LogLevel.INFO))
-        .childHandler(new InputStreamingChannelInitializer(channelContextQueue, bufferForEachContext))
+        .childHandler(new InputStreamingChannelInitializer(channelContextQueue, stateByContext))
 
       bootstrapServer.bind(host, port).sync().channel().closeFuture().sync()
     }
