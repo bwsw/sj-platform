@@ -31,11 +31,11 @@ import com.bwsw.sj.engine.core.output.types.CommandBuilder
   * @param entity               data
   * @author Ivan Kudryavtsev
   */
-
 class JdbcCommandBuilder(client: IJdbcClient,
                          transactionFieldName: String,
                          entity: Entity[(PreparedStatement, Int) => Unit])
   extends CommandBuilder[PreparedStatement] {
+
   /**
     * Create a select prepared statement according to txn field
     */
@@ -65,19 +65,32 @@ class JdbcCommandBuilder(client: IJdbcClient,
   /**
     * @inheritdoc
     */
-  override def buildInsert(transaction: Long, fields: Map[String, Any]): PreparedStatement = {
-    val insertPreparedStatement = insert
-    var t = 0
-    val mv = entity.getFields.map(f => if (fields.contains(f)) {
-      t += 1
-      t -> entity.getField(f).transform(fields(f))
-    } else {
-      t += 1
-      t -> entity.getField(f).transform(entity.getField(f).getDefaultValue)
-    })
-    t += 1
-    mv.foreach({ case (key: Int, value: ((PreparedStatement, Int) => Unit)) => value.apply(insertPreparedStatement, key) })
-    insertPreparedStatement.setLong(t, transaction)
+  override def buildInsert(transaction: Long, fields: Map[String, Any]): PreparedStatement =
+    buildInsert(transaction, fields, insert)
+
+  /**
+    * Places data in a placeholders in prepared statement
+    *
+    * @param transaction             transaction ID
+    * @param fields                  data
+    * @param insertPreparedStatement insertion prepared statement
+    * @return insertion prepared statement
+    */
+  def buildInsert(transaction: Long,
+                  fields: Map[String, Any],
+                  insertPreparedStatement: PreparedStatement): PreparedStatement = {
+    var position = 0
+    entity.getFields.foreach { field =>
+      val transformation = {
+        if (fields.contains(field)) fields(field)
+        else entity.getField(field).getDefaultValue
+      }
+      position += 1
+      entity.getField(field).transform(transformation)(insertPreparedStatement, position)
+    }
+
+    position += 1
+    insertPreparedStatement.setLong(position, transaction)
 
     insertPreparedStatement
   }

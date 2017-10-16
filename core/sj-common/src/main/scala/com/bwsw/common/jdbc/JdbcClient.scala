@@ -95,6 +95,7 @@ trait IJdbcClient {
   private val logger = Logger(this.getClass)
   protected var _connection: Option[Connection]
   val jdbcCCD: JdbcClientConnectionData
+  lazy val supportsBatchUpdates: Boolean = _connection.get.getMetaData.supportsBatchUpdates()
 
   def isConnected: Boolean = _connection.isDefined && _connection.get.isValid(1)
 
