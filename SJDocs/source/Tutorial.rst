@@ -4,6 +4,8 @@ Tutorial
 ========================
 
 .. Contents::
+   :depth: 3
+
 
 Introduction 
 -----------------------
