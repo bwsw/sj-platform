@@ -18,37 +18,9 @@
  */
 package com.bwsw.sj.common.engine.core.entities
 
-import com.bwsw.sj.common.utils.StreamLiterals
-import com.fasterxml.jackson.annotation.JsonIgnore
-
-import scala.collection.mutable
-
 /**
-  * Provides a wrapper for t-stream transaction.
-  *
-  * @param consumerName name of consumer that obtains messages from t-stream
-  *                     (used for saving stream offset to recover after failure)
-  * @param data         message data
-  * @tparam T type of data containing in a message
+  * @author Pavel Tomskikh
   */
-class TStreamEnvelope[T <: AnyRef](val data: mutable.Queue[T], val consumerName: String) extends Envelope {
-  streamType = StreamLiterals.tstreamsType
-  override val weight: Int = data.size
-
-  @JsonIgnore
-  override def equals(obj: Any): Boolean = obj match {
-    case t: TStreamEnvelope[_] =>
-      id == t.id &&
-        stream == t.stream &&
-        partition == t.partition
-
-    case _ => super.equals(obj)
-  }
+case class KafkaEnvelopes[T <: AnyRef](envelopes: Seq[KafkaEnvelope[T]]) extends EnvelopeInterface {
+  override val weight: Int = envelopes.size
 }
-
-
-
-
-
-
-

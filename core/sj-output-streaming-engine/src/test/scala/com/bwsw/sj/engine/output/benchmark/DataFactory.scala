@@ -29,7 +29,7 @@ import com.bwsw.common.jdbc.JdbcClientBuilder
 import com.bwsw.sj.common.config.{BenchmarkConfigNames, TempHelperForConfigDestroy, TempHelperForConfigSetup}
 import com.bwsw.sj.common.dal.model._
 import com.bwsw.sj.common.dal.model.instance.{ExecutionPlan, Task}
-import com.bwsw.sj.common.dal.model.provider.{JDBCProviderDomain, ProviderDomain}
+import com.bwsw.sj.common.dal.model.provider.{JDBCProviderDomain, ProviderDomain, ESProviderDomain}
 import com.bwsw.sj.common.dal.model.service._
 import com.bwsw.sj.common.dal.model.stream._
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
@@ -127,7 +127,7 @@ object DataFactory {
   private val restHosts = config.getString(OutputBenchmarkConfigNames.restHosts).split(",").map(host => host.trim)
   private val zookeeperHosts = config.getString(BenchmarkConfigNames.zkHosts).split(",").map(host => host.trim)
   private val zookeeperProvider = new ProviderDomain(zookeeperProviderName, zookeeperProviderName,
-    zookeeperHosts, "", "", ProviderLiterals.zookeeperType, new Date())
+    zookeeperHosts, ProviderLiterals.zookeeperType, new Date())
   private val tstrqService = new TStreamServiceDomain(tstreamServiceName, tstreamServiceName, zookeeperProvider,
     TestStorageServer.defaultPrefix, TestStorageServer.defaultToken, creationDate = new Date())
   private val tstreamFactory = new TStreamsFactory()
@@ -273,7 +273,8 @@ object DataFactory {
 
 
   def createProviders() = {
-    val esProvider = new ProviderDomain(esProviderName, "", esProviderHosts, "", "", ProviderLiterals.elasticsearchType, new Date())
+    val esProvider = new ESProviderDomain(
+      esProviderName, "", esProviderHosts, "", "", new Date())
     providerService.save(esProvider)
 
     providerService.save(zookeeperProvider)
@@ -281,12 +282,12 @@ object DataFactory {
     val jdbcProvider = new JDBCProviderDomain(jdbcProviderName, "", jdbcHosts, "admin", "admin", jdbcDriver, new Date())
     providerService.save(jdbcProvider)
 
-    val restProvider = new ProviderDomain(restProviderName, "", restHosts, "", "", ProviderLiterals.restType, new Date())
+    val restProvider = new ProviderDomain(restProviderName, "", restHosts, ProviderLiterals.restType, new Date())
     providerService.save(restProvider)
   }
 
   def createServices() = {
-    val esProv: ProviderDomain = providerService.get(esProviderName).get
+    val esProv: ESProviderDomain = providerService.get(esProviderName).get.asInstanceOf[ESProviderDomain]
     val esService: ESServiceDomain = new ESServiceDomain(esServiceName, esServiceName, esProv,
       esIndex, creationDate = new Date())
     serviceManager.save(esService)

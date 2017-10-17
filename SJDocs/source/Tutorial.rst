@@ -4,13 +4,15 @@ Tutorial
 ========================
 
 .. Contents::
+   :depth: 3
+
 
 Introduction 
 -----------------------
 
 This tutorial is aimed to present SJ-Platform and give a quick start for a user to see the platform at work.
 
-The demo projects presented below are example tasks developed to demonstrate a user how to run his/her first SJ module. A step-by-step guidance will help to deploy the system in a local mode (minimesos) or at a cluster (Mesos) and to implement a module example to a real-life task. 
+The demo projects presented below are example tasks developed to demonstrate how to run user's first SJ module. A step-by-step guidance will help to deploy the system in a local mode (minimesos) or at a cluster (Mesos) and to implement a module example to a real-life task. 
 
 Through an example project, a user will get to know the system structure, its key components and general concepts of the platform workflow.
 
@@ -27,7 +29,7 @@ A simplified structure of SJ-Platform can be presented as at the image below:
 
 A **processor** represents a part of the pipeline where the data processing is performed.
 
-Configurations uploaded to the system determine the mode of data processing in the modules.
+Configurations uploaded to the system determine the mode of data processing in the processors.
 
 The processing result is exported to an external storage. It can be Elasticsearch, RESTful endpoint or JDBC-compatible data storages.
 

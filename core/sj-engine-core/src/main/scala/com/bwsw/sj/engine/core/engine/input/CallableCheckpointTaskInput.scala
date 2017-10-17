@@ -60,7 +60,8 @@ object CallableCheckpointTaskInput {
       case (true, false) => new CallableKafkaCheckpointTaskInput[T](
         manager,
         blockingQueue,
-        checkpointGroup)
+        checkpointGroup,
+        envelopeDataSerializer)
 
       case _ =>
         logger.error("Type of input stream is not 'kafka' or 't-stream'")

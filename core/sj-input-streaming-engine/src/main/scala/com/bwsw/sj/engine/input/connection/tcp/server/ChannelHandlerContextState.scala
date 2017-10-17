@@ -16,17 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.sj.common.dal.model.service
+package com.bwsw.sj.engine.input.connection.tcp.server
 
-import java.util.Date
+import io.netty.buffer.ByteBuf
 
-import com.bwsw.sj.common.dal.model.provider.ESProviderDomain
-import com.bwsw.sj.common.utils.ServiceLiterals
-
-class ESServiceDomain(name: String,
-                      description: String,
-                      override val provider: ESProviderDomain,
-                      val index: String,
-                      creationDate: Date)
-  extends ServiceDomain(name, description, provider, ServiceLiterals.elasticsearchType, creationDate) {
-}
+/**
+  * @author Pavel Tomskikh
+  */
+case class ChannelHandlerContextState(buffer: ByteBuf,
+                                      var isActive: Boolean = true,
+                                      var isQueued: Boolean = false)

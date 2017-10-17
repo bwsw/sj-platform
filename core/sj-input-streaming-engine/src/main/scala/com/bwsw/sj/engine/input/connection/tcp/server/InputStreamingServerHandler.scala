@@ -33,34 +33,55 @@ import scala.util.{Failure, Success, Try}
   * It receives a new portion of bytes from the server and puts it in an auxiliary buffer
   * because of a handler should not contain an execution logic of incoming data to avoid locks
   *
-  * @param channelContextQueue  queue for keeping a channel context [[io.netty.channel.ChannelHandlerContext]]
-  *                             to process messages ([[io.netty.buffer.ByteBuf]]) in their turn
-  * @param bufferForEachContext map for keeping a buffer containing incoming bytes [[io.netty.buffer.ByteBuf]]
-  *                             with the appropriate channel context [[io.netty.channel.ChannelHandlerContext]]
+  * @param channelContextQueue queue for keeping a channel context [[io.netty.channel.ChannelHandlerContext]]
+  *                            to process messages ([[io.netty.buffer.ByteBuf]]) in their turn
+  * @param stateByContext      map for keeping a state of a channel context
+  *                            [[com.bwsw.sj.engine.input.connection.tcp.server.ChannelHandlerContextState]]
+  *                            with the appropriate channel context [[io.netty.channel.ChannelHandlerContext]]
   */
 
 @Sharable
 class InputStreamingServerHandler(channelContextQueue: ArrayBlockingQueue[ChannelHandlerContext],
-                                  bufferForEachContext: concurrent.Map[ChannelHandlerContext, ByteBuf])
+                                  stateByContext: concurrent.Map[ChannelHandlerContext, ChannelHandlerContextState])
   extends ChannelInboundHandlerAdapter {
 
   override def channelRead(ctx: ChannelHandlerContext, msg: Any): Unit = {
     val result = Try {
       val message = msg.asInstanceOf[ByteBuf]
+      var maybeState = stateByContext.get(ctx)
 
-      if (bufferForEachContext.contains(ctx)) {
-        bufferForEachContext(ctx).writeBytes(message)
-      } else {
-        bufferForEachContext += ctx -> ctx.alloc().buffer().writeBytes(message)
+      maybeState match {
+        case Some(state) =>
+          state.buffer.writeBytes(message)
+
+        case None =>
+          maybeState = Some(ChannelHandlerContextState(ctx.alloc().buffer().writeBytes(message)))
+          stateByContext += ctx -> maybeState.get
       }
 
-      channelContextQueue.add(ctx)
+      if (!maybeState.get.isQueued) {
+        channelContextQueue.add(ctx)
+        maybeState.get.isQueued = true
+      }
     }
     ReferenceCountUtil.release(msg)
     result match {
       case Success(_) =>
       case Failure(e) => throw e
     }
+  }
+
+  override def channelInactive(ctx: ChannelHandlerContext): Unit = {
+    stateByContext.get(ctx) match {
+      case Some(state) =>
+        state.isActive = false
+        if (!state.buffer.isReadable)
+          stateByContext -= ctx
+
+      case None =>
+    }
+
+    super.channelInactive(ctx)
   }
 
   /**
@@ -70,6 +91,7 @@ class InputStreamingServerHandler(channelContextQueue: ArrayBlockingQueue[Channe
     * @param cause what has caused an exception
     */
   override def exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable): Unit = {
+    stateByContext -= ctx
     cause.printStackTrace()
     ctx.close()
   }
