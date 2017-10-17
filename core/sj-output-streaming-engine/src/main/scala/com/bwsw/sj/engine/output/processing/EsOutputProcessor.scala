@@ -25,6 +25,8 @@ import com.bwsw.sj.common.engine.core.output.Entity
 import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
 import com.bwsw.sj.engine.core.output.types.es.ElasticsearchCommandBuilder
 import com.bwsw.sj.engine.output.task.OutputTaskManager
+import org.elasticsearch.action.bulk.BulkRequestBuilder
+import scaldi.Injector
 
 /**
   * ref. [[OutputProcessor]] object
@@ -33,10 +35,15 @@ class EsOutputProcessor[T <: AnyRef](esStream: ESStreamDomain,
                                      performanceMetrics: PerformanceMetrics,
                                      manager: OutputTaskManager,
                                      entity: Entity[_])
+                                    (implicit injector: Injector)
   extends AsyncOutputProcessor[T](esStream, performanceMetrics) {
 
   private val esService = esStream.service
   private val esClient = openConnection()
+  private var maybeBulkRequestBuilder: Option[BulkRequestBuilder] = None
+  private var inputEnvelopesInBulk: Long = 0
+  private val maxInputEnvelopesPerBulk = Seq(manager.outputInstance.checkpointInterval / outputParallelism, 1L).max
+  private var lastInputEnvelopeId: Long = 0
   override protected val commandBuilder: ElasticsearchCommandBuilder =
     new ElasticsearchCommandBuilder(transactionFieldName, entity.asInstanceOf[Entity[String]])
 
@@ -65,15 +72,42 @@ class EsOutputProcessor[T <: AnyRef](esStream: ESStreamDomain,
     }
   }
 
+  override def send(envelope: OutputEnvelope, inputEnvelope: TStreamEnvelope[T]): Unit = {
+    if (maybeBulkRequestBuilder.isEmpty)
+      maybeBulkRequestBuilder = Some(esClient.createBulk())
 
-  override protected def asyncSend(envelope: OutputEnvelope, inputEnvelope: TStreamEnvelope[T]): Unit = {
+    if (lastInputEnvelopeId != inputEnvelope.id) {
+      lastInputEnvelopeId = inputEnvelope.id
+      inputEnvelopesInBulk += 1
+    }
+
+    val bulkRequestBuilder = maybeBulkRequestBuilder.get
     val esFieldsValue = envelope.getFieldsValue
     val data = commandBuilder.buildInsert(inputEnvelope.id, esFieldsValue)
     logger.debug(s"Task: ${manager.taskName}. Write an output envelope to elasticsearch stream.")
-    esClient.write(data, esService.index, esStream.name)
+    esClient.addToBulk(bulkRequestBuilder, data, esService.index, esStream.name)
+
+
+    if (inputEnvelopesInBulk > maxInputEnvelopesPerBulk) sendBulk()
+  }
+
+  override def checkpoint(): Unit = {
+    sendBulk()
+    super.checkpoint()
   }
 
   override def close(): Unit = {
     esClient.close()
+  }
+
+  private def sendBulk(): Unit = {
+    maybeBulkRequestBuilder match {
+      case Some(bulkRequestBuilder) =>
+        runInFuture(() => bulkRequestBuilder.get())
+        inputEnvelopesInBulk = 0
+        maybeBulkRequestBuilder = None
+
+      case None =>
+    }
   }
 }

@@ -26,6 +26,7 @@ import com.typesafe.scalalogging.Logger
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse
 import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse
+import org.elasticsearch.action.bulk.BulkRequestBuilder
 import org.elasticsearch.action.index.IndexResponse
 import org.elasticsearch.client.transport.TransportClient
 import org.elasticsearch.common.settings.Settings
@@ -124,6 +125,37 @@ class ElasticsearchClient(hosts: Set[(String, Int)],
       .execute()
       .actionGet()
   }
+
+  /**
+    * Adds data into bulk builder
+    *
+    * @param bulkRequestBuilder bulk builder
+    * @param data               document data
+    * @param index              index
+    * @param documentType       document type
+    * @param documentId         document id
+    * @return bulk builder
+    */
+  def addToBulk(bulkRequestBuilder: BulkRequestBuilder,
+                data: String,
+                index: String,
+                documentType: String,
+                documentId: String = UUID.randomUUID().toString): BulkRequestBuilder = {
+    logger.debug(s"Write a data: '$data' to an elasticsearch index: '$index'.")
+
+    bulkRequestBuilder.add(
+      client
+        .prepareIndex(index, documentType, documentId)
+        .setSource(data, XContentType.JSON))
+  }
+
+  /**
+    * Creates new bulk builder
+    *
+    * @return bulk builder
+    */
+  def createBulk(): BulkRequestBuilder =
+    client.prepareBulk()
 
   def isConnected(): Boolean = {
     logger.debug(s"Check a connection to an elasticsearch database.")

@@ -21,7 +21,7 @@ package com.bwsw.sj.common.config
 import com.bwsw.sj.common.config.ConfigLiterals._
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.si.model.config.ConfigurationSetting
-import com.bwsw.sj.common.utils.FrameworkLiterals
+import com.bwsw.sj.common.utils.{EngineLiterals, FrameworkLiterals}
 import scaldi.Injectable.inject
 import scaldi.Injector
 
@@ -83,6 +83,10 @@ class SettingsUtils(implicit val injector: Injector) {
 
   def getBackoffSettings(): (Int, Double, Int) = {
     (getFrameworkBackoffSeconds(), getFrameworkBackoffFactor(), getFrameworkMaxLaunchDelaySeconds())
+  }
+
+  def getOutputProcessorParallelism(): Int = {
+    getIntConfigSetting(outputProcessorParallelism, Some(EngineLiterals.outputProcessorParallelism))
   }
 
   private def getFrameworkBackoffSeconds(): Int = {

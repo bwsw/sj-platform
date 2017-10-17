@@ -26,6 +26,7 @@ import com.bwsw.sj.common.engine.core.output.Entity
 import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
 import com.bwsw.sj.engine.core.output.types.rest.RestCommandBuilder
 import com.bwsw.sj.engine.output.task.OutputTaskManager
+import scaldi.Injector
 
 import scala.collection.JavaConverters._
 
@@ -40,6 +41,7 @@ class RestOutputProcessor[T <: AnyRef](restOutputStream: RestStreamDomain,
                                        performanceMetrics: PerformanceMetrics,
                                        manager: OutputTaskManager,
                                        entity: Entity[_])
+                                      (implicit injector: Injector)
   extends AsyncOutputProcessor[T](restOutputStream, performanceMetrics) {
 
   private val jsonSerializer = new JsonSerializer(ignoreUnknown = true)
@@ -56,16 +58,18 @@ class RestOutputProcessor[T <: AnyRef](restOutputStream: RestStreamDomain,
     Map(service.headers.asScala.toList: _*)
   )
 
-  override protected def asyncSend(envelope: OutputEnvelope, inputEnvelope: TStreamEnvelope[T]): Unit = {
+  override def send(envelope: OutputEnvelope, inputEnvelope: TStreamEnvelope[T]): Unit = {
     logger.debug(createLogMessage("Write an output envelope to RESTful stream."))
 
-    val posted = client.execute(commandBuilder.buildInsert(inputEnvelope.id, envelope.getFieldsValue))
-    if (!posted) {
-      val errorMessage = createLogMessage(s"Cannot send envelope '${inputEnvelope.id}'.")
-      logger.error(errorMessage)
-      delete(inputEnvelope)
-      throw new RuntimeException(errorMessage)
-    }
+    runInFuture(() => {
+      val posted = client.execute(commandBuilder.buildInsert(inputEnvelope.id, envelope.getFieldsValue))
+      if (!posted) {
+        val errorMessage = createLogMessage(s"Cannot send envelope '${inputEnvelope.id}'.")
+        logger.error(errorMessage)
+        delete(inputEnvelope)
+        throw new RuntimeException(errorMessage)
+      }
+    })
   }
 
   override def delete(envelope: TStreamEnvelope[T]): Unit = {

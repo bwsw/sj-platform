@@ -20,10 +20,11 @@ package com.bwsw.sj.engine.output.processing
 
 import java.util.concurrent.Executors
 
+import com.bwsw.sj.common.config.SettingsUtils
 import com.bwsw.sj.common.dal.model.stream.StreamDomain
-import com.bwsw.sj.common.engine.core.entities.{OutputEnvelope, TStreamEnvelope}
 import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
-import com.bwsw.sj.common.utils.EngineLiterals
+import scaldi.Injectable._
+import scaldi.Injector
 
 import scala.collection.mutable
 import scala.concurrent.duration.Duration
@@ -39,18 +40,17 @@ import scala.concurrent.{Await, ExecutionContext, Future}
   */
 abstract class AsyncOutputProcessor[T <: AnyRef](outputStream: StreamDomain,
                                                  performanceMetrics: PerformanceMetrics)
+                                                (implicit injector: Injector)
   extends OutputProcessor[T](outputStream, performanceMetrics) {
 
   private val futures = mutable.Queue.empty[Future[Unit]]
+  protected val outputParallelism = inject[SettingsUtils].getOutputProcessorParallelism()
   private implicit val executionContext =
-    ExecutionContext.fromExecutorService(Executors.newFixedThreadPool(EngineLiterals.outputProcessorExecutionContextSize))
+    ExecutionContext.fromExecutorService(
+      Executors.newFixedThreadPool(outputParallelism))
 
   override def checkpoint(): Unit =
     futures.dequeueAll(_ => true).foreach(future => Await.result(future, Duration.Inf))
 
-  override def send(envelope: OutputEnvelope, inputEnvelope: TStreamEnvelope[T]): Unit =
-    futures.enqueue(Future(asyncSend(envelope, inputEnvelope)))
-
-  protected def asyncSend(envelope: OutputEnvelope, inputEnvelope: TStreamEnvelope[T]): Unit
-
+  protected def runInFuture(f: () => Unit): Unit = futures.enqueue(Future(f()))
 }
