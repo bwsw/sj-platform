@@ -269,7 +269,7 @@ class InstanceStarterTestSuit extends FlatSpec with Matchers with PrivateMethodT
 
   it should "createFramework() method creates a new marathon app" in {
     //arrange
-    val createFramework = PrivateMethod('createNewFramework)
+    val createFramework = PrivateMethod('createFramework)
 
     val okFrameworkResponse = getClosableHttpResponseMock(marathonApplicationStub, okStatus)
     val marathonManager = mock[MarathonApi]
@@ -289,10 +289,10 @@ class InstanceStarterTestSuit extends FlatSpec with Matchers with PrivateMethodT
     verify(instanceManager, times(1)).updateInstanceStatus(instanceMock, EngineLiterals.started)
   }
 
-  it should "createNewFramework() method doesn't create a new marathon app " +
+  it should "createFramework() method doesn't create a new marathon app " +
     "if marathon has got some problems with creation process of app" in {
     //arrange
-    val createFramework = PrivateMethod('createNewFramework)
+    val createFramework = PrivateMethod('createFramework)
 
     val okFrameworkResponse = getClosableHttpResponseMock(marathonApplicationStub, okStatus)
     val marathonManager = mock[MarathonApi]
