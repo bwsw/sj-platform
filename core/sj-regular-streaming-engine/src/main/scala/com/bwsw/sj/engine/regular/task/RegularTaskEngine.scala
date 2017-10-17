@@ -25,15 +25,12 @@ import com.bwsw.sj.common.engine.core.regular.RegularStreamingExecutor
 import com.bwsw.sj.common.engine.core.state.CommonModuleService
 import com.bwsw.sj.common.si.model.instance.RegularInstance
 import com.bwsw.sj.common.utils.EngineLiterals
-import com.bwsw.sj.engine.core.engine.input.{CallableCheckpointTaskInput, KafkaTaskInput}
+import com.bwsw.sj.engine.core.engine.input.CallableCheckpointTaskInput
 import com.bwsw.sj.engine.core.engine.{NumericalCheckpointTaskEngine, TimeCheckpointTaskEngine}
 import com.bwsw.sj.engine.regular.task.reporting.RegularStreamingPerformanceMetrics
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import com.typesafe.scalalogging.Logger
-import org.apache.kafka.clients.consumer.ConsumerRecord
 import scaldi.Injector
-
-import scala.collection.JavaConverters._
 
 /**
   * Class contains methods for running regular module
@@ -73,40 +70,35 @@ abstract class RegularTaskEngine(manager: CommonTaskManager,
       val maybeEnvelope = blockingQueue.poll(instance.eventWaitIdleTime)
 
       maybeEnvelope match {
-        case Some(envelope) =>
-          logger.debug(s"Task: ${manager.taskName}. Invoke onMessage() handler.")
-          envelope match {
-            case KafkaRecords(records) =>
-              records.asScala.foreach { record =>
-                val kafkaEnvelope = consumerRecordToEnvelope(record)
-                registerEnvelope(kafkaEnvelope)
-                executor.onMessage(kafkaEnvelope)
-              }
-
-            case kafkaEnvelope: KafkaEnvelope[AnyRef@unchecked] =>
-              registerEnvelope(kafkaEnvelope)
-              executor.onMessage(kafkaEnvelope)
-
-            case tstreamEnvelope: TStreamEnvelope[AnyRef@unchecked] =>
-              registerEnvelope(tstreamEnvelope)
-              executor.onMessage(tstreamEnvelope)
-
-            case wrongEnvelope =>
-              logger.error(s"Incoming envelope with type: ${wrongEnvelope.getClass} is not defined for regular/batch" +
-                s" streaming engine")
-              throw new Exception(s"Incoming envelope with type: ${wrongEnvelope.getClass} is not defined for " +
-                s"regular/batch streaming engine")
+        case Some(KafkaEnvelopes(envelopes)) =>
+          envelopes.foreach { kafkaEnvelope =>
+            registerEnvelope(kafkaEnvelope)
+            executor.onMessage(kafkaEnvelope)
+            timerAndCheckpoint()
           }
+
+        case Some(tStreamEnvelope: TStreamEnvelope[AnyRef@unchecked]) =>
+          registerEnvelope(tStreamEnvelope)
+          executor.onMessage(tStreamEnvelope)
+          timerAndCheckpoint()
+
+        case Some(wrongEnvelope) =>
+          val error = s"Incoming envelope with type: ${wrongEnvelope.getClass} is not defined for " +
+            s"regular streaming engine"
+          logger.error(error)
+          throw new Exception(error)
 
         case None =>
           performanceMetrics.increaseTotalIdleTime(instance.eventWaitIdleTime)
           executor.onIdle()
+          timerAndCheckpoint()
       }
-
-      moduleService.onTimer()
-
-      if (isItTimeToCheckpoint(moduleService.isCheckpointInitiated)) doCheckpoint()
     }
+  }
+
+  private def timerAndCheckpoint(): Unit = {
+    moduleService.onTimer()
+    if (isItTimeToCheckpoint(moduleService.isCheckpointInitiated)) doCheckpoint()
   }
 
   private def registerEnvelope(envelope: Envelope): Unit = {
@@ -139,18 +131,6 @@ abstract class RegularTaskEngine(manager: CommonTaskManager,
     prepareForNextCheckpoint()
   }
 
-
-  private def consumerRecordToEnvelope(consumerRecord: ConsumerRecord[Array[Byte], Array[Byte]]): KafkaEnvelope[AnyRef] = {
-    logger.debug(s"Task name: ${manager.taskName}. Convert a consumed kafka record to kafka envelope.")
-    val data = executor.deserialize(consumerRecord.value())
-    val envelope = new KafkaEnvelope(data)
-    envelope.stream = consumerRecord.topic()
-    envelope.partition = consumerRecord.partition()
-    envelope.tags = taskInputService.asInstanceOf[KafkaTaskInput[AnyRef@unchecked]].streamNamesToTags(consumerRecord.topic())
-    envelope.id = consumerRecord.offset()
-
-    envelope
-  }
 
   protected def prepareForNextCheckpoint(): Unit
 }

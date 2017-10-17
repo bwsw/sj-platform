@@ -44,7 +44,8 @@ class CallableCompleteCheckpointTaskInput[T <: AnyRef](manager: CommonTaskManage
   private val kafkaCheckpointTaskInput = new CallableKafkaCheckpointTaskInput[T](
     manager,
     blockingQueue,
-    checkpointGroup)
+    checkpointGroup,
+    envelopeDataSerializer)
   private val tStreamCheckpointTaskInput = new CallableTStreamCheckpointTaskInput[T](
     manager,
     blockingQueue,

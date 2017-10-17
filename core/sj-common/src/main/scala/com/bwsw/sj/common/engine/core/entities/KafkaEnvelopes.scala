@@ -18,11 +18,9 @@
  */
 package com.bwsw.sj.common.engine.core.entities
 
-import org.apache.kafka.clients.consumer.ConsumerRecords
-
 /**
   * @author Pavel Tomskikh
   */
-case class KafkaRecords(records: ConsumerRecords[Array[Byte], Array[Byte]]) extends EnvelopeInterface {
-  override val weight: Int = records.count()
+case class KafkaEnvelopes[T <: AnyRef](envelopes: Seq[KafkaEnvelope[T]]) extends EnvelopeInterface {
+  override val weight: Int = envelopes.size
 }
