@@ -133,25 +133,25 @@ class InstanceStarter(instance: Instance,
     if (isStatusOK(frameworkApplicationInfo)) {
       launchExistingFramework()
     } else {
-      createNewFramework(marathonMaster, zookeeperServer)
+      createFramework(marathonMaster, zookeeperServer)
     }
   }
 
   protected def launchExistingFramework(): Unit = {
     logger.debug(s"Instance: '${instance.name}'. Launch a framework: '$frameworkName'.")
     val startFrameworkResult = marathonManager.scaleMarathonApplication(frameworkName, 1)
-    checkIsFrameworkStarted(isStatusOK(startFrameworkResult))
+    checkIsFrameworkLaunched(isStatusOK(startFrameworkResult))
   }
 
-  protected def createNewFramework(marathonMaster: String, zookeeperServer: String): Unit = {
+  protected def createFramework(marathonMaster: String, zookeeperServer: String): Unit = {
     logger.debug(s"Instance: '${instance.name}'. Create a framework: '$frameworkName'.")
     val request = createRequestForFrameworkCreation(marathonMaster, zookeeperServer)
     val startFrameworkResult = marathonManager.startMarathonApplication(request)
-    checkIsFrameworkStarted(isStatusCreated(startFrameworkResult))
+    checkIsFrameworkLaunched(isStatusCreated(startFrameworkResult))
   }
 
-  protected def checkIsFrameworkStarted(isStartedOrCreate: Boolean): Unit = {
-    if (isStartedOrCreate) {
+  protected def checkIsFrameworkLaunched(isLaunched: Boolean): Unit = {
+    if (isLaunched) {
       waitForFrameworkToStart()
     } else {
       instanceManager.updateFrameworkStage(instance, failed)
