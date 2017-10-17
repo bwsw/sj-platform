@@ -31,20 +31,15 @@ import scala.collection.mutable
   * @param data         message data
   * @tparam T type of data containing in a message
   */
-
-class TStreamEnvelope[T <: AnyRef](var data: mutable.Queue[T], var consumerName: String) extends Envelope {
+class TStreamEnvelope[T <: AnyRef](val data: mutable.Queue[T], val consumerName: String) extends Envelope {
   streamType = StreamLiterals.tstreamsType
   override val weight: Int = data.size
 
   @JsonIgnore
   override def equals(obj: Any): Boolean = obj match {
     case t: TStreamEnvelope[_] =>
-      data.toList == t.data.toList &&
-        consumerName == t.consumerName &&
-        streamType == t.streamType &&
-        id == t.id &&
+      id == t.id &&
         stream == t.stream &&
-        (tags sameElements t.tags) &&
         partition == t.partition
 
     case _ => super.equals(obj)
