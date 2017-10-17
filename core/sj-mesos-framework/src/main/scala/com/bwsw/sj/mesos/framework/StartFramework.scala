@@ -28,7 +28,7 @@ import com.bwsw.sj.mesos.framework.rest.Rest
 import com.bwsw.sj.mesos.framework.schedule.{FrameworkScheduler, FrameworkUtil}
 import com.typesafe.config.ConfigFactory
 import org.apache.mesos.MesosSchedulerDriver
-import org.apache.mesos.Protos.{Credential, FrameworkInfo}
+import org.apache.mesos.Protos.{Credential, FrameworkInfo, Status}
 import scaldi.Injectable.inject
 
 import scala.util.Try
@@ -95,10 +95,15 @@ object StartFramework {
     leader.start()
     leader.acquireLeadership(5)
 
-    driver.start()
-    driver.join()
+    val driverStatus: Status = driver.run()
+    val status = {
+      driverStatus.getNumber match {
+        case 3 => 1
+        case 4 => 0
+      }
+    }
 
     leader.close()
-    System.exit(0)
+    System.exit(status)
   }
 }

@@ -37,7 +37,7 @@ private class Handler extends AbstractHandler {
                       httpRes: HttpServletResponse): Unit = {
     httpRes.setContentType("application/json")
     httpRes.setStatus(HttpServletResponse.SC_OK)
-    httpRes.getWriter().println(serializer.serialize(TasksList.toFrameworkTask))
+    httpRes.getWriter.println(serializer.serialize(TasksList.toFrameworkTask))
     req.setHandled(true)
   }
 }
@@ -50,7 +50,7 @@ object Rest {
   def start(port: Int): Server = {
     val server = new Server(port)
     server.setHandler(new Handler)
-    server.start
+    server.start()
 
     server
   }
