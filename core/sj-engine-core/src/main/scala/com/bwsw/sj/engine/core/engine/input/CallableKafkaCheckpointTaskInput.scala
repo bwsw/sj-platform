@@ -19,13 +19,17 @@
 package com.bwsw.sj.engine.core.engine.input
 
 
-import com.bwsw.sj.common.engine.core.entities.{EnvelopeInterface, KafkaEnvelope, KafkaRecords, WeightedBlockingQueue}
+import com.bwsw.common.SerializerInterface
+import com.bwsw.sj.common.engine.core.entities._
 import com.bwsw.sj.common.engine.core.managment.CommonTaskManager
 import com.bwsw.sj.common.si.model.instance.RegularInstance
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import com.bwsw.tstreams.agents.producer.NewProducerTransactionPolicy
+import org.apache.kafka.clients.consumer.ConsumerRecord
 import scaldi.Injector
+
+import scala.collection.JavaConverters._
 
 /**
   * Class is responsible for launching kafka consumers
@@ -39,7 +43,8 @@ import scaldi.Injector
   */
 class CallableKafkaCheckpointTaskInput[T <: AnyRef](override val manager: CommonTaskManager,
                                                     blockingQueue: WeightedBlockingQueue[EnvelopeInterface],
-                                                    override val checkpointGroup: CheckpointGroup)
+                                                    override val checkpointGroup: CheckpointGroup,
+                                                    envelopeDataSerializer: SerializerInterface)
                                                    (override implicit val injector: Injector)
   extends CallableCheckpointTaskInput[KafkaEnvelope[T]](manager.inputs) with KafkaTaskInput[T] {
   currentThread.setName(s"regular-task-${manager.taskName}-kafka-consumer")
@@ -63,7 +68,7 @@ class CallableKafkaCheckpointTaskInput[T <: AnyRef](override val manager: Common
       val records = kafkaConsumer.poll(kafkaSubscriberTimeout)
 
       if (!records.isEmpty)
-        blockingQueue.put(KafkaRecords(records))
+        blockingQueue.put(KafkaEnvelopes(records.asScala.toSeq.map(consumerRecordToEnvelope)))
     }
   }
 
@@ -72,5 +77,18 @@ class CallableKafkaCheckpointTaskInput[T <: AnyRef](override val manager: Common
     super.setConsumerOffsetToLastEnvelope()
     offsetProducer.newTransaction(NewProducerTransactionPolicy.ErrorIfOpened)
       .send(offsetSerializer.serialize(kafkaOffsetsStorage))
+  }
+
+
+  private def consumerRecordToEnvelope(consumerRecord: ConsumerRecord[Array[Byte], Array[Byte]]): KafkaEnvelope[T] = {
+    logger.debug(s"Task name: ${manager.taskName}. Convert a consumed kafka record to kafka envelope.")
+    val data = envelopeDataSerializer.deserialize(consumerRecord.value()).asInstanceOf[T]
+    val envelope = new KafkaEnvelope(data)
+    envelope.stream = consumerRecord.topic()
+    envelope.partition = consumerRecord.partition()
+    envelope.tags = streamNamesToTags(consumerRecord.topic())
+    envelope.id = consumerRecord.offset()
+
+    envelope
   }
 }
