@@ -135,11 +135,12 @@ abstract class InputTaskEngine(manager: InputTaskManager,
     if (maybeChannelContext.isEmpty)
       stateByContext.find(_._2.buffer.isReadable)
     else
-      maybeChannelContext.map { channelContext =>
-        val state = stateByContext(channelContext)
-        state.isQueued = false
+      maybeChannelContext.flatMap { channelContext =>
+        stateByContext.get(channelContext).map { state =>
+          state.isQueued = false
 
-        (channelContext, state)
+          (channelContext, state)
+        }
       }
   }
 
