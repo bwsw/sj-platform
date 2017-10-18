@@ -66,7 +66,7 @@ class SjBenchmark(zkHost: String,
   private val mongoAuthChecker = new MongoAuthChecker(mongoAddress, mongoDatabase)
   private lazy val connectionRepository = new ConnectionRepository(mongoAuthChecker, mongoAddress, mongoDatabase, None, None)
 
-  private val benchmarkPreparation = new SjBenchmarkPreparation(
+  private val benchmarkPreparation = new SjKafkaReaderBenchmarkPreparation(
     mongoPort = mongoPort,
     zooKeeperHost = zkHost,
     zooKeeperPort = zkPort,
@@ -74,8 +74,8 @@ class SjBenchmark(zkHost: String,
     kafkaAddress = kafkaAddress,
     kafkaTopic = kafkaTopic,
     zkNamespace = "benchmark",
-    tStreamPrefix = TestStorageServer.defaultPrefix,
-    tStreamToken = TestStorageServer.defaultToken,
+    tStreamsPrefix = TestStorageServer.defaultPrefix,
+    tStreamsToken = TestStorageServer.defaultToken,
     instanceName,
     taskName)
 

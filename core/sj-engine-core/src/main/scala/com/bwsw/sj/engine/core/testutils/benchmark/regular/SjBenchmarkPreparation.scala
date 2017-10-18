@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.sj.engine.regular.benchmark.read_kafka.sj
+package com.bwsw.sj.engine.core.testutils.benchmark.regular
 
 import java.io.File
 import java.util.Date
@@ -26,8 +26,8 @@ import com.bwsw.sj.common.benchmark.RegularExecutorOptions
 import com.bwsw.sj.common.dal.model.instance.{ExecutionPlan, InstanceDomain, RegularInstanceDomain, Task}
 import com.bwsw.sj.common.dal.model.module.SpecificationDomain
 import com.bwsw.sj.common.dal.model.provider.ProviderDomain
-import com.bwsw.sj.common.dal.model.service.{KafkaServiceDomain, TStreamServiceDomain, ZKServiceDomain}
-import com.bwsw.sj.common.dal.model.stream.{KafkaStreamDomain, TStreamStreamDomain}
+import com.bwsw.sj.common.dal.model.service.{TStreamServiceDomain, ZKServiceDomain}
+import com.bwsw.sj.common.dal.model.stream.{StreamDomain, TStreamStreamDomain}
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
 import com.bwsw.sj.common.utils.{EngineLiterals, ProviderLiterals, SpecificationUtils}
 
@@ -39,40 +39,24 @@ import scala.util.Try
   *
   * @author Pavel Tomskikh
   */
-class SjBenchmarkPreparation(mongoPort: Int,
-                             zooKeeperHost: String,
-                             zooKeeperPort: Int,
-                             module: File,
-                             kafkaAddress: String,
-                             kafkaTopic: String,
-                             zkNamespace: String,
-                             tStreamPrefix: String,
-                             tStreamToken: String,
-                             instanceName: String,
-                             taskName: String) {
+abstract class SjBenchmarkPreparation(mongoPort: Int,
+                                      zooKeeperHost: String,
+                                      zooKeeperPort: Int,
+                                      module: File,
+                                      zkNamespace: String,
+                                      tStreamPrefix: String,
+                                      tStreamToken: String,
+                                      instanceName: String,
+                                      taskName: String) {
 
-  private val jsonSerializer = new JsonSerializer(ignoreUnknown = true)
 
-  val kafkaProvider: ProviderDomain = new ProviderDomain(
-    name = "benchmark-kafka-provider",
-    description = "Kafka provider for benchmark",
-    hosts = Array(kafkaAddress),
-    providerType = ProviderLiterals.kafkaType,
-    creationDate = new Date())
+  protected val jsonSerializer = new JsonSerializer(ignoreUnknown = true)
 
   val zooKeeperProvider: ProviderDomain = new ProviderDomain(
     name = "benchmark-zk-provider",
     description = "ZooKeeper provider for benchmark",
     hosts = Array(zooKeeperHost + ":" + zooKeeperPort),
     providerType = ProviderLiterals.zookeeperType,
-    creationDate = new Date())
-
-  val kafkaService: KafkaServiceDomain = new KafkaServiceDomain(
-    name = "benchmark-kafka-service",
-    description = "Kafka service for benchmark",
-    provider = kafkaProvider,
-    zkProvider = zooKeeperProvider,
-    zkNamespace = zkNamespace,
     creationDate = new Date())
 
   val zooKeeperService: ZKServiceDomain = new ZKServiceDomain(
@@ -82,26 +66,22 @@ class SjBenchmarkPreparation(mongoPort: Int,
     namespace = zkNamespace,
     creationDate = new Date())
 
-  val tStreamService: TStreamServiceDomain = new TStreamServiceDomain(
-    name = "benchmark-tstream-service",
-    description = "TStream service for benchmark",
+  val tStreamsService: TStreamServiceDomain = new TStreamServiceDomain(
+    name = "benchmark-tstreams-service",
+    description = "T-Streams service for benchmark",
     provider = zooKeeperProvider,
     prefix = tStreamPrefix,
     token = tStreamToken,
     creationDate = new Date())
 
-  val kafkaStream: KafkaStreamDomain = new KafkaStreamDomain(
-    name = kafkaTopic,
-    service = kafkaService,
+  val outputStream = new TStreamStreamDomain(
+    name = "benchmark-output-stream",
+    service = tStreamsService,
     partitions = 1,
-    replicationFactor = 1,
     creationDate = new Date())
 
-  val tStreamStream = new TStreamStreamDomain(
-    name = "benchmark-tstream-stream",
-    service = tStreamService,
-    partitions = 1,
-    creationDate = new Date())
+  val inputStream: StreamDomain
+  val inputStreamPartitions: Int
 
   private var maybeInstance: Option[RegularInstanceDomain] = None
 
@@ -125,14 +105,18 @@ class SjBenchmarkPreparation(mongoPort: Int,
     val streamRepository = connectionRepository.getStreamRepository
 
     providerRepository.save(zooKeeperProvider)
-    providerRepository.save(kafkaProvider)
     serviceRepository.save(zooKeeperService)
-    serviceRepository.save(kafkaService)
-    serviceRepository.save(tStreamService)
-    streamRepository.save(kafkaStream)
-    streamRepository.save(tStreamStream)
-    tStreamStream.create()
+    serviceRepository.save(tStreamsService)
+    streamRepository.save(outputStream)
+    outputStream.create()
+
+    loadSpecificMetadata(connectionRepository)
+
+    streamRepository.save(inputStream)
+    inputStream.create()
   }
+
+  protected def loadSpecificMetadata(connectionRepository: ConnectionRepository): Unit
 
   private def loadModule(module: File, connectionRepository: ConnectionRepository): SpecificationDomain = {
     val specificationUtils = new SpecificationUtils
@@ -146,7 +130,7 @@ class SjBenchmarkPreparation(mongoPort: Int,
 
   private def createInstance(specification: SpecificationDomain): RegularInstanceDomain = {
     val task = new Task()
-    task.inputs.put(kafkaStream.name, Array(0, kafkaStream.partitions - 1))
+    task.inputs.put(inputStream.name, Array(0, inputStreamPartitions - 1))
 
     new RegularInstanceDomain(
       name = instanceName,
@@ -156,8 +140,8 @@ class SjBenchmarkPreparation(mongoPort: Int,
       engine = specification.engineName + "-" + specification.engineVersion,
       coordinationService = zooKeeperService,
       status = EngineLiterals.started,
-      inputs = Array(kafkaStream.name + "/split"),
-      outputs = Array(tStreamStream.name),
+      inputs = Array(inputStream.name + "/split"),
+      outputs = Array(outputStream.name),
       eventWaitIdleTime = 1,
       checkpointMode = EngineLiterals.everyNthMode,
       startFrom = EngineLiterals.oldestStartMode,
@@ -166,7 +150,9 @@ class SjBenchmarkPreparation(mongoPort: Int,
       creationDate = new Date())
   }
 
-  private def updateMessageCount(instance: RegularInstanceDomain, outputFile: String, messagesCount: Long): RegularInstanceDomain = {
+  private def updateMessageCount(instance: RegularInstanceDomain,
+                                 outputFile: String,
+                                 messagesCount: Long): RegularInstanceDomain = {
     val options = RegularExecutorOptions(outputFile, messagesCount)
 
     new RegularInstanceDomain(
