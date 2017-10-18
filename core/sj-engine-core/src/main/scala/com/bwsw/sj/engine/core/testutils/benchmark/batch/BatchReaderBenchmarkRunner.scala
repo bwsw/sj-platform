@@ -74,7 +74,7 @@ class BatchReaderBenchmarkRunner(benchmark: BatchReaderBenchmark,
       }
     }
 
-    benchmark.close()
+    benchmark.stop()
 
     benchmarkResults
   }

@@ -66,7 +66,7 @@ abstract class KafkaReaderBenchmark(zooKeeperAddress: String,
   /**
     * Closes opened connections, deletes temporary files
     */
-  override def close(): Unit = {
+  override def stop(): Unit = {
     deleteTopic()
     kafkaClient.close()
   }

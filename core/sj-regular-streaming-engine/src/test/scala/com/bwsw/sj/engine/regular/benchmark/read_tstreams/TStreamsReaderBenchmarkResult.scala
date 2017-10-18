@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.sj.engine.regular.benchmark.read_tstream
+package com.bwsw.sj.engine.regular.benchmark.read_tstreams
 
 import com.bwsw.sj.engine.core.testutils.benchmark.ReaderBenchmarkResult
 

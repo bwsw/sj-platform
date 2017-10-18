@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.sj.engine.regular.benchmark.read_tstream
+package com.bwsw.sj.engine.regular.benchmark.read_tstreams
 
 import java.io.File
 import java.util.Date
@@ -39,16 +39,16 @@ import scala.util.Try
   *
   * @author Pavel Tomskikh
   */
-class TStreamReaderBenchmarkPreparation(mongoPort: Int,
-                                        zooKeeperHost: String,
-                                        zooKeeperPort: Int,
-                                        module: File,
-                                        streamName: String,
-                                        zkNamespace: String,
-                                        tStreamPrefix: String,
-                                        tStreamToken: String,
-                                        instanceName: String,
-                                        taskName: String) {
+class TStreamsReaderBenchmarkPreparation(mongoPort: Int,
+                                         zooKeeperHost: String,
+                                         zooKeeperPort: Int,
+                                         module: File,
+                                         streamName: String,
+                                         zkNamespace: String,
+                                         tStreamsPrefix: String,
+                                         tStreamsToken: String,
+                                         instanceName: String,
+                                         taskName: String) {
 
   private val jsonSerializer = new JsonSerializer(ignoreUnknown = true)
 
@@ -56,8 +56,6 @@ class TStreamReaderBenchmarkPreparation(mongoPort: Int,
     name = "benchmark-zk-provider",
     description = "ZooKeeper provider for benchmark",
     hosts = Array(zooKeeperHost + ":" + zooKeeperPort),
-    login = null,
-    password = null,
     providerType = ProviderLiterals.zookeeperType,
     creationDate = new Date())
 
@@ -68,23 +66,23 @@ class TStreamReaderBenchmarkPreparation(mongoPort: Int,
     namespace = zkNamespace,
     creationDate = new Date())
 
-  val tStreamService: TStreamServiceDomain = new TStreamServiceDomain(
-    name = "benchmark-tstream-service",
-    description = "TStream service for benchmark",
+  val tStreamsService: TStreamServiceDomain = new TStreamServiceDomain(
+    name = "benchmark-tstreams-service",
+    description = "TStreams service for benchmark",
     provider = zooKeeperProvider,
-    prefix = tStreamPrefix,
-    token = tStreamToken,
+    prefix = tStreamsPrefix,
+    token = tStreamsToken,
     creationDate = new Date())
 
   val inputStream = new TStreamStreamDomain(
     name = streamName,
-    service = tStreamService,
+    service = tStreamsService,
     partitions = 1,
     creationDate = new Date())
 
   val outputStream = new TStreamStreamDomain(
     name = "benchmark-output-stream",
-    service = tStreamService,
+    service = tStreamsService,
     partitions = 1,
     creationDate = new Date())
 
@@ -111,7 +109,7 @@ class TStreamReaderBenchmarkPreparation(mongoPort: Int,
 
     providerRepository.save(zooKeeperProvider)
     serviceRepository.save(zooKeeperService)
-    serviceRepository.save(tStreamService)
+    serviceRepository.save(tStreamsService)
     streamRepository.save(inputStream)
     streamRepository.save(outputStream)
     inputStream.create()

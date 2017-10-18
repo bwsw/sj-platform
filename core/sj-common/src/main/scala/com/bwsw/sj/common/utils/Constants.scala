@@ -301,10 +301,10 @@ object BenchmarkConfigNames {
   val windowSizesConfig = batchConfig + ".window.sizes"
   val slidingIntervalsConfig = batchConfig + ".sliding.intervals"
 
-  val tStreamConfig = performanceBenchmarkConfig + ".tstreams"
-  val tStreamPrefixConfig = tStreamConfig + ".prefix"
-  val tStreamTokenConfig = tStreamConfig + ".token"
-  val tStreamSizePerTransaction = tStreamConfig + ".transactions.sizes"
+  val tStreamsConfig = performanceBenchmarkConfig + ".tstreams"
+  val tStreamsPrefixConfig = tStreamsConfig + ".prefix"
+  val tStreamsTokenConfig = tStreamsConfig + ".token"
+  val tStreamsSizePerTransaction = tStreamsConfig + ".transactions.sizes"
 }
 
 object BenchmarkLiterals {

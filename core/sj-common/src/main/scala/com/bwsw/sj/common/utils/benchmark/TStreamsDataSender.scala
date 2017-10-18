@@ -35,12 +35,12 @@ import scala.util.Random
   * @param separator  separator between words
   * @author Pavel Tomskikh
   */
-class TStreamDataSender(address: String,
-                        streamName: String,
-                        token: String,
-                        prefix: String,
-                        words: Seq[String],
-                        separator: String) {
+class TStreamsDataSender(address: String,
+                         streamName: String,
+                         token: String,
+                         prefix: String,
+                         words: Seq[String],
+                         separator: String) {
 
   private val tStreamsFactory = new TStreamsFactory
   tStreamsFactory.setProperty(ConfigurationOptions.Coordination.endpoints, address)

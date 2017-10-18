@@ -47,11 +47,11 @@ class SamzaBenchmark(zooKeeperAddress: String,
   /**
     * Closes opened connections, deletes temporary files
     */
-  override def close(): Unit = {
+  override def stop(): Unit = {
     if (propertiesFile.exists())
       propertiesFile.delete()
 
-    super.close()
+    super.stop()
   }
 
 

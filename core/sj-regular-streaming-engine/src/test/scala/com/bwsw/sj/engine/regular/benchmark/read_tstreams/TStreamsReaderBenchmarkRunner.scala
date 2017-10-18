@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.sj.engine.regular.benchmark.read_tstream
+package com.bwsw.sj.engine.regular.benchmark.read_tstreams
 
 import java.util.{Calendar, Date}
 
@@ -28,7 +28,7 @@ import com.bwsw.sj.engine.core.testutils.benchmark.regular.RegularReaderBenchmar
 import com.typesafe.config.{Config, ConfigFactory, ConfigValueFactory}
 
 /**
-  * Performs [[TStreamReaderBenchmark]].
+  * Performs [[TStreamsReaderBenchmark]].
   *
   * Configuration:
   *
@@ -59,22 +59,22 @@ import com.typesafe.config.{Config, ConfigFactory, ConfigValueFactory}
   *
   * @author Pavel Tomskikh
   */
-object TStreamReaderBenchmarkRunner extends App {
+object TStreamsReaderBenchmarkRunner extends App {
   println(Calendar.getInstance().getTime)
 
   private val config: Config = ConfigFactory.load()
   private val zkPort = config.getInt(zooKeeperPort)
   private val zkHost = config.getString(zooKeeperHost)
 
-  private val benchmarkConfig = new TStreamReaderBenchmarkConfig(
+  private val benchmarkConfig = new TStreamsReaderBenchmarkConfig(
     config = config.withValue(zooKeeperAddressConfig, ConfigValueFactory.fromAnyRef(s"$zkHost:$zkPort")),
     sjTStreamsDefaultOutputFile)
 
-  private val benchmark = new TStreamReaderBenchmark(
+  private val benchmark = new TStreamsReaderBenchmark(
     zkHost,
     zkPort,
-    benchmarkConfig.tStreamToken,
-    benchmarkConfig.tStreamPrefix,
+    benchmarkConfig.tStreamsToken,
+    benchmarkConfig.tStreamsPrefix,
     benchmarkConfig.words)
 
   benchmark.startServices()
@@ -95,8 +95,8 @@ object TStreamReaderBenchmarkRunner extends App {
   System.exit(0)
 }
 
-class TStreamReaderBenchmarkRunner(benchmark: TStreamReaderBenchmark,
-                                   config: TStreamReaderBenchmarkConfig)
+class TStreamsReaderBenchmarkRunner(benchmark: TStreamsReaderBenchmark,
+                                    config: TStreamsReaderBenchmarkConfig)
   extends ReaderBenchmarkRunner(config) {
   override def run(): Seq[TStreamsReaderBenchmarkResult] = {
     benchmark.warmUp()
@@ -104,7 +104,7 @@ class TStreamReaderBenchmarkRunner(benchmark: TStreamReaderBenchmark,
     val benchmarkResults = config.messageSizes.flatMap { messageSize =>
       println(s"Message size: $messageSize")
 
-      config.sizesPerTransaction.flatMap { sizePerTransaction =>
+      config.sizePerTransaction.flatMap { sizePerTransaction =>
         println(s"Transaction size: $sizePerTransaction")
         benchmark.clearStorage()
         var streamSize: Long = 0
@@ -128,10 +128,8 @@ class TStreamReaderBenchmarkRunner(benchmark: TStreamReaderBenchmark,
       }
     }
 
-    benchmark.close()
+    benchmark.stop()
 
     benchmarkResults
   }
 }
-
-

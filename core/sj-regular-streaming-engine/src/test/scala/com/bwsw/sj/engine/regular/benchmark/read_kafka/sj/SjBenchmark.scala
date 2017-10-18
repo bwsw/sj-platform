@@ -116,14 +116,14 @@ class SjBenchmark(zkHost: String,
     println("Entities loaded")
   }
 
-  override def close(): Unit = {
+  override def stop(): Unit = {
     maybeTssProcess.foreach(_.destroy())
     println("TSS server stopped")
 
     mongoServer.stop()
     println("Mongo server stopped")
 
-    super.close()
+    super.stop()
   }
 
 

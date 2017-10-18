@@ -36,7 +36,7 @@ trait ReaderBenchmark {
   /**
     * Closes opened connections, deletes temporary files
     */
-  def close(): Unit
+  def stop(): Unit
 
   protected def awaitResult(process: Process): Long = {
     var maybeResult: Option[Long] = retrieveResultFromFile()

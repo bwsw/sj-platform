@@ -16,24 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.sj.engine.regular.benchmark.read_tstream
+package com.bwsw.sj.engine.regular.benchmark.read_tstreams
 
 import com.bwsw.sj.common.utils.BenchmarkConfigNames._
 import com.bwsw.sj.engine.core.testutils.benchmark.ReaderBenchmarkConfig
 import com.typesafe.config.Config
 
 /**
-  * Loads the config parameters from typesafe config for [[TStreamReaderBenchmark]]
+  * Loads the config parameters from typesafe config for [[TStreamsReaderBenchmark]]
   *
   * @param config               typesafe config
   * @param outputFilenamePrefix prefix for default name of output file
   * @author Pavel Tomskikh
   */
-class TStreamReaderBenchmarkConfig(override protected val config: Config,
-                                   override protected val outputFilenamePrefix: String)
+class TStreamsReaderBenchmarkConfig(override protected val config: Config,
+                                    override protected val outputFilenamePrefix: String)
   extends ReaderBenchmarkConfig {
 
-  val tStreamPrefix = config.getString(tStreamPrefixConfig)
-  val tStreamToken = config.getString(tStreamTokenConfig)
-  val sizesPerTransaction = config.getString(tStreamSizePerTransaction)
+  val tStreamsPrefix = config.getString(tStreamsPrefixConfig)
+  val tStreamsToken = config.getString(tStreamsTokenConfig)
+  val sizePerTransaction = config.getString(tStreamsSizePerTransaction)
 }

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.sj.engine.regular.benchmark.read_tstream
+package com.bwsw.sj.engine.regular.benchmark.read_tstreams
 
 import java.io.File
 import java.util.UUID
@@ -26,7 +26,7 @@ import com.bwsw.sj.common.MongoAuthChecker
 import com.bwsw.sj.common.config.TempHelperForConfigSetup
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.CommonAppConfigNames
-import com.bwsw.sj.common.utils.benchmark.{ClassRunner, TStreamDataSender}
+import com.bwsw.sj.common.utils.benchmark.{ClassRunner, TStreamsDataSender}
 import com.bwsw.sj.engine.core.testutils.benchmark.regular.RegularReaderBenchmark
 import com.bwsw.sj.engine.regular.RegularTaskRunner
 import com.bwsw.tstreams.env.{ConfigurationOptions, TStreamsFactory}
@@ -35,26 +35,26 @@ import com.typesafe.config.ConfigFactory
 /**
   * Provides methods for testing the speed of reading data from T-Streams by SJ.
   *
-  * @param zkHost        ZooKeeper server's host
-  * @param zkPort        ZooKeeper server's port
-  * @param tStreamToken  authentication token
-  * @param tStreamPrefix ZooKeeper root node which holds coordination tree
-  * @param words         list of words that are sent to the kafka server
+  * @param zkHost         ZooKeeper server's host
+  * @param zkPort         ZooKeeper server's port
+  * @param tStreamsToken  authentication token
+  * @param tStreamsPrefix ZooKeeper root node which holds coordination tree
+  * @param words          list of words that are sent to the kafka server
   * @author Pavel Tomskikh
   */
-class TStreamReaderBenchmark(zkHost: String,
-                             zkPort: Int,
-                             tStreamToken: String,
-                             tStreamPrefix: String,
-                             words: Array[String])
+class TStreamsReaderBenchmark(zkHost: String,
+                              zkPort: Int,
+                              tStreamsToken: String,
+                              tStreamsPrefix: String,
+                              words: Array[String])
   extends RegularReaderBenchmark {
   private val zooKeeperAddress = zkHost + ":" + zkPort
   private val streamName: String = "performance-benchmark-" + UUID.randomUUID().toString
-  private val tStreamDataSender: TStreamDataSender = new TStreamDataSender(
+  private val tStreamsDataSender: TStreamsDataSender = new TStreamsDataSender(
     zooKeeperAddress,
     streamName,
-    tStreamToken,
-    tStreamPrefix,
+    tStreamsToken,
+    tStreamsPrefix,
     words,
     " ")
 
@@ -74,23 +74,23 @@ class TStreamReaderBenchmark(zkHost: String,
   private val mongoAuthChecker = new MongoAuthChecker(mongoAddress, mongoDatabase)
   private lazy val connectionRepository = new ConnectionRepository(mongoAuthChecker, mongoAddress, mongoDatabase, None, None)
 
-  private val benchmarkPreparation = new TStreamReaderBenchmarkPreparation(
+  private val benchmarkPreparation = new TStreamsReaderBenchmarkPreparation(
     mongoPort = mongoPort,
     zooKeeperHost = zkHost,
     zooKeeperPort = zkPort,
     module = module,
     streamName = streamName,
     zkNamespace = "benchmark",
-    tStreamPrefix = tStreamPrefix,
-    tStreamToken = tStreamToken,
+    tStreamsPrefix = tStreamsPrefix,
+    tStreamsToken = tStreamsToken,
     instanceName,
     taskName)
 
   private val tStreamsFactory = new TStreamsFactory
   tStreamsFactory.setProperty(ConfigurationOptions.Coordination.endpoints, zooKeeperAddress)
-  tStreamsFactory.setProperty(ConfigurationOptions.Common.authenticationKey, tStreamToken)
+  tStreamsFactory.setProperty(ConfigurationOptions.Common.authenticationKey, tStreamsToken)
   tStreamsFactory.setProperty(ConfigurationOptions.Stream.partitionsCount, 1)
-  tStreamsFactory.setProperty(ConfigurationOptions.Coordination.path, tStreamPrefix)
+  tStreamsFactory.setProperty(ConfigurationOptions.Coordination.path, tStreamsPrefix)
 
   private val client = tStreamsFactory.getStorageClient()
 
@@ -132,7 +132,7 @@ class TStreamReaderBenchmark(zkHost: String,
     * @param transactionSize count of messages per transaction
     */
   def sendData(messageSize: Long, messagesCount: Long, transactionSize: Long): Unit =
-    tStreamDataSender.send(messageSize, messagesCount, transactionSize)
+    tStreamsDataSender.send(messageSize, messagesCount, transactionSize)
 
   override def clearStorage(): Unit = {
     client.deleteStream(benchmarkPreparation.inputStream.name)
@@ -141,8 +141,8 @@ class TStreamReaderBenchmark(zkHost: String,
   /**
     * Closes opened connections, deletes temporary files
     */
-  override def close(): Unit = {
-    tStreamDataSender.close()
+  override def stop(): Unit = {
+    tStreamsDataSender.close()
     tStreamsFactory.close()
   }
 

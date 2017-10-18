@@ -59,7 +59,7 @@ class RegularReaderBenchmarkRunner(benchmark: RegularReaderBenchmark,
       }
     }
 
-    benchmark.close()
+    benchmark.stop()
 
     benchmarkResults
   }
