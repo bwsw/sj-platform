@@ -21,7 +21,7 @@ package com.bwsw.sj.common.si.model.provider
 import java.net.{URI, URISyntaxException}
 import java.util.Date
 
-import com.bwsw.sj.common.dal.model.provider.{JDBCProviderDomain, ProviderDomain}
+import com.bwsw.sj.common.dal.model.provider.{JDBCProviderDomain, ProviderDomain, ESProviderDomain}
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.rest.utils.ValidationUtils.{normalizeName, validateName}
 import com.bwsw.sj.common.utils.ProviderLiterals.types
@@ -33,8 +33,6 @@ import scala.collection.mutable.ArrayBuffer
 import scala.util.{Failure, Success, Try}
 
 class Provider(val name: String,
-               val login: String,
-               val password: String,
                val providerType: String,
                val hosts: Array[String],
                val description: String,
@@ -53,11 +51,8 @@ class Provider(val name: String,
       name = this.name,
       description = this.description,
       hosts = this.hosts,
-      login = this.login,
-      password = this.password,
       providerType = this.providerType,
-      creationDate = new Date()
-    )
+      creationDate = new Date())
   }
 
   /**
@@ -165,18 +160,27 @@ class ProviderCreator {
           driver = jdbcProvider.driver,
           description = jdbcProvider.description,
           providerType = jdbcProvider.providerType,
-          creationDate = jdbcProvider.creationDate.toString
-        )
+          creationDate = jdbcProvider.creationDate.toString)
+
+      case ProviderLiterals.elasticsearchType =>
+        val esProvider = providerDomain.asInstanceOf[ESProviderDomain]
+
+        new ESProvider(
+          name = esProvider.name,
+          login = esProvider.login,
+          password = esProvider.password,
+          providerType = esProvider.providerType,
+          hosts = esProvider.hosts,
+          description = esProvider.description,
+          creationDate = esProvider.creationDate.toString)
+
       case _ =>
         new Provider(
           name = providerDomain.name,
-          login = providerDomain.login,
-          password = providerDomain.password,
           providerType = providerDomain.providerType,
           hosts = providerDomain.hosts,
           description = providerDomain.description,
-          creationDate = providerDomain.creationDate.toString
-        )
+          creationDate = providerDomain.creationDate.toString)
     }
   }
 }

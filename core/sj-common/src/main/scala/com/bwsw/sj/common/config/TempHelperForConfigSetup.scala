@@ -35,7 +35,10 @@ class TempHelperForConfigSetup(connectionRepository: ConnectionRepository) {
 
   val configService: GenericMongoRepository[ConfigurationSettingDomain] = connectionRepository.getConfigRepository
 
-  def setupConfigs(): Unit = {
+  def setupConfigs(marathonTimeout: Int = 60000,
+                   zkSessionTimeout: Int = 7000,
+                   kafkaSubscriberTimeout: Int = 100,
+                   lowWatermark: Int = 100): Unit = {
     configService.save(ConfigurationSettingDomain(ConfigLiterals.frameworkTag, "com.bwsw.fw-1.0", ConfigLiterals.systemDomain, new Date()))
 
     configService.save(ConfigurationSettingDomain(ConfigurationSetting.createConfigurationSettingName(ConfigLiterals.systemDomain, regularStreamingValidatorClass),
@@ -52,14 +55,19 @@ class TempHelperForConfigSetup(connectionRepository: ConnectionRepository) {
       "http://stream-juggler.z1.netpoint-dc.com:8080",
       ConfigLiterals.systemDomain, new Date()))
 
-    configService.save(ConfigurationSettingDomain(ConfigLiterals.marathonTimeoutTag, "60000", ConfigLiterals.systemDomain, new Date()))
+    configService.save(ConfigurationSettingDomain(
+      ConfigLiterals.marathonTimeoutTag, marathonTimeout.toString, ConfigLiterals.systemDomain, new Date()))
 
-    configService.save(ConfigurationSettingDomain(ConfigLiterals.zkSessionTimeoutTag, "7000", ConfigLiterals.zookeeperDomain, new Date()))
+    configService.save(ConfigurationSettingDomain(
+      ConfigLiterals.zkSessionTimeoutTag, zkSessionTimeout.toString, ConfigLiterals.zookeeperDomain, new Date()))
 
     //configService.save(new ConfigurationSetting("session.timeout.ms", "30000", ConfigConstants.kafkaDomain))
 
-    configService.save(ConfigurationSettingDomain(ConfigLiterals.kafkaSubscriberTimeoutTag, "100", ConfigLiterals.systemDomain, new Date()))
-    configService.save(ConfigurationSettingDomain(ConfigLiterals.lowWatermark, "100", ConfigLiterals.systemDomain, new Date()))
+    configService.save(ConfigurationSettingDomain(
+      ConfigLiterals.kafkaSubscriberTimeoutTag, lowWatermark.toString, ConfigLiterals.systemDomain, new Date()))
+
+    configService.save(ConfigurationSettingDomain(
+      ConfigLiterals.lowWatermark, lowWatermark.toString, ConfigLiterals.systemDomain, new Date()))
   }
 
   def loadJdbcDriver(): Unit = {

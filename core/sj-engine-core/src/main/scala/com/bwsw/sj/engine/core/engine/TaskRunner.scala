@@ -23,9 +23,9 @@ import java.util.concurrent._
 
 import com.bwsw.sj.common.engine.TaskEngine
 import com.bwsw.sj.common.engine.core.managment.TaskManager
-import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
+import com.bwsw.sj.common.engine.core.reporting.{PerformanceMetricsReporter, PerformanceMetrics}
 import com.google.common.util.concurrent.ThreadFactoryBuilder
-import org.slf4j.{Logger, LoggerFactory}
+import com.typesafe.scalalogging.Logger
 import scaldi.Injector
 
 import scala.util.{Failure, Success, Try}
@@ -40,7 +40,7 @@ import scala.util.{Failure, Success, Try}
   * @author Kseniya Mikhaleva
   */
 abstract class TaskRunner(implicit val injector: Injector = com.bwsw.sj.common.SjModule.injector) {
-  protected val logger: Logger = LoggerFactory.getLogger(this.getClass)
+  protected val logger: Logger = Logger(this.getClass)
   protected val threadName: String
   private val countOfThreads = 4
   private val threadPool: ExecutorService = createThreadPool(threadName)
@@ -90,7 +90,9 @@ abstract class TaskRunner(implicit val injector: Injector = com.bwsw.sj.common.S
 
     logger.info(s"Task: ${manager.taskName}. Start preparing of task runner for '${manager.instance.moduleType}' module\n")
 
-    val performanceMetrics = createPerformanceMetrics(manager)
+    val performanceMetricsReporter = createPerformanceMetricsReporter(manager)
+
+    val performanceMetrics = createPerformanceMetrics(manager.taskName, performanceMetricsReporter)
 
     val taskEngine = createTaskEngine(manager, performanceMetrics)
 
@@ -101,12 +103,12 @@ abstract class TaskRunner(implicit val injector: Injector = com.bwsw.sj.common.S
     logger.info(s"Task: ${manager.taskName}. The preparation finished. Launch a task\n")
 
     taskInputService match {
-      case callable: Callable[Unit@unchecked] => {
+      case callable: Callable[Unit@unchecked] =>
         executorService.submit(callable)
-      }
       case _ =>
     }
     executorService.submit(taskEngine)
+    executorService.submit(performanceMetricsReporter)
     executorService.submit(performanceMetrics)
     executorService.submit(instanceStatusObserver)
 
@@ -115,9 +117,13 @@ abstract class TaskRunner(implicit val injector: Injector = com.bwsw.sj.common.S
 
   protected def createTaskManager(): TaskManager
 
-  protected def createPerformanceMetrics(manager: TaskManager): PerformanceMetrics
+  protected def createPerformanceMetricsReporter(manager: TaskManager): PerformanceMetricsReporter
 
   protected def createTaskEngine(manager: TaskManager, performanceMetrics: PerformanceMetrics): TaskEngine
 
   protected def createTaskInputService(manager: TaskManager, taskEngine: TaskEngine): Closeable
+
+  protected def createPerformanceMetrics(taskName: String,
+                                         performanceMetricsReporter: PerformanceMetricsReporter): PerformanceMetrics =
+    new PerformanceMetrics(performanceMetricsReporter, s"performance-metrics-$taskName")
 }

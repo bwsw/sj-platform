@@ -23,7 +23,7 @@ import java.util.Properties
 
 import com.bwsw.common.file.utils.FileStorage
 import com.bwsw.sj.common.utils.{FileClassLoader, JdbcLiterals}
-import org.slf4j.LoggerFactory
+import com.typesafe.scalalogging.Logger
 
 import scala.util.{Failure, Success, Try}
 
@@ -43,7 +43,7 @@ import scala.util.{Failure, Success, Try}
   */
 
 protected class JdbcClient(override val jdbcCCD: JdbcClientConnectionData, fileStorage: FileStorage) extends IJdbcClient {
-  private val logger = LoggerFactory.getLogger(this.getClass)
+  private val logger = Logger(this.getClass)
   private val driver = createDriver()
   private val credential = createCredential()
   override var _connection: Option[Connection] = None
@@ -92,7 +92,7 @@ protected class JdbcClient(override val jdbcCCD: JdbcClientConnectionData, fileS
 }
 
 trait IJdbcClient {
-  private val logger = LoggerFactory.getLogger(this.getClass)
+  private val logger = Logger(this.getClass)
   protected var _connection: Option[Connection]
   val jdbcCCD: JdbcClientConnectionData
 

@@ -25,7 +25,7 @@ import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.FrameworkLiterals
 import com.bwsw.sj.mesos.framework.config.FrameworkConfigNames
 import com.bwsw.sj.mesos.framework.rest.Rest
-import com.bwsw.sj.mesos.framework.schedule.FrameworkScheduler
+import com.bwsw.sj.mesos.framework.schedule.{FrameworkScheduler, FrameworkUtil}
 import com.typesafe.config.ConfigFactory
 import org.apache.mesos.MesosSchedulerDriver
 import org.apache.mesos.Protos.{Credential, FrameworkInfo}
@@ -39,6 +39,7 @@ object StartFramework {
   import com.bwsw.sj.common.SjModule._
 
   private val config = ConfigFactory.load()
+  FrameworkUtil.config = Option(config)
   val frameworkName = "JugglerFramework"
   val frameworkUser = Try(config.getString(FrameworkConfigNames.user)).getOrElse("root")
   val frameworkCheckpoint = false
@@ -60,6 +61,7 @@ object StartFramework {
   def main(args: Array[String]): Unit = {
     val port = if (args.nonEmpty) args(0).toInt else 8080
     Rest.start(port)
+    FrameworkUtil.instancePort = Option(port)
 
     val frameworkInfo = FrameworkInfo.newBuilder.
       setName(frameworkName).

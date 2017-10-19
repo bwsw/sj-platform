@@ -22,6 +22,7 @@ import java.net.InetAddress
 import java.util.UUID
 
 import com.bwsw.sj.common.utils.ProviderLiterals
+import com.typesafe.scalalogging.Logger
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse
 import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse
@@ -33,22 +34,28 @@ import org.elasticsearch.common.xcontent.{XContentBuilder, XContentType}
 import org.elasticsearch.index.query.{BoolQueryBuilder, QueryBuilder, QueryBuilders}
 import org.elasticsearch.index.reindex.{BulkByScrollResponse, DeleteByQueryAction}
 import org.elasticsearch.search.SearchHits
-import org.elasticsearch.transport.client.PreBuiltTransportClient
-import org.slf4j.LoggerFactory
+import org.elasticsearch.xpack.client.PreBuiltXPackTransportClient
 
 /**
   * Wrapper for [[org.elasticsearch.client.transport.TransportClient]]
   *
-  * @param hosts es address
+  * @param hosts    es address
+  * @param username es username
+  * @param password es password
   */
-class ElasticsearchClient(hosts: Set[(String, Int)]) {
-  private val logger = LoggerFactory.getLogger(this.getClass)
+class ElasticsearchClient(hosts: Set[(String, Int)],
+                          username: Option[String] = None,
+                          password: Option[String] = None) {
+  private val logger = Logger(this.getClass)
   private val typeName = "_type"
   System.setProperty("es.set.netty.runtime.available.processors", "false")
-  private val settings = Settings.builder()
-    .put("transport.tcp.connect_timeout", ProviderLiterals.connectTimeoutMillis + "ms")
-    .build()
-  private val client = new PreBuiltTransportClient(settings)
+  private val settingsBuilder = Settings.builder()
+  settingsBuilder.put("transport.tcp.connect_timeout", ProviderLiterals.connectTimeoutMillis + "ms")
+  username.zip(password).foreach {
+    case (u, p) => settingsBuilder.put("xpack.security.user", s"$u:$p")
+  }
+
+  private val client = new PreBuiltXPackTransportClient(settingsBuilder.build())
   hosts.foreach(x => setTransportAddressToClient(x._1, x._2))
   private val deleteByQueryAction = DeleteByQueryAction.INSTANCE.newRequestBuilder(client)
 

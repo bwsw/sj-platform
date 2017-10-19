@@ -29,13 +29,12 @@ import com.bwsw.sj.common.engine.core.state.CommonModuleService
 import com.bwsw.sj.common.si.model.instance.BatchInstance
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.batch.task.input.{EnvelopeFetcher, RetrievableCheckpointTaskInput}
-import org.slf4j.LoggerFactory
+import com.typesafe.scalalogging.Logger
 import scaldi.Injectable.inject
 import scaldi.Injector
 
 import scala.collection.mutable
-import scala.collection.mutable.ListBuffer
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 /**
   * Class contains methods for running batch module
@@ -56,7 +55,7 @@ class BatchTaskEngine(manager: CommonTaskManager,
 
   private val currentThread = Thread.currentThread()
   currentThread.setName(s"batch-task-engine")
-  private val logger = LoggerFactory.getLogger(this.getClass)
+  private val logger = Logger(this.getClass)
   private val instance = manager.instance.asInstanceOf[BatchInstance]
   private val inputs = instance.getInputsWithoutStreamMode
   private val batchCollector = manager.getBatchCollector(instance.to, performanceMetrics, inputs)
@@ -67,7 +66,8 @@ class BatchTaskEngine(manager: CommonTaskManager,
     RetrievableCheckpointTaskInput[AnyRef](
       manager.asInstanceOf[CommonTaskManager],
       checkpointGroup,
-      executor
+      executor,
+      lowWatermark
     ).asInstanceOf[RetrievableCheckpointTaskInput[Envelope]]
   private val envelopeFetcher = new EnvelopeFetcher(taskInputService, lowWatermark)
   private var retrievableStreams = instance.getInputsWithoutStreamMode
@@ -112,24 +112,26 @@ class BatchTaskEngine(manager: CommonTaskManager,
   }
 
   private def retrieveAndProcessEnvelopes(): Unit = {
+    var gotEnvelope = false
     retrievableStreams.foreach(stream => {
       logger.debug(s"Retrieve an available envelope from '$stream' stream.")
       envelopeFetcher.get(stream) match {
         case Some(envelope) =>
           batchCollector.onReceive(envelope)
-          processBatches()
-
-          moduleService.onTimer()
-
-          if (allWindowsCollected) {
-            onWindow()
-          }
-
+          gotEnvelope = true
         case None =>
-          moduleService.onTimer()
-          onIdle()
+      }
+
+      processBatches()
+
+      moduleService.onTimer()
+
+      if (allWindowsCollected) {
+        onWindow()
       }
     })
+
+    if (!gotEnvelope) onIdle()
   }
 
   private def processBatches(): Unit = {
@@ -148,13 +150,14 @@ class BatchTaskEngine(manager: CommonTaskManager,
   }
 
   private def onIdle(): Unit = {
-    logger.debug(s"An envelope has been received but no batches have been collected.")
+    logger.debug(s"An envelope has not been received.")
     performanceMetrics.increaseTotalIdleTime(instance.eventWaitIdleTime)
     Thread.sleep(instance.eventWaitIdleTime)
     executor.onIdle()
+    Thread.sleep(instance.eventWaitIdleTime)
   }
 
-  private def registerBatch(batch: Batch): ListBuffer[Int] = {
+  private def registerBatch(batch: Batch): Unit = {
     addBatchToWindow(batch)
     performanceMetrics.addBatch(batch)
   }
@@ -208,7 +211,10 @@ class BatchTaskEngine(manager: CommonTaskManager,
     commonBarrier.enter()
     val onEnterResult = Try(executor.onEnter())
     commonBarrier.leave()
-    onEnterResult.get
+    onEnterResult match {
+      case Failure(e) => throw e
+      case Success(_) =>
+    }
     if (leaderLatch.hasLeadership()) executor.onLeaderEnter()
     retrievableStreams = inputs
     doCheckpoint()

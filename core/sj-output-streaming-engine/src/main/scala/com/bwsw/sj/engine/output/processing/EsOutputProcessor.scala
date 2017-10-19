@@ -22,18 +22,18 @@ import com.bwsw.common.es.ElasticsearchClient
 import com.bwsw.sj.common.dal.model.stream.ESStreamDomain
 import com.bwsw.sj.common.engine.core.entities.{OutputEnvelope, TStreamEnvelope}
 import com.bwsw.sj.common.engine.core.output.Entity
+import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
 import com.bwsw.sj.engine.core.output.types.es.ElasticsearchCommandBuilder
 import com.bwsw.sj.engine.output.task.OutputTaskManager
-import com.bwsw.sj.engine.output.task.reporting.OutputStreamingPerformanceMetrics
 
 /**
   * ref. [[OutputProcessor]] object
   */
 class EsOutputProcessor[T <: AnyRef](esStream: ESStreamDomain,
-                                     performanceMetrics: OutputStreamingPerformanceMetrics,
+                                     performanceMetrics: PerformanceMetrics,
                                      manager: OutputTaskManager,
                                      entity: Entity[_])
-  extends OutputProcessor[T](esStream, performanceMetrics) {
+  extends AsyncOutputProcessor[T](esStream, performanceMetrics) {
 
   private val esService = esStream.service
   private val esClient = openConnection()
@@ -43,7 +43,10 @@ class EsOutputProcessor[T <: AnyRef](esStream: ESStreamDomain,
   private def openConnection(): ElasticsearchClient = {
     logger.info(s"Open a connection to elasticsearch at address: '${esService.provider.hosts}'.")
     val hosts = esService.provider.hosts.map(splitHost).toSet
-    new ElasticsearchClient(hosts)
+    val maybeUsername = Option(esService.provider.login)
+    val maybePassword = Option(esService.provider.password)
+
+    new ElasticsearchClient(hosts, maybeUsername, maybePassword)
   }
 
   private def splitHost(host: String): (String, Int) = {
@@ -63,7 +66,7 @@ class EsOutputProcessor[T <: AnyRef](esStream: ESStreamDomain,
   }
 
 
-  def send(envelope: OutputEnvelope, inputEnvelope: TStreamEnvelope[T]): Unit = {
+  override protected def asyncSend(envelope: OutputEnvelope, inputEnvelope: TStreamEnvelope[T]): Unit = {
     val esFieldsValue = envelope.getFieldsValue
     val data = commandBuilder.buildInsert(inputEnvelope.id, esFieldsValue)
     logger.debug(s"Task: ${manager.taskName}. Write an output envelope to elasticsearch stream.")

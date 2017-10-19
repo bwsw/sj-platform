@@ -75,8 +75,8 @@ object DataFactory {
   private val task: Task = new Task()
   private val serializer = new JsonSerializer()
   private val objectSerializer = new ObjectSerializer()
-  private val zookeeperProvider = new ProviderDomain(zookeeperProviderName, zookeeperProviderName, zookeeperHosts,
-    "", "", ProviderLiterals.zookeeperType, new Date())
+  private val zookeeperProvider = new ProviderDomain(
+    zookeeperProviderName, zookeeperProviderName, zookeeperHosts, ProviderLiterals.zookeeperType, new Date())
   private val tstrqService = new TStreamServiceDomain(tstreamServiceName, tstreamServiceName, zookeeperProvider,
     TestStorageServer.defaultPrefix, TestStorageServer.defaultToken, new Date())
   private val tstreamFactory = new TStreamsFactory()
@@ -104,8 +104,8 @@ object DataFactory {
   }
 
   def createProviders(providerService: GenericMongoRepository[ProviderDomain]) = {
-    val kafkaProvider = new ProviderDomain(kafkaProviderName, kafkaProviderName, kafkaHosts.split(","),
-      "", "", ProviderLiterals.kafkaType, new Date())
+    val kafkaProvider = new ProviderDomain(
+      kafkaProviderName, kafkaProviderName, kafkaHosts.split(","), ProviderLiterals.kafkaType, new Date())
     providerService.save(kafkaProvider)
 
     providerService.save(zookeeperProvider)

@@ -22,7 +22,6 @@ import java.net.{InetSocketAddress, Socket, URI}
 import java.nio.channels.ClosedChannelException
 import java.util.{Collections, Date}
 
-import com.bwsw.common.es.ElasticsearchClient
 import com.bwsw.sj.common.dal.morphia.MorphiaAnnotations.{IdField, PropertyField}
 import com.bwsw.sj.common.utils.ProviderLiterals
 import kafka.javaapi.TopicMetadataRequest
@@ -42,8 +41,6 @@ import scala.util.{Failure, Success, Try}
 class ProviderDomain(@IdField val name: String,
                      val description: String,
                      val hosts: Array[String],
-                     val login: String,
-                     val password: String,
                      @PropertyField("provider-type") val providerType: String,
                      val creationDate: Date) {
 
@@ -115,16 +112,7 @@ class ProviderDomain(@IdField val name: String,
     errors
   }
 
-  protected def checkESConnection(address: String): ArrayBuffer[String] = {
-    val errors = ArrayBuffer[String]()
-    val client = new ElasticsearchClient(Set(getHostAndPort(address)))
-    if (!client.isConnected()) {
-      errors += s"Can not establish connection to ElasticSearch on '$address'"
-    }
-    client.close()
-
-    errors
-  }
+  protected def checkESConnection(address: String): ArrayBuffer[String] = ArrayBuffer()
 
   protected def checkJdbcConnection(address: String): ArrayBuffer[String] = ArrayBuffer()
 
@@ -144,7 +132,7 @@ class ProviderDomain(@IdField val name: String,
     errors
   }
 
-  private def getHostAndPort(address: String): (String, Int) = {
+  protected def getHostAndPort(address: String): (String, Int) = {
     val uri = new URI("dummy://" + address)
     val host = uri.getHost
     val port = uri.getPort

@@ -32,6 +32,7 @@ val commonSettings = Seq(
   resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
   resolvers += "Twitter Repository" at "http://maven.twttr.com",
   resolvers += "Oracle Maven2 Repo" at "http://download.oracle.com/maven",
+  resolvers += "Elasticsearch Releases" at "https://artifacts.elastic.co/maven",
 
   assemblyMergeStrategy in assembly := {
     case PathList("org", "apache", "commons", "logging", xs@_*) => MergeStrategy.first
@@ -97,6 +98,7 @@ lazy val engineCore = Project(id = "sj-engine-core",
   base = file("./core/sj-engine-core"))
   .settings(commonSettings: _*)
   .settings(
+    resolvers += "Clojars Repository" at "http://clojars.org/repo/",
     libraryDependencies ++= Dependencies.sjEngineCoreDependencies.value,
     libraryDependencies ++= Dependencies.sjTestDependencies.value
   )
@@ -125,8 +127,6 @@ lazy val regularStreamingEngine = Project(id = "sj-regular-streaming-engine",
   base = file("./core/sj-regular-streaming-engine"))
   .settings(commonSettings: _*)
   .settings(
-    resolvers += "Clojars Repository" at "http://clojars.org/repo/",
-    libraryDependencies ++= Dependencies.sjRegularEngineDependencies.value,
     libraryDependencies ++= Dependencies.sjTestDependencies.value,
     test in Test <<= (test in Test).dependsOn(assembly in stubRegular)
   )
@@ -234,8 +234,21 @@ lazy val regularPerformanceBenchmark = Project(id = "sj-regular-performance-benc
   .settings(commonSettings: _*)
   .dependsOn(engineCore % "provided")
 
+lazy val batchPerformanceBenchmark = Project(id = "sj-batch-performance-benchmark",
+  base = file("./contrib/benchmarks/sj-batch-performance-benchmark"))
+  .settings(commonSettings: _*)
+  .dependsOn(engineCore % "provided")
+
 lazy val flinkBenchmarkTask = Project(id = "flink-benchmark-task",
   base = file("./contrib/benchmarks/flink-benchmark-task"))
+  .settings(commonSettings: _*)
+  .settings(
+    scalaVersion := "2.11.8",
+    libraryDependencies ++= Dependencies.flinkDependencies.value
+  )
+
+lazy val flinkBatchBenchmarkTask = Project(id = "flink-batch-benchmark-task",
+  base = file("./contrib/benchmarks/flink-batch-benchmark-task"))
   .settings(commonSettings: _*)
   .settings(
     scalaVersion := "2.11.8",

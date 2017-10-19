@@ -20,12 +20,15 @@ package com.bwsw.sj.mesos.framework.schedule
 
 import java.util
 
+import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.mesos.framework.config.FrameworkConfigNames
+import com.bwsw.sj.mesos.framework.mesos_api.{Framework, Frameworks}
 import com.bwsw.sj.mesos.framework.task.{StatusHandler, TasksList}
 import com.typesafe.config.ConfigFactory
 import org.apache.log4j.Logger
 import org.apache.mesos.Protos._
 import org.apache.mesos.{Scheduler, SchedulerDriver}
+import scaldi.Injectable._
 import scaldi.Injector
 
 import scala.collection.JavaConverters._
@@ -156,6 +159,8 @@ class FrameworkScheduler(implicit injector: Injector) extends Scheduler {
   def reregistered(driver: SchedulerDriver, masterInfo: MasterInfo): Unit = {
     logger.debug(s"New master $masterInfo.")
     TasksList.setMessage(s"New master $masterInfo")
+
+    updateInstanceRestAddress(masterInfo)
   }
 
   /**
@@ -177,10 +182,26 @@ class FrameworkScheduler(implicit injector: Injector) extends Scheduler {
     TasksList.prepareTasks(FrameworkUtil.instance.get)
     logger.debug(s"Got tasks: $TasksList.")
 
-    val config = ConfigFactory.load()
+    val config = FrameworkUtil.config.get
     uniqueHosts = Try(config.getBoolean(FrameworkConfigNames.uniqueHosts)).getOrElse(false)
 
     TasksList.setMessage(s"Registered framework as: ${frameworkId.getValue}")
+
+    updateInstanceRestAddress(masterInfo)
+
   }
+
+  def updateInstanceRestAddress(masterInfo: MasterInfo) = {
+    val frameworkAddress = masterInfo.getAddress
+    val frameworksUrl = s"http://${frameworkAddress.getIp}:${frameworkAddress.getPort}/frameworks"
+    val frameworksResponse = scala.io.Source.fromURL(frameworksUrl).mkString
+    val frameworksData = StatusHandler.serializer.deserialize[Frameworks](frameworksResponse)
+    val framework = frameworksData.frameworks.find((framework: Framework) => framework.id == FrameworkUtil.frameworkId.get).head
+    val frameworkHostname = framework.hostname
+    val address = s"http://$frameworkHostname:${FrameworkUtil.instancePort.get}"
+    FrameworkUtil.instance.get.restAddress = Option(address)
+    inject[ConnectionRepository].getInstanceRepository.save(FrameworkUtil.instance.get.to)
+  }
+
 }
 

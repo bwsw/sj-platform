@@ -24,7 +24,7 @@ import com.bwsw.sj.common.engine.core.input.Interval
 import io.netty.buffer.ByteBuf
 import io.netty.util.ByteProcessor
 
-import scala.io.Source
+import scala.collection.mutable.ArrayBuffer
 
 /**
   * Splits buffer by separator.
@@ -38,15 +38,22 @@ class Tokenizer(separator: String, encoding: String) {
   require(separator.length > 0, "separator must be nonempty")
   require(Charset.isSupported(encoding), s"encoding '$encoding' does not supported")
 
+  private val separatorBytes = separator.getBytes(encoding)
+
   private class TokenizerByteProcessor extends ByteProcessor {
-    private var bytes: Array[Byte] = Array.empty
+    private val bytes = new ArrayBuffer[Byte]
 
     override def process(value: Byte): Boolean = {
-      bytes = bytes :+ value
-      val line = Source.fromBytes(bytes, encoding).mkString
-      !line.endsWith(separator)
+      bytes += value
+
+      !bytes.endsWith(separatorBytes)
     }
+
+    def clear(): Unit =
+      bytes.clear()
   }
+
+  private val byteProcessor = new TokenizerByteProcessor
 
   /**
     * Splits buffer by separator
@@ -56,7 +63,8 @@ class Tokenizer(separator: String, encoding: String) {
     */
   def tokenize(buffer: ByteBuf): Option[Interval] = {
     val startIndex = buffer.readerIndex()
-    val endIndex = buffer.forEachByte(new TokenizerByteProcessor)
+    val endIndex = buffer.forEachByte(byteProcessor)
+    byteProcessor.clear()
 
     if (endIndex != -1) Some(Interval(startIndex, endIndex))
     else None

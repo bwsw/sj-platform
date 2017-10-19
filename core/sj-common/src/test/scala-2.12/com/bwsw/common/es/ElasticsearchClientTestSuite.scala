@@ -45,7 +45,7 @@ class ElasticsearchClientTestSuite extends FlatSpec with Matchers with BeforeAnd
     val client = new ElasticsearchClient(hosts)
 
     //assert
-    client.isConnected() shouldBe true
+    client.isConnected shouldBe true
   }
 
   "isConnected" should "return false if client has connected to ES but the node has been shutdown" in {
@@ -56,7 +56,7 @@ class ElasticsearchClientTestSuite extends FlatSpec with Matchers with BeforeAnd
     Thread.sleep(5000)
 
     //assert
-    client.isConnected() shouldBe false
+    client.isConnected shouldBe false
   }
 
   "doesIndexExist" should "return false if an index doesn't exist" in {
@@ -132,7 +132,7 @@ class ElasticsearchClientTestSuite extends FlatSpec with Matchers with BeforeAnd
     Thread.sleep(1000)
 
     //assert
-    client.search(index, documentType).getTotalHits() shouldBe 1
+    client.search(index, documentType).getTotalHits shouldBe 1
   }
 
   "Client" should "write the several documents" in {
@@ -153,7 +153,7 @@ class ElasticsearchClientTestSuite extends FlatSpec with Matchers with BeforeAnd
     })
 
     //assert
-    client.search(index, documentType).getTotalHits() shouldBe numberOfDocuments
+    client.search(index, documentType).getTotalHits shouldBe numberOfDocuments
   }
 
   "Client" should "delete all documents that has been written if no match query has been passed" in {
@@ -178,7 +178,7 @@ class ElasticsearchClientTestSuite extends FlatSpec with Matchers with BeforeAnd
     Thread.sleep(1000)
 
     //assert
-    client.search(index, documentType).getTotalHits() shouldBe 0
+    client.search(index, documentType).getTotalHits shouldBe 0
   }
 
   "Client" should "delete documents according to passed match query" in {
@@ -204,7 +204,7 @@ class ElasticsearchClientTestSuite extends FlatSpec with Matchers with BeforeAnd
     Thread.sleep(1000)
 
     //assert
-    client.search(index, documentType).getTotalHits() shouldBe (numberOfDocuments - 1)
+    client.search(index, documentType).getTotalHits shouldBe (numberOfDocuments - 1)
   }
 
   "deleteDocuments" should "throw an exception if non-existing index has been passed" in {
@@ -241,6 +241,6 @@ class ElasticsearchClientTestSuite extends FlatSpec with Matchers with BeforeAnd
     Thread.sleep(1000)
 
     //assert
-    client.search(index, documentType).getTotalHits() shouldBe numberOfDocuments
+    client.search(index, documentType).getTotalHits shouldBe numberOfDocuments
   }
 }
