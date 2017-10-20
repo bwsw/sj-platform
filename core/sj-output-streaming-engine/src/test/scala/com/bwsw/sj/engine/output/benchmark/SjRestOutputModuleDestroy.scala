@@ -20,6 +20,7 @@ package com.bwsw.sj.engine.output.benchmark
 
 import java.io.File
 
+import com.bwsw.sj.common.utils.benchmark.ProcessTerminator
 import com.bwsw.sj.engine.output.benchmark.DataFactory._
 import com.bwsw.sj.engine.output.benchmark.SjOutputModuleBenchmarkConstants.{pathToRestModule, restInstanceName}
 
@@ -34,17 +35,17 @@ import com.bwsw.sj.engine.output.benchmark.SjOutputModuleBenchmarkConstants.{pat
   * @author Pavel Tomskikh
   */
 object SjRestOutputModuleDestroy extends App {
-  val restModule = new File(pathToRestModule)
+  ProcessTerminator.terminateProcessAfter { () =>
+    val restModule = new File(pathToRestModule)
 
-  deleteStreams()
-  deleteServices()
-  deleteProviders()
-  deleteInstance(restInstanceName)
-  deleteModule(restModule.getName)
+    deleteStreams()
+    deleteServices()
+    deleteProviders()
+    deleteInstance(restInstanceName)
+    deleteModule(restModule.getName)
 
-  close()
-  tempHelperForConfigDestroy.deleteConfigs()
-  connectionRepository.close()
-
-  println("DONE")
+    close()
+    tempHelperForConfigDestroy.deleteConfigs()
+    connectionRepository.close()
+  }
 }

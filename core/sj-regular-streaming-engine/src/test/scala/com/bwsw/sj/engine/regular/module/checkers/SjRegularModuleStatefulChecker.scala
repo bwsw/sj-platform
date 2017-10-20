@@ -18,13 +18,13 @@
  */
 package com.bwsw.sj.engine.regular.module.checkers
 
-import com.bwsw.sj.common.utils.benchmark.BenchmarkUtils
+import com.bwsw.sj.common.utils.benchmark.ProcessTerminator
 import com.bwsw.sj.engine.regular.module.DataFactory.connectionRepository
-import com.bwsw.sj.engine.regular.module.checkers.elements_readers.{OutputElementsReader, StateReader}
+import com.bwsw.sj.engine.regular.module.checkers.elements_readers._
 
-abstract class SjRegularModuleStatefulChecker extends App {
-  BenchmarkUtils.exitAfter { () =>
-    val inputElements = getInputElements()
+abstract class SjRegularModuleStatefulChecker(inputElementsReaders: Seq[InputElementsReader]) extends App {
+  ProcessTerminator.terminateProcessAfter { () =>
+    val inputElements = inputElementsReaders.flatMap(_.getInputElements())
     val outputElements = OutputElementsReader.getOutputElements()
 
     val sum = StateReader.getStateSum(connectionRepository)
@@ -39,24 +39,21 @@ abstract class SjRegularModuleStatefulChecker extends App {
 
     assert(sum == inputElements.sum,
       "Sum of all txns elements that are consumed from input stream should equals state variable sum")
-
-    println("DONE")
   }
-
-  def getInputElements(): Seq[Int]
 }
 
 
-object SjRegularModuleStatefulBothChecker extends SjRegularModuleStatefulChecker with InputElementsBothType
+object SjRegularModuleStatefulBothChecker
+  extends SjRegularModuleStatefulChecker(Seq(TStreamInputElementsReader, KafkaInputElementsReader))
 
 class SjRegularModuleStatefulBothChecker
 
 
-object SjRegularModuleStatefulTstreamChecker extends SjRegularModuleStatefulChecker with InputElementsTStream
+object SjRegularModuleStatefulTstreamChecker extends SjRegularModuleStatefulChecker(Seq(TStreamInputElementsReader))
 
 class SjRegularModuleStatefulTstreamChecker
 
 
-object SjRegularModuleStatefulKafkaChecker extends SjRegularModuleStatefulChecker with InputElementsKafka
+object SjRegularModuleStatefulKafkaChecker extends SjRegularModuleStatefulChecker(Seq(KafkaInputElementsReader))
 
 class SjRegularModuleStatefulKafkaChecker

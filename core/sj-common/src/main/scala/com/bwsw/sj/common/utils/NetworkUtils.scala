@@ -21,9 +21,17 @@ package com.bwsw.sj.common.utils
 import java.net.ServerSocket
 
 /**
+  * Contains useful methods to work with network
+  *
   * @author Pavel Tomskikh
   */
 object NetworkUtils {
+
+  /**
+    * Returns a free port number on localhost
+    *
+    * @return a free port number on localhost
+    */
   def findFreePort(): Int = {
     val randomSocket = new ServerSocket(0)
     val port = randomSocket.getLocalPort

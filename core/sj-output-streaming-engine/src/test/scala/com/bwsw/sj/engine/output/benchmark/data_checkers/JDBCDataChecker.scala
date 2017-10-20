@@ -23,8 +23,18 @@ import com.bwsw.sj.engine.output.benchmark.DataFactory.{jdbcStreamName, openJdbc
 
 import scala.collection.mutable.ArrayBuffer
 
+/**
+  * Validates that data in SQL database corresponds to data in input storage
+  *
+  * @author Pavel Tomskikh
+  */
 object JDBCDataChecker extends DataChecker {
 
+  /**
+    * Returns a data from SQL database
+    *
+    * @return a data from SQL database
+    */
   override def getOutputElements(): ArrayBuffer[(Int, String)] = {
     val jdbcStream: JDBCStreamDomain = streamService.get(jdbcStreamName).get.asInstanceOf[JDBCStreamDomain]
 

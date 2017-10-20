@@ -18,12 +18,12 @@
  */
 package com.bwsw.sj.engine.regular.module.checkers
 
-import com.bwsw.sj.common.utils.benchmark.BenchmarkUtils
-import com.bwsw.sj.engine.regular.module.checkers.elements_readers.OutputElementsReader
+import com.bwsw.sj.common.utils.benchmark.ProcessTerminator
+import com.bwsw.sj.engine.regular.module.checkers.elements_readers._
 
-abstract class SjRegularModuleStatelessChecker extends App {
-  BenchmarkUtils.exitAfter { () =>
-    val inputElements = getInputElements()
+abstract class SjRegularModuleStatelessChecker(inputElementsReaders: Seq[InputElementsReader]) extends App {
+  ProcessTerminator.terminateProcessAfter { () =>
+    val inputElements = inputElementsReaders.flatMap(_.getInputElements())
     val outputElements = OutputElementsReader.getOutputElements()
 
     assert(inputElements.length == outputElements.length,
@@ -32,15 +32,12 @@ abstract class SjRegularModuleStatelessChecker extends App {
 
     assert(inputElements.forall(x => outputElements.contains(x)) && outputElements.forall(x => inputElements.contains(x)),
       "All txns elements that are consumed from output stream should equals all txns elements that are consumed from input stream")
-
-    println("DONE")
   }
-
-  def getInputElements(): Seq[Int]
 }
 
-object SjRegularModuleStatelessBothChecker extends SjRegularModuleStatelessChecker with InputElementsBothType
+object SjRegularModuleStatelessBothChecker
+  extends SjRegularModuleStatelessChecker(Seq(TStreamInputElementsReader, KafkaInputElementsReader))
 
-object SjRegularModuleStatelessKafkaChecker extends SjRegularModuleStatelessChecker with InputElementsKafka
+object SjRegularModuleStatelessKafkaChecker extends SjRegularModuleStatelessChecker(Seq(KafkaInputElementsReader))
 
-object SjRefularModuleStatelessTstreamChecker extends SjRegularModuleStatelessChecker with InputElementsTStream
+object SjRefularModuleStatelessTstreamChecker extends SjRegularModuleStatelessChecker(Seq(TStreamInputElementsReader))

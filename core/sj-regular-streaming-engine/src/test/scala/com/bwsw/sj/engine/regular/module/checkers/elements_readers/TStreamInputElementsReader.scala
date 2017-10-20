@@ -24,9 +24,9 @@ import com.bwsw.sj.engine.regular.module.SjRegularBenchmarkConstants._
 
 import scala.collection.mutable.ArrayBuffer
 
-object TStreamInputElementsReader {
+object TStreamInputElementsReader extends InputElementsReader {
 
-  def getInputElements(): ArrayBuffer[Int] = {
+  def getInputElements(): Seq[Int] = {
     val objectSerializer = new ObjectSerializer()
 
     val consumers = (1 to inputCount).map(x => createInputTstreamConsumer(partitions, x.toString))

@@ -21,7 +21,7 @@ package com.bwsw.sj.engine.output.benchmark
 import java.io.File
 
 import com.bwsw.sj.common.utils.EngineLiterals
-import com.bwsw.sj.common.utils.benchmark.BenchmarkUtils
+import com.bwsw.sj.common.utils.benchmark.ProcessTerminator
 import com.bwsw.sj.engine.output.benchmark.DataFactory._
 import com.bwsw.sj.engine.output.benchmark.SjOutputModuleBenchmarkConstants._
 
@@ -38,7 +38,7 @@ import com.bwsw.sj.engine.output.benchmark.SjOutputModuleBenchmarkConstants._
   * @author Kseniya Tomskikh
   */
 object SjESOutputModuleSetup extends App {
-  BenchmarkUtils.exitAfter { () =>
+  ProcessTerminator.terminateProcessAfter { () =>
     tempHelperForConfigSetup.setupConfigs()
     val checkpointMode = EngineLiterals.everyNthMode
     val partitions = 4
@@ -72,8 +72,6 @@ object SjESOutputModuleSetup extends App {
     println("close connections")
     close()
     connectionRepository.close()
-
-    println("DONE")
   }
 }
 

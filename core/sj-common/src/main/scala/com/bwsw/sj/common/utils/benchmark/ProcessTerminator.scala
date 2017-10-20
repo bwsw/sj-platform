@@ -16,25 +16,32 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.sj.engine.batch.module.checkers
+package com.bwsw.sj.common.utils.benchmark
 
-import com.bwsw.sj.engine.batch.module.checkers.elements_readers.{KafkaInputElementsReader, TStreamInputElementsReader}
+import scala.util.{Failure, Success, Try}
 
-trait InputElements {
-  def getInputElements(): Seq[Int]
-}
+/**
+  * This is a service responsible for termination of run process (which have been started during test execution).
+  * It is being called to terminate processes using java.lang.System.exit() method terminating the currently running
+  * Java virtual machine.
+  *
+  * @author Pavel Tomskikh
+  */
+object ProcessTerminator {
 
-trait InputElementsBothType extends InputElements {
-  override def getInputElements(): Seq[Int] =
-    TStreamInputElementsReader.getInputElements() ++ KafkaInputElementsReader.getInputElements()
-}
+  /**
+    * Terminates the current process after executing the method
+    *
+    * @param f method after which the current process will be terminated
+    */
+  def terminateProcessAfter(f: () => Unit): Unit = {
+    val exitCode = Try(f()) match {
+      case Success(_) => 0
+      case Failure(e) =>
+        e.printStackTrace()
+        1
+    }
 
-trait InputElementsKafka extends InputElements {
-  override def getInputElements(): Seq[Int] =
-    KafkaInputElementsReader.getInputElements()
-}
-
-trait InputElementsTStream extends InputElements {
-  override def getInputElements(): Seq[Int] =
-    TStreamInputElementsReader.getInputElements()
+    System.exit(exitCode)
+  }
 }

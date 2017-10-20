@@ -20,6 +20,7 @@ package com.bwsw.sj.engine.output.benchmark
 
 import java.io.File
 
+import com.bwsw.sj.common.utils.benchmark.ProcessTerminator
 import com.bwsw.sj.engine.output.benchmark.DataFactory._
 import com.bwsw.sj.engine.output.benchmark.SjOutputModuleBenchmarkConstants.{jdbcInstanceName, pathToJdbcModule}
 
@@ -36,19 +37,19 @@ import scala.util.Try
   * @author Kseniya Tomskikh
   */
 object SjJDBCOutputModuleDestroy extends App {
-  val jdbcModule = new File(pathToJdbcModule)
+  ProcessTerminator.terminateProcessAfter { () =>
+    val jdbcModule = new File(pathToJdbcModule)
 
-  Try(clearDatabase())
-  deleteStreams()
-  deleteServices()
-  deleteProviders()
-  deleteInstance(jdbcInstanceName)
-  deleteModule(jdbcModule.getName)
+    Try(clearDatabase())
+    deleteStreams()
+    deleteServices()
+    deleteProviders()
+    deleteInstance(jdbcInstanceName)
+    deleteModule(jdbcModule.getName)
 
-  close()
-  tempHelperForConfigDestroy.deleteJdbcDriver()
-  tempHelperForConfigDestroy.deleteConfigs()
-  connectionRepository.close()
-
-  println("DONE")
+    close()
+    tempHelperForConfigDestroy.deleteJdbcDriver()
+    tempHelperForConfigDestroy.deleteConfigs()
+    connectionRepository.close()
+  }
 }

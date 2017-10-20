@@ -22,14 +22,14 @@ import java.io.File
 import java.util.logging.LogManager
 
 import com.bwsw.sj.common.config.TempHelperForConfigDestroy
-import com.bwsw.sj.common.utils.benchmark.BenchmarkUtils
+import com.bwsw.sj.common.utils.benchmark.ProcessTerminator
 import com.bwsw.sj.engine.regular.module.DataFactory._
 import com.bwsw.sj.engine.regular.module.SjRegularBenchmarkConstants._
 
 object SjRegularModuleDestroy extends App {
   LogManager.getLogManager.reset()
 
-  BenchmarkUtils.exitAfter { () =>
+  ProcessTerminator.terminateProcessAfter { () =>
     val streamService = connectionRepository.getStreamRepository
     val serviceManager = connectionRepository.getServiceRepository
     val providerService = connectionRepository.getProviderRepository
@@ -47,7 +47,5 @@ object SjRegularModuleDestroy extends App {
     val tempHelperForConfigDestroy = new TempHelperForConfigDestroy(connectionRepository)
     tempHelperForConfigDestroy.deleteConfigs()
     connectionRepository.close()
-
-    println("DONE")
   }
 }

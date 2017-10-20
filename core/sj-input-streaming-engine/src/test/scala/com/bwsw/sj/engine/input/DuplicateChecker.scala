@@ -18,12 +18,12 @@
  */
 package com.bwsw.sj.engine.input
 
-import com.bwsw.sj.common.utils.benchmark.BenchmarkUtils
+import com.bwsw.sj.common.utils.benchmark.ProcessTerminator
 import com.bwsw.sj.engine.input.DataFactory._
 
 object DuplicateChecker extends App {
 
-  BenchmarkUtils.exitAfter { () =>
+  ProcessTerminator.terminateProcessAfter { () =>
     val streamService = connectionRepository.getStreamRepository
 
     val outputConsumers = (1 to outputCount).map(x => createOutputConsumer(streamService, x.toString))

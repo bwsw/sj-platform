@@ -21,7 +21,7 @@ package com.bwsw.sj.engine.output.benchmark
 import java.io.File
 
 import com.bwsw.sj.common.utils.EngineLiterals
-import com.bwsw.sj.common.utils.benchmark.BenchmarkUtils
+import com.bwsw.sj.common.utils.benchmark.ProcessTerminator
 import com.bwsw.sj.engine.output.benchmark.DataFactory._
 import com.bwsw.sj.engine.output.benchmark.SjOutputModuleBenchmarkConstants._
 
@@ -33,12 +33,12 @@ import com.bwsw.sj.engine.output.benchmark.SjOutputModuleBenchmarkConstants._
   * ZOOKEEPER_HOSTS=176.120.25.19:2181
   * ES_HOSTS=176.120.25.19:9300
   * JDBC_HOSTS=176.120.25.19:5432  -postgresql
-  * RESTFUL_HOSTS=
+  * RESTFUL_HOSTS=localhost:45000
   *
   * @author Kseniya Tomskikh
   */
 object SjJDBCOutputModuleSetup extends App {
-  BenchmarkUtils.exitAfter { () =>
+  ProcessTerminator.terminateProcessAfter { () =>
     tempHelperForConfigSetup.setupConfigs()
     tempHelperForConfigSetup.loadJdbcDriver()
     val checkpointMode = EngineLiterals.everyNthMode
@@ -70,8 +70,6 @@ object SjJDBCOutputModuleSetup extends App {
     println("close connections")
     close()
     connectionRepository.close()
-
-    println("DONE")
   }
 }
 

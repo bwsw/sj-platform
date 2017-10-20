@@ -24,9 +24,9 @@ import com.bwsw.sj.engine.regular.module.SjRegularBenchmarkConstants._
 
 import scala.collection.JavaConverters._
 
-object KafkaInputElementsReader {
+object KafkaInputElementsReader extends InputElementsReader {
 
-  def getInputElements(): List[Int] = {
+  def getInputElements(): Seq[Int] = {
     val objectSerializer = new ObjectSerializer()
     val inputKafkaConsumer = createInputKafkaConsumer(inputCount, partitions)
 

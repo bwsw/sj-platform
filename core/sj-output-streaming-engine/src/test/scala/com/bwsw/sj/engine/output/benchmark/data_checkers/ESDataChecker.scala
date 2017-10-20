@@ -22,27 +22,30 @@ import com.bwsw.sj.common.dal.model.stream.ESStreamDomain
 import com.bwsw.sj.engine.output.benchmark.DataFactory.{esStreamName, openEsConnection, streamService}
 
 import scala.collection.JavaConverters._
-import scala.collection.mutable.ArrayBuffer
 
 /**
+  * Validates that data in Elasticsearch corresponds to data in input storage
+  *
   * @author Kseniya Tomskikh
   */
 object ESDataChecker extends DataChecker {
 
-  override def getOutputElements(): ArrayBuffer[(Int, String)] = {
+  /**
+    * Returns a data from Elasticsearch
+    *
+    * @return a data from Elasticsearch
+    */
+  override def getOutputElements(): Seq[(Int, String)] = {
     val esStream: ESStreamDomain = streamService.get(esStreamName).get.asInstanceOf[ESStreamDomain]
     val (esClient, esService) = openEsConnection(esStream)
     val outputData = esClient.search(esService.index, esStream.name)
-    val outputElements = ArrayBuffer.empty[(Int, String)]
 
-    outputData.getHits.foreach { hit =>
+    outputData.getHits.map { hit =>
       val content = hit.getSource.asScala
       val value = content("value")
       val stringValue = content("string-value")
-      outputElements.append((value.asInstanceOf[Int], stringValue.asInstanceOf[String]))
+      (value.asInstanceOf[Int], stringValue.asInstanceOf[String])
     }
-
-    outputElements
   }
 }
 

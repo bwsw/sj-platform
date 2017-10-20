@@ -22,7 +22,7 @@ import java.io.PrintStream
 import java.net.Socket
 import java.util.logging.LogManager
 
-import com.bwsw.sj.common.utils.benchmark.BenchmarkUtils
+import com.bwsw.sj.common.utils.benchmark.ProcessTerminator
 import com.bwsw.sj.engine.input.DataFactory.instancePort
 import com.bwsw.sj.engine.input.SjInputModuleBenchmarkConstants.{instanceHost, numberOfDuplicates, totalInputElements}
 
@@ -32,7 +32,7 @@ import com.bwsw.sj.engine.input.SjInputModuleBenchmarkConstants.{instanceHost, n
 object SjInputModuleDataWriter extends App {
   LogManager.getLogManager.reset()
 
-  BenchmarkUtils.exitAfter { () =>
+  ProcessTerminator.terminateProcessAfter { () =>
     val socket = new Socket(instanceHost, instancePort)
     var amountOfDuplicates = -1
     var amountOfElements = 0
@@ -45,8 +45,7 @@ object SjInputModuleDataWriter extends App {
         out.flush()
         amountOfElements += 1
         amountOfDuplicates += 1
-      }
-      else {
+      } else {
         currentElement += 1
         out.println(currentElement)
         out.flush()
@@ -55,7 +54,6 @@ object SjInputModuleDataWriter extends App {
     }
 
     socket.close()
-    println("DONE")
   }
 }
 

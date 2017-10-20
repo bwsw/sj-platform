@@ -33,7 +33,7 @@ import scala.collection.mutable.ListBuffer
   *
   * @author Pavel Tomskikh
   */
-object OutputTestRestServer extends App {
+object TestHttpServer extends App {
 
   case class Entity(value: Int, stringValue: String, txn: Long) extends Serializable
 
@@ -49,23 +49,20 @@ object OutputTestRestServer extends App {
                         response: HttpServletResponse) = {
       request.getMethod match {
         case "GET" =>
-          //println("GET")
           response.setStatus(HttpServletResponse.SC_OK)
           response.setContentType("application/json;charset=utf-8")
           val writer = response.getWriter
           val data = jsonSerializer.serialize(storage.toList)
           data.foreach(writer.println)
+
         case "POST" =>
-          //println("POST")
           val reader = request.getReader
           val data = reader.lines().toArray.map(_.asInstanceOf[String]).mkString
           val entity = jsonSerializer.deserialize[Entity](data)
-          //println(s"  $entity")
           storage += entity
+
         case "DELETE" =>
-          //println("DELETE")
           val txn = request.getParameter("txn").toLong
-          //println(s"  txn=$txn")
           storage.find(_.txn == txn) match {
             case Some(e) =>
               storage -= e
@@ -73,8 +70,8 @@ object OutputTestRestServer extends App {
             case None =>
               response.setStatus(HttpServletResponse.SC_NOT_FOUND)
           }
+
         case _ =>
-          //println("UNKNOWN")
           response.setStatus(HttpServletResponse.SC_BAD_REQUEST)
       }
       request.setHandled(true)
@@ -87,4 +84,4 @@ object OutputTestRestServer extends App {
   server.join()
 }
 
-class OutputTestRestServer
+class TestHttpServer

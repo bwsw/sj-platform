@@ -34,11 +34,13 @@ import scala.collection.mutable
 import scala.util.Try
 
 /**
+  * Checks that regular-streaming module works properly
+  *
   * @author Pavel Tomskikh
   */
 class SjRegularModuleBenchmark extends FlatSpec with Matchers with TableDrivenPropertyChecks {
   val waitingTimeout = 1000
-  val tStreamWritingTimeout = 30 * 1000
+  val tStreamWriteTimeout = 30 * 1000
   val mongoPort = findFreePort()
   val ttsPort = findFreePort()
   val serverSocket = new ServerSocket(0)
@@ -52,7 +54,7 @@ class SjRegularModuleBenchmark extends FlatSpec with Matchers with TableDrivenPr
     "TASK_NAME" -> "test-instance-for-regular-engine-task0",
     "AGENTS_HOST" -> localhost,
     "AGENTS_PORTS" -> agentsPorts.mkString(","),
-    "BENCHMARK_PORT" -> serverSocket.getLocalPort.toString)
+    "BENCHMARK_PORT" -> serverSocket.getLocalPort)
 
   val mongoServer = new EmbeddedMongo(mongoPort)
 
@@ -100,7 +102,7 @@ class SjRegularModuleBenchmark extends FlatSpec with Matchers with TableDrivenPr
         runner = runClass(classOf[SjRegularModuleRunner])
     }
 
-    Thread.sleep(tStreamWritingTimeout)
+    Thread.sleep(tStreamWriteTimeout)
     runner.destroy()
 
     val checker = runClass(classOf[SjRegularModuleStatefulTstreamChecker])
@@ -125,7 +127,7 @@ class SjRegularModuleBenchmark extends FlatSpec with Matchers with TableDrivenPr
         runner = runClass(classOf[SjRegularModuleRunner])
     }
 
-    Thread.sleep(tStreamWritingTimeout)
+    Thread.sleep(tStreamWriteTimeout)
     runner.destroy()
 
     val checker = runClass(classOf[SjRegularModuleStatefulKafkaChecker])
@@ -150,7 +152,7 @@ class SjRegularModuleBenchmark extends FlatSpec with Matchers with TableDrivenPr
         runner = runClass(classOf[SjRegularModuleRunner])
     }
 
-    Thread.sleep(tStreamWritingTimeout)
+    Thread.sleep(tStreamWriteTimeout)
     runner.destroy()
 
     val checker = runClass(classOf[SjRegularModuleStatefulBothChecker])

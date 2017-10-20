@@ -34,6 +34,8 @@ import ru.yandex.qatools.embed.postgresql.distribution.Version
 import scala.util.Try
 
 /**
+  * Checks that output-streaming module works properly
+  *
   * @author Pavel Tomskikh
   */
 class SjOutputModuleBenchmark extends FlatSpec with Matchers {
@@ -61,7 +63,6 @@ class SjOutputModuleBenchmark extends FlatSpec with Matchers {
     "JDBC_HOSTS" -> s"$localhost:$jdbcPort",
     "SILENT" -> "",
     "BENCHMARK_PORT" -> serverSocket.getLocalPort)
-    .mapValues(_.toString)
 
 
   override def withFixture(test: NoArgTest): Outcome = {
@@ -83,14 +84,12 @@ class SjOutputModuleBenchmark extends FlatSpec with Matchers {
   }
 
   "Output-streaming module" should "send data to the RESTful server properly" in {
-    val environment = commonEnvironment ++ Map(
-      "INSTANCE_NAME" -> restInstanceName,
-      "TASK_NAME" -> s"$restInstanceName-task0")
+    val environment = addInstanceToEnvironment(restInstanceName)
 
     def runClass(clazz: Class[_]): Process =
       new ClassRunner(clazz, environment = environment).start()
 
-    val restServer = runClass(classOf[OutputTestRestServer])
+    val restServer = runClass(classOf[TestHttpServer])
     val waitResponseFromRunner = new Thread(() => serverSocket.accept())
 
     val result = Try {
@@ -121,9 +120,7 @@ class SjOutputModuleBenchmark extends FlatSpec with Matchers {
   }
 
   it should "send data to the Elasticsearch properly" in {
-    val environment = commonEnvironment ++ Map(
-      "INSTANCE_NAME" -> esInstanceName,
-      "TASK_NAME" -> s"$esInstanceName-task0")
+    val environment = addInstanceToEnvironment(esInstanceName)
 
     def runClass(clazz: Class[_]): Process =
       new ClassRunner(clazz, environment = environment).start()
@@ -159,9 +156,7 @@ class SjOutputModuleBenchmark extends FlatSpec with Matchers {
   }
 
   it should "send data to the SQL-database properly" in {
-    val environment = commonEnvironment ++ Map(
-      "INSTANCE_NAME" -> jdbcInstanceName,
-      "TASK_NAME" -> s"$jdbcInstanceName-task0")
+    val environment = addInstanceToEnvironment(jdbcInstanceName)
 
     def runClass(clazz: Class[_]): Process =
       new ClassRunner(clazz, environment = environment).start()
@@ -194,5 +189,11 @@ class SjOutputModuleBenchmark extends FlatSpec with Matchers {
     server.stop()
 
     result.get
+  }
+
+  def addInstanceToEnvironment(instanceName: String): Map[String, Any] = {
+    commonEnvironment ++ Map(
+      "INSTANCE_NAME" -> instanceName,
+      "TASK_NAME" -> s"$instanceName-task0")
   }
 }

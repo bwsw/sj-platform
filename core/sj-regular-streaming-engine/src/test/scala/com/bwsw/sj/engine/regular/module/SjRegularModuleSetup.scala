@@ -23,14 +23,14 @@ import java.util.logging.LogManager
 
 import com.bwsw.sj.common.config.TempHelperForConfigSetup
 import com.bwsw.sj.common.utils.EngineLiterals
-import com.bwsw.sj.common.utils.benchmark.BenchmarkUtils
+import com.bwsw.sj.common.utils.benchmark.ProcessTerminator
 import com.bwsw.sj.engine.regular.module.DataFactory._
 import com.bwsw.sj.engine.regular.module.SjRegularBenchmarkConstants._
 
 object SjRegularModuleSetup extends App {
   LogManager.getLogManager.reset()
 
-  BenchmarkUtils.exitAfter { () =>
+  ProcessTerminator.terminateProcessAfter { () =>
     val tempHelperForConfigSetup = new TempHelperForConfigSetup(connectionRepository)
     tempHelperForConfigSetup.setupConfigs()
     val streamService = connectionRepository.getStreamRepository
@@ -54,8 +54,6 @@ object SjRegularModuleSetup extends App {
 
     createData(defaultValueOfTxns, defaultValueOfElements, partitions, inputStreamsType, inputCount)
     connectionRepository.close()
-
-    println("DONE")
   }
 }
 

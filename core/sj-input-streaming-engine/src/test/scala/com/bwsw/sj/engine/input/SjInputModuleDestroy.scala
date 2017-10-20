@@ -21,11 +21,11 @@ package com.bwsw.sj.engine.input
 import java.util.logging.LogManager
 
 import com.bwsw.sj.common.config.TempHelperForConfigDestroy
-import com.bwsw.sj.common.utils.benchmark.BenchmarkUtils
+import com.bwsw.sj.common.utils.benchmark.ProcessTerminator
 import com.bwsw.sj.engine.input.DataFactory._
 
 object SjInputModuleDestroy extends App {
-  BenchmarkUtils.exitAfter { () =>
+  ProcessTerminator.terminateProcessAfter { () =>
     LogManager.getLogManager.reset()
 
     deleteStreams(SjInputServices.streamService, outputCount)
@@ -37,7 +37,5 @@ object SjInputModuleDestroy extends App {
     val tempHelperForConfigDestroy = new TempHelperForConfigDestroy(connectionRepository)
     tempHelperForConfigDestroy.deleteConfigs()
     connectionRepository.close()
-
-    println("DONE")
   }
 }

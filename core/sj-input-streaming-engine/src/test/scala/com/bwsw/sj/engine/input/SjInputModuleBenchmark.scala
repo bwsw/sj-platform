@@ -31,6 +31,8 @@ import org.scalatest.{FlatSpec, Matchers, Outcome}
 import scala.util.Try
 
 /**
+  * Checks that input-streaming module works properly
+  *
   * @author Pavel Tomskikh
   */
 class SjInputModuleBenchmark extends FlatSpec with Matchers {
@@ -52,7 +54,6 @@ class SjInputModuleBenchmark extends FlatSpec with Matchers {
     "ENTRY_PORT" -> instancePort,
     "INSTANCE_HOSTS" -> instanceHost,
     "BENCHMARK_PORT" -> serverSocket.getLocalPort)
-    .mapValues(_.toString)
 
   val ttsServer = new ClassRunner(classOf[Server], environment = environment).start()
   Thread.sleep(waitingTimeout)

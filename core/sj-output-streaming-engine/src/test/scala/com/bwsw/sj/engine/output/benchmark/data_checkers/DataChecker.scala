@@ -20,16 +20,18 @@ package com.bwsw.sj.engine.output.benchmark.data_checkers
 
 import com.bwsw.sj.common.dal.model.stream.{StreamDomain, TStreamStreamDomain}
 import com.bwsw.sj.common.dal.repository.GenericMongoRepository
-import com.bwsw.sj.common.utils.benchmark.BenchmarkUtils
+import com.bwsw.sj.common.utils.benchmark.ProcessTerminator
 import com.bwsw.sj.engine.output.benchmark.DataFactory.{connectionRepository, createConsumer, objectSerializer, tstreamInputName}
 
 import scala.collection.mutable.ArrayBuffer
 
 /**
+  * Validates that data in output storage corresponds to data in input storage
+  *
   * @author Pavel Tomskikh
   */
 trait DataChecker extends App {
-  BenchmarkUtils.exitAfter { () =>
+  ProcessTerminator.terminateProcessAfter { () =>
     val inputElements = getInputElements()
     val outputElements = getOutputElements()
 
@@ -41,10 +43,14 @@ trait DataChecker extends App {
       "All txns elements that are consumed from output stream should equals all txns elements that are consumed from input stream")
 
     connectionRepository.close()
-    println("DONE")
   }
 
-  def getInputElements(): ArrayBuffer[(Int, String)] = {
+  /**
+    * Returns a data from input storage
+    *
+    * @return a data from input storage
+    */
+  def getInputElements(): Seq[(Int, String)] = {
     val streamService: GenericMongoRepository[StreamDomain] = connectionRepository.getStreamRepository
     val tStream: TStreamStreamDomain = streamService.get(tstreamInputName).get.asInstanceOf[TStreamStreamDomain]
     val inputConsumer = createConsumer(tStream)
@@ -65,5 +71,10 @@ trait DataChecker extends App {
     inputElements
   }
 
+  /**
+    * Returns a data from output storage
+    *
+    * @return a data from output storage
+    */
   def getOutputElements(): Seq[(Int, String)]
 }

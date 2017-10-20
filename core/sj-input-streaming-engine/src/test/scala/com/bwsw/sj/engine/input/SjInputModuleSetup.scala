@@ -21,7 +21,7 @@ package com.bwsw.sj.engine.input
 import java.util.logging.LogManager
 
 import com.bwsw.sj.common.config.TempHelperForConfigSetup
-import com.bwsw.sj.common.utils.benchmark.BenchmarkUtils
+import com.bwsw.sj.common.utils.benchmark.ProcessTerminator
 import com.bwsw.sj.engine.input.DataFactory._
 import com.bwsw.sj.engine.input.SjInputModuleBenchmarkConstants.{checkpointInterval, inputModule}
 
@@ -31,7 +31,7 @@ import com.bwsw.sj.engine.input.SjInputModuleBenchmarkConstants.{checkpointInter
 object SjInputModuleSetup extends App {
   LogManager.getLogManager.reset()
 
-  BenchmarkUtils.exitAfter { () =>
+  ProcessTerminator.terminateProcessAfter { () =>
     val tempHelperForConfigSetup = new TempHelperForConfigSetup(connectionRepository)
     tempHelperForConfigSetup.setupConfigs()
     println("config loaded")
@@ -48,7 +48,6 @@ object SjInputModuleSetup extends App {
     println("instances created")
 
     connectionRepository.close()
-    println("DONE")
   }
 }
 

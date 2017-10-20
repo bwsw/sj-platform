@@ -22,13 +22,23 @@ import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.dal.model.service.RestServiceDomain
 import com.bwsw.sj.common.dal.model.stream.RestStreamDomain
 import com.bwsw.sj.engine.output.benchmark.DataFactory.{restStreamName, streamService}
-import com.bwsw.sj.engine.output.benchmark.OutputTestRestServer.Entity
+import com.bwsw.sj.engine.output.benchmark.TestHttpServer.Entity
 import org.eclipse.jetty.client.HttpClient
 
 import scala.util.Try
 
+/**
+  * Validates that data in RESTful storage corresponds to data in input storage
+  *
+  * @author Pavel Tomskikh
+  */
 object RestDataChecker extends DataChecker {
 
+  /**
+    * Returns a data from RESTful storage
+    *
+    * @return a data from RESTful storage
+    */
   override def getOutputElements(): Seq[(Int, String)] = {
     val restStream: RestStreamDomain = streamService.get(restStreamName).get.asInstanceOf[RestStreamDomain]
 
