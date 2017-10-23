@@ -27,7 +27,7 @@ object SjBatchModuleBenchmarkConstants {
   val stateFullCheckpoint = 3
   val window = 2
   val slidingInterval = 1
-  val defaultValueOfTxns = 12
+  val defaultValueOfTxns = 24
   val defaultValueOfElements = 1
   val inputCount = 2
   val outputCount = 2

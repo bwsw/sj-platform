@@ -40,7 +40,7 @@ import scala.util.Try
   */
 class SjBatchModuleBenchmark extends FlatSpec with Matchers with TableDrivenPropertyChecks {
   val waitingTimeout = 1000
-  val tStreamWriteTimeout = 30 * 1000
+  val tStreamWriteTimeout = 60 * 1000
   val mongoPort = findFreePort()
   val ttsPort = findFreePort()
   val serverSocket = new ServerSocket(0)

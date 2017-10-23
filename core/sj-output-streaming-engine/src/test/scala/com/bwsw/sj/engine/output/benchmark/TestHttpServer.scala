@@ -40,7 +40,7 @@ object TestHttpServer extends App {
   private val config = ConfigFactory.load()
   val httpPort = config.getInt(OutputBenchmarkConfigNames.restPort)
   val jsonSerializer = new JsonSerializer
-  val storage = new ListBuffer[Entity]()
+  val storage = new ConcurrentStorage
 
   val handler = new AbstractHandler {
     override def handle(path: String,
@@ -85,3 +85,22 @@ object TestHttpServer extends App {
 }
 
 class TestHttpServer
+
+
+/**
+  * Provides concurrency access to the entities storage
+  */
+class ConcurrentStorage {
+
+  import TestHttpServer.Entity
+
+  private val list = new ListBuffer[Entity]()
+
+  def toList: Seq[Entity] = synchronized(list.toList)
+
+  def +=(e: Entity): Unit = synchronized(list += e)
+
+  def -=(e: Entity): Unit = synchronized(list -= e)
+
+  def find(p: (Entity) => Boolean): Option[Entity] = synchronized(list.find(p))
+}

@@ -270,7 +270,7 @@ object DataFactory {
 
   def createProviders() = {
     val esProvider = new ESProviderDomain(
-      esProviderName, "", esProviderHosts, "", "", new Date())
+      esProviderName, "", esProviderHosts, null, null, new Date())
     providerService.save(esProvider)
 
     providerService.save(zookeeperProvider)

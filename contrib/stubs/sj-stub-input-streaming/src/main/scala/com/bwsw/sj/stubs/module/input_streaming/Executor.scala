@@ -41,10 +41,11 @@ class Executor(manager: InputEnvironmentManager) extends InputStreamingExecutor[
     * @return Interval into buffer that probably contains a message or None
     */
   override def tokenize(buffer: ByteBuf): Option[Interval] = {
+    val readerIndex = buffer.readerIndex()
     val writeIndex = buffer.writerIndex()
-    val endIndex = buffer.indexOf(0, writeIndex, 10)
+    val endIndex = buffer.indexOf(readerIndex, writeIndex, 10)
 
-    if (endIndex != -1) Some(Interval(0, endIndex)) else None
+    if (endIndex != -1) Some(Interval(readerIndex, endIndex)) else None
   }
 
   /**
@@ -55,7 +56,7 @@ class Executor(manager: InputEnvironmentManager) extends InputStreamingExecutor[
     */
   override def parse(buffer: ByteBuf, interval: Interval) = {
 
-    val rawData = buffer.slice(interval.initialValue, interval.finalValue)
+    val rawData = buffer.slice(interval.initialValue, interval.finalValue - interval.initialValue)
 
     val data = new Array[Byte](rawData.capacity())
     rawData.getBytes(0, data)
