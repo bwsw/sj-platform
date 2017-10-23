@@ -19,6 +19,7 @@
 package com.bwsw.sj.engine.output.benchmark.data_checkers
 
 import com.bwsw.sj.common.dal.model.stream.JDBCStreamDomain
+import com.bwsw.sj.engine.core.testutils.checkers.Reader
 import com.bwsw.sj.engine.output.benchmark.DataFactory.{jdbcStreamName, openJdbcConnection, streamService}
 
 import scala.collection.mutable.ArrayBuffer
@@ -28,14 +29,19 @@ import scala.collection.mutable.ArrayBuffer
   *
   * @author Pavel Tomskikh
   */
-object JDBCDataChecker extends DataChecker {
+object JDBCDataChecker extends SjOutputModuleChecker(JDBCReader$)
+
+class JDBCDataChecker
+
+
+object JDBCReader$ extends Reader[(Int, String)] {
 
   /**
     * Returns a data from SQL database
     *
     * @return a data from SQL database
     */
-  override def getOutputElements(): ArrayBuffer[(Int, String)] = {
+  override def get(): Seq[(Int, String)] = {
     val jdbcStream: JDBCStreamDomain = streamService.get(jdbcStreamName).get.asInstanceOf[JDBCStreamDomain]
 
     val jdbcClient = openJdbcConnection(jdbcStream)
@@ -52,5 +58,3 @@ object JDBCDataChecker extends DataChecker {
     outputElements
   }
 }
-
-class JDBCDataChecker

@@ -16,22 +16,30 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.sj.engine.batch.module.checkers.elements_readers
+package com.bwsw.sj.engine.core.testutils.checkers
 
 import com.bwsw.common.ObjectSerializer
-import com.bwsw.sj.engine.batch.module.DataFactory.createInputKafkaConsumer
-import com.bwsw.sj.engine.batch.module.SjBatchModuleBenchmarkConstants.{inputCount, partitions}
+import org.apache.kafka.clients.consumer.KafkaConsumer
 
 import scala.collection.JavaConverters._
 
-object KafkaInputElementsReader extends InputElementsReader {
+/**
+  * Returns a data from Kafka
+  *
+  * @author Pavel Tomskikh
+  */
+class KafkaReader[+T](consumer: KafkaConsumer[Array[Byte], Array[Byte]]) extends Reader[T] {
 
-  def getInputElements(): Seq[Int] = {
+  /**
+    * Returns a data from Kafka
+    *
+    * @return a data from Kafka
+    */
+  def get(): Seq[T] = {
     val objectSerializer = new ObjectSerializer()
-    val inputKafkaConsumer = createInputKafkaConsumer(inputCount, partitions)
 
-    inputKafkaConsumer.poll(1000 * 20).asScala.toList
+    consumer.poll(1000 * 20).asScala.toList
       .map(_.value())
-      .map(bytes => objectSerializer.deserialize(bytes).asInstanceOf[Int])
+      .map(bytes => objectSerializer.deserialize(bytes).asInstanceOf[T])
   }
 }

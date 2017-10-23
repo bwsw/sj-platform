@@ -16,21 +16,29 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.sj.engine.batch.module.checkers.elements_readers
+package com.bwsw.sj.engine.core.testutils.checkers
 
 import com.bwsw.common.ObjectSerializer
-import com.bwsw.sj.engine.batch.module.DataFactory.createInputTstreamConsumer
-import com.bwsw.sj.engine.batch.module.SjBatchModuleBenchmarkConstants.{inputCount, partitions}
+import com.bwsw.tstreams.agents.consumer.Consumer
 
 import scala.collection.mutable.ArrayBuffer
 
-object TStreamInputElementsReader extends InputElementsReader {
+/**
+  * Returns a data from a T-Streams
+  *
+  * @author Pavel Tomskikh
+  */
+class TStreamsReader[+T](consumers: Seq[Consumer]) extends Reader[T] {
 
-  def getInputElements(): Seq[Int] = {
+  /**
+    * Returns a data from a T-Streams
+    *
+    * @return a data from a T-Streams
+    */
+  def get(): Seq[T] = {
     val objectSerializer = new ObjectSerializer()
 
-    val consumers = (1 to inputCount).map(x => createInputTstreamConsumer(partitions, x.toString))
-    val inputElements = ArrayBuffer.empty[Int]
+    val inputElements = ArrayBuffer.empty[T]
 
     consumers.foreach { consumer =>
       consumer.start()
@@ -41,7 +49,7 @@ object TStreamInputElementsReader extends InputElementsReader {
 
         while (maybeTxn.isDefined) {
           inputElements ++= maybeTxn.get.getAll.toList
-            .map(bytes => objectSerializer.deserialize(bytes).asInstanceOf[Int])
+            .map(bytes => objectSerializer.deserialize(bytes).asInstanceOf[T])
 
           maybeTxn = consumer.getTransaction(partition)
         }

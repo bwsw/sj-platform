@@ -16,25 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.sj.engine.batch.module.checkers.elements_readers
+package com.bwsw.sj.engine.output.benchmark.data_checkers
 
-import com.bwsw.common.ObjectSerializer
-import com.bwsw.sj.common.dal.repository.ConnectionRepository
-import com.bwsw.sj.engine.batch.module.DataFactory.createStateConsumer
-import com.bwsw.sj.engine.batch.utils.StateHelper
+import com.bwsw.sj.engine.core.testutils.checkers.{Reader, SjModuleChecker}
 
-object StateReader {
-
-  def getStateSum(connectionRepository: ConnectionRepository) = {
-    val streamService = connectionRepository.getStreamRepository
-    val objectSerializer: ObjectSerializer = new ObjectSerializer()
-
-    val consumer = createStateConsumer(streamService)
-    consumer.start()
-    val initialState = StateHelper.getState(consumer, objectSerializer)
-    val sum = initialState("sum").asInstanceOf[Int]
-    consumer.stop()
-
-    sum
-  }
-}
+/**
+  * Validates that data in output storage corresponds to data in input storage
+  *
+  * @param outputElementsReader reads data from output storage
+  * @author Pavel Tomskikh
+  */
+abstract class SjOutputModuleChecker(outputElementsReader: Reader[(Int, String)])
+  extends SjModuleChecker(Seq(ElementsReaderFactory.createInputElementsReader), outputElementsReader)

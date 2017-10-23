@@ -16,22 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.sj.engine.regular.module.checkers.elements_readers
+package com.bwsw.sj.engine.core.testutils.checkers
 
 import com.bwsw.common.ObjectSerializer
-import com.bwsw.sj.engine.regular.module.DataFactory._
-import com.bwsw.sj.engine.regular.module.SjRegularBenchmarkConstants._
+import com.bwsw.sj.engine.core.testutils.StateHelper
+import com.bwsw.tstreams.agents.consumer.Consumer
 
-import scala.collection.JavaConverters._
+object StateReader {
+  def getStateSum(consumer: Consumer) = {
+    val objectSerializer: ObjectSerializer = new ObjectSerializer()
 
-object KafkaInputElementsReader extends InputElementsReader {
+    consumer.start()
+    val initialState = StateHelper.getState(consumer, objectSerializer)
+    val sum = initialState("sum").asInstanceOf[Int]
+    consumer.stop()
 
-  def getInputElements(): Seq[Int] = {
-    val objectSerializer = new ObjectSerializer()
-    val inputKafkaConsumer = createInputKafkaConsumer(inputCount, partitions)
-
-    inputKafkaConsumer.poll(1000 * 20).asScala.toList
-      .map(_.value())
-      .map(bytes => objectSerializer.deserialize(bytes).asInstanceOf[Int])
+    sum
   }
 }

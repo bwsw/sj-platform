@@ -18,42 +18,23 @@
  */
 package com.bwsw.sj.engine.batch.module.checkers
 
-import com.bwsw.sj.common.utils.benchmark.ProcessTerminator
-import com.bwsw.sj.engine.batch.module.DataFactory.connectionRepository
-import com.bwsw.sj.engine.batch.module.checkers.elements_readers._
-
-abstract class SjBatchModuleStatefulChecker(inputElementsReaders: Seq[InputElementsReader]) extends App {
-  ProcessTerminator.terminateProcessAfter { () =>
-    val inputElements = inputElementsReaders.flatMap(_.getInputElements())
-    val outputElements = OutputElementsReader.getOutputElements()
-
-    val sum = StateReader.getStateSum(connectionRepository)
-    connectionRepository.close()
-
-    assert(inputElements.length == outputElements.length,
-      s"Count of all txns elements that are consumed from output stream (${outputElements.length}) " +
-        s"should equals count of all txns elements that are consumed from input stream (${inputElements.length})")
-
-    assert(inputElements.forall(x => outputElements.contains(x)) && outputElements.forall(x => inputElements.contains(x)),
-      "All txns elements that are consumed from output stream should equals all txns elements that are consumed from input stream")
-
-    assert(sum == inputElements.sum,
-      "Sum of all txns elements that are consumed from input stream should equals state variable sum")
-  }
-}
-
+import com.bwsw.sj.engine.batch.module.checkers.ElementsReaderFactory._
 
 object SjBatchModuleStatefulBothChecker
-  extends SjBatchModuleStatefulChecker(Seq(TStreamInputElementsReader, KafkaInputElementsReader))
+  extends SjBatchModuleChecker(
+    Seq(createTStreamsInputElementsReader, createKafkaInputElementsReader),
+    Some(createStateConsumer))
 
 class SjBatchModuleStatefulBothChecker
 
 
-object SjBatchModuleStatefulTstreamChecker extends SjBatchModuleStatefulChecker(Seq(TStreamInputElementsReader))
+object SjBatchModuleStatefulTstreamChecker
+  extends SjBatchModuleChecker(Seq(createTStreamsInputElementsReader), Some(createStateConsumer))
 
 class SjBatchModuleStatefulTstreamChecker
 
 
-object SjBatchModuleStatefulKafkaChecker extends SjBatchModuleStatefulChecker(Seq(KafkaInputElementsReader))
+object SjBatchModuleStatefulKafkaChecker
+  extends SjBatchModuleChecker(Seq(createKafkaInputElementsReader), Some(createStateConsumer))
 
 class SjBatchModuleStatefulKafkaChecker

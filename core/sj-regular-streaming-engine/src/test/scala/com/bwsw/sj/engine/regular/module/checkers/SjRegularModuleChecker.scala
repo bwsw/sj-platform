@@ -16,25 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.sj.engine.regular.module.checkers.elements_readers
+package com.bwsw.sj.engine.regular.module.checkers
 
-import com.bwsw.common.ObjectSerializer
-import com.bwsw.sj.common.dal.repository.ConnectionRepository
-import com.bwsw.sj.engine.regular.module.DataFactory._
-import com.bwsw.sj.engine.regular.utils.StateHelper
+import com.bwsw.sj.engine.core.testutils.checkers.{Reader, SjModuleChecker}
+import com.bwsw.sj.engine.regular.module.checkers.ElementsReaderFactory.createOutputElementsReader
+import com.bwsw.tstreams.agents.consumer.Consumer
 
-object StateReader {
-
-  def getStateSum(connectionRepository: ConnectionRepository) = {
-    val streamService = connectionRepository.getStreamRepository
-    val objectSerializer: ObjectSerializer = new ObjectSerializer()
-
-    val consumer = createStateConsumer(streamService)
-    consumer.start()
-    val initialState = StateHelper.getState(consumer, objectSerializer)
-    val sum = initialState("sum").asInstanceOf[Int]
-    consumer.stop()
-
-    sum
-  }
-}
+/**
+  * Validates that data in output stream corresponds data in output stream and data in state is correct
+  *
+  * @param inputElementsReaders reads data from input stream
+  * @param stateConsumer        consumer for state stream
+  * @author Pavel Tomskikh
+  */
+abstract class SjRegularModuleChecker(inputElementsReaders: Seq[Reader[Int]],
+                                      stateConsumer: Option[Consumer] = None)
+  extends SjModuleChecker(inputElementsReaders, createOutputElementsReader, stateConsumer)

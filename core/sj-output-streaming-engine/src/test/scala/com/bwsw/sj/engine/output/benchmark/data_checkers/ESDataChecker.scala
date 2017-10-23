@@ -19,6 +19,7 @@
 package com.bwsw.sj.engine.output.benchmark.data_checkers
 
 import com.bwsw.sj.common.dal.model.stream.ESStreamDomain
+import com.bwsw.sj.engine.core.testutils.checkers.Reader
 import com.bwsw.sj.engine.output.benchmark.DataFactory.{esStreamName, openEsConnection, streamService}
 
 import scala.collection.JavaConverters._
@@ -28,14 +29,19 @@ import scala.collection.JavaConverters._
   *
   * @author Kseniya Tomskikh
   */
-object ESDataChecker extends DataChecker {
+object ESDataChecker extends SjOutputModuleChecker(ESReader$)
+
+class ESDataChecker
+
+
+object ESReader$ extends Reader[(Int, String)] {
 
   /**
     * Returns a data from Elasticsearch
     *
     * @return a data from Elasticsearch
     */
-  override def getOutputElements(): Seq[(Int, String)] = {
+  override def get(): Seq[(Int, String)] = {
     val esStream: ESStreamDomain = streamService.get(esStreamName).get.asInstanceOf[ESStreamDomain]
     val (esClient, esService) = openEsConnection(esStream)
     val outputData = esClient.search(esService.index, esStream.name)
@@ -48,5 +54,3 @@ object ESDataChecker extends DataChecker {
     }
   }
 }
-
-class ESDataChecker

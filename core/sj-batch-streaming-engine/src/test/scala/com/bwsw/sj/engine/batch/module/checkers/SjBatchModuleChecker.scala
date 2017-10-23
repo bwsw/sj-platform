@@ -18,13 +18,16 @@
  */
 package com.bwsw.sj.engine.batch.module.checkers
 
-import com.bwsw.sj.engine.batch.module.checkers.ElementsReaderFactory._
+import com.bwsw.sj.engine.core.testutils.checkers.{Reader, SjModuleChecker}
+import com.bwsw.tstreams.agents.consumer.Consumer
 
-object SjBatchModuleStatelessBothChecker
-  extends SjBatchModuleChecker(Seq(createTStreamsInputElementsReader, createKafkaInputElementsReader))
-
-object SjBatchModuleStatelessKafkaChecker
-  extends SjBatchModuleChecker(Seq(createKafkaInputElementsReader))
-
-object SjBatchModuleStatelessTstreamChecker
-  extends SjBatchModuleChecker(Seq(createTStreamsInputElementsReader))
+/**
+  * Validates that data in output stream corresponds data in output stream and data in state is correct
+  *
+  * @param inputElementsReaders reads data from input stream
+  * @param stateConsumer        consumer for state stream
+  * @author Pavel Tomskikh
+  */
+abstract class SjBatchModuleChecker(inputElementsReaders: Seq[Reader[Int]],
+                                    stateConsumer: Option[Consumer] = None)
+  extends SjModuleChecker(inputElementsReaders, OutputReader$, stateConsumer)

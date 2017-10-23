@@ -21,6 +21,7 @@ package com.bwsw.sj.engine.output.benchmark.data_checkers
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.dal.model.service.RestServiceDomain
 import com.bwsw.sj.common.dal.model.stream.RestStreamDomain
+import com.bwsw.sj.engine.core.testutils.checkers.Reader
 import com.bwsw.sj.engine.output.benchmark.DataFactory.{restStreamName, streamService}
 import com.bwsw.sj.engine.output.benchmark.TestHttpServer.Entity
 import org.eclipse.jetty.client.HttpClient
@@ -32,14 +33,19 @@ import scala.util.Try
   *
   * @author Pavel Tomskikh
   */
-object RestDataChecker extends DataChecker {
+object RestDataChecker extends SjOutputModuleChecker(RestReader$)
+
+class RestDataChecker
+
+
+object RestReader$ extends Reader[(Int, String)] {
 
   /**
     * Returns a data from RESTful storage
     *
     * @return a data from RESTful storage
     */
-  override def getOutputElements(): Seq[(Int, String)] = {
+  override def get(): Seq[(Int, String)] = {
     val restStream: RestStreamDomain = streamService.get(restStreamName).get.asInstanceOf[RestStreamDomain]
 
     val jsonSerializer = new JsonSerializer()
@@ -62,5 +68,3 @@ object RestDataChecker extends DataChecker {
     outputElements
   }
 }
-
-class RestDataChecker
