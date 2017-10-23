@@ -18,6 +18,8 @@
  */
 package com.bwsw.sj.engine.regular.module
 
+import com.bwsw.sj.engine.core.testutils.Constants
+
 /**
   * @author Pavel Tomskikh
   */
@@ -34,5 +36,6 @@ object SjRegularBenchmarkConstants {
   val tStreamMode = "tstream"
   val commonMode = "both"
 
-  val modulePath = "../../contrib/stubs/sj-stub-regular-streaming/target/scala-2.12/sj-stub-regular-streaming-1.0-SNAPSHOT.jar"
+  val modulePath = s"../../contrib/stubs/sj-stub-regular-streaming/target/scala-2.12/" +
+    s"sj-stub-regular-streaming_2.12-${Constants.sjVersion}.jar"
 }

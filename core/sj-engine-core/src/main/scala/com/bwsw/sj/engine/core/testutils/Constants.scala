@@ -16,20 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.sj.engine.input
+package com.bwsw.sj.engine.core.testutils
 
-import java.io.File
-
-import com.bwsw.sj.engine.core.testutils.Constants
-
-/**
-  * @author Pavel Tomskikh
-  */
-object SjInputModuleBenchmarkConstants {
-  val instanceHost = "localhost"
-  val inputModule = new File(s"../../contrib/stubs/sj-stub-input-streaming/target/scala-2.12/" +
-    s"sj-stub-input-streaming_2.12-${Constants.sjVersion}.jar")
-  val checkpointInterval = 10
-  val numberOfDuplicates = 10
-  val totalInputElements = 2 * checkpointInterval + numberOfDuplicates // increase/decrease a constant to change the number of input elements
+object Constants {
+  val sjVersion = "1.0-SNAPSHOT"
 }

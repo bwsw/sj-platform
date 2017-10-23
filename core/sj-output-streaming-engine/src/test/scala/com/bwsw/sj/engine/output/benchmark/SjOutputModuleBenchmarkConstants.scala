@@ -18,6 +18,8 @@
  */
 package com.bwsw.sj.engine.output.benchmark
 
+import com.bwsw.sj.engine.core.testutils.Constants
+
 object SjOutputModuleBenchmarkConstants {
   val countTxns = 20
   val countElements = 50
@@ -31,7 +33,10 @@ object SjOutputModuleBenchmarkConstants {
   val jdbcInstanceName = "test-jdbc-instance-for-output-engine"
   val restInstanceName = "test-rest-instance-for-output-engine"
 
-  val pathToESModule = "../../contrib/stubs/sj-stub-es-output-streaming/target/scala-2.12/sj-stub-es-output-streaming-1.0-SNAPSHOT.jar"
-  val pathToJdbcModule = "../../contrib/stubs/sj-stub-jdbc-output-streaming/target/scala-2.12/sj-stub-jdbc-output-streaming-1.0-SNAPSHOT.jar"
-  val pathToRestModule = "../../contrib/stubs/sj-stub-rest-output-streaming/target/scala-2.12/sj-stub-rest-output-streaming-1.0-SNAPSHOT.jar"
+  val pathToESModule = s"../../contrib/stubs/sj-stub-es-output-streaming/target/scala-2.12/" +
+    s"sj-stub-es-output-streaming_2.12-${Constants.sjVersion}.jar"
+  val pathToJdbcModule = s"../../contrib/stubs/sj-stub-jdbc-output-streaming/target/scala-2.12/" +
+    s"sj-stub-jdbc-output-streaming_2.12-${Constants.sjVersion}.jar"
+  val pathToRestModule = s"../../contrib/stubs/sj-stub-rest-output-streaming/target/scala-2.12/" +
+    s"sj-stub-rest-output-streaming_2.12-${Constants.sjVersion}.jar"
 }

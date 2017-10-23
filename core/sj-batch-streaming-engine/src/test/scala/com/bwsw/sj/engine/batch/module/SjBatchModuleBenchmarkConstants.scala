@@ -18,6 +18,8 @@
  */
 package com.bwsw.sj.engine.batch.module
 
+import com.bwsw.sj.engine.core.testutils.Constants
+
 /**
   * @author Pavel Tomskikh
   */
@@ -35,5 +37,6 @@ object SjBatchModuleBenchmarkConstants {
   val tStreamMode = "tstream"
   val commonMode = "both"
 
-  val modulePath = "../../contrib/stubs/sj-stub-batch-streaming/target/scala-2.12/sj-stub-batch-streaming-1.0-SNAPSHOT.jar"
+  val modulePath = s"../../contrib/stubs/sj-stub-batch-streaming/target/scala-2.12/" +
+    s"sj-stub-batch-streaming_2.12-${Constants.sjVersion}.jar"
 }
