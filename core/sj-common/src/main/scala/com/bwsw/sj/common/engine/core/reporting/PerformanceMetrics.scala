@@ -59,14 +59,26 @@ class PerformanceMetrics(performanceMetrics: PerformanceMetricsReporter, threadN
     * @param elementSize size of appended element
     */
   def addElementToOutputEnvelope(name: String, envelopeID: String, elementSize: Long): Unit =
-    envelopesQueue.put(OutputEnvelope(name, envelopeID, elementSize))
+    envelopesQueue.put(OutputEnvelope(name, envelopeID, Right(elementSize)))
+
+  /**
+    * Invokes when a new element is sent to txn of some output stream
+    *
+    * @param name       stream name
+    * @param envelopeID id of envelope of output stream
+    * @param element    appended element
+    */
+  def addElementToOutputEnvelope(name: String, envelopeID: String, element: AnyRef): Unit =
+    envelopesQueue.put(OutputEnvelope(name, envelopeID, Left(element)))
 
   override def call(): Unit = {
     while (true) {
       envelopesQueue.poll(EngineLiterals.eventWaitTimeout, TimeUnit.MILLISECONDS) match {
         case InputEnvelope(name, elements) =>
           performanceMetrics.addEnvelopeToInputStream(elements, name)
-        case OutputEnvelope(name, envelopeID, elementSize) =>
+        case OutputEnvelope(name, envelopeID, Left(element)) =>
+          performanceMetrics.addElementToOutputEnvelope(name, envelopeID, element)
+        case OutputEnvelope(name, envelopeID, Right(elementSize)) =>
           performanceMetrics.addElementToOutputEnvelope(name, envelopeID, elementSize)
         case null =>
         case message => handleCustomMessage(message)
@@ -88,6 +100,6 @@ object PerformanceMetrics {
 
   case class InputEnvelope(name: String, elements: List[AnyRef]) extends Message
 
-  case class OutputEnvelope(name: String, envelopeID: String, elementSize: Long) extends Message
+  case class OutputEnvelope(name: String, envelopeID: String, element: Either[AnyRef, Long]) extends Message
 
 }

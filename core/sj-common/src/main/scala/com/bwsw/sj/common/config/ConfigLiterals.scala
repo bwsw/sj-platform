@@ -60,4 +60,6 @@ object ConfigLiterals {
   val frameworkMaxLaunchDelaySeconds = s"$systemDomain.framework-max-launch-delay-seconds"
 
   val zkSessionTimeoutDefault = 3000
+
+  val outputProcessorParallelism = s"$systemDomain.output-processor-parallelism"
 }
