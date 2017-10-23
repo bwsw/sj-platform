@@ -36,9 +36,9 @@ Executor
 
 An executor is a key component that performs the data processing. It receives the data flow and processes it in correspondence with the parameters of module specification. It utilizes an instance/instances for processing. An instance is a full range of settings for an exact module. 
 
-Data-Flow Processing in Modules
+Data Processing Flow in Modules
 ---------------------------------
-In general, data-flow processing in modules can be described in a simple scheme.
+In general, data processing in modules can be generally described in a simple scheme.
 
 A module is started at the moment it gets data from an engine. The engine is a .jar file containing required configuration settings. It serializes/deserializes the flow of data into a proper format suitable for processing/storing. The engine is started via a Mesos framework. The framework then renders the statistics on task execution for a started instance.
 
