@@ -16,18 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.sj.engine.core.testutils.benchmark.read_kafka.batch
+package com.bwsw.sj.engine.core.testutils.benchmark.loader.tstreams
 
-import com.bwsw.sj.engine.core.testutils.benchmark.batch.BatchReaderBenchmarkConfig
-import com.bwsw.sj.engine.core.testutils.benchmark.read_kafka.KafkaReaderBenchmarkConfig
+import java.util.UUID
+
+import com.bwsw.sj.common.utils.BenchmarkConfigNames.{tStreamsPrefixConfig, tStreamsSizePerTransaction, tStreamsTokenConfig, zooKeeperAddressConfig}
+import com.bwsw.sj.engine.core.testutils.benchmark.loader.BenchmarkDataLoaderConfig
 import com.typesafe.config.Config
 
 /**
-  * Loads the config parameters from typesafe config for [[BatchKafkaReaderBenchmark]]
+  * Contains configuration of T-Streams stream
   *
-  * @param config               typesafe config
-  * @param outputFilenamePrefix prefix for default name of output file
   * @author Pavel Tomskikh
   */
-class BatchKafkaReaderBenchmarkConfig(config: Config, outputFilenamePrefix: String)
-  extends KafkaReaderBenchmarkConfig(config, outputFilenamePrefix) with BatchReaderBenchmarkConfig
+class TStreamsBenchmarkDataLoaderConfig(override protected val config: Config) extends BenchmarkDataLoaderConfig {
+  val zooKeeperAddress = config.getString(zooKeeperAddressConfig)
+  val prefix = config.getString(tStreamsPrefixConfig)
+  val token = config.getString(tStreamsTokenConfig)
+  val sizePerTransaction = config.getString(tStreamsSizePerTransaction).split(",").map(_.toLong)
+  val stream = "performance-benchmark-" + UUID.randomUUID().toString
+}

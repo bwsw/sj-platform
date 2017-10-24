@@ -16,45 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.sj.engine.regular.benchmark.utils
+package com.bwsw.sj.engine.core.testutils.benchmark.loader.kafka
 
-import java.io.{BufferedReader, File, FileReader}
-import java.net.ServerSocket
+import com.bwsw.sj.engine.core.testutils.benchmark.loader.BenchmarkDataSenderParameters
 
 /**
-  * Provides some useful methods for benchmarks
+  * Contains parameters of data that sends into Kafka
   *
+  * @param messageSize  size of one message
+  * @param messageCount count of messages
   * @author Pavel Tomskikh
   */
-object BenchmarkUtils {
+case class KafkaBenchmarkDataSenderParameters(messageSize: Long, messageCount: Long)
+  extends BenchmarkDataSenderParameters {
 
-  /**
-    * Retrieves result from file
-    *
-    * @param outputFile file that must contain result
-    * @return result if a file exists or None otherwise
-    */
-  def retrieveResultFromFile(outputFile: File): Option[String] = {
-    if (outputFile.exists()) {
-      val reader = new BufferedReader(new FileReader(outputFile))
-      val result = reader.readLine()
-      reader.close()
-      outputFile.delete()
-
-      Some(result)
-    }
-    else
-      None
-  }
-
-  /**
-    * Returns free port
-    */
-  def findFreePort(): Int = {
-    val randomSocket = new ServerSocket(0)
-    val port = randomSocket.getLocalPort
-    randomSocket.close()
-
-    port
-  }
+  override def toSeq: Seq[Any] = Seq(messageSize, messageCount)
 }

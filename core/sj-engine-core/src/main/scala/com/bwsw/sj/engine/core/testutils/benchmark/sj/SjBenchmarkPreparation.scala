@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.sj.engine.core.testutils.benchmark.regular
+package com.bwsw.sj.engine.core.testutils.benchmark.sj
 
 import java.io.File
 import java.util.Date

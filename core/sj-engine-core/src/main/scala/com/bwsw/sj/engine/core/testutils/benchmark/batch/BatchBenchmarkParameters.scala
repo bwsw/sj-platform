@@ -16,9 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.sj.engine.core.testutils.benchmark
+package com.bwsw.sj.engine.core.testutils.benchmark.batch
 
-class ReaderBenchmarkResult(results: Seq[Long]) {
-  def averageResult: Long =
-    results.sum / results.length
+import com.bwsw.sj.engine.core.testutils.benchmark.BenchmarkParameters
+
+/**
+  * Parameters of application in regular mode for specific test
+  *
+  * @param batchSize       batch size
+  * @param windowSize      batches in one window
+  * @param slidingInterval sliding interval
+  * @author Pavel Tomskikh
+  */
+case class BatchBenchmarkParameters(batchSize: Int, windowSize: Int, slidingInterval: Int) extends BenchmarkParameters {
+
+  /**
+    * Returns list of parameters
+    *
+    * @return list of parameters
+    */
+  override def toSeq = Seq(batchSize, windowSize, slidingInterval)
 }

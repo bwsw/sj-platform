@@ -16,24 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.sj.engine.regular.benchmark.read_tstreams
+package com.bwsw.sj.engine.core.testutils.benchmark
+
+import java.util.Date
 
 import com.bwsw.sj.common.utils.BenchmarkConfigNames._
-import com.bwsw.sj.engine.core.testutils.benchmark.ReaderBenchmarkConfig
 import com.typesafe.config.Config
 
+import scala.util.Try
+
 /**
-  * Loads the config parameters from typesafe config for [[TStreamsReaderBenchmark]]
+  * Loads the config parameters from typesafe config for [[BenchmarkRunner]]
   *
-  * @param config               typesafe config
-  * @param outputFilenamePrefix prefix for default name of output file
   * @author Pavel Tomskikh
   */
-class TStreamsReaderBenchmarkConfig(override protected val config: Config,
-                                    override protected val outputFilenamePrefix: String)
-  extends ReaderBenchmarkConfig {
-
-  val tStreamsPrefix = config.getString(tStreamsPrefixConfig)
-  val tStreamsToken = config.getString(tStreamsTokenConfig)
-  val sizePerTransaction = config.getString(tStreamsSizePerTransaction)
+class BenchmarkRunnerConfig(config: Config, outputFilenamePrefix: String) {
+  private val format = new java.text.SimpleDateFormat("yyyy-MM-dd-HH-mm-ss")
+  val outputFileName = Try(config.getString(outputFileConfig))
+    .getOrElse(s"$outputFilenamePrefix-${format.format(new Date())}")
+  val repetitions = config.getInt(repetitionsConfig)
 }

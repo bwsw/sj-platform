@@ -27,7 +27,8 @@ import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.CommonAppConfigNames
 import com.bwsw.sj.common.utils.benchmark.ClassRunner
 import com.bwsw.sj.engine.batch.BatchTaskRunner
-import com.bwsw.sj.engine.core.testutils.benchmark.read_kafka.batch.BatchKafkaReaderBenchmark
+import com.bwsw.sj.engine.core.testutils.benchmark.batch.{BatchBenchmark, BatchBenchmarkConfig, BatchBenchmarkParameters}
+import com.bwsw.sj.engine.core.testutils.benchmark.loader.kafka.KafkaBenchmarkDataLoaderConfig
 import com.bwsw.sj.engine.core.testutils.{Server, TestStorageServer}
 import com.typesafe.config.ConfigFactory
 
@@ -38,18 +39,17 @@ import com.typesafe.config.ConfigFactory
   *
   * Host and port must point to the ZooKeeper server that used by the Kafka server.
   *
-  * @param zkHost       ZooKeeper server's host
-  * @param zkPort       ZooKeeper server's port
-  * @param kafkaAddress Kafka server's address
-  * @param words        list of words that are sent to the Kafka server
+  * @param benchmarkConfig configuration of application
+  * @param senderConfig    configuration of Kafka topic
+  * @param zkHost          ZooKeeper server's host
+  * @param zkPort          ZooKeeper server's port
   * @author Pavel Tomskikh
   */
-class SjBenchmark(zkHost: String,
-                  zkPort: Int,
-                  kafkaAddress: String,
-                  words: Array[String]) extends {
-  private val zooKeeperAddress = zkHost + ":" + zkPort
-} with BatchKafkaReaderBenchmark(zooKeeperAddress, kafkaAddress, words) {
+class SjBenchmark(benchmarkConfig: BatchBenchmarkConfig,
+                  senderConfig: KafkaBenchmarkDataLoaderConfig,
+                  zkHost: String,
+                  zkPort: Int)
+  extends BatchBenchmark(benchmarkConfig) {
 
   private val moduleFilename = "../../contrib/benchmarks/sj-batch-performance-benchmark/target/scala-2.12/" +
     "sj-batch-performance-benchmark-1.0-SNAPSHOT.jar"
@@ -64,15 +64,16 @@ class SjBenchmark(zkHost: String,
   private val config = ConfigFactory.load()
   private val mongoDatabase = config.getString(CommonAppConfigNames.mongoDbName)
   private val mongoAuthChecker = new MongoAuthChecker(mongoAddress, mongoDatabase)
-  private lazy val connectionRepository = new ConnectionRepository(mongoAuthChecker, mongoAddress, mongoDatabase, None, None)
+  private lazy val connectionRepository =
+    new ConnectionRepository(mongoAuthChecker, mongoAddress, mongoDatabase, None, None)
 
   private val benchmarkPreparation = new SjBenchmarkPreparation(
     mongoPort = mongoPort,
     zooKeeperHost = zkHost,
     zooKeeperPort = zkPort,
     module = module,
-    kafkaAddress = kafkaAddress,
-    kafkaTopic = kafkaTopic,
+    kafkaAddress = senderConfig.kafkaAddress,
+    kafkaTopic = senderConfig.topic,
     zkNamespace = "benchmark",
     tStreamPrefix = TestStorageServer.defaultPrefix,
     tStreamToken = TestStorageServer.defaultToken,
@@ -93,7 +94,7 @@ class SjBenchmark(zkHost: String,
   /**
     * Starts [[com.bwsw.sj.engine.core.testutils.TestStorageServer]] and mongo servers
     */
-  def startServices(): Unit = {
+  private def startServices(): Unit = {
     mongoServer.start()
     println("Mongo server started")
   }
@@ -101,7 +102,9 @@ class SjBenchmark(zkHost: String,
   /**
     * Upload data in a mongo storage
     */
-  def prepare(): Unit = {
+  override def prepare(): Unit = {
+    startServices()
+
     val tempHelperForConfigSetup = new TempHelperForConfigSetup(connectionRepository)
     tempHelperForConfigSetup.setupConfigs(lowWatermark = 10000)
     println("Config settings loaded")
@@ -120,19 +123,16 @@ class SjBenchmark(zkHost: String,
     super.stop()
   }
 
-  override protected def runProcess(messagesCount: Long,
-                                    batchSize: Int,
-                                    windowSize: Int,
-                                    slidingInterval: Int): Process = {
+  override protected def runProcess(parameters: BatchBenchmarkParameters, messagesCount: Long): Process = {
     maybeTssProcess.foreach(_.destroy())
     startTssProcess()
 
     benchmarkPreparation.loadInstance(
       outputFile.getAbsolutePath,
       messagesCount,
-      batchSize,
-      windowSize,
-      slidingInterval,
+      parameters.batchSize,
+      parameters.windowSize,
+      parameters.slidingInterval,
       connectionRepository.getInstanceRepository)
 
     new ClassRunner(classOf[BatchTaskRunner], environment = environment).start()
@@ -140,7 +140,7 @@ class SjBenchmark(zkHost: String,
 
 
   private def startTssProcess(): Unit = {
-    val tssEnv = Map("ZOOKEEPER_HOSTS" -> zooKeeperAddress, "TSS_PORT" -> findFreePort().toString)
+    val tssEnv = Map("ZOOKEEPER_HOSTS" -> senderConfig.zooKeeperAddress, "TSS_PORT" -> findFreePort().toString)
 
     maybeTssProcess = Some(new ClassRunner(classOf[Server], environment = tssEnv).start())
     Thread.sleep(5000)

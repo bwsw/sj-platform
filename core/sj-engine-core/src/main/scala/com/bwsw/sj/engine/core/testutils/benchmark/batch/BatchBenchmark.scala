@@ -18,17 +18,23 @@
  */
 package com.bwsw.sj.engine.core.testutils.benchmark.batch
 
-import com.bwsw.sj.common.utils.BenchmarkConfigNames._
-import com.bwsw.sj.engine.core.testutils.benchmark.ReaderBenchmarkConfig
+import com.bwsw.sj.engine.core.testutils.benchmark.Benchmark
 
 /**
-  * Loads the config parameters from typesafe config for [[BatchReaderBenchmark]]
+  * Provides methods for testing the speed of reading data from a storage by some application in a batch mode
   *
+  * @param benchmarkConfig configuration of application
   * @author Pavel Tomskikh
   */
-trait BatchReaderBenchmarkConfig extends ReaderBenchmarkConfig {
+abstract class BatchBenchmark(benchmarkConfig: BatchBenchmarkConfig)
+  extends Benchmark[BatchBenchmarkParameters] {
 
-  val batchSizes = config.getString(batchSizesConfig).split(",").map(_.toInt)
-  val windowSizes = config.getString(windowSizesConfig).split(",").map(_.toInt)
-  val slidingIntervals = config.getString(slidingIntervalsConfig).split(",").map(_.toInt)
+  override protected val warmingUpParams: BatchBenchmarkParameters = BatchBenchmarkParameters(1, 1, 1)
+
+  override def iterator: Iterator[BatchBenchmarkParameters] = {
+    benchmarkConfig.batchSizes.flatMap(batchSize =>
+      benchmarkConfig.windowSizes.flatMap(windowSize =>
+        benchmarkConfig.slidingIntervals.map(slidingInterval =>
+          BatchBenchmarkParameters(batchSize, windowSize, slidingInterval)))).iterator
+  }
 }

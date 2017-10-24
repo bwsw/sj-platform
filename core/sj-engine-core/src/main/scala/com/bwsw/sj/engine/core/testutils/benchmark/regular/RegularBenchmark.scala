@@ -18,39 +18,36 @@
  */
 package com.bwsw.sj.engine.core.testutils.benchmark.regular
 
-import com.bwsw.sj.engine.core.testutils.benchmark.ReaderBenchmark
+import com.bwsw.sj.engine.core.testutils.benchmark.{Benchmark, BenchmarkParameters}
 
 /**
-  * Provides methods for testing the speed of reading data from storage by some application.
+  * Provides methods for testing the speed of handling data by some application
   *
   * @author Pavel Tomskikh
   */
-trait RegularReaderBenchmark extends ReaderBenchmark {
+trait RegularBenchmark extends Benchmark[BenchmarkParameters] {
+  override protected val warmingUpParams: BenchmarkParameters = RegularBenchmarkParameters
+
+  override def iterator: Iterator[BenchmarkParameters] =
+    Seq(RegularBenchmarkParameters).iterator
+
 
   /**
-    * Performs the first test because it needs more time than subsequent tests
+    * Runs an application under test with specific parameters in separate process
+    *
+    * @param benchmarkParameters specific parameters
+    * @param messagesCount       count of messages
+    * @return process with application under test
     */
-  def warmUp(): Long = {
-    clearStorage()
-    sendData(warmingUpMessageSize, warmingUpMessagesCount)
-    runTest(warmingUpMessagesCount)
-  }
+  override protected def runProcess(benchmarkParameters: BenchmarkParameters, messagesCount: Long): Process =
+    runProcess(messagesCount)
+
 
   /**
-    * Runs an application under test
+    * Runs an application under test in separate process
     *
     * @param messagesCount count of messages
-    * @return time in milliseconds within which an application under test reads messages from a storage
-    */
-  def runTest(messagesCount: Long): Long =
-    awaitResult(runProcess(messagesCount))
-
-
-  /**
-    * Used to run an application under test in a separate process
-    *
-    * @param messagesCount count of messages
-    * @return process of an application under test
+    * @return process with application under test
     */
   protected def runProcess(messagesCount: Long): Process
 }

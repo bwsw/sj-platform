@@ -18,17 +18,17 @@
  */
 package com.bwsw.sj.engine.regular.benchmark.read_tstreams
 
-import java.util.{Calendar, Date}
+import java.util.Calendar
 
 import com.bwsw.sj.common.utils.BenchmarkConfigNames._
-import com.bwsw.sj.common.utils.BenchmarkLiterals.Regular.sjTStreamsDefaultOutputFile
+import com.bwsw.sj.common.utils.BenchmarkLiterals.Regular.sjDefaultOutputFile
 import com.bwsw.sj.common.utils.CommonAppConfigNames.{zooKeeperHost, zooKeeperPort}
-import com.bwsw.sj.engine.core.testutils.benchmark.ReaderBenchmarkRunner
-import com.bwsw.sj.engine.core.testutils.benchmark.regular.RegularReaderBenchmarkRunner
+import com.bwsw.sj.engine.core.testutils.benchmark.loader.tstreams.{TStreamsBenchmarkDataSender, TStreamsBenchmarkDataLoaderConfig}
+import com.bwsw.sj.engine.core.testutils.benchmark.{BenchmarkRunnerConfig, BenchmarkRunner}
 import com.typesafe.config.{Config, ConfigFactory, ConfigValueFactory}
 
 /**
-  * Performs [[TStreamsReaderBenchmark]].
+  * Performs [[SjBenchmark]].
   *
   * Configuration:
   *
@@ -59,28 +59,21 @@ import com.typesafe.config.{Config, ConfigFactory, ConfigValueFactory}
   *
   * @author Pavel Tomskikh
   */
-object TStreamsReaderBenchmarkRunner extends App {
+object SjBenchmarkRunner extends App {
   println(Calendar.getInstance().getTime)
 
   private val config: Config = ConfigFactory.load()
   private val zkPort = config.getInt(zooKeeperPort)
   private val zkHost = config.getString(zooKeeperHost)
+  private val updatedConfig = config.withValue(zooKeeperAddressConfig, ConfigValueFactory.fromAnyRef(s"$zkHost:$zkPort"))
 
-  private val benchmarkConfig = new TStreamsReaderBenchmarkConfig(
-    config = config.withValue(zooKeeperAddressConfig, ConfigValueFactory.fromAnyRef(s"$zkHost:$zkPort")),
-    sjTStreamsDefaultOutputFile)
+  private val senderConfig = new TStreamsBenchmarkDataLoaderConfig(updatedConfig)
+  private val runnerConfig = new BenchmarkRunnerConfig(updatedConfig, sjDefaultOutputFile)
 
-  private val benchmark = new TStreamsReaderBenchmark(
-    zkHost,
-    zkPort,
-    benchmarkConfig.tStreamsToken,
-    benchmarkConfig.tStreamsPrefix,
-    benchmarkConfig.words)
+  private val sender = new TStreamsBenchmarkDataSender(senderConfig)
+  private val benchmark = new SjBenchmark(senderConfig, zkHost, zkPort)
+  private val benchmarkRunner = new BenchmarkRunner(runnerConfig, sender, benchmark)
 
-  benchmark.startServices()
-  benchmark.prepare()
-
-  private val benchmarkRunner = new RegularReaderBenchmarkRunner(benchmark, benchmarkConfig)
   private val results = benchmarkRunner.run()
   benchmarkRunner.writeResult(results)
 
@@ -93,43 +86,4 @@ object TStreamsReaderBenchmarkRunner extends App {
   println(Calendar.getInstance().getTime)
 
   System.exit(0)
-}
-
-class TStreamsReaderBenchmarkRunner(benchmark: TStreamsReaderBenchmark,
-                                    config: TStreamsReaderBenchmarkConfig)
-  extends ReaderBenchmarkRunner(config) {
-  override def run(): Seq[TStreamsReaderBenchmarkResult] = {
-    benchmark.warmUp()
-
-    val benchmarkResults = config.messageSizes.flatMap { messageSize =>
-      println(s"Message size: $messageSize")
-
-      config.sizePerTransaction.flatMap { sizePerTransaction =>
-        println(s"Transaction size: $sizePerTransaction")
-        benchmark.clearStorage()
-        var streamSize: Long = 0
-
-        config.messagesCounts.map { messagesCount =>
-          println(s"Messages count: $messagesCount")
-          if (messagesCount > streamSize) {
-            benchmark.sendData(messageSize, messagesCount - streamSize, sizePerTransaction)
-            streamSize = messagesCount
-          }
-
-          val result = (0 until config.repetitions).map { _ =>
-            val millis = benchmark.runTest(messagesCount)
-            println(s"[${new Date()}] $millis")
-
-            millis
-          }
-
-          TStreamsReaderBenchmarkResult(messageSize, messagesCount, sizePerTransaction, result)
-        }
-      }
-    }
-
-    benchmark.stop()
-
-    benchmarkResults
-  }
 }

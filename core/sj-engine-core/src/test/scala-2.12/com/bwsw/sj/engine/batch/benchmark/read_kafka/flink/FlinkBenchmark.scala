@@ -18,7 +18,8 @@
  */
 package com.bwsw.sj.engine.batch.benchmark.read_kafka.flink
 
-import com.bwsw.sj.engine.core.testutils.benchmark.read_kafka.batch.BatchKafkaReaderBenchmark
+import com.bwsw.sj.engine.core.testutils.benchmark.batch.{BatchBenchmark, BatchBenchmarkConfig, BatchBenchmarkParameters}
+import com.bwsw.sj.engine.core.testutils.benchmark.loader.kafka.KafkaBenchmarkDataLoaderConfig
 
 import scala.collection.JavaConverters._
 
@@ -28,32 +29,27 @@ import scala.collection.JavaConverters._
   *
   * Topic deletion must be enabled on the Kafka server.
   *
-  * @param zooKeeperAddress ZooKeeper server's address. Must point to the ZooKeeper server that used by the Kafka server.
-  * @param kafkaAddress     Kafka server's address
-  * @param words            list of words that are sent to the Kafka server
+  * @param benchmarkConfig configuration of application
+  * @param senderConfig    configuration of Kafka topic
   * @author Pavel Tomskikh
   */
-class FlinkBenchmark(zooKeeperAddress: String,
-                     kafkaAddress: String,
-                     words: Array[String])
-  extends BatchKafkaReaderBenchmark(zooKeeperAddress, kafkaAddress, words) {
+class FlinkBenchmark(benchmarkConfig: BatchBenchmarkConfig,
+                     senderConfig: KafkaBenchmarkDataLoaderConfig)
+  extends BatchBenchmark(benchmarkConfig) {
 
   private val taskJarPath = "../../contrib/benchmarks/flink-batch-benchmark-task/target/scala-2.11/" +
     "flink-batch-benchmark-task-1.0-SNAPSHOT.jar"
 
-  override protected def runProcess(messagesCount: Long,
-                                    batchSize: Int,
-                                    windowSize: Int,
-                                    slidingInterval: Int): Process = {
+  override protected def runProcess(parameters: BatchBenchmarkParameters, messagesCount: Long): Process = {
     val arguments = Seq(
       s"--messagesCount", messagesCount,
       s"--outputFile", outputFile.getAbsolutePath,
-      s"--batchSize", batchSize,
-      s"--windowSize", windowSize,
-      s"--slidingInterval", slidingInterval,
-      s"--topic", kafkaTopic,
-      "--bootstrap.servers", kafkaAddress,
-      "--zookeeper.connect", zooKeeperAddress,
+      s"--batchSize", parameters.batchSize,
+      s"--windowSize", parameters.windowSize,
+      s"--slidingInterval", parameters.slidingInterval,
+      s"--topic", senderConfig.topic,
+      "--bootstrap.servers", senderConfig.kafkaAddress,
+      "--zookeeper.connect", senderConfig.zooKeeperAddress,
       "--from-beginning")
 
     val command = Seq("java", "-jar", taskJarPath) ++ arguments.map(_.toString)

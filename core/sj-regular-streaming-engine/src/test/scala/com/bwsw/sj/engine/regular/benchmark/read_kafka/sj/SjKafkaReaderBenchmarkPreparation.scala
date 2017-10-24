@@ -26,7 +26,7 @@ import com.bwsw.sj.common.dal.model.service.KafkaServiceDomain
 import com.bwsw.sj.common.dal.model.stream.KafkaStreamDomain
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.ProviderLiterals
-import com.bwsw.sj.engine.core.testutils.benchmark.regular.SjBenchmarkPreparation
+import com.bwsw.sj.engine.core.testutils.benchmark.sj.SjBenchmarkPreparation
 
 /**
   * It is needed to upload SJ entities such as providers, services, streams, a module and an instance

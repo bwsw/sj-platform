@@ -23,8 +23,9 @@ import java.util.Calendar
 import com.bwsw.sj.common.utils.BenchmarkConfigNames._
 import com.bwsw.sj.common.utils.BenchmarkLiterals.Batch.sjDefaultOutputFile
 import com.bwsw.sj.common.utils.CommonAppConfigNames.{zooKeeperHost, zooKeeperPort}
-import com.bwsw.sj.engine.core.testutils.benchmark.batch.BatchReaderBenchmarkRunner
-import com.bwsw.sj.engine.core.testutils.benchmark.read_kafka.batch.BatchKafkaReaderBenchmarkConfig
+import com.bwsw.sj.engine.core.testutils.benchmark.batch.BatchBenchmarkConfig
+import com.bwsw.sj.engine.core.testutils.benchmark.loader.kafka.{KafkaBenchmarkDataSender, KafkaBenchmarkDataLoaderConfig}
+import com.bwsw.sj.engine.core.testutils.benchmark.{BenchmarkRunner, BenchmarkRunnerConfig}
 import com.typesafe.config.{Config, ConfigFactory, ConfigValueFactory}
 
 /**
@@ -71,21 +72,16 @@ object SjBenchmarkRunner extends App {
   private val config: Config = ConfigFactory.load()
   private val zkPort = config.getInt(zooKeeperPort)
   private val zkHost = config.getString(zooKeeperHost)
+  private val updatedConfig = config.withValue(zooKeeperAddressConfig, ConfigValueFactory.fromAnyRef(s"$zkHost:$zkPort"))
 
-  private val benchmarkConfig = new BatchKafkaReaderBenchmarkConfig(
-    config = config.withValue(zooKeeperAddressConfig, ConfigValueFactory.fromAnyRef(s"$zkHost:$zkPort")),
-    sjDefaultOutputFile)
+  private val senderConfig = new KafkaBenchmarkDataLoaderConfig(updatedConfig)
+  private val benchmarkConfig = new BatchBenchmarkConfig(updatedConfig)
+  private val runnerConfig = new BenchmarkRunnerConfig(updatedConfig, sjDefaultOutputFile)
 
-  private val benchmark = new SjBenchmark(
-    zkHost,
-    zkPort,
-    benchmarkConfig.kafkaAddress,
-    benchmarkConfig.words)
+  private val sender = new KafkaBenchmarkDataSender(senderConfig)
+  private val benchmark = new SjBenchmark(benchmarkConfig, senderConfig, zkHost, zkPort)
 
-  benchmark.startServices()
-  benchmark.prepare()
-
-  private val benchmarkRunner = new BatchReaderBenchmarkRunner(benchmark, benchmarkConfig)
+  private val benchmarkRunner = new BenchmarkRunner(runnerConfig, sender, benchmark)
   private val results = benchmarkRunner.run()
   benchmarkRunner.writeResult(results)
 

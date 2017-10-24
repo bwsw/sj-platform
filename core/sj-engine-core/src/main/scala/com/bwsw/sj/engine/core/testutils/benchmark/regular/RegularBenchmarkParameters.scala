@@ -16,23 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.sj.engine.core.testutils.benchmark
+package com.bwsw.sj.engine.core.testutils.benchmark.regular
 
-import java.io.{File, FileWriter}
+import com.bwsw.sj.engine.core.testutils.benchmark.BenchmarkParameters
 
 /**
-  * Provides methods for running [[ReaderBenchmark]] and writing a result into a file
+  * Parameters of application in regular mode for specific test
   *
-  * @param config config for benchmark
   * @author Pavel Tomskikh
   */
-abstract class ReaderBenchmarkRunner(config: ReaderBenchmarkConfig) {
+case object RegularBenchmarkParameters extends BenchmarkParameters {
 
-  def run(): Seq[ReaderBenchmarkResult]
-
-  def writeResult(benchmarkResults: Seq[ReaderBenchmarkResult]) = {
-    val writer = new FileWriter(new File(config.outputFileName))
-    writer.write(benchmarkResults.mkString("\n"))
-    writer.close()
-  }
+  override def toSeq: Seq[Any] = Seq.empty
 }

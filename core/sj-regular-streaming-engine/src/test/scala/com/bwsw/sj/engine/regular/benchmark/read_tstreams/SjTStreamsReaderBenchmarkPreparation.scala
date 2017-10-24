@@ -23,23 +23,23 @@ import java.util.Date
 
 import com.bwsw.sj.common.dal.model.stream.TStreamStreamDomain
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
-import com.bwsw.sj.engine.core.testutils.benchmark.regular.SjBenchmarkPreparation
+import com.bwsw.sj.engine.core.testutils.benchmark.sj.SjBenchmarkPreparation
 
 /**
   * It is needed to upload SJ entities such as providers, services, streams, a module and an instance
   *
   * @author Pavel Tomskikh
   */
-class TStreamsReaderBenchmarkPreparation(mongoPort: Int,
-                                         zooKeeperHost: String,
-                                         zooKeeperPort: Int,
-                                         module: File,
-                                         streamName: String,
-                                         zkNamespace: String,
-                                         tStreamsPrefix: String,
-                                         tStreamsToken: String,
-                                         instanceName: String,
-                                         taskName: String)
+class SjTStreamsReaderBenchmarkPreparation(mongoPort: Int,
+                                           zooKeeperHost: String,
+                                           zooKeeperPort: Int,
+                                           module: File,
+                                           streamName: String,
+                                           zkNamespace: String,
+                                           tStreamsPrefix: String,
+                                           tStreamsToken: String,
+                                           instanceName: String,
+                                           taskName: String)
   extends SjBenchmarkPreparation(
     mongoPort,
     zooKeeperHost,

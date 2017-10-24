@@ -16,16 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.sj.engine.regular.benchmark.read_tstreams
+package com.bwsw.sj.engine.core.testutils.benchmark.loader
 
-import com.bwsw.sj.engine.core.testutils.benchmark.ReaderBenchmarkResult
+/**
+  * Contains parameters of data that sends into some storage
+  *
+  * @author Pavel Tomskikh
+  */
+trait BenchmarkDataSenderParameters {
+  val messageCount: Long
+  val messageSize: Long
 
-case class TStreamsReaderBenchmarkResult(messageSize: Long,
-                                         messagesCount: Long,
-                                         transactionSize: Long,
-                                         results: Seq[Long])
-  extends ReaderBenchmarkResult(results) {
-
-  override def toString: String =
-    s"$messagesCount,$messageSize,$transactionSize,${results.mkString(",")},$averageResult"
+  /**
+    * Returns list of parameters
+    *
+    * @return list of parameters
+    */
+  def toSeq: Seq[Any]
 }

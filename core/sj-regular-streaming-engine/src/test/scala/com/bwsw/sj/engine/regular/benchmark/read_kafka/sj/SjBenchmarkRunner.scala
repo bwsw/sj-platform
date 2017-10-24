@@ -23,8 +23,8 @@ import java.util.Calendar
 import com.bwsw.sj.common.utils.BenchmarkConfigNames._
 import com.bwsw.sj.common.utils.BenchmarkLiterals.Regular.sjDefaultOutputFile
 import com.bwsw.sj.common.utils.CommonAppConfigNames.{zooKeeperHost, zooKeeperPort}
-import com.bwsw.sj.engine.core.testutils.benchmark.read_kafka.KafkaReaderBenchmarkConfig
-import com.bwsw.sj.engine.core.testutils.benchmark.regular.RegularReaderBenchmarkRunner
+import com.bwsw.sj.engine.core.testutils.benchmark.loader.kafka.{KafkaBenchmarkDataSender, KafkaBenchmarkDataLoaderConfig}
+import com.bwsw.sj.engine.core.testutils.benchmark.{BenchmarkRunnerConfig, BenchmarkRunner}
 import com.typesafe.config.{Config, ConfigFactory, ConfigValueFactory}
 
 /**
@@ -63,21 +63,15 @@ object SjBenchmarkRunner extends App {
   private val config: Config = ConfigFactory.load()
   private val zkPort = config.getInt(zooKeeperPort)
   private val zkHost = config.getString(zooKeeperHost)
+  private val updatedConfig = config.withValue(zooKeeperAddressConfig, ConfigValueFactory.fromAnyRef(s"$zkHost:$zkPort"))
 
-  private val benchmarkConfig = new KafkaReaderBenchmarkConfig(
-    config = config.withValue(zooKeeperAddressConfig, ConfigValueFactory.fromAnyRef(s"$zkHost:$zkPort")),
-    sjDefaultOutputFile)
+  private val senderConfig = new KafkaBenchmarkDataLoaderConfig(updatedConfig)
+  private val runnerConfig = new BenchmarkRunnerConfig(updatedConfig, sjDefaultOutputFile)
 
-  private val benchmark = new SjBenchmark(
-    zkHost,
-    zkPort,
-    benchmarkConfig.kafkaAddress,
-    benchmarkConfig.words)
+  private val sender = new KafkaBenchmarkDataSender(senderConfig)
+  private val benchmark = new SjBenchmark(senderConfig, zkHost, zkPort)
+  private val benchmarkRunner = new BenchmarkRunner(runnerConfig, sender, benchmark)
 
-  benchmark.startServices()
-  benchmark.prepare()
-
-  private val benchmarkRunner = new RegularReaderBenchmarkRunner(benchmark, benchmarkConfig)
   private val results = benchmarkRunner.run()
   benchmarkRunner.writeResult(results)
 

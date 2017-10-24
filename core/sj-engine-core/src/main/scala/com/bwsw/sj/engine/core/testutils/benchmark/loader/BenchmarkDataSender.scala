@@ -16,18 +16,32 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.sj.engine.core.testutils.benchmark.batch
+package com.bwsw.sj.engine.core.testutils.benchmark.loader
 
-import com.bwsw.sj.engine.core.testutils.benchmark.ReaderBenchmarkResult
+/**
+  * Provides methods for sending data into some storage for test some application.
+  * Subclasses must iterate through all combination of sending data parameters.
+  *
+  * @tparam T type of storage parameters
+  * @author Pavel Tomskikh
+  */
+trait BenchmarkDataSender[+T <: BenchmarkDataSenderParameters] extends Iterable[T] {
 
-case class BatchReaderBenchmarkResult(messageSize: Long,
-                                      messagesCount: Long,
-                                      batchSize: Int,
-                                      windowSize: Int,
-                                      slidingInterval: Int,
-                                      results: Seq[Long])
-  extends ReaderBenchmarkResult(results) {
+  protected val warmingUpMessageSize: Long = 10
+  val warmingUpMessagesCount: Long = 10
 
-  override def toString: String =
-    s"$messagesCount,$messageSize,$batchSize,$windowSize,$slidingInterval,${results.mkString(",")},$averageResult"
+  /**
+    * Sends data into storage for first test
+    */
+  def warmUp(): Unit
+
+  /**
+    * Removes data from storage
+    */
+  def clearStorage(): Unit
+
+  /**
+    * Closes connections with storage
+    */
+  def stop(): Unit
 }

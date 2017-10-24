@@ -26,7 +26,8 @@ import com.bwsw.sj.common.config.TempHelperForConfigSetup
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.CommonAppConfigNames
 import com.bwsw.sj.common.utils.benchmark.ClassRunner
-import com.bwsw.sj.engine.core.testutils.benchmark.read_kafka.regular.RegularKafkaReaderBenchmark
+import com.bwsw.sj.engine.core.testutils.benchmark.loader.kafka.KafkaBenchmarkDataLoaderConfig
+import com.bwsw.sj.engine.core.testutils.benchmark.regular.RegularBenchmark
 import com.bwsw.sj.engine.core.testutils.{Server, TestStorageServer}
 import com.bwsw.sj.engine.regular.RegularTaskRunner
 import com.typesafe.config.ConfigFactory
@@ -38,19 +39,14 @@ import com.typesafe.config.ConfigFactory
   *
   * Host and port must point to the ZooKeeper server that used by the Kafka server.
   *
+  * @param senderConfig configuration of Kafka topic
   * @param zkHost       ZooKeeper server's host
   * @param zkPort       ZooKeeper server's port
-  * @param kafkaAddress Kafka server's address
-  * @param words        list of words that are sent to the Kafka server
   * @author Pavel Tomskikh
   */
-class SjBenchmark(zkHost: String,
-                  zkPort: Int,
-                  kafkaAddress: String,
-                  words: Array[String]) extends {
-  private val zooKeeperAddress = zkHost + ":" + zkPort
-} with RegularKafkaReaderBenchmark(zooKeeperAddress, kafkaAddress, words) {
-
+class SjBenchmark(senderConfig: KafkaBenchmarkDataLoaderConfig,
+                  zkHost: String,
+                  zkPort: Int) extends RegularBenchmark {
   private val moduleFilename = "../../contrib/benchmarks/sj-regular-performance-benchmark/target/scala-2.12/" +
     "sj-regular-performance-benchmark-1.0-SNAPSHOT.jar"
   private val module = new File(moduleFilename)
@@ -64,15 +60,16 @@ class SjBenchmark(zkHost: String,
   private val config = ConfigFactory.load()
   private val mongoDatabase = config.getString(CommonAppConfigNames.mongoDbName)
   private val mongoAuthChecker = new MongoAuthChecker(mongoAddress, mongoDatabase)
-  private lazy val connectionRepository = new ConnectionRepository(mongoAuthChecker, mongoAddress, mongoDatabase, None, None)
+  private lazy val connectionRepository =
+    new ConnectionRepository(mongoAuthChecker, mongoAddress, mongoDatabase, None, None)
 
   private val benchmarkPreparation = new SjKafkaReaderBenchmarkPreparation(
     mongoPort = mongoPort,
     zooKeeperHost = zkHost,
     zooKeeperPort = zkPort,
     module = module,
-    kafkaAddress = kafkaAddress,
-    kafkaTopic = kafkaTopic,
+    kafkaAddress = senderConfig.kafkaAddress,
+    kafkaTopic = senderConfig.topic,
     zkNamespace = "benchmark",
     tStreamsPrefix = TestStorageServer.defaultPrefix,
     tStreamsToken = TestStorageServer.defaultToken,
@@ -93,8 +90,8 @@ class SjBenchmark(zkHost: String,
   /**
     * Starts [[com.bwsw.sj.engine.core.testutils.TestStorageServer]] and mongo servers
     */
-  def startServices(): Unit = {
-    val tssEnv = Map("ZOOKEEPER_HOSTS" -> zooKeeperAddress, "TSS_PORT" -> findFreePort().toString)
+  private def startServices(): Unit = {
+    val tssEnv = Map("ZOOKEEPER_HOSTS" -> senderConfig.zooKeeperAddress, "TSS_PORT" -> findFreePort().toString)
 
     maybeTssProcess = Some(new ClassRunner(classOf[Server], environment = tssEnv).start())
     Thread.sleep(1000)
@@ -107,7 +104,9 @@ class SjBenchmark(zkHost: String,
   /**
     * Upload data in a mongo storage
     */
-  def prepare(): Unit = {
+  override def prepare(): Unit = {
+    startServices()
+
     val tempHelperForConfigSetup = new TempHelperForConfigSetup(connectionRepository)
     tempHelperForConfigSetup.setupConfigs(lowWatermark = 5000)
     println("Config settings loaded")
@@ -128,7 +127,8 @@ class SjBenchmark(zkHost: String,
 
 
   override protected def runProcess(messagesCount: Long): Process = {
-    benchmarkPreparation.loadInstance(outputFile.getAbsolutePath, messagesCount, connectionRepository.getInstanceRepository)
+    benchmarkPreparation.loadInstance(
+      outputFile.getAbsolutePath, messagesCount, connectionRepository.getInstanceRepository)
 
     new ClassRunner(classOf[RegularTaskRunner], environment = environment).start()
   }

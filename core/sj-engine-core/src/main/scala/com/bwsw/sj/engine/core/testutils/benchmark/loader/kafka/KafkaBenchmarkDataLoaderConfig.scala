@@ -16,30 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.sj.engine.core.testutils.benchmark
+package com.bwsw.sj.engine.core.testutils.benchmark.loader.kafka
 
-import java.util.Date
+import java.util.UUID
 
-import com.bwsw.sj.common.utils.BenchmarkConfigNames._
+import com.bwsw.sj.common.utils.BenchmarkConfigNames.{kafkaAddressConfig, zooKeeperAddressConfig}
+import com.bwsw.sj.engine.core.testutils.benchmark.loader.BenchmarkDataLoaderConfig
 import com.typesafe.config.Config
 
-import scala.util.Try
-
 /**
-  * Loads the config parameters from typesafe config for [[ReaderBenchmark]]
+  * Contains configuration of Kafka topic
   *
   * @author Pavel Tomskikh
   */
-trait ReaderBenchmarkConfig {
-  protected val config: Config
-  protected val outputFilenamePrefix: String
-
-  val messagesCounts = config.getString(messagesCountsConfig).split(",").map(_.toLong)
-  val words = config.getString(wordsConfig).split(",")
+class KafkaBenchmarkDataLoaderConfig(override protected val config: Config) extends BenchmarkDataLoaderConfig {
+  val kafkaAddress = config.getString(kafkaAddressConfig)
   val zooKeeperAddress = config.getString(zooKeeperAddressConfig)
-
-  private val format = new java.text.SimpleDateFormat("yyyy-MM-dd-HH-mm-ss")
-  val outputFileName = Try(config.getString(outputFileConfig)).getOrElse(s"$outputFilenamePrefix-${format.format(new Date())}")
-  val messageSizes = config.getString(messageSizesConfig).split(",").map(_.toLong)
-  val repetitions = config.getInt(repetitionsConfig)
+  val topic = "performance-benchmark-" + UUID.randomUUID().toString
 }

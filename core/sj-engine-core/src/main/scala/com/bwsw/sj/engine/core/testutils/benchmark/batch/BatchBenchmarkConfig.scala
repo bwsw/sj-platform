@@ -16,22 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.sj.engine.core.testutils.benchmark.read_kafka
+package com.bwsw.sj.engine.core.testutils.benchmark.batch
 
-import com.bwsw.sj.common.utils.BenchmarkConfigNames._
-import com.bwsw.sj.engine.core.testutils.benchmark.ReaderBenchmarkConfig
+import com.bwsw.sj.common.utils.BenchmarkConfigNames.{batchSizesConfig, slidingIntervalsConfig, windowSizesConfig}
 import com.typesafe.config.Config
 
 /**
-  * Loads the config parameters from typesafe config for [[KafkaReaderBenchmark]]
+  * Contains configurations of application in a batch mode
   *
-  * @param config               typesafe config
-  * @param outputFilenamePrefix prefix for default name of output file
   * @author Pavel Tomskikh
   */
-class KafkaReaderBenchmarkConfig(override protected val config: Config,
-                                 override protected val outputFilenamePrefix: String)
-  extends ReaderBenchmarkConfig {
-
-  val kafkaAddress = config.getString(kafkaAddressConfig)
+class BatchBenchmarkConfig(config: Config) {
+  val batchSizes = config.getString(batchSizesConfig).split(",").map(_.toInt)
+  val windowSizes = config.getString(windowSizesConfig).split(",").map(_.toInt)
+  val slidingIntervals = config.getString(slidingIntervalsConfig).split(",").map(_.toInt)
 }

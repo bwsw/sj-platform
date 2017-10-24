@@ -16,13 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.sj.engine.core.testutils.benchmark.regular
+package com.bwsw.sj.engine.core.testutils.benchmark.loader
 
-import com.bwsw.sj.engine.core.testutils.benchmark.ReaderBenchmarkResult
+import com.bwsw.sj.common.utils.BenchmarkConfigNames.{messageSizesConfig, messagesCountsConfig, wordsConfig}
+import com.typesafe.config.Config
 
-case class RegularReaderBenchmarkResult(messageSize: Long, messagesCount: Long, results: Seq[Long])
-  extends ReaderBenchmarkResult(results) {
+/**
+  * Contains configuration of storage
+  *
+  * @author Pavel Tomskikh
+  */
+trait BenchmarkDataLoaderConfig {
+  protected val config: Config
 
-  override def toString: String =
-    s"$messagesCount,$messageSize,${results.mkString(",")},$averageResult"
+  val messagesCounts = config.getString(messagesCountsConfig).split(",").map(_.toLong)
+  val messageSizes = config.getString(messageSizesConfig).split(",").map(_.toLong)
+  val words = config.getString(wordsConfig).split(",")
 }
