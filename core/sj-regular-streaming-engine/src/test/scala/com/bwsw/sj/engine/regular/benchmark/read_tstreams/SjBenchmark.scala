@@ -26,6 +26,7 @@ import com.bwsw.sj.common.config.TempHelperForConfigSetup
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.CommonAppConfigNames
 import com.bwsw.sj.common.utils.benchmark.ClassRunner
+import com.bwsw.sj.engine.core.testutils.benchmark.BenchmarkConfig
 import com.bwsw.sj.engine.core.testutils.benchmark.loader.tstreams.TStreamsBenchmarkDataLoaderConfig
 import com.bwsw.sj.engine.core.testutils.benchmark.regular.RegularBenchmark
 import com.bwsw.sj.engine.regular.RegularTaskRunner
@@ -35,15 +36,18 @@ import com.typesafe.config.ConfigFactory
 /**
   * Provides methods for testing the speed of reading data from T-Streams by SJ.
   *
-  * @param senderConfig configuration of T-Streams stream
-  * @param zkHost       ZooKeeper server's host
-  * @param zkPort       ZooKeeper server's port
+  * @param benchmarkConfig configuration of application
+  * @param senderConfig    configuration of T-Streams stream
+  * @param zkHost          ZooKeeper server's host
+  * @param zkPort          ZooKeeper server's port
   * @author Pavel Tomskikh
   */
-class SjBenchmark(senderConfig: TStreamsBenchmarkDataLoaderConfig,
+class SjBenchmark(benchmarkConfig: BenchmarkConfig,
+                  senderConfig: TStreamsBenchmarkDataLoaderConfig,
                   zkHost: String,
                   zkPort: Int)
-  extends RegularBenchmark {
+  extends RegularBenchmark(benchmarkConfig) {
+
   private val moduleFilename = "../../contrib/benchmarks/sj-regular-performance-benchmark/target/scala-2.12/" +
     "sj-regular-performance-benchmark-1.0-SNAPSHOT.jar"
 

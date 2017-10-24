@@ -19,6 +19,7 @@
 package com.bwsw.sj.engine.regular.benchmark.read_kafka.storm
 
 import com.bwsw.sj.common.utils.benchmark.ClassRunner
+import com.bwsw.sj.engine.core.testutils.benchmark.BenchmarkConfig
 import com.bwsw.sj.engine.core.testutils.benchmark.loader.kafka.KafkaBenchmarkDataLoaderConfig
 import com.bwsw.sj.engine.core.testutils.benchmark.regular.RegularBenchmark
 import com.bwsw.sj.engine.regular.benchmark.read_kafka.storm.StormBenchmarkLiterals._
@@ -28,10 +29,13 @@ import com.bwsw.sj.engine.regular.benchmark.read_kafka.storm.StormBenchmarkLiter
   *
   * Topic deletion must be enabled on the Kafka server.
   *
-  * @param senderConfig configuration of Kafka topic
+  * @param benchmarkConfig configuration of application
+  * @param senderConfig    configuration of Kafka topic
   * @author Pavel Tomskikh
   */
-class StormBenchmark(senderConfig: KafkaBenchmarkDataLoaderConfig) extends RegularBenchmark {
+class StormBenchmark(benchmarkConfig: BenchmarkConfig,
+                     senderConfig: KafkaBenchmarkDataLoaderConfig)
+  extends RegularBenchmark(benchmarkConfig) {
 
   override protected def runProcess(messagesCount: Long): Process = {
     val properties = Map(

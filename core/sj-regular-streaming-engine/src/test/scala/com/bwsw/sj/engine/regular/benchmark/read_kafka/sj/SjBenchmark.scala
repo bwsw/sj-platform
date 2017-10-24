@@ -26,6 +26,7 @@ import com.bwsw.sj.common.config.TempHelperForConfigSetup
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.CommonAppConfigNames
 import com.bwsw.sj.common.utils.benchmark.ClassRunner
+import com.bwsw.sj.engine.core.testutils.benchmark.BenchmarkConfig
 import com.bwsw.sj.engine.core.testutils.benchmark.loader.kafka.KafkaBenchmarkDataLoaderConfig
 import com.bwsw.sj.engine.core.testutils.benchmark.regular.RegularBenchmark
 import com.bwsw.sj.engine.core.testutils.{Server, TestStorageServer}
@@ -39,14 +40,18 @@ import com.typesafe.config.ConfigFactory
   *
   * Host and port must point to the ZooKeeper server that used by the Kafka server.
   *
-  * @param senderConfig configuration of Kafka topic
-  * @param zkHost       ZooKeeper server's host
-  * @param zkPort       ZooKeeper server's port
+  * @param benchmarkConfig configuration of application
+  * @param senderConfig    configuration of Kafka topic
+  * @param zkHost          ZooKeeper server's host
+  * @param zkPort          ZooKeeper server's port
   * @author Pavel Tomskikh
   */
-class SjBenchmark(senderConfig: KafkaBenchmarkDataLoaderConfig,
+class SjBenchmark(benchmarkConfig: BenchmarkConfig,
+                  senderConfig: KafkaBenchmarkDataLoaderConfig,
                   zkHost: String,
-                  zkPort: Int) extends RegularBenchmark {
+                  zkPort: Int)
+  extends RegularBenchmark(benchmarkConfig) {
+
   private val moduleFilename = "../../contrib/benchmarks/sj-regular-performance-benchmark/target/scala-2.12/" +
     "sj-regular-performance-benchmark-1.0-SNAPSHOT.jar"
   private val module = new File(moduleFilename)

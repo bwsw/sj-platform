@@ -27,7 +27,7 @@ import com.bwsw.sj.engine.core.testutils.benchmark.Benchmark
   * @author Pavel Tomskikh
   */
 abstract class BatchBenchmark(benchmarkConfig: BatchBenchmarkConfig)
-  extends Benchmark[BatchBenchmarkParameters] {
+  extends Benchmark[BatchBenchmarkParameters](benchmarkConfig) {
 
   override protected val warmingUpParams: BatchBenchmarkParameters = BatchBenchmarkParameters(1, 1, 1)
 

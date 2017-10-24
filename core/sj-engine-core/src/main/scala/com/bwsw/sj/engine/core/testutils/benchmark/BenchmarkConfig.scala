@@ -16,19 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.sj.engine.core.testutils.benchmark.batch
+package com.bwsw.sj.engine.core.testutils.benchmark
 
-import com.bwsw.sj.common.utils.BenchmarkConfigNames.{batchSizesConfig, slidingIntervalsConfig, windowSizesConfig}
-import com.bwsw.sj.engine.core.testutils.benchmark.BenchmarkConfig
+import com.bwsw.sj.common.utils.BenchmarkConfigNames.timeoutPerTestConfig
 import com.typesafe.config.Config
 
 /**
-  * Contains configurations of application in a batch mode
+  * Contains configurations of application
   *
   * @author Pavel Tomskikh
   */
-class BatchBenchmarkConfig(config: Config) extends BenchmarkConfig(config) {
-  val batchSizes = config.getString(batchSizesConfig).split(",").map(_.toInt)
-  val windowSizes = config.getString(windowSizesConfig).split(",").map(_.toInt)
-  val slidingIntervals = config.getString(slidingIntervalsConfig).split(",").map(_.toInt)
+class BenchmarkConfig(config: Config) {
+  val timeoutPerTest: Long = config.getLong(timeoutPerTestConfig) * 60 * 1000
 }

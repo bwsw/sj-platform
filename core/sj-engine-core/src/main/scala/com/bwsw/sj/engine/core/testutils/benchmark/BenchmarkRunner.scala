@@ -70,7 +70,12 @@ class BenchmarkRunner[T <: BenchmarkParameters](config: BenchmarkRunnerConfig,
 case class Results(dataLoaderParams: BenchmarkDataSenderParameters,
                    moduleBenchParams: BenchmarkParameters,
                    results: Seq[Long]) {
-  val averageResult: Long = results.sum / results.length
+  val averageResult: Long = {
+    val successResults = results.filter(_ >= 0)
+
+    if (successResults.nonEmpty) successResults.sum / successResults.length
+    else -1L
+  }
 
   def toSeq: Seq[Any] =
     dataLoaderParams.toSeq ++ moduleBenchParams.toSeq ++ results :+ averageResult

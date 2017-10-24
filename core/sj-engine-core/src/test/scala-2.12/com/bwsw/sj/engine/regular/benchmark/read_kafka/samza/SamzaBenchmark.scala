@@ -22,6 +22,7 @@ import java.io.{File, FileWriter}
 import java.util.UUID
 
 import com.bwsw.sj.common.utils.benchmark.ClassRunner
+import com.bwsw.sj.engine.core.testutils.benchmark.BenchmarkConfig
 import com.bwsw.sj.engine.core.testutils.benchmark.loader.kafka.KafkaBenchmarkDataLoaderConfig
 import com.bwsw.sj.engine.core.testutils.benchmark.regular.RegularBenchmark
 import com.bwsw.sj.engine.regular.benchmark.read_kafka.samza.SamzaBenchmarkLiterals._
@@ -32,10 +33,13 @@ import org.apache.samza.job.JobRunner
   *
   * Topic deletion must be enabled on the Kafka server.
   *
-  * @param senderConfig configuration of Kafka topic
+  * @param benchmarkConfig configuration of application
+  * @param senderConfig    configuration of Kafka topic
   * @author Pavel Tomskikh
   */
-class SamzaBenchmark(senderConfig: KafkaBenchmarkDataLoaderConfig) extends RegularBenchmark {
+class SamzaBenchmark(benchmarkConfig: BenchmarkConfig,
+                     senderConfig: KafkaBenchmarkDataLoaderConfig)
+  extends RegularBenchmark(benchmarkConfig) {
 
   private val propertiesFilename = s"samza-benchmark-${UUID.randomUUID().toString}.properties"
   private val propertiesFile = new File(propertiesFilename)

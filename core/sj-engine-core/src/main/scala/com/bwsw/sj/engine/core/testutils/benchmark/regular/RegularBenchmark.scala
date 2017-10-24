@@ -18,14 +18,16 @@
  */
 package com.bwsw.sj.engine.core.testutils.benchmark.regular
 
-import com.bwsw.sj.engine.core.testutils.benchmark.{Benchmark, BenchmarkParameters}
+import com.bwsw.sj.engine.core.testutils.benchmark.{Benchmark, BenchmarkConfig, BenchmarkParameters}
 
 /**
   * Provides methods for testing the speed of handling data by some application
   *
+  * @param benchmarkConfig configuration of application
   * @author Pavel Tomskikh
   */
-trait RegularBenchmark extends Benchmark[BenchmarkParameters] {
+abstract class RegularBenchmark(benchmarkConfig: BenchmarkConfig)
+  extends Benchmark[BenchmarkParameters](benchmarkConfig) {
   override protected val warmingUpParams: BenchmarkParameters = RegularBenchmarkParameters
 
   override def iterator: Iterator[BenchmarkParameters] =

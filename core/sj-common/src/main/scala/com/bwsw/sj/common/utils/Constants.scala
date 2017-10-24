@@ -284,6 +284,8 @@ object CommonAppConfigNames {
 object BenchmarkConfigNames {
   val performanceBenchmarkConfig = "sj-benchmark.performance"
 
+  val timeoutPerTestConfig = performanceBenchmarkConfig + ".timeout"
+
   val messageConfig = performanceBenchmarkConfig + ".message"
   val messageSizesConfig = messageConfig + ".sizes"
   val messagesCountsConfig = messageConfig + ".counts"

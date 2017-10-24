@@ -26,10 +26,11 @@ import java.util.UUID
   * Provides methods for testing the speed of handling data by some application.
   * Subclasses must iterate through all combination of application parameters.
   *
+  * @param benchmarkConfig configuration of application
   * @tparam T type of application parameters
   * @author Pavel Tomskikh
   */
-trait Benchmark[T <: BenchmarkParameters] extends Iterable[T] {
+abstract class Benchmark[T <: BenchmarkParameters](benchmarkConfig: BenchmarkConfig) extends Iterable[T] {
 
   protected val warmingUpParams: T
   protected val lookupResultTimeout: Long = 5000
@@ -55,10 +56,15 @@ trait Benchmark[T <: BenchmarkParameters] extends Iterable[T] {
     * @return time in milliseconds within which an application under test handle messageCount messages
     */
   def run(benchmarkParameters: T, messagesCount: Long): Long = {
+    val start = System.currentTimeMillis()
+
+    def timeoutExceeded: Boolean =
+      System.currentTimeMillis() - start > benchmarkConfig.timeoutPerTest
+
     val process = runProcess(benchmarkParameters, messagesCount)
 
     var maybeResult: Option[Long] = retrieveResultFromFile()
-    while (maybeResult.isEmpty && process.isAlive) {
+    while (maybeResult.isEmpty && process.isAlive && !timeoutExceeded) {
       Thread.sleep(lookupResultTimeout)
       maybeResult = retrieveResultFromFile()
     }

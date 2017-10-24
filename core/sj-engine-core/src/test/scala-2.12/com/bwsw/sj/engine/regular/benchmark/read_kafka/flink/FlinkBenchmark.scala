@@ -18,6 +18,7 @@
  */
 package com.bwsw.sj.engine.regular.benchmark.read_kafka.flink
 
+import com.bwsw.sj.engine.core.testutils.benchmark.BenchmarkConfig
 import com.bwsw.sj.engine.core.testutils.benchmark.loader.kafka.KafkaBenchmarkDataLoaderConfig
 import com.bwsw.sj.engine.core.testutils.benchmark.regular.RegularBenchmark
 
@@ -28,10 +29,13 @@ import scala.collection.JavaConverters._
   *
   * Topic deletion must be enabled on the Kafka server.
   *
-  * @param senderConfig configuration of Kafka topic
+  * @param benchmarkConfig configuration of application
+  * @param senderConfig    configuration of Kafka topic
   * @author Pavel Tomskikh
   */
-class FlinkBenchmark(senderConfig: KafkaBenchmarkDataLoaderConfig) extends RegularBenchmark {
+class FlinkBenchmark(benchmarkConfig: BenchmarkConfig,
+                     senderConfig: KafkaBenchmarkDataLoaderConfig)
+  extends RegularBenchmark(benchmarkConfig) {
 
   private val taskJarPath =
     "../../contrib/benchmarks/flink-benchmark-task/target/scala-2.11/flink-benchmark-task-1.0-SNAPSHOT.jar"
