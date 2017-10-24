@@ -24,7 +24,7 @@ import com.bwsw.sj.common.utils.BenchmarkConfigNames._
 import com.bwsw.sj.common.utils.BenchmarkLiterals.Batch.sjDefaultOutputFile
 import com.bwsw.sj.common.utils.CommonAppConfigNames.{zooKeeperHost, zooKeeperPort}
 import com.bwsw.sj.engine.core.testutils.benchmark.batch.BatchBenchmarkConfig
-import com.bwsw.sj.engine.core.testutils.benchmark.loader.kafka.{KafkaBenchmarkDataSender, KafkaBenchmarkDataLoaderConfig}
+import com.bwsw.sj.engine.core.testutils.benchmark.loader.kafka.{KafkaBenchmarkDataLoaderConfig, KafkaBenchmarkDataSender}
 import com.bwsw.sj.engine.core.testutils.benchmark.{BenchmarkRunner, BenchmarkRunnerConfig}
 import com.typesafe.config.{Config, ConfigFactory, ConfigValueFactory}
 
@@ -84,6 +84,7 @@ object SjBenchmarkRunner extends App {
   private val benchmarkRunner = new BenchmarkRunner(runnerConfig, sender, benchmark)
   private val results = benchmarkRunner.run()
   benchmarkRunner.writeResult(results)
+  benchmarkRunner.stop()
 
   private val resultsString = results.mkString("\n")
 

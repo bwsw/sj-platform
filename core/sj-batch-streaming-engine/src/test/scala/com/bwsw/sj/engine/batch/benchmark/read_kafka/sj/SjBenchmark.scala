@@ -143,7 +143,7 @@ class SjBenchmark(benchmarkConfig: BatchBenchmarkConfig,
     val tssEnv = Map("ZOOKEEPER_HOSTS" -> senderConfig.zooKeeperAddress, "TSS_PORT" -> findFreePort().toString)
 
     maybeTssProcess = Some(new ClassRunner(classOf[Server], environment = tssEnv).start())
-    Thread.sleep(5000)
+    Thread.sleep(10000)
     println("TSS server started")
   }
 }

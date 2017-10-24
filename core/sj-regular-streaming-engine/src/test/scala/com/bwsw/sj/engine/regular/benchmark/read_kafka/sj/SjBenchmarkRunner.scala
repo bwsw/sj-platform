@@ -74,6 +74,7 @@ object SjBenchmarkRunner extends App {
 
   private val results = benchmarkRunner.run()
   benchmarkRunner.writeResult(results)
+  benchmarkRunner.stop()
 
   private val resultsString = results.mkString("\n")
 
