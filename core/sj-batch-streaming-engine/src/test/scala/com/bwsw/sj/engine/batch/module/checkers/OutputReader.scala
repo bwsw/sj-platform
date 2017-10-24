@@ -28,7 +28,7 @@ import com.bwsw.sj.engine.core.testutils.checkers.{Reader, TStreamsReader}
   *
   * @author Pavel Tomskikh
   */
-object OutputReader$ extends Reader[Int] {
+class OutputReader extends Reader[Int] {
 
   private val reader =
     new TStreamsReader[Batch]((1 to outputCount).map(x => createOutputConsumer(partitions, x.toString)))

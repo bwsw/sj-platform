@@ -18,6 +18,7 @@
  */
 package com.bwsw.sj.engine.batch.module.checkers
 
+import com.bwsw.sj.engine.batch.module.checkers.ElementsReaderFactory.createOutputElementsReader
 import com.bwsw.sj.engine.core.testutils.checkers.{Reader, SjModuleChecker}
 import com.bwsw.tstreams.agents.consumer.Consumer
 
@@ -30,4 +31,4 @@ import com.bwsw.tstreams.agents.consumer.Consumer
   */
 abstract class SjBatchModuleChecker(inputElementsReaders: Seq[Reader[Int]],
                                     stateConsumer: Option[Consumer] = None)
-  extends SjModuleChecker(inputElementsReaders, OutputReader$, stateConsumer)
+  extends SjModuleChecker(inputElementsReaders, createOutputElementsReader, stateConsumer)

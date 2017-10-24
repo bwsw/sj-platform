@@ -21,4 +21,6 @@ object ElementsReaderFactory {
 
   def createStateConsumer: Consumer =
     DataFactory.createStateConsumer(DataFactory.connectionRepository.getStreamRepository)
+
+  def createOutputElementsReader: OutputReader = new OutputReader
 }
