@@ -34,7 +34,10 @@ abstract class BatchBenchmark(benchmarkConfig: BatchBenchmarkConfig)
   override def iterator: Iterator[BatchBenchmarkParameters] = {
     benchmarkConfig.batchSizes.flatMap(batchSize =>
       benchmarkConfig.windowSizes.flatMap(windowSize =>
-        benchmarkConfig.slidingIntervals.map(slidingInterval =>
+        benchmarkConfig.slidingIntervals.map { slidingInterval =>
+          if (slidingInterval != 0) slidingInterval
+          else windowSize
+        }.map(slidingInterval =>
           BatchBenchmarkParameters(batchSize, windowSize, slidingInterval)))).iterator
   }
 }
