@@ -38,6 +38,9 @@ import com.typesafe.config.{Config, ConfigFactory, ConfigValueFactory}
   * sj-benchmark.performance.message.counts - list of counts of messages per test (1000000 by default).
   * Counts separated by a comma (','). Environment variable MESSAGES_COUNT_PER_TEST.
   *
+  * sj-benchmark.performance.tstreams.transactions.sizes - number of messages per transaction (1000 by default)
+  * that separated by a comma (','). Environment variable SIZE_PER_TRANSACTION.
+  *
   * sj-benchmark.performance.output-file - file to output results in csv format (message size, milliseconds)
   * (sj-benchmark-output-`<`date-time`>` by default). Environment variable OUTPUT_FILE.
   *
