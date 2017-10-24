@@ -8,6 +8,8 @@ addCommandAlias("rebuild", ";clean; compile; package")
 
 val commonSettings = Seq(
   version := sjVersion,
+  publishMavenStyle := true,
+  pomIncludeRepository := { _ => false },
   scalaVersion := Dependencies.Versions.scala,
   scalacOptions ++= Seq(
     "-unchecked",
@@ -29,7 +31,8 @@ val commonSettings = Seq(
       </developers>
     ),
 
-  resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
+  resolvers += "Sonatype OSS Releases" at "https://oss.sonatype.org/content/repositories/snapshots",
+  resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/service/local/staging/deploy/maven2",
   resolvers += "Twitter Repository" at "http://maven.twttr.com",
   resolvers += "Oracle Maven2 Repo" at "http://download.oracle.com/maven",
   resolvers += "Elasticsearch Releases" at "https://artifacts.elastic.co/maven",
@@ -56,18 +59,17 @@ val commonSettings = Seq(
   licenses := Seq("Apache 2" -> url("http://www.apache.org/licenses/LICENSE-2.0")),
   homepage := Some(url("http://stream-juggler.com/")),
   pomIncludeRepository := { _ => false },
-  scalacOptions += "-feature",
-  scalacOptions += "-deprecation",
   parallelExecution in Test := false,
   organization := "com.bwsw",
   publishMavenStyle := true,
   pomIncludeRepository := { _ => false },
-  publishTo := {
+
+  publishTo <<= version { (v: String) =>
     val nexus = "https://oss.sonatype.org/"
-    if (isSnapshot.value)
-      Some("snapshots" at nexus + "content/repositories/snapshots")
-    else
-      Some("releases" at nexus + "service/local/staging/deploy/maven2")
+    if (v.trim.endsWith("SNAPSHOT")) Some(
+      "snapshots" at nexus + "content/repositories/snapshots"
+    )
+    else Some("releases" at nexus + "service/local/staging/deploy/maven2")
   },
   publishArtifact in Test := false
 )
