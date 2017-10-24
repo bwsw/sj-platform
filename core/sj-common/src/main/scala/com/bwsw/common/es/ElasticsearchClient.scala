@@ -49,7 +49,9 @@ class ElasticsearchClient(hosts: Set[(String, Int)],
                           password: Option[String] = None) {
   private val logger = Logger(this.getClass)
   private val typeName = "_type"
-  System.setProperty("es.set.netty.runtime.available.processors", "false")
+  System.setProperty("es.set.netty.runtime.available.processors", "false") //to avoid the following exception
+  // Exception in thread "output-task-pingstation-output-task0-engine" java.lang.IllegalStateException:
+  // availableProcessors is already set to [4], rejecting [4] (we don't know it's a bug or not)
   private val settingsBuilder = Settings.builder()
   settingsBuilder.put("transport.tcp.connect_timeout", ProviderLiterals.connectTimeoutMillis + "ms")
   username.zip(password).foreach {
