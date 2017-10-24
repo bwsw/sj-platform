@@ -29,12 +29,6 @@ import scala.util.Try
   *
   * @author Kseniya Tomskikh
   *
-  *         MONGO_HOST=176.120.25.19:27017
-  *         AGENTS_HOST=176.120.25.19
-  *         AGENTS_PORTS=31000,31001
-  *         ZOOKEEPER_HOSTS=176.120.25.19:2181
-  *         ES_HOSTS=176.120.25.19:9300
-  *         JDBC_HOSTS=0.0.0.0:5432
   */
 object SjESOutputModuleDestroy extends App {
   val module = new File("./contrib/stubs/sj-stub-es-output-streaming/target/scala-2.12/sj-stub-es-output-streaming-1.0-SNAPSHOT.jar")
