@@ -71,7 +71,9 @@ val commonSettings = Seq(
     )
     else Some("releases" at nexus + "service/local/staging/deploy/maven2")
   },
-  publishArtifact in Test := false
+  publishArtifact in Test := false,
+
+  concurrentRestrictions in Global += Tags.limit(Tags.Test, 1)
 )
 
 lazy val sj = (project in file(".")).settings(publish := {})

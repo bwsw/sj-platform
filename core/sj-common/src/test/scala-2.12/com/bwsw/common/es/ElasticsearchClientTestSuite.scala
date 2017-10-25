@@ -34,10 +34,12 @@ class ElasticsearchClientTestSuite extends FlatSpec with Matchers with BeforeAnd
   override protected def beforeEach(): Unit = {
     embeddedElasticsearch = Option(new EmbeddedElasticsearch(port))
     embeddedElasticsearch.foreach(_.start())
+    Thread.sleep(1000)
   }
 
   override protected def afterEach(): Unit = {
     embeddedElasticsearch.foreach(_.stop())
+    Thread.sleep(1000)
   }
 
   "isConnected" should "return true if client has connected to ES" in {
