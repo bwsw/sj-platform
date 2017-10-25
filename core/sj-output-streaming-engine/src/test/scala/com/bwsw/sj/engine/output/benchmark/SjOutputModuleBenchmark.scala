@@ -23,7 +23,7 @@ import java.net.ServerSocket
 import com.bwsw.common.embedded.{EmbeddedElasticsearch, EmbeddedMongo}
 import com.bwsw.sj.common.utils.NetworkUtils.findFreePort
 import com.bwsw.sj.common.utils.benchmark.ClassRunner
-import com.bwsw.sj.engine.core.testutils.Server
+import com.bwsw.sj.engine.core.testutils.{Constants, Server}
 import com.bwsw.sj.engine.output.benchmark.SjOutputModuleBenchmarkConstants._
 import com.bwsw.sj.engine.output.benchmark.data_checkers.{ESDataChecker, JDBCDataChecker, RestDataChecker}
 import org.apache.curator.test.TestingServer
@@ -69,7 +69,7 @@ class SjOutputModuleBenchmark extends FlatSpec with Matchers {
     val zkServer = new TestingServer(zkPort, true)
 
     val ttsServer = new ClassRunner(classOf[Server], environment = commonEnvironment).start()
-    Thread.sleep(waitingTimeout)
+    Thread.sleep(Constants.ttsLaunchTimeout)
 
     val mongoServer = new EmbeddedMongo(mongoPort)
     mongoServer.start()

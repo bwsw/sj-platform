@@ -23,7 +23,7 @@ import java.net.{ServerSocket, Socket}
 import com.bwsw.common.embedded.EmbeddedMongo
 import com.bwsw.sj.common.utils.NetworkUtils.findFreePort
 import com.bwsw.sj.common.utils.benchmark.ClassRunner
-import com.bwsw.sj.engine.core.testutils.Server
+import com.bwsw.sj.engine.core.testutils.{Constants, Server}
 import com.bwsw.sj.engine.input.SjInputModuleBenchmarkConstants.instanceHost
 import org.apache.curator.test.TestingServer
 import org.scalatest.{FlatSpec, Matchers, Outcome}
@@ -56,7 +56,7 @@ class SjInputModuleBenchmark extends FlatSpec with Matchers {
     "BENCHMARK_PORT" -> serverSocket.getLocalPort)
 
   val ttsServer = new ClassRunner(classOf[Server], environment = environment).start()
-  Thread.sleep(waitingTimeout)
+  Thread.sleep(Constants.ttsLaunchTimeout)
 
   val mongoServer = new EmbeddedMongo(mongoPort)
   mongoServer.start()

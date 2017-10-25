@@ -23,7 +23,7 @@ import java.net.ServerSocket
 import com.bwsw.common.embedded.{EmbeddedKafka, EmbeddedMongo}
 import com.bwsw.sj.common.utils.NetworkUtils.findFreePort
 import com.bwsw.sj.common.utils.benchmark.ClassRunner
-import com.bwsw.sj.engine.core.testutils.Server
+import com.bwsw.sj.engine.core.testutils.{Constants, Server}
 import com.bwsw.sj.engine.regular.module.SjRegularBenchmarkConstants._
 import com.bwsw.sj.engine.regular.module.checkers.{SjRegularModuleStatefulBothChecker, SjRegularModuleStatefulKafkaChecker, SjRegularModuleStatefulTstreamChecker}
 import org.apache.curator.test.TestingServer
@@ -69,7 +69,7 @@ class SjRegularModuleBenchmark extends FlatSpec with Matchers with TableDrivenPr
     val mongoServer = new EmbeddedMongo(mongoPort)
 
     val ttsServer = runClass(classOf[Server])
-    Thread.sleep(waitingTimeout)
+    Thread.sleep(Constants.ttsLaunchTimeout)
 
     mongoServer.start()
     kafkaServer.start()
