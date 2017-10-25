@@ -24,8 +24,7 @@ import com.bwsw.sj.common.utils.BenchmarkConfigNames._
 import com.bwsw.sj.common.utils.BenchmarkLiterals.Regular.sjDefaultOutputFile
 import com.bwsw.sj.common.utils.CommonAppConfigNames.{zooKeeperHost, zooKeeperPort}
 import com.bwsw.sj.engine.core.testutils.benchmark.loader.tstreams.{TStreamsBenchmarkDataLoaderConfig, TStreamsBenchmarkDataSender}
-import com.bwsw.sj.engine.core.testutils.benchmark.{BenchmarkRunner, BenchmarkRunnerConfig}
-import com.bwsw.sj.engine.regular.benchmark.read_kafka.sj.SjBenchmarkRunner.benchmarkRunner
+import com.bwsw.sj.engine.core.testutils.benchmark.{BenchmarkConfig, BenchmarkRunner, BenchmarkRunnerConfig}
 import com.typesafe.config.{Config, ConfigFactory, ConfigValueFactory}
 
 /**
@@ -73,9 +72,10 @@ object SjBenchmarkRunner extends App {
 
   private val senderConfig = new TStreamsBenchmarkDataLoaderConfig(updatedConfig)
   private val runnerConfig = new BenchmarkRunnerConfig(updatedConfig, sjDefaultOutputFile)
+  private val benchmarkConfig = new BenchmarkConfig(config)
 
   private val sender = new TStreamsBenchmarkDataSender(senderConfig)
-  private val benchmark = new SjBenchmark(senderConfig, zkHost, zkPort)
+  private val benchmark = new SjBenchmark(benchmarkConfig, senderConfig, zkHost, zkPort)
   private val benchmarkRunner = new BenchmarkRunner(runnerConfig, sender, benchmark)
 
   private val results = benchmarkRunner.run()

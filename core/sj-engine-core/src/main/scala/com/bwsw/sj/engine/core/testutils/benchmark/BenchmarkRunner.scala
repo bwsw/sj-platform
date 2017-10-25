@@ -28,23 +28,23 @@ import com.bwsw.sj.engine.core.testutils.benchmark.loader.{BenchmarkDataSender, 
   *
   * @author Pavel Tomskikh
   */
-class BenchmarkRunner[T <: BenchmarkParameters](config: BenchmarkRunnerConfig,
-                                                sender: BenchmarkDataSender[BenchmarkDataSenderParameters],
-                                                benchmark: Benchmark[T]) {
+class BenchmarkRunner[T <: BenchmarkParameters, S <: BenchmarkDataSenderParameters](config: BenchmarkRunnerConfig,
+                                                                                    sender: BenchmarkDataSender[S],
+                                                                                    benchmark: Benchmark[T]) {
   benchmark.prepare()
 
   def run(): Iterable[Results] = {
     sender.warmUp()
-    benchmark.warmUp(sender.warmingUpMessagesCount)
-    sender.clearStorage()
+    benchmark.warmUp(sender.warmingUpParameters.messagesCount)
 
     sender.flatMap { senderParameters =>
       printWithTime(s"Sender parameters: ${senderParameters.toSeq.mkString(",")}")
+      sender.send(senderParameters)
 
       benchmark.map { benchmarkParameters =>
         printWithTime(s"Benchmark parameters: ${benchmarkParameters.toSeq.mkString(",")}")
         val results = (1 to config.repetitions).map { _ =>
-          val result = benchmark.run(benchmarkParameters, senderParameters.messageCount)
+          val result = benchmark.run(benchmarkParameters, senderParameters.messagesCount)
           printWithTime(result)
 
           result

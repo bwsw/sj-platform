@@ -24,11 +24,11 @@ import com.bwsw.sj.engine.core.testutils.benchmark.loader.BenchmarkDataSenderPar
   * Contains parameters of data that sends into Kafka
   *
   * @param messageSize  size of one message
-  * @param messageCount count of messages
+  * @param messagesCount count of messages
   * @author Pavel Tomskikh
   */
-case class KafkaBenchmarkDataSenderParameters(messageSize: Long, messageCount: Long)
+case class KafkaBenchmarkDataSenderParameters(messageSize: Long, messagesCount: Long)
   extends BenchmarkDataSenderParameters {
 
-  override def toSeq: Seq[Any] = Seq(messageSize, messageCount)
+  override def toSeq: Seq[Any] = Seq(messageSize, messagesCount)
 }

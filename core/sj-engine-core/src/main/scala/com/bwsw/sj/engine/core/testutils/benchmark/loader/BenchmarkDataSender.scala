@@ -25,15 +25,22 @@ package com.bwsw.sj.engine.core.testutils.benchmark.loader
   * @tparam T type of storage parameters
   * @author Pavel Tomskikh
   */
-trait BenchmarkDataSender[+T <: BenchmarkDataSenderParameters] extends Iterable[T] {
+trait BenchmarkDataSender[T <: BenchmarkDataSenderParameters] extends Iterable[T] {
 
-  protected val warmingUpMessageSize: Long = 10
-  val warmingUpMessagesCount: Long = 10
+  val warmingUpParameters: T
 
   /**
     * Sends data into storage for first test
     */
-  def warmUp(): Unit
+  def warmUp(): Unit =
+    send(warmingUpParameters)
+
+  /**
+    * Sends data into storage
+    *
+    * @param parameters sending data parameters
+    */
+  def send(parameters: T): Unit
 
   /**
     * Removes data from storage

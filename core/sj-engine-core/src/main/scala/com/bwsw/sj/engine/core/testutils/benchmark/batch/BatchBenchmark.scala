@@ -29,7 +29,7 @@ import com.bwsw.sj.engine.core.testutils.benchmark.Benchmark
 abstract class BatchBenchmark(benchmarkConfig: BatchBenchmarkConfig)
   extends Benchmark[BatchBenchmarkParameters](benchmarkConfig) {
 
-  override protected val warmingUpParams: BatchBenchmarkParameters = BatchBenchmarkParameters(1, 1, 1)
+  override protected val warmingUpParams: BatchBenchmarkParameters = BatchBenchmarkParameters(1000, 1, 1)
 
   override def iterator: Iterator[BatchBenchmarkParameters] = {
     benchmarkConfig.batchSizes.flatMap(batchSize =>

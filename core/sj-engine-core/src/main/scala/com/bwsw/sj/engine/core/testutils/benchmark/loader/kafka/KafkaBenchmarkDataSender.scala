@@ -30,16 +30,13 @@ import com.bwsw.sj.engine.core.testutils.benchmark.loader.BenchmarkDataSender
 class KafkaBenchmarkDataSender(config: KafkaBenchmarkDataLoaderConfig)
   extends BenchmarkDataSender[KafkaBenchmarkDataSenderParameters] {
 
+  override val warmingUpParameters = KafkaBenchmarkDataSenderParameters(10, 10)
   private val client: KafkaClient = new KafkaClient(Array(config.zooKeeperAddress))
   private val sender = new KafkaDataSender(config.kafkaAddress, config.topic, config.words, " ")
+  private var currentMessageSize: Long = 0
+  private var currentStorageSize: Long = 0
 
-  /**
-    * Sends data into Kafka topic for first test
-    */
-  override def warmUp(): Unit = {
-    clearStorage()
-    sender.send(warmingUpMessageSize, warmingUpMessagesCount)
-  }
+  clearStorage()
 
   /**
     * Removes data from Kafka topic
@@ -49,35 +46,31 @@ class KafkaBenchmarkDataSender(config: KafkaBenchmarkDataLoaderConfig)
     createTopic()
   }
 
+  /**
+    * Sends data into Kafka topic
+    *
+    * @param parameters sending data parameters
+    */
+  override def send(parameters: KafkaBenchmarkDataSenderParameters): Unit = {
+    if (parameters.messageSize != currentMessageSize) {
+      clearStorage()
+      currentStorageSize = 0
+      currentMessageSize = parameters.messageSize
+    }
+
+    if (parameters.messagesCount > currentStorageSize) {
+      val appendedMessages = parameters.messagesCount - currentStorageSize
+      sender.send(currentMessageSize, appendedMessages + appendedMessages / 10)
+      currentStorageSize = parameters.messagesCount
+    }
+  }
+
   override def iterator: Iterator[KafkaBenchmarkDataSenderParameters] = {
-    new Iterator[KafkaBenchmarkDataSenderParameters] {
-
-      private val messageSizeIterator = config.messageSizes.iterator
-      private var messagesCountIterator = config.messagesCounts.iterator
-      private var messageSize = messageSizeIterator.next()
-      private var currentTopicSize: Long = 0
-
-      override def hasNext: Boolean =
-        messageSizeIterator.hasNext || messagesCountIterator.hasNext
-
-      override def next(): KafkaBenchmarkDataSenderParameters = {
-        if (messagesCountIterator.isEmpty) {
-          messageSize = messageSizeIterator.next()
-          messagesCountIterator = config.messagesCounts.iterator
-          clearStorage()
-          currentTopicSize = 0
-        }
-
-        val messagesCount = messagesCountIterator.next()
-        if (messagesCount > currentTopicSize) {
-          val appendedMessages = messagesCount - currentTopicSize
-          sender.send(messageSize, appendedMessages + appendedMessages / 10)
-          currentTopicSize = messagesCount
-        }
-
+    config.messageSizes.flatMap { messageSize =>
+      config.messagesCounts.map { messagesCount =>
         KafkaBenchmarkDataSenderParameters(messageSize, messagesCount)
       }
-    }
+    }.iterator
   }
 
   /**

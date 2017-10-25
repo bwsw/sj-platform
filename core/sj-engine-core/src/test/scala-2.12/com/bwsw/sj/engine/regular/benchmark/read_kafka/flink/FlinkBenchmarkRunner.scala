@@ -22,7 +22,7 @@ import java.util.Calendar
 
 import com.bwsw.sj.common.utils.BenchmarkLiterals.Regular.flinkDefaultOutputFile
 import com.bwsw.sj.engine.core.testutils.benchmark.loader.kafka.{KafkaBenchmarkDataLoaderConfig, KafkaBenchmarkDataSender}
-import com.bwsw.sj.engine.core.testutils.benchmark.{BenchmarkRunner, BenchmarkRunnerConfig}
+import com.bwsw.sj.engine.core.testutils.benchmark.{BenchmarkConfig, BenchmarkRunner, BenchmarkRunnerConfig}
 import com.typesafe.config.ConfigFactory
 
 /**
@@ -58,9 +58,10 @@ object FlinkBenchmarkRunner extends App {
   private val config = ConfigFactory.load()
   private val senderConfig = new KafkaBenchmarkDataLoaderConfig(config)
   private val runnerConfig = new BenchmarkRunnerConfig(config, flinkDefaultOutputFile)
+  private val benchmarkConfig = new BenchmarkConfig(config)
 
   private val sender = new KafkaBenchmarkDataSender(senderConfig)
-  private val benchmark = new FlinkBenchmark(senderConfig)
+  private val benchmark = new FlinkBenchmark(benchmarkConfig, senderConfig)
   private val benchmarkRunner = new BenchmarkRunner(runnerConfig, sender, benchmark)
 
   private val results = benchmarkRunner.run()

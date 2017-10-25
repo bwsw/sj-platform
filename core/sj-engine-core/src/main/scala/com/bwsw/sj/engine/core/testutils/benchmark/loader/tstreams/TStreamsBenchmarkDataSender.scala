@@ -30,7 +30,7 @@ import com.bwsw.tstreams.env.{ConfigurationOptions, TStreamsFactory}
 class TStreamsBenchmarkDataSender(config: TStreamsBenchmarkDataLoaderConfig)
   extends BenchmarkDataSender[TStreamsBenchmarkDataSenderParameters] {
 
-  private val warmingUpTransactionSize: Long = 10
+  override val warmingUpParameters = TStreamsBenchmarkDataSenderParameters(1, 10, 10)
   private val tStreamsFactory = new TStreamsFactory
   tStreamsFactory.setProperty(ConfigurationOptions.Coordination.endpoints, config.zooKeeperAddress)
   tStreamsFactory.setProperty(ConfigurationOptions.Common.authenticationKey, config.token)
@@ -46,13 +46,11 @@ class TStreamsBenchmarkDataSender(config: TStreamsBenchmarkDataLoaderConfig)
     config.words,
     " ")
 
-  /**
-    * Sends data into T-Streams stream for first test
-    */
-  override def warmUp(): Unit = {
-    clearStorage()
-    sender.send(warmingUpMessageSize, warmingUpMessagesCount, warmingUpTransactionSize)
-  }
+  private var currentStorageSize: Long = 0
+  private var currentMessageSize: Long = 0
+  private var currentTransactionSize: Long = 0
+
+  clearStorage()
 
   /**
     * Removes data from T-Streams stream
@@ -60,42 +58,34 @@ class TStreamsBenchmarkDataSender(config: TStreamsBenchmarkDataLoaderConfig)
   override def clearStorage(): Unit =
     client.deleteStream(config.stream)
 
-  override def iterator: Iterator[TStreamsBenchmarkDataSenderParameters] = {
-    new Iterator[TStreamsBenchmarkDataSenderParameters] {
-
-      private val transactionSizeIterator = config.sizePerTransaction.iterator
-      private var messageSizeIterator = config.messageSizes.iterator
-      private var messagesCountIterator = config.messagesCounts.iterator
-      private var transactionSize = transactionSizeIterator.next()
-      private var messageSize = messageSizeIterator.next()
-      private var currentTopicSize: Long = 0
-
-      override def hasNext: Boolean =
-        transactionSizeIterator.hasNext || messageSizeIterator.hasNext || messagesCountIterator.hasNext
-
-      override def next(): TStreamsBenchmarkDataSenderParameters = {
-        if (messagesCountIterator.isEmpty) {
-          if (messageSizeIterator.isEmpty) {
-            transactionSize = transactionSizeIterator.next()
-            messageSizeIterator = config.messageSizes.iterator
-          }
-
-          messageSize = messageSizeIterator.next()
-          messagesCountIterator = config.messagesCounts.iterator
-          clearStorage()
-          currentTopicSize = 0
-        }
-
-        val messagesCount = messagesCountIterator.next()
-        if (messagesCount > currentTopicSize) {
-          val appendedMessages = messagesCount - currentTopicSize
-          sender.send(messageSize, appendedMessages + appendedMessages / 10, transactionSize)
-          currentTopicSize = messagesCount
-        }
-
-        TStreamsBenchmarkDataSenderParameters(transactionSize, messageSize, messagesCount)
-      }
+  /**
+    * Sends data into T-Streams stream
+    *
+    * @param parameters sending data parameters
+    */
+  override def send(parameters: TStreamsBenchmarkDataSenderParameters): Unit = {
+    if (currentTransactionSize != parameters.transactionSize || currentMessageSize != parameters.messageSize) {
+      clearStorage()
+      currentStorageSize = 0
+      currentTransactionSize = parameters.transactionSize
+      currentMessageSize = parameters.messageSize
     }
+
+    if (parameters.messagesCount > currentStorageSize) {
+      val appendedMessages = parameters.messagesCount - currentStorageSize
+      sender.send(currentMessageSize, appendedMessages + appendedMessages / 10, currentTransactionSize)
+      currentStorageSize = parameters.messagesCount
+    }
+  }
+
+  override def iterator: Iterator[TStreamsBenchmarkDataSenderParameters] = {
+    config.sizePerTransaction.flatMap { transactionSize =>
+      config.messageSizes.flatMap { messageSize =>
+        config.messagesCounts.map { messagesCount =>
+          TStreamsBenchmarkDataSenderParameters(transactionSize, messageSize, messagesCount)
+        }
+      }
+    }.iterator
   }
 
   /**

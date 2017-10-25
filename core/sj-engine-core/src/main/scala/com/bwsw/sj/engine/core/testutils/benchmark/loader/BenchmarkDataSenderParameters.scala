@@ -24,7 +24,7 @@ package com.bwsw.sj.engine.core.testutils.benchmark.loader
   * @author Pavel Tomskikh
   */
 trait BenchmarkDataSenderParameters {
-  val messageCount: Long
+  val messagesCount: Long
   val messageSize: Long
 
   /**
