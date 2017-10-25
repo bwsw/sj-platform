@@ -18,20 +18,14 @@
  */
 package com.bwsw.sj.stubs.module.input_streaming
 
-import com.bwsw.common.JsonSerializer
-import com.bwsw.sj.common.engine.{StreamingValidator, ValidationInfo}
-
-import scala.collection.mutable.ArrayBuffer
-
-class Validator extends StreamingValidator {
-
-  private val serializer = new JsonSerializer(ignoreUnknown = true, enableNullForPrimitives = true)
-
-  override def validate(serializedOptions: String): ValidationInfo = {
-    val options = serializer.deserialize[InputExecutorOptions](serializedOptions)
-
-    ValidationInfo(
-      options.benchmarkPort.isEmpty == options.totalInputElements.isEmpty,
-      ArrayBuffer("Properties benchmarkPort and totalInputElements both must be defined or not-defined"))
-  }
-}
+/**
+  * Options for sj-stub-input-streaming
+  *
+  * @param totalInputElements count of elements on input stream
+  * @param benchmarkPort      port to report that benchmark is done
+  * @param verbose            true means that module will print progress in console
+  * @author Pavel Tomskikh
+  */
+case class InputExecutorOptions(totalInputElements: Option[Int],
+                                benchmarkPort: Option[Int],
+                                verbose: Option[Boolean] = Some(false))

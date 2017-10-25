@@ -168,7 +168,10 @@ object DataFactory {
       defaultEvictionPolicy = EngineLiterals.lruDefaultEvictionPolicy,
       evictionPolicy = "expanded-time",
       tasks = tasks,
-      options = s"${SjInputModuleBenchmarkConstants.totalInputElements},$benchmarkPort",
+      options =
+        s"""{"totalInputElements":${SjInputModuleBenchmarkConstants.totalInputElements},
+           |"benchmarkPort":$benchmarkPort,
+           |"verbose":false}""".stripMargin,
       creationDate = new Date().toString)
 
     instanceService.save(instance.to)
