@@ -18,49 +18,66 @@
  */
 package com.bwsw.sj.stubs.module.batch_streaming
 
-import java.util.Random
+import java.net.Socket
 
 import com.bwsw.sj.common.engine.core.entities.{KafkaEnvelope, TStreamEnvelope}
 import com.bwsw.sj.common.engine.core.environment.ModuleEnvironmentManager
 import com.bwsw.sj.common.engine.core.state.StateStorage
-import com.bwsw.sj.common.engine.core.batch.{WindowRepository, BatchStreamingExecutor}
+import com.bwsw.sj.common.engine.core.batch.{BatchStreamingExecutor, WindowRepository}
+
+import scala.util.{Random, Try}
 
 
 class Executor(manager: ModuleEnvironmentManager) extends BatchStreamingExecutor[Integer](manager) {
   val state: StateStorage = manager.getState
+  val splitOptions = manager.options.split(",")
+  val totalInputElements = splitOptions(0).toInt
+  val benchmarkPort = splitOptions(1).toInt
+
+  val sumStateName = "sum"
+  val elementsStateName = "elements"
 
   override def onInit(): Unit = {
-    if (!state.isExist("sum")) state.set("sum", 0)
+    if (!state.isExist(sumStateName)) state.set(sumStateName, 0)
+    if (!state.isExist(elementsStateName)) state.set(elementsStateName, 0)
     println("new init")
   }
 
   override def onWindow(windowRepository: WindowRepository): Unit = {
     val outputs = manager.getStreamsByTags(Array("output"))
-    val output = manager.getRoundRobinOutput(outputs(new Random().nextInt(outputs.length)))
-    var sum = state.get("sum").asInstanceOf[Int]
+    val output = manager.getRoundRobinOutput(outputs(Random.nextInt(outputs.length)))
+    var sum = state.get(sumStateName).asInstanceOf[Int]
+    var elements = state.get(elementsStateName).asInstanceOf[Int]
     val allWindows = windowRepository.getAll()
 
-    if (new Random().nextInt(100) < 5) {
+    if (Random.nextInt(100) < 5) {
       println("it happened")
       throw new Exception("it happened")
     }
-    val begin = if (sum != 0) windowRepository.window - windowRepository.slidingInterval else 0
-    val end = windowRepository.window
 
-    allWindows.flatMap(x => x._2.batches.slice(begin, end)).foreach(x => {
+    val allBatches =
+      if (sum == 0) allWindows.flatMap(_._2.batches)
+      else allWindows.flatMap(_._2.batches.takeRight(windowRepository.slidingInterval))
+
+    allBatches.foreach(x => {
       output.put(x)
       println("stream name = " + x.stream)
     })
 
-    allWindows.flatMap(x => x._2.batches.slice(begin, end)).flatMap(x => x.envelopes).foreach {
+    allBatches.flatMap(_.envelopes).foreach {
       case kafkaEnvelope: KafkaEnvelope[Integer@unchecked] =>
         sum += kafkaEnvelope.data
-        state.set("sum", sum)
+        elements += 1
+        state.set(sumStateName, sum)
+        state.set(elementsStateName, elements)
+
       case tstreamEnvelope: TStreamEnvelope[Integer@unchecked] =>
         tstreamEnvelope.data.foreach(x => {
           sum += x
+          elements += 1
         })
-        state.set("sum", sum)
+        state.set(sumStateName, sum)
+        state.set(elementsStateName, elements)
     }
   }
 
@@ -83,6 +100,10 @@ class Executor(manager: ModuleEnvironmentManager) extends BatchStreamingExecutor
     */
   override def onBeforeStateSave(isFullState: Boolean): Unit = {
     println("on before state saving")
+
+    val elements = state.get(elementsStateName).asInstanceOf[Int]
+    if (elements >= totalInputElements && benchmarkPort > 0)
+      Try(new Socket("localhost", benchmarkPort))
   }
 
   override def onEnter() = {

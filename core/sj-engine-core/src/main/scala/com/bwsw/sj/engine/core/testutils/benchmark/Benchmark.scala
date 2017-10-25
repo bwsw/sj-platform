@@ -19,7 +19,6 @@
 package com.bwsw.sj.engine.core.testutils.benchmark
 
 import java.io.{BufferedReader, File, FileReader}
-import java.net.ServerSocket
 import java.util.UUID
 
 /**
@@ -109,13 +108,5 @@ abstract class Benchmark[T <: BenchmarkParameters](benchmarkConfig: BenchmarkCon
     }
     else
       None
-  }
-
-  protected def findFreePort(): Int = {
-    val randomSocket = new ServerSocket(0)
-    val port = randomSocket.getLocalPort
-    randomSocket.close()
-
-    port
   }
 }

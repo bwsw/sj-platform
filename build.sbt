@@ -71,7 +71,9 @@ val commonSettings = Seq(
     )
     else Some("releases" at nexus + "service/local/staging/deploy/maven2")
   },
-  publishArtifact in Test := false
+  publishArtifact in Test := false,
+
+  concurrentRestrictions in Global += Tags.limit(Tags.Test, 1)
 )
 
 lazy val sj = (project in file(".")).settings(publish := {})
@@ -120,25 +122,39 @@ lazy val inputStreamingEngine = Project(id = "sj-input-streaming-engine",
   .settings(commonSettings: _*)
   .settings(
     libraryDependencies ++= Dependencies.sjInputEngineDependencies.value,
-    libraryDependencies ++= Dependencies.sjTestDependencies.value
+    libraryDependencies ++= Dependencies.sjTestDependencies.value,
+    test in Test <<= (test in Test).dependsOn((Keys.`package` in Compile) in stubInput)
   )
   .dependsOn(engineCore)
 
 lazy val regularStreamingEngine = Project(id = "sj-regular-streaming-engine",
   base = file("./core/sj-regular-streaming-engine"))
   .settings(commonSettings: _*)
+  .settings(
+    libraryDependencies ++= Dependencies.sjTestDependencies.value,
+    test in Test <<= (test in Test).dependsOn((Keys.`package` in Compile) in stubRegular)
+  )
   .dependsOn(engineCore)
 
 lazy val batchStreamingEngine = Project(id = "sj-batch-streaming-engine",
   base = file("./core/sj-batch-streaming-engine"))
   .settings(commonSettings: _*)
+  .settings(
+    libraryDependencies ++= Dependencies.sjTestDependencies.value,
+    test in Test <<= (test in Test).dependsOn((Keys.`package` in Compile) in stubBatch)
+  )
   .dependsOn(engineCore)
 
 lazy val outputStreamingEngine = Project(id = "sj-output-streaming-engine",
   base = file("./core/sj-output-streaming-engine"))
   .settings(commonSettings: _*)
   .settings(
-    libraryDependencies ++= Dependencies.sjOutputEngineDependencies.value
+    libraryDependencies ++= Dependencies.sjOutputEngineDependencies.value,
+    libraryDependencies ++= Dependencies.sjTestDependencies.value,
+    test in Test <<= (test in Test)
+      .dependsOn((Keys.`package` in Compile) in stubESOutput)
+      .dependsOn((Keys.`package` in Compile) in stubJDBCOutput)
+      .dependsOn((Keys.`package` in Compile) in stubRestOutput)
   )
   .dependsOn(engineCore)
 

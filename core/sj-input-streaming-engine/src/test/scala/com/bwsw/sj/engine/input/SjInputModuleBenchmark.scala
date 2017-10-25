@@ -18,110 +18,80 @@
  */
 package com.bwsw.sj.engine.input
 
-import java.io.{File, PrintStream}
-import java.net.Socket
-import java.util.logging.LogManager
+import java.net.{ServerSocket, Socket}
 
-import com.bwsw.sj.common.config.{TempHelperForConfigDestroy, TempHelperForConfigSetup}
-import com.bwsw.sj.engine.input.DataFactory._
-import com.bwsw.sj.engine.input.SjInputServices._
+import com.bwsw.common.embedded.EmbeddedMongo
+import com.bwsw.sj.common.utils.NetworkUtils.findFreePort
+import com.bwsw.sj.common.utils.benchmark.ClassRunner
+import com.bwsw.sj.engine.core.testutils.Server
+import com.bwsw.sj.engine.input.SjInputModuleBenchmarkConstants.instanceHost
+import org.apache.curator.test.TestingServer
+import org.scalatest.{FlatSpec, Matchers, Outcome}
 
-import scala.util.{Failure, Success, Try}
+import scala.util.Try
 
-object SjInputServices {
-  val streamService = connectionRepository.getStreamRepository
-  val serviceManager = connectionRepository.getServiceRepository
-  val providerService = connectionRepository.getProviderRepository
-  val instanceService = connectionRepository.getInstanceRepository
-  val fileStorage = connectionRepository.getFileStorage
+/**
+  * Checks that input-streaming module works properly
+  *
+  * @author Pavel Tomskikh
+  */
+class SjInputModuleBenchmark extends FlatSpec with Matchers {
+  val waitingTimeout = 1000
+  val zkServer = new TestingServer(true)
+  val zkAddress = zkServer.getConnectString
+  val mongoPort = findFreePort()
+  val ttsPort = findFreePort()
+  val serverSocket = new ServerSocket(0)
+  val instancePort = findFreePort()
 
-  val host = "localhost"
-  val port = 8888
-  val inputModule = new File("./contrib/stubs/sj-stub-input-streaming/target/scala-2.12/sj-stub-input-streaming-1.0-SNAPSHOT.jar")
-  val checkpointInterval = 10
-  val numberOfDuplicates = 10
-  val totalInputElements = 2 * checkpointInterval + numberOfDuplicates // increase/decrease a constant to change the number of input elements
-}
+  val environment = Map(
+    "MONGO_HOSTS" -> s"localhost:$mongoPort",
+    "ZOOKEEPER_HOSTS" -> zkAddress,
+    "TSS_PORT" -> ttsPort,
+    "INSTANCE_NAME" -> "test-instance-for-input-engine",
+    "TASK_NAME" -> "test-instance-for-input-engine-task0",
+    "AGENTS_HOST" -> instanceHost,
+    "ENTRY_PORT" -> instancePort,
+    "INSTANCE_HOSTS" -> instanceHost,
+    "BENCHMARK_PORT" -> serverSocket.getLocalPort)
 
-object SjInputModuleSetup extends App {
-  LogManager.getLogManager.reset()
+  val ttsServer = new ClassRunner(classOf[Server], environment = environment).start()
+  Thread.sleep(waitingTimeout)
 
-  val tempHelperForConfigSetup = new TempHelperForConfigSetup(connectionRepository)
-  tempHelperForConfigSetup.setupConfigs()
-  println("config loaded")
+  val mongoServer = new EmbeddedMongo(mongoPort)
+  mongoServer.start()
 
-  loadModule(SjInputServices.inputModule, SjInputServices.fileStorage)
-  println("module loaded")
-  createProviders(SjInputServices.providerService)
-  println("providers created")
-  createServices(SjInputServices.serviceManager, SjInputServices.providerService)
-  println("services created")
-  createStreams(SjInputServices.streamService, SjInputServices.serviceManager, outputCount)
-  println("streams created")
-  createInstance(SjInputServices.serviceManager, SjInputServices.instanceService, checkpointInterval)
-  println("instances created")
+  override def withFixture(test: NoArgTest): Outcome = {
+    val result = Try(super.withFixture(test))
 
-  connectionRepository.close()
+    mongoServer.stop()
+    ttsServer.destroy()
+    zkServer.close()
 
-  println("DONE")
-}
-
-object SjInputModuleRunner extends App {
-  InputTaskRunner.main(Array())
-}
-
-object SjInputModuleDataWriter extends App {
-  LogManager.getLogManager.reset()
-  writeData(totalInputElements, numberOfDuplicates)
-
-  private def writeData(totalInputElements: Int, numberOfDuplicates: Int) = {
-    Try {
-      val socket = new Socket(host, port)
-      var amountOfDuplicates = -1
-      var amountOfElements = 0
-      var currentElement = 1
-      val out = new PrintStream(socket.getOutputStream)
-
-      while (amountOfElements < totalInputElements) {
-        if (amountOfDuplicates != numberOfDuplicates) {
-          out.println(currentElement)
-          out.flush()
-          amountOfElements += 1
-          amountOfDuplicates += 1
-        }
-        else {
-          currentElement += 1
-          out.println(currentElement)
-          out.flush()
-          amountOfElements += 1
-        }
-      }
-
-      socket.close()
-    } match {
-      case Success(_) =>
-      case Failure(e) =>
-        System.out.println("init error: " + e)
-    }
+    result.get
   }
-}
 
-object SjInputModuleDuplicateCheckerRunner extends App {
-  DuplicateChecker.main(Array(totalInputElements.toString, numberOfDuplicates.toString))
-}
+  "Input-streaming module" should "work properly" in {
+    val setup = new ClassRunner(classOf[SjInputModuleSetup], environment = environment).start()
+    setup.waitFor() shouldBe 0
 
-object SjInputModuleDestroy extends App {
-  LogManager.getLogManager.reset()
+    val runner = new ClassRunner(classOf[SjInputModuleRunner], environment = environment).start()
+    waitUntilModuleStarted()
 
-  deleteStreams(SjInputServices.streamService, outputCount)
-  deleteServices(SjInputServices.serviceManager)
-  deleteProviders(SjInputServices.providerService)
-  deleteInstance(SjInputServices.instanceService)
-  deleteModule(SjInputServices.fileStorage, SjInputServices.inputModule.getName)
+    val dataWriter = new ClassRunner(classOf[SjInputModuleDataWriter], environment = environment).start()
+    dataWriter.waitFor() shouldBe 0
 
-  val tempHelperForConfigDestroy = new TempHelperForConfigDestroy(connectionRepository)
-  tempHelperForConfigDestroy.deleteConfigs()
-  connectionRepository.close()
+    serverSocket.accept()
+    serverSocket.close()
+    Thread.sleep(waitingTimeout)
+    runner.destroy()
 
-  println("DONE")
+    val duplicateChecker = new ClassRunner(classOf[SjInputModuleDuplicateCheckerRunner], environment = environment).start()
+    duplicateChecker.waitFor() shouldBe 0
+  }
+
+  def waitUntilModuleStarted(): Unit = {
+    while (Try(new Socket(instanceHost, instancePort)).isFailure)
+      Thread.sleep(waitingTimeout)
+  }
 }

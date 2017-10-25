@@ -26,3 +26,5 @@ object SjRegularModuleRunner extends App {
   LogManager.getLogManager.reset()
   RegularTaskRunner.main(Array())
 }
+
+class SjRegularModuleRunner

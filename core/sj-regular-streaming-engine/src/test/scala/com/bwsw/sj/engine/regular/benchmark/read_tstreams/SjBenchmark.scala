@@ -24,7 +24,7 @@ import com.bwsw.common.embedded.EmbeddedMongo
 import com.bwsw.sj.common.MongoAuthChecker
 import com.bwsw.sj.common.config.TempHelperForConfigSetup
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
-import com.bwsw.sj.common.utils.CommonAppConfigNames
+import com.bwsw.sj.common.utils.{CommonAppConfigNames, NetworkUtils}
 import com.bwsw.sj.common.utils.benchmark.ClassRunner
 import com.bwsw.sj.engine.core.testutils.benchmark.BenchmarkConfig
 import com.bwsw.sj.engine.core.testutils.benchmark.loader.tstreams.TStreamsBenchmarkDataLoaderConfig
@@ -53,7 +53,7 @@ class SjBenchmark(benchmarkConfig: BenchmarkConfig,
 
   private val module = new File(moduleFilename)
 
-  private val mongoPort = findFreePort()
+  private val mongoPort = NetworkUtils.findFreePort()
   private val mongoServer = new EmbeddedMongo(mongoPort)
   private val instanceName = "sj-benchmark-instance"
   private val taskName = instanceName + "-task"
@@ -82,14 +82,14 @@ class SjBenchmark(benchmarkConfig: BenchmarkConfig,
   tStreamsFactory.setProperty(ConfigurationOptions.Stream.partitionsCount, 1)
   tStreamsFactory.setProperty(ConfigurationOptions.Coordination.path, senderConfig.prefix)
 
-  private val environment: Map[String, String] = Map(
+  private val environment: Map[String, Any] = Map(
     "ZOOKEEPER_HOST" -> zkHost,
-    "ZOOKEEPER_PORT" -> zkPort.toString,
+    "ZOOKEEPER_PORT" -> zkPort,
     "MONGO_HOSTS" -> mongoAddress,
     "INSTANCE_NAME" -> instanceName,
     "TASK_NAME" -> taskName,
     "AGENTS_HOST" -> "localhost",
-    "AGENTS_PORTS" -> findFreePort().toString)
+    "AGENTS_PORTS" -> NetworkUtils.findFreePort())
 
   /**
     * Starts mongo server

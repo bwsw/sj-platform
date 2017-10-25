@@ -24,7 +24,8 @@ import com.bwsw.common.embedded.EmbeddedMongo
 import com.bwsw.sj.common.MongoAuthChecker
 import com.bwsw.sj.common.config.TempHelperForConfigSetup
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
-import com.bwsw.sj.common.utils.CommonAppConfigNames
+import com.bwsw.sj.common.utils.{CommonAppConfigNames, NetworkUtils}
+import com.bwsw.sj.common.utils.NetworkUtils.findFreePort
 import com.bwsw.sj.common.utils.benchmark.ClassRunner
 import com.bwsw.sj.engine.core.testutils.benchmark.BenchmarkConfig
 import com.bwsw.sj.engine.core.testutils.benchmark.loader.kafka.KafkaBenchmarkDataLoaderConfig
@@ -56,7 +57,7 @@ class SjBenchmark(benchmarkConfig: BenchmarkConfig,
     "sj-regular-performance-benchmark-1.0-SNAPSHOT.jar"
   private val module = new File(moduleFilename)
 
-  private val mongoPort = findFreePort()
+  private val mongoPort = NetworkUtils.findFreePort()
   private val mongoServer = new EmbeddedMongo(mongoPort)
   private val instanceName = "sj-benchmark-instance"
   private val taskName = instanceName + "-task"
@@ -96,7 +97,9 @@ class SjBenchmark(benchmarkConfig: BenchmarkConfig,
     * Starts [[com.bwsw.sj.engine.core.testutils.TestStorageServer]] and mongo servers
     */
   private def startServices(): Unit = {
-    val tssEnv = Map("ZOOKEEPER_HOSTS" -> senderConfig.zooKeeperAddress, "TSS_PORT" -> findFreePort().toString)
+    val tssEnv = Map(
+      "ZOOKEEPER_HOSTS" -> senderConfig.zooKeeperAddress,
+      "TSS_PORT" -> NetworkUtils.findFreePort())
 
     maybeTssProcess = Some(new ClassRunner(classOf[Server], environment = tssEnv).start())
     Thread.sleep(10000)
