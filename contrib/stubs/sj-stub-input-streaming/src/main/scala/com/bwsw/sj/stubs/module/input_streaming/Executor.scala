@@ -20,19 +20,25 @@ package com.bwsw.sj.stubs.module.input_streaming
 
 import java.net.Socket
 
-import com.bwsw.common.ObjectSerializer
+import com.bwsw.common.JsonSerializer
+import com.bwsw.sj.common.dal.model.stream.TStreamStreamDomain
 import com.bwsw.sj.common.engine.core.entities.InputEnvelope
 import com.bwsw.sj.common.engine.core.environment.InputEnvironmentManager
 import com.bwsw.sj.common.engine.core.input.{InputStreamingExecutor, Interval}
 import io.netty.buffer.ByteBuf
 
+import scala.util.Random
+
 class Executor(manager: InputEnvironmentManager) extends InputStreamingExecutor[String](manager) {
-  val objectSerializer = new ObjectSerializer()
-  val outputs = manager.getStreamsByTags(Array("output"))
-  val splittedOptions = manager.options.split(",")
-  val totalInputElements = splittedOptions(0).toInt
-  val benchmarkPort = splittedOptions(1).toInt
-  var inputElements = 0
+  private val serializer = new JsonSerializer(ignoreUnknown = true, enableNullForPrimitives = true)
+  private val outputs = manager.outputs
+    .filter(_.tags.contains("output"))
+    .map(_.asInstanceOf[TStreamStreamDomain])
+    .map(s => (s.name, s.partitions))
+
+  private val options = serializer.deserialize[InputExecutorOptions](manager.options)
+  private var inputElements = 0
+  private val verbose = options.verbose.getOrElse(false)
 
   /**
     * Will be invoked every time when a new part of data is received
@@ -43,7 +49,7 @@ class Executor(manager: InputEnvironmentManager) extends InputStreamingExecutor[
   override def tokenize(buffer: ByteBuf): Option[Interval] = {
     val readerIndex = buffer.readerIndex()
     val writeIndex = buffer.writerIndex()
-    val endIndex = buffer.indexOf(readerIndex, writeIndex, 10)
+    val endIndex = buffer.indexOf(readerIndex, writeIndex, '\n')
 
     if (endIndex != -1) Some(Interval(readerIndex, endIndex)) else None
   }
@@ -60,19 +66,20 @@ class Executor(manager: InputEnvironmentManager) extends InputStreamingExecutor[
 
     val data = new Array[Byte](rawData.capacity())
     rawData.getBytes(0, data)
+    val line = new String(data)
 
-    println("data into parse method " + new String(data) + ";")
+    if (verbose)
+      println("data into parse method " + line + ";")
 
-    val envelope = InputEnvelope(
-      new String(data),
-      outputs.map(x => (x, 0)),
-      new String(data)
-    )
+    if (options.totalInputElements.isDefined) {
+      inputElements += 1
+      if (options.benchmarkPort.isDefined && inputElements == options.totalInputElements.get)
+        new Socket("localhost", options.benchmarkPort.get)
+    }
 
-    inputElements += 1
-    if (inputElements == totalInputElements)
-      new Socket("localhost", benchmarkPort)
-
-    Some(envelope)
+    Some(InputEnvelope(
+      line,
+      outputs.map { case (s, p) => (s, Random.nextInt(p)) },
+      line))
   }
 }
