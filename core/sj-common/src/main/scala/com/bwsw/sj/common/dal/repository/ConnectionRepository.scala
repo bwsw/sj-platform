@@ -27,9 +27,9 @@ import com.bwsw.sj.common.dal.model.provider.ProviderDomain
 import com.bwsw.sj.common.dal.model.service.ServiceDomain
 import com.bwsw.sj.common.dal.model.stream.StreamDomain
 import com.bwsw.sj.common.dal.morphia.CustomMorphiaObjectFactory
+import com.typesafe.scalalogging.Logger
 import org.mongodb.morphia.Morphia
 import org.mongodb.morphia.dao.BasicDAO
-import org.slf4j.LoggerFactory
 
 import scala.reflect.ClassTag
 
@@ -42,7 +42,7 @@ class ConnectionRepository(mongoAuthChecker: MongoAuthChecker,
                            mongoUser: Option[String],
                            mongoPassword: Option[String]) {
 
-  private val logger = LoggerFactory.getLogger(this.getClass)
+  private val logger = Logger(this.getClass)
   private val authEnable: Boolean = mongoAuthChecker.isAuthRequired()
 
   private lazy val (mongoClient, mongoConnection) = mongoAuthChecker.createClient("mongodb-driver", authEnable, mongoUser, mongoPassword) // new MongoClient(mongoHosts.asJava, mongoCredential.asJava)

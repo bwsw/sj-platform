@@ -27,7 +27,7 @@ Further, in the documentation, we explain how, why and when technologies mention
 
 Documentation Structure
 -------------------------------
-The documentation is organized in two big parts. The first one is a tutorial part which guides a reader through the system in a way which motivates him/her to observe, try and explain every step in practice. The second part is a referential one, which explains specific topics and lists system specifications for administrative and programming API, RESTful interface and Web UI.
+The documentation corresponds to the Stream Juggler Platform Release 1.1.1. It is organized in two big parts. The first one is a tutorial part which guides a reader through the system in a way which motivates him/her to observe, try and explain every step in practice. The second part is a referential one, which explains specific topics and lists system specifications for administrative and programming API, RESTful interface and Web UI.
 
 Preliminary Requirements to The Reader
 -------------------------------
@@ -36,7 +36,7 @@ SJ-Platform is a quite complex system, but the tutorial tries to guide the reade
 1. scala programming language and generic data structures;
 2. basics of Docker.
 
-Also, the reader should have working Linux host with 4-8GB of RAM and 4 CPU cores with Docker installed (in the tutorial the installation of Docker for Ubuntu 17.04 OS will be explained).
+Also, the reader should have working Linux host with 4-8GB of RAM and 4 CPU cores with Docker installed (in the tutorial the installation of Docker for Ubuntu 16.04 OS will be explained).
 
 In the tutorial we will demonstrate the functionality of SJ-Platform and train the reader to develop the modules for it using the example problem, which is listed further:
 
@@ -77,10 +77,12 @@ These features will be explained in the documentation in depth.
 
 To find more about the platform, please, visit the pages below:
 
+:ref:`Tutorial` - a quick example to demonstrate the platform in action.
+
 :ref:`Architecture` - here the architecture of the Stream Juggler Platform is presented, its components, connections between them, necessary services and other prerequisites for the Platform operation are described.
 
-:ref:`Modules` - here more information on modules is given: what module types are supported in the Stream Juggler Platform, how they work, etc.
+:ref:`Modules` - here more information on modules is given: what module types are supported in Stream Juggler Platform, how they work, etc.
 
 :ref:`REST_API` - the REST API service is described here to work with the platform without the UI.
 
-:ref:`UI_Guide` - the section is devoted to the UI and its basic features.
+:ref:`UI_Guide` - the section is devoted to the UI and its basic features to configure and monitor the platform.

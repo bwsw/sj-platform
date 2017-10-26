@@ -23,16 +23,13 @@ import com.bwsw.sj.common.dal.model.stream.StreamDomain
 import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
 import com.bwsw.sj.common.engine.core.state.StateStorage
 import com.bwsw.sj.common.utils.SjTimer
-import com.bwsw.tstreams.agents.producer.Producer
 
-import scala.collection.{mutable, _}
+import scala.collection.mutable
 
 /**
   * Class allowing to manage environment of module that has got a state
   *
   * @param stateStorage           storage of state of module [[com.bwsw.sj.common.engine.core.state.StateStorage]]
-  * @param producers              t-streams producers for each output stream from instance
-  *                               [[com.bwsw.sj.common.dal.model.instance.InstanceDomain.outputs]]
   * @param options                user defined options from instance
   *                               [[com.bwsw.sj.common.dal.model.instance.InstanceDomain.options]]
   * @param outputs                set of output streams [[com.bwsw.sj.common.dal.model.stream.StreamDomain]]
@@ -44,25 +41,25 @@ import scala.collection.{mutable, _}
   *                               of [[com.bwsw.sj.common.utils.EngineLiterals.regularStreamingType]]
   *                               or [[com.bwsw.sj.common.utils.EngineLiterals.batchStreamingType]] module
   * @param fileStorage            file storage
+  * @param senderThread           thread for sending data to the T-Streams service
   * @author Kseniya Mikhaleva
   */
-
 class StatefulModuleEnvironmentManager(stateStorage: StateStorage,
                                        options: String,
-                                       producers: Map[String, Producer],
                                        outputs: Array[StreamDomain],
-                                       producerPolicyByOutput: mutable.Map[String, (String, ModuleOutput)],
+                                       producerPolicyByOutput: mutable.Map[String, ModuleOutput],
                                        moduleTimer: SjTimer,
                                        performanceMetrics: PerformanceMetrics,
-                                       fileStorage: FileStorage)
+                                       fileStorage: FileStorage,
+                                       senderThread: TStreamsSenderThread)
   extends ModuleEnvironmentManager(
     options,
-    producers,
     outputs,
     producerPolicyByOutput,
     moduleTimer,
     performanceMetrics,
-    fileStorage) {
+    fileStorage,
+    senderThread) {
 
   override def getState: StateStorage = {
     logger.info(s"Get a storage where states are kept.")

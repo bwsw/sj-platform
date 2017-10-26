@@ -23,10 +23,10 @@ import java.util.concurrent.Callable
 
 import com.bwsw.sj.common.engine.TaskEngine
 import com.bwsw.sj.common.engine.core.managment.{CommonTaskManager, TaskManager}
-import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
+import com.bwsw.sj.common.engine.core.reporting.{PerformanceMetricsReporter, PerformanceMetrics}
 import com.bwsw.sj.engine.core.engine.TaskRunner
 import com.bwsw.sj.engine.regular.task.RegularTaskEngine
-import com.bwsw.sj.engine.regular.task.reporting.RegularStreamingPerformanceMetrics
+import com.bwsw.sj.engine.regular.task.reporting.{RegularStreamingPerformanceMetricsReporter, RegularStreamingPerformanceMetrics}
 
 /**
   * Class is responsible for launching regular engine execution logic.
@@ -42,16 +42,25 @@ object RegularTaskRunner extends {
 
   override protected def createTaskManager(): TaskManager = new CommonTaskManager()
 
-  override protected def createPerformanceMetrics(manager: TaskManager): PerformanceMetrics = {
-    new RegularStreamingPerformanceMetrics(manager.asInstanceOf[CommonTaskManager])
+  override protected def createPerformanceMetricsReporter(manager: TaskManager): PerformanceMetricsReporter = {
+    new RegularStreamingPerformanceMetricsReporter(manager.asInstanceOf[CommonTaskManager])
   }
 
   override protected def createTaskEngine(manager: TaskManager, performanceMetrics: PerformanceMetrics): TaskEngine =
-    RegularTaskEngine(manager.asInstanceOf[CommonTaskManager], performanceMetrics.asInstanceOf[RegularStreamingPerformanceMetrics])
+    RegularTaskEngine(
+      manager.asInstanceOf[CommonTaskManager],
+      performanceMetrics.asInstanceOf[RegularStreamingPerformanceMetrics])
 
   override protected def createTaskInputService(manager: TaskManager, taskEngine: TaskEngine): Callable[Unit] with Closeable = {
     taskEngine.asInstanceOf[RegularTaskEngine].taskInputService
   }
+
+  override def createPerformanceMetrics(taskName: String,
+                                        performanceMetricsReporter: PerformanceMetricsReporter): PerformanceMetrics =
+
+    new RegularStreamingPerformanceMetrics(
+      performanceMetricsReporter.asInstanceOf[RegularStreamingPerformanceMetricsReporter],
+      s"performance-metrics-$taskName")
 }
 
 class RegularTaskRunner

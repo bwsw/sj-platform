@@ -25,16 +25,16 @@ import com.bwsw.sj.common.dal.model.service.JDBCServiceDomain
 import com.bwsw.sj.common.dal.model.stream.{JDBCStreamDomain, StreamDomain}
 import com.bwsw.sj.common.engine.core.entities._
 import com.bwsw.sj.common.engine.core.output.Entity
-import com.bwsw.sj.engine.core.output.types.jdbc.JdbcCommandBuilder
+import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
+import com.bwsw.sj.engine.core.output.types.jdbc.{JdbcCommandBuilder, JdbcSender}
 import com.bwsw.sj.engine.output.task.OutputTaskManager
-import com.bwsw.sj.engine.output.task.reporting.OutputStreamingPerformanceMetrics
 import scaldi.Injector
 
 /**
   * ref. [[OutputProcessor]] object
   */
 class JdbcOutputProcessor[T <: AnyRef](outputStream: StreamDomain,
-                                       performanceMetrics: OutputStreamingPerformanceMetrics,
+                                       performanceMetrics: PerformanceMetrics,
                                        manager: OutputTaskManager,
                                        entity: Entity[_])
                                       (implicit injector: Injector)
@@ -46,6 +46,8 @@ class JdbcOutputProcessor[T <: AnyRef](outputStream: StreamDomain,
   override protected val commandBuilder: JdbcCommandBuilder = new JdbcCommandBuilder(
     jdbcClient, transactionFieldName, entity.asInstanceOf[Entity[(PreparedStatement, Int) => Unit]])
   jdbcClient.start()
+
+  private val jdbcSender = JdbcSender[T](commandBuilder, jdbcClient.supportsBatchUpdates)
 
   private def createClient() = {
     logger.info(s"Open a JDBC connection at address: '${jdbcService.provider.hosts.mkString(", ")}'.")
@@ -77,15 +79,13 @@ class JdbcOutputProcessor[T <: AnyRef](outputStream: StreamDomain,
 
   def send(envelope: OutputEnvelope, inputEnvelope: TStreamEnvelope[T]): Unit = {
     logger.debug(s"Send an envelope: '${inputEnvelope.id}' to a JDBC stream: '${jdbcStream.name}'.")
-    if (jdbcClient.tableExists()) {
-      val preparedStatement = commandBuilder.buildInsert(inputEnvelope.id, envelope.getFieldsValue)
-      preparedStatement.executeUpdate()
-      preparedStatement.close()
-    } else throw new RuntimeException(s"A table: '${jdbcStream.name}' doesn't exist so it is impossible to write data.")
+    jdbcSender.send(envelope, inputEnvelope)
   }
 
   override def close(): Unit = {
     logger.info(s"Close a JDBC connection at address: '${jdbcService.provider.hosts}'.")
     jdbcClient.close()
   }
+
+  override def checkpoint(): Unit = jdbcSender.checkpoint()
 }

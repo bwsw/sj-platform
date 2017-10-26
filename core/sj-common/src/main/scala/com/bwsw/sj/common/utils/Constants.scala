@@ -92,6 +92,8 @@ object EngineLiterals {
   final val splitStreamMode = "split"
   final val fullStreamMode = "full"
   val streamModes: Array[String] = Array(splitStreamMode, fullStreamMode)
+
+  final val outputProcessorParallelism = 8
 }
 
 object StreamLiterals {
@@ -169,6 +171,8 @@ object ProviderLiterals {
   final val jdbcType = "provider.sql-database"
   final val restType = "provider.restful"
 
+  val withAuth = Seq(elasticsearchType)
+
   val types: Seq[String] = Seq(
     zookeeperType,
     kafkaType,
@@ -184,6 +188,8 @@ object ProviderLiterals {
     jdbcType -> "SQL database",
     restType -> "RESTful"
   )
+
+  val connectTimeoutMillis = 10000
 }
 
 object RestLiterals {
@@ -230,14 +236,17 @@ object FrameworkLiterals {
   val instanceIdLabel = "INSTANCE_ID"
   val frameworkIdLabel = "FRAMEWORK_ID"
   val mesosMasterLabel = "MESOS_MASTER"
-  val zookeeperLabel = "ZOOKEEPER_ADDRESS"
+  val zookeeperHostLabel = "ZOOKEEPER_HOST"
+  val zookeeperPortLabel = "ZOOKEEPER_PORT"
 
   val framework = "mesos-framework"
+  val common = "sj-common"
   val frameworkId = framework + ".id"
   val instance = framework + ".instance"
   val instanceId = instance + ".id"
   val mesosMaster = framework + ".mesos.master"
-  val zookeeperAddress = framework + ".zookeeper.address"
+  val zookeeperHost = common + ".zookeeper.host"
+  val zookeeperPort = common + ".zookeeper.port"
 
   val defaultBackoffSeconds = 7
   val defaultBackoffFactor = 7.0
@@ -286,11 +295,26 @@ object BenchmarkConfigNames {
   val zooKeeperAddressConfig = performanceBenchmarkConfig + ".zookeeper.address"
 
   val repetitionsConfig = performanceBenchmarkConfig + ".repetitions"
+
+  val batchConfig = performanceBenchmarkConfig + ".batch"
+  val batchSizesConfig = batchConfig + ".sizes"
+  val windowSizesConfig = batchConfig + ".window.sizes"
+  val slidingIntervalsConfig = batchConfig + ".sliding.intervals"
 }
 
 object BenchmarkLiterals {
-  val sjDefaultOutputFile = "sj-benchmark-output"
-  val samzaDefaultOutputFile = "samza-benchmark-output"
-  val flinkDefaultOutputFile = "flink-benchmark-output"
-  val stormDefaultOutputFile = "storm-benchmark-output"
+
+  object Regular {
+    val sjDefaultOutputFile = "sj-regular-benchmark-output"
+    val samzaDefaultOutputFile = "samza-regular-benchmark-output"
+    val flinkDefaultOutputFile = "flink-regular-benchmark-output"
+    val stormDefaultOutputFile = "storm-regular-benchmark-output"
+  }
+
+  object Batch {
+    val sjDefaultOutputFile = "sj-batch-benchmark-output"
+    val flinkDefaultOutputFile = "flink-batch-benchmark-output"
+    val stormDefaultOutputFile = "storm-batch-benchmark-output"
+  }
+
 }

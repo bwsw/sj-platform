@@ -56,7 +56,8 @@
 					"key": "jar",
 					"type": "file",
 					"enabled": true,
-					"warning": ""
+					"warning": "",
+					"value": "ModuleBatch_6.1.6.Nonexistent_engine.jar"
 				}
 			],
 			"dataMode": "params",
@@ -73,14 +74,14 @@
 		{
 			"id": "05e2108f-5874-6dcc-c3f0-206f144c7c81",
 			"headers": "",
-			"url": "{{address}}/v1/modules/batch-streaming/Masha_win/1.0",
+			"url": "{{address}}/v1/modules/batch-streaming/batch-streaming-stub/1.0",
 			"preRequestScript": null,
 			"pathVariables": {},
 			"method": "DELETE",
 			"data": null,
 			"dataMode": "params",
 			"version": 2,
-			"tests": "tests[\"Status code is 404\"] = responseCode.code === 404;\n\ntests[\"Body matches string\"] = responseBody.has(\"Module 'batch-streaming-Masha_win-1.0' has not been found.\");",
+			"tests": "tests[\"Status code is 404\"] = responseCode.code === 404;\n\ntests[\"Body matches string\"] = responseBody.has(\"Module 'batch-streaming-batch-streaming-stub-1.0' has not been found.\");",
 			"currentHelper": "normal",
 			"helperAttributes": {},
 			"time": 1488355094637,
@@ -104,7 +105,8 @@
 					"key": "jar",
 					"type": "file",
 					"enabled": true,
-					"warning": ""
+					"warning": "",
+					"value": "ModuleBatch_6.1.8.Output_cardinality_second_value_less_than_first.jar"
 				}
 			],
 			"dataMode": "params",
@@ -133,7 +135,8 @@
 					"key": "jar",
 					"type": "file",
 					"enabled": true,
-					"warning": ""
+					"warning": "",
+					"value": "ModuleBatch_6.1.22.Output_types_numbers.jar"
 				}
 			],
 			"dataMode": "params",
@@ -162,12 +165,13 @@
 					"key": "jar",
 					"type": "file",
 					"enabled": true,
-					"warning": ""
+					"warning": "",
+					"value": "ModuleBatch_6.1.1.Upload_module.jar"
 				}
 			],
 			"dataMode": "params",
 			"version": 2,
-			"tests": "tests[\"Body matches string\"] = responseBody.has(\"Cannot upload jar file 'ModuleBatch_6.1.1.Upload_module.jar' of module. Errors: module 'batch-streaming-Masha_win-1.0' already exists;file 'ModuleBatch_6.1.1.Upload_module.jar' already exists\");\n\ntests[\"Status code is 400\"] = responseCode.code === 400;",
+			"tests": "tests[\"Body matches string\"] = responseBody.has(\"Cannot upload jar file 'ModuleBatch_6.1.1.Upload_module.jar' of module. Errors: module 'batch-streaming-batch-streaming-stub-1.0' already exists;file 'ModuleBatch_6.1.1.Upload_module.jar' already exists\");\n\ntests[\"Status code is 400\"] = responseCode.code === 400;",
 			"currentHelper": "normal",
 			"helperAttributes": {},
 			"time": 1500886332859,
@@ -191,7 +195,8 @@
 					"key": "jar",
 					"type": "file",
 					"enabled": true,
-					"warning": ""
+					"warning": "",
+					"value": "ModuleBatch_6.1.11.Output.types_letters(not_type).jar"
 				}
 			],
 			"dataMode": "params",
@@ -220,7 +225,8 @@
 					"key": "jar",
 					"type": "file",
 					"enabled": true,
-					"warning": ""
+					"warning": "",
+					"value": "ModuleBatch_6.1.19.Input_types_numbers.jar"
 				}
 			],
 			"dataMode": "params",
@@ -249,7 +255,8 @@
 					"key": "jar",
 					"type": "file",
 					"enabled": true,
-					"warning": ""
+					"warning": "",
+					"value": "ModuleBatch_6.1.7.Output_cardinality_first_value_less_1.jar"
 				}
 			],
 			"dataMode": "params",
@@ -278,12 +285,13 @@
 					"key": "jar",
 					"type": "file",
 					"enabled": true,
-					"warning": ""
+					"warning": "",
+					"value": "ModuleBatch_6.1.4.Name_type_version_already_exists.jar"
 				}
 			],
 			"dataMode": "params",
 			"version": 2,
-			"tests": "tests[\"Body matches string\"] = responseBody.has(\"Cannot upload jar file 'ModuleBatch_6.1.4.Name_type_version_already_exists.jar' of module. Errors: module 'batch-streaming-Masha_win-1.0' already exists\");\n\ntests[\"Status code is 400\"] = responseCode.code === 400;",
+			"tests": "tests[\"Body matches string\"] = responseBody.has(\"Cannot upload jar file 'ModuleBatch_6.1.4.Name_type_version_already_exists.jar' of module. Errors: module 'batch-streaming-batch-streaming-stub-1.0' already exists\");\n\ntests[\"Status code is 400\"] = responseCode.code === 400;",
 			"currentHelper": "normal",
 			"helperAttributes": {},
 			"time": 1500886298219,
@@ -295,14 +303,14 @@
 		{
 			"id": "3741e10f-4fd9-1499-3c17-0149d66afab0",
 			"headers": "",
-			"url": "{{address}}/v1/modules/batch-streaming/Masha_win/1.0/specification",
+			"url": "{{address}}/v1/modules/batch-streaming/batch-streaming-stub/1.0/specification",
 			"preRequestScript": null,
 			"pathVariables": {},
 			"method": "GET",
 			"data": null,
 			"dataMode": "params",
 			"version": 2,
-			"tests": "tests[\"Status code is 200\"] = responseCode.code === 200;\n\n\n\ntests[\"Body matches string\"] = responseBody.has(\"batch-streaming\");\n\ntests[\"Body matches string\"] = responseBody.has(\"Masha_win\");\n\ntests[\"Body matches string\"] = responseBody.has(\"1.0\");\n\ntests[\"Body matches string\"] = responseBody.has(\"specification\");",
+			"tests": "tests[\"Status code is 200\"] = responseCode.code === 200;\n\n\n\ntests[\"Body matches string\"] = responseBody.has(\"batch-streaming\");\n\ntests[\"Body matches string\"] = responseBody.has(\"batch-streaming-stub\");\n\ntests[\"Body matches string\"] = responseBody.has(\"1.0\");\n\ntests[\"Body matches string\"] = responseBody.has(\"specification\");",
 			"currentHelper": "normal",
 			"helperAttributes": {},
 			"time": 1493350682838,
@@ -315,7 +323,7 @@
 			"id": "421a419a-7381-881c-4aea-aafbbf8dd9e4",
 			"headers": "",
 			"headerData": [],
-			"url": "{{address}}/v1/modules/batch-streaming1/Masha_win/1.0/specification",
+			"url": "{{address}}/v1/modules/batch-streaming1/batch-streaming-stub/1.0/specification",
 			"queryParams": [],
 			"preRequestScript": null,
 			"pathVariables": {},
@@ -348,7 +356,8 @@
 					"key": "jar",
 					"type": "file",
 					"enabled": true,
-					"warning": ""
+					"warning": "",
+					"value": "ModuleBatch_6.1.21.Input_cardinality_second_value_is_negative.jar"
 				}
 			],
 			"dataMode": "params",
@@ -365,14 +374,14 @@
 		{
 			"id": "486e7ee5-80ce-265c-dd56-738cef0fe829",
 			"headers": "",
-			"url": "{{address}}/v1/modules/batch-streaming/Masha_win/1.0",
+			"url": "{{address}}/v1/modules/batch-streaming/batch-streaming-stub/1.0",
 			"preRequestScript": null,
 			"pathVariables": {},
 			"method": "DELETE",
 			"data": null,
 			"dataMode": "params",
 			"version": 2,
-			"tests": "tests[\"Status code is 200\"] = responseCode.code === 200;\n\ntests[\"Body matches string\"] = responseBody.has(\"Module 'batch-streaming-Masha_win-1.0' has been deleted\");",
+			"tests": "tests[\"Status code is 200\"] = responseCode.code === 200;\n\ntests[\"Body matches string\"] = responseBody.has(\"Module 'batch-streaming-batch-streaming-stub-1.0' has been deleted\");",
 			"currentHelper": "normal",
 			"helperAttributes": {},
 			"time": 1488355064852,
@@ -396,7 +405,8 @@
 					"key": "jar",
 					"type": "file",
 					"enabled": true,
-					"warning": ""
+					"warning": "",
+					"value": "ModuleBatch_6.1.10.Output.types_wrong_type.jar"
 				}
 			],
 			"dataMode": "params",
@@ -425,7 +435,8 @@
 					"key": "jar",
 					"type": "file",
 					"enabled": true,
-					"warning": ""
+					"warning": "",
+                    "value": "ModuleBatch_6.1.12.Output_cardinality_first_value_negative.jar"
 				}
 			],
 			"dataMode": "params",
@@ -443,7 +454,7 @@
 			"id": "75e86093-78f0-c6d9-1cfe-ba41afda0d51",
 			"headers": "",
 			"headerData": [],
-			"url": "{{address}}/v1/modules/batch-streaming/Masha_win/1.0/specification",
+			"url": "{{address}}/v1/modules/batch-streaming/batch-streaming-stub/1.0/specification",
 			"queryParams": [],
 			"preRequestScript": null,
 			"pathVariables": {},
@@ -452,7 +463,7 @@
 			"data": null,
 			"dataMode": "params",
 			"version": 2,
-			"tests": "tests[\"Status code is 404\"] = responseCode.code === 404;\n\ntests[\"Body matches string\"] = responseBody.has(\"Module 'batch-streaming-Masha_win-1.0' has not been found.\");",
+			"tests": "tests[\"Status code is 404\"] = responseCode.code === 404;\n\ntests[\"Body matches string\"] = responseBody.has(\"Module 'batch-streaming-batch-streaming-stub-1.0' has not been found.\");",
 			"currentHelper": "normal",
 			"helperAttributes": {},
 			"time": 1500959891356,
@@ -471,7 +482,7 @@
 			"data": null,
 			"dataMode": "params",
 			"version": 2,
-			"tests": "tests[\"Status code is 200\"] = responseCode.code === 200;\n\ntests[\"Body matches string\"] = responseBody.has(\"batch-streaming\");\n\ntests[\"Body matches string\"] = responseBody.has(\"Masha_win\");\n\ntests[\"Body matches string\"] = responseBody.has(\"1.0\");",
+			"tests": "tests[\"Status code is 200\"] = responseCode.code === 200;\n\ntests[\"Body matches string\"] = responseBody.has(\"batch-streaming\");\n\ntests[\"Body matches string\"] = responseBody.has(\"batch-streaming-stub\");\n\ntests[\"Body matches string\"] = responseBody.has(\"1.0\");",
 			"currentHelper": "normal",
 			"helperAttributes": {},
 			"time": 1493350676302,
@@ -495,7 +506,8 @@
 					"key": "jar",
 					"type": "file",
 					"enabled": true,
-					"warning": ""
+					"warning": "",
+                    "value": "ModuleBatch_6.1.1.Upload_module.jar"
 				}
 			],
 			"dataMode": "params",
@@ -524,7 +536,8 @@
 					"key": "jar",
 					"type": "file",
 					"enabled": true,
-					"warning": ""
+					"warning": "",
+                    "value": "ModuleBatch_6.1.13.Output_cardinality_second_value_negative.jar"
 				}
 			],
 			"dataMode": "params",
@@ -541,7 +554,7 @@
 		{
 			"id": "9df8f147-699e-05be-eed3-0fe39ffab879",
 			"headers": "",
-			"url": "{{address}}/v1/modules/batch-streaming1/Masha_win/1.0",
+			"url": "{{address}}/v1/modules/batch-streaming1/batch-streaming-stub/1.0",
 			"preRequestScript": null,
 			"pathVariables": {},
 			"method": "DELETE",
@@ -572,7 +585,8 @@
 					"key": "jar",
 					"type": "file",
 					"enabled": true,
-					"warning": ""
+					"warning": "",
+                    "value": "ModuleBatch_6.1.18.Input_types_letters(not_type).jar"
 				}
 			],
 			"dataMode": "params",
@@ -601,7 +615,8 @@
 					"key": "jar",
 					"type": "file",
 					"enabled": true,
-					"warning": ""
+					"warning": "",
+                    "value": "ModuleBatch_6.1.3.Not_jar_file.json"
 				}
 			],
 			"dataMode": "params",
@@ -630,12 +645,13 @@
 					"key": "jar",
 					"type": "file",
 					"enabled": true,
-					"warning": ""
+					"warning": "",
+                    "value": "ModuleBatch_6.1.23.Unknown_module_type.jar"
 				}
 			],
 			"dataMode": "params",
 			"version": 2,
-			"tests": "tests[\"Status code is 400\"] = responseCode.code === 400;\n\ntests[\"Body matches string\"] = responseBody.has(\"Cannot upload jar file 'ModuleBatch_6.1.23.Unknown_module_type.jar' of module. Errors: 'module-type' attribute of the specification.json must be one of [input-streaming, regular-streaming, batch-streaming, output-streaming];'engine-name' and 'engine-version' attributes in specification.json is invalid\");",
+			"tests": "tests[\"Status code is 400\"] = responseCode.code === 400;\n\ntests[\"Body matches string\"] = responseBody.has(\"Cannot upload jar file 'ModuleBatch_6.1.23.Unknown_module_type.jar' of module. Errors: 'module-type' attribute of the specification.json must be one of [input-streaming, regular-streaming, batch-streaming, output-streaming]\");",
 			"currentHelper": "normal",
 			"helperAttributes": {},
 			"time": 1500886252876,
@@ -654,7 +670,7 @@
 			"data": null,
 			"dataMode": "params",
 			"version": 2,
-			"tests": "tests[\"Status code is 200\"] = responseCode.code === 200;\n\n\ntests[\"Body matches string\"] = responseBody.has(\"batch-streaming\");\n\ntests[\"Body matches string\"] = responseBody.has(\"Masha_win\");\n\ntests[\"Body matches string\"] = responseBody.has(\"1.0\");",
+			"tests": "tests[\"Status code is 200\"] = responseCode.code === 200;\n\n\ntests[\"Body matches string\"] = responseBody.has(\"batch-streaming\");\n\ntests[\"Body matches string\"] = responseBody.has(\"batch-streaming-stub\");\n\ntests[\"Body matches string\"] = responseBody.has(\"1.0\");",
 			"currentHelper": "normal",
 			"helperAttributes": {},
 			"time": 1493350664710,
@@ -678,12 +694,13 @@
 					"key": "jar",
 					"type": "file",
 					"enabled": true,
-					"warning": ""
+					"warning": "",
+                    "value": "ModuleBatch_6.1.16.Input_cardinality_string.jar"
 				}
 			],
 			"dataMode": "params",
 			"version": 2,
-			"tests": "tests[\"Body matches string\"] = responseBody.has(\"Cannot parse json:\");\n\ntests[\"Status code is 400\"] = responseCode.code === 400;",
+			"tests": "tests[\"Body matches string\"] = responseBody.has(\"Json contains incorrect value in property 'inputs.cardinality(1)'\");\n\ntests[\"Status code is 400\"] = responseCode.code === 400;",
 			"currentHelper": "normal",
 			"helperAttributes": {},
 			"time": 1500885988801,
@@ -707,7 +724,8 @@
 					"key": "jar",
 					"type": "file",
 					"enabled": true,
-					"warning": ""
+					"warning": "",
+                    "value": "ModuleBatch_6.1.20.Input_cardinality_first_value_is_negative.jar"
 				}
 			],
 			"dataMode": "params",
@@ -736,7 +754,8 @@
 					"key": "jar",
 					"type": "file",
 					"enabled": true,
-					"warning": ""
+					"warning": "",
+                    "value": "ModuleBatch_6.1.17.Input_types_wrong_type.jar"
 				}
 			],
 			"dataMode": "params",
@@ -765,7 +784,8 @@
 					"key": "jar",
 					"type": "file",
 					"enabled": true,
-					"warning": ""
+					"warning": "",
+                    "value": "ModuleBatch_6.1.14.Input_cardinality_first_value_less_1.jar"
 				}
 			],
 			"dataMode": "params",
@@ -783,7 +803,7 @@
 			"id": "ee5f295a-ffd7-50e1-0171-e1560a8cc910",
 			"headers": "",
 			"headerData": [],
-			"url": "{{address}}/v1/modules/batch-streaming/Masha_win123/1.0/specification",
+			"url": "{{address}}/v1/modules/batch-streaming/batch-streaming-stub123/1.0/specification",
 			"queryParams": [],
 			"preRequestScript": null,
 			"pathVariables": {},
@@ -792,7 +812,7 @@
 			"data": null,
 			"dataMode": "params",
 			"version": 2,
-			"tests": "tests[\"Status code is 404\"] = responseCode.code === 404;\n\ntests[\"Body matches string\"] = responseBody.has(\"Module 'batch-streaming-Masha_win123-1.0' has not been found\");",
+			"tests": "tests[\"Status code is 404\"] = responseCode.code === 404;\n\ntests[\"Body matches string\"] = responseBody.has(\"Module 'batch-streaming-batch-streaming-stub123-1.0' has not been found\");",
 			"currentHelper": "normal",
 			"helperAttributes": {},
 			"time": 1500959804335,
@@ -816,7 +836,8 @@
 					"key": "jar",
 					"type": "file",
 					"enabled": true,
-					"warning": ""
+					"warning": "",
+                    "value": "ModuleBatch_6.1.15.Input_cardinality_second_value_less_than_first.jar"
 				}
 			],
 			"dataMode": "params",
@@ -845,12 +866,13 @@
 					"key": "jar",
 					"type": "file",
 					"enabled": true,
-					"warning": ""
+					"warning": "",
+                    "value": "ModuleBatch_6.1.9.Output_cardinality_string.jar"
 				}
 			],
 			"dataMode": "params",
 			"version": 2,
-			"tests": "tests[\"Body matches string\"] = responseBody.has(\"Cannot parse json:\");\n\ntests[\"Status code is 400\"] = responseCode.code === 400;",
+			"tests": "tests[\"Body matches string\"] = responseBody.has(\"Json contains incorrect value in property 'outputs.cardinality(1)'\");\n\ntests[\"Status code is 400\"] = responseCode.code === 400;",
 			"currentHelper": "normal",
 			"helperAttributes": {},
 			"time": 1500886161717,

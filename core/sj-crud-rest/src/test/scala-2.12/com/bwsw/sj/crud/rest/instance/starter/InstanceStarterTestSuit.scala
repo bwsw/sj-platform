@@ -68,7 +68,9 @@ class InstanceStarterTestSuit extends FlatSpec with Matchers with PrivateMethodT
     envs shouldBe Map(FrameworkLiterals.frameworkIdLabel -> frameworkName,
       FrameworkLiterals.instanceIdLabel -> instanceName,
       FrameworkLiterals.mesosMasterLabel -> master,
-      FrameworkLiterals.zookeeperLabel -> zookeeperAddress) ++ mongoEnv ++ instanceEnv
+      FrameworkLiterals.zookeeperHostLabel -> new URI("zk://"+zookeeperServer).getHost,
+      FrameworkLiterals.zookeeperPortLabel -> new URI("zk://"+zookeeperServer).getPort.toString
+    ) ++ mongoEnv ++ instanceEnv
   }
 
   it should "getZooKeeperServers() method returns a zookeeper address that has been passed to InstanceStarter" in {
@@ -120,7 +122,9 @@ class InstanceStarterTestSuit extends FlatSpec with Matchers with PrivateMethodT
       env = Map(FrameworkLiterals.frameworkIdLabel -> frameworkName,
         FrameworkLiterals.instanceIdLabel -> instanceName,
         FrameworkLiterals.mesosMasterLabel -> marathonMaster,
-        FrameworkLiterals.zookeeperLabel -> zookeeperAddress) ++ mongoEnv ++ instanceEnv,
+        FrameworkLiterals.zookeeperHostLabel -> new URI("zk://"+zookeeperServer).getHost,
+        FrameworkLiterals.zookeeperPortLabel -> new URI("zk://"+zookeeperServer).getPort.toString
+      ) ++ mongoEnv ++ instanceEnv,
       uris = List(new URI(s"$restAddress/v1/custom/jars/$frameworkJarNameStub").toString),
       backoffSeconds = backoffSecondsStub,
       backoffFactor = backoffFactorStub,
@@ -131,7 +135,6 @@ class InstanceStarterTestSuit extends FlatSpec with Matchers with PrivateMethodT
   it should "startInstance() method works properly if framework has been run without any exceptions" in {
     //arrange
     val startInstance = PrivateMethod('startInstance)
-    val restAddress = InstanceAdditionalFieldCreator.getRestAddress(Some(marathonTasksStub))
 
     val okMarathonResponse = getClosableHttpResponseMock(marathonInfoStub, okStatus)
     val okFrameworkResponse = getClosableHttpResponseMock(marathonApplicationStub, okStatus)
@@ -152,7 +155,6 @@ class InstanceStarterTestSuit extends FlatSpec with Matchers with PrivateMethodT
     verify(instanceManager, times(1)).updateFrameworkStage(instanceMock, EngineLiterals.starting)
     verify(instanceManager, times(1)).updateFrameworkStage(instanceMock, EngineLiterals.started)
     verify(instanceManager, times(1)).updateInstanceStatus(instanceMock, EngineLiterals.started)
-    verify(instanceManager, times(1)).updateInstanceRestAddress(instanceMock, restAddress)
   }
 
   it should s"startInstance() method doesn't start an instance (set '${EngineLiterals.failed}' status) if marathon has got some problems" in {
@@ -175,7 +177,6 @@ class InstanceStarterTestSuit extends FlatSpec with Matchers with PrivateMethodT
   it should "startFramework() method launches the existent marathon app if framework has been created earlier" in {
     //arrange
     val startFramework = PrivateMethod('startFramework)
-    val restAddress = InstanceAdditionalFieldCreator.getRestAddress(Some(marathonTasksStub))
 
 
     val okFrameworkResponse = getClosableHttpResponseMock(marathonApplicationStub, okStatus)
@@ -194,13 +195,11 @@ class InstanceStarterTestSuit extends FlatSpec with Matchers with PrivateMethodT
     verify(marathonManager, times(1)).scaleMarathonApplication(frameworkName, 1)
     verify(instanceManager, times(1)).updateFrameworkStage(instanceMock, EngineLiterals.started)
     verify(instanceManager, times(1)).updateInstanceStatus(instanceMock, EngineLiterals.started)
-    verify(instanceManager, times(1)).updateInstanceRestAddress(instanceMock, restAddress)
   }
 
   it should "startFramework() method creates a new marathon app if framework hasn't been created earlier" in {
     //arrange
     val startFramework = PrivateMethod('startFramework)
-    val restAddress = InstanceAdditionalFieldCreator.getRestAddress(Some(marathonTasksStub))
 
     val notOkFrameworkResponse = getClosableHttpResponseMock(marathonApplicationStub, errorStatus)
     val okFrameworkResponse = getClosableHttpResponseMock(marathonApplicationStub, okStatus)
@@ -219,13 +218,11 @@ class InstanceStarterTestSuit extends FlatSpec with Matchers with PrivateMethodT
     verify(marathonManager, times(1)).startMarathonApplication(any())
     verify(instanceManager, times(1)).updateFrameworkStage(instanceMock, EngineLiterals.started)
     verify(instanceManager, times(1)).updateInstanceStatus(instanceMock, EngineLiterals.started)
-    verify(instanceManager, times(1)).updateInstanceRestAddress(instanceMock, restAddress)
   }
 
-  it should "launchFramework() method launches the existent marathon app" in {
+  it should "launchExistingFramework() method launches the existent marathon app" in {
     //arrange
-    val launchFramework = PrivateMethod('launchFramework)
-    val restAddress = InstanceAdditionalFieldCreator.getRestAddress(Some(marathonTasksStub))
+    val launchFramework = PrivateMethod('launchExistingFramework)
 
 
     val okFrameworkResponse = getClosableHttpResponseMock(marathonApplicationStub, okStatus)
@@ -244,13 +241,12 @@ class InstanceStarterTestSuit extends FlatSpec with Matchers with PrivateMethodT
     verify(marathonManager, times(1)).scaleMarathonApplication(frameworkName, 1)
     verify(instanceManager, times(1)).updateFrameworkStage(instanceMock, EngineLiterals.started)
     verify(instanceManager, times(1)).updateInstanceStatus(instanceMock, EngineLiterals.started)
-    verify(instanceManager, times(1)).updateInstanceRestAddress(instanceMock, restAddress)
   }
 
-  it should "launchFramework() method doesn't launch the existent marathon app " +
+  it should "launchExistingFramework() method doesn't launch the existent marathon app " +
     "if marathon has got some problems with scaling of app" in {
     //arrange
-    val launchFramework = PrivateMethod('launchFramework)
+    val launchFramework = PrivateMethod('launchExistingFramework)
 
     val okFrameworkResponse = getClosableHttpResponseMock(marathonApplicationStub, okStatus)
     val marathonManager = mock[MarathonApi]
@@ -274,7 +270,6 @@ class InstanceStarterTestSuit extends FlatSpec with Matchers with PrivateMethodT
   it should "createFramework() method creates a new marathon app" in {
     //arrange
     val createFramework = PrivateMethod('createFramework)
-    val restAddress = InstanceAdditionalFieldCreator.getRestAddress(Some(marathonTasksStub))
 
     val okFrameworkResponse = getClosableHttpResponseMock(marathonApplicationStub, okStatus)
     val marathonManager = mock[MarathonApi]
@@ -292,7 +287,6 @@ class InstanceStarterTestSuit extends FlatSpec with Matchers with PrivateMethodT
     verify(marathonManager, times(1)).startMarathonApplication(any())
     verify(instanceManager, times(1)).updateFrameworkStage(instanceMock, EngineLiterals.started)
     verify(instanceManager, times(1)).updateInstanceStatus(instanceMock, EngineLiterals.started)
-    verify(instanceManager, times(1)).updateInstanceRestAddress(instanceMock, restAddress)
   }
 
   it should "createFramework() method doesn't create a new marathon app " +
@@ -322,7 +316,6 @@ class InstanceStarterTestSuit extends FlatSpec with Matchers with PrivateMethodT
   it should "waitForFrameworkToStart() method works properly if there are no errors" in {
     //arrange
     val waitForFrameworkToStart = PrivateMethod('waitForFrameworkToStart)
-    val restAddress = InstanceAdditionalFieldCreator.getRestAddress(Some(marathonTasksStub))
 
     val okFrameworkResponse = getClosableHttpResponseMock(marathonApplicationStub, okStatus)
     val marathonManager = mock[MarathonApi]
@@ -338,7 +331,6 @@ class InstanceStarterTestSuit extends FlatSpec with Matchers with PrivateMethodT
     //assert
     verify(instanceManager, times(1)).updateFrameworkStage(instanceMock, EngineLiterals.started)
     verify(instanceManager, times(1)).updateInstanceStatus(instanceMock, EngineLiterals.started)
-    verify(instanceManager, times(1)).updateInstanceRestAddress(instanceMock, restAddress)
   }
 
   it should "waitForFrameworkToStart() method do multiple tries to wait until all tasks start if app tasks don't start the first time" in {
@@ -346,7 +338,6 @@ class InstanceStarterTestSuit extends FlatSpec with Matchers with PrivateMethodT
     val numberOfTries = 5
     val notStartedMarathonApps = Array.fill(numberOfTries - 1)(notStartedMarathonApplicationStub).toList
     val waitForFrameworkToStart = PrivateMethod('waitForFrameworkToStart)
-    val restAddress = InstanceAdditionalFieldCreator.getRestAddress(Some(marathonTasksStub))
 
     val okFrameworkResponse = getClosableHttpResponseMock(marathonApplicationStub, okStatus)
     val marathonManager = mock[MarathonApi]
@@ -364,7 +355,6 @@ class InstanceStarterTestSuit extends FlatSpec with Matchers with PrivateMethodT
     verify(instanceManager, times(numberOfTries)).updateFrameworkStage(instanceMock, EngineLiterals.starting)
     verify(instanceManager, times(1)).updateFrameworkStage(instanceMock, EngineLiterals.started)
     verify(instanceManager, times(1)).updateInstanceStatus(instanceMock, EngineLiterals.started)
-    verify(instanceManager, times(1)).updateInstanceRestAddress(instanceMock, restAddress)
   }
 
   it should s"waitForFrameworkToStart() method set an instance status to '${EngineLiterals.failed}' and throws exception" +
@@ -409,7 +399,6 @@ class InstanceStarterTestSuit extends FlatSpec with Matchers with PrivateMethodT
 
   it should "run() method works properly if framework has been run without any exceptions" in {
     //arrange
-    val restAddress = InstanceAdditionalFieldCreator.getRestAddress(Some(marathonTasksStub))
     val okMarathonResponse = getClosableHttpResponseMock(marathonInfoStub, okStatus)
     val okFrameworkResponse = getClosableHttpResponseMock(marathonApplicationStub, okStatus)
     val marathonManager = mock[MarathonApi]
@@ -430,7 +419,6 @@ class InstanceStarterTestSuit extends FlatSpec with Matchers with PrivateMethodT
     verify(instanceManager, times(1)).updateFrameworkStage(instanceMock, EngineLiterals.starting)
     verify(instanceManager, times(1)).updateFrameworkStage(instanceMock, EngineLiterals.started)
     verify(instanceManager, times(1)).updateInstanceStatus(instanceMock, EngineLiterals.started)
-    verify(instanceManager, times(1)).updateInstanceRestAddress(instanceMock, restAddress)
   }
 
   it should s"run() method doesn't start an instance (set '${EngineLiterals.failed}' status) if there are some exceptions during start process" in {

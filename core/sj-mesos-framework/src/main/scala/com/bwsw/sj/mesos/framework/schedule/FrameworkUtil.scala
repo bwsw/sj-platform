@@ -27,7 +27,7 @@ import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepo
 import com.bwsw.sj.common.si.model.instance._
 import com.bwsw.sj.common.utils.{CommonAppConfigNames, FrameworkLiterals}
 import com.bwsw.sj.mesos.framework.task.TasksList
-import com.typesafe.config.ConfigFactory
+import com.typesafe.config.{Config, ConfigFactory}
 import org.apache.log4j.Logger
 import org.apache.mesos.Protos.MasterInfo
 import org.apache.mesos.SchedulerDriver
@@ -53,8 +53,10 @@ object FrameworkUtil {
   var driver: Option[SchedulerDriver] = None
   var jarName: Option[String] = None
   var instance: Option[Instance] = None
-  val connectionRepository: ConnectionRepository = inject[ConnectionRepository]
-  val configRepository: GenericMongoRepository[ConfigurationSettingDomain] = connectionRepository.getConfigRepository
+  var instancePort: Option[Int] = None
+  var config: Option[Config] = None
+  lazy val connectionRepository: ConnectionRepository = inject[ConnectionRepository]
+  lazy val configRepository: GenericMongoRepository[ConfigurationSettingDomain] = connectionRepository.getConfigRepository
   private val logger = Logger.getLogger(this.getClass)
 
   /**

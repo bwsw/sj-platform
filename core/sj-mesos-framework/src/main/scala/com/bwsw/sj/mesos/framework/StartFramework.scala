@@ -18,7 +18,7 @@
  */
 package com.bwsw.sj.mesos.framework
 
-import java.net.URI
+import java.lang.Enum
 
 import com.bwsw.common.LeaderLatch
 import com.bwsw.sj.common.config.ConfigLiterals
@@ -27,10 +27,11 @@ import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.FrameworkLiterals
 import com.bwsw.sj.mesos.framework.config.FrameworkConfigNames
 import com.bwsw.sj.mesos.framework.rest.Rest
-import com.bwsw.sj.mesos.framework.schedule.FrameworkScheduler
+import com.bwsw.sj.mesos.framework.schedule.{FrameworkScheduler, FrameworkUtil}
+import com.google.protobuf.Enum
 import com.typesafe.config.ConfigFactory
 import org.apache.mesos.MesosSchedulerDriver
-import org.apache.mesos.Protos.{Credential, FrameworkInfo}
+import org.apache.mesos.Protos.{Credential, FrameworkInfo, Status}
 import scaldi.Injectable.inject
 
 import scala.util.Try
@@ -41,6 +42,7 @@ object StartFramework {
   import com.bwsw.sj.common.SjModule._
 
   private val config = ConfigFactory.load()
+  FrameworkUtil.config = Option(config)
   val frameworkName = "JugglerFramework"
   val frameworkUser = Try(config.getString(FrameworkConfigNames.user)).getOrElse("root")
   val frameworkCheckpoint = false
@@ -48,7 +50,8 @@ object StartFramework {
   val frameworkRole = "*"
 
   val master_path = Try(config.getString(FrameworkLiterals.mesosMaster)).getOrElse("zk://127.0.0.1:2181/mesos")
-  val zookeeper_address = Try(config.getString(FrameworkLiterals.zookeeperAddress)).getOrElse("zk://127.0.0.1:2181/")
+  val zookeeper_host = Try(config.getString(FrameworkLiterals.zookeeperHost)).getOrElse("127.0.0.1")
+  val zookeeper_port = Try(config.getString(FrameworkLiterals.zookeeperPort)).getOrElse("2181")
   val frameworkTaskId = Try(config.getString(FrameworkLiterals.frameworkId)).getOrElse("broken")
 
   val connectionRepository: ConnectionRepository = inject[ConnectionRepository]
@@ -60,7 +63,8 @@ object StartFramework {
     */
   def main(args: Array[String]): Unit = {
     val port = if (args.nonEmpty) args(0).toInt else 8080
-    val restThread = Rest.start(port)
+    Rest.start(port)
+    FrameworkUtil.instancePort = Option(port)
 
     val frameworkInfo = FrameworkInfo.newBuilder.
       setName(frameworkName).
@@ -89,27 +93,15 @@ object StartFramework {
       else new MesosSchedulerDriver(scheduler, frameworkInfo, master_path)
     }
 
-    val zkServers: String = getZooKeeperServers(zookeeper_address)
+    val zkServers: String = zookeeper_host + ":" + zookeeper_port
     val leader: LeaderLatch = new LeaderLatch(Set(zkServers), s"/framework/$frameworkTaskId/lock")
     leader.start()
     leader.acquireLeadership(5)
 
-
-    driver.start()
-    driver.join()
-    restThread.join()
+    val driverStatus: Status = driver.run()
+    val status = if (driverStatus == Status.DRIVER_STOPPED) 0 else 1
 
     leader.close()
-    System.exit(0)
-  }
-
-  /**
-    * Return zookeeper address
-    * @param zookeeperURI
-    * @return
-    */
-  private def getZooKeeperServers(zookeeperURI: String): String = {
-    val mesosMasterUrl = new URI(zookeeperURI)
-    mesosMasterUrl.getHost + ":" + mesosMasterUrl.getPort
+    System.exit(status)
   }
 }

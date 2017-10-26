@@ -17,30 +17,32 @@ Get Started
 
 The Stream Juggler Platform has a user-friendly UI to create a processing sequence of arbitrary complexity, watch it in action and manage it using pre-created modules with flexible functionality. 
 
-If you are a developer and are willing to use the platform you need to know of some prerequisites for the platform. These are required settings and engines for launching a module. Find more information about that in the `Configuration`_ and the `Custom Files`_ sections of this document. And make sure the following services are preliminarily deployed:
+If you are a developer and are willing to use the platform you need to know of some prerequisites for the platform. Make sure the following services are preliminarily deployed:
 
 - Mesos
 - Marathon 
-- Zookeeper
+- Apache Zookeeper
 - MongoDB
-- Kafka (if you are going to work with Kafka input data)
+- Apache Kafka (as an input source)
 - an external storage (Elasticsearch, JDBC, etc.).
 
 .. tip:: Find more about SJ-Platform architecture at :ref:`Architecture`.
 
-Once everything is ready you can move to the Stream Juggler Platform.
+There are required configurations and engines for launching a module. Find more information about that in the `Configuration`_ and the :ref:`Custom_Files` sections of this document. 
+
+Once everything is ready, you can move to the Stream Juggler Platform.
 
 The SJ-Platform allows to upload your custom module for data stream processing with prerequisite engines and configuration settings. 
 
 For correct performance a module requires creating a stream/streams with its service(-s) and service providers.
 
-The diagram below may help you to understand the dependency of instances in the platform.
+The diagram below may help you to understand the dependency of entity types in the platform.
 
 .. figure:: _static/InstanceCorrelation1.png
 
-For example, if you want to create a regular module that will process Kafka input data streams you have to create a Kafka service with a Kafka and a ZooKeeper providers for it.
+For example, if you want to create a regular module that will process Apache Kafka input data streams you have to create an Apache Kafka service with a Kafka and a ZooKeeper providers for it.
 
-A module can not process data streams without uploading an engine (that is a .jar file) that launches the module and contains required configuration settings. More information about these settings can be found in the `Configuration`_ and the `Custom Files`_ sections of this document.
+A module can not process data streams without uploading an engine (that is a .jar file) that launches the module and contains required configuration settings. More information about these settings can be found in the `Configuration`_ and the :ref:`Custom Files` sections of this document.
 
 An executor of the module utilizes an instance/instances, i.e. a full range of settings for an exact handler/executor.
 
@@ -49,16 +51,17 @@ See more information on the platform structure and architecture at the :ref:`Arc
 Below you will find the information on uploading your module via UI and starting data processing.
 
 .. _Configuration:
+
 Configuration 
 ----------------------
 
-And the first step is to upload necessary configurations to the platform.
+So, the first step is to upload necessary configurations to the platform.
 
 Here the basic settings necessary for the platform are described. Besides, the flow of Configuration addition to the system is clarified here.
 
 Configurations are the settings required for the modules start working.
  
-The configurations can be added under the "Configuration" tab of the main navigation bar. Please, click at "Add Settings" in the upper-right corner above the list and fill in the form (the information on the required settings can be found in the table_ below):
+The configurations can be added under the *Configuration* tab of the main navigation bar. Please, click at "Add Settings" in the upper-right corner above the list and fill in the form (the information on the required settings can be found in the table_ below):
 
 1. *Name* *
         Enter a setting name here. 
@@ -77,7 +80,8 @@ Once the fields are correctly filled in, click at the "Create" button and see th
 
 Click "Cancel" to drop all the specified settings. The configuration will not be added then.
 
-The list of configurations added to the platform can be viewed under the Configuration section of the main navigation bar. 
+The list of configurations added to the platform can be viewed under the *Configuration* section of the main navigation bar. 
+
 It can be filtered by its type and/or a name using the search tool above the list.
  
 Please, find the required config settings in the table below and make sure they are added to your platform so that your modules could work.
@@ -96,7 +100,7 @@ Please, find the required config settings in the table below and make sure they 
   "system", "marathon-connect-timeout", "Use when trying to connect by marathon-connect (in milliseconds).", "60000"
   "system", "current-framework", "Indicates what file is used to run a framework. By this value you can get a setting that contains a file name of framework jar.", "com.bwsw.fw-0.1"
   "system", "low-watermark", "A number of preloaded messages for batch engine processing.", "1000"
-  "kafka", "subscriber-timeout", "The time, in milliseconds, spent waiting in poll if data is not available. Must not be negative", "100"
+  "kafka", "subscriber-timeout", "The time, in milliseconds, spent waiting in poll if data are not available. Must not be negative", "100"
   "zk", "session.timeout", "Use when connecting to zookeeper in milliseconds (usually when we are dealing with t-streams consumers/producers)", "3000"
 .. "system", "current-transaction-generator", "Indicates what jar is used for running transaction generators. By this value you can get configuration setting that contains file name of transaction generator jar.", "com.bwsw.tg-0.1"
   "system", "transaction-generator-client-retry-period", "Time for connecting attempt to TG-server", "500"
@@ -120,11 +124,11 @@ The range of optional settings is presented below. They have default values in t
 
 .. note::  In general 'framework-backoff-seconds', 'framework-backoff-factor' and 'framework-max-launch-delay-seconds' configure exponential backoff behavior when launching potentially sick apps. This prevents sandboxes associated with consecutively failing tasks from filling up the hard disk on Mesos slaves. The backoff period is multiplied by the factor for each consecutive failure until it reaches maxLaunchDelaySeconds. This applies also to tasks that are killed due to failing too many health checks.
 
-Сonfig domain which named 'kafka' contains properties used to create a kafka consumer. 
+Сonfiguration domain named 'kafka' contains properties used to create a Kafka consumer. 
 
 .. note:: You must not define properties such as 'bootstrap.servers', 'enable.auto.commit', 'key.deserializer' and 'value.deserializer' to avoid a crashing of system
 
-Сonfig domain which named 't-streams' contains properties used for a t-streams consumer/producer. 
+Сonfiguration domain named 't-streams' contains properties used for a T-streams consumer/producer. 
 
 .. note:: You must not define properties such as 'producer.bind-host', 'producer.bind-port', 'consumer.subscriber.bind-host' and 'consumer.subscriber.bind-port' to avoid a crashing of system. 
 
@@ -137,11 +141,13 @@ For each uploaded custom jar a new configuration is added in the following forma
 
 Providers 
 ---------
-Once all necessary configurations are added, a provider can be created.  That is the provider of services for input data transformation into a stream.
+Once all necessary configurations are added, a provider can be created.  
+
+A **provider** is a part of streaming infrastructure. That is the provider of services for input data transformation into a stream.
 
 .. figure:: _static/CreateProvider1.png
 
-Please, press the «Create provider» button and fill in the form where general fields and specific fields should be completed:
+Please, in the *Providers* section, press the «Create provider» button and fill in the form where general fields and specific fields should be completed:
 
 **General fileds:**
 
@@ -149,22 +155,23 @@ Please, press the «Create provider» button and fill in the form where general 
 
 .. figure:: _static/CreateProvider_Type1.png
 
-  Select from the drop down a type of the provider you are aimed to create. The following options are available:
 
-  - Elasticsearch
+Select from the drop-down a type of the provider you are aimed to create. The following options are available:
+
+ - Elasticsearch;
   
-  - Apache Zookeeper
+ - Apache Zookeeper;
 
-  - Apache Kafka
+ - Apache Kafka;
 
-  - RESTful
+ - RESTful;
 
-  - SQL database
+ - SQL database.
 
 The type of the provider is determined with the type of the instance you want to create and work with at the end.
 
 - *Name* *
-       Enter  a name of the provider here. It should be unique, must contain digits, lowercase letters or hyphens and start with a letter. 
+       Enter a name of the provider here. It should be unique, must contain digits, lowercase letters or hyphens and start with a letter. 
 
 - *Description* 
        Enter a description for the provider here.
@@ -175,7 +182,7 @@ The type of the provider is determined with the type of the instance you want to
 
 **Specific fields:**
 
-**SQL database** **Provider** **Type**
+**SQL database Provider Type**
 
 - *Login* *
        Enter a provider login here if necessary
@@ -186,7 +193,7 @@ The type of the provider is determined with the type of the instance you want to
 - *Driver* * 
        Enter a provider driver for SQL database provider type. 
 
-**Elasticsearch** **Provider** **Type**
+**Elasticsearch Provider Type**
 
 - *Login* *
        Enter a provider login here.
@@ -219,7 +226,7 @@ Services
 
 The next step is to create services. These are services to tranform input data into a stream of an exact type. 
 
-Under the Services section of the main navigation bar you will find the list of services.
+Under the *Services* section of the main navigation bar you will find the list of services.
 
 .. figure:: _static/CreateService1.png
 
@@ -228,7 +235,7 @@ Please, press the «Create Service» button and fill in the form where general a
 **General fields:**
 
 - *Type* *
-        Select from the dropdown a type of the services:
+        Select from the dropdown a type of the service:
 
 - Elasticsearch
 - SQL database
@@ -254,7 +261,7 @@ Please, press the «Create Service» button and fill in the form where general a
 
 **Specific fields:**
 
-**Apache Zookeeper** **Service** **Type**
+**Apache Zookeeper Service Type**
 
 - *Namespace* *
              Please, specify a namespace here. It must contain digits, lowercase letters or underscore and start with a letter. 
@@ -262,7 +269,7 @@ Please, press the «Create Service» button and fill in the form where general a
 - *Http scheme* *
             Select the scheme of HTTP protocol from the dropdown ("http" is set by default). 
 	     
-**Elasticsearch** **Service** **Type**
+**Elasticsearch Service Type**
 
 -  *Index* *
         This field is required for filling in.
@@ -282,7 +289,7 @@ Please, press the «Create Service» button and fill in the form where general a
 - *Http scheme* *
              Select the scheme of HTTP protocol from the dropdown ("http" is set by default). 
 	     
-**Apache Kafka** **Service** **Type**
+**Apache Kafka Service Type**
 
 - *ZK provider* *
        This field is required for filling in.
@@ -297,7 +304,7 @@ Please, press the «Create Service» button and fill in the form where general a
 - *Http scheme* *
             Select the scheme of HTTP protocol from the dropdown ("http" is set by default). 
 	     
-**T-streams** **Service** **Type**
+**T-streams Service Type**
 
 - *Prefix* *
         This field is required for filling in.
@@ -316,7 +323,7 @@ Please, press the «Create Service» button and fill in the form where general a
 - *Http scheme* *
              Select the scheme of HTTP protocol from the dropdown ("http" is set by default). 
 	     
-**SQL database** **Service** **Type**
+**SQL database Service Type**
 
 - *Database* *name* *
         This field required for filling in.
@@ -326,7 +333,7 @@ Please, press the «Create Service» button and fill in the form where general a
 - *Http scheme* *
         Select 'http' or 'https' from the dropdown.
 	     
-**RESTful** **Service** **Type**
+**RESTful Service Type**
 
 - *Http scheme* *
         Select the scheme of HTTP protocol from the dropdown ("http" is set by default). 
@@ -350,9 +357,9 @@ Click "Cancel" to drop all the specified settings. The service will not be creat
 
 In the list of services the following actions can be performed:
 
-1. **View** services` name and description, the date of creation.
+1. **View** service` name and description, the date of creation.
 
-2. **View** a provider for the services and get the provider`s information in a pop-up window by clicking at the active provider`s name in the «Providers» column.
+2. **View** a provider for the service and get the provider`s information in a pop-up window by clicking at the active provider`s name in the «Providers» column.
 
 .. figure:: _static/ServicesList_ProviderInfo1.png
 
@@ -364,17 +371,17 @@ The list of services can be filtered by its type and/or a name using the search 
 
 
 Streams
--------
+----------
 
 The next step is to create a data stream. A stream is a sequence of events happening randomly at irregular intervals.
 
 There are two kinds of streams in the SJ-Platform.
 
-:An input stream: It is a stream which provides new events. There are two different input stream types in the SJ-Platform: Apache Kafka and T-Streams
+:An input stream: It is a stream which provides new events. There are two different input stream types in the SJ-Platform: Apache Kafka and T-Streams.
 
 :An output stream: It is a stream which is a destination point for results. There is one output stream type supported within the SJ-Platform: T-Streams. Besides, three types of output streams are available for sending the processed data into different external storages: RESTful, SQL database and Elasticsearch.
 
-Under the Streams section of the main navigation bar you will find the list of streams.
+Under the *Streams* section of the main navigation bar you will find the list of streams.
 
 .. figure:: _static/CreateStreams1.png
 
@@ -413,8 +420,7 @@ Select from the dropdown a type of a stream:
 
 **Specific fields:**
 
-
-**T-streams** **Stream** **Type**
+**T-streams Stream Type**
 
 - *Partitions count* *
         Partitions is a part of data stream. Partitions are a special conception which handle regular queues in multi-queues, e.g. a stream with one partition is a queue, but a stream with two partitions is like a two different queues. Using streams with many partitions allows to handle parallelism properly as engine instances divide existing partitions fairly.
@@ -427,7 +433,7 @@ Select from the dropdown a type of a stream:
 - *Tags*
         Enter a tag\tags for the stream here.
 
-**Apache Kafka** **Stream** **Type**
+**Apache Kafka Stream Type**
 
 - *Partitions count* *
         Partitions is a part of data stream. Partitions are a special conception which handle regular queues in multi-queues, e.g. a stream with one partition is a queue, but a stream with two partitions is like a two different queues. Using streams with many partitions allows to handle parallelism properly as engine instances divide existing partitions fairly.
@@ -445,7 +451,7 @@ Select from the dropdown a type of a stream:
 
        Enter a replication factor here. It must be an integer.
        
-**SQL database** **Stream** **Type**
+**SQL database Stream Type**
 
 - *Partitions count* *
         Partitions is a part of data stream. Partitions are a special conception which handle regular queues in multi-queues, e.g. a stream with one partition is a queue, but a stream with two partitions is like a two different queues. Using streams with many partitions allows to handle parallelism properly as engine instances divide existing partitions fairly.
@@ -461,7 +467,7 @@ Select from the dropdown a type of a stream:
 - *Primary*
        Enter a primary key here. It is a primary key field name used in sql database.
 
-**RESTful** **Stream** **Type**
+**RESTful Stream Type**
 
 - *Partitions count* *
         Partitions is a part of data stream. Partitions are a special conception which handle regular queues in multi-queues, e.g. a stream with one partition is a queue, but a stream with two partitions is like a two different queues. Using streams with many partitions allows to handle parallelism properly as engine instances divide existing partitions fairly.
@@ -474,7 +480,7 @@ Select from the dropdown a type of a stream:
 - *Tags*
         Enter a tag\tags for the stream here.
 		
-**Elasticsearch** **Stream** **Type**
+**Elasticsearch Stream Type**
 
 - *Force create*
         This field indicates if a stream should be removed and re-created by force (if it exists). Set it «True» or «False». It is set as «False» by default.
@@ -507,18 +513,18 @@ The list of streams can be filtered by its type and/or a name using the search t
 Modules
 -------
 
-In the next section  — Modules — you can upload and manage your own module(s). 
+In the next section — *Modules* — you can upload and manage your own module(s). 
 
 The platform supports 4 types of modules:
 
-1. regular-streaming (base type)
-2. batch-streaming
-3. input-streaming
+1. input-streaming
+2. regular-streaming (base type)
+3. batch-streaming
 4. output-streaming
 
 A module must be a `.jar` file containing classes and specifications.
 
-In the table below the *specification* *fields* that should be specified in the module are described:
+In the table below the *specification fields* that should be specified in the module are described:
 
 .. csv-table:: Specification fields
    :header: "Field", "Format", "Description"
@@ -544,14 +550,14 @@ IOstream for inputs and outputs has the following structure:
   :header: "Field", "Format",  "Description"
   :widths: 20, 20, 60
 
-  "cardinality*", "Array[Int]", "The boundary of interval in that a number of inputs can change. Must contain 2 items."
+  "cardinality*", "Array[Int]", "The boundary of interval in which a number of inputs can change. Must contain 2 items."
   "types*", "Array[String]", "The enumeration of types of inputs. Can contain only [stream.t-streams, stream.apache-kafka, stream.elasticsearch, stream.sql-database, stream.restful, input]"
 
 Before uploading a module make sure an engine of corresponding type is uploaded.
 
-An **engine** is a framework that performs processing of streams. It runs an application code and handles data from an input stream providing results to an output stream.
+An **engine** is a worker that performs processing of streams. It runs an application code and handles data from an input stream providing results to an output stream.
 
-Currently the following **engine** **types** are supported in the SJ-Platform:
+Currently the following **engine types** are supported in the SJ-Platform:
 
 1. TCP Input Engine
         It gets packages of data from TCP, handles them and produces series of events to T-stream streams. It can be used to program arbitrary TCP protocol recognition.
@@ -560,7 +566,7 @@ Currently the following **engine** **types** are supported in the SJ-Platform:
 3. Windowed Processing Engine 
         It gets events from T-stream input streams, organizes them in batches and produces the results to T-stream output streams.
 4. Output Engine   
-         - ElasticSearch Output Engine - allows creating output endpoint and place processing results 		to Elasticsearch index.   
+         - ElasticSearch Output Engine - allows creating output endpoint and place processing results to Elasticsearch index.   
 	 - JDBC Output Engine  - allows creating output endpoint and place processing results to 			MySQL, PostgreSQL, Oracle tables.
 
 Engines should be uploaded as a .jar file under the `Custom files`_ section in the "Custom Jars" tab.
@@ -569,7 +575,7 @@ After an engine is uploaded and a corresponding config settings file appears in 
 
 .. note:: Read more about necessary configuration settings in the `Configuration`_ section below.
 
-Click the «Upload Module» button and select a `.jar` file in the window to upload.  Press «Open» and wait for a few seconds till the module is uploaded.
+Click the "Upload Module" button and select a `.jar` file in the window to upload.  Press "Open" and wait for a few seconds till the module is uploaded.
 
 If the module is uploaded correctly a success message appears and the uploaded module is in the list of modules.
 
@@ -587,16 +593,14 @@ In the list of modules the following actions can be performed:
 
 The list of modules can be filtered by its type and/or a name using the search tool above the list.
 
-
-.. _Custom Files:
+.. _Custom_Files:
 
 Custom Files
 -------------
 
-A «Custom Files» section is a section where a user can upload custom .jar files and other files that can be necessary for correct module performance.
+A *Custom Files* section is a section where a user can upload custom .jar files and other files that can be necessary for correct module performance.
 
-Here you can find two tabs: **Custom** **Jars** and **Custom** **files**. Below you will find more information for each of these tabs.
-
+Here you can find two tabs: **Custom Jars** and **Custom files**. Below you will find more information for each of these tabs.
 
 Custom Jars
 ~~~~~~~~~~~
@@ -613,8 +617,7 @@ The following actions can be performed with the files in the list:
 
 The list of jars can be filtered by its name using the search tool above the list.
 
-
-
+.. _Custom_Files:
 Custom Files
 ~~~~~~~~~~~~
 
@@ -636,13 +639,13 @@ Instances
 ---------
 Module uses a specific instance to personalize its work.
 
-Instance is a full range of settings to perform an exact executor type.
+**Instance** is a full range of settings to perform an exact executor type.
 
 Before creating an instance make sure all necessary *configuration* *settings* are added to the system.
 
 .. note:: Read more about necessary configuration settings in the `Configuration`_ section below.
 
-Under the «Instances» section of the main navigation menu there is a list of instances.  In the upper-right corner click the «Create Instance» button and choose the module from the drop-down. This is the module an instance will be created for. 
+Under the *Instances* section of the main navigation menu there is a list of instances.  In the upper-right corner click the "Create Instance" button and choose the module from the drop-down. This is the module an instance will be created for. 
 
 .. figure:: _static/CreateInstance_Type1.png
 
@@ -664,28 +667,28 @@ Please, review the tables with general and specific fields description below.
     This field determines the number of tasks that will process the streams. For load reduction and the enhancement of velocity Parallelism should be over 1. Value may be integer or `max` string. If `max`, then parallelism equals minimum count of partitions of streams (1 by default). For an input streaming instance it can not exceed the total number of back-ups (Backup count + Async-backup-count)
     
 - Options
-    Json with options for module
+    Json with options for the module. Validates by implementation of the Streaming Validator method in the module. That field can be set as required according to the Validator. 
     
 - Per-Task-Cores
-    Quantity of cores for task (1 by default)
+    Quantity of cores for task (1 by default).
     
 - Per-Task-Ram
-    Amount of RAM for task (1024 by default)
+    Amount of RAM for task (1024 by default).
     
 - JVM Options
-    Json with jvm-options. It is important to emphasize that Mesos deletes a task if it uses more memory than it is specified in the 'perTaskRam' parameter. There are no default options. The options defined in the example fit the Per-Task-Ram = 192 and it's recommended for launching modules. In general, the sum of the following parameters: `Xmx`, `XX:MaxDirectMemorySize` and `XX:MaxMetaspaceSize` should be less than `Per-Task-Ram`; `XX:MaxMetaspaceSize` must be grater or larger than `Xmx` by 32m.
+    Json with jvm-options. It is important to emphasize that Mesos deletes a task if it uses more memory than it is specified in the ``perTaskRam`` parameter. There are no default options. The options defined in the example fit the Per-Task-Ram = 192 and it's recommended for launching modules. In general, the sum of the following parameters: `Xmx`, `XX:MaxDirectMemorySize` and `XX:MaxMetaspaceSize` should be less than `Per-Task-Ram`; `XX:MaxMetaspaceSize` must be grater or larger than `Xmx` by 32m.
 
 - Node Attributes
-    Json with map attributes for framework
+    Json with map attributes for framework.
     
 - Coordination Service*
-    Service name of ZooKeeper service
+    Service name of Apache ZooKeeper service.
     
 -  Environment Variables
-    Variables used in the framework
+    Variables used in the framework.
     
 - Performance Reporting Interval 
-      Interval for creating a report of module performance metrics in ms (60000 by default)
+      Interval for creating a report of module performance metrics in ms (60000 by default).
 
 **Input-streaming instance fields**
   
@@ -748,25 +751,6 @@ Please, review the tables with general and specific fields description below.
 ..  "InputAvroSchema", "Avro schema for input objects. Requires if input object is instance of 'org.apache.avro.generic.GenericRecord':https://avro.apache.org/docs/1.8.1/api/java/org/apache/avro/generic/GenericRecord.html@.", "{'type':'record', 'name':'rec', 'fields':[{'name':'f1','type':string'}]}"
 
 
-**Output-streaming instance fields**
-   
-- Checkpoint Mode*
-      Value must be 'time-interval' for checkpointing after a set period of time, or 'every-nth' for performing a checkpoint after a set number of events. For output streams 'every-nth' is only available.
-      
-- Checkpoint Interval*
-      Interval for performing the checkpoint. If Checkpoint Mode is 'time-interval' the value is set in ms.  If Checkpoint Mode is 'every-nth' the value is the number of events after which the checkpoint is done.
-      
-- Inputs* 
-      Names of input stream. Must be only 't-stream' type. Stream for this type of module is 'split' only. Stream must exist in database.
-      
-- Outputs* 
-     Names of output stream (must be streams.sql-database, streams.elasticsearch or streams.restful).
-     
-- Start From
-     Value must be 'newest' (the system reads nothing, waits for new events), 'oldest' (the system reads all input stream events) or datetime (that requires specifying a timestamp and means the system reads events from the stream starting from the specified moment).
-     
-..  "InputAvroSchema", "Avro schema for input objects. Requires if input object is instance of 'org.apache.avro.generic.GenericRecord':https://avro.apache.org/docs/1.8.1/api/java/org/apache/avro/generic/GenericRecord.html@.", "{'type':'record', 'name':'rec', 'fields':[{'name':'f1','type':string'}]}"
-
 **Batch-streaming instance fields**
 
 - Outputs* 
@@ -795,14 +779,33 @@ Please, review the tables with general and specific fields description below.
     
 ..  "InputAvroSchema", "Avro schema for input objects. Requires if input object is instance of 'org.apache.avro.generic.GenericRecord':https://avro.apache.org/docs/1.8.1/api/java/org/apache/avro/generic/GenericRecord.html@.", "{'type':'record', 'name':'rec', 'fields':[{'name':'f1','type':string'}]}"
   .. note:: Required fields are marked with an asterisk (*)
+  
+**Output-streaming instance fields**
+   
+- Checkpoint Mode*
+      Value must be 'time-interval' for checkpointing after a set period of time, or 'every-nth' for performing a checkpoint after a set number of events. For output streams 'every-nth' is only available.
+      
+- Checkpoint Interval*
+      Interval for performing the checkpoint. If Checkpoint Mode is 'time-interval' the value is set in ms.  If Checkpoint Mode is 'every-nth' the value is the number of events after which the checkpoint is done.
+      
+- Inputs* 
+      Names of input stream. Must be only 't-stream' type. Stream for this type of module is 'split' only. Stream must exist in database.
+      
+- Outputs* 
+     Names of output stream (must be streams.sql-database, streams.elasticsearch or streams.restful).
+     
+- Start From
+     Value must be 'newest' (the system reads nothing, waits for new events), 'oldest' (the system reads all input stream events) or datetime (that requires specifying a timestamp and means the system reads events from the stream starting from the specified moment).
+     
+..  "InputAvroSchema", "Avro schema for input objects. Requires if input object is instance of 'org.apache.avro.generic.GenericRecord':https://avro.apache.org/docs/1.8.1/api/java/org/apache/avro/generic/GenericRecord.html@.", "{'type':'record', 'name':'rec', 'fields':[{'name':'f1','type':string'}]}
 Click «Create» at the bottom and see the instance is in the list of instances now. 
 
 Click "Cancel" to drop all the specified settings. The instance will not be created then.
 
 
-Details of the node are displayed to the right when clicking the instance in the list. 
+Details of an instance are displayed to the right when clicking the instance in the list. 
 
-.. _static/InstancesList.png
+.. figure:: _static/InstancesList.png
 
 Please, note, the details of an Instance show not only the instance settings but also:
 
@@ -818,6 +821,8 @@ Please, note, the details of an Instance show not only the instance settings but
 - Execution plan
     Execution plan consists of tasks. The number of tasks equals to a 'Parallelism' parameter. Each task has a unique name within the execution plan. Also the task has a set of Input stream names and their intervals of partitions. In general, it provides the information of the sources from which the data will be consumed.
 
+- Tasks
+    For a started instance the task name and address (host and port) is specified in the *Instance details* panel.
 In the list of instances the following actions can be performed:
 
 1. **Start** an instance by clicking the «Start» button in the Actions section. The instance status will first change to «Starting» and in a few seconds to «Started». That means the instance is launched and is working now.
@@ -884,7 +889,7 @@ It includes the following information for each task in the list:
 - Last node - Name of node that was used by a task before the status change (task failure)
 - Node - Name of node used by the task
 
-This is the statistic data from a Mesos framework that starts a module. The statistics is aggregated for started instances. ()
+This is the statistic data from a Mesos framework that starts a module. The statistics is aggregated for started instances. 
 
 The list of instances can be filtered by its type and/or a name using the search tool above the list.
 

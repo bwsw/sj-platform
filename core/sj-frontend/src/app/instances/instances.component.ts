@@ -232,9 +232,15 @@ export class InstancesComponent implements OnInit, AfterViewChecked, OnDestroy {
   }
 
   public cloneInstance(instance: InstanceModel, modal: ModalDirective) {
+    this.clearInstance();
     this.isInstanceClone = true;
     this.createByClone(instance);
     modal.show();
+    modal.onHide.subscribe(() => {
+      if (this.isInstanceClone) {
+        this.clearInstance();
+      }
+    });
   }
 
   public createInstance(modal: ModalDirective) {
@@ -243,6 +249,7 @@ export class InstancesComponent implements OnInit, AfterViewChecked, OnDestroy {
     req.subscribe(
       response => {
         modal.hide();
+        this.isInstanceClone = false;
         this.newInstance = new InstanceModel();
         this.showSpinner = false;
         this.showAlert({message: response.message, type: 'success', closable: true, timeout: 3000});
@@ -254,7 +261,6 @@ export class InstancesComponent implements OnInit, AfterViewChecked, OnDestroy {
         this.showSpinner = false;
         this.formAlerts.push({message: error, type: 'danger', closable: true, timeout: 0});
       });
-    this.isInstanceClone = false;
   }
 
   public closeModal(modal: ModalDirective) {
@@ -273,6 +279,11 @@ export class InstancesComponent implements OnInit, AfterViewChecked, OnDestroy {
   public showInstanceTasks(modal: ModalDirective, instance: InstanceModel) {
     this.getInstanceTasks(instance);
     modal.show();
+  }
+
+  public hideTaskModal(modal: ModalDirective) {
+    modal.hide();
+    this.tasks = null;
   }
 
   public deleteInstanceConfirm(modal: ModalDirective, instance: InstanceModel) {
@@ -296,6 +307,7 @@ export class InstancesComponent implements OnInit, AfterViewChecked, OnDestroy {
   public clearInstance() {
     this.newInstance = new InstanceModel();
     this.cloningInstance = new InstanceModel();
+    this.isInstanceClone = false;
   }
 
   public startInstance(instance: InstanceModel) {

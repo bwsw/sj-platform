@@ -105,21 +105,25 @@ export class ModulesComponent implements OnInit {
 
   public uploadFile(event: any) {
     this.isUploading = true;
+    this.showSpinner = true;
     const file = event.target.files[0];
     if (file) {
       this.modulesService.upload({file: file}).then((result: any) => {
         this.isUploading = false;
+          this.showSpinner = false;
         this.showAlert({ message: result, type: 'success', closable: true, timeout: 3000 });
         event.target.value = null;
         this.getModuleList();
       },
         (error: any) => {
         this.isUploading = false;
+          this.showSpinner = false;
         event.target.value = null;
         this.showAlert({ message: error, type: 'danger', closable: true, timeout: 0 });
       });
     } else {
       this.isUploading = false;
+      this.showSpinner = false;
     }
   }
 

@@ -64,22 +64,6 @@ class InstanceDomainRenewerTestSuit extends FlatSpec with Matchers with Instance
     verify(getInstanceRepository).save(instanceDomain)
   }
 
-  it should "updateInstanceRestAddress() method works properly: " +
-    "change an instance field of rest address and save a new instance to repository (SOME)" in {
-    //arrange
-    val restAddress = Some("host")
-    val instanceDomain: InstanceDomain = mock[InstanceDomain]
-    val instance: Instance = mock[Instance]
-    when(instance.to).thenReturn(instanceDomain)
-
-    //act
-    instanceManager.updateInstanceRestAddress(instance, restAddress)
-
-    //assert
-    verify(instance, times(1)).restAddress = restAddress
-    verify(getInstanceRepository).save(instanceDomain)
-  }
-
   it should "updateFrameworkStage() method works properly: " +
     "change a stage 'duration' field if the stage has got the same status which passed as a parameter" +
     "and save a new instance to repository" in {

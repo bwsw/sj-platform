@@ -23,33 +23,37 @@ import java.util.logging.LogManager
 
 import com.bwsw.sj.common.config.TempHelperForConfigSetup
 import com.bwsw.sj.common.utils.EngineLiterals
+import com.bwsw.sj.common.utils.benchmark.ProcessTerminator
 import com.bwsw.sj.engine.batch.module.DataFactory._
+import com.bwsw.sj.engine.batch.module.SjBatchModuleBenchmarkConstants._
 
 object SjBatchModuleSetup extends App {
-  LogManager.getLogManager.reset()
-  val tempHelperForConfigSetup = new TempHelperForConfigSetup(connectionRepository)
-  tempHelperForConfigSetup.setupConfigs()
-  val streamService = connectionRepository.getStreamRepository
-  val serviceManager = connectionRepository.getServiceRepository
-  val providerService = connectionRepository.getProviderRepository
-  val instanceService = connectionRepository.getInstanceRepository
-  val fileStorage = connectionRepository.getFileStorage
-  val stateManagement = EngineLiterals.ramStateMode
-  val stateFullCheckpoint = 3
-  val window = 2
-  val slidingInterval = 1
-  val _type = commonMode
+  ProcessTerminator.terminateProcessAfter { () =>
+    LogManager.getLogManager.reset()
+    val tempHelperForConfigSetup = new TempHelperForConfigSetup(connectionRepository)
+    tempHelperForConfigSetup.setupConfigs()
+    val streamService = connectionRepository.getStreamRepository
+    val serviceManager = connectionRepository.getServiceRepository
+    val providerService = connectionRepository.getProviderRepository
+    val instanceService = connectionRepository.getInstanceRepository
+    val fileStorage = connectionRepository.getFileStorage
+    val stateManagement = EngineLiterals.ramStateMode
+    val totalInputElements = defaultValueOfTxns * defaultValueOfElements * inputCount * {
+      if (inputStreamsType == commonMode) 2
+      else 1
+    }
 
-  val module = new File("./contrib/stubs/sj-stub-batch-streaming/target/scala-2.12/sj-stub-batch-streaming-1.0-SNAPSHOT.jar")
+    val module = new File(modulePath)
 
-  loadModule(module, fileStorage)
-  createProviders(providerService)
-  createServices(serviceManager, providerService)
-  createStreams(streamService, serviceManager, partitions, _type, inputCount, outputCount)
-  createInstance(serviceManager, instanceService, window, slidingInterval, stateManagement, stateFullCheckpoint)
+    loadModule(module, fileStorage)
+    createProviders(providerService)
+    createServices(serviceManager, providerService)
+    createStreams(streamService, serviceManager, partitions, inputStreamsType, inputCount, outputCount)
+    createInstance(serviceManager, instanceService, window, slidingInterval, totalInputElements, stateManagement, stateFullCheckpoint)
 
-  createData(6, 1, streamService, _type, inputCount)
-  connectionRepository.close()
-
-  println("DONE")
+    createData(defaultValueOfTxns, defaultValueOfElements, streamService, inputStreamsType, inputCount)
+    connectionRepository.close()
+  }
 }
+
+class SjBatchModuleSetup

@@ -32,16 +32,16 @@ import com.bwsw.sj.common.si.model.module.{ModuleMetadata, ModuleMetadataCreator
 import com.bwsw.sj.common.si.result._
 import com.bwsw.sj.common.utils.{CommonAppConfigNames, EngineLiterals, MessageResourceUtils, RestLiterals}
 import com.bwsw.sj.crud.rest.exceptions.ConfigSettingNotFound
-import com.bwsw.sj.crud.rest.instance.validator.InstanceValidator
 import com.bwsw.sj.crud.rest.instance._
+import com.bwsw.sj.crud.rest.instance.validator.InstanceValidator
 import com.bwsw.sj.crud.rest.model.instance._
 import com.bwsw.sj.crud.rest.model.instance.response.InstanceApiResponseCreator
 import com.bwsw.sj.crud.rest.utils.JsonDeserializationErrorMessageCreator
 import com.bwsw.sj.crud.rest.{InstanceResponseEntity, InstancesResponseEntity, ShortInstance, ShortInstancesResponseEntity}
 import com.typesafe.config.ConfigFactory
+import com.typesafe.scalalogging.Logger
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.util.EntityUtils
-import org.slf4j.LoggerFactory
 import scaldi.Injectable.inject
 import scaldi.Injector
 
@@ -54,7 +54,7 @@ class InstanceController(implicit injector: Injector) {
 
   import messageResourceUtils._
 
-  private val logger = LoggerFactory.getLogger(getClass)
+  private val logger = Logger(getClass)
   private val (zkHost, zkPort) = getZkProperties()
   private val serializer = inject[JsonSerializer]
   serializer.enableNullForPrimitives(false)

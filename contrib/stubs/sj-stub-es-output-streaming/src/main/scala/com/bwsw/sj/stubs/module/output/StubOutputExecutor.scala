@@ -18,6 +18,7 @@
  */
 package com.bwsw.sj.stubs.module.output
 
+import java.net.Socket
 import java.util.Calendar
 
 import com.bwsw.sj.common.engine.core.entities.{OutputEnvelope, TStreamEnvelope}
@@ -25,6 +26,8 @@ import com.bwsw.sj.common.engine.core.environment.OutputEnvironmentManager
 import com.bwsw.sj.common.engine.core.output.OutputStreamingExecutor
 import com.bwsw.sj.engine.core.output.types.es._
 import com.bwsw.sj.stubs.module.output.data.StubEsData
+
+import scala.util.Try
 
 /**
   * Handler for work with t-stream envelopes
@@ -34,6 +37,11 @@ import com.bwsw.sj.stubs.module.output.data.StubEsData
   */
 class StubOutputExecutor(manager: OutputEnvironmentManager) extends OutputStreamingExecutor[(Integer, String)](manager) {
 
+  private val splitOptions = manager.options.split(",")
+  private val totalInputElements = splitOptions(0).toInt
+  private val benchmarkPort = splitOptions(1).toInt
+  private var processedElements = 0
+
   /**
     * Transform t-stream transaction to output entities
     *
@@ -41,11 +49,15 @@ class StubOutputExecutor(manager: OutputEnvironmentManager) extends OutputStream
     * @return List of output envelopes
     */
   override def onMessage(envelope: TStreamEnvelope[(Integer, String)]): Seq[OutputEnvelope] = {
-    println("Processed: " + envelope.data.size + " elements")
+    processedElements += envelope.data.size
+    println(s"Processed: ${envelope.data.size} elements ($processedElements/$totalInputElements)")
 
     val list = envelope.data.dequeueAll(_ => true).map {
       case (i, s) => new StubEsData(Calendar.getInstance().getTime, i, s)
     }
+
+    if (processedElements >= totalInputElements)
+      Try(new Socket("localhost", benchmarkPort))
 
     list
   }

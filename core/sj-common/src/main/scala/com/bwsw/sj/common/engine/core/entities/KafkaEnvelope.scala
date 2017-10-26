@@ -27,18 +27,14 @@ import com.fasterxml.jackson.annotation.JsonIgnore
   * @param data message data
   * @tparam T type of data containing in a message
   */
-
-class KafkaEnvelope[T <: AnyRef](var data: T) extends Envelope {
+class KafkaEnvelope[T <: AnyRef](val data: T) extends Envelope {
   streamType = StreamLiterals.kafkaType
 
   @JsonIgnore
   override def equals(obj: Any): Boolean = obj match {
     case k: KafkaEnvelope[_] =>
-      data == k.data &&
-        streamType == k.streamType &&
-        id == k.id &&
+      id == k.id &&
         stream == k.stream &&
-        (tags sameElements k.tags) &&
         partition == k.partition
 
     case _ => super.equals(obj)

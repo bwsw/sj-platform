@@ -26,16 +26,16 @@ import com.bwsw.sj.common.config.{ConfigLiterals, SettingsUtils}
 import com.bwsw.sj.common.dal.model.service.KafkaServiceDomain
 import com.bwsw.sj.common.dal.model.stream.{StreamDomain, TStreamStreamDomain}
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
-import com.bwsw.sj.common.si.model.config.ConfigurationSetting
-import com.bwsw.sj.common.utils.StreamLiterals
 import com.bwsw.sj.common.engine.core.entities.KafkaEnvelope
 import com.bwsw.sj.common.engine.core.managment.CommonTaskManager
+import com.bwsw.sj.common.si.model.config.ConfigurationSetting
+import com.bwsw.sj.common.utils.StreamLiterals
 import com.bwsw.tstreams.agents.consumer.Offset.Oldest
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import com.bwsw.tstreams.agents.producer.Producer
+import com.typesafe.scalalogging.Logger
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.common.TopicPartition
-import org.slf4j.{Logger, LoggerFactory}
 import scaldi.Injectable.inject
 
 import scala.collection.JavaConverters._
@@ -44,13 +44,14 @@ import scala.collection.mutable
 trait KafkaTaskInput[T <: AnyRef] extends SjInjector {
   protected val manager: CommonTaskManager
   protected val checkpointGroup: CheckpointGroup
+  protected val maxPollRecords: Int = 500
   protected val currentThread: Thread = Thread.currentThread()
-  protected val logger: Logger = LoggerFactory.getLogger(this.getClass)
+  protected val logger: Logger = Logger(this.getClass)
   protected val offsetSerializer = new ObjectSerializer()
   protected val settingsUtils: SettingsUtils = inject[SettingsUtils]
   protected val kafkaSubscriberTimeout: Int = settingsUtils.getKafkaSubscriberTimeout()
   protected val kafkaInputs: mutable.Map[StreamDomain, Array[Int]] = getKafkaInputs()
-  protected val streamNamesToTags: Map[String, Array[String]] = kafkaInputs.map(x => (x._1.name, x._1.tags)).toMap
+  val streamNamesToTags: Map[String, Array[String]] = kafkaInputs.map(x => (x._1.name, x._1.tags)).toMap
   protected var kafkaOffsetsStorage: mutable.Map[(String, Int), Long] = mutable.Map[(String, Int), Long]()
   protected val kafkaOffsetsStream: String = manager.taskName + "_kafka_offsets"
   protected val offsetStream: TStreamStreamDomain = createOffsetStream()
@@ -132,6 +133,7 @@ trait KafkaTaskInput[T <: AnyRef] extends SjInjector {
     properties.put("auto.offset.reset", offset)
     properties.put("key.deserializer", "org.apache.kafka.common.serialization.ByteArrayDeserializer")
     properties.put("value.deserializer", "org.apache.kafka.common.serialization.ByteArrayDeserializer")
+    properties.put("max.poll.records", Int.box(maxPollRecords))
     applyConfigurationSettings(properties)
 
     val consumer = new KafkaConsumer[Array[Byte], Array[Byte]](properties)

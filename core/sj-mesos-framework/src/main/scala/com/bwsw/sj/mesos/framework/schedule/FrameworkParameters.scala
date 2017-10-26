@@ -20,7 +20,7 @@
 package com.bwsw.sj.mesos.framework.schedule
 
 import com.bwsw.sj.common.utils.{CommonAppConfigNames, FrameworkLiterals}
-import com.typesafe.config.ConfigFactory
+import com.typesafe.config.{Config, ConfigFactory}
 
 import scala.collection.immutable
 import scala.util.Try
@@ -37,7 +37,7 @@ object FrameworkParameters {
   private var params: Map[String, String] = immutable.Map[String, String]()
 
   def prepareEnvParams() = {
-    val config = ConfigFactory.load()
+    val config: Config = FrameworkUtil.config.get
 
     this.params = Map(
       instanceId ->
@@ -55,6 +55,4 @@ object FrameworkParameters {
   def apply(): Map[String, String] = {
     params
   }
-
-
 }
