@@ -18,13 +18,20 @@
  */
 package com.bwsw.sj.stubs.module.input_streaming
 
+import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.engine.{StreamingValidator, ValidationInfo}
 
 import scala.collection.mutable.ArrayBuffer
 
 class Validator extends StreamingValidator {
 
-  override def validate(options: String): ValidationInfo = {
-    ValidationInfo(options.nonEmpty, ArrayBuffer("Options have to be non-empty."))
+  private val serializer = new JsonSerializer(ignoreUnknown = true, enableNullForPrimitives = true)
+
+  override def validate(serializedOptions: String): ValidationInfo = {
+    val options = serializer.deserialize[InputExecutorOptions](serializedOptions)
+
+    ValidationInfo(
+      options.benchmarkPort.isEmpty == options.totalInputElements.isEmpty,
+      ArrayBuffer("Properties benchmarkPort and totalInputElements both must be defined or not-defined"))
   }
 }

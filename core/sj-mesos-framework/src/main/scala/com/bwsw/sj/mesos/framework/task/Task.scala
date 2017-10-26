@@ -22,6 +22,7 @@ import java.util.{Calendar, Date}
 
 import com.bwsw.sj.common.rest.{Directory, FrameworkTask}
 import com.bwsw.sj.mesos.framework.config.FrameworkConfigNames
+import com.bwsw.sj.mesos.framework.schedule.FrameworkUtil
 import com.typesafe.config.ConfigFactory
 import org.apache.mesos.Protos.Resource
 
@@ -33,7 +34,7 @@ import scala.collection.mutable
   * @param taskId
   */
 class Task(taskId: String) {
-  private val config = ConfigFactory.load()
+  private val config = FrameworkUtil.config.get
 
   val id: String = taskId
   var state: String = "TASK_STAGING"

@@ -20,10 +20,10 @@ package com.bwsw.common
 
 import java.io.ByteArrayOutputStream
 
+import com.typesafe.scalalogging.Logger
 import org.apache.avro.Schema
 import org.apache.avro.generic.{GenericDatumReader, GenericDatumWriter, GenericRecord}
 import org.apache.avro.io.{DecoderFactory, EncoderFactory}
-import org.slf4j.LoggerFactory
 
 /**
   * Serializer from [[org.apache.avro.generic.GenericRecord]] and vice versa.
@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory
   * @author Pavel Tomskikh
   */
 class AvroSerializer {
-  private val logger = LoggerFactory.getLogger(this.getClass)
+  private val logger = Logger(this.getClass)
   private val writerOutput = new ByteArrayOutputStream()
   private val encoder = EncoderFactory.get().binaryEncoder(writerOutput, null)
 

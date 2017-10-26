@@ -21,13 +21,14 @@ package com.bwsw.sj.common.si
 import java.util.UUID
 
 import com.bwsw.sj.common.dal.model.ConfigurationSettingDomain
-import com.bwsw.sj.common.dal.model.provider.{JDBCProviderDomain, ProviderDomain}
+import com.bwsw.sj.common.dal.model.provider.{ESProviderDomain, JDBCProviderDomain, ProviderDomain}
 import com.bwsw.sj.common.dal.model.service._
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
-import com.bwsw.sj.common.si.model.provider.{ProviderCreator, Provider}
+import com.bwsw.sj.common.si.model.provider.{Provider, ProviderCreator}
 import com.bwsw.sj.common.si.result._
 import com.bwsw.sj.common.utils.MessageResourceUtils
 import com.bwsw.sj.common.utils.MessageResourceUtilsMock.messageResourceUtils
+import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.{any, anyString}
 import org.mockito.Mockito.when
 import org.mockito.invocation.InvocationOnMock
@@ -103,7 +104,8 @@ class ProviderSiTests extends FlatSpec with Matchers {
     val successConnectionProviderName = "success-connection-provider"
     val successConnectionProviderDomain = mock[ProviderDomain]
     when(successConnectionProviderDomain.name).thenReturn(successConnectionProviderName)
-    when(successConnectionProviderDomain.checkConnection(any())).thenReturn(ArrayBuffer[String]())
+    when(successConnectionProviderDomain.checkConnection(any())(ArgumentMatchers.eq(injector)))
+      .thenReturn(ArrayBuffer[String]())
     providerStorage += successConnectionProviderDomain
 
     providerSI.checkConnection(successConnectionProviderName) shouldBe Right(true)
@@ -114,7 +116,7 @@ class ProviderSiTests extends FlatSpec with Matchers {
     val failedConnectionProviderName = "failed-connection-provider"
     val failedConnectionProviderDomain = mock[ProviderDomain]
     when(failedConnectionProviderDomain.name).thenReturn(failedConnectionProviderName)
-    when(failedConnectionProviderDomain.checkConnection(any())).thenReturn(errors)
+    when(failedConnectionProviderDomain.checkConnection(any())(ArgumentMatchers.eq(injector))).thenReturn(errors)
     providerStorage += failedConnectionProviderDomain
 
     providerSI.checkConnection(failedConnectionProviderName) shouldBe Left(errors)
@@ -223,16 +225,16 @@ class ProviderSiTests extends FlatSpec with Matchers {
     val jdbcProviderDomain = mock[JDBCProviderDomain]
     when(jdbcProviderDomain.name).thenReturn(jdbcProviderName)
 
+    val esProviderName = "es-provider"
+    val esProviderDomain = mock[ESProviderDomain]
+    when(esProviderDomain.name).thenReturn(esProviderName)
+
     providerStorage ++= mutable.Buffer(
       providerWithServicesDomain,
       providerWithoutServicesDomain,
       otherProviderDomain,
       jdbcProviderDomain)
 
-    val esServiceRelatedName = "esServiceRelated"
-    val esServiceRelated = mock[ESServiceDomain]
-    when(esServiceRelated.name).thenReturn(esServiceRelatedName)
-    when(esServiceRelated.provider).thenReturn(providerWithServicesDomain)
     val zkServiceRelatedName = "zkServiceRelated"
     val zkServiceRelated = mock[ZKServiceDomain]
     when(zkServiceRelated.name).thenReturn(zkServiceRelatedName)
@@ -243,8 +245,12 @@ class ProviderSiTests extends FlatSpec with Matchers {
     when(kfkServiceRelated.provider).thenReturn(providerWithServicesDomain)
     when(kfkServiceRelated.zkProvider).thenReturn(otherProviderDomain)
 
-    val relatedServices = Set(esServiceRelatedName, zkServiceRelatedName, kfkServiceRelatedName)
+    val relatedServices = Set(zkServiceRelatedName, kfkServiceRelatedName)
 
+    val esServiceRelatedName = "esServiceRelated"
+    val esServiceNotRelated = mock[ESServiceDomain]
+    when(esServiceNotRelated.name).thenReturn(esServiceRelatedName)
+    when(esServiceNotRelated.provider).thenReturn(esProviderDomain)
     val restServiceNotRelatedName = "restServiceNotRelated"
     val restServiceNotRelated = mock[RestServiceDomain]
     when(restServiceNotRelated.name).thenReturn(restServiceNotRelatedName)
@@ -258,10 +264,14 @@ class ProviderSiTests extends FlatSpec with Matchers {
     when(jdbcServiceNotRelated.name).thenReturn(jdbcServiceNotRelatedName)
     when(jdbcServiceNotRelated.provider).thenReturn(jdbcProviderDomain)
 
-    val notRelatedServices = Set(restServiceNotRelatedName, tServiceNotRelatedName, jdbcServiceNotRelatedName)
+    val notRelatedServices = Set(
+      esServiceNotRelated,
+      restServiceNotRelatedName,
+      tServiceNotRelatedName,
+      jdbcServiceNotRelatedName)
 
     val serviceStorage = mutable.Buffer[ServiceDomain](
-      esServiceRelated,
+      esServiceNotRelated,
       zkServiceRelated,
       kfkServiceRelated,
       restServiceNotRelated,

@@ -18,7 +18,7 @@
  */
 package com.bwsw.sj.stubs.module.regular_streaming
 
-import java.util.Random
+import java.net.Socket
 
 import com.bwsw.sj.common.engine.core.entities.{KafkaEnvelope, TStreamEnvelope}
 import com.bwsw.sj.common.engine.core.environment.ModuleEnvironmentManager
@@ -26,41 +26,57 @@ import com.bwsw.sj.common.engine.core.regular.RegularStreamingExecutor
 import com.bwsw.sj.common.engine.core.state.StateStorage
 
 import scala.language.higherKinds
+import scala.util.{Random, Try}
 
 class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecutor[Integer](manager) {
 
   val state: StateStorage = manager.getState
   val outputs = manager.getStreamsByTags(Array("output"))
+  val splitOptions = manager.options.split(",")
+  val totalInputElements = splitOptions(0).toInt
+  val benchmarkPort = splitOptions(1).toInt
+
+  val sumStateName = "sum"
+  val elementsStateName = "elements"
 
   override def onInit(): Unit = {
-    if (!state.isExist("sum")) state.set("sum", 0)
+    if (!state.isExist(sumStateName)) state.set(sumStateName, 0)
+    if (!state.isExist(elementsStateName)) state.set(elementsStateName, 0)
     println("new init")
   }
 
   override def onMessage(envelope: TStreamEnvelope[Integer]): Unit = {
-    val output = manager.getRoundRobinOutput(outputs(new Random().nextInt(outputs.length)))
-    var sum = state.get("sum").asInstanceOf[Int]
+    val output = manager.getRoundRobinOutput(outputs(Random.nextInt(outputs.length)))
+    var sum = state.get(sumStateName).asInstanceOf[Int]
+    var elements = state.get(elementsStateName).asInstanceOf[Int]
 
-    if (new Random().nextInt(100) < 5) throw new Exception("it happened")
+    if (Random.nextInt(100) < 5) throw new Exception("it happened")
 
     println("elements: " + envelope.data.mkString(","))
-    envelope.data.foreach(x => sum += x)
+    envelope.data.foreach(x => {
+      sum += x
+      elements += 1
+    })
     envelope.data.foreach(output.put)
-    state.set("sum", sum)
+    state.set(sumStateName, sum)
+    state.set(elementsStateName, elements)
 
     println("stream name = " + envelope.stream)
   }
 
   override def onMessage(envelope: KafkaEnvelope[Integer]): Unit = {
-    val output = manager.getRoundRobinOutput(outputs(new Random().nextInt(outputs.length)))
-    var sum = state.get("sum").asInstanceOf[Int]
+    val output = manager.getRoundRobinOutput(outputs(Random.nextInt(outputs.length)))
+    var sum = state.get(sumStateName).asInstanceOf[Int]
+    var elements = state.get(elementsStateName).asInstanceOf[Int]
 
-    if (new Random().nextInt(100) < 5) throw new Exception("it happened")
+    if (Random.nextInt(100) < 5) throw new Exception("it happened")
 
     println("element: " + envelope.data)
     output.put(envelope.data)
     sum += envelope.data
-    state.set("sum", sum)
+    elements += 1
+    state.set(sumStateName, sum)
+    state.set(elementsStateName, elements)
 
     println("stream name = " + envelope.stream)
   }
@@ -84,5 +100,9 @@ class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecut
     */
   override def onBeforeStateSave(isFullState: Boolean): Unit = {
     println("on before state saving")
+
+    val elements = state.get(elementsStateName).asInstanceOf[Int]
+    if (elements >= totalInputElements && benchmarkPort > 0)
+      Try(new Socket("localhost", benchmarkPort))
   }
 }

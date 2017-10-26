@@ -6,8 +6,17 @@ val sjVersion = "1.0-SNAPSHOT"
 
 addCommandAlias("rebuild", ";clean; compile; package")
 
+artifact in (Compile, assembly) := {
+  val art = (artifact in (Compile, assembly)).value
+  art.copy(`classifier` = Some("assembly"))
+}
+
+addArtifact(artifact in (Compile, assembly), assembly)
+
 val commonSettings = Seq(
   version := sjVersion,
+  publishMavenStyle := true,
+  pomIncludeRepository := { _ => false },
   scalaVersion := Dependencies.Versions.scala,
   scalacOptions ++= Seq(
     "-unchecked",
@@ -29,9 +38,11 @@ val commonSettings = Seq(
       </developers>
     ),
 
-  resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
+  resolvers += "Sonatype OSS Releases" at "https://oss.sonatype.org/content/repositories/snapshots",
+  resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/service/local/staging/deploy/maven2",
   resolvers += "Twitter Repository" at "http://maven.twttr.com",
   resolvers += "Oracle Maven2 Repo" at "http://download.oracle.com/maven",
+  resolvers += "Elasticsearch Releases" at "https://artifacts.elastic.co/maven",
 
   assemblyMergeStrategy in assembly := {
     case PathList("org", "apache", "commons", "logging", xs@_*) => MergeStrategy.first
@@ -55,20 +66,21 @@ val commonSettings = Seq(
   licenses := Seq("Apache 2" -> url("http://www.apache.org/licenses/LICENSE-2.0")),
   homepage := Some(url("http://stream-juggler.com/")),
   pomIncludeRepository := { _ => false },
-  scalacOptions += "-feature",
-  scalacOptions += "-deprecation",
   parallelExecution in Test := false,
   organization := "com.bwsw",
   publishMavenStyle := true,
   pomIncludeRepository := { _ => false },
-  publishTo := {
+
+  publishTo <<= version { (v: String) =>
     val nexus = "https://oss.sonatype.org/"
-    if (isSnapshot.value)
-      Some("snapshots" at nexus + "content/repositories/snapshots")
-    else
-      Some("releases" at nexus + "service/local/staging/deploy/maven2")
+    if (v.trim.endsWith("SNAPSHOT")) Some(
+      "snapshots" at nexus + "content/repositories/snapshots"
+    )
+    else Some("releases" at nexus + "service/local/staging/deploy/maven2")
   },
-  publishArtifact in Test := false
+  publishArtifact in Test := false,
+
+  concurrentRestrictions in Global += Tags.limit(Tags.Test, 1)
 )
 
 lazy val sj = (project in file(".")).settings(publish := {})
@@ -97,6 +109,7 @@ lazy val engineCore = Project(id = "sj-engine-core",
   base = file("./core/sj-engine-core"))
   .settings(commonSettings: _*)
   .settings(
+    resolvers += "Clojars Repository" at "http://clojars.org/repo/",
     libraryDependencies ++= Dependencies.sjEngineCoreDependencies.value,
     libraryDependencies ++= Dependencies.sjTestDependencies.value
   )
@@ -116,7 +129,8 @@ lazy val inputStreamingEngine = Project(id = "sj-input-streaming-engine",
   .settings(commonSettings: _*)
   .settings(
     libraryDependencies ++= Dependencies.sjInputEngineDependencies.value,
-    libraryDependencies ++= Dependencies.sjTestDependencies.value
+    libraryDependencies ++= Dependencies.sjTestDependencies.value,
+    test in Test <<= (test in Test).dependsOn((Keys.`package` in Compile) in stubInput)
   )
   .dependsOn(engineCore)
 
@@ -124,21 +138,30 @@ lazy val regularStreamingEngine = Project(id = "sj-regular-streaming-engine",
   base = file("./core/sj-regular-streaming-engine"))
   .settings(commonSettings: _*)
   .settings(
-    resolvers += "Clojars Repository" at "http://clojars.org/repo/",
-    libraryDependencies ++= Dependencies.sjRegularEngineDependencies.value
+    libraryDependencies ++= Dependencies.sjTestDependencies.value,
+    test in Test <<= (test in Test).dependsOn((Keys.`package` in Compile) in stubRegular)
   )
   .dependsOn(engineCore)
 
 lazy val batchStreamingEngine = Project(id = "sj-batch-streaming-engine",
   base = file("./core/sj-batch-streaming-engine"))
   .settings(commonSettings: _*)
+  .settings(
+    libraryDependencies ++= Dependencies.sjTestDependencies.value,
+    test in Test <<= (test in Test).dependsOn((Keys.`package` in Compile) in stubBatch)
+  )
   .dependsOn(engineCore)
 
 lazy val outputStreamingEngine = Project(id = "sj-output-streaming-engine",
   base = file("./core/sj-output-streaming-engine"))
   .settings(commonSettings: _*)
   .settings(
-    libraryDependencies ++= Dependencies.sjOutputEngineDependencies.value
+    libraryDependencies ++= Dependencies.sjOutputEngineDependencies.value,
+    libraryDependencies ++= Dependencies.sjTestDependencies.value,
+    test in Test <<= (test in Test)
+      .dependsOn((Keys.`package` in Compile) in stubESOutput)
+      .dependsOn((Keys.`package` in Compile) in stubJDBCOutput)
+      .dependsOn((Keys.`package` in Compile) in stubRestOutput)
   )
   .dependsOn(engineCore)
 
@@ -222,8 +245,21 @@ lazy val regularPerformanceBenchmark = Project(id = "sj-regular-performance-benc
   .settings(commonSettings: _*)
   .dependsOn(engineCore % "provided")
 
+lazy val batchPerformanceBenchmark = Project(id = "sj-batch-performance-benchmark",
+  base = file("./contrib/benchmarks/sj-batch-performance-benchmark"))
+  .settings(commonSettings: _*)
+  .dependsOn(engineCore % "provided")
+
 lazy val flinkBenchmarkTask = Project(id = "flink-benchmark-task",
   base = file("./contrib/benchmarks/flink-benchmark-task"))
+  .settings(commonSettings: _*)
+  .settings(
+    scalaVersion := "2.11.8",
+    libraryDependencies ++= Dependencies.flinkDependencies.value
+  )
+
+lazy val flinkBatchBenchmarkTask = Project(id = "flink-batch-benchmark-task",
+  base = file("./contrib/benchmarks/flink-batch-benchmark-task"))
   .settings(commonSettings: _*)
   .settings(
     scalaVersion := "2.11.8",

@@ -281,6 +281,11 @@ export class InstancesComponent implements OnInit, AfterViewChecked, OnDestroy {
     modal.show();
   }
 
+  public hideTaskModal(modal: ModalDirective) {
+    modal.hide();
+    this.tasks = null;
+  }
+
   public deleteInstanceConfirm(modal: ModalDirective, instance: InstanceModel) {
     this.getInstanceInfo(instance);
     modal.show();

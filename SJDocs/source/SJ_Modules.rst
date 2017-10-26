@@ -1,46 +1,56 @@
 .. _Modules:
 
-Modules: types, structure, pipeline
+Modules: Types, Structure, Pipeline
 ===================================
-
 
 .. contents:: Contents
    
-Module is a processor that handles events in data streams.
+A **module** is a processor that handles events in data streams. In fact, it is a JAR file, containing a module specification and configurations.
 
-It includes an executor that processes data streams and a validator.
+It includes:
+
+- an executor that processes data streams,
+- a validator to check an instance.
+
+.. figure:: _static/moduleExecutorAndValidator.png
+   :scale: 120%
+   :align: center
+
+Below you will find more information on each of these two components.
 
 .. _validator:
 
-Streaming validator
+Streaming Validator
 -------------------------
 
-It provides a method to validate ``options`` or ``InstanceMetadata`` parameter of run module specification.
+It provides a method to validate ``options`` or ``InstanceMetadata`` parameter of the running module specification.
 
-This method returns a tuple that contains two values. 
+This method returns a tuple of values that contains:
 
-The first value indicates whether ``options`` or ``InstanceMetadata`` is proper or not (true value by default). 
+- The value that indicates whether ``options`` or ``InstanceMetadata`` is proper or not (the "true" value is set by default). 
 
-The second value is a list of errors in case of the validation failure (empty list by default). It is used when you try to create a new instance of a specific module, and if the validation method returns false value the instance will not be created.
+- The value that is a list of errors in case of the validation failure (it is an empty list by default). It is used when you try to create a new instance of a specific module, and if the validation method returns false value the instance will not be created.
 
 Executor
 ---------------------
 
-An executor of the module utilizes an instance/instances. An instance is a full range of settings for an exact module.
+An executor is a key component that performs the data processing. It receives the data flow and processes it in correspondence with the parameters of module specification. It utilizes an instance/instances for processing. An instance is a full range of settings for an exact module. 
 
-An engine is required to start a module. A module can not process data streams without an engine (that is a .jar file containing required configuration settings) that launches the module ingesting raw data and sends the processed data further in the stream.
+Data Processing Flow in Modules
+---------------------------------
+In general, data processing in modules can be generally described in a simple scheme.
 
-The engine is getting started via a Mesos framework. The framework then renders the statistics on task execution for a started instance.
+A module is started at the moment it gets data from an engine. The engine is a .jar file containing required configuration settings. It serializes/deserializes the flow of data into a proper format suitable for processing/storing. The engine is started via a Mesos framework. The framework then renders the statistics on task execution for a started instance.
 
-A general structure of a module can be rendered as at the scheme below:
+A module is uploaded into the engine. 
 
-.. figure:: _static/ModuleGeneralStructure2.png
+.. figure:: _static/engine.png
+   :scale: 120%
+   :align: center
+   
+The engine receives raw data and sends them to the module executor. The executor starts data processing and returns the resulting data back to the engine where they are deserialized to be put into the stream or a storage.
 
-A module handles data flow making it into streams. Raw data are transformed to objects referred to as an envelope. 
-
-An envelope is a container for messages or events with data records.
-
-Module types
+Module Types
 --------------
 
 The platform supports 4 types of modules:
@@ -57,28 +67,33 @@ The modules can be strung in a pipeline as illustrated below:
 
 .. figure:: _static/ModulePipeline1.png
 
-In this document each module is described in detail.
+At this page each module is described in detail. You will find more information on the methods provided by module executors as well as entities' description.
 
 .. _input-module:
 
-Input module
+Input Module
 ~~~~~~~~~~~~~~~~~~~
-An input type of modules handles external input streams, does data deduplication, transforms raw data to objects. In the SJ-Platform the TCP Input Stream processor is currently implemented in an Input module.
+An input type of modules handles external input streams, does data deduplication, transforms raw data to objects. 
+
+In the SJ-Platform the TCP Input Stream processor is currently implemented in the input module.
 
 .. figure:: _static/InputModuleStructure1.png
   :scale: 80 %
-It performs the transformation of the streams incoming from TCP to T-streams. T-streams are persistent streams designed for exactly-once processing (so it includes transactional producer, consumer and subscriber). Find more information about T-streams at `the site <http://t-streams.com>`_ .
 
-In the diagram below you can see the illustrated dataflow for an input module.
+It performs the transformation of the streams incoming from TCP into T-streams. T-streams are persistent streams designed for exactly-once processing (so they include a transactional producer, a consumer and a subscriber). Find more information about T-streams at `the site <http://t-streams.com>`_ .
+
+In the diagram below you can see the illustrated data flow for the input module.
 
 .. figure:: _static/InputModuleDataflow1.png
   :scale: 80 %
 
-All input data elements are going as a flow of bytes to particular interface provided by TaskEngine. That flow is going straight to StreamingExecutor and is converted to an InputEnvelope instance.
+All input data elements are going as a flow of bytes to particular interface provided by Task Engine. That flow is going straight to Streaming Executor and is converted to an object called an Input Envelope. 
 
-The InputEnvelope instance then goes to TaskEngine which serializes it to a stream of bytes and then sends to T-Streams. 
+An **envelope** is a container for messages or events with data records.
 
-An Input module executor provides the following methods with default implementation but they can be overridden.
+The Input Envelope then goes to Task Engine which serializes it to a stream of bytes and then sends to T-Streams. 
+
+An input module executor provides the following methods with default implementation but they can be overridden.
 
 1) ``tokenize``: 
       It is invoked every time when a new portion of data is received. It processes a flow of bytes to determine the beginning and the end of the Interval (significant set of bytes in incoming flow of bytes). By default it returns None value (meaning that it is impossible to determine an Interval). If Interval detected, method should return it (the first and the last indexes of Interval elements in the flow of bytes). The resulting interval can either contain message or not.
@@ -87,7 +102,7 @@ An Input module executor provides the following methods with default implementat
      This method is invoked once the "tokenize" method returns an Interval. It processes both a buffer with incoming data (a flow of bytes) and an Interval (an output of "tokenize" method). Its purpose is to define whether the Interval contains a message or meaningless data. Default return value is None. The same value should be returned if Interval contains meaningless data. If Interval contains a message, the "InputEnvelope" value should be returned.
 
 3) ``createProcessedMessageResponse``:
-      It is invoked after each call of parse method. Its purpose is to create response to the source of data - instance of InputStreamingResponse.
+      It is invoked after each call of parsing method. Its purpose is to create response to the source of data - the instance of InputStreamingResponse.
 
 The parameters of the method are:
 
@@ -153,7 +168,7 @@ CSV Input Module
 
 This module extends *InputStreamingExecutor* interface. Its aim is to process CSV lines and create ``InputEnvelope`` instance which stores all data as AvroRecord inside.
 
-Module configuration is located in the ``options`` field of instance configuration (:ref:`REST_API_Instance_Create`).
+Module configuration is located in the ``options`` field of instance configuration (see :ref:`REST_API_Instance_Create`).
 
 .. csv-table:: 
  :header: "Field Name", "Format", "Description", "Example"
@@ -171,7 +186,7 @@ Module configuration is located in the ``options`` field of instance configurati
 
 .. note:: `*` - required field.
 
-This module puts ``"org.apache.avro.generic.GenericRecord":https://avro.apache.org/docs/1.8.1/api/java/org/apache/avro/generic/GenericRecord.html`` in output streams. Executor in the next module must be ``GenericRecord`` type, e.g::
+This module puts ``"org.apache.avro.generic.GenericRecord":https://avro.apache.org/docs/1.8.1/api/java/org/apache/avro/generic/GenericRecord.html`` in output streams. The executor in the next module must be ``GenericRecord`` type, e.g::
 
  class Executor(manager: ModuleEnvironmentManager) extends BatchStreamingExecutor[Record](manager) {
  ...
@@ -201,14 +216,14 @@ This module is provided via Sonatype repository and it extends *InputStreamingEx
 Regex input module uses the following policies:
 
 1. first-match-win
-       To each data the regular expressions from list of rules are applied until the first match is found; then this data is converted into Avro Record and put into the output stream. Matching process for this data is stopped. 
+       To each data the regular expressions from the list of rules are applied until the first match is found; then these data are converted into avro record and put into the output stream. The matching process for these data is stopped. 
 
-If none of the rules is matched, data is converted to unified fallback avro record and put into the fallback stream.
+       If none of the rules is matched, the data are converted to unified fallback avro record and put into the fallback stream.
 
 2. check-every
-      To each data the regular expressions from the list of rules are applied. When matched, the data is converted to Avro Record and put into the output stream. Matching process will continue using the next rule.
+      To each data portion the regular expressions from the list of rules are applied. When matched, the data are converted to Avro Record and put into the output stream. Matching process will continue using the next rule.
  
-If none of the rules is matched, data is converted to unified fallback avro record and put into the fallback stream.
+If none of the rules is matched, data are converted to unified fallback avro record and put into the fallback stream.
 
 **Configuration**
 
@@ -296,9 +311,9 @@ Configuration example::
 
 .. _regular-module:
 
-Regular module
+Regular Module
 ~~~~~~~~~~~~~~~~~~~~~~~
-A simplified definition of a Regular module is a handler that performs data transformation and put the processed data into a T-stream.
+A simplified definition of a Regular module is a handler that performs data transformation and put the processed data into T-streams.
 
 .. figure:: _static/RegularModule3.png
   :scale: 80 %
@@ -336,7 +351,7 @@ Example of the checking a state variable::
  
 Each envelope has a type parameter that defines the type of data in the envelope.
 
-.. note:: The data type of the envelope can be only KafkaEnvelope data type or TStreamEnvelope data type. A user may specify one of them or both, depending on which type(s) is(are) used. 
+.. note:: The data type of the envelope can be only "KafkaEnvelope" data type or "TStreamEnvelope" data type. A user may specify one of them or both, depending on which type(s) is(are) used. 
 
 3) ``onBeforeCheckpoint``: 
     It is invoked before every checkpoint.
@@ -365,9 +380,9 @@ To see a flow chart on how these methods intercommunicate see the :ref:`Regular_
 
 .. _batch-module:
 
-Batch module
+Batch Module
 ~~~~~~~~~~~~~~~~~
-A batch is a minimum data set for a handler to collect the events in the stream. The size of a batch is defined by a user. It can be a period of time or a quantity of events or a specific type of event after receiving which the batch is considered closed.  Then, the queue of batches is sent further in the flow for the next stage of processing. 
+A batch is a minimum data set for a handler to collect the events in the stream. The size of a batch is defined by a user. It can be a period of time or a quantity of events or a specific type of the event after receiving which the batch is considered closed.  Then, the queue of batches is sent further in the flow for the next stage of processing. 
 
 .. _Batch-Collector:
 
@@ -436,7 +451,7 @@ The module allows to transform the data aggregated from input streams applying t
 
 A window is a period of time that is multiple of a batch and during which the batches of input events are collected into a queue for further transformation.
 
-The diagram below is a simple illustration of how a sliding widow operation looks like.
+The diagram below is a simple illustration of how a sliding window operation looks like.
 
 .. figure:: _static/BatchModule1.png
    :scale: 120 %
@@ -456,7 +471,7 @@ In general, a window consists of batches, a batch consists of events (messages) 
 The executor of the batch module provides the following methods that does not perform any work by default. So you should define their implementation by yourself.
 
 1) ``onInit``: 
-    It is invoked only once, when a module is launched. This method can be used to initialize some auxiliary variables or check the state variables on existence and if it's necessary create them. Thus, you should do preparation of the executor before usage.
+    It is invoked only once, when a module is launched. This method can be used to initialize some auxiliary variables or check the state variables on existence and if it's necessary to create them. Thus, you should do preparation of the executor before usage.
 
 Example of the checking a state variable::
  
@@ -478,7 +493,7 @@ Example of a message casting to a particular data type::
   case tstreamEnvelope: TStreamEnvelope[Integer @unchecked] => //here there is an access to certain fields such as txnUUID, consumerName and data (array of integers)
   }
 
-The data type of the envelope can be "KafkaEnvelope" data type or "TStreamEnvelope" data type. If you specify in an instance the inputs of the only one of this data types you shouldn't match the envelope like in the  example above and cast right the envelope to a particular data type::
+.. note:: The data type of the envelope can be "KafkaEnvelope" data type or "TStreamEnvelope" data type. If you specify in an instance the inputs of the only one of this data types you shouldn't match the envelope like in the  example above and cast right the envelope to a particular data type::
 
   val tstreamEnvelope =
   envelope.asInstanceOf[TStreamEnvelope[Integer]]
@@ -506,7 +521,7 @@ The following handlers are used for synchronizing the tasks' work. It can be use
 
 .. 4) "onLeaderLeave": It is invoked by a leader-task after passing an output barrier
 
-To see a flow chart about how these methods intercommunicate see the :ref:`Batch_Streaming_Engine` section .
+To see a flow chart about how these methods intercommunicate see the :ref:`Batch_Streaming_Engine` section.
 
 The Batch module can either have a state or not. A state is a sort of a key-value storage and can be used to keep some global module variables related to processing. These variables are persisted and are recovered after a fail. A fail means that something is going wrong in one of the methods described above. In this case a whole module will be restarted. And the work will start on onInit method invocation.
 There is a manager inside module which grants access to:
@@ -522,7 +537,7 @@ The state is performed alongside with the checkpoint. At a checkpoint the data r
 
 .. _output-module:
 
-Output module
+Output Module
 ~~~~~~~~~~~~~~~~~~~~
 
 An output module handles external output from event processing pipeline to external data destinations (Elasticsearch, JDBC, etc.)

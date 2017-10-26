@@ -20,7 +20,7 @@ package com.bwsw.sj.common.engine.core.environment
 
 import com.bwsw.common.file.utils.FileStorage
 import com.bwsw.sj.common.dal.model.stream.StreamDomain
-import org.slf4j.{Logger, LoggerFactory}
+import com.typesafe.scalalogging.Logger
 
 /**
   * A common class providing for user methods that can be used in a module of specific type
@@ -34,7 +34,7 @@ import org.slf4j.{Logger, LoggerFactory}
 
 class EnvironmentManager(val options: String, val outputs: Array[StreamDomain], val fileStorage: FileStorage) {
 
-  protected val logger: Logger = LoggerFactory.getLogger(this.getClass)
+  protected val logger: Logger = Logger(this.getClass)
 
   var isCheckpointInitiated: Boolean = false
 

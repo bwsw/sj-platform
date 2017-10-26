@@ -42,9 +42,12 @@ import scala.collection.JavaConverters._
   */
 class RetrievableKafkaCheckpointTaskInput[T <: AnyRef](override val manager: CommonTaskManager,
                                                        override val checkpointGroup: CheckpointGroup,
-                                                       envelopeDataSerializer: SerializerInterface)
+                                                       envelopeDataSerializer: SerializerInterface,
+                                                       lowWatermark: Int)
                                                       (override implicit val injector: Injector)
-  extends RetrievableCheckpointTaskInput[KafkaEnvelope[T]](manager.inputs) with KafkaTaskInput[T] {
+  extends {
+    override protected val maxPollRecords = lowWatermark
+  } with RetrievableCheckpointTaskInput[KafkaEnvelope[T]](manager.inputs) with KafkaTaskInput[T] {
   currentThread.setName(s"batch-task-${manager.taskName}-kafka-consumer")
 
   override def chooseOffset(): String = {

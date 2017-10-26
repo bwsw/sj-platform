@@ -40,26 +40,26 @@ class JdbcClientConnectionData(val hosts: Array[String],
     *
     * @return String: name of class of using driver
     */
-  def driverClass: String = settingsUtils.getJdbcDriverClass(driver)
+  lazy val driverClass: String = settingsUtils.getJdbcDriverClass(driver)
 
   /**
     * This method returns a prefix of server url: (prefix)://(host:port)/(database)
     *
     * @return String: prefix of server url
     */
-  def driverPrefix: String = settingsUtils.getJdbcDriverPrefix(driver)
+  lazy val driverPrefix: String = settingsUtils.getJdbcDriverPrefix(driver)
 
   /**
     * This method returns a name of file with jdbc driver
     *
     * @return String: name of file with jdbc driver
     */
-  def driverFileName: String = settingsUtils.getJdbcDriverFilename(driver)
+  lazy val driverFileName: String = settingsUtils.getJdbcDriverFilename(driver)
 
   /**
     * This method returns a server URL
     */
-  def url: String = database match {
+  lazy val url: String = database match {
     case Some(database_) => driverPrefix match {
       case `mysqlDriverPrefix` | `postgresqlDriverPrefix` =>
         s"$driverPrefix://${hosts.mkString(",")}/$database_"
@@ -80,7 +80,7 @@ class JdbcClientConnectionData(val hosts: Array[String],
   /**
     * Server url without database name to check a connection
     */
-  def urlWithoutDatabase: String = driverPrefix match {
+  lazy val urlWithoutDatabase: String = driverPrefix match {
     case `mysqlDriverPrefix` =>
       s"$driverPrefix://${hosts.mkString(",")}"
     case `postgresqlDriverPrefix` =>

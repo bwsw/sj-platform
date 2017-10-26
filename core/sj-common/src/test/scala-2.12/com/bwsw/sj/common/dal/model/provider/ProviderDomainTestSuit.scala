@@ -23,7 +23,9 @@ import com.bwsw.sj.common.utils.ProviderLiterals
 import org.scalatest.mockito.MockitoSugar
 import org.mockito.Mockito._
 import org.mockito.ArgumentMatchers._
+import org.mockito.ArgumentMatchers
 import org.scalatest.{FlatSpec, Matchers, PrivateMethodTester}
+import scaldi.Injector
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -63,15 +65,17 @@ class ProviderDomainTestSuit extends FlatSpec with Matchers with PrivateMethodTe
     val provider = mock[ProviderDomainMock]
     when(provider.providerType).thenReturn(ProviderLiterals.jdbcType)
     when(provider.hosts).thenReturn(Array.fill(numberOfChecks)("example"))
-    when(provider.checkConnection(any())).thenCallRealMethod()
-    when(provider.checkProviderConnectionByType(any(), any(), any())).thenCallRealMethod()
-    when(provider.checkJdbcConnection(any())).thenCallRealMethod()
+    when(provider.checkConnection(any())(any())).thenCallRealMethod()
+    when(provider.checkProviderConnectionByType(any(), any(), any())(any())).thenCallRealMethod()
+    when(provider.checkJdbcConnection(any())(any())).thenCallRealMethod()
+
+    val injector = mock[Injector]
 
     //act
-    provider.checkConnection(ConfigLiterals.zkSessionTimeoutDefault)
+    provider.checkConnection(ConfigLiterals.zkSessionTimeoutDefault)(injector)
 
     //assert
-    verify(provider, times(numberOfChecks)).checkJdbcConnection(any())
+    verify(provider, times(numberOfChecks)).checkJdbcConnection(any())(ArgumentMatchers.eq(injector))
   }
 
 
@@ -82,12 +86,12 @@ class ProviderDomainTestSuit extends FlatSpec with Matchers with PrivateMethodTe
     val provider = mock[ProviderDomainMock]
     when(provider.providerType).thenReturn(ProviderLiterals.elasticsearchType)
     when(provider.hosts).thenReturn(Array.fill(numberOfChecks)("example"))
-    when(provider.checkConnection(any())).thenCallRealMethod()
-    when(provider.checkProviderConnectionByType(any(), any(), any())).thenCallRealMethod()
+    when(provider.checkConnection(any())(any())).thenCallRealMethod()
+    when(provider.checkProviderConnectionByType(any(), any(), any())(any())).thenCallRealMethod()
     when(provider.checkESConnection(any())).thenCallRealMethod()
 
     //act
-    provider.checkConnection(ConfigLiterals.zkSessionTimeoutDefault)
+    provider.checkConnection(ConfigLiterals.zkSessionTimeoutDefault)(mock[Injector])
 
     //assert
     verify(provider, times(numberOfChecks)).checkESConnection(any())
@@ -100,12 +104,12 @@ class ProviderDomainTestSuit extends FlatSpec with Matchers with PrivateMethodTe
     val provider = mock[ProviderDomainMock]
     when(provider.providerType).thenReturn(ProviderLiterals.kafkaType)
     when(provider.hosts).thenReturn(Array.fill(numberOfChecks)("example"))
-    when(provider.checkConnection(any())).thenCallRealMethod()
-    when(provider.checkProviderConnectionByType(any(), any(), any())).thenCallRealMethod()
+    when(provider.checkConnection(any())(any())).thenCallRealMethod()
+    when(provider.checkProviderConnectionByType(any(), any(), any())(any())).thenCallRealMethod()
     when(provider.checkKafkaConnection(any())).thenCallRealMethod()
 
     //act
-    provider.checkConnection(ConfigLiterals.zkSessionTimeoutDefault)
+    provider.checkConnection(ConfigLiterals.zkSessionTimeoutDefault)(mock[Injector])
 
     //assert
     verify(provider, times(numberOfChecks)).checkKafkaConnection(any())
@@ -118,12 +122,12 @@ class ProviderDomainTestSuit extends FlatSpec with Matchers with PrivateMethodTe
     val provider = mock[ProviderDomainMock]
     when(provider.providerType).thenReturn(ProviderLiterals.restType)
     when(provider.hosts).thenReturn(Array.fill(numberOfChecks)("example"))
-    when(provider.checkConnection(any())).thenCallRealMethod()
-    when(provider.checkProviderConnectionByType(any(), any(), any())).thenCallRealMethod()
+    when(provider.checkConnection(any())(any())).thenCallRealMethod()
+    when(provider.checkProviderConnectionByType(any(), any(), any())(any())).thenCallRealMethod()
     when(provider.checkRestConnection(any())).thenCallRealMethod()
 
     //act
-    provider.checkConnection(ConfigLiterals.zkSessionTimeoutDefault)
+    provider.checkConnection(ConfigLiterals.zkSessionTimeoutDefault)(mock[Injector])
 
     //assert
     verify(provider, times(numberOfChecks)).checkRestConnection(any())
@@ -136,12 +140,12 @@ class ProviderDomainTestSuit extends FlatSpec with Matchers with PrivateMethodTe
     val provider = mock[ProviderDomainMock]
     when(provider.providerType).thenReturn(ProviderLiterals.zookeeperType)
     when(provider.hosts).thenReturn(Array.fill(numberOfChecks)("example"))
-    when(provider.checkConnection(any())).thenCallRealMethod()
-    when(provider.checkProviderConnectionByType(any(), any(), any())).thenCallRealMethod()
+    when(provider.checkConnection(any())(any())).thenCallRealMethod()
+    when(provider.checkProviderConnectionByType(any(), any(), any())(any())).thenCallRealMethod()
     when(provider.checkZookeeperConnection(any(), any())).thenCallRealMethod()
 
     //act
-    provider.checkConnection(ConfigLiterals.zkSessionTimeoutDefault)
+    provider.checkConnection(ConfigLiterals.zkSessionTimeoutDefault)(mock[Injector])
 
     //assert
     verify(provider, times(numberOfChecks)).checkZookeeperConnection(any(), any())
@@ -150,20 +154,21 @@ class ProviderDomainTestSuit extends FlatSpec with Matchers with PrivateMethodTe
 
 trait ProviderDomainMocks extends MockitoSugar {
   def providerDomain(setOfHosts: Array[String] = Array()) =
-    new ProviderDomain(null, null, setOfHosts, null, null, null, null)
+    new ProviderDomain(null, null, setOfHosts, null, null)
 }
 
-class ProviderDomainMock extends ProviderDomain(null, null, Array("host"), null, null, null, null) {
+class ProviderDomainMock extends ProviderDomain(null, null, Array("host"), null, null) {
   override def checkESConnection(address: String): ArrayBuffer[String] = ArrayBuffer()
 
   override def checkRestConnection(address: String): ArrayBuffer[String] = ArrayBuffer()
 
-  override def checkJdbcConnection(address: String): ArrayBuffer[String] = ArrayBuffer()
+  override def checkJdbcConnection(address: String)(implicit injector: Injector): ArrayBuffer[String] = ArrayBuffer()
 
   override def checkKafkaConnection(address: String): ArrayBuffer[String] = ArrayBuffer()
 
   override def checkZookeeperConnection(address: String, zkSessionTimeout: Int): ArrayBuffer[String] = ArrayBuffer()
 
-  override def checkProviderConnectionByType(host: String, providerType: String, zkSessionTimeout: Int): ArrayBuffer[String] =
+  override def checkProviderConnectionByType(host: String, providerType: String, zkSessionTimeout: Int)
+                                            (implicit injector: Injector): ArrayBuffer[String] =
     super.checkProviderConnectionByType(host, providerType, zkSessionTimeout)
 }

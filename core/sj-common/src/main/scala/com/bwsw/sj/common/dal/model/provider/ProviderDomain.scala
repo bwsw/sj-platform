@@ -22,13 +22,13 @@ import java.net.{InetSocketAddress, Socket, URI}
 import java.nio.channels.ClosedChannelException
 import java.util.{Collections, Date}
 
-import com.bwsw.common.es.ElasticsearchClient
-import com.bwsw.sj.common.dal.morphia.MorphiaAnnotations.{IdField, PropertyField}
+import com.bwsw.sj.common.dal.morphia.MorphiaAnnotations.{IdField, NotSavedField, PropertyField}
 import com.bwsw.sj.common.utils.{MessageResourceUtils, ProviderLiterals}
 import kafka.javaapi.TopicMetadataRequest
 import kafka.javaapi.consumer.SimpleConsumer
 import org.apache.zookeeper.ZooKeeper
 import org.mongodb.morphia.annotations.Entity
+import scaldi.Injector
 
 import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.duration._
@@ -42,18 +42,16 @@ import scala.util.{Failure, Success, Try}
 class ProviderDomain(@IdField val name: String,
                      val description: String,
                      val hosts: Array[String],
-                     val login: String,
-                     val password: String,
                      @PropertyField("provider-type") val providerType: String,
                      val creationDate: Date) {
 
-  protected val messageResourceUtils = new MessageResourceUtils
+  @NotSavedField protected val messageResourceUtils = new MessageResourceUtils
 
   def getConcatenatedHosts(separator: String = ","): String = {
     hosts.mkString(separator)
   }
 
-  def checkConnection(zkSessionTimeout: Int): ArrayBuffer[String] = {
+  def checkConnection(zkSessionTimeout: Int)(implicit injector: Injector): ArrayBuffer[String] = {
     val errors = ArrayBuffer[String]()
     for (host <- this.hosts) {
       errors ++= checkProviderConnectionByType(host, this.providerType, zkSessionTimeout)
@@ -62,7 +60,8 @@ class ProviderDomain(@IdField val name: String,
     errors
   }
 
-  protected def checkProviderConnectionByType(host: String, providerType: String, zkSessionTimeout: Int): ArrayBuffer[String] = {
+  protected def checkProviderConnectionByType(host: String, providerType: String, zkSessionTimeout: Int)
+                                             (implicit injector: Injector): ArrayBuffer[String] = {
     providerType match {
       case ProviderLiterals.zookeeperType =>
         checkZookeeperConnection(host, zkSessionTimeout)
@@ -117,18 +116,9 @@ class ProviderDomain(@IdField val name: String,
     errors
   }
 
-  protected def checkESConnection(address: String): ArrayBuffer[String] = {
-    val errors = ArrayBuffer[String]()
-    val client = new ElasticsearchClient(Set(getHostAndPort(address)))
-    if (!client.isConnected()) {
-      errors += messageResourceUtils.createMessage("rest.providers.provider.cannot.connect.es", address)
-    }
-    client.close()
+  protected def checkESConnection(address: String): ArrayBuffer[String] = ArrayBuffer()
 
-    errors
-  }
-
-  protected def checkJdbcConnection(address: String): ArrayBuffer[String] = ArrayBuffer()
+  protected def checkJdbcConnection(address: String)(implicit injector: Injector): ArrayBuffer[String] = ArrayBuffer()
 
   protected def checkRestConnection(address: String): ArrayBuffer[String] = {
     val (host, port) = getHostAndPort(address)
@@ -146,7 +136,7 @@ class ProviderDomain(@IdField val name: String,
     errors
   }
 
-  private def getHostAndPort(address: String): (String, Int) = {
+  protected def getHostAndPort(address: String): (String, Int) = {
     val uri = new URI("dummy://" + address)
     val host = uri.getHost
     val port = uri.getPort

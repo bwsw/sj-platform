@@ -35,37 +35,45 @@ class TempHelperForConfigSetup(connectionRepository: ConnectionRepository) {
 
   val configService: GenericMongoRepository[ConfigurationSettingDomain] = connectionRepository.getConfigRepository
 
-  def setupConfigs(): Unit = {
+  def setupConfigs(marathonTimeout: Int = 60000,
+                   zkSessionTimeout: Int = 7000,
+                   kafkaSubscriberTimeout: Int = 100,
+                   lowWatermark: Int = 100): Unit = {
     configService.save(ConfigurationSettingDomain(ConfigLiterals.frameworkTag, "com.bwsw.fw-1.0", ConfigLiterals.systemDomain, new Date()))
 
-  configService.save(ConfigurationSettingDomain(ConfigurationSetting.createConfigurationSettingName(ConfigLiterals.systemDomain, regularStreamingValidatorClass),
-    "com.bwsw.sj.crud.rest.instance.validator.RegularInstanceValidator", ConfigLiterals.systemDomain, new Date()))
-  configService.save(ConfigurationSettingDomain(ConfigurationSetting.createConfigurationSettingName(ConfigLiterals.systemDomain, batchStreamingValidatorClass),
-    "com.bwsw.sj.crud.rest.instance.validator.BatchInstanceValidator", ConfigLiterals.systemDomain, new Date()))
-  configService.save(ConfigurationSettingDomain(ConfigurationSetting.createConfigurationSettingName(ConfigLiterals.systemDomain, outputStreamingValidatorClass),
-    "com.bwsw.sj.crud.rest.instance.validator.OutputInstanceValidator", ConfigLiterals.systemDomain, new Date()))
-  configService.save(ConfigurationSettingDomain(ConfigurationSetting.createConfigurationSettingName(ConfigLiterals.systemDomain, inputStreamingValidatorClass),
-    "com.bwsw.sj.crud.rest.instance.validator.InputInstanceValidator", ConfigLiterals.systemDomain, new Date()))
+    configService.save(ConfigurationSettingDomain(ConfigurationSetting.createConfigurationSettingName(ConfigLiterals.systemDomain, regularStreamingValidatorClass),
+      "com.bwsw.sj.crud.rest.instance.validator.RegularInstanceValidator", ConfigLiterals.systemDomain, new Date()))
+    configService.save(ConfigurationSettingDomain(ConfigurationSetting.createConfigurationSettingName(ConfigLiterals.systemDomain, batchStreamingValidatorClass),
+      "com.bwsw.sj.crud.rest.instance.validator.BatchInstanceValidator", ConfigLiterals.systemDomain, new Date()))
+    configService.save(ConfigurationSettingDomain(ConfigurationSetting.createConfigurationSettingName(ConfigLiterals.systemDomain, outputStreamingValidatorClass),
+      "com.bwsw.sj.crud.rest.instance.validator.OutputInstanceValidator", ConfigLiterals.systemDomain, new Date()))
+    configService.save(ConfigurationSettingDomain(ConfigurationSetting.createConfigurationSettingName(ConfigLiterals.systemDomain, inputStreamingValidatorClass),
+      "com.bwsw.sj.crud.rest.instance.validator.InputInstanceValidator", ConfigLiterals.systemDomain, new Date()))
 
     configService.save(ConfigurationSettingDomain(
       ConfigLiterals.marathonTag,
       "http://stream-juggler.z1.netpoint-dc.com:8080",
       ConfigLiterals.systemDomain, new Date()))
 
-    configService.save(ConfigurationSettingDomain(ConfigLiterals.marathonTimeoutTag, "60000", ConfigLiterals.systemDomain, new Date()))
+    configService.save(ConfigurationSettingDomain(
+      ConfigLiterals.marathonTimeoutTag, marathonTimeout.toString, ConfigLiterals.systemDomain, new Date()))
 
-    configService.save(ConfigurationSettingDomain(ConfigLiterals.zkSessionTimeoutTag, "7000", ConfigLiterals.zookeeperDomain, new Date()))
+    configService.save(ConfigurationSettingDomain(
+      ConfigLiterals.zkSessionTimeoutTag, zkSessionTimeout.toString, ConfigLiterals.zookeeperDomain, new Date()))
 
     //configService.save(new ConfigurationSetting("session.timeout.ms", "30000", ConfigConstants.kafkaDomain))
 
-    configService.save(ConfigurationSettingDomain(ConfigLiterals.kafkaSubscriberTimeoutTag, "100", ConfigLiterals.systemDomain, new Date()))
-    configService.save(ConfigurationSettingDomain(ConfigLiterals.lowWatermark, "100", ConfigLiterals.systemDomain, new Date()))
+    configService.save(ConfigurationSettingDomain(
+      ConfigLiterals.kafkaSubscriberTimeoutTag, lowWatermark.toString, ConfigLiterals.systemDomain, new Date()))
+
+    configService.save(ConfigurationSettingDomain(
+      ConfigLiterals.lowWatermark, lowWatermark.toString, ConfigLiterals.systemDomain, new Date()))
   }
 
   def loadJdbcDriver(): Unit = {
     val driver: File = new File(driverFileName)
     FileUtils.copyURLToFile(
-      new URL("http://central.maven.org/maven2/mysql/mysql-connector-java/5.1.41/mysql-connector-java-5.1.41.jar"),
+      new URL("https://jdbc.postgresql.org/download/postgresql-42.1.4.jar"),
       driver)
     connectionRepository.getFileStorage.put(
       driver,
@@ -73,8 +81,8 @@ class TempHelperForConfigSetup(connectionRepository: ConnectionRepository) {
       Map("description" -> RestLiterals.defaultDescription),
       FileMetadataLiterals.customFileType)
     configService.save(ConfigurationSettingDomain(driverFilenameConfig, driverFileName, ConfigLiterals.jdbcDomain, new Date()))
-    configService.save(ConfigurationSettingDomain(driverClassConfig, "com.mysql.jdbc.Driver", ConfigLiterals.jdbcDomain, new Date()))
-    configService.save(ConfigurationSettingDomain(driverPrefixConfig, "jdbc:mysql", ConfigLiterals.jdbcDomain, new Date()))
+    configService.save(ConfigurationSettingDomain(driverClassConfig, "org.postgresql.Driver", ConfigLiterals.jdbcDomain, new Date()))
+    configService.save(ConfigurationSettingDomain(driverPrefixConfig, "jdbc:postgresql", ConfigLiterals.jdbcDomain, new Date()))
 
     driver.delete()
   }
@@ -119,7 +127,7 @@ object TempHelperForConfigConstants {
   val inputStreamingValidatorClass: String = "input-streaming-validator-class"
   val outputStreamingValidatorClass: String = "output-streaming-validator-class"
 
-  val driverName: String = "mysql"
+  val driverName: String = "postgres"
   val driverFileName: String = s"$driverName.jar"
   val driverFilenameConfig: String = ConfigLiterals.getDriverFilename(driverName)
   val driverClassConfig: String = ConfigLiterals.getDriverClass(driverName)

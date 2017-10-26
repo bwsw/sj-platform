@@ -28,15 +28,15 @@ import com.bwsw.sj.common.config.{ConfigLiterals, SettingsUtils}
 import com.bwsw.sj.common.dal.model.ConfigurationSettingDomain
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.si.model.FileMetadataLiterals
-import com.bwsw.sj.common.utils.{MessageResourceUtils, ProviderLiterals}
+import com.bwsw.sj.common.utils.{MessageResourceUtils, NetworkUtils, ProviderLiterals}
 import org.apache.commons.io.FileUtils
 import org.apache.curator.test.TestingServer
 import org.mockserver.integration.ClientAndServer
+import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{Assertion, BeforeAndAfterAll, FlatSpec, Matchers}
 import ru.yandex.qatools.embed.postgresql.EmbeddedPostgres
 import ru.yandex.qatools.embed.postgresql.distribution.Version
-import ru.yandex.qatools.embed.postgresql.util.SocketUtil
-import scaldi.Module
+import scaldi.{Injector, Module}
 
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Try
@@ -46,7 +46,7 @@ import scala.util.Try
   *
   * @author Pavel Tomskikh
   */
-class ProviderDomainIntegrationTests extends FlatSpec with Matchers with BeforeAndAfterAll {
+class ProviderDomainIntegrationTests extends FlatSpec with Matchers with BeforeAndAfterAll with MockitoSugar {
 
   val messageResourceUtils = new MessageResourceUtils
 
@@ -66,8 +66,6 @@ class ProviderDomainIntegrationTests extends FlatSpec with Matchers with BeforeA
       "zk-provider",
       "description",
       Array(address1, address2),
-      null,
-      null,
       ProviderLiterals.zookeeperType,
       new Date())
 
@@ -93,8 +91,6 @@ class ProviderDomainIntegrationTests extends FlatSpec with Matchers with BeforeA
       "rest-provider",
       "description",
       Array(address1, address2),
-      null,
-      null,
       ProviderLiterals.restType,
       new Date())
 
@@ -125,8 +121,6 @@ class ProviderDomainIntegrationTests extends FlatSpec with Matchers with BeforeA
       "kafka-provider",
       "description",
       Array(address1, address2),
-      null,
-      null,
       ProviderLiterals.kafkaType,
       new Date())
 
@@ -144,7 +138,7 @@ class ProviderDomainIntegrationTests extends FlatSpec with Matchers with BeforeA
   }
 
   it should "check connection to the PostgreSQL database properly" in {
-    val mongoPort = SocketUtil.findFreePort()
+    val mongoPort = NetworkUtils.findFreePort()
     val mongoServer = new EmbeddedMongo(mongoPort)
     mongoServer.start()
 
@@ -161,11 +155,11 @@ class ProviderDomainIntegrationTests extends FlatSpec with Matchers with BeforeA
     val version = Version.V9_6_2
 
     val server1 = new EmbeddedPostgres(version)
-    val server1Port = SocketUtil.findFreePort()
+    val server1Port = NetworkUtils.findFreePort()
     server1.start("localhost", server1Port, database, user, password)
 
     val server2 = new EmbeddedPostgres(version)
-    val server2Port = SocketUtil.findFreePort()
+    val server2Port = NetworkUtils.findFreePort()
     server2.start("localhost", server2Port, database, user, password)
 
     val address1 = "localhost:" + server1Port
@@ -181,12 +175,12 @@ class ProviderDomainIntegrationTests extends FlatSpec with Matchers with BeforeA
       user,
       password,
       driverName,
-      new Date())(injector)
+      new Date())
 
     val wrappedServer1 = new ServerWrapper(createJdbcConnectionError(address1), () => server1.stop())
     val wrappedServer2 = new ServerWrapper(createJdbcConnectionError(address2), () => server2.stop())
 
-    val result = Try(testProviderConnection(provider, wrappedServer1, wrappedServer2))
+    val result = Try(testProviderConnection(provider, wrappedServer1, wrappedServer2, injector))
 
     wrappedServer1.stop()
     wrappedServer2.stop()
@@ -196,21 +190,20 @@ class ProviderDomainIntegrationTests extends FlatSpec with Matchers with BeforeA
   }
 
   it should "check connection to the Elasticsearch database properly" in {
-    val server1 = new EmbeddedElasticsearch(SocketUtil.findFreePort())
+    val server1 = new EmbeddedElasticsearch(NetworkUtils.findFreePort())
     server1.start()
-    val server2 = new EmbeddedElasticsearch(SocketUtil.findFreePort())
+    val server2 = new EmbeddedElasticsearch(NetworkUtils.findFreePort())
     server2.start()
 
     val address1 = "localhost:" + server1.port
     val address2 = "localhost:" + server2.port
 
-    val provider = new ProviderDomain(
+    val provider = new ESProviderDomain(
       "es-provider",
       "description",
       Array(address1, address2),
       null,
       null,
-      ProviderLiterals.elasticsearchType,
       new Date())
 
     val wrappedServer1 = new ServerWrapper(createEsConnectionError(address1), () => server1.stop())
@@ -231,16 +224,19 @@ class ProviderDomainIntegrationTests extends FlatSpec with Matchers with BeforeA
   }
 
 
-  private def testProviderConnection(provider: ProviderDomain, server1: ServerWrapper, server2: ServerWrapper): Assertion = {
-    provider.checkConnection(zkTimeout) shouldBe empty
+  private def testProviderConnection(provider: ProviderDomain,
+                                     server1: ServerWrapper,
+                                     server2: ServerWrapper,
+                                     injector: Injector = mock[Injector]): Assertion = {
+    provider.checkConnection(zkTimeout)(injector) shouldBe empty
 
     server1.stop()
 
-    provider.checkConnection(zkTimeout) shouldBe ArrayBuffer(server1.connectionError)
+    provider.checkConnection(zkTimeout)(injector) shouldBe ArrayBuffer(server1.connectionError)
 
     server2.stop()
 
-    provider.checkConnection(zkTimeout) shouldBe ArrayBuffer(server1.connectionError, server2.connectionError)
+    provider.checkConnection(zkTimeout)(injector) shouldBe ArrayBuffer(server1.connectionError, server2.connectionError)
   }
 
   private def createZkConnectionError(address: String): String =

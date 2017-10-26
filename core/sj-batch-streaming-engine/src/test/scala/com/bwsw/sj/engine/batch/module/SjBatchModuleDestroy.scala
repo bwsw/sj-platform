@@ -22,28 +22,29 @@ import java.io.File
 import java.util.logging.LogManager
 
 import com.bwsw.sj.common.config.TempHelperForConfigDestroy
+import com.bwsw.sj.common.utils.benchmark.ProcessTerminator
 import com.bwsw.sj.engine.batch.module.DataFactory._
+import com.bwsw.sj.engine.batch.module.SjBatchModuleBenchmarkConstants._
 
 object SjBatchModuleDestroy extends App {
-  LogManager.getLogManager.reset()
-  val streamService = connectionRepository.getStreamRepository
-  val serviceManager = connectionRepository.getServiceRepository
-  val providerService = connectionRepository.getProviderRepository
-  val instanceService = connectionRepository.getInstanceRepository
-  val fileStorage = connectionRepository.getFileStorage
-  val _type = commonMode
+  ProcessTerminator.terminateProcessAfter { () =>
+    LogManager.getLogManager.reset()
+    val streamService = connectionRepository.getStreamRepository
+    val serviceManager = connectionRepository.getServiceRepository
+    val providerService = connectionRepository.getProviderRepository
+    val instanceService = connectionRepository.getInstanceRepository
+    val fileStorage = connectionRepository.getFileStorage
 
-  val module = new File("./contrib/stubs/sj-stub-batch-streaming/target/scala-2.12/sj-stub-batch-streaming-1.0-SNAPSHOT.jar")
+    val module = new File(modulePath)
 
-  deleteStreams(streamService, _type, serviceManager, inputCount, outputCount)
-  deleteServices(serviceManager)
-  deleteProviders(providerService)
-  deleteInstance(instanceService)
-  deleteModule(fileStorage, module.getName)
+    deleteStreams(streamService, inputStreamsType, serviceManager, inputCount, outputCount)
+    deleteServices(serviceManager)
+    deleteProviders(providerService)
+    deleteInstance(instanceService)
+    deleteModule(fileStorage, module.getName)
 
-  val tempHelperForConfigDestroy = new TempHelperForConfigDestroy(connectionRepository)
-  tempHelperForConfigDestroy.deleteConfigs()
-  connectionRepository.close()
-
-  println("DONE")
+    val tempHelperForConfigDestroy = new TempHelperForConfigDestroy(connectionRepository)
+    tempHelperForConfigDestroy.deleteConfigs()
+    connectionRepository.close()
+  }
 }

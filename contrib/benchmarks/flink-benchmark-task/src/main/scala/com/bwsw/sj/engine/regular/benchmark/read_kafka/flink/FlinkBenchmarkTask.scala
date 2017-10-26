@@ -19,6 +19,7 @@
 package com.bwsw.sj.engine.regular.benchmark.read_kafka.flink
 
 import java.io.{File, FileWriter}
+import java.util.UUID
 
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.api.java.utils.ParameterTool
@@ -45,6 +46,7 @@ object FlinkBenchmarkTask extends App {
   val outputFilename = parameterTool.getRequired("outputFile")
   val properties = parameterTool.getProperties
   properties.setProperty("auto.offset.reset", "earliest")
+  properties.setProperty("group.id", UUID.randomUUID().toString)
 
   val consumer: FlinkKafkaConsumer010[String] = new FlinkKafkaConsumer010(
     Seq(parameterTool.getRequired("topic")).asJava, new SimpleStringSchema(), properties)

@@ -31,14 +31,13 @@ import scala.util.{Failure, Success, Try}
 class JDBCProviderDomain(name: String,
                          description: String,
                          hosts: Array[String],
-                         login: String,
-                         password: String,
+                         val login: String,
+                         val password: String,
                          val driver: String,
                          creationDate: Date)
-                        (implicit injector: Injector)
-  extends ProviderDomain(name, description, hosts, login, password, ProviderLiterals.jdbcType, creationDate) {
+  extends ProviderDomain(name, description, hosts, ProviderLiterals.jdbcType, creationDate) {
 
-  override def checkJdbcConnection(address: String): ArrayBuffer[String] = {
+  override def checkJdbcConnection(address: String)(implicit injector: Injector): ArrayBuffer[String] = {
     val errors = ArrayBuffer[String]()
     Try {
       val client = JdbcClientBuilder.

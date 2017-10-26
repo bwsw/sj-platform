@@ -30,7 +30,7 @@ import com.bwsw.sj.common.si.model.instance.Instance
 import com.bwsw.sj.common.utils.FrameworkLiterals._
 import com.bwsw.sj.common.utils._
 import com.bwsw.sj.crud.rest.utils.RestLiterals
-import org.slf4j.LoggerFactory
+import com.typesafe.scalalogging.Logger
 import scaldi.Injectable.inject
 import scaldi.Injector
 
@@ -53,7 +53,7 @@ class InstanceStarter(instance: Instance,
 
   import EngineLiterals._
 
-  private val logger = LoggerFactory.getLogger(getClass.getName)
+  private val logger = Logger(getClass.getName)
   private val settingsUtils = inject[SettingsUtils]
   private lazy val restHost = settingsUtils.getCrudRestHost()
   private lazy val restPort = settingsUtils.getCrudRestPort()
@@ -131,29 +131,27 @@ class InstanceStarter(instance: Instance,
     logger.debug(s"Instance: '${instance.name}'. Try to launch or create a framework: '$frameworkName'.")
     val frameworkApplicationInfo = marathonManager.getApplicationInfo(frameworkName)
     if (isStatusOK(frameworkApplicationInfo)) {
-      launchFramework()
+      launchExistingFramework()
     } else {
       createFramework(marathonMaster, zookeeperServer)
     }
   }
 
-  protected def launchFramework(): Unit = {
+  protected def launchExistingFramework(): Unit = {
     logger.debug(s"Instance: '${instance.name}'. Launch a framework: '$frameworkName'.")
     val startFrameworkResult = marathonManager.scaleMarathonApplication(frameworkName, 1)
-    if (isStatusOK(startFrameworkResult)) {
-      waitForFrameworkToStart()
-    } else {
-      instanceManager.updateFrameworkStage(instance, failed)
-      instanceManager.updateInstanceStatus(instance, failed)
-      instanceManager.updateInstanceRestAddress(instance, None)
-    }
+    checkIsFrameworkLaunched(isStatusOK(startFrameworkResult))
   }
 
   protected def createFramework(marathonMaster: String, zookeeperServer: String): Unit = {
     logger.debug(s"Instance: '${instance.name}'. Create a framework: '$frameworkName'.")
     val request = createRequestForFrameworkCreation(marathonMaster, zookeeperServer)
     val startFrameworkResult = marathonManager.startMarathonApplication(request)
-    if (isStatusCreated(startFrameworkResult)) {
+    checkIsFrameworkLaunched(isStatusCreated(startFrameworkResult))
+  }
+
+  protected def checkIsFrameworkLaunched(isLaunched: Boolean): Unit = {
+    if (isLaunched) {
       waitForFrameworkToStart()
     } else {
       instanceManager.updateFrameworkStage(instance, failed)
@@ -184,7 +182,7 @@ class InstanceStarter(instance: Instance,
 
   /**
     *
-    * @param marathonMaster
+    * @param marathonMaster mesos master used by marathon framework
     * @param zookeeperServer Format: '<zookeeper_ip>:<zookeeper_port>'
     * @return
     */
@@ -214,9 +212,6 @@ class InstanceStarter(instance: Instance,
         if (hasFrameworkStarted(applicationParsedEntity)) {
           instanceManager.updateFrameworkStage(instance, started)
           instanceManager.updateInstanceStatus(instance, started)
-          var fwRest = InstanceAdditionalFieldCreator.getRestAddress(marathonManager.getLeaderTask(marathonManager.getApplicationInfo(frameworkName)))
-          while (fwRest.isEmpty) fwRest = InstanceAdditionalFieldCreator.getRestAddress(marathonManager.getLeaderTask(marathonManager.getApplicationInfo(frameworkName)))
-          instanceManager.updateInstanceRestAddress(instance, fwRest)
           isStarted = true
         } else {
           Option(applicationParsedEntity.app.lastTaskFailure) match {

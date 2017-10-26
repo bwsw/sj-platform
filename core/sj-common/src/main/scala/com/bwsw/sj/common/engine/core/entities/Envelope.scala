@@ -25,12 +25,14 @@ import com.fasterxml.jackson.annotation.JsonIgnore
   * that is received from a partition of a specific input stream [[com.bwsw.sj.common.utils.StreamLiterals.types]]
   */
 
-class Envelope extends Serializable {
+class Envelope extends EnvelopeInterface {
   protected var streamType: String = _
   var stream: String = _
   var partition: Int = 0
   var tags: Array[String] = Array()
   var id: Long = 0
+
+  override val weight: Int = 1
 
   @JsonIgnore()
   def isEmpty(): Boolean = Option(streamType).isEmpty

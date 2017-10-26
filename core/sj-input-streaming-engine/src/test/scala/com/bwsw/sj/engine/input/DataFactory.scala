@@ -33,6 +33,7 @@ import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepo
 import com.bwsw.sj.common.si.model.instance.InputInstance
 import com.bwsw.sj.common.utils.{ProviderLiterals, _}
 import com.bwsw.sj.engine.core.testutils.TestStorageServer
+import com.bwsw.sj.engine.input.config.InputEngineConfigNames
 import com.bwsw.tstreams.agents.consumer.Consumer
 import com.bwsw.tstreams.agents.consumer.Offset.Oldest
 import com.bwsw.tstreams.env.{ConfigurationOptions, TStreamsFactory}
@@ -49,6 +50,7 @@ object DataFactory {
   val connectionRepository: ConnectionRepository = inject[ConnectionRepository]
   private val config = ConfigFactory.load()
   private val zookeeperHosts = config.getString(BenchmarkConfigNames.zkHosts)
+  private val benchmarkPort = config.getInt(BenchmarkConfigNames.benchmarkPort)
   private val testNamespace = "test_namespace_for_input_engine"
   private val instanceName = "test-instance-for-input-engine"
   private val zookeeperProviderName = "zookeeper-test-provider"
@@ -57,11 +59,12 @@ object DataFactory {
   private val tstreamOutputNamePrefix = "tstream-output"
   private var instanceOutputs: Array[String] = Array()
   private val tasks = mutable.Map[String, InputTask]()
-  tasks.put(s"$instanceName-task0", new InputTask(SjInputServices.host, SjInputServices.port))
+  val instancePort = config.getInt(InputEngineConfigNames.entryPort)
+  tasks.put(s"$instanceName-task0", new InputTask(SjInputModuleBenchmarkConstants.instanceHost, instancePort))
   private val partitions = 1
   private val serializer = new JsonSerializer()
-  private val zookeeperProvider = new ProviderDomain(zookeeperProviderName, zookeeperProviderName, zookeeperHosts.split(","),
-    "", "", ProviderLiterals.zookeeperType, new Date())
+  private val zookeeperProvider = new ProviderDomain(
+    zookeeperProviderName, zookeeperProviderName, zookeeperHosts.split(","), ProviderLiterals.zookeeperType, new Date())
   private val tstrqService = new TStreamServiceDomain(tstreamServiceName, tstreamServiceName, zookeeperProvider,
     TestStorageServer.defaultPrefix, TestStorageServer.defaultToken, creationDate = new Date())
   private val tstreamFactory = new TStreamsFactory()
@@ -165,6 +168,10 @@ object DataFactory {
       defaultEvictionPolicy = EngineLiterals.lruDefaultEvictionPolicy,
       evictionPolicy = "expanded-time",
       tasks = tasks,
+      options =
+        s"""{"totalInputElements":${SjInputModuleBenchmarkConstants.totalInputElements},
+           |"benchmarkPort":$benchmarkPort,
+           |"verbose":false}""".stripMargin,
       creationDate = new Date().toString)
 
     instanceService.save(instance.to)

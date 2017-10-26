@@ -20,12 +20,12 @@ package com.bwsw.sj.common.dal.model.service
 
 import java.util.Date
 
-import com.bwsw.sj.common.dal.model.provider.ProviderDomain
+import com.bwsw.sj.common.dal.model.provider.ESProviderDomain
 import com.bwsw.sj.common.utils.ServiceLiterals
 
 class ESServiceDomain(name: String,
                       description: String,
-                      provider: ProviderDomain,
+                      override val provider: ESProviderDomain,
                       val index: String,
                       creationDate: Date)
   extends ServiceDomain(name, description, provider, ServiceLiterals.elasticsearchType, creationDate) {
