@@ -121,6 +121,21 @@ abstract class PerformanceMetricsReporter(manager: TaskManager) extends Callable
     mutex.unlock()
   }
 
+
+  /**
+    * Invokes when a new element is sent to txn of some output stream
+    *
+    * @param name       stream name
+    * @param envelopeID id of envelope of output stream
+    * @param element    appended element
+    */
+  def addElementToOutputEnvelope(name: String, envelopeID: String, element: AnyRef): Unit = {
+    Future(ObjectSizeFetcher.getObjectSize(element)).onComplete {
+      case Success(elementSize) => addElementToOutputEnvelope(name, envelopeID, elementSize)
+      case Failure(exception) => throw exception
+    }
+  }
+
   /**
     * Invokes when a new element is sent to txn of some output stream
     *

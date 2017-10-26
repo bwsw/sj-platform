@@ -42,9 +42,11 @@ class InstanceStarterMock(_marathonManager: MarathonApi,
 
   override def startFramework(marathonMaster: String, zookeeperAddress: String): Unit = super.startFramework(marathonMaster, zookeeperAddress)
 
-  override def launchFramework(): Unit = super.launchFramework()
+  override def launchExistingFramework(): Unit = super.launchExistingFramework()
 
   override protected def createFramework(marathonMaster: String, zookeeperAddress: String): Unit = super.createFramework(marathonMaster, zookeeperAddress)
+
+  override protected def checkIsFrameworkLaunched(isStartedOrCreate: Boolean): Unit = super.checkIsFrameworkLaunched(isStartedOrCreate)
 
   override protected def waitForFrameworkToStart(): Unit = super.waitForFrameworkToStart()
 }

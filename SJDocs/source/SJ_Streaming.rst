@@ -27,6 +27,7 @@ Using TCP as an input source a custom protocol can be applied for receiving even
 But in case TCP is used as a source, there arises a need in an input module to transform the input data into a stream to bring them to processing. At the project `repository <https://github.com/bwsw/sj-platform/tree/develop>`_ two input modules are available for users - a CSV input module and a Regex input module - that transform data flow of CSV/regex type to message format acceptable for T-streams. 
 
 Within the platform, the data are transported to and from modules via *transactional streams* or T-streams. It is a message broker and a Scala library native to SJ-Platform and designed primarily for exactly-once processing (so it includes a transactional producer, a consumer and a subscriber). More information on T-streams can be found at the `project site <http://t-streams.com/>`_. Some general information on T-streams you can find below.
+
 About T-Streams
 """"""""""""""""""""""""
 

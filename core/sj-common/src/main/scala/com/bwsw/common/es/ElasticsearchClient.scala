@@ -26,6 +26,7 @@ import com.typesafe.scalalogging.Logger
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse
 import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse
+import org.elasticsearch.action.bulk.BulkRequestBuilder
 import org.elasticsearch.action.index.IndexResponse
 import org.elasticsearch.client.transport.TransportClient
 import org.elasticsearch.common.settings.Settings
@@ -48,7 +49,9 @@ class ElasticsearchClient(hosts: Set[(String, Int)],
                           password: Option[String] = None) {
   private val logger = Logger(this.getClass)
   private val typeName = "_type"
-  System.setProperty("es.set.netty.runtime.available.processors", "false")
+  System.setProperty("es.set.netty.runtime.available.processors", "false") //to avoid the following exception
+  // Exception in thread "output-task-pingstation-output-task0-engine" java.lang.IllegalStateException:
+  // availableProcessors is already set to [4], rejecting [4] (we don't know it's a bug or not)
   private val settingsBuilder = Settings.builder()
   settingsBuilder.put("transport.tcp.connect_timeout", ProviderLiterals.connectTimeoutMillis + "ms")
   username.zip(password).foreach {
@@ -124,6 +127,37 @@ class ElasticsearchClient(hosts: Set[(String, Int)],
       .execute()
       .actionGet()
   }
+
+  /**
+    * Adds data into bulk builder
+    *
+    * @param bulkRequestBuilder bulk builder
+    * @param data               document data
+    * @param index              index
+    * @param documentType       document type
+    * @param documentId         document id
+    * @return bulk builder
+    */
+  def addToBulk(bulkRequestBuilder: BulkRequestBuilder,
+                data: String,
+                index: String,
+                documentType: String,
+                documentId: String = UUID.randomUUID().toString): BulkRequestBuilder = {
+    logger.debug(s"Write a data: '$data' to an elasticsearch index: '$index'.")
+
+    bulkRequestBuilder.add(
+      client
+        .prepareIndex(index, documentType, documentId)
+        .setSource(data, XContentType.JSON))
+  }
+
+  /**
+    * Creates new bulk builder
+    *
+    * @return bulk builder
+    */
+  def createBulk(): BulkRequestBuilder =
+    client.prepareBulk()
 
   def isConnected(): Boolean = {
     logger.debug(s"Check a connection to an elasticsearch database.")

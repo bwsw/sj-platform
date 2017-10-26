@@ -73,7 +73,7 @@ class TempHelperForConfigSetup(connectionRepository: ConnectionRepository) {
   def loadJdbcDriver(): Unit = {
     val driver: File = new File(driverFileName)
     FileUtils.copyURLToFile(
-      new URL("http://central.maven.org/maven2/mysql/mysql-connector-java/5.1.41/mysql-connector-java-5.1.41.jar"),
+      new URL("https://jdbc.postgresql.org/download/postgresql-42.1.4.jar"),
       driver)
     connectionRepository.getFileStorage.put(
       driver,
@@ -81,8 +81,8 @@ class TempHelperForConfigSetup(connectionRepository: ConnectionRepository) {
       Map("description" -> RestLiterals.defaultDescription),
       FileMetadataLiterals.customFileType)
     configService.save(ConfigurationSettingDomain(driverFilenameConfig, driverFileName, ConfigLiterals.jdbcDomain, new Date()))
-    configService.save(ConfigurationSettingDomain(driverClassConfig, "com.mysql.jdbc.Driver", ConfigLiterals.jdbcDomain, new Date()))
-    configService.save(ConfigurationSettingDomain(driverPrefixConfig, "jdbc:mysql", ConfigLiterals.jdbcDomain, new Date()))
+    configService.save(ConfigurationSettingDomain(driverClassConfig, "org.postgresql.Driver", ConfigLiterals.jdbcDomain, new Date()))
+    configService.save(ConfigurationSettingDomain(driverPrefixConfig, "jdbc:postgresql", ConfigLiterals.jdbcDomain, new Date()))
 
     driver.delete()
   }
@@ -127,7 +127,7 @@ object TempHelperForConfigConstants {
   val inputStreamingValidatorClass: String = "input-streaming-validator-class"
   val outputStreamingValidatorClass: String = "output-streaming-validator-class"
 
-  val driverName: String = "mysql"
+  val driverName: String = "postgres"
   val driverFileName: String = s"$driverName.jar"
   val driverFilenameConfig: String = ConfigLiterals.getDriverFilename(driverName)
   val driverClassConfig: String = ConfigLiterals.getDriverClass(driverName)

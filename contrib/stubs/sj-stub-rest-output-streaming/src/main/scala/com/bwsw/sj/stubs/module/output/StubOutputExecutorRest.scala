@@ -18,11 +18,15 @@
  */
 package com.bwsw.sj.stubs.module.output
 
+import java.net.Socket
+
 import com.bwsw.sj.common.engine.core.entities.TStreamEnvelope
 import com.bwsw.sj.common.engine.core.environment.OutputEnvironmentManager
 import com.bwsw.sj.common.engine.core.output.OutputStreamingExecutor
 import com.bwsw.sj.engine.core.output.types.rest.{RestEntityBuilder, RestField}
 import com.bwsw.sj.stubs.module.output.data.StubRestData
+
+import scala.util.Try
 
 /**
   * @author Pavel Tomskikh
@@ -30,8 +34,14 @@ import com.bwsw.sj.stubs.module.output.data.StubRestData
 class StubOutputExecutorRest(manager: OutputEnvironmentManager)
   extends OutputStreamingExecutor[(Integer, String)](manager) {
 
+  private val splitOptions = manager.options.split(",")
+  private val totalInputElements = splitOptions(0).toInt
+  private val benchmarkPort = splitOptions(1).toInt
+  private var processedElements = 0
+
   override def onMessage(envelope: TStreamEnvelope[(Integer, String)]) = {
-    println("Processed: " + envelope.data.size + " elements")
+    processedElements += envelope.data.size
+    println(s"Processed: ${envelope.data.size} elements ($processedElements/$totalInputElements)")
 
     val list = envelope.data.dequeueAll(_ => true).map {
       case (i, s) =>
@@ -41,6 +51,9 @@ class StubOutputExecutorRest(manager: OutputEnvironmentManager)
 
         data
     }
+
+    if (processedElements >= totalInputElements)
+      Try(new Socket("localhost", benchmarkPort))
 
     list
   }

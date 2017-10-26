@@ -27,4 +27,5 @@ object OutputBenchmarkConfigNames {
   val restHosts = test + ".restful.hosts"
 
   val restPort = test + ".output.rest.port"
+  val silent = test + ".silent"
 }

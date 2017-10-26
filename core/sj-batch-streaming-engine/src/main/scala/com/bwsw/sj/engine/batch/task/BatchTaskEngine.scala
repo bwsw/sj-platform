@@ -152,6 +152,7 @@ class BatchTaskEngine(manager: CommonTaskManager,
   private def onIdle(): Unit = {
     logger.debug(s"An envelope has not been received.")
     performanceMetrics.increaseTotalIdleTime(instance.eventWaitIdleTime)
+    Thread.sleep(instance.eventWaitIdleTime)
     executor.onIdle()
     Thread.sleep(instance.eventWaitIdleTime)
   }

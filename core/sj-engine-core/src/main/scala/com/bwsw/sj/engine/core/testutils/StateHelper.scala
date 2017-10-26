@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.sj.engine.batch.utils
+package com.bwsw.sj.engine.core.testutils
 
 import com.bwsw.common.ObjectSerializer
 import com.bwsw.tstreams.agents.consumer.{Consumer, ConsumerTransaction}
@@ -31,7 +31,8 @@ object StateHelper {
 
     val initialState = mutable.Map[String, Any]()
     val tempTransaction = consumer.getLastTransaction(0).get
-    val lastTxn = consumer.buildTransactionObject(tempTransaction.getPartition, tempTransaction.getTransactionID, tempTransaction.getState, tempTransaction.getCount).get //todo fix it next milestone TR1216
+    val lastTxn = consumer.buildTransactionObject(tempTransaction.getPartition, tempTransaction.getTransactionID, tempTransaction.getState, tempTransaction.getCount).get
+    //todo fix it next milestone TR1216
     var value = objectSerializer.deserialize(lastTxn.next())
     value match {
       case variable: (Any, Any) =>

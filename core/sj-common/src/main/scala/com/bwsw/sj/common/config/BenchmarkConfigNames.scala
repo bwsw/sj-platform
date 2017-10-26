@@ -22,4 +22,6 @@ object BenchmarkConfigNames {
   val test = "test"
   val zkHosts = test + ".zookeeper.hosts"
   val kafkaHosts = test + ".kafka.hosts"
+  val benchmarkPort = test + ".benchmark.port"
+  val inputStreamTypes = test + ".input.stream.types"
 }

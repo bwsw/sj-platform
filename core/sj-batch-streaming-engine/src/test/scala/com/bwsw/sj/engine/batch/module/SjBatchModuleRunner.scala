@@ -26,3 +26,5 @@ object SjBatchModuleRunner extends App {
   LogManager.getLogManager.reset()
   BatchTaskRunner.main(Array())
 }
+
+class SjBatchModuleRunner
