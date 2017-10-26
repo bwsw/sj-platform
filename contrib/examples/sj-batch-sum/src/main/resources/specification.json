@@ -28,5 +28,6 @@
   "options": {
   },
   "validator-class": "com.bwsw.sj.examples.sum.Validator",
-  "executor-class": "com.bwsw.sj.examples.sum.Executor"
+  "executor-class": "com.bwsw.sj.examples.sum.Executor",
+  "batch-collector-class": "com.bwsw.sj.examples.sum.NumericalBatchCollector"
 }
