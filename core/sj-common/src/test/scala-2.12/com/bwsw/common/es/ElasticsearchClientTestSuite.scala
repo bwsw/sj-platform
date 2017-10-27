@@ -19,6 +19,7 @@
 package com.bwsw.common.es
 
 import com.bwsw.common.embedded.EmbeddedElasticsearch
+import com.bwsw.sj.common.utils.NetworkUtils
 import org.elasticsearch.ResourceAlreadyExistsException
 import org.elasticsearch.index.IndexNotFoundException
 import org.elasticsearch.index.query.QueryBuilders
@@ -27,8 +28,8 @@ import org.scalatest.{BeforeAndAfterEach, FlatSpec, Matchers}
 import scala.util.Random
 
 class ElasticsearchClientTestSuite extends FlatSpec with Matchers with BeforeAndAfterEach {
-  val port = 9300
-  val hosts = Set(("127.0.0.1", port))
+  val port = NetworkUtils.findFreePort()
+  val hosts = Set(("localhost", port))
   var embeddedElasticsearch: Option[EmbeddedElasticsearch] = None
 
   override protected def beforeEach(): Unit = {

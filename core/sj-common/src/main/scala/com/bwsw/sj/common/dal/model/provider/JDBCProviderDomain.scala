@@ -22,8 +22,8 @@ import java.sql.SQLException
 import java.util.Date
 
 import com.bwsw.common.jdbc.JdbcClientBuilder
-import com.bwsw.sj.common.SjModule
 import com.bwsw.sj.common.utils.ProviderLiterals
+import scaldi.Injector
 
 import scala.collection.mutable.ArrayBuffer
 import scala.util.{Failure, Success, Try}
@@ -36,23 +36,24 @@ class JDBCProviderDomain(name: String,
                          val driver: String,
                          creationDate: Date)
   extends ProviderDomain(name, description, hosts, ProviderLiterals.jdbcType, creationDate) {
+  import ProviderDomain._
 
-  override def checkJdbcConnection(address: String): ArrayBuffer[String] = {
+  override def checkJdbcConnection(address: String)(implicit injector: Injector): ArrayBuffer[String] = {
     val errors = ArrayBuffer[String]()
     Try {
       val client = JdbcClientBuilder.
-        setHosts(hosts).
+        setHosts(Array(address)).
         setDriver(driver).
         setUsername(login).
         setPassword(password).
-        build()(SjModule.injector)
+        build()
 
       client.checkConnectionToDatabase()
     } match {
       case Success(_) =>
       case Failure(ex: SQLException) =>
         ex.printStackTrace()
-        errors += s"Cannot gain an access to JDBC on '$address'"
+        errors += messageResourceUtils.createMessage("rest.providers.provider.cannot.connect.jdbc", address)
       case Failure(e) => throw e
     }
 

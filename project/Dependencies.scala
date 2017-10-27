@@ -49,9 +49,8 @@ object Dependencies {
       .exclude("org.slf4j", "slf4j-api")
       .exclude("log4j", "log4j")
       .exclude("io.netty", "netty"),
-    ("org.elasticsearch.client" % "transport" % "5.5.1")
+    ("org.elasticsearch.client" % "x-pack-transport" % "5.5.1")
       .exclude("com.fasterxml.jackson.core", "jackson-core"),
-    "org.elasticsearch.client" % "x-pack-transport" % "5.5.1",
     "org.apache.logging.log4j" % "log4j-core" % "2.8.2",
     "org.apache.logging.log4j" % "log4j-api" % "2.8.2",
     "com.maxmind.geoip" % "geoip-api" % "1.3.1",
@@ -68,6 +67,7 @@ object Dependencies {
     "com.carrotsearch" % "java-sizeof" % "0.0.5",
     ("de.flapdoodle.embed" % "de.flapdoodle.embed.mongo" % "2.0.0")
       .exclude("org.slf4j", "slf4j-api"),
+    "ru.yandex.qatools.embed" % "postgresql-embedded" % "2.2" % "test",
     "com.typesafe.scala-logging" %% "scala-logging" % "3.7.2"
   ))
 

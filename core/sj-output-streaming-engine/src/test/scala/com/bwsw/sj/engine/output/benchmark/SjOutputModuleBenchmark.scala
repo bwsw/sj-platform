@@ -31,6 +31,7 @@ import org.scalatest.{FlatSpec, Matchers, Outcome}
 import ru.yandex.qatools.embed.postgresql.EmbeddedPostgres
 import ru.yandex.qatools.embed.postgresql.distribution.Version
 
+import scala.io.StdIn
 import scala.util.Try
 
 /**
@@ -93,6 +94,9 @@ class SjOutputModuleBenchmark extends FlatSpec with Matchers {
     val waitResponseFromRunner = new Thread(() => serverSocket.accept())
 
     val result = Try {
+//      println(environment.map(x => s"${x._1}=${x._2}").mkString("\n"))
+//      StdIn.readLine("!!!!!")
+
       val setup = runClass(classOf[SjRestOutputModuleSetup])
       setup.waitFor() shouldBe 0
 

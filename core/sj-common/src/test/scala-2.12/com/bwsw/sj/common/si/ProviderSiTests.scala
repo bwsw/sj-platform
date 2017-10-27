@@ -21,13 +21,14 @@ package com.bwsw.sj.common.si
 import java.util.UUID
 
 import com.bwsw.sj.common.dal.model.ConfigurationSettingDomain
-import com.bwsw.sj.common.dal.model.provider.{JDBCProviderDomain, ProviderDomain, ESProviderDomain}
+import com.bwsw.sj.common.dal.model.provider.{ESProviderDomain, JDBCProviderDomain, ProviderDomain}
 import com.bwsw.sj.common.dal.model.service._
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
 import com.bwsw.sj.common.si.model.provider.{Provider, ProviderCreator}
 import com.bwsw.sj.common.si.result._
 import com.bwsw.sj.common.utils.MessageResourceUtils
 import com.bwsw.sj.common.utils.MessageResourceUtilsMock.messageResourceUtils
+import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.{any, anyString}
 import org.mockito.Mockito.when
 import org.mockito.invocation.InvocationOnMock
@@ -103,7 +104,8 @@ class ProviderSiTests extends FlatSpec with Matchers {
     val successConnectionProviderName = "success-connection-provider"
     val successConnectionProviderDomain = mock[ProviderDomain]
     when(successConnectionProviderDomain.name).thenReturn(successConnectionProviderName)
-    when(successConnectionProviderDomain.checkConnection(any())).thenReturn(ArrayBuffer[String]())
+    when(successConnectionProviderDomain.checkConnection(any())(ArgumentMatchers.eq(injector)))
+      .thenReturn(ArrayBuffer[String]())
     providerStorage += successConnectionProviderDomain
 
     providerSI.checkConnection(successConnectionProviderName) shouldBe Right(true)
@@ -114,7 +116,7 @@ class ProviderSiTests extends FlatSpec with Matchers {
     val failedConnectionProviderName = "failed-connection-provider"
     val failedConnectionProviderDomain = mock[ProviderDomain]
     when(failedConnectionProviderDomain.name).thenReturn(failedConnectionProviderName)
-    when(failedConnectionProviderDomain.checkConnection(any())).thenReturn(errors)
+    when(failedConnectionProviderDomain.checkConnection(any())(ArgumentMatchers.eq(injector))).thenReturn(errors)
     providerStorage += failedConnectionProviderDomain
 
     providerSI.checkConnection(failedConnectionProviderName) shouldBe Left(errors)
