@@ -36,6 +36,7 @@ class ESProviderDomain(name: String,
                        val password: String,
                        creationDate: Date)
   extends ProviderDomain(name, description, hosts, ProviderLiterals.elasticsearchType, creationDate) {
+  import ProviderDomain._
 
   override protected def checkESConnection(address: String): ArrayBuffer[String] = {
     val errors = ArrayBuffer[String]()

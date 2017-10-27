@@ -36,6 +36,7 @@ class JDBCProviderDomain(name: String,
                          val driver: String,
                          creationDate: Date)
   extends ProviderDomain(name, description, hosts, ProviderLiterals.jdbcType, creationDate) {
+  import ProviderDomain._
 
   override def checkJdbcConnection(address: String)(implicit injector: Injector): ArrayBuffer[String] = {
     val errors = ArrayBuffer[String]()

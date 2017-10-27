@@ -31,5 +31,4 @@ object MorphiaAnnotations {
   type PropertyField = Property@field
   type ReferenceField = Reference@field
   type EmbeddedField = Embedded@field
-  type NotSavedField = NotSaved@field
 }

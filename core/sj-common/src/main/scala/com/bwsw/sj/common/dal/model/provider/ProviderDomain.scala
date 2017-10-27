@@ -22,7 +22,7 @@ import java.net.{InetSocketAddress, Socket, URI}
 import java.nio.channels.ClosedChannelException
 import java.util.{Collections, Date}
 
-import com.bwsw.sj.common.dal.morphia.MorphiaAnnotations.{IdField, NotSavedField, PropertyField}
+import com.bwsw.sj.common.dal.morphia.MorphiaAnnotations.{IdField, PropertyField}
 import com.bwsw.sj.common.utils.{MessageResourceUtils, ProviderLiterals}
 import kafka.javaapi.TopicMetadataRequest
 import kafka.javaapi.consumer.SimpleConsumer
@@ -45,7 +45,7 @@ class ProviderDomain(@IdField val name: String,
                      @PropertyField("provider-type") val providerType: String,
                      val creationDate: Date) {
 
-  @NotSavedField protected val messageResourceUtils = new MessageResourceUtils
+  import ProviderDomain._
 
   def getConcatenatedHosts(separator: String = ","): String = {
     hosts.mkString(separator)
@@ -143,4 +143,8 @@ class ProviderDomain(@IdField val name: String,
 
     (host, port)
   }
+}
+
+object ProviderDomain {
+  protected[provider] val messageResourceUtils = new MessageResourceUtils
 }
