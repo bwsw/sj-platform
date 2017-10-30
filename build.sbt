@@ -1,5 +1,3 @@
-
-
 name := "sj"
 scalaVersion := Dependencies.Versions.scala
 val sjVersion = "1.0-SNAPSHOT"
@@ -71,20 +69,21 @@ val commonSettings = Seq(
   publishMavenStyle := true,
   pomIncludeRepository := { _ => false },
 
-  publishTo <<= version { (v: String) =>
+  publishTo := version { (v: String) =>
     val nexus = "https://oss.sonatype.org/"
     if (v.trim.endsWith("SNAPSHOT")) Some(
       "snapshots" at nexus + "content/repositories/snapshots"
     )
     else Some("releases" at nexus + "service/local/staging/deploy/maven2")
-  },
-  publishArtifact in Test := false,
+  }.value,
 
+  publishArtifact in Test := false,
   concurrentRestrictions in Global += Tags.limit(Tags.Test, 1)
 )
 
-lazy val sj = (project in file(".")).settings(publish := {})
-  .settings(unidocSettings: _*)
+lazy val sj = (project in file("."))
+  .enablePlugins(ScalaUnidocPlugin)
+  .settings(publish := {})
   .settings(updateOptions :=
     updateOptions.value.withCachedResolution(true))
   .aggregate(common,
@@ -130,7 +129,7 @@ lazy val inputStreamingEngine = Project(id = "sj-input-streaming-engine",
   .settings(
     libraryDependencies ++= Dependencies.sjInputEngineDependencies.value,
     libraryDependencies ++= Dependencies.sjTestDependencies.value,
-    test in Test <<= (test in Test).dependsOn((Keys.`package` in Compile) in stubInput)
+    test in Test := (test in Test).dependsOn((Keys.`package` in Compile) in stubInput)
   )
   .dependsOn(engineCore)
 
@@ -139,7 +138,7 @@ lazy val regularStreamingEngine = Project(id = "sj-regular-streaming-engine",
   .settings(commonSettings: _*)
   .settings(
     libraryDependencies ++= Dependencies.sjTestDependencies.value,
-    test in Test <<= (test in Test).dependsOn((Keys.`package` in Compile) in stubRegular)
+    test in Test := (test in Test).dependsOn((Keys.`package` in Compile) in stubRegular)
   )
   .dependsOn(engineCore)
 
@@ -148,7 +147,7 @@ lazy val batchStreamingEngine = Project(id = "sj-batch-streaming-engine",
   .settings(commonSettings: _*)
   .settings(
     libraryDependencies ++= Dependencies.sjTestDependencies.value,
-    test in Test <<= (test in Test).dependsOn((Keys.`package` in Compile) in stubBatch)
+    test in Test := (test in Test).dependsOn((Keys.`package` in Compile) in stubBatch)
   )
   .dependsOn(engineCore)
 
@@ -158,7 +157,7 @@ lazy val outputStreamingEngine = Project(id = "sj-output-streaming-engine",
   .settings(
     libraryDependencies ++= Dependencies.sjOutputEngineDependencies.value,
     libraryDependencies ++= Dependencies.sjTestDependencies.value,
-    test in Test <<= (test in Test)
+    test in Test := (test in Test)
       .dependsOn((Keys.`package` in Compile) in stubESOutput)
       .dependsOn((Keys.`package` in Compile) in stubJDBCOutput)
       .dependsOn((Keys.`package` in Compile) in stubRestOutput)
