@@ -23,11 +23,12 @@ import java.nio.channels.ClosedChannelException
 import java.util.{Collections, Date}
 
 import com.bwsw.sj.common.dal.morphia.MorphiaAnnotations.{IdField, PropertyField}
-import com.bwsw.sj.common.utils.ProviderLiterals
+import com.bwsw.sj.common.utils.{MessageResourceUtils, ProviderLiterals}
 import kafka.javaapi.TopicMetadataRequest
 import kafka.javaapi.consumer.SimpleConsumer
 import org.apache.zookeeper.ZooKeeper
 import org.mongodb.morphia.annotations.Entity
+import scaldi.Injector
 
 import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.duration._
@@ -44,11 +45,13 @@ class ProviderDomain(@IdField val name: String,
                      @PropertyField("provider-type") val providerType: String,
                      val creationDate: Date) {
 
+  import ProviderDomain._
+
   def getConcatenatedHosts(separator: String = ","): String = {
     hosts.mkString(separator)
   }
 
-  def checkConnection(zkSessionTimeout: Int): ArrayBuffer[String] = {
+  def checkConnection(zkSessionTimeout: Int)(implicit injector: Injector): ArrayBuffer[String] = {
     val errors = ArrayBuffer[String]()
     for (host <- this.hosts) {
       errors ++= checkProviderConnectionByType(host, this.providerType, zkSessionTimeout)
@@ -57,7 +60,8 @@ class ProviderDomain(@IdField val name: String,
     errors
   }
 
-  protected def checkProviderConnectionByType(host: String, providerType: String, zkSessionTimeout: Int): ArrayBuffer[String] = {
+  protected def checkProviderConnectionByType(host: String, providerType: String, zkSessionTimeout: Int)
+                                             (implicit injector: Injector): ArrayBuffer[String] = {
     providerType match {
       case ProviderLiterals.zookeeperType =>
         checkZookeeperConnection(host, zkSessionTimeout)
@@ -85,11 +89,11 @@ class ProviderDomain(@IdField val name: String,
           connected = client.getState.isConnected
         }
         if (!connected) {
-          errors += s"Can gain an access to Zookeeper on '$address'"
+          errors += messageResourceUtils.createMessage("rest.providers.provider.cannot.connect.zk", address)
         }
         client.close()
       case Failure(_) =>
-        errors += s"Wrong host '$address'"
+        errors += messageResourceUtils.createMessage("rest.providers.provider.cannot.connect.zk.wrong.host", address)
     }
 
     errors
@@ -104,9 +108,9 @@ class ProviderDomain(@IdField val name: String,
     Try(consumer.send(req)) match {
       case Success(_) =>
       case Failure(_: ClosedChannelException) | Failure(_: java.io.EOFException) =>
-        errors += s"Can not establish connection to Kafka on '$address'"
+        errors += messageResourceUtils.createMessage("rest.providers.provider.cannot.connect.kafka", address)
       case Failure(_) =>
-        errors += s"Some issues encountered while trying to establish connection to '$address'"
+        errors += messageResourceUtils.createMessage("rest.providers.provider.cannot.connect.kafka.wrong.host", address)
     }
 
     errors
@@ -114,7 +118,7 @@ class ProviderDomain(@IdField val name: String,
 
   protected def checkESConnection(address: String): ArrayBuffer[String] = ArrayBuffer()
 
-  protected def checkJdbcConnection(address: String): ArrayBuffer[String] = ArrayBuffer()
+  protected def checkJdbcConnection(address: String)(implicit injector: Injector): ArrayBuffer[String] = ArrayBuffer()
 
   protected def checkRestConnection(address: String): ArrayBuffer[String] = {
     val (host, port) = getHostAndPort(address)
@@ -125,7 +129,7 @@ class ProviderDomain(@IdField val name: String,
       case Success(_) =>
         ArrayBuffer[String]()
       case Failure(_) =>
-        ArrayBuffer[String](s"Can not establish connection to Rest on '$address'")
+        ArrayBuffer[String](messageResourceUtils.createMessage("rest.providers.provider.cannot.connect.rest", address))
     }
     if (!socket.isClosed) socket.close()
 
@@ -139,4 +143,8 @@ class ProviderDomain(@IdField val name: String,
 
     (host, port)
   }
+}
+
+object ProviderDomain {
+  protected[provider] val messageResourceUtils = new MessageResourceUtils
 }

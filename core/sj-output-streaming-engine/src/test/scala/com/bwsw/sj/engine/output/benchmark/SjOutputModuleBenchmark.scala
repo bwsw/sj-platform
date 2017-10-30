@@ -23,7 +23,7 @@ import java.net.ServerSocket
 import com.bwsw.common.embedded.{EmbeddedElasticsearch, EmbeddedMongo}
 import com.bwsw.sj.common.utils.NetworkUtils.findFreePort
 import com.bwsw.sj.common.utils.benchmark.ClassRunner
-import com.bwsw.sj.engine.core.testutils.Server
+import com.bwsw.sj.engine.core.testutils.{Constants, Server}
 import com.bwsw.sj.engine.output.benchmark.SjOutputModuleBenchmarkConstants._
 import com.bwsw.sj.engine.output.benchmark.data_checkers.{ESDataChecker, JDBCDataChecker, RestDataChecker}
 import org.apache.curator.test.TestingServer
@@ -31,6 +31,7 @@ import org.scalatest.{FlatSpec, Matchers, Outcome}
 import ru.yandex.qatools.embed.postgresql.EmbeddedPostgres
 import ru.yandex.qatools.embed.postgresql.distribution.Version
 
+import scala.io.StdIn
 import scala.util.Try
 
 /**
@@ -69,7 +70,7 @@ class SjOutputModuleBenchmark extends FlatSpec with Matchers {
     val zkServer = new TestingServer(zkPort, true)
 
     val ttsServer = new ClassRunner(classOf[Server], environment = commonEnvironment).start()
-    Thread.sleep(waitingTimeout)
+    Thread.sleep(Constants.ttsLaunchTimeout)
 
     val mongoServer = new EmbeddedMongo(mongoPort)
     mongoServer.start()
@@ -93,6 +94,9 @@ class SjOutputModuleBenchmark extends FlatSpec with Matchers {
     val waitResponseFromRunner = new Thread(() => serverSocket.accept())
 
     val result = Try {
+//      println(environment.map(x => s"${x._1}=${x._2}").mkString("\n"))
+//      StdIn.readLine("!!!!!")
+
       val setup = runClass(classOf[SjRestOutputModuleSetup])
       setup.waitFor() shouldBe 0
 

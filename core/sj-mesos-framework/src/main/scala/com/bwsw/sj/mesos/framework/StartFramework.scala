@@ -18,6 +18,8 @@
  */
 package com.bwsw.sj.mesos.framework
 
+import java.lang.Enum
+
 import com.bwsw.common.LeaderLatch
 import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.common.dal.model.ConfigurationSettingDomain
@@ -26,9 +28,10 @@ import com.bwsw.sj.common.utils.FrameworkLiterals
 import com.bwsw.sj.mesos.framework.config.FrameworkConfigNames
 import com.bwsw.sj.mesos.framework.rest.Rest
 import com.bwsw.sj.mesos.framework.schedule.{FrameworkScheduler, FrameworkUtil}
+import com.google.protobuf.Enum
 import com.typesafe.config.ConfigFactory
 import org.apache.mesos.MesosSchedulerDriver
-import org.apache.mesos.Protos.{Credential, FrameworkInfo}
+import org.apache.mesos.Protos.{Credential, FrameworkInfo, Status}
 import scaldi.Injectable.inject
 
 import scala.util.Try
@@ -95,10 +98,10 @@ object StartFramework {
     leader.start()
     leader.acquireLeadership(5)
 
-    driver.start()
-    driver.join()
+    val driverStatus: Status = driver.run()
+    val status = if (driverStatus == Status.DRIVER_STOPPED) 0 else 1
 
     leader.close()
-    System.exit(0)
+    System.exit(status)
   }
 }

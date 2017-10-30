@@ -36,12 +36,13 @@ class ESProviderDomain(name: String,
                        val password: String,
                        creationDate: Date)
   extends ProviderDomain(name, description, hosts, ProviderLiterals.elasticsearchType, creationDate) {
+  import ProviderDomain._
 
   override protected def checkESConnection(address: String): ArrayBuffer[String] = {
     val errors = ArrayBuffer[String]()
     val client = new ElasticsearchClient(Set(getHostAndPort(address)), Option(login), Option(password))
     if (!client.isConnected()) {
-      errors += s"Can not establish connection to ElasticSearch on '$address'"
+      errors += messageResourceUtils.createMessage("rest.providers.provider.cannot.connect.es", address)
     }
     client.close()
 

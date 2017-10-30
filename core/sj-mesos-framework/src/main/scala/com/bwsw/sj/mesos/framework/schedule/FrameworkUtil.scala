@@ -55,8 +55,8 @@ object FrameworkUtil {
   var instance: Option[Instance] = None
   var instancePort: Option[Int] = None
   var config: Option[Config] = None
-  val connectionRepository: ConnectionRepository = inject[ConnectionRepository]
-  val configRepository: GenericMongoRepository[ConfigurationSettingDomain] = connectionRepository.getConfigRepository
+  lazy val connectionRepository: ConnectionRepository = inject[ConnectionRepository]
+  lazy val configRepository: GenericMongoRepository[ConfigurationSettingDomain] = connectionRepository.getConfigRepository
   private val logger = Logger.getLogger(this.getClass)
 
   /**

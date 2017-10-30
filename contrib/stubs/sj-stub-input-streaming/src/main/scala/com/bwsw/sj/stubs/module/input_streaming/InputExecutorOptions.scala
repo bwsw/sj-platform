@@ -16,9 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.sj.engine.core.testutils
+package com.bwsw.sj.stubs.module.input_streaming
 
-object Constants {
-  val sjVersion = "1.0-SNAPSHOT"
-  val ttsLaunchTimeout = 15 * 1000
-}
+/**
+  * Options for sj-stub-input-streaming
+  *
+  * @param totalInputElements count of elements on input stream
+  * @param benchmarkPort      port to report that benchmark is done
+  * @param verbose            true means that module will print progress in console
+  * @author Pavel Tomskikh
+  */
+case class InputExecutorOptions(totalInputElements: Option[Int],
+                                benchmarkPort: Option[Int],
+                                verbose: Option[Boolean] = Some(false))

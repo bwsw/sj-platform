@@ -25,7 +25,7 @@ import com.bwsw.sj.common.utils.NetworkUtils.findFreePort
 import com.bwsw.sj.common.utils.benchmark.ClassRunner
 import com.bwsw.sj.engine.batch.module.SjBatchModuleBenchmarkConstants.{commonMode, inputCount, kafkaMode, tStreamMode}
 import com.bwsw.sj.engine.batch.module.checkers.{SjBatchModuleStatefulBothChecker, SjBatchModuleStatefulKafkaChecker, SjBatchModuleStatefulTstreamChecker}
-import com.bwsw.sj.engine.core.testutils.Server
+import com.bwsw.sj.engine.core.testutils.{Constants, Server}
 import org.apache.curator.test.TestingServer
 import org.scalatest.prop.TableDrivenPropertyChecks
 import org.scalatest.{FlatSpec, Matchers, Outcome}
@@ -68,7 +68,7 @@ class SjBatchModuleBenchmark extends FlatSpec with Matchers with TableDrivenProp
     val mongoServer = new EmbeddedMongo(mongoPort)
 
     val ttsServer = runClass(classOf[Server])
-    Thread.sleep(waitingTimeout)
+    Thread.sleep(Constants.ttsLaunchTimeout)
 
     mongoServer.start()
     kafkaServer.start()
