@@ -21,17 +21,43 @@ package com.bwsw.sj.engine.core.testutils.benchmark
 import java.io.{File, FileWriter}
 import java.util.Calendar
 
-import com.bwsw.sj.engine.core.testutils.benchmark.loader.{BenchmarkDataSender, BenchmarkDataSenderParameters}
+import com.bwsw.sj.engine.core.testutils.benchmark.loader.{BenchmarkDataSenderConfig, BenchmarkDataSenderParameters, SenderFactory}
 
 /**
   * Provides methods for running [[Benchmark]] and writing a result into a file
   *
   * @author Pavel Tomskikh
   */
-class BenchmarkRunner[T <: BenchmarkParameters, S <: BenchmarkDataSenderParameters](config: BenchmarkRunnerConfig,
-                                                                                    sender: BenchmarkDataSender[S],
-                                                                                    benchmark: Benchmark[T]) {
+class BenchmarkRunner[T <: BenchmarkParameters, S <: BenchmarkDataSenderParameters, C <: BenchmarkDataSenderConfig]
+(configFactory: ConfigFactory,
+ outputFilenamePrefix: String,
+ senderFactory: SenderFactory[S, C],
+ benchmarkFactory: BenchmarkFactory[T, C])
+  extends App {
+
+  println(Calendar.getInstance().getTime)
+
+  private val config = configFactory.createConfig
+  private val runnerConfig = new BenchmarkRunnerConfig(config, outputFilenamePrefix)
+  private val (sender, senderConfig) = senderFactory.create(config)
+  private val benchmark = benchmarkFactory.create(config, senderConfig)
+
   benchmark.prepare()
+
+  private val results = run()
+  writeResult(results)
+  benchmark.stop()
+
+  private val resultsString = results.mkString("\n")
+
+  println("DONE")
+  println("Results:")
+  println(resultsString)
+
+  println(Calendar.getInstance().getTime)
+
+  System.exit(0)
+
 
   def run(): Iterable[Results] = {
     sender.warmUp()
@@ -43,7 +69,7 @@ class BenchmarkRunner[T <: BenchmarkParameters, S <: BenchmarkDataSenderParamete
 
       benchmark.map { benchmarkParameters =>
         printWithTime(s"Benchmark parameters: ${benchmarkParameters.toSeq.mkString(",")}")
-        val results = (1 to config.repetitions).map { _ =>
+        val results = (1 to runnerConfig.repetitions).map { _ =>
           val result = benchmark.run(benchmarkParameters, senderParameters.messagesCount)
           printWithTime(result)
 
@@ -56,12 +82,10 @@ class BenchmarkRunner[T <: BenchmarkParameters, S <: BenchmarkDataSenderParamete
   }
 
   def writeResult(benchmarkResults: Iterable[Results]) = {
-    val writer = new FileWriter(new File(config.outputFileName))
+    val writer = new FileWriter(new File(runnerConfig.outputFileName))
     writer.write(benchmarkResults.mkString("\n"))
     writer.close()
   }
-
-  def stop(): Unit = benchmark.stop()
 
   private def printWithTime(a: Any): Unit =
     println(s"[${Calendar.getInstance().getTime}] $a")

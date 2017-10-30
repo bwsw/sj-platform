@@ -20,7 +20,7 @@ package com.bwsw.sj.engine.regular.benchmark.read_kafka.storm
 
 import com.bwsw.sj.common.utils.benchmark.ClassRunner
 import com.bwsw.sj.engine.core.testutils.benchmark.BenchmarkConfig
-import com.bwsw.sj.engine.core.testutils.benchmark.loader.kafka.KafkaBenchmarkDataLoaderConfig
+import com.bwsw.sj.engine.core.testutils.benchmark.loader.kafka.KafkaBenchmarkDataSenderConfig
 import com.bwsw.sj.engine.core.testutils.benchmark.regular.RegularBenchmark
 import com.bwsw.sj.engine.regular.benchmark.read_kafka.storm.StormBenchmarkLiterals._
 
@@ -34,7 +34,7 @@ import com.bwsw.sj.engine.regular.benchmark.read_kafka.storm.StormBenchmarkLiter
   * @author Pavel Tomskikh
   */
 class StormBenchmark(benchmarkConfig: BenchmarkConfig,
-                     senderConfig: KafkaBenchmarkDataLoaderConfig)
+                     senderConfig: KafkaBenchmarkDataSenderConfig)
   extends RegularBenchmark(benchmarkConfig) {
 
   override protected def runProcess(messagesCount: Long): Process = {

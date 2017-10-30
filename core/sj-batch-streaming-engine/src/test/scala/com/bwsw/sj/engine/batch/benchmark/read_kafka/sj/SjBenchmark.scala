@@ -28,7 +28,7 @@ import com.bwsw.sj.common.utils.{CommonAppConfigNames, NetworkUtils}
 import com.bwsw.sj.common.utils.benchmark.ClassRunner
 import com.bwsw.sj.engine.batch.BatchTaskRunner
 import com.bwsw.sj.engine.core.testutils.benchmark.batch.{BatchBenchmark, BatchBenchmarkConfig, BatchBenchmarkParameters}
-import com.bwsw.sj.engine.core.testutils.benchmark.loader.kafka.KafkaBenchmarkDataLoaderConfig
+import com.bwsw.sj.engine.core.testutils.benchmark.loader.kafka.KafkaBenchmarkDataSenderConfig
 import com.bwsw.sj.engine.core.testutils.{Server, TestStorageServer}
 import com.typesafe.config.ConfigFactory
 
@@ -41,15 +41,15 @@ import com.typesafe.config.ConfigFactory
   *
   * @param benchmarkConfig configuration of application
   * @param senderConfig    configuration of Kafka topic
-  * @param zkHost          ZooKeeper server's host
-  * @param zkPort          ZooKeeper server's port
   * @author Pavel Tomskikh
   */
 class SjBenchmark(benchmarkConfig: BatchBenchmarkConfig,
-                  senderConfig: KafkaBenchmarkDataLoaderConfig,
-                  zkHost: String,
-                  zkPort: Int)
+                  senderConfig: KafkaBenchmarkDataSenderConfig)
   extends BatchBenchmark(benchmarkConfig) {
+
+  private val zkAddressSplit = senderConfig.zooKeeperAddress.split(",")
+  private val zkHost = zkAddressSplit(0)
+  private val zkPort = zkAddressSplit(1).toInt
 
   private val moduleFilename = "../../contrib/benchmarks/sj-batch-performance-benchmark/target/scala-2.12/" +
     "sj-batch-performance-benchmark-1.0-SNAPSHOT.jar"

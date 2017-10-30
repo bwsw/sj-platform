@@ -18,12 +18,10 @@
  */
 package com.bwsw.sj.engine.regular.benchmark.read_kafka.storm
 
-import java.util.Calendar
-
 import com.bwsw.sj.common.utils.BenchmarkLiterals.Regular.stormDefaultOutputFile
-import com.bwsw.sj.engine.core.testutils.benchmark.loader.kafka.{KafkaBenchmarkDataLoaderConfig, KafkaBenchmarkDataSender}
-import com.bwsw.sj.engine.core.testutils.benchmark.{BenchmarkConfig, BenchmarkRunner, BenchmarkRunnerConfig}
-import com.typesafe.config.ConfigFactory
+import com.bwsw.sj.engine.core.testutils.benchmark.loader.kafka.{KafkaBenchmarkDataSender, KafkaBenchmarkDataSenderConfig}
+import com.bwsw.sj.engine.core.testutils.benchmark.regular.RegularBenchmarkFactory
+import com.bwsw.sj.engine.core.testutils.benchmark.{BenchmarkConfig, BenchmarkRunner, ConfigFactory}
 
 /**
   * Performs [[StormBenchmark]]
@@ -52,27 +50,14 @@ import com.typesafe.config.ConfigFactory
   *
   * @author Pavel Tomskikh
   */
-object StormBenchmarkRunner extends App {
-  println(Calendar.getInstance().getTime)
+object StormBenchmarkRunner extends BenchmarkRunner(
+  ConfigFactory,
+  stormDefaultOutputFile,
+  KafkaBenchmarkDataSender,
+  StormBenchmarkFactory)
 
-  private val config = ConfigFactory.load()
-  private val senderConfig = new KafkaBenchmarkDataLoaderConfig(config)
-  private val runnerConfig = new BenchmarkRunnerConfig(config, stormDefaultOutputFile)
-  private val benchmarkConfig = new BenchmarkConfig(config)
-
-  private val sender = new KafkaBenchmarkDataSender(senderConfig)
-  private val benchmark = new StormBenchmark(benchmarkConfig, senderConfig)
-  private val benchmarkRunner = new BenchmarkRunner(runnerConfig, sender, benchmark)
-
-  private val results = benchmarkRunner.run()
-  benchmarkRunner.writeResult(results)
-  benchmarkRunner.stop()
-
-  private val resultsString = results.mkString("\n")
-
-  println("DONE")
-  println("Results:")
-  println(resultsString)
-
-  println(Calendar.getInstance().getTime)
+object StormBenchmarkFactory extends RegularBenchmarkFactory[KafkaBenchmarkDataSenderConfig] {
+  override protected def create(benchmarkConfig: BenchmarkConfig,
+                                senderConfig: KafkaBenchmarkDataSenderConfig): StormBenchmark =
+    new StormBenchmark(benchmarkConfig, senderConfig)
 }

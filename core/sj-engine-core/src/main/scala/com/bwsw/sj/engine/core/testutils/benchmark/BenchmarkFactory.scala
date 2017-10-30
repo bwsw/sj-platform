@@ -16,20 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.sj.engine.core.testutils.benchmark.loader
+package com.bwsw.sj.engine.core.testutils.benchmark
 
-import com.bwsw.sj.common.utils.BenchmarkConfigNames.{messageSizesConfig, messagesCountsConfig, wordsConfig}
+import com.bwsw.sj.engine.core.testutils.benchmark.loader.BenchmarkDataSenderConfig
 import com.typesafe.config.Config
 
 /**
-  * Contains configuration of storage
+  * Provides method to create banchmark instance
   *
   * @author Pavel Tomskikh
   */
-trait BenchmarkDataLoaderConfig {
-  protected val config: Config
+trait BenchmarkFactory[T <: BenchmarkParameters, C <: BenchmarkDataSenderConfig] {
 
-  val messagesCounts = config.getString(messagesCountsConfig).split(",").map(_.toLong)
-  val messageSizes = config.getString(messageSizesConfig).split(",").map(_.toLong)
-  val words = config.getString(wordsConfig).split(",")
+  /**
+    * Creates benchmark instance
+    *
+    * @param config       typesafe config
+    * @param senderConfig sender config
+    * @return benchmark instance
+    */
+  def create(config: Config, senderConfig: C): Benchmark[T]
 }

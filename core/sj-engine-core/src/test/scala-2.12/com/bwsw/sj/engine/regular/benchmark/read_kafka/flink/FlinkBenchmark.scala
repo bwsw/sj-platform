@@ -19,7 +19,7 @@
 package com.bwsw.sj.engine.regular.benchmark.read_kafka.flink
 
 import com.bwsw.sj.engine.core.testutils.benchmark.BenchmarkConfig
-import com.bwsw.sj.engine.core.testutils.benchmark.loader.kafka.KafkaBenchmarkDataLoaderConfig
+import com.bwsw.sj.engine.core.testutils.benchmark.loader.kafka.KafkaBenchmarkDataSenderConfig
 import com.bwsw.sj.engine.core.testutils.benchmark.regular.RegularBenchmark
 
 import scala.collection.JavaConverters._
@@ -34,7 +34,7 @@ import scala.collection.JavaConverters._
   * @author Pavel Tomskikh
   */
 class FlinkBenchmark(benchmarkConfig: BenchmarkConfig,
-                     senderConfig: KafkaBenchmarkDataLoaderConfig)
+                     senderConfig: KafkaBenchmarkDataSenderConfig)
   extends RegularBenchmark(benchmarkConfig) {
 
   private val taskJarPath =

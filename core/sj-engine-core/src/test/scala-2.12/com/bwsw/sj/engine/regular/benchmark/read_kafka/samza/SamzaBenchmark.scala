@@ -23,7 +23,7 @@ import java.util.UUID
 
 import com.bwsw.sj.common.utils.benchmark.ClassRunner
 import com.bwsw.sj.engine.core.testutils.benchmark.BenchmarkConfig
-import com.bwsw.sj.engine.core.testutils.benchmark.loader.kafka.KafkaBenchmarkDataLoaderConfig
+import com.bwsw.sj.engine.core.testutils.benchmark.loader.kafka.KafkaBenchmarkDataSenderConfig
 import com.bwsw.sj.engine.core.testutils.benchmark.regular.RegularBenchmark
 import com.bwsw.sj.engine.regular.benchmark.read_kafka.samza.SamzaBenchmarkLiterals._
 import org.apache.samza.job.JobRunner
@@ -38,7 +38,7 @@ import org.apache.samza.job.JobRunner
   * @author Pavel Tomskikh
   */
 class SamzaBenchmark(benchmarkConfig: BenchmarkConfig,
-                     senderConfig: KafkaBenchmarkDataLoaderConfig)
+                     senderConfig: KafkaBenchmarkDataSenderConfig)
   extends RegularBenchmark(benchmarkConfig) {
 
   private val propertiesFilename = s"samza-benchmark-${UUID.randomUUID().toString}.properties"

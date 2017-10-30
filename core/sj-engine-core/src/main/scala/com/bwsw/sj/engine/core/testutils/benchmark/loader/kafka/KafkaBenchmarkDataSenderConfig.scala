@@ -16,23 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.sj.engine.core.testutils.benchmark.loader.tstreams
+package com.bwsw.sj.engine.core.testutils.benchmark.loader.kafka
 
 import java.util.UUID
 
-import com.bwsw.sj.common.utils.BenchmarkConfigNames.{tStreamsPrefixConfig, tStreamsSizePerTransaction, tStreamsTokenConfig, zooKeeperAddressConfig}
-import com.bwsw.sj.engine.core.testutils.benchmark.loader.BenchmarkDataLoaderConfig
+import com.bwsw.sj.common.utils.BenchmarkConfigNames.{kafkaAddressConfig, zooKeeperAddressConfig}
+import com.bwsw.sj.engine.core.testutils.benchmark.loader.BenchmarkDataSenderConfig
 import com.typesafe.config.Config
 
 /**
-  * Contains configuration of T-Streams stream
+  * Contains configuration of Kafka topic
   *
   * @author Pavel Tomskikh
   */
-class TStreamsBenchmarkDataLoaderConfig(override protected val config: Config) extends BenchmarkDataLoaderConfig {
+class KafkaBenchmarkDataSenderConfig(override protected val config: Config) extends BenchmarkDataSenderConfig {
+  val kafkaAddress = config.getString(kafkaAddressConfig)
   val zooKeeperAddress = config.getString(zooKeeperAddressConfig)
-  val prefix = config.getString(tStreamsPrefixConfig)
-  val token = config.getString(tStreamsTokenConfig)
-  val sizePerTransaction = config.getString(tStreamsSizePerTransaction).split(",").map(_.toLong)
-  val stream = "performance-benchmark-" + UUID.randomUUID().toString
+  val topic = "performance-benchmark-" + UUID.randomUUID().toString
 }

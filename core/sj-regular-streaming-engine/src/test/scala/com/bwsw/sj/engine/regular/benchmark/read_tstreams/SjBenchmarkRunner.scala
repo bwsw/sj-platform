@@ -18,14 +18,10 @@
  */
 package com.bwsw.sj.engine.regular.benchmark.read_tstreams
 
-import java.util.Calendar
-
-import com.bwsw.sj.common.utils.BenchmarkConfigNames._
 import com.bwsw.sj.common.utils.BenchmarkLiterals.Regular.sjDefaultOutputFile
-import com.bwsw.sj.common.utils.CommonAppConfigNames.{zooKeeperHost, zooKeeperPort}
-import com.bwsw.sj.engine.core.testutils.benchmark.loader.tstreams.{TStreamsBenchmarkDataLoaderConfig, TStreamsBenchmarkDataSender}
-import com.bwsw.sj.engine.core.testutils.benchmark.{BenchmarkConfig, BenchmarkRunner, BenchmarkRunnerConfig}
-import com.typesafe.config.{Config, ConfigFactory, ConfigValueFactory}
+import com.bwsw.sj.engine.core.testutils.benchmark.loader.tstreams.{TStreamsBenchmarkDataSender, TStreamsBenchmarkDataSenderConfig}
+import com.bwsw.sj.engine.core.testutils.benchmark.regular.RegularBenchmarkFactory
+import com.bwsw.sj.engine.core.testutils.benchmark.{BenchmarkConfig, BenchmarkRunner, ConfigFactory}
 
 /**
   * Performs [[SjBenchmark]].
@@ -62,33 +58,14 @@ import com.typesafe.config.{Config, ConfigFactory, ConfigValueFactory}
   *
   * @author Pavel Tomskikh
   */
-object SjBenchmarkRunner extends App {
-  println(Calendar.getInstance().getTime)
+object SjBenchmarkRunner extends BenchmarkRunner(
+  ConfigFactory,
+  sjDefaultOutputFile,
+  TStreamsBenchmarkDataSender,
+  SjBenchmarkFactory)
 
-  private val config: Config = ConfigFactory.load()
-  private val zkPort = config.getInt(zooKeeperPort)
-  private val zkHost = config.getString(zooKeeperHost)
-  private val updatedConfig = config.withValue(zooKeeperAddressConfig, ConfigValueFactory.fromAnyRef(s"$zkHost:$zkPort"))
-
-  private val senderConfig = new TStreamsBenchmarkDataLoaderConfig(updatedConfig)
-  private val runnerConfig = new BenchmarkRunnerConfig(updatedConfig, sjDefaultOutputFile)
-  private val benchmarkConfig = new BenchmarkConfig(config)
-
-  private val sender = new TStreamsBenchmarkDataSender(senderConfig)
-  private val benchmark = new SjBenchmark(benchmarkConfig, senderConfig, zkHost, zkPort)
-  private val benchmarkRunner = new BenchmarkRunner(runnerConfig, sender, benchmark)
-
-  private val results = benchmarkRunner.run()
-  benchmarkRunner.writeResult(results)
-  benchmarkRunner.stop()
-
-  private val resultsString = results.mkString("\n")
-
-  println("DONE")
-  println("Results:")
-  println(resultsString)
-
-  println(Calendar.getInstance().getTime)
-
-  System.exit(0)
+object SjBenchmarkFactory extends RegularBenchmarkFactory[TStreamsBenchmarkDataSenderConfig] {
+  override protected def create(benchmarkConfig: BenchmarkConfig,
+                                senderConfig: TStreamsBenchmarkDataSenderConfig): SjBenchmark =
+    new SjBenchmark(benchmarkConfig, senderConfig)
 }

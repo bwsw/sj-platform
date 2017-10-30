@@ -16,21 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.sj.engine.core.testutils.benchmark.loader.kafka
+package com.bwsw.sj.engine.core.testutils.benchmark.loader
 
-import java.util.UUID
-
-import com.bwsw.sj.common.utils.BenchmarkConfigNames.{kafkaAddressConfig, zooKeeperAddressConfig}
-import com.bwsw.sj.engine.core.testutils.benchmark.loader.BenchmarkDataLoaderConfig
+import com.bwsw.sj.common.utils.BenchmarkConfigNames.{messageSizesConfig, messagesCountsConfig, wordsConfig}
 import com.typesafe.config.Config
 
 /**
-  * Contains configuration of Kafka topic
+  * Contains configuration of storage
   *
   * @author Pavel Tomskikh
   */
-class KafkaBenchmarkDataLoaderConfig(override protected val config: Config) extends BenchmarkDataLoaderConfig {
-  val kafkaAddress = config.getString(kafkaAddressConfig)
-  val zooKeeperAddress = config.getString(zooKeeperAddressConfig)
-  val topic = "performance-benchmark-" + UUID.randomUUID().toString
+trait BenchmarkDataSenderConfig {
+  protected val config: Config
+
+  val messagesCounts = config.getString(messagesCountsConfig).split(",").map(_.toLong)
+  val messageSizes = config.getString(messageSizesConfig).split(",").map(_.toLong)
+  val words = config.getString(wordsConfig).split(",")
 }

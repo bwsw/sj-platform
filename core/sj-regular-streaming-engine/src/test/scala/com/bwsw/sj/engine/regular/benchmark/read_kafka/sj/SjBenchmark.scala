@@ -18,17 +18,16 @@
  */
 package com.bwsw.sj.engine.regular.benchmark.read_kafka.sj
 
-import java.io._
+import java.io.File
 
 import com.bwsw.common.embedded.EmbeddedMongo
 import com.bwsw.sj.common.MongoAuthChecker
 import com.bwsw.sj.common.config.TempHelperForConfigSetup
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
-import com.bwsw.sj.common.utils.{CommonAppConfigNames, NetworkUtils}
-import com.bwsw.sj.common.utils.NetworkUtils.findFreePort
 import com.bwsw.sj.common.utils.benchmark.ClassRunner
+import com.bwsw.sj.common.utils.{CommonAppConfigNames, NetworkUtils}
 import com.bwsw.sj.engine.core.testutils.benchmark.BenchmarkConfig
-import com.bwsw.sj.engine.core.testutils.benchmark.loader.kafka.KafkaBenchmarkDataLoaderConfig
+import com.bwsw.sj.engine.core.testutils.benchmark.loader.kafka.KafkaBenchmarkDataSenderConfig
 import com.bwsw.sj.engine.core.testutils.benchmark.regular.RegularBenchmark
 import com.bwsw.sj.engine.core.testutils.{Server, TestStorageServer}
 import com.bwsw.sj.engine.regular.RegularTaskRunner
@@ -43,15 +42,15 @@ import com.typesafe.config.ConfigFactory
   *
   * @param benchmarkConfig configuration of application
   * @param senderConfig    configuration of Kafka topic
-  * @param zkHost          ZooKeeper server's host
-  * @param zkPort          ZooKeeper server's port
   * @author Pavel Tomskikh
   */
 class SjBenchmark(benchmarkConfig: BenchmarkConfig,
-                  senderConfig: KafkaBenchmarkDataLoaderConfig,
-                  zkHost: String,
-                  zkPort: Int)
+                  senderConfig: KafkaBenchmarkDataSenderConfig)
   extends RegularBenchmark(benchmarkConfig) {
+
+  private val zkAddressSplit = senderConfig.zooKeeperAddress.split(",")
+  private val zkHost = zkAddressSplit(0)
+  private val zkPort = zkAddressSplit(1).toInt
 
   private val moduleFilename = "../../contrib/benchmarks/sj-regular-performance-benchmark/target/scala-2.12/" +
     "sj-regular-performance-benchmark-1.0-SNAPSHOT.jar"

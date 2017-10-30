@@ -19,15 +19,16 @@
 package com.bwsw.sj.engine.core.testutils.benchmark.loader.tstreams
 
 import com.bwsw.sj.common.utils.benchmark.TStreamsDataSender
-import com.bwsw.sj.engine.core.testutils.benchmark.loader.BenchmarkDataSender
+import com.bwsw.sj.engine.core.testutils.benchmark.loader.{BenchmarkDataSender, SenderFactory}
 import com.bwsw.tstreams.env.{ConfigurationOptions, TStreamsFactory}
+import com.typesafe.config.Config
 
 /**
   * Provides methods for sending data into T-Streams stream for test some application
   *
   * @author Pavel Tomskikh
   */
-class TStreamsBenchmarkDataSender(config: TStreamsBenchmarkDataLoaderConfig)
+class TStreamsBenchmarkDataSender(config: TStreamsBenchmarkDataSenderConfig)
   extends BenchmarkDataSender[TStreamsBenchmarkDataSenderParameters] {
 
   override val warmingUpParameters = TStreamsBenchmarkDataSenderParameters(1, 10, 10)
@@ -94,5 +95,16 @@ class TStreamsBenchmarkDataSender(config: TStreamsBenchmarkDataLoaderConfig)
   override def stop(): Unit = {
     client.shutdown()
     tStreamsFactory.close()
+  }
+}
+
+object TStreamsBenchmarkDataSender
+  extends SenderFactory[TStreamsBenchmarkDataSenderParameters, TStreamsBenchmarkDataSenderConfig] {
+
+  override def create(config: Config) = {
+    val senderConfig = new TStreamsBenchmarkDataSenderConfig(config)
+    val sender = new TStreamsBenchmarkDataSender(senderConfig)
+
+    (sender, senderConfig)
   }
 }

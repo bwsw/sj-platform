@@ -27,7 +27,7 @@ import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.{CommonAppConfigNames, NetworkUtils}
 import com.bwsw.sj.common.utils.benchmark.ClassRunner
 import com.bwsw.sj.engine.core.testutils.benchmark.BenchmarkConfig
-import com.bwsw.sj.engine.core.testutils.benchmark.loader.tstreams.TStreamsBenchmarkDataLoaderConfig
+import com.bwsw.sj.engine.core.testutils.benchmark.loader.tstreams.TStreamsBenchmarkDataSenderConfig
 import com.bwsw.sj.engine.core.testutils.benchmark.regular.RegularBenchmark
 import com.bwsw.sj.engine.regular.RegularTaskRunner
 import com.bwsw.tstreams.env.{ConfigurationOptions, TStreamsFactory}
@@ -38,16 +38,15 @@ import com.typesafe.config.ConfigFactory
   *
   * @param benchmarkConfig configuration of application
   * @param senderConfig    configuration of T-Streams stream
-  * @param zkHost          ZooKeeper server's host
-  * @param zkPort          ZooKeeper server's port
   * @author Pavel Tomskikh
   */
 class SjBenchmark(benchmarkConfig: BenchmarkConfig,
-                  senderConfig: TStreamsBenchmarkDataLoaderConfig,
-                  zkHost: String,
-                  zkPort: Int)
+                  senderConfig: TStreamsBenchmarkDataSenderConfig)
   extends RegularBenchmark(benchmarkConfig) {
 
+  private val zkAddressSplit = senderConfig.zooKeeperAddress.split(",")
+  private val zkHost = zkAddressSplit(0)
+  private val zkPort = zkAddressSplit(1).toInt
   private val moduleFilename = "../../contrib/benchmarks/sj-regular-performance-benchmark/target/scala-2.12/" +
     "sj-regular-performance-benchmark-1.0-SNAPSHOT.jar"
 

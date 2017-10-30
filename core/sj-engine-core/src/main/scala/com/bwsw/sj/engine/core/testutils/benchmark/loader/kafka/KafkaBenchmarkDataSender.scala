@@ -20,14 +20,15 @@ package com.bwsw.sj.engine.core.testutils.benchmark.loader.kafka
 
 import com.bwsw.common.KafkaClient
 import com.bwsw.sj.common.utils.benchmark.KafkaDataSender
-import com.bwsw.sj.engine.core.testutils.benchmark.loader.BenchmarkDataSender
+import com.bwsw.sj.engine.core.testutils.benchmark.loader.{BenchmarkDataSender, SenderFactory}
+import com.typesafe.config.Config
 
 /**
   * Provides methods for sending data into Kafka topic for test some application
   *
   * @author Pavel Tomskikh
   */
-class KafkaBenchmarkDataSender(config: KafkaBenchmarkDataLoaderConfig)
+class KafkaBenchmarkDataSender(config: KafkaBenchmarkDataSenderConfig)
   extends BenchmarkDataSender[KafkaBenchmarkDataSenderParameters] {
 
   override val warmingUpParameters = KafkaBenchmarkDataSenderParameters(10, 10)
@@ -99,5 +100,16 @@ class KafkaBenchmarkDataSender(config: KafkaBenchmarkDataLoaderConfig)
       while (client.topicExists(config.topic))
         Thread.sleep(100)
     }
+  }
+}
+
+object KafkaBenchmarkDataSender
+  extends SenderFactory[KafkaBenchmarkDataSenderParameters, KafkaBenchmarkDataSenderConfig] {
+
+  override def create(config: Config): (KafkaBenchmarkDataSender, KafkaBenchmarkDataSenderConfig) = {
+    val senderConfig = new KafkaBenchmarkDataSenderConfig(config)
+    val sender = new KafkaBenchmarkDataSender(senderConfig)
+
+    (sender, senderConfig)
   }
 }
