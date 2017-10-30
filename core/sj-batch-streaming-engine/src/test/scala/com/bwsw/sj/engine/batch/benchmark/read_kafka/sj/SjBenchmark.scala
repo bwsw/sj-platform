@@ -47,7 +47,7 @@ class SjBenchmark(benchmarkConfig: BatchBenchmarkConfig,
                   senderConfig: KafkaBenchmarkDataSenderConfig)
   extends BatchBenchmark(benchmarkConfig) {
 
-  private val zkAddressSplit = senderConfig.zooKeeperAddress.split(",")
+  private val zkAddressSplit = senderConfig.zooKeeperAddress.split(":")
   private val zkHost = zkAddressSplit(0)
   private val zkPort = zkAddressSplit(1).toInt
 

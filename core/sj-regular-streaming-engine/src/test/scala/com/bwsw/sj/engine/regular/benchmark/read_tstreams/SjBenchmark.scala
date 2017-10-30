@@ -44,7 +44,7 @@ class SjBenchmark(benchmarkConfig: BenchmarkConfig,
                   senderConfig: TStreamsBenchmarkDataSenderConfig)
   extends RegularBenchmark(benchmarkConfig) {
 
-  private val zkAddressSplit = senderConfig.zooKeeperAddress.split(",")
+  private val zkAddressSplit = senderConfig.zooKeeperAddress.split(":")
   private val zkHost = zkAddressSplit(0)
   private val zkPort = zkAddressSplit(1).toInt
   private val moduleFilename = "../../contrib/benchmarks/sj-regular-performance-benchmark/target/scala-2.12/" +
