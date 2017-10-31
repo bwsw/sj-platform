@@ -21,7 +21,7 @@ package com.bwsw.sj.common.si.model.service
 import java.util.Date
 
 import com.bwsw.sj.common.dal.model.service.KafkaServiceDomain
-import com.bwsw.sj.common.rest.utils.ValidationUtils.validateNamespace
+import com.bwsw.sj.common.rest.utils.ValidationUtils.isAlphaNumericWithUnderscore
 import com.bwsw.sj.common.utils.ProviderLiterals
 import scaldi.Injector
 
@@ -94,7 +94,7 @@ class KafkaService(name: String,
           errors += createMessage("entity.error.attribute.required", "zkNamespace")
         }
         else {
-          if (!validateNamespace(x)) {
+          if (!isAlphaNumericWithUnderscore(x)) {
             errors += createMessage("entity.error.incorrect.service.namespace", "zkNamespace", x)
           }
         }

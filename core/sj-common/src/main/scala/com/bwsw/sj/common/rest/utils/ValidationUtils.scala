@@ -39,9 +39,9 @@ object ValidationUtils {
     name.matches( """^([a-z][a-z0-9-\.]*)$""")
   }
 
-  def validateNamespace(namespace: String): Boolean = {
-    logger.debug(s"Validate a namespace: '$namespace'.")
-    namespace.matches( """^([a-z][a-z0-9_]*)$""")
+  def isAlphaNumericWithUnderscore(name: String): Boolean = {
+    logger.debug(s"Validate a namespace/database: '$name'.")
+    name.matches( """^([a-z][a-z0-9_]*)$""")
   }
 
   def normalizeName(name: String): String = {

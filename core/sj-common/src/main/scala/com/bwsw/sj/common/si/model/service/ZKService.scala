@@ -21,7 +21,7 @@ package com.bwsw.sj.common.si.model.service
 import java.util.Date
 
 import com.bwsw.sj.common.dal.model.service.ZKServiceDomain
-import com.bwsw.sj.common.rest.utils.ValidationUtils.validateNamespace
+import com.bwsw.sj.common.rest.utils.ValidationUtils.isAlphaNumericWithUnderscore
 import scaldi.Injector
 
 import scala.collection.mutable.ArrayBuffer
@@ -70,7 +70,7 @@ class ZKService(name: String,
           errors += createMessage("entity.error.attribute.required", "Namespace")
         }
         else {
-          if (!validateNamespace(x)) {
+          if (!isAlphaNumericWithUnderscore(x)) {
             errors += createMessage("entity.error.incorrect.service.namespace", "namespace", x)
             //todo think about using, maybe this is going to be more correct to check with validatePrefix()
           }

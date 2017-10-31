@@ -22,7 +22,7 @@ import java.util.Date
 
 import com.bwsw.sj.common.dal.model.service.JDBCServiceDomain
 import com.bwsw.sj.common.dal.model.stream.JDBCStreamDomain
-import com.bwsw.sj.common.rest.utils.ValidationUtils.validateNamespace
+import com.bwsw.sj.common.rest.utils.ValidationUtils.isAlphaNumericWithUnderscore
 import scaldi.Injector
 
 import scala.collection.mutable.ArrayBuffer
@@ -57,7 +57,7 @@ class JDBCStream(name: String,
   override protected def validateStreamName(name: String): ArrayBuffer[String] = {
     val errors = new ArrayBuffer[String]()
 
-    if (!validateNamespace(name)) {
+    if (!isAlphaNumericWithUnderscore(name)) {
       errors += createMessage("entity.error.jdbc.incorrect.stream.name", name)
     }
 

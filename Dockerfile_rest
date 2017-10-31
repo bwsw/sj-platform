@@ -3,6 +3,7 @@ FROM ubuntu:xenial
 MAINTAINER BITWORKS
 
 ENV version 1.0-SNAPSHOT
+ENV DEBIAN_FRONTEND noninteractive
 
 # Install Oracle JDK 8
 RUN echo "deb http://ppa.launchpad.net/webupd8team/java/ubuntu xenial main" | tee /etc/apt/sources.list.d/webupd8team-java.list && \
@@ -10,7 +11,8 @@ RUN echo "deb http://ppa.launchpad.net/webupd8team/java/ubuntu xenial main" | te
     apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys EEA14886 && \
     apt-get update && \
     echo "oracle-java8-installer shared/accepted-oracle-license-v1-1 select true" | debconf-set-selections && \
-    apt-get install -y --no-install-recommends oracle-java8-installer && \
+    apt-get install -y --no-install-recommends apt-utils && \
+    apt-get install -y --no-install-recommends bc oracle-java8-installer && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
@@ -53,7 +55,7 @@ RUN cd /opt/bin/juggler/core/sj-frontend && \
 WORKDIR /opt/bin/juggler
 
 RUN mkdir -p /root/.sbt/0.13 && \
-    echo 'scalacOptions ++= Seq("-Xmax-classfile-name","100")' > /root/.sbt/0.13/local.sbt && \
+    echo 'scalacOptions ++= Seq("-Xmax-classfile-name","100")' > /root/.sbt/0.13/global.sbt && \
     sbt sj-crud-rest/assembly && \
     mv core/sj-crud-rest/target/scala-2.12/sj-crud-rest-${version}.jar . && \
     sbt clean clean-files && \
