@@ -25,6 +25,7 @@ import com.bwsw.sj.common.dal.model.service.JDBCServiceDomain
 import scaldi.Injector
 
 import scala.collection.mutable.ArrayBuffer
+import com.bwsw.sj.common.rest.utils.ValidationUtils._
 
 class JDBCService(name: String,
                   val database: String,
@@ -63,7 +64,10 @@ class JDBCService(name: String,
 
     // 'database' field
     Option(this.database) match {
-      case Some(dbName) if dbName.nonEmpty =>
+      case Some(databaseName) if databaseName.nonEmpty =>
+        if (!isAlphaNumericWithUnderscore(databaseName)) {
+            errors += createMessage("entity.error.jdbc.incorrect.database.name", databaseName)
+          }
       case _ =>
         errors += createMessage("entity.error.attribute.required", "Database")
     }

@@ -22,7 +22,7 @@ import java.util.Date
 
 import com.bwsw.sj.common.dal.model.provider.ESProviderDomain
 import com.bwsw.sj.common.dal.model.service.ESServiceDomain
-import com.bwsw.sj.common.rest.utils.ValidationUtils.validateNamespace
+import com.bwsw.sj.common.rest.utils.ValidationUtils.isAlphaNumericWithUnderscore
 import scaldi.Injector
 
 import scala.collection.mutable.ArrayBuffer
@@ -70,7 +70,7 @@ class ESService(name: String,
           errors += createMessage("entity.error.attribute.required", "Index")
         }
         else {
-          if (!validateNamespace(x)) {
+          if (!isAlphaNumericWithUnderscore(x)) {
             errors += createMessage("entity.error.incorrect.service.namespace", "index", x)
           }
         }
