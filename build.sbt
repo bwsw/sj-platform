@@ -129,7 +129,7 @@ lazy val inputStreamingEngine = Project(id = "sj-input-streaming-engine",
   .settings(
     libraryDependencies ++= Dependencies.sjInputEngineDependencies.value,
     libraryDependencies ++= Dependencies.sjTestDependencies.value,
-    test in Test := (test in Test).dependsOn((Keys.`package` in Compile) in stubInput)
+    test in Test := (test in Test).dependsOn((Keys.`package` in Compile) in stubInput).value
   )
   .dependsOn(engineCore)
 
@@ -138,7 +138,7 @@ lazy val regularStreamingEngine = Project(id = "sj-regular-streaming-engine",
   .settings(commonSettings: _*)
   .settings(
     libraryDependencies ++= Dependencies.sjTestDependencies.value,
-    test in Test := (test in Test).dependsOn((Keys.`package` in Compile) in stubRegular)
+    test in Test := (test in Test).dependsOn((Keys.`package` in Compile) in stubRegular).value
   )
   .dependsOn(engineCore)
 
@@ -147,7 +147,7 @@ lazy val batchStreamingEngine = Project(id = "sj-batch-streaming-engine",
   .settings(commonSettings: _*)
   .settings(
     libraryDependencies ++= Dependencies.sjTestDependencies.value,
-    test in Test := (test in Test).dependsOn((Keys.`package` in Compile) in stubBatch)
+    test in Test := (test in Test).dependsOn((Keys.`package` in Compile) in stubBatch).value
   )
   .dependsOn(engineCore)
 
@@ -161,6 +161,7 @@ lazy val outputStreamingEngine = Project(id = "sj-output-streaming-engine",
       .dependsOn((Keys.`package` in Compile) in stubESOutput)
       .dependsOn((Keys.`package` in Compile) in stubJDBCOutput)
       .dependsOn((Keys.`package` in Compile) in stubRestOutput)
+      .value
   )
   .dependsOn(engineCore)
 
