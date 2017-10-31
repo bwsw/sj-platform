@@ -50,13 +50,16 @@ class EnvelopeFetcher(taskInput: RetrievableCheckpointTaskInput[Envelope], lowWa
 
   private def fillQueue() = new Runnable {
     override def run(): Unit = {
-      if (envelopesByStream.forall(x => x._2.size < lowWatermark)) {
-        logger.debug(s"An envelope queue has got less than $lowWatermark elements so it needs to be filled.")
-        val unarrangedEnvelopes = taskInput.get()
-
-        if (unarrangedEnvelopes.nonEmpty)
-          unarrangedEnvelopes.foreach(x => envelopesByStream(x.stream).add(x))
-        else
+      val notFullQueues = envelopesByStream.filter(x => x._2.size < lowWatermark)
+      if (notFullQueues.nonEmpty) {
+        var gotEnvelopes = false
+        notFullQueues.foreach {
+          case (stream, queue) =>
+            val envelopes = taskInput.get(stream)
+            envelopes.foreach(queue.add)
+            gotEnvelopes |= envelopes.nonEmpty
+        }
+        if (!gotEnvelopes)
           Thread.sleep(EngineLiterals.eventWaitTimeout)
       } else
         Thread.sleep(EngineLiterals.eventWaitTimeout)

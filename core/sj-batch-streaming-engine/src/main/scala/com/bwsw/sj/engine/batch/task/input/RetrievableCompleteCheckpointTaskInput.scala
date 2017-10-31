@@ -52,6 +52,11 @@ class RetrievableCompleteCheckpointTaskInput[T <: AnyRef](manager: CommonTaskMan
     envelopeDataSerializer,
     lowWatermark)
 
+  private val taskInputByStream =
+    Seq(retrievableKafkaTaskInput, retrievableTStreamTaskInput)
+      .map(_.asInstanceOf[RetrievableCheckpointTaskInput[Envelope]])
+      .flatMap(taskInput => taskInput.inputs.keys.map(s => s.name -> taskInput)).toMap
+
   override def registerEnvelope(envelope: Envelope): Unit = {
     envelope match {
       case tstreamEnvelope: TStreamEnvelope[T] =>
@@ -64,9 +69,8 @@ class RetrievableCompleteCheckpointTaskInput[T <: AnyRef](manager: CommonTaskMan
     }
   }
 
-  override def get(): Iterable[Envelope] = {
-    retrievableKafkaTaskInput.get() ++ retrievableTStreamTaskInput.get()
-  }
+  override def get(stream: String): Iterable[Envelope] =
+    taskInputByStream(stream).get(stream)
 
   override def setConsumerOffset(envelope: Envelope): Unit = {
     envelope match {

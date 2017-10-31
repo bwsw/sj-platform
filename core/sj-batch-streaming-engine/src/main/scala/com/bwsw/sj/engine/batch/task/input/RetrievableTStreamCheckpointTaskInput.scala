@@ -35,7 +35,6 @@ import com.typesafe.scalalogging.Logger
 import scaldi.Injectable.inject
 import scaldi.Injector
 
-import scala.collection.immutable.Iterable
 import scala.collection.mutable
 
 /**
@@ -54,14 +53,16 @@ class RetrievableTStreamCheckpointTaskInput[T <: AnyRef](manager: CommonTaskMana
                                                          envelopeDataSerializer: SerializerInterface,
                                                          lowWatermark: Int)
                                                         (implicit injector: Injector)
-  extends RetrievableCheckpointTaskInput[TStreamEnvelope[T]](manager.inputs) {
+  extends RetrievableCheckpointTaskInput[TStreamEnvelope[T]](
+    manager.inputs.filter(_._1.isInstanceOf[TStreamStreamDomain])) {
 
   private val logger = Logger(this.getClass)
   private val instance = manager.instance.asInstanceOf[BatchInstance]
   private val tstreamOffsetsStorage = mutable.Map[(String, Int), Long]()
   private val consumers = createConsumers()
+  private val consumersByStream = consumers.map { case (_, consumer) => consumer.stream.name -> consumer }
   private val partitionLowWatermarkByConsumer = consumers.map {
-    case (_, consumer) => consumer -> (lowWatermark / consumer.getPartitions.size)
+    case (_, consumer) => consumer -> Math.max(lowWatermark / consumer.getPartitions.size, 1)
   }
   addConsumersToCheckpointGroup()
   launchConsumers()
@@ -94,12 +95,11 @@ class RetrievableTStreamCheckpointTaskInput[T <: AnyRef](manager: CommonTaskMana
     }
   }
 
-  override def get(): Iterable[TStreamEnvelope[T]] = {
-    consumers.flatMap(x => {
-      val consumer = x._2
-      val transactions = getAvailableTransactions(consumer)
-      transactionsToEnvelopes(transactions, consumer)
-    })
+  override def get(stream: String): Seq[TStreamEnvelope[T]] = {
+    val consumer = consumersByStream(stream)
+    val transactions = getAvailableTransactions(consumer)
+
+    transactionsToEnvelopes(transactions, consumer)
   }
 
   private def getAvailableTransactions(consumer: Consumer): Seq[ConsumerTransaction] = {

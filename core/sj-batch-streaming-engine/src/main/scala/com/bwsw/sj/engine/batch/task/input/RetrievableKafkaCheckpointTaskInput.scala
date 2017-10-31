@@ -19,6 +19,7 @@
 package com.bwsw.sj.engine.batch.task.input
 
 import com.bwsw.common.SerializerInterface
+import com.bwsw.sj.common.dal.model.stream.KafkaStreamDomain
 import com.bwsw.sj.common.engine.core.entities.KafkaEnvelope
 import com.bwsw.sj.common.engine.core.managment.CommonTaskManager
 import com.bwsw.sj.common.si.model.instance.BatchInstance
@@ -26,7 +27,7 @@ import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.core.engine.input.KafkaTaskInput
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import com.bwsw.tstreams.agents.producer.NewProducerTransactionPolicy
-import org.apache.kafka.clients.consumer.ConsumerRecord
+import org.apache.kafka.clients.consumer.{ConsumerRecord, KafkaConsumer}
 import scaldi.Injector
 
 import scala.collection.JavaConverters._
@@ -47,7 +48,20 @@ class RetrievableKafkaCheckpointTaskInput[T <: AnyRef](override val manager: Com
                                                       (override implicit val injector: Injector)
   extends {
     override protected val maxPollRecords = lowWatermark
-  } with RetrievableCheckpointTaskInput[KafkaEnvelope[T]](manager.inputs) with KafkaTaskInput[T] {
+  } with RetrievableCheckpointTaskInput[KafkaEnvelope[T]](manager.inputs.filter(_._1.isInstanceOf[KafkaStreamDomain]))
+    with KafkaTaskInput[T] {
+
+  override protected def createKafkaConsumers(): Map[String, KafkaConsumer[Array[Byte], Array[Byte]]] = {
+    val offset = chooseOffset()
+    kafkaInputs.map {
+      case (stream, partitions) =>
+        stream.name -> createSubscribingKafkaConsumer(
+          List((stream.name, partitions.toList)),
+          stream.service.provider.hosts.toList,
+          offset)
+    }.toMap
+  }
+
   currentThread.setName(s"batch-task-${manager.taskName}-kafka-consumer")
 
   override def chooseOffset(): String = {
@@ -58,10 +72,11 @@ class RetrievableKafkaCheckpointTaskInput[T <: AnyRef](override val manager: Com
     }
   }
 
-  override def get(): Iterable[KafkaEnvelope[T]] = {
-    logger.debug(s"Task: ${manager.taskName}. Waiting for records that consumed from kafka for" +
+  override def get(stream: String): Iterable[KafkaEnvelope[T]] = {
+    logger.debug(s"Task: ${manager.taskName}. Waiting for records that consumed from kafka topic '$stream' for" +
       s" $kafkaSubscriberTimeout milliseconds.")
-    val records = kafkaConsumer.poll(kafkaSubscriberTimeout)
+    val records = kafkaConsumers(stream).poll(kafkaSubscriberTimeout)
+
     records.asScala.map(consumerRecordToEnvelope)
   }
 
