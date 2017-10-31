@@ -38,6 +38,7 @@ import com.bwsw.sj.engine.core.testutils.TestStorageServer
 import com.bwsw.tstreams.agents.consumer.Consumer
 import com.bwsw.tstreams.agents.consumer.Offset.Oldest
 import com.bwsw.tstreams.agents.producer
+import com.bwsw.tstreams.agents.producer.Producer
 import com.bwsw.tstreams.env.{ConfigurationOptions, TStreamsFactory}
 import com.typesafe.config.ConfigFactory
 import org.apache.kafka.clients.consumer.KafkaConsumer
@@ -57,7 +58,7 @@ object DataFactory {
   private val zookeeperHosts = config.getString(BenchmarkConfigNames.zkHosts).split(",")
   private val kafkaHosts = config.getString(BenchmarkConfigNames.kafkaHosts)
   private val benchmarkPort = config.getInt(BenchmarkConfigNames.benchmarkPort)
-  val inputStreamsType = config.getString(BenchmarkConfigNames.inputStreamTypes)
+  val inputStreamsType: String = config.getString(BenchmarkConfigNames.inputStreamTypes)
   private val agentsHost = "localhost"
   private val testNamespace = "test_namespace_for_batch_engine"
   private val instanceName = "test-instance-for-batch-engine"
@@ -103,7 +104,7 @@ object DataFactory {
     tstreamFactory.setProperty(ConfigurationOptions.Consumer.Subscriber.bindHost, agentsHost)
   }
 
-  def createProviders(providerService: GenericMongoRepository[ProviderDomain]) = {
+  def createProviders(providerService: GenericMongoRepository[ProviderDomain]): Unit = {
     val kafkaProvider = new ProviderDomain(
       kafkaProviderName, kafkaProviderName, kafkaHosts.split(","), ProviderLiterals.kafkaType, new Date())
     providerService.save(kafkaProvider)
@@ -111,12 +112,12 @@ object DataFactory {
     providerService.save(zookeeperProvider)
   }
 
-  def deleteProviders(providerService: GenericMongoRepository[ProviderDomain]) = {
+  def deleteProviders(providerService: GenericMongoRepository[ProviderDomain]): Unit = {
     providerService.delete(kafkaProviderName)
     providerService.delete(zookeeperProviderName)
   }
 
-  def createServices(serviceManager: GenericMongoRepository[ServiceDomain], providerService: GenericMongoRepository[ProviderDomain]) = {
+  def createServices(serviceManager: GenericMongoRepository[ServiceDomain], providerService: GenericMongoRepository[ProviderDomain]): Unit = {
     val zkService = new ZKServiceDomain(zookeeperServiceName, zookeeperServiceName, zookeeperProvider,
       testNamespace, new Date())
     serviceManager.save(zkService)
@@ -129,14 +130,14 @@ object DataFactory {
     serviceManager.save(tstrqService)
   }
 
-  def deleteServices(serviceManager: GenericMongoRepository[ServiceDomain]) = {
+  def deleteServices(serviceManager: GenericMongoRepository[ServiceDomain]): Unit = {
     serviceManager.delete(kafkaServiceName)
     serviceManager.delete(zookeeperServiceName)
     serviceManager.delete(tstreamServiceName)
   }
 
   def createStreams(repository: GenericMongoRepository[StreamDomain], serviceManager: GenericMongoRepository[ServiceDomain],
-                    partitions: Int, _type: String, inputCount: Int, outputCount: Int) = {
+                    partitions: Int, _type: String, inputCount: Int, outputCount: Int): Unit = {
     require(partitions >= 1, "Partitions must be a positive integer")
     _type match {
       case `tStreamMode` =>
@@ -181,7 +182,7 @@ object DataFactory {
                     _type: String,
                     serviceManager: GenericMongoRepository[ServiceDomain],
                     inputCount: Int,
-                    outputCount: Int) = {
+                    outputCount: Int): Unit = {
     _type match {
       case `tStreamMode` =>
         (1 to inputCount).foreach(x => deleteInputTStream(streamService, x.toString))
@@ -251,7 +252,7 @@ object DataFactory {
     storageClient.deleteStream(tstreamOutputNamePrefix + suffix)
   }
 
-  private def createKafkaStream(repository: GenericMongoRepository[StreamDomain], serviceManager: GenericMongoRepository[ServiceDomain], partitions: Int, suffix: String) = {
+  private def createKafkaStream(repository: GenericMongoRepository[StreamDomain], serviceManager: GenericMongoRepository[ServiceDomain], partitions: Int, suffix: String): Unit = {
     val kService = serviceManager.get(kafkaServiceName).get.asInstanceOf[KafkaServiceDomain]
 
     val kafkaStreamDomain = new KafkaStreamDomain(kafkaInputNamePrefix + suffix,
@@ -273,7 +274,7 @@ object DataFactory {
     kafkaClient.close()
   }
 
-  private def deleteKafkaStream(streamService: GenericMongoRepository[StreamDomain], serviceManager: GenericMongoRepository[ServiceDomain], suffix: String) = {
+  private def deleteKafkaStream(streamService: GenericMongoRepository[StreamDomain], serviceManager: GenericMongoRepository[ServiceDomain], suffix: String): Unit = {
     val kService = serviceManager.get(kafkaServiceName).get.asInstanceOf[KafkaServiceDomain]
     val zkServers = kService.zkProvider.hosts
     val kafkaClient = new KafkaClient(zkServers)
@@ -288,9 +289,9 @@ object DataFactory {
                      instanceService: GenericMongoRepository[InstanceDomain],
                      window: Int,
                      slidingInterval: Int,
-                     totalInputElements: Int,
+                     totalInputEnvelopes: Int,
                      stateManagement: String = EngineLiterals.noneStateMode,
-                     stateFullCheckpoint: Int = 0) = {
+                     stateFullCheckpoint: Int = 0): Unit = {
     import scala.collection.JavaConverters._
 
     val instance = new BatchInstance(
@@ -308,7 +309,7 @@ object DataFactory {
       stateManagement = stateManagement,
       stateFullCheckpoint = stateFullCheckpoint,
       startFrom = EngineLiterals.oldestStartMode,
-      options = s"$totalInputElements,$benchmarkPort",
+      options = s"$totalInputEnvelopes,$benchmarkPort",
       //executionPlan = new ExecutionPlan(Map((instanceName + "-task0", task), (instanceName + "-task1", task)).asJava) //for barriers test,
       executionPlan = new ExecutionPlan(Map(instanceName + "-task0" -> task).asJava),
       creationDate = new Date().toString
@@ -317,11 +318,11 @@ object DataFactory {
     instanceService.save(instance.to)
   }
 
-  def deleteInstance(instanceService: GenericMongoRepository[InstanceDomain]) = {
+  def deleteInstance(instanceService: GenericMongoRepository[InstanceDomain]): Unit = {
     instanceService.delete(instanceName)
   }
 
-  def loadModule(file: File, storage: FileStorage) = {
+  def loadModule(file: File, storage: FileStorage): Unit = {
     val builder = new StringBuilder
     val jar = new JarFile(file)
     val enu = jar.entries()
@@ -350,20 +351,27 @@ object DataFactory {
     storage.put(file, file.getName, specification, "module")
   }
 
-  def deleteModule(storage: FileStorage, filename: String) = {
+  def deleteModule(storage: FileStorage, filename: String): Boolean = {
     storage.delete(filename)
   }
 
-  def createData(countTxns: Int, countElements: Int, streamService: GenericMongoRepository[StreamDomain], _type: String, count: Int) = {
+  def createData(countTxns: Int,
+                 countElementsPerTxn: Int,
+                 streamService: GenericMongoRepository[StreamDomain],
+                 _type: String,
+                 streamsCount: Int): Unit = {
+
+    require(types.contains(_type), s"Unknown type : ${_type}. Can be only: ${types.mkString(",")}")
+
     var number = 0
     val policy = producer.NewProducerTransactionPolicy.ErrorIfOpened
 
-    def createTstreamData(countTxns: Int, countElements: Int, suffix: String) = {
+    def createTstreamData(suffix: String): Unit = {
       val producer = createProducer(tstreamInputNamePrefix + suffix, partitions)
       val s = System.currentTimeMillis()
-      (0 until countTxns) foreach { (x: Int) =>
+      (0 until countTxns) foreach { _ =>
         val transaction = producer.newTransaction(policy)
-        (0 until countElements) foreach { (y: Int) =>
+        (0 until countElementsPerTxn) foreach { _ =>
           number += 1
           transaction.send(objectSerializer.serialize(number.asInstanceOf[Object]))
         }
@@ -375,7 +383,7 @@ object DataFactory {
       producer.stop()
     }
 
-    def createKafkaData(countTxns: Int, countElements: Int, suffix: String) = {
+    def createKafkaData(suffix: String): Unit = {
       val props = new Properties()
       props.put("bootstrap.servers", kafkaHosts)
       props.put("key.serializer", "org.apache.kafka.common.serialization.ByteArraySerializer")
@@ -384,39 +392,29 @@ object DataFactory {
       val producer = new KafkaProducer[Array[Byte], Array[Byte]](props)
       var number = 0
       val s = System.currentTimeMillis()
-      (0 until countTxns) foreach { (x: Int) =>
-        (0 until countElements) foreach { (y: Int) =>
-          number += 1
-          val record = new ProducerRecord[Array[Byte], Array[Byte]](
-            kafkaInputNamePrefix + suffix, Array[Byte](100), objectSerializer.serialize(number.asInstanceOf[Object])
-          )
-          producer.send(record)
-        }
+      (0 until countTxns) foreach { _ =>
+        number += 1
+        val record = new ProducerRecord[Array[Byte], Array[Byte]](
+          kafkaInputNamePrefix + suffix, Array[Byte](100), objectSerializer.serialize(number.asInstanceOf[Object]))
+        producer.send(record)
       }
 
       println(s"producer time: ${(System.currentTimeMillis() - s) / 1000}")
       producer.close()
     }
 
-    _type match {
-      case `tStreamMode` =>
-        (1 to count).foreach(x => createTstreamData(countTxns, countElements, x.toString))
-      case `kafkaMode` =>
-        (1 to count).foreach(x => createKafkaData(countTxns, countElements, x.toString))
-      case `commonMode` =>
-        (1 to count).foreach(x => {
-          createTstreamData(countTxns, countElements, x.toString)
-          createKafkaData(countTxns, countElements, x.toString)
-        })
-      case _ => throw new Exception(s"Unknown type : ${_type}. Can be only: $tStreamMode, $kafkaMode, $commonMode")
-    }
+    if (Seq(tStreamMode, commonMode).contains(_type))
+      (1 to streamsCount).foreach(x => createTstreamData(x.toString))
+
+    if (Seq(kafkaMode, commonMode).contains(_type))
+      (1 to streamsCount).foreach(x => createKafkaData(x.toString))
   }
 
-  def createInputTstreamConsumer(partitions: Int, suffix: String) = {
+  def createInputTstreamConsumer(partitions: Int, suffix: String): Consumer = {
     createConsumer(tstreamInputNamePrefix + suffix, partitions)
   }
 
-  def createStateConsumer(streamService: GenericMongoRepository[StreamDomain]) = {
+  def createStateConsumer(streamService: GenericMongoRepository[StreamDomain]): Consumer = {
     val name = instanceName + "-task0" + "_state"
     val partitions = 1
 
@@ -428,7 +426,7 @@ object DataFactory {
       Oldest)
   }
 
-  def createInputKafkaConsumer(inputCount: Int, partitionNumber: Int) = {
+  def createInputKafkaConsumer(inputCount: Int, partitionNumber: Int): KafkaConsumer[Array[Byte], Array[Byte]] = {
 
     val props = new Properties()
     props.put("bootstrap.servers", kafkaHosts)
@@ -447,11 +445,11 @@ object DataFactory {
     consumer
   }
 
-  def createOutputConsumer(partitions: Int, suffix: String) = {
+  def createOutputConsumer(partitions: Int, suffix: String): Consumer = {
     createConsumer(tstreamOutputNamePrefix + suffix, partitions)
   }
 
-  def createProducer(streamName: String, partitions: Int) = {
+  def createProducer(streamName: String, partitions: Int): Producer = {
     setStreamOptions(streamName, partitions)
 
     tstreamFactory.getProducer(
@@ -468,7 +466,7 @@ object DataFactory {
       Oldest)
   }
 
-  protected def setStreamOptions(streamName: String, partitions: Int) = {
+  protected def setStreamOptions(streamName: String, partitions: Int): TStreamsFactory = {
     tstreamFactory.setProperty(ConfigurationOptions.Stream.name, streamName)
     tstreamFactory.setProperty(ConfigurationOptions.Stream.partitionsCount, partitions)
   }
