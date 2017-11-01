@@ -19,7 +19,9 @@
 package com.bwsw.sj.engine.regular.benchmark.read_kafka.storm
 
 import com.bwsw.sj.common.utils.benchmark.ClassRunner
-import com.bwsw.sj.engine.core.testutils.benchmark.read_kafka.regular.RegularKafkaReaderBenchmark
+import com.bwsw.sj.engine.core.testutils.benchmark.BenchmarkConfig
+import com.bwsw.sj.engine.core.testutils.benchmark.loader.kafka.KafkaBenchmarkDataSenderConfig
+import com.bwsw.sj.engine.core.testutils.benchmark.regular.RegularBenchmark
 import com.bwsw.sj.engine.regular.benchmark.read_kafka.storm.StormBenchmarkLiterals._
 
 /**
@@ -27,19 +29,17 @@ import com.bwsw.sj.engine.regular.benchmark.read_kafka.storm.StormBenchmarkLiter
   *
   * Topic deletion must be enabled on the Kafka server.
   *
-  * @param zooKeeperAddress ZooKeeper server's address. Must point to the ZooKeeper server that used by the Kafka server.
-  * @param kafkaAddress     Kafka server's address
-  * @param words            list of words that are sent to the Kafka server
+  * @param benchmarkConfig configuration of application
+  * @param senderConfig    configuration of Kafka topic
   * @author Pavel Tomskikh
   */
-class StormBenchmark(zooKeeperAddress: String,
-                     kafkaAddress: String,
-                     words: Array[String])
-  extends RegularKafkaReaderBenchmark(zooKeeperAddress, kafkaAddress, words) {
+class StormBenchmark(benchmarkConfig: BenchmarkConfig,
+                     senderConfig: KafkaBenchmarkDataSenderConfig)
+  extends RegularBenchmark(benchmarkConfig) {
 
   override protected def runProcess(messagesCount: Long): Process = {
     val properties = Map(
-      kafkaTopicProperty -> kafkaTopic,
+      kafkaTopicProperty -> senderConfig.topic,
       outputFilenameProperty -> outputFile.getAbsolutePath,
       messagesCountProperty -> messagesCount.toString)
 

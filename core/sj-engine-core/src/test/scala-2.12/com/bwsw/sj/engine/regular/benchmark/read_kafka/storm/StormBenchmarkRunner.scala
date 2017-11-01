@@ -18,12 +18,10 @@
  */
 package com.bwsw.sj.engine.regular.benchmark.read_kafka.storm
 
-import java.util.Calendar
-
 import com.bwsw.sj.common.utils.BenchmarkLiterals.Regular.stormDefaultOutputFile
-import com.bwsw.sj.engine.core.testutils.benchmark.read_kafka.KafkaReaderBenchmarkConfig
-import com.bwsw.sj.engine.core.testutils.benchmark.read_kafka.regular.RegularKafkaReaderBenchmarkRunner
-import com.typesafe.config.ConfigFactory
+import com.bwsw.sj.engine.core.testutils.benchmark.loader.kafka.{KafkaBenchmarkDataSender, KafkaBenchmarkDataSenderConfig}
+import com.bwsw.sj.engine.core.testutils.benchmark.regular.RegularBenchmarkFactory
+import com.bwsw.sj.engine.core.testutils.benchmark.{BenchmarkConfig, BenchmarkRunner, ConfigFactory}
 
 /**
   * Performs [[StormBenchmark]]
@@ -52,21 +50,14 @@ import com.typesafe.config.ConfigFactory
   *
   * @author Pavel Tomskikh
   */
-object StormBenchmarkRunner extends App {
-  println(Calendar.getInstance().getTime)
+object StormBenchmarkRunner extends BenchmarkRunner(
+  ConfigFactory,
+  stormDefaultOutputFile,
+  KafkaBenchmarkDataSender,
+  StormBenchmarkFactory)
 
-  private val benchmarkConfig = new KafkaReaderBenchmarkConfig(ConfigFactory.load(), stormDefaultOutputFile)
-  private val benchmark = new StormBenchmark(benchmarkConfig.zooKeeperAddress, benchmarkConfig.kafkaAddress, benchmarkConfig.words)
-  private val benchmarkRunner = new RegularKafkaReaderBenchmarkRunner(benchmark, benchmarkConfig)
-
-  private val results = benchmarkRunner.run()
-  benchmarkRunner.writeResult(results)
-
-  private val resultsString = results.mkString("\n")
-
-  println("DONE")
-  println("Results:")
-  println(resultsString)
-
-  println(Calendar.getInstance().getTime)
+object StormBenchmarkFactory extends RegularBenchmarkFactory[KafkaBenchmarkDataSenderConfig] {
+  override protected def create(benchmarkConfig: BenchmarkConfig,
+                                senderConfig: KafkaBenchmarkDataSenderConfig): StormBenchmark =
+    new StormBenchmark(benchmarkConfig, senderConfig)
 }

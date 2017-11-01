@@ -18,12 +18,10 @@
  */
 package com.bwsw.sj.engine.regular.benchmark.read_kafka.flink
 
-import java.util.Calendar
-
 import com.bwsw.sj.common.utils.BenchmarkLiterals.Regular.flinkDefaultOutputFile
-import com.bwsw.sj.engine.core.testutils.benchmark.read_kafka.KafkaReaderBenchmarkConfig
-import com.bwsw.sj.engine.core.testutils.benchmark.read_kafka.regular.RegularKafkaReaderBenchmarkRunner
-import com.typesafe.config.ConfigFactory
+import com.bwsw.sj.engine.core.testutils.benchmark._
+import com.bwsw.sj.engine.core.testutils.benchmark.loader.kafka.{KafkaBenchmarkDataSender, KafkaBenchmarkDataSenderConfig}
+import com.bwsw.sj.engine.core.testutils.benchmark.regular.RegularBenchmarkFactory
 
 /**
   * Performs [[FlinkBenchmark]]
@@ -52,21 +50,14 @@ import com.typesafe.config.ConfigFactory
   *
   * @author Pavel Tomskikh
   */
-object FlinkBenchmarkRunner extends App {
-  println(Calendar.getInstance().getTime)
+object FlinkBenchmarkRunner extends BenchmarkRunner(
+  ConfigFactory,
+  flinkDefaultOutputFile,
+  KafkaBenchmarkDataSender,
+  FlinkBenchmarkFactory)
 
-  private val benchmarkConfig = new KafkaReaderBenchmarkConfig(ConfigFactory.load(), flinkDefaultOutputFile)
-  private val benchmark = new FlinkBenchmark(benchmarkConfig.zooKeeperAddress, benchmarkConfig.kafkaAddress, benchmarkConfig.words)
-  private val benchmarkRunner = new RegularKafkaReaderBenchmarkRunner(benchmark, benchmarkConfig)
-
-  private val results = benchmarkRunner.run()
-  benchmarkRunner.writeResult(results)
-
-  private val resultsString = results.mkString("\n")
-
-  println("DONE")
-  println("Results:")
-  println(resultsString)
-
-  println(Calendar.getInstance().getTime)
+object FlinkBenchmarkFactory extends RegularBenchmarkFactory[KafkaBenchmarkDataSenderConfig] {
+  override protected def create(benchmarkConfig: BenchmarkConfig,
+                                senderConfig: KafkaBenchmarkDataSenderConfig): FlinkBenchmark =
+    new FlinkBenchmark(benchmarkConfig, senderConfig)
 }

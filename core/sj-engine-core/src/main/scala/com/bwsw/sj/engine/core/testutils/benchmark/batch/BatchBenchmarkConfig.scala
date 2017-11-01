@@ -16,28 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.sj.engine.core.testutils.benchmark.read_kafka
+package com.bwsw.sj.engine.core.testutils.benchmark.batch
 
-import java.io.{File, FileWriter}
+import com.bwsw.sj.common.utils.BenchmarkConfigNames.{batchSizesConfig, slidingIntervalsConfig, windowSizesConfig}
+import com.bwsw.sj.engine.core.testutils.benchmark.BenchmarkConfig
+import com.typesafe.config.Config
 
 /**
-  * Provides methods for running [[KafkaReaderBenchmark]] and writing a result into a file
+  * Contains configurations of application in a batch mode
   *
-  * @param config config for benchmark
   * @author Pavel Tomskikh
   */
-abstract class KafkaReaderBenchmarkRunner(config: KafkaReaderBenchmarkConfig) {
-
-  def run(): Seq[KafkaReaderBenchmarkResult]
-
-  def writeResult(benchmarkResults: Seq[KafkaReaderBenchmarkResult]) = {
-    val writer = new FileWriter(new File(config.outputFileName))
-    writer.write(benchmarkResults.mkString("\n"))
-    writer.close()
-  }
-}
-
-class KafkaReaderBenchmarkResult(results: Seq[Long]) {
-  def averageResult: Long =
-    results.sum / results.length
+class BatchBenchmarkConfig(config: Config) extends BenchmarkConfig(config) {
+  val batchSizes = config.getString(batchSizesConfig).split(",").map(_.toInt)
+  val windowSizes = config.getString(windowSizesConfig).split(",").map(_.toInt)
+  val slidingIntervals = config.getString(slidingIntervalsConfig).split(",").map(_.toInt)
 }

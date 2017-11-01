@@ -18,14 +18,10 @@
  */
 package com.bwsw.sj.engine.regular.benchmark.read_kafka.sj
 
-import java.util.Calendar
-
-import com.bwsw.sj.common.utils.BenchmarkConfigNames._
 import com.bwsw.sj.common.utils.BenchmarkLiterals.Regular.sjDefaultOutputFile
-import com.bwsw.sj.common.utils.CommonAppConfigNames.{zooKeeperHost, zooKeeperPort}
-import com.bwsw.sj.engine.core.testutils.benchmark.read_kafka.KafkaReaderBenchmarkConfig
-import com.bwsw.sj.engine.core.testutils.benchmark.read_kafka.regular.RegularKafkaReaderBenchmarkRunner
-import com.typesafe.config.{Config, ConfigFactory, ConfigValueFactory}
+import com.bwsw.sj.engine.core.testutils.benchmark.loader.kafka.{KafkaBenchmarkDataSender, KafkaBenchmarkDataSenderConfig}
+import com.bwsw.sj.engine.core.testutils.benchmark.regular.RegularBenchmarkFactory
+import com.bwsw.sj.engine.core.testutils.benchmark.{BenchmarkConfig, BenchmarkRunner, ConfigFactory}
 
 /**
   * Performs [[SjBenchmark]].
@@ -57,37 +53,14 @@ import com.typesafe.config.{Config, ConfigFactory, ConfigValueFactory}
   *
   * @author Pavel Tomskikh
   */
-object SjBenchmarkRunner extends App {
-  println(Calendar.getInstance().getTime)
+object SjBenchmarkRunner extends BenchmarkRunner(
+  ConfigFactory,
+  sjDefaultOutputFile,
+  KafkaBenchmarkDataSender,
+  SjBenchmarkFactory)
 
-  private val config: Config = ConfigFactory.load()
-  private val zkPort = config.getInt(zooKeeperPort)
-  private val zkHost = config.getString(zooKeeperHost)
-
-  private val benchmarkConfig = new KafkaReaderBenchmarkConfig(
-    config = config.withValue(zooKeeperAddressConfig, ConfigValueFactory.fromAnyRef(s"$zkHost:$zkPort")),
-    sjDefaultOutputFile)
-
-  private val benchmark = new SjBenchmark(
-    zkHost,
-    zkPort,
-    benchmarkConfig.kafkaAddress,
-    benchmarkConfig.words)
-
-  benchmark.startServices()
-  benchmark.prepare()
-
-  private val benchmarkRunner = new RegularKafkaReaderBenchmarkRunner(benchmark, benchmarkConfig)
-  private val results = benchmarkRunner.run()
-  benchmarkRunner.writeResult(results)
-
-  private val resultsString = results.mkString("\n")
-
-  println("DONE")
-  println("Results:")
-  println(resultsString)
-
-  println(Calendar.getInstance().getTime)
-
-  System.exit(0)
+object SjBenchmarkFactory extends RegularBenchmarkFactory[KafkaBenchmarkDataSenderConfig] {
+  override protected def create(benchmarkConfig: BenchmarkConfig,
+                                senderConfig: KafkaBenchmarkDataSenderConfig): SjBenchmark =
+    new SjBenchmark(benchmarkConfig, senderConfig)
 }

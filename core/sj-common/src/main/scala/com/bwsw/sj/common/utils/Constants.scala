@@ -284,6 +284,8 @@ object CommonAppConfigNames {
 object BenchmarkConfigNames {
   val performanceBenchmarkConfig = "sj-benchmark.performance"
 
+  val timeoutPerTestConfig = performanceBenchmarkConfig + ".timeout"
+
   val messageConfig = performanceBenchmarkConfig + ".message"
   val messageSizesConfig = messageConfig + ".sizes"
   val messagesCountsConfig = messageConfig + ".counts"
@@ -300,12 +302,18 @@ object BenchmarkConfigNames {
   val batchSizesConfig = batchConfig + ".sizes"
   val windowSizesConfig = batchConfig + ".window.sizes"
   val slidingIntervalsConfig = batchConfig + ".sliding.intervals"
+
+  val tStreamsConfig = performanceBenchmarkConfig + ".tstreams"
+  val tStreamsPrefixConfig = tStreamsConfig + ".prefix"
+  val tStreamsTokenConfig = tStreamsConfig + ".token"
+  val tStreamsSizePerTransaction = tStreamsConfig + ".transactions.sizes"
 }
 
 object BenchmarkLiterals {
 
   object Regular {
     val sjDefaultOutputFile = "sj-regular-benchmark-output"
+    val sjTStreamsDefaultOutputFile = "sj-t-streams-regular-benchmark-output"
     val samzaDefaultOutputFile = "samza-regular-benchmark-output"
     val flinkDefaultOutputFile = "flink-regular-benchmark-output"
     val stormDefaultOutputFile = "storm-regular-benchmark-output"

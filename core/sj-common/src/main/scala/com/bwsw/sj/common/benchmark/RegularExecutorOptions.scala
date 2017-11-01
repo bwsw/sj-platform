@@ -19,6 +19,10 @@
 package com.bwsw.sj.common.benchmark
 
 /**
+  * Configuration for module of performance benchmark
+  *
+  * @param outputFilePath path to the file to write the benchmark result
+  * @param messagesCount  count of input messages
   * @author Pavel Tomskikh
   */
 case class RegularExecutorOptions(outputFilePath: String, messagesCount: Long)

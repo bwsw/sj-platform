@@ -16,30 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.sj.engine.core.testutils.benchmark.read_kafka
+package com.bwsw.sj.engine.core.testutils.benchmark.loader
 
-import java.util.Date
-
-import com.bwsw.sj.common.utils.BenchmarkConfigNames._
+import com.bwsw.sj.common.utils.BenchmarkConfigNames.{messageSizesConfig, messagesCountsConfig, wordsConfig}
 import com.typesafe.config.Config
 
-import scala.util.Try
-
 /**
-  * Loads the config parameters from typesafe config for [[KafkaReaderBenchmark]]
+  * Contains configuration of storage
   *
-  * @param config               typesafe config
-  * @param outputFilenamePrefix prefix for default name of output file
   * @author Pavel Tomskikh
   */
-class KafkaReaderBenchmarkConfig(config: Config, outputFilenamePrefix: String) {
-  val zooKeeperAddress = config.getString(zooKeeperAddressConfig)
-  val kafkaAddress = config.getString(kafkaAddressConfig)
-  val messagesCounts = config.getString(messagesCountsConfig).split(",").map(_.toLong)
-  val words = config.getString(wordsConfig).split(",")
+trait BenchmarkDataSenderConfig {
+  protected val config: Config
 
-  private val format = new java.text.SimpleDateFormat("yyyy-MM-dd-HH-mm-ss")
-  val outputFileName = Try(config.getString(outputFileConfig)).getOrElse(s"$outputFilenamePrefix-${format.format(new Date())}")
+  val messagesCounts = config.getString(messagesCountsConfig).split(",").map(_.toLong)
   val messageSizes = config.getString(messageSizesConfig).split(",").map(_.toLong)
-  val repetitions = config.getInt(repetitionsConfig)
+  val words = config.getString(wordsConfig).split(",")
 }

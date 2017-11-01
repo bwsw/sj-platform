@@ -41,27 +41,19 @@ class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecut
   private val options = jsonSerializer.deserialize[RegularExecutorOptions](manager.options)
 
   private var processedMessages: Long = 0
-  private var firstMessageTimestamp: Long = 0
-  private var lastMessageTimestamp: Long = 0
+  private lazy val firstMessageTimestamp: Long = System.currentTimeMillis()
+  private lazy val lastMessageTimestamp: Long = System.currentTimeMillis()
 
 
   override def onInit(): Unit = println("onInit")
 
-  override def onMessage(envelope: KafkaEnvelope[String]): Unit = stopWatcher()
-
-  override def onMessage(envelope: TStreamEnvelope[String]): Unit = stopWatcher()
-
-  override def deserialize(bytes: Array[Byte]): AnyRef = new String(bytes)
-
-
-  private def stopWatcher(): Unit = {
-    if (processedMessages == 0)
-      firstMessageTimestamp = System.currentTimeMillis()
+  override def onMessage(envelope: KafkaEnvelope[String]): Unit = {
+    if (processedMessages == 0) firstMessageTimestamp
 
     processedMessages += 1
 
     if (processedMessages == options.messagesCount) {
-      lastMessageTimestamp = System.currentTimeMillis()
+      lastMessageTimestamp
 
       val outputFile = new File(options.outputFilePath)
       val writer = new FileWriter(outputFile, true)
@@ -69,4 +61,21 @@ class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecut
       writer.close()
     }
   }
+
+  override def onMessage(envelope: TStreamEnvelope[String]): Unit = {
+    if (processedMessages == 0) firstMessageTimestamp
+
+    processedMessages += envelope.data.toList.length
+
+    if (processedMessages >= options.messagesCount) {
+      lastMessageTimestamp
+
+      val outputFile = new File(options.outputFilePath)
+      val writer = new FileWriter(outputFile, true)
+      writer.write(s"${lastMessageTimestamp - firstMessageTimestamp}\n")
+      writer.close()
+    }
+  }
+
+  override def deserialize(bytes: Array[Byte]): AnyRef = new String(bytes)
 }

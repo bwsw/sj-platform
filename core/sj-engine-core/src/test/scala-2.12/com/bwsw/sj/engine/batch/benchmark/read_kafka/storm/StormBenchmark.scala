@@ -20,7 +20,8 @@ package com.bwsw.sj.engine.batch.benchmark.read_kafka.storm
 
 import com.bwsw.sj.common.utils.benchmark.ClassRunner
 import com.bwsw.sj.engine.batch.benchmark.read_kafka.storm.StormBenchmarkBatchLiterals._
-import com.bwsw.sj.engine.core.testutils.benchmark.read_kafka.batch.BatchKafkaReaderBenchmark
+import com.bwsw.sj.engine.core.testutils.benchmark.batch.{BatchBenchmark, BatchBenchmarkConfig, BatchBenchmarkParameters}
+import com.bwsw.sj.engine.core.testutils.benchmark.loader.kafka.KafkaBenchmarkDataSenderConfig
 import com.bwsw.sj.engine.regular.benchmark.read_kafka.storm.StormBenchmarkLiterals._
 
 /**
@@ -29,27 +30,22 @@ import com.bwsw.sj.engine.regular.benchmark.read_kafka.storm.StormBenchmarkLiter
   *
   * Topic deletion must be enabled on the Kafka server.
   *
-  * @param zooKeeperAddress ZooKeeper server's address. Must point to the ZooKeeper server that used by the Kafka server.
-  * @param kafkaAddress     Kafka server's address
-  * @param words            list of words that are sent to the Kafka server
+  * @param benchmarkConfig configuration of application
+  * @param senderConfig    configuration of Kafka topic
   * @author Pavel Tomskikh
   */
-class StormBenchmark(zooKeeperAddress: String,
-                     kafkaAddress: String,
-                     words: Array[String])
-  extends BatchKafkaReaderBenchmark(zooKeeperAddress, kafkaAddress, words) {
+class StormBenchmark(benchmarkConfig: BatchBenchmarkConfig,
+                     senderConfig: KafkaBenchmarkDataSenderConfig)
+  extends BatchBenchmark(benchmarkConfig) {
 
-  override protected def runProcess(messagesCount: Long,
-                                    batchSize: Int,
-                                    windowSize: Int,
-                                    slidingInterval: Int): Process = {
+  override protected def runProcess(parameters: BatchBenchmarkParameters, messagesCount: Long): Process = {
     val properties = Map(
-      kafkaTopicProperty -> kafkaTopic,
+      kafkaTopicProperty -> senderConfig.topic,
       outputFilenameProperty -> outputFile.getAbsolutePath,
       messagesCountProperty -> messagesCount,
-      batchSizeProperty -> batchSize,
-      windowSizeProperty -> windowSize,
-      slidingIntervalProperty -> slidingInterval)
+      batchSizeProperty -> parameters.batchSize,
+      windowSizeProperty -> parameters.windowSize,
+      slidingIntervalProperty -> parameters.slidingInterval)
       .map { case (property, value) => property -> value.toString }
 
     new ClassRunner(classOf[StormBenchmarkLocalCluster], properties = properties).start()

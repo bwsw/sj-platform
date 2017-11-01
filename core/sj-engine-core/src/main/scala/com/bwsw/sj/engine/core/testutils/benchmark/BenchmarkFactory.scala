@@ -16,23 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.sj.engine.core.testutils.benchmark.read_kafka.batch
+package com.bwsw.sj.engine.core.testutils.benchmark
 
-import com.bwsw.sj.common.utils.BenchmarkConfigNames._
-import com.bwsw.sj.engine.core.testutils.benchmark.read_kafka.KafkaReaderBenchmarkConfig
+import com.bwsw.sj.engine.core.testutils.benchmark.loader.BenchmarkDataSenderConfig
 import com.typesafe.config.Config
 
 /**
-  * Loads the config parameters from typesafe config for [[BatchKafkaReaderBenchmark]]
+  * Provides method to create banchmark instance
   *
-  * @param config               typesafe config
-  * @param outputFilenamePrefix prefix for default name of output file
   * @author Pavel Tomskikh
   */
-class BatchKafkaReaderBenchmarkConfig(config: Config, outputFilenamePrefix: String)
-  extends KafkaReaderBenchmarkConfig(config, outputFilenamePrefix) {
+trait BenchmarkFactory[T <: BenchmarkParameters, C <: BenchmarkDataSenderConfig] {
 
-  val batchSizes = config.getString(batchSizesConfig).split(",").map(_.toInt)
-  val windowSizes = config.getString(windowSizesConfig).split(",").map(_.toInt)
-  val slidingIntervals = config.getString(slidingIntervalsConfig).split(",").map(_.toInt)
+  /**
+    * Creates benchmark instance
+    *
+    * @param config       typesafe config
+    * @param senderConfig sender config
+    * @return benchmark instance
+    */
+  def create(config: Config, senderConfig: C): Benchmark[T]
 }

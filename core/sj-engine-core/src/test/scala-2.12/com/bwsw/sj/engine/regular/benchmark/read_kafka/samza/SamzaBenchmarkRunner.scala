@@ -18,15 +18,13 @@
  */
 package com.bwsw.sj.engine.regular.benchmark.read_kafka.samza
 
-import java.util.Calendar
-
 import com.bwsw.sj.common.utils.BenchmarkLiterals.Regular.samzaDefaultOutputFile
-import com.bwsw.sj.engine.core.testutils.benchmark.read_kafka.KafkaReaderBenchmarkConfig
-import com.bwsw.sj.engine.core.testutils.benchmark.read_kafka.regular.RegularKafkaReaderBenchmarkRunner
-import com.typesafe.config.ConfigFactory
+import com.bwsw.sj.engine.core.testutils.benchmark.loader.kafka.{KafkaBenchmarkDataSender, KafkaBenchmarkDataSenderConfig}
+import com.bwsw.sj.engine.core.testutils.benchmark.regular.RegularBenchmarkFactory
+import com.bwsw.sj.engine.core.testutils.benchmark.{BenchmarkConfig, BenchmarkRunner, ConfigFactory}
 
 /**
-  * Performs [[SamzaBenchmark]]
+  * Performs [[com.bwsw.sj.engine.regular.benchmark.read_kafka.samza.SamzaBenchmark]]
   *
   * Configuration:
   *
@@ -52,21 +50,14 @@ import com.typesafe.config.ConfigFactory
   *
   * @author Pavel Tomskikh
   */
-object SamzaBenchmarkRunner extends App {
-  println(Calendar.getInstance().getTime)
+object SamzaBenchmarkRunner extends BenchmarkRunner(
+  ConfigFactory,
+  samzaDefaultOutputFile,
+  KafkaBenchmarkDataSender,
+  SamzaBenchmarkFactory)
 
-  private val benchmarkConfig = new KafkaReaderBenchmarkConfig(ConfigFactory.load(), samzaDefaultOutputFile)
-  private val benchmark = new SamzaBenchmark(benchmarkConfig.zooKeeperAddress, benchmarkConfig.kafkaAddress, benchmarkConfig.words)
-  private val benchmarkRunner = new RegularKafkaReaderBenchmarkRunner(benchmark, benchmarkConfig)
-
-  private val results = benchmarkRunner.run()
-  benchmarkRunner.writeResult(results)
-
-  private val resultsString = results.mkString("\n")
-
-  println("DONE")
-  println("Results:")
-  println(resultsString)
-
-  println(Calendar.getInstance().getTime)
+object SamzaBenchmarkFactory extends RegularBenchmarkFactory[KafkaBenchmarkDataSenderConfig] {
+  override protected def create(benchmarkConfig: BenchmarkConfig,
+                                senderConfig: KafkaBenchmarkDataSenderConfig): SamzaBenchmark =
+    new SamzaBenchmark(benchmarkConfig, senderConfig)
 }
