@@ -120,6 +120,7 @@ class TStreamStream(name: String,
       }
     }
 
+    tstreamFactory.close()
     storageClient.shutdown()
 
     errors
