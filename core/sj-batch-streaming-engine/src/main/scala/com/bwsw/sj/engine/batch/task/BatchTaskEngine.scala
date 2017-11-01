@@ -112,13 +112,13 @@ class BatchTaskEngine(manager: CommonTaskManager,
   }
 
   private def retrieveAndProcessEnvelopes(): Unit = {
-    var gotEnvelope = false
+    var isEnvelopeReceived = false
     retrievableStreams.foreach(stream => {
       logger.debug(s"Retrieve an available envelope from '$stream' stream.")
       envelopeFetcher.get(stream) match {
         case Some(envelope) =>
           batchCollector.onReceive(envelope)
-          gotEnvelope = true
+          isEnvelopeReceived = true
         case None =>
       }
 
@@ -131,7 +131,7 @@ class BatchTaskEngine(manager: CommonTaskManager,
       }
     })
 
-    if (!gotEnvelope) onIdle()
+    if (!isEnvelopeReceived) onIdle()
   }
 
   private def processBatches(): Unit = {

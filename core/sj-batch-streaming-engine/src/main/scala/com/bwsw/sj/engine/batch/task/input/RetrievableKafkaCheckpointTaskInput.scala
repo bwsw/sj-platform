@@ -27,7 +27,7 @@ import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.core.engine.input.KafkaTaskInput
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import com.bwsw.tstreams.agents.producer.NewProducerTransactionPolicy
-import org.apache.kafka.clients.consumer.{ConsumerRecord, KafkaConsumer}
+import org.apache.kafka.clients.consumer.ConsumerRecord
 import scaldi.Injector
 
 import scala.collection.JavaConverters._
@@ -51,15 +51,17 @@ class RetrievableKafkaCheckpointTaskInput[T <: AnyRef](override val manager: Com
   } with RetrievableCheckpointTaskInput[KafkaEnvelope[T]](manager.inputs.filter(_._1.isInstanceOf[KafkaStreamDomain]))
     with KafkaTaskInput[T] {
 
-  override protected def createKafkaConsumers(): Map[String, KafkaConsumer[Array[Byte], Array[Byte]]] = {
+  override protected def createKafkaConsumer(): SeparatedKafkaConsumer = {
     val offset = chooseOffset()
-    kafkaInputs.map {
-      case (stream, partitions) =>
-        stream.name -> createSubscribingKafkaConsumer(
-          List((stream.name, partitions.toList)),
-          stream.service.provider.hosts.toList,
-          offset)
-    }.toMap
+
+    new SeparatedKafkaConsumer(
+      kafkaInputs.map {
+        case (stream, partitions) =>
+          stream.name -> createSubscribingKafkaConsumer(
+            List((stream.name, partitions.toList)),
+            stream.service.provider.hosts.toList,
+            offset)
+      }.toMap)
   }
 
   currentThread.setName(s"batch-task-${manager.taskName}-kafka-consumer")
@@ -75,7 +77,7 @@ class RetrievableKafkaCheckpointTaskInput[T <: AnyRef](override val manager: Com
   override def get(stream: String): Iterable[KafkaEnvelope[T]] = {
     logger.debug(s"Task: ${manager.taskName}. Waiting for records that consumed from kafka topic '$stream' for" +
       s" $kafkaSubscriberTimeout milliseconds.")
-    val records = kafkaConsumers(stream).poll(kafkaSubscriberTimeout)
+    val records = kafkaConsumer.poll(kafkaSubscriberTimeout, Some(stream))
 
     records.asScala.map(consumerRecordToEnvelope)
   }

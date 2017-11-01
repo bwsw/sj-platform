@@ -23,7 +23,6 @@ import java.util.Properties
 import com.bwsw.common.ObjectSerializer
 import com.bwsw.sj.common.SjInjector
 import com.bwsw.sj.common.config.{ConfigLiterals, SettingsUtils}
-import com.bwsw.sj.common.dal.model.service.KafkaServiceDomain
 import com.bwsw.sj.common.dal.model.stream.{StreamDomain, TStreamStreamDomain}
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.engine.core.entities.KafkaEnvelope
@@ -59,7 +58,7 @@ trait KafkaTaskInput[T <: AnyRef] extends SjInjector {
   protected val offsetProducer: Producer = createOffsetProducer()
   addOffsetProducerToCheckpointGroup()
 
-  protected val kafkaConsumers: Map[String, KafkaConsumer[Array[Byte], Array[Byte]]] = createKafkaConsumers()
+  protected val kafkaConsumer: KafkaConsumerWrapper = createKafkaConsumer()
 
   protected def getKafkaInputs(): mutable.Map[StreamDomain, Array[Int]] = {
     manager.inputs.filter(x => x._1.streamType == StreamLiterals.kafkaType)
@@ -190,8 +189,8 @@ trait KafkaTaskInput[T <: AnyRef] extends SjInjector {
   }
 
   def close(): Unit = {
-    kafkaConsumers.values.foreach(_.close())
+    kafkaConsumer.close()
   }
 
-  protected def createKafkaConsumers(): Map[String, KafkaConsumer[Array[Byte], Array[Byte]]]
+  protected def createKafkaConsumer(): KafkaConsumerWrapper
 }

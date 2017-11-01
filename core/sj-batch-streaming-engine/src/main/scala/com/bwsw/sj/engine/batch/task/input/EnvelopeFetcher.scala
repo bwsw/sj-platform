@@ -52,14 +52,14 @@ class EnvelopeFetcher(taskInput: RetrievableCheckpointTaskInput[Envelope], lowWa
     override def run(): Unit = {
       val notFullQueues = envelopesByStream.filter(x => x._2.size < lowWatermark)
       if (notFullQueues.nonEmpty) {
-        var gotEnvelopes = false
+        var isEnvelopeReceived = false
         notFullQueues.foreach {
           case (stream, queue) =>
             val envelopes = taskInput.get(stream)
             envelopes.foreach(queue.add)
-            gotEnvelopes |= envelopes.nonEmpty
+            isEnvelopeReceived |= envelopes.nonEmpty
         }
-        if (!gotEnvelopes)
+        if (!isEnvelopeReceived)
           Thread.sleep(EngineLiterals.eventWaitTimeout)
       } else
         Thread.sleep(EngineLiterals.eventWaitTimeout)

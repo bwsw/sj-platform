@@ -27,7 +27,7 @@ import com.bwsw.sj.common.si.model.instance.RegularInstance
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import com.bwsw.tstreams.agents.producer.NewProducerTransactionPolicy
-import org.apache.kafka.clients.consumer.{ConsumerRecord, KafkaConsumer}
+import org.apache.kafka.clients.consumer.ConsumerRecord
 import scaldi.Injector
 
 import scala.collection.JavaConverters._
@@ -50,10 +50,8 @@ class CallableKafkaCheckpointTaskInput[T <: AnyRef](override val manager: Common
   extends CallableCheckpointTaskInput[KafkaEnvelope[T]](manager.inputs) with KafkaTaskInput[T] {
   currentThread.setName(s"regular-task-${manager.taskName}-kafka-consumer")
 
-  private val kafkaConsumer = kafkaConsumers.values.head
-
-  override protected def createKafkaConsumers(): Map[String, KafkaConsumer[Array[Byte], Array[Byte]]] = {
-    Map("" ->
+  override protected def createKafkaConsumer(): SingleKafkaConsumer = {
+    new SingleKafkaConsumer(
       createSubscribingKafkaConsumer(
         kafkaInputs.map(x => (x._1.name, x._2.toList)).toList,
         kafkaInputs.flatMap(_._1.service.asInstanceOf[KafkaServiceDomain].provider.hosts).toList,
