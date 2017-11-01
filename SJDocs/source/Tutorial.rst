@@ -12,7 +12,7 @@ Introduction
 
 This tutorial is aimed to present SJ-Platform and give a quick start for a user to see the platform at work.
 
-The demo projects presented below are example tasks developed to demonstrate how to run user's first SJ module. A step-by-step guidance will help to deploy the system in a local mode (minimesos) or at a cluster (Mesos) and to implement a module example to a real-life task. 
+The demo projects presented below are example tasks introduced to demonstrate how to run user's first SJ module. A step-by-step guidance will help to deploy the system in a local mode (minimesos) or at a cluster (Mesos) and to implement SJ-Platform to a real-life task. 
 
 Through an example project, a user will get to know the system structure, its key components and general concepts of the platform workflow.
 
@@ -20,20 +20,16 @@ Through an example project, a user will get to know the system structure, its ke
 SJ-Platform Overview
 ----------------------------------
 
-In SJ-Platform the data are processed in modules where they are passed via streams. The result data are exported to an external storage.
+In SJ-Platform the data streams pass a processor that handles their transformation and processing. A **processor** can be represented by a module or an array of modules. Configurations uploaded to the system determine the mode of data processing in these modules.
+
+The result data are exported to an external storage. It can be Elasticsearch, RESTful endpoint or JDBC-compatible data storages.
 
 A simplified structure of SJ-Platform can be presented as at the image below:
 
 .. figure:: _static/tutorialGeneral.png
    :align: center
 
-A **processor** represents a part of the pipeline where the data processing is performed.
-
-Configurations uploaded to the system determine the mode of data processing in the processors.
-
-The processing result is exported to an external storage. It can be Elasticsearch, RESTful endpoint or JDBC-compatible data storages.
-
-Besides, SJ-Platform provides a user with a comprehensive RESTful API instrumentation and Web UI.
+To configure and monitor the system, SJ-Platform provides a user with a comprehensive RESTful API instrumentation and Web UI.
 
 Below an example of a real-life task solution will demonstrate the platform at work for better understanding of how the data processing can be performed on the platform. Thus, the tutorial will provide you with:
 
@@ -48,16 +44,16 @@ Fping Example Task
 
 Let’s introduce an example task which illustrates the platform workflow in the real-world use.
 
-The demonstration code is responsible for collecting of aggregated information on the accessibility of nodes. 
-
-The `fping <https://fping.org/>`_ utility checks the list of provided IPs for accessibility. It sends a 64-bytes packet to each IP and waits for a return packet. If the connections are good and the node can be accessed, a good return packet will be received. The amount of time is also returned for how long it takes for a packet to make the complete trip. On the basis of this information the processor calculates the average response time for each node per 1 minute. The amount of successful responses by IP per 1 minute is calculated by the processing module as well. The result is exported to an external data store.  
+The demonstration task is responsible for collecting of aggregated information on the accessibility of nodes. The node accessibility is to be checked using `fping <https://fping.org/>`_ utility. It checks accessibility of provided IPs sending a 64-bytes packet to each IP and waiting for a return packet. If the connections are good and the node can be accessed, a good return packet will be received. The amount of time is also returned for how long it takes for a packet to make the complete trip. On the basis of this information the processor calculates the average response time for each node per 1 minute. The amount of successful responses by IP per 1 minute is calculated by the processing module as well. The result is exported to an external data store.  
 
 Before providing a solution to the task, let’s have a look at the platform from the perspective of a processing pipeline.
 
 Processing
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-A general processing workflow which system allows implementing is illustrated in the diagram below:
+In SJ-Platform the data processing is handled in modules. These modules form a pipeline. Alongside with the processing module it may include an input module that receives data stream, and an output module that exports the result.
+
+General processing workflow which the system allows implementing is illustrated in the diagram below:
 
 .. figure:: _static/ModulePipeline.png
    :scale: 80%
@@ -72,7 +68,7 @@ In the output module, the processed data are transformed into entities appropria
            
 The illustrated pipeline is a common scenario for a lot of different tasks.
 
-But the platform allows implementation of more complicated processing pipelines. So the pipeline can be expanded. More input streams can ingest raw data. Several input modules can be included in the pipeline to accept the raw data and transform them for passing further to the processing stage.
+But the platform allows implementation of more complicated processing pipelines. So the pipeline can be expanded.  Several input modules can be included in the pipeline to accept the raw data and transform them for passing further to the processing stage.
 
 You can launch more than a single processing module. The data streams can be distributed among them in various ways.
 
@@ -96,9 +92,8 @@ Finally, the output modules export aggregated data from echo-response streams to
 
 The data are fed to the system, passed from one module to another and exported from the system via streams. Read more about streams under the :ref:`Creating_Streams` section.
 
-In the demonstration project, the entities are added to the system via REST API as it is less time-consuming. The platform entities can be also created via the UI filling in the creation forms for each entity with necessary settings.
-
-The result is easy-to-see via Web UI. Or send ‘GET’ API requests to return created entities in JSON.
+In the demonstration project, the entities are added to the system via REST API as it is less time-consuming. 
+The added entities are easy-to-see via Web UI. Or send ‘GET’ API requests to return created entities in JSON. The platform entities can surely be created via the UI setting up necessary configurations in the creation forms for an each entity.
 
 Now, having the general idea on the platform workflow, we can dive into solving an example task on the base of SJ-Platform. 
 
