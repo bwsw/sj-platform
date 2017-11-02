@@ -19,16 +19,16 @@
 package com.bwsw.sj.engine.batch.benchmark.read_kafka.storm
 
 import com.bwsw.sj.common.utils.BenchmarkLiterals.Batch.stormDefaultOutputFile
+import com.bwsw.sj.engine.core.testutils.benchmark.BenchmarkRunner
 import com.bwsw.sj.engine.core.testutils.benchmark.batch.{BatchBenchmarkConfig, BatchBenchmarkFactory}
 import com.bwsw.sj.engine.core.testutils.benchmark.loader.kafka.{KafkaBenchmarkDataSender, KafkaBenchmarkDataSenderConfig}
-import com.bwsw.sj.engine.core.testutils.benchmark.{BenchmarkRunner, ConfigFactory}
 
 /**
   * Performs [[StormBenchmark]]
   *
   * Configuration:
   *
-  * sj-benchmark.performance.message.sizes - list of messages' sizes that separated by a comma (',').
+  * sj-benchmark.performance.message.sizes - list of messages' sizes separated by a comma (',').
   * Environment variable MESSAGES_SIZE_PER_TEST.
   *
   * sj-benchmark.performance.message.counts - list of counts of messages per test (1000000 by default).
@@ -36,7 +36,7 @@ import com.bwsw.sj.engine.core.testutils.benchmark.{BenchmarkRunner, ConfigFacto
   *
   * sj-benchmark.performance.kafka.address - Kafka server's address. Environment variable KAFKA_ADDRESS.
   *
-  * sj-benchmark.performance.zookeeper.address - ZooKeeper server's address. Must point to the ZooKeeper server that used
+  * sj-benchmark.performance.zookeeper.address - ZooKeeper server's address. Must point to the ZooKeeper server used
   * by the Kafka server. Environment variable ZOOKEEPER_ADDRESS.
   *
   * sj-benchmark.performance.output-file - file to output results in csv format (message size, milliseconds)
@@ -48,19 +48,18 @@ import com.bwsw.sj.engine.core.testutils.benchmark.{BenchmarkRunner, ConfigFacto
   * sj-benchmark.performance.repetitions - count of repetitions of same test configuration (messages count and message size)
   * (1 by default). Environment variable REPETITIONS.
   *
-  * sj-benchmark.performance.batch.sizes - list of batches' sizes in milliseconds that separated by a comma (',').
+  * sj-benchmark.performance.batch.sizes - list of batches' sizes in milliseconds separated by a comma (',').
   * Environment variable BATCH_SIZE_PER_TEST.
   *
-  * sj-benchmark.performance.batch.window.sizes - list of windows' sizes that separated by a comma (',').
+  * sj-benchmark.performance.batch.window.sizes - list of windows' sizes separated by a comma (',').
   * Environment variable WINDOW_SIZE_PER_TEST.
   *
-  * sj-benchmark.performance.batch.sliding.intervals - list of sliding intervals that separated by a comma (',').
+  * sj-benchmark.performance.batch.sliding.intervals - list of sliding intervals separated by a comma (',').
   * 0 means that sliding interval equal to a window size. Environment variable SLIDING_INTERVAL.
   *
   * @author Pavel Tomskikh
   */
 object StormBenchmarkRunner extends BenchmarkRunner(
-  ConfigFactory,
   stormDefaultOutputFile,
   KafkaBenchmarkDataSender,
   StormBenchmarkFactory)

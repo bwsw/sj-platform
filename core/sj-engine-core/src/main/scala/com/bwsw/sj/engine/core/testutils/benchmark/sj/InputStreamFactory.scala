@@ -18,28 +18,19 @@
  */
 package com.bwsw.sj.engine.core.testutils.benchmark.sj
 
-import com.bwsw.sj.common.utils.BenchmarkConfigNames.zooKeeperAddressConfig
-import com.bwsw.sj.common.utils.CommonAppConfigNames.{zooKeeperHost, zooKeeperPort}
-import com.bwsw.sj.engine.core.testutils.benchmark.ConfigFactory
-import com.typesafe.config.{Config, ConfigValueFactory}
+import com.bwsw.sj.common.dal.model.stream.StreamDomain
+import com.bwsw.sj.common.dal.repository.ConnectionRepository
 
 /**
-  * Provides method to create typesafe config instance for SJ benchmarks
+  * Provides method to create an input stream and upload it into a Mongo storage
   *
   * @author Pavel Tomskikh
   */
-object SjConfigFactory extends ConfigFactory {
+trait InputStreamFactory {
 
-  /**
-    * Creates typesafe config instance for SJ benchmarks
-    *
-    * @return typesafe config instance for SJ benchmarks
-    */
-  override def createConfig: Config = {
-    val config = com.typesafe.config.ConfigFactory.load()
-    val zkPort = config.getInt(zooKeeperPort)
-    val zkHost = config.getString(zooKeeperHost)
+  val name: String
+  val partitions: Int = 1
 
-    config.withValue(zooKeeperAddressConfig, ConfigValueFactory.fromAnyRef(s"$zkHost:$zkPort"))
-  }
+  def loadInputStream(benchmarkPreparation: SjBenchmarkHelper[_],
+                      connectionRepository: ConnectionRepository): StreamDomain
 }

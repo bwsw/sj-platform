@@ -21,7 +21,7 @@ package com.bwsw.sj.engine.core.testutils.benchmark.batch
 import com.bwsw.sj.engine.core.testutils.benchmark.Benchmark
 
 /**
-  * Provides methods for testing the speed of reading data from a storage by some application in a batch mode
+  * Provides methods for testing the speed of reading data from a storage by some application in batch mode
   *
   * @param benchmarkConfig configuration of application
   * @author Pavel Tomskikh

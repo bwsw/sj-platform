@@ -33,8 +33,8 @@ abstract class Benchmark[T <: BenchmarkParameters](benchmarkConfig: BenchmarkCon
 
   protected val warmingUpParams: T
   protected val lookupResultTimeout: Long = 5000
-  protected val outputFilename = "benchmark-output-" + UUID.randomUUID().toString
-  protected val outputFile = new File(outputFilename)
+  protected val outputFilename: String = "benchmark-output-" + UUID.randomUUID().toString
+  protected val outputFile: File = new File(outputFilename)
 
   /**
     * Performs the first test because it needs more time than subsequent tests
@@ -45,7 +45,7 @@ abstract class Benchmark[T <: BenchmarkParameters](benchmarkConfig: BenchmarkCon
   /**
     * Performs some preparations before all tests
     */
-  def prepare(): Unit = {}
+  def start(): Unit = {}
 
   /**
     * Tests an application with specific parameters

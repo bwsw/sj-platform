@@ -30,7 +30,6 @@ import com.typesafe.config.Config
   * @author Pavel Tomskikh
   */
 class KafkaBenchmarkDataSenderConfig(override protected val config: Config) extends BenchmarkDataSenderConfig {
-  val kafkaAddress = config.getString(kafkaAddressConfig)
-  val zooKeeperAddress = config.getString(zooKeeperAddressConfig)
-  val topic = "performance-benchmark-" + UUID.randomUUID().toString
+  val kafkaAddress: String = config.getString(kafkaAddressConfig)
+  val topic: String = "performance-benchmark-" + UUID.randomUUID().toString
 }

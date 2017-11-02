@@ -19,16 +19,16 @@
 package com.bwsw.sj.engine.regular.benchmark.read_kafka.flink
 
 import com.bwsw.sj.common.utils.BenchmarkLiterals.Regular.flinkDefaultOutputFile
-import com.bwsw.sj.engine.core.testutils.benchmark._
 import com.bwsw.sj.engine.core.testutils.benchmark.loader.kafka.{KafkaBenchmarkDataSender, KafkaBenchmarkDataSenderConfig}
 import com.bwsw.sj.engine.core.testutils.benchmark.regular.RegularBenchmarkFactory
+import com.bwsw.sj.engine.core.testutils.benchmark.{BenchmarkConfig, BenchmarkRunner}
 
 /**
   * Performs [[FlinkBenchmark]]
   *
   * Configuration:
   *
-  * sj-benchmark.performance.message.sizes - list of messages' sizes that separated by a comma (',').
+  * sj-benchmark.performance.message.sizes - list of messages' sizes separated by a comma (',').
   * Environment variable MESSAGES_SIZE_PER_TEST.
   *
   * sj-benchmark.performance.message.counts - list of counts of messages per test (1000000 by default).
@@ -36,7 +36,7 @@ import com.bwsw.sj.engine.core.testutils.benchmark.regular.RegularBenchmarkFacto
   *
   * sj-benchmark.performance.kafka.address - Kafka server's address. Environment variable KAFKA_ADDRESS.
   *
-  * sj-benchmark.performance.zookeeper.address - ZooKeeper server's address. Must point to the ZooKeeper server that used
+  * sj-benchmark.performance.zookeeper.address - ZooKeeper server's address. Must point to the ZooKeeper server used
   * by the Kafka server. Environment variable ZOOKEEPER_ADDRESS.
   *
   * sj-benchmark.performance.output-file - file to output results in csv format (message size, milliseconds)
@@ -51,7 +51,6 @@ import com.bwsw.sj.engine.core.testutils.benchmark.regular.RegularBenchmarkFacto
   * @author Pavel Tomskikh
   */
 object FlinkBenchmarkRunner extends BenchmarkRunner(
-  ConfigFactory,
   flinkDefaultOutputFile,
   KafkaBenchmarkDataSender,
   FlinkBenchmarkFactory)

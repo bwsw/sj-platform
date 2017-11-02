@@ -18,6 +18,7 @@
  */
 package com.bwsw.sj.engine.batch.benchmark.read_kafka.flink
 
+import com.bwsw.sj.engine.core.testutils.Constants
 import com.bwsw.sj.engine.core.testutils.benchmark.batch.{BatchBenchmark, BatchBenchmarkConfig, BatchBenchmarkParameters}
 import com.bwsw.sj.engine.core.testutils.benchmark.loader.kafka.KafkaBenchmarkDataSenderConfig
 
@@ -25,7 +26,7 @@ import scala.collection.JavaConverters._
 
 /**
   * Provides methods for testing the speed of reading data by [[https://flink.apache.org Apache Flink]] from Kafka in
-  * a windowed mode.
+  * windowed mode.
   *
   * Topic deletion must be enabled on the Kafka server.
   *
@@ -38,7 +39,7 @@ class FlinkBenchmark(benchmarkConfig: BatchBenchmarkConfig,
   extends BatchBenchmark(benchmarkConfig) {
 
   private val taskJarPath = "../../contrib/benchmarks/flink-batch-benchmark-task/target/scala-2.11/" +
-    "flink-batch-benchmark-task-1.0-SNAPSHOT.jar"
+    s"flink-batch-benchmark-task-${Constants.sjVersion}.jar"
 
   override protected def runProcess(parameters: BatchBenchmarkParameters, messagesCount: Long): Process = {
     val arguments = Seq(
