@@ -32,8 +32,6 @@ object Dependencies {
       .exclude("org.slf4j", "slf4j-api")
       .exclude("org.slf4j", "slf4j-log4j12")
       .exclude("log4j", "log4j")
-      .exclude("io.netty", "netty")
-      .exclude("io.netty", "netty-all")
       .exclude("org.scalatest", "scalatest_2.12"),
     ("org.mongodb" %% "casbah" % "3.1.1")
       .exclude("org.slf4j", "slf4j-api"),
@@ -45,16 +43,15 @@ object Dependencies {
       .exclude("org.slf4j", "slf4j-api")
       .exclude("log4j", "log4j")
       .exclude("io.netty", "netty"),
-    ("org.apache.curator" % "curator-recipes" % "2.11.1")
-      .exclude("org.slf4j", "slf4j-api")
-      .exclude("log4j", "log4j")
-      .exclude("io.netty", "netty"),
+    "io.netty" % "netty-all" % "4.1.11.Final" % "provided",
+    "io.netty" % "netty-transport-native-epoll" % "4.1.11.Final" classifier "linux-x86_64",
+    "org.apache.curator" % "curator-recipes" % "2.12.0" % "provided",
+    "org.apache.curator" % "curator-test" % "2.12.0" % "provided",
     ("org.elasticsearch.client" % "x-pack-transport" % "5.5.1")
       .exclude("com.fasterxml.jackson.core", "jackson-core"),
     "org.apache.logging.log4j" % "log4j-core" % "2.8.2",
     "org.apache.logging.log4j" % "log4j-api" % "2.8.2",
     "com.maxmind.geoip" % "geoip-api" % "1.3.1",
-    "io.netty" % "netty-all" % "4.1.7.Final",
     "com.opencsv" % "opencsv" % "3.9",
     ("org.apache.avro" % "avro" % "1.8.1")
       .exclude("org.slf4j", "slf4j-api"),

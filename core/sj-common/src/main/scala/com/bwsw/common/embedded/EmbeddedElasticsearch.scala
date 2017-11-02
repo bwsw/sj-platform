@@ -35,6 +35,7 @@ import scala.util.Try
   * Used for testing purposes only. Single node es cluster
   */
 class EmbeddedElasticsearch(val port: Int) {
+  System.setProperty("es.set.netty.runtime.available.processors", "false")
   private val clusterName = "elasticsearch"
   private val dataDir = Files.createTempDirectory("elasticsearch_data_").toFile
   private val settings = Settings.builder()

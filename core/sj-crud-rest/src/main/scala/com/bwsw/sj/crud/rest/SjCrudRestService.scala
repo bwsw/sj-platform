@@ -49,6 +49,7 @@ object SjCrudRestService extends {
   override implicit val injector: Injector = CrudRestModule.injector
 } with App with SjCrudRestApi {
 
+  System.setProperty("io.netty.noUnsafe", "false")
   private val connectionRepository = inject[ConnectionRepository]
   private val settingsUtils = inject[SettingsUtils]
   private val config = ConfigFactory.load()
