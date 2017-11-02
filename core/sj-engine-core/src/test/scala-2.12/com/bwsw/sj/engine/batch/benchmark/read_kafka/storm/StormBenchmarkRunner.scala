@@ -21,7 +21,7 @@ package com.bwsw.sj.engine.batch.benchmark.read_kafka.storm
 import com.bwsw.sj.common.utils.BenchmarkLiterals.Batch.stormDefaultOutputFile
 import com.bwsw.sj.engine.core.testutils.benchmark.BenchmarkRunner
 import com.bwsw.sj.engine.core.testutils.benchmark.batch.{BatchBenchmarkConfig, BatchBenchmarkFactory}
-import com.bwsw.sj.engine.core.testutils.benchmark.loader.kafka.{KafkaBenchmarkDataSender, KafkaBenchmarkDataSenderConfig}
+import com.bwsw.sj.engine.core.testutils.benchmark.loader.kafka.{KafkaBenchmarkDataSenderConfig, KafkaBenchmarkDataSenderFactory}
 
 /**
   * Performs [[StormBenchmark]]
@@ -61,7 +61,7 @@ import com.bwsw.sj.engine.core.testutils.benchmark.loader.kafka.{KafkaBenchmarkD
   */
 object StormBenchmarkRunner extends BenchmarkRunner(
   stormDefaultOutputFile,
-  KafkaBenchmarkDataSender,
+  new KafkaBenchmarkDataSenderFactory(2),
   StormBenchmarkFactory)
 
 object StormBenchmarkFactory extends BatchBenchmarkFactory[KafkaBenchmarkDataSenderConfig] {
