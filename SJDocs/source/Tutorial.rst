@@ -104,7 +104,7 @@ And the first step is the system deployment.
 Step 1. Deployment 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Though SJ-Platform is quite a complex system and it includes a range of necessary services, no special skills are required for its deployment. 
+Though SJ-Platform is quite a complex system and it requires a range of services to be deployed, no special skills are required for its setting up. 
 
 There are three options to deploy the platform. Please, read the description for each option and choose the most convenient for you.
 
