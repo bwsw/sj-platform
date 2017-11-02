@@ -44,7 +44,6 @@ object Dependencies {
       .exclude("log4j", "log4j")
       .exclude("io.netty", "netty"),
     "io.netty" % "netty-all" % "4.1.11.Final" % "provided",
-    "io.netty" % "netty-transport-native-epoll" % "4.1.11.Final" classifier "linux-x86_64",
     "org.apache.curator" % "curator-recipes" % "2.12.0" % "provided",
     "org.apache.curator" % "curator-test" % "2.12.0" % "provided",
     ("org.elasticsearch.client" % "x-pack-transport" % "5.5.1")
