@@ -30,8 +30,21 @@ import org.apache.kafka.clients.consumer.{ConsumerRecords, KafkaConsumer}
 class SeparatedKafkaConsumer(kafkaConsumerPerTopic: Map[String, KafkaConsumer[Array[Byte], Array[Byte]]])
   extends KafkaConsumerWrapper {
 
-  override def poll(timeout: Long, topic: Option[String] = None): ConsumerRecords[Array[Byte], Array[Byte]] =
-    kafkaConsumerPerTopic(topic.get).poll(timeout)
+  override def poll(timeout: Long, maybeTopic: Option[String] = None): ConsumerRecords[Array[Byte], Array[Byte]] = {
+    maybeTopic match {
+      case Some(topic) =>
+        kafkaConsumerPerTopic.get(topic) match {
+          case Some(consumer) =>
+            consumer.poll(timeout)
+          case None =>
+            throw new IllegalArgumentException(s"KafkaConsumer for topic '$topic' not defined")
+        }
+
+      case None =>
+        throw new IllegalArgumentException("Parameter 'topic' must be defined")
+    }
+    kafkaConsumerPerTopic(maybeTopic.get).poll(timeout)
+  }
 
   override def close(): Unit =
     kafkaConsumerPerTopic.values.foreach(_.close())
