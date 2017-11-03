@@ -43,7 +43,6 @@ class SeparatedKafkaConsumer(kafkaConsumerPerTopic: Map[String, KafkaConsumer[Ar
       case None =>
         throw new IllegalArgumentException("Parameter 'topic' must be defined")
     }
-    kafkaConsumerPerTopic(maybeTopic.get).poll(timeout)
   }
 
   override def close(): Unit =
