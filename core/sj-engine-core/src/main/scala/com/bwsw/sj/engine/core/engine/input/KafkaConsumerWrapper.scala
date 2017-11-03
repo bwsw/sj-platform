@@ -16,23 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.sj.engine.output.benchmark.data_checkers
+package com.bwsw.sj.engine.core.engine.input
 
-import com.bwsw.sj.common.dal.model.stream.{StreamDomain, TStreamStreamDomain}
-import com.bwsw.sj.common.dal.repository.GenericMongoRepository
-import com.bwsw.sj.engine.core.testutils.checkers.TStreamsReader
-import com.bwsw.sj.engine.output.benchmark.DataFactory.{connectionRepository, createConsumer, tstreamInputName}
+import org.apache.kafka.clients.consumer.ConsumerRecords
 
 /**
-  * Provides methods to create data readers
+  * Retrieves records from Kafka
   *
   * @author Pavel Tomskikh
   */
-object ElementsReaderFactory {
-  def createInputElementsReader: TStreamsReader[(Int, String)] = {
-    val streamService: GenericMongoRepository[StreamDomain] = connectionRepository.getStreamRepository
-    val tStream: TStreamStreamDomain = streamService.get(tstreamInputName).get.asInstanceOf[TStreamStreamDomain]
+trait KafkaConsumerWrapper {
 
-    new TStreamsReader[(Int, String)](Seq(createConsumer(tStream)))
-  }
+  def poll(timeout: Long, topic: Option[String] = None): ConsumerRecords[Array[Byte], Array[Byte]]
+
+  def close(): Unit
 }

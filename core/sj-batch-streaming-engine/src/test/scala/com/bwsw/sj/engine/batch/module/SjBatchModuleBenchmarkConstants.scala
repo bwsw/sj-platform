@@ -27,16 +27,18 @@ object SjBatchModuleBenchmarkConstants {
   val stateFullCheckpoint = 3
   val window = 2
   val slidingInterval = 1
-  val defaultValueOfTxns = 24
-  val defaultValueOfElements = 1
+  val countOfTxns = 32
+  val elementsPerTxn = 2
   val inputCount = 2
   val outputCount = 2
   val partitions = 4
+  val lowWatermark = 4
 
   val kafkaMode = "kafka"
   val tStreamMode = "tstream"
   val commonMode = "both"
+  val types = Seq(kafkaMode, tStreamMode, commonMode)
 
-  val modulePath = s"../../contrib/stubs/sj-stub-batch-streaming/target/scala-2.12/" +
+  val modulePath: String = s"../../contrib/stubs/sj-stub-batch-streaming/target/scala-2.12/" +
     s"sj-stub-batch-streaming_2.12-${Constants.sjVersion}.jar"
 }

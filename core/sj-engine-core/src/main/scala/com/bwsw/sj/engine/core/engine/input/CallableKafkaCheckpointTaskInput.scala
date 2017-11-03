@@ -20,6 +20,7 @@ package com.bwsw.sj.engine.core.engine.input
 
 
 import com.bwsw.common.SerializerInterface
+import com.bwsw.sj.common.dal.model.service.KafkaServiceDomain
 import com.bwsw.sj.common.engine.core.entities._
 import com.bwsw.sj.common.engine.core.managment.CommonTaskManager
 import com.bwsw.sj.common.si.model.instance.RegularInstance
@@ -48,6 +49,14 @@ class CallableKafkaCheckpointTaskInput[T <: AnyRef](override val manager: Common
                                                    (override implicit val injector: Injector)
   extends CallableCheckpointTaskInput[KafkaEnvelope[T]](manager.inputs) with KafkaTaskInput[T] {
   currentThread.setName(s"regular-task-${manager.taskName}-kafka-consumer")
+
+  override protected def createKafkaConsumer(): SingleKafkaConsumer = {
+    new SingleKafkaConsumer(
+      createSubscribingKafkaConsumer(
+        kafkaInputs.map(x => (x._1.name, x._2.toList)).toList,
+        kafkaInputs.flatMap(_._1.service.asInstanceOf[KafkaServiceDomain].provider.hosts).toList,
+        chooseOffset()))
+  }
 
   def chooseOffset(): String = {
     logger.debug(s"Task: ${manager.taskName}. Get a start-from parameter from instance.")

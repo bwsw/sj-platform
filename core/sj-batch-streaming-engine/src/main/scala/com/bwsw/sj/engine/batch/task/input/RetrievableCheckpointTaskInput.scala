@@ -38,7 +38,7 @@ import scala.collection.mutable
   */
 abstract class RetrievableCheckpointTaskInput[T <: Envelope](val inputs: mutable.Map[StreamDomain, Array[Int]])
   extends CheckpointTaskInput[T](inputs) {
-  def get(): Iterable[T]
+  def get(stream: String): Iterable[T]
 }
 
 object RetrievableCheckpointTaskInput {

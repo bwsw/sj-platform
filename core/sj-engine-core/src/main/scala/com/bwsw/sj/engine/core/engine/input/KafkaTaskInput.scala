@@ -23,7 +23,6 @@ import java.util.Properties
 import com.bwsw.common.ObjectSerializer
 import com.bwsw.sj.common.SjInjector
 import com.bwsw.sj.common.config.{ConfigLiterals, SettingsUtils}
-import com.bwsw.sj.common.dal.model.service.KafkaServiceDomain
 import com.bwsw.sj.common.dal.model.stream.{StreamDomain, TStreamStreamDomain}
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.engine.core.entities.KafkaEnvelope
@@ -59,11 +58,7 @@ trait KafkaTaskInput[T <: AnyRef] extends SjInjector {
   protected val offsetProducer: Producer = createOffsetProducer()
   addOffsetProducerToCheckpointGroup()
 
-  protected val kafkaConsumer: KafkaConsumer[Array[Byte], Array[Byte]] = createSubscribingKafkaConsumer(
-    kafkaInputs.map(x => (x._1.name, x._2.toList)).toList,
-    kafkaInputs.flatMap(_._1.service.asInstanceOf[KafkaServiceDomain].provider.hosts).toList,
-    chooseOffset()
-  )
+  protected val kafkaConsumer: KafkaConsumerWrapper = createKafkaConsumer()
 
   protected def getKafkaInputs(): mutable.Map[StreamDomain, Array[Int]] = {
     manager.inputs.filter(x => x._1.streamType == StreamLiterals.kafkaType)
@@ -170,7 +165,10 @@ trait KafkaTaskInput[T <: AnyRef] extends SjInjector {
       logger.debug(s"Task name: ${manager.taskName}. Get saved offsets for kafka consumer and apply them.")
       val lastTxn = offsetConsumer.buildTransactionObject(tempTransaction.getPartition, tempTransaction.getTransactionID, tempTransaction.getState, tempTransaction.getCount).get //todo fix it next milestone TR1216
       kafkaOffsetsStorage = offsetSerializer.deserialize(lastTxn.next()).asInstanceOf[mutable.Map[(String, Int), Long]]
-      kafkaOffsetsStorage.foreach(x => consumer.seek(new TopicPartition(x._1._1, x._1._2), x._2 + 1))
+      val consumerTopics = consumer.assignment().asScala.map(_.topic())
+      kafkaOffsetsStorage
+        .filterKeys { case (topic, _) => consumerTopics.contains(topic) }
+        .foreach(x => consumer.seek(new TopicPartition(x._1._1, x._1._2), x._2 + 1))
     }
 
     offsetConsumer.stop()
@@ -193,4 +191,6 @@ trait KafkaTaskInput[T <: AnyRef] extends SjInjector {
   def close(): Unit = {
     kafkaConsumer.close()
   }
+
+  protected def createKafkaConsumer(): KafkaConsumerWrapper
 }

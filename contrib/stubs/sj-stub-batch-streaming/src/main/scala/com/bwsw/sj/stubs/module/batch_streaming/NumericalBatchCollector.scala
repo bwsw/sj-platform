@@ -33,27 +33,21 @@ class NumericalBatchCollector(instance: BatchInstanceDomain,
 
   private val logger = Logger(this.getClass)
   private val countOfEnvelopesPerStream = mutable.Map(instance.getInputsWithoutStreamMode.map(x => (x, 0)): _*)
-  private val everyNthCount = 2
 
-  def getBatchesToCollect(): Seq[String] = {
-    countOfEnvelopesPerStream.filter(x => x._2 == everyNthCount).keys.toSeq
-  }
+  def getBatchesToCollect(): Seq[String] =
+    countOfEnvelopesPerStream.filter(x => x._2 == NumericalBatchCollector.batchSize).keys.toSeq
 
   def afterEnvelopeReceive(envelope: Envelope): Unit = {
-    increaseCounter(envelope)
-  }
-
-  private def increaseCounter(envelope: Envelope) = {
     countOfEnvelopesPerStream(envelope.stream) += 1
     logger.debug(s"Increase count of envelopes of stream: ${envelope.stream} to: ${countOfEnvelopesPerStream(envelope.stream)}.")
   }
 
   def prepareForNextCollecting(streamName: String): Unit = {
-    resetCounter(streamName)
-  }
-
-  private def resetCounter(streamName: String) = {
     logger.debug(s"Reset a counter of envelopes to 0.")
     countOfEnvelopesPerStream(streamName) = 0
   }
+}
+
+object NumericalBatchCollector {
+  val batchSize = 2
 }

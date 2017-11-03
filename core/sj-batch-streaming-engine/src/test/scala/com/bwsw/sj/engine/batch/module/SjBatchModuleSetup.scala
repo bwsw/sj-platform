@@ -31,14 +31,14 @@ object SjBatchModuleSetup extends App {
   ProcessTerminator.terminateProcessAfter { () =>
     LogManager.getLogManager.reset()
     val tempHelperForConfigSetup = new TempHelperForConfigSetup(connectionRepository)
-    tempHelperForConfigSetup.setupConfigs()
+    tempHelperForConfigSetup.setupConfigs(lowWatermark = lowWatermark)
     val streamService = connectionRepository.getStreamRepository
     val serviceManager = connectionRepository.getServiceRepository
     val providerService = connectionRepository.getProviderRepository
     val instanceService = connectionRepository.getInstanceRepository
     val fileStorage = connectionRepository.getFileStorage
     val stateManagement = EngineLiterals.ramStateMode
-    val totalInputElements = defaultValueOfTxns * defaultValueOfElements * inputCount * {
+    val totalInputEnvelopes = countOfTxns * inputCount * {
       if (inputStreamsType == commonMode) 2
       else 1
     }
@@ -49,9 +49,9 @@ object SjBatchModuleSetup extends App {
     createProviders(providerService)
     createServices(serviceManager, providerService)
     createStreams(streamService, serviceManager, partitions, inputStreamsType, inputCount, outputCount)
-    createInstance(serviceManager, instanceService, window, slidingInterval, totalInputElements, stateManagement, stateFullCheckpoint)
+    createInstance(serviceManager, instanceService, window, slidingInterval, totalInputEnvelopes, stateManagement, stateFullCheckpoint)
 
-    createData(defaultValueOfTxns, defaultValueOfElements, streamService, inputStreamsType, inputCount)
+    createData(countOfTxns, elementsPerTxn, streamService, inputStreamsType, inputCount)
     connectionRepository.close()
   }
 }
