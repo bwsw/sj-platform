@@ -22,6 +22,7 @@ import java.io.{File, FileWriter}
 import java.util.Calendar
 
 import com.bwsw.sj.engine.core.testutils.benchmark.loader.{BenchmarkDataSenderConfig, BenchmarkDataSenderParameters, SenderFactory}
+import com.typesafe.config.ConfigFactory
 
 /**
   * Provides methods for running [[Benchmark]] and writing a result into a file
@@ -29,20 +30,19 @@ import com.bwsw.sj.engine.core.testutils.benchmark.loader.{BenchmarkDataSenderCo
   * @author Pavel Tomskikh
   */
 class BenchmarkRunner[T <: BenchmarkParameters, S <: BenchmarkDataSenderParameters, C <: BenchmarkDataSenderConfig]
-(configFactory: ConfigFactory,
- outputFilenamePrefix: String,
+(outputFilenamePrefix: String,
  senderFactory: SenderFactory[S, C],
  benchmarkFactory: BenchmarkFactory[T, C])
   extends App {
 
   println(Calendar.getInstance().getTime)
 
-  private val config = configFactory.createConfig
+  private val config = ConfigFactory.load()
   private val runnerConfig = new BenchmarkRunnerConfig(config, outputFilenamePrefix)
   private val (sender, senderConfig) = senderFactory.create(config)
   private val benchmark = benchmarkFactory.create(config, senderConfig)
 
-  benchmark.prepare()
+  benchmark.start()
 
   private val results = run()
   writeResult(results)
@@ -81,7 +81,7 @@ class BenchmarkRunner[T <: BenchmarkParameters, S <: BenchmarkDataSenderParamete
     }
   }
 
-  def writeResult(benchmarkResults: Iterable[Results]) = {
+  def writeResult(benchmarkResults: Iterable[Results]): Unit = {
     val writer = new FileWriter(new File(runnerConfig.outputFileName))
     writer.write(benchmarkResults.mkString("\n"))
     writer.close()

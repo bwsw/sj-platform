@@ -32,7 +32,7 @@ import scala.util.Try
   */
 class BenchmarkRunnerConfig(config: Config, outputFilenamePrefix: String) {
   private val format = new java.text.SimpleDateFormat("yyyy-MM-dd-HH-mm-ss")
-  val outputFileName = Try(config.getString(outputFileConfig))
+  val outputFileName: String = Try(config.getString(outputFileConfig))
     .getOrElse(s"$outputFilenamePrefix-${format.format(new Date())}")
-  val repetitions = config.getInt(repetitionsConfig)
+  val repetitions: Int = config.getInt(repetitionsConfig)
 }

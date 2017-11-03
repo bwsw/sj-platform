@@ -18,6 +18,7 @@
  */
 package com.bwsw.sj.engine.regular.benchmark.read_kafka.flink
 
+import com.bwsw.sj.engine.core.testutils.Constants
 import com.bwsw.sj.engine.core.testutils.benchmark.BenchmarkConfig
 import com.bwsw.sj.engine.core.testutils.benchmark.loader.kafka.KafkaBenchmarkDataSenderConfig
 import com.bwsw.sj.engine.core.testutils.benchmark.regular.RegularBenchmark
@@ -38,7 +39,7 @@ class FlinkBenchmark(benchmarkConfig: BenchmarkConfig,
   extends RegularBenchmark(benchmarkConfig) {
 
   private val taskJarPath =
-    "../../contrib/benchmarks/flink-benchmark-task/target/scala-2.11/flink-benchmark-task-1.0-SNAPSHOT.jar"
+    s"../../contrib/benchmarks/flink-benchmark-task/target/scala-2.11/flink-benchmark-task-${Constants.sjVersion}.jar"
 
   override protected def runProcess(messagesCount: Long): Process = {
     val arguments = Seq(

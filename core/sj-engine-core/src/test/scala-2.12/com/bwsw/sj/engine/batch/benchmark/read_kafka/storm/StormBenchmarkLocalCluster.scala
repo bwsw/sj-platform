@@ -64,7 +64,7 @@ object StormBenchmarkLocalCluster extends App {
   private val stormConfig = new Config
   stormConfig.setNumWorkers(1)
   stormConfig.setMaxTaskParallelism(1)
-  stormConfig.setDebug(false)
+  stormConfig.setDebug(true)
 
   private val topologyName = "benchmark-topology"
 

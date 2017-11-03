@@ -18,7 +18,7 @@
  */
 package com.bwsw.sj.engine.core.testutils.benchmark.loader
 
-import com.bwsw.sj.common.utils.BenchmarkConfigNames.{messageSizesConfig, messagesCountsConfig, wordsConfig}
+import com.bwsw.sj.common.utils.BenchmarkConfigNames.{messageSizesConfig, messagesCountsConfig, wordsConfig, zooKeeperAddressConfig}
 import com.typesafe.config.Config
 
 /**
@@ -29,7 +29,8 @@ import com.typesafe.config.Config
 trait BenchmarkDataSenderConfig {
   protected val config: Config
 
-  val messagesCounts = config.getString(messagesCountsConfig).split(",").map(_.toLong)
-  val messageSizes = config.getString(messageSizesConfig).split(",").map(_.toLong)
-  val words = config.getString(wordsConfig).split(",")
+  val zooKeeperAddress: String = config.getString(zooKeeperAddressConfig)
+  val messagesCounts: Array[Long] = config.getString(messagesCountsConfig).split(",").map(_.toLong)
+  val messageSizes: Array[Long] = config.getString(messageSizesConfig).split(",").map(_.toLong)
+  val words: Array[String] = config.getString(wordsConfig).split(",")
 }

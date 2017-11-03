@@ -16,26 +16,30 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.sj.engine.core.testutils.benchmark
+package com.bwsw.sj.engine.core.testutils.benchmark.sj
 
-import com.typesafe.config.Config
+import java.util.Date
+
+import com.bwsw.sj.common.dal.model.stream.TStreamStreamDomain
+import com.bwsw.sj.common.dal.repository.ConnectionRepository
 
 /**
-  * Provides method to create typesafe config instance
+  * Provides method to create an input stream and upload it into a Mongo storage
   *
   * @author Pavel Tomskikh
   */
-trait ConfigFactory {
+class TStreamsInputStreamFactory(override val name: String) extends InputStreamFactory {
+  def loadInputStream(benchmarkPreparation: SjBenchmarkHelper[_],
+                      connectionRepository: ConnectionRepository): TStreamStreamDomain = {
+    val stream = new TStreamStreamDomain(
+      name = name,
+      service = benchmarkPreparation.tStreamsService,
+      partitions = partitions,
+      creationDate = new Date())
 
-  /**
-    * Creates typesafe config instance
-    *
-    * @return typesafe config instance
-    */
-  def createConfig: Config
-}
+    connectionRepository.getStreamRepository.save(stream)
+    stream.create()
 
-object ConfigFactory extends ConfigFactory {
-  override def createConfig: Config =
-    com.typesafe.config.ConfigFactory.load()
+    stream
+  }
 }

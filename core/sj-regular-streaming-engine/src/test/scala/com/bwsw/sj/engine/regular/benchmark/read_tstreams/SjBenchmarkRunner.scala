@@ -21,21 +21,26 @@ package com.bwsw.sj.engine.regular.benchmark.read_tstreams
 import com.bwsw.sj.common.utils.BenchmarkLiterals.Regular.sjDefaultOutputFile
 import com.bwsw.sj.engine.core.testutils.benchmark.loader.tstreams.{TStreamsBenchmarkDataSender, TStreamsBenchmarkDataSenderConfig}
 import com.bwsw.sj.engine.core.testutils.benchmark.regular.RegularBenchmarkFactory
-import com.bwsw.sj.engine.core.testutils.benchmark.{BenchmarkConfig, BenchmarkRunner, ConfigFactory}
+import com.bwsw.sj.engine.core.testutils.benchmark.sj.TStreamsInputStreamFactory
+import com.bwsw.sj.engine.core.testutils.benchmark.{BenchmarkConfig, BenchmarkRunner}
+import com.bwsw.sj.engine.regular.benchmark.SjRegularBenchmark
 
 /**
-  * Performs [[SjBenchmark]].
+  * Performs [[SjRegularBenchmark]].
   *
   * Configuration:
   *
-  * sj-benchmark.performance.message.sizes - list of messages' sizes that separated by a comma (',').
+  * sj-benchmark.performance.message.sizes - list of messages' sizes separated by a comma (',').
   * Environment variable MESSAGES_SIZE_PER_TEST.
   *
   * sj-benchmark.performance.message.counts - list of counts of messages per test (1000000 by default).
   * Counts separated by a comma (','). Environment variable MESSAGES_COUNT_PER_TEST.
   *
+  * sj-benchmark.performance.zookeeper.address - ZooKeeper server's address. Must point to the ZooKeeper server used
+  * by the T-Streams server. Environment variable ZOOKEEPER_ADDRESS.
+  *
   * sj-benchmark.performance.tstreams.transactions.sizes - number of messages per transaction (1000 by default)
-  * that separated by a comma (','). Environment variable SIZE_PER_TRANSACTION.
+  * separated by a comma (','). Environment variable SIZE_PER_TRANSACTION.
   *
   * sj-benchmark.performance.output-file - file to output results in csv format (message size, milliseconds)
   * (sj-benchmark-output-`<`date-time`>` by default). Environment variable OUTPUT_FILE.
@@ -50,22 +55,25 @@ import com.bwsw.sj.engine.core.testutils.benchmark.{BenchmarkConfig, BenchmarkRu
   *
   * sj-benchmark.performance.tstreams.token - T-Streams authentication token. Environment variable TOKEN.
   *
-  * sj-common.zookeeper.host - ZooKeeper server's host. Environment variable ZOOKEEPER_HOST.
-  *
-  * sj-common.zookeeper.port - ZooKeeper server's port. Environment variable ZOOKEEPER_PORT.
-  *
-  * Host and port must point to the ZooKeeper server that used by the T-Streams server.
+  * Host and port must point to the ZooKeeper server used by the T-Streams server.
   *
   * @author Pavel Tomskikh
   */
 object SjBenchmarkRunner extends BenchmarkRunner(
-  ConfigFactory,
   sjDefaultOutputFile,
   TStreamsBenchmarkDataSender,
   SjBenchmarkFactory)
 
 object SjBenchmarkFactory extends RegularBenchmarkFactory[TStreamsBenchmarkDataSenderConfig] {
   override protected def create(benchmarkConfig: BenchmarkConfig,
-                                senderConfig: TStreamsBenchmarkDataSenderConfig): SjBenchmark =
-    new SjBenchmark(benchmarkConfig, senderConfig)
+                                senderConfig: TStreamsBenchmarkDataSenderConfig): SjRegularBenchmark = {
+    val tStreamsInputStreamFactory = new TStreamsInputStreamFactory(senderConfig.stream)
+
+    new SjRegularBenchmark(
+      benchmarkConfig,
+      senderConfig,
+      tStreamsInputStreamFactory,
+      Some(senderConfig.prefix),
+      Some(senderConfig.token))
+  }
 }
