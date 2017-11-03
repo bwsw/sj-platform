@@ -29,17 +29,17 @@ import scala.util.{Random, Try}
 
 
 class Executor(manager: ModuleEnvironmentManager) extends BatchStreamingExecutor[Integer](manager) {
-  val state: StateStorage = manager.getState
-  val splitOptions = manager.options.split(",")
-  val totalInputElements = splitOptions(0).toInt
-  val benchmarkPort = splitOptions(1).toInt
+  private val state: StateStorage = manager.getState
+  private val splitOptions = manager.options.split(",")
+  private val totalInputEnvelopes = splitOptions(0).toInt
+  private val benchmarkPort = splitOptions(1).toInt
 
-  val sumStateName = "sum"
-  val elementsStateName = "elements"
+  private val sumStateName = "sum"
+  private val envelopesStateName = "envelopes"
 
   override def onInit(): Unit = {
     if (!state.isExist(sumStateName)) state.set(sumStateName, 0)
-    if (!state.isExist(elementsStateName)) state.set(elementsStateName, 0)
+    if (!state.isExist(envelopesStateName)) state.set(envelopesStateName, 0)
     println("new init")
   }
 
@@ -47,8 +47,10 @@ class Executor(manager: ModuleEnvironmentManager) extends BatchStreamingExecutor
     val outputs = manager.getStreamsByTags(Array("output"))
     val output = manager.getRoundRobinOutput(outputs(Random.nextInt(outputs.length)))
     var sum = state.get(sumStateName).asInstanceOf[Int]
-    var elements = state.get(elementsStateName).asInstanceOf[Int]
+    var envelopesCount = state.get(envelopesStateName).asInstanceOf[Int]
     val allWindows = windowRepository.getAll()
+    val envelopesInWindow =
+      windowRepository.window * windowRepository.slidingInterval * NumericalBatchCollector.batchSize * allWindows.size
 
     if (Random.nextInt(100) < 5) {
       println("it happened")
@@ -56,42 +58,36 @@ class Executor(manager: ModuleEnvironmentManager) extends BatchStreamingExecutor
     }
 
     val allBatches =
-      if (sum == 0) allWindows.flatMap(_._2.batches)
-      else allWindows.flatMap(_._2.batches.takeRight(windowRepository.slidingInterval))
+      if (envelopesCount + envelopesInWindow < totalInputEnvelopes)
+        allWindows.flatMap(_._2.batches.take(windowRepository.slidingInterval))
+      else
+        allWindows.flatMap(_._2.batches)
 
     allBatches.foreach(x => {
       output.put(x)
       println("stream name = " + x.stream)
     })
 
-    allBatches.flatMap(_.envelopes).foreach {
+
+    val envelopes = allBatches.flatMap(_.envelopes)
+    envelopes.foreach {
       case kafkaEnvelope: KafkaEnvelope[Integer@unchecked] =>
         sum += kafkaEnvelope.data
-        elements += 1
-        state.set(sumStateName, sum)
-        state.set(elementsStateName, elements)
 
       case tstreamEnvelope: TStreamEnvelope[Integer@unchecked] =>
-        tstreamEnvelope.data.foreach(x => {
-          sum += x
-          elements += 1
-        })
-        state.set(sumStateName, sum)
-        state.set(elementsStateName, elements)
+        tstreamEnvelope.data.foreach(x => sum += x)
     }
+    envelopesCount += envelopes.size
+
+    state.set(sumStateName, sum)
+    state.set(envelopesStateName, envelopesCount)
   }
 
-  override def onTimer(jitter: Long): Unit = {
-    println("onTimer")
-  }
+  override def onTimer(jitter: Long): Unit = println("onTimer")
 
-  override def onBeforeCheckpoint(): Unit = {
-    println("on before checkpoint")
-  }
+  override def onBeforeCheckpoint(): Unit = println("on before checkpoint")
 
-  override def onIdle(): Unit = {
-    println("on Idle")
-  }
+  override def onIdle(): Unit = println("on Idle")
 
   /**
     * Handler triggered before save state
@@ -101,16 +97,13 @@ class Executor(manager: ModuleEnvironmentManager) extends BatchStreamingExecutor
   override def onBeforeStateSave(isFullState: Boolean): Unit = {
     println("on before state saving")
 
-    val elements = state.get(elementsStateName).asInstanceOf[Int]
-    if (elements >= totalInputElements && benchmarkPort > 0)
+    val envelopes = state.get(envelopesStateName).asInstanceOf[Int]
+    println(s"processed $envelopes/$totalInputEnvelopes envelopes")
+    if (envelopes >= totalInputEnvelopes && benchmarkPort > 0)
       Try(new Socket("localhost", benchmarkPort))
   }
 
-  override def onEnter() = {
-    println("on enter")
-  }
+  override def onEnter(): Unit = println("on enter")
 
-  override def onLeaderEnter() = {
-    println("on leader enter")
-  }
+  override def onLeaderEnter(): Unit = println("on leader enter")
 }
