@@ -37,11 +37,11 @@ class SjStream(val streamType: String,
                val creationDate: String)
               (implicit injector: Injector) {
 
-  protected val messageResourceUtils = inject[MessageResourceUtils]
+  protected val messageResourceUtils: MessageResourceUtils = inject[MessageResourceUtils]
 
   import messageResourceUtils.createMessage
 
-  protected val connectionRepository = inject[ConnectionRepository]
+  protected val connectionRepository: ConnectionRepository = inject[ConnectionRepository]
 
   protected var serviceDomain: ServiceDomain = _
 
@@ -57,15 +57,17 @@ class SjStream(val streamType: String,
 
     errors ++= validateGeneralFields()
 
-    if (errors.isEmpty) {
-      val serviceType = StreamLiterals.typeToServiceType(streamType)
-      val (serviceDomain, extractedErrors) = extractServiceByName(service, serviceType)
-      if (serviceDomain.isEmpty)
-        errors ++= extractedErrors
-      else {
-        this.serviceDomain = serviceDomain.get
-        errors ++= validateSpecificFields()
-      }
+    StreamLiterals.typeToServiceType.get(streamType) match {
+      case Some(serviceType) =>
+        val (serviceDomain, extractedErrors) = extractServiceByName(service, serviceType)
+        if (serviceDomain.isEmpty)
+          errors ++= extractedErrors
+        else {
+          this.serviceDomain = serviceDomain.get
+          errors ++= validateSpecificFields()
+        }
+
+      case None =>
     }
 
     errors
@@ -170,8 +172,7 @@ class StreamCreator {
         tStreamStream.force,
         tStreamStream.streamType,
         tStreamStream.description,
-        tStreamStream.creationDate.toString
-      )
+        tStreamStream.creationDate.toString)
 
     case StreamLiterals.`restType` =>
       val restStream = streamDomain.asInstanceOf[RestStreamDomain]
@@ -183,8 +184,7 @@ class StreamCreator {
         restStream.force,
         restStream.streamType,
         restStream.description,
-        restStream.creationDate.toString
-      )
+        restStream.creationDate.toString)
 
     case StreamLiterals.`kafkaType` =>
       val kafkaStream = streamDomain.asInstanceOf[KafkaStreamDomain]
@@ -198,8 +198,7 @@ class StreamCreator {
         kafkaStream.force,
         kafkaStream.streamType,
         kafkaStream.description,
-        kafkaStream.creationDate.toString
-      )
+        kafkaStream.creationDate.toString)
 
     case StreamLiterals.`jdbcType` =>
       val jdbcStream = streamDomain.asInstanceOf[JDBCStreamDomain]
@@ -212,8 +211,7 @@ class StreamCreator {
         jdbcStream.force,
         jdbcStream.streamType,
         jdbcStream.description,
-        jdbcStream.creationDate.toString
-      )
+        jdbcStream.creationDate.toString)
 
     case StreamLiterals.`elasticsearchType` =>
       val esStream = streamDomain.asInstanceOf[ESStreamDomain]
@@ -225,7 +223,6 @@ class StreamCreator {
         esStream.force,
         esStream.streamType,
         esStream.description,
-        esStream.creationDate.toString
-      )
+        esStream.creationDate.toString)
   }
 }
