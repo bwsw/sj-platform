@@ -19,8 +19,10 @@
 package com.bwsw.common.http
 
 import com.typesafe.scalalogging.Logger
+import org.apache.http.auth.UsernamePasswordCredentials
 import org.apache.http.client.config.RequestConfig
 import org.apache.http.client.methods.{CloseableHttpResponse, HttpUriRequest}
+import org.apache.http.impl.auth.BasicScheme
 import org.apache.http.impl.client.{CloseableHttpClient, HttpClientBuilder => ApacheHttpClientBuilder}
 
 /**
@@ -29,8 +31,9 @@ import org.apache.http.impl.client.{CloseableHttpClient, HttpClientBuilder => Ap
   *
   * @author Kseniya Tomskikh
   */
-class HttpClient(timeout: Int) {
+class HttpClient(timeout: Int, username: Option[String] = None, password: Option[String] = None) {
   private val logger = Logger(getClass.getName)
+
   private val requestBuilder = RequestConfig
     .custom()
     .setConnectTimeout(timeout)
@@ -41,12 +44,20 @@ class HttpClient(timeout: Int) {
     .create()
     .setDefaultRequestConfig(requestBuilder.build())
 
+
   private val client: CloseableHttpClient = {
     logger.debug("Create an http client.")
     builder.build()
   }
 
   def execute(request: HttpUriRequest): CloseableHttpResponse = {
+    (username, password) match {
+      case (Some(_username), Some(_password)) =>
+        val credentials = new UsernamePasswordCredentials(_username, _password)
+        request.addHeader(new BasicScheme().authenticate(credentials, request, null))
+      case _ =>
+    }
+
     client.execute(request)
   }
 
@@ -57,5 +68,7 @@ class HttpClient(timeout: Int) {
 }
 
 class HttpClientBuilder {
-  def apply(timeout: Int): HttpClient = new HttpClient(timeout)
+  def apply(timeout: Int,
+            username: Option[String] = None,
+            password: Option[String] = None): HttpClient = new HttpClient(timeout, username, password)
 }

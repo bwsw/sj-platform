@@ -28,7 +28,7 @@ import scaldi.Injector
 class InstanceDestroyerMock(_marathonManager: MarathonApi,
                             _instanceManager: InstanceDomainRenewer,
                             instance: Instance)(implicit override val injector: Injector)
-  extends InstanceDestroyer(instance, "stub", 100) with MockitoSugar {
+  extends InstanceDestroyer(instance, "stub", delay = 100) with MockitoSugar {
 
   override protected val instanceManager: InstanceDomainRenewer = _instanceManager
   override protected val client: HttpClient = mock[HttpClient]

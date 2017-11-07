@@ -89,6 +89,14 @@ class SettingsUtils(implicit val injector: Injector) {
     getIntConfigSetting(outputProcessorParallelism, Some(EngineLiterals.outputProcessorParallelism))
   }
 
+  def getFrameworkPrincipal(): Option[String] = {
+    getConfigSettings(frameworkPrincipalTag)
+  }
+
+  def getFrameworkSecret(): Option[String] = {
+    getConfigSettings(frameworkSecretTag)
+  }
+
   private def getFrameworkBackoffSeconds(): Int = {
     getIntConfigSetting(frameworkBackoffSeconds, Some(FrameworkLiterals.defaultBackoffSeconds))
   }

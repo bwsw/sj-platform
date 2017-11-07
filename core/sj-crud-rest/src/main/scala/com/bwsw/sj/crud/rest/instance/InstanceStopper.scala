@@ -38,13 +38,15 @@ import scala.util.{Failure, Success, Try}
   */
 class InstanceStopper(instance: Instance,
                       marathonAddress: String,
+                      marathonUsername: Option[String] = None,
+                      marathonPassword: Option[String] = None,
                       delay: Long = 1000,
                       marathonTimeout: Int = 60000)
                      (implicit val injector: Injector) extends Runnable {
 
   private val logger = Logger(getClass.getName)
   protected val instanceManager = new InstanceDomainRenewer()
-  protected val client = new HttpClient(marathonTimeout)
+  protected val client = new HttpClient(marathonTimeout, marathonUsername, marathonPassword)
   protected val marathonManager = new MarathonApi(client, marathonAddress)
   private val frameworkName = InstanceAdditionalFieldCreator.getFrameworkName(instance)
 
@@ -127,7 +129,9 @@ class InstanceStopper(instance: Instance,
 class InstanceStopperBuilder(implicit val injector: Injector) {
   def apply(instance: Instance,
             marathonAddress: String,
+            marathonUsername: Option[String] = None,
+            marathonPassword: Option[String] = None,
             delay: Long = 1000,
             marathonTimeout: Int = 60000): InstanceStopper =
-    new InstanceStopper(instance, marathonAddress, delay, marathonTimeout)
+    new InstanceStopper(instance, marathonAddress, marathonUsername, marathonPassword, delay, marathonTimeout)
 }

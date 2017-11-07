@@ -37,7 +37,7 @@ import scaldi.Injectable.inject
 import scala.util.Try
 
 
-object StartFramework {
+object FrameworkStarter {
 
   import com.bwsw.sj.common.SjModule._
 
@@ -77,8 +77,8 @@ object StartFramework {
 
     val scheduler = new FrameworkScheduler
 
-    val frameworkPrincipal: Option[ConfigurationSettingDomain] = connectionRepository.getConfigRepository.get(ConfigLiterals.frameworkPrincipalTag)
-    val frameworkSecret: Option[ConfigurationSettingDomain] = connectionRepository.getConfigRepository.get(ConfigLiterals.frameworkSecretTag)
+    val frameworkPrincipal = connectionRepository.getConfigRepository.get(ConfigLiterals.frameworkPrincipalTag)
+    val frameworkSecret = connectionRepository.getConfigRepository.get(ConfigLiterals.frameworkSecretTag)
     var credential: Option[Credential] = None
 
     if (frameworkPrincipal.isDefined && frameworkSecret.isDefined) {

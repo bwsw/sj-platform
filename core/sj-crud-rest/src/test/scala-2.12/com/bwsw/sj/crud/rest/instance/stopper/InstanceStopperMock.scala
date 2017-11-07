@@ -29,7 +29,7 @@ class InstanceStopperMock(_marathonManager: MarathonApi,
                           _instanceManager: InstanceDomainRenewer,
                           instance: Instance,
                           marathonAddress: String)(implicit override val injector: Injector)
-  extends InstanceStopper(instance, marathonAddress, 100) with MockitoSugar {
+  extends InstanceStopper(instance, marathonAddress, delay = 100) with MockitoSugar {
 
   override protected val instanceManager: InstanceDomainRenewer = _instanceManager
   override protected val client: HttpClient = mock[HttpClient]

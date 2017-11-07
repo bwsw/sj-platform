@@ -56,6 +56,8 @@ class InstanceController(implicit injector: Injector) {
 
   private val logger = Logger(getClass)
   private val (zkHost, zkPort) = getZkProperties()
+  private val marathonUsername = settingsUtils.getFrameworkPrincipal()
+  private val marathonSecret = settingsUtils.getFrameworkSecret()
   private val serializer = inject[JsonSerializer]
   serializer.enableNullForPrimitives(false)
   private val jsonDeserializationErrorMessageCreator = inject[JsonDeserializationErrorMessageCreator]
@@ -234,21 +236,21 @@ class InstanceController(implicit injector: Injector) {
     logger.debug(s"Starting application of instance ${instance.name}.")
 
     val instanceStarter = inject[InstanceStarterBuilder]
-      .apply(instance, settingsUtils.getMarathonConnect(), zkHost, zkPort)
+      .apply(instance, settingsUtils.getMarathonConnect(), zkHost, zkPort, marathonUsername, marathonSecret)
     new Thread(instanceStarter).start()
   }
 
   private def stopInstance(instance: Instance) = {
     logger.debug(s"Stopping application of instance ${instance.name}.")
 
-    val instanceStopper = inject[InstanceStopperBuilder].apply(instance, settingsUtils.getMarathonConnect())
+    val instanceStopper = inject[InstanceStopperBuilder].apply(instance, settingsUtils.getMarathonConnect(), marathonUsername, marathonSecret)
     new Thread(instanceStopper).start()
   }
 
   private def destroyInstance(instance: Instance) = {
     logger.debug(s"Destroying application of instance ${instance.name}.")
 
-    val instanceDestroyer = inject[InstanceDestroyerBuilder].apply(instance, settingsUtils.getMarathonConnect())
+    val instanceDestroyer = inject[InstanceDestroyerBuilder].apply(instance, settingsUtils.getMarathonConnect(), marathonUsername, marathonSecret)
     new Thread(instanceDestroyer).start()
   }
 

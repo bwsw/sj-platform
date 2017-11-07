@@ -48,6 +48,8 @@ class InstanceStarter(instance: Instance,
                       marathonAddress: String,
                       zookeeperHost: Option[String] = None,
                       zookeeperPort: Option[Int] = None,
+                      marathonUsername: Option[String] = None,
+                      marathonPassword: Option[String] = None,
                       delay: Long = 1000,
                       marathonTimeout: Int = 60000)(implicit val injector: Injector) extends Runnable {
 
@@ -59,7 +61,7 @@ class InstanceStarter(instance: Instance,
   private lazy val restPort = settingsUtils.getCrudRestPort()
   private lazy val restAddress = RestLiterals.createUri(restHost, restPort)
   protected val instanceManager = new InstanceDomainRenewer()
-  protected val client = new HttpClient(marathonTimeout)
+  protected val client = new HttpClient(marathonTimeout, marathonUsername, marathonPassword)
   protected val marathonManager = new MarathonApi(client, marathonAddress)
   private val frameworkName = InstanceAdditionalFieldCreator.getFrameworkName(instance)
 
@@ -182,12 +184,12 @@ class InstanceStarter(instance: Instance,
 
   /**
     *
-    * @param marathonMaster mesos master used by marathon framework
+    * @param marathonMaster  mesos master used by marathon framework
     * @param zookeeperServer Format: '<zookeeper_ip>:<zookeeper_port>'
     * @return
     */
   protected def getFrameworkEnvironmentVariables(marathonMaster: String, zookeeperServer: String): Map[String, String] = {
-    val zooUrl = new URI("zk://"+zookeeperServer)
+    val zooUrl = new URI("zk://" + zookeeperServer)
     var environmentVariables = Map(
       instanceIdLabel -> instance.name,
       mesosMasterLabel -> marathonMaster,
@@ -243,6 +245,8 @@ class InstanceStarterBuilder(implicit val injector: Injector) {
             marathonAddress: String,
             zookeeperHost: Option[String] = None,
             zookeeperPort: Option[Int] = None,
+            marathonUsername: Option[String] = None,
+            marathonPassword: Option[String] = None,
             delay: Long = 1000,
             marathonTimeout: Int = 60000): InstanceStarter = {
     new InstanceStarter(
@@ -250,6 +254,8 @@ class InstanceStarterBuilder(implicit val injector: Injector) {
       marathonAddress,
       zookeeperHost,
       zookeeperPort,
+      marathonUsername,
+      marathonPassword,
       delay,
       marathonTimeout)
   }
