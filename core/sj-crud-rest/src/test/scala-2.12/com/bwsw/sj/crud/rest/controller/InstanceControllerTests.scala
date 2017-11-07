@@ -424,7 +424,7 @@ class InstanceControllerTests extends FlatSpec with Matchers with MockitoSugar w
     val httpClient = mock[HttpClient]
     when(httpClient.execute(argThat[HttpGet](
       (argument: HttpGet) => argument.getURI == new URI(restAddress)))).thenReturn(httpResponse)
-    when(httpClientBuilder.apply(anyInt())).thenReturn(httpClient)
+    when(httpClientBuilder.apply(anyInt(), any(), any())).thenReturn(httpClient)
 
     val expectedResponse = OkRestResponse(frameworkRestEntity)
     val response = controller.tasks(
