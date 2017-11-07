@@ -393,7 +393,7 @@
 			"description": "",
 			"collectionId": "0228ed14-1c01-e820-5a06-362b58e96e2e",
 			"responses": [],
-			"rawModeData": "{\"name\": \"marathon-connect\",\"value\": \"http://marathon.mm:8080\",\"domain\": \"configuration.system\"}"
+			"rawModeData": "{\"name\": \"marathon-connect\",\"value\": \"{{marathon-address}}\",\"domain\": \"configuration.system\"}"
 		},
 		{
 			"id": "d473bcf7-ffb9-a92e-4b63-10192596c6b1",

@@ -323,7 +323,7 @@
 			"description": "",
 			"collectionId": "86de6676-5e66-9bb8-88a3-bdfd7360e3df",
 			"responses": [],
-			"rawModeData": "{\n\"name\":\"marathon-connect\",\n\"value\":\"http://192.168.89.2:8080\",\n\"domain\":\"configuration.system\"\n}"
+			"rawModeData": "{\n\"name\":\"marathon-connect\",\n\"value\":\"{{marathon-address}}\",\n\"domain\":\"configuration.system\"\n}"
 		},
 		{
 			"id": "6041d5c2-b25f-23e6-6599-c2015835f2f6",

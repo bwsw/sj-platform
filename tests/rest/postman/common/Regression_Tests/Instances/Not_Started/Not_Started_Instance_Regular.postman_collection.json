@@ -500,7 +500,7 @@
 			"description": "",
 			"collectionId": "cc53151c-1cd6-f38d-2a49-5a4660f1ed8f",
 			"responses": [],
-			"rawModeData": "{\n\"name\":\"marathon-connect\",\n\"value\":\"http://192.168.89.2:8080\",\n\"domain\":\"configuration.system\"\n}"
+			"rawModeData": "{\n\"name\":\"marathon-connect\",\n\"value\":\"{{marathon-address}}\",\n\"domain\":\"configuration.system\"\n}"
 		},
 		{
 			"id": "c842945f-9f12-21b9-9d5b-6a9df88fd120",

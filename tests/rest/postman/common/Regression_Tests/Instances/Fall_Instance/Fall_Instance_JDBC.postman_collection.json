@@ -208,7 +208,7 @@
 			"description": "",
 			"collectionId": "08247709-f217-ddce-3929-602e49a406da",
 			"responses": [],
-			"rawModeData": "{\n\"name\":\"marathon-connect\",\n\"value\":\"http://192.168.89.2:8080\",\n\"domain\":\"configuration.system\"\n}"
+			"rawModeData": "{\n\"name\":\"marathon-connect\",\n\"value\":\"{{marathon-address}}\",\n\"domain\":\"configuration.system\"\n}"
 		},
 		{
 			"id": "5955dcc8-5aa7-6796-b9e4-f51df7d6ef97",
