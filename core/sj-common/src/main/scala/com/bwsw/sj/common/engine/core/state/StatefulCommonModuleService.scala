@@ -91,13 +91,13 @@ class StatefulCommonModuleService(manager: CommonTaskManager,
   /**
     * Does group checkpoint of t-streams state consumers/producers
     */
-  override def doCheckpoint(): Unit = {
+  override def prepareToCheckpoint(): Unit = {
     if (countOfCheckpoints != stateFullCheckpoint) {
       doCheckpointOfPartOfState()
     } else {
       doCheckpointOfFullState()
     }
-    super.doCheckpoint()
+    super.prepareToCheckpoint()
   }
 
   /**

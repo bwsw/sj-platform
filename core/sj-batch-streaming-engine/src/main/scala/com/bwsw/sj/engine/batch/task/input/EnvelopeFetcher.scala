@@ -67,7 +67,7 @@ class EnvelopeFetcher(taskInput: RetrievableCheckpointTaskInput[Envelope], lowWa
 
   def registerEnvelope(envelope: Envelope): Unit = taskInput.registerEnvelope(envelope)
 
-  def doCheckpoint(): Unit = taskInput.doCheckpoint()
+  def prepareToCheckpoint(): Unit = taskInput.prepareToCheckpoint()
 
   def close(): Unit = taskInput.close()
 }

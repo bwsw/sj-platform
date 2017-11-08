@@ -47,7 +47,7 @@ class TStreamsSenderThreadMock(streams: Set[String])
   def getStreamDataList: Seq[StreamData] =
     streamDataList.values.filter(_.partitionDataList.nonEmpty).toSeq
 
-  override def checkpoint(): Unit = streamDataList.clear()
+  override def prepareToCheckpoint(): Unit = streamDataList.clear()
 
 
   override def run(): Unit = {}

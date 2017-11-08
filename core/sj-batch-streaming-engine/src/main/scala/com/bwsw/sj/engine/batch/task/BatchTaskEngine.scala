@@ -243,8 +243,8 @@ class BatchTaskEngine(manager: CommonTaskManager,
     logger.debug(s"Invoke onBeforeCheckpoint() handler.")
     executor.onBeforeCheckpoint()
     logger.debug(s"Do group checkpoint.")
-    moduleService.doCheckpoint()
-    envelopeFetcher.doCheckpoint()
+    moduleService.prepareToCheckpoint()
+    envelopeFetcher.prepareToCheckpoint()
     checkpointGroup.checkpoint()
     logger.debug(s"Invoke onAfterCheckpoint() handler.")
   }

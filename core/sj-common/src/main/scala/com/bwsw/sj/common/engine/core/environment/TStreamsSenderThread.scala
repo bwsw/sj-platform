@@ -63,9 +63,9 @@ class TStreamsSenderThread(producers: Map[String, Producer],
     messagesQueue.put(SerializedEnvelope(bytes, stream, partition))
 
   /**
-    * Performs checkpoint
+    * Blocks until all messages will be sent into T-Streams
     */
-  def checkpoint(): Unit = {
+  def prepareToCheckpoint(): Unit = {
     synchronized {
       messagesQueue.put(Checkpoint)
       wait()

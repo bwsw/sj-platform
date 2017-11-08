@@ -51,6 +51,6 @@ abstract class CheckpointTaskInput[E <: Envelope](inputs: scala.collection.mutab
 
   protected def setConsumerOffset(envelope: E): Unit
 
-  def doCheckpoint(): Unit =
+  def prepareToCheckpoint(): Unit =
     setConsumerOffsetToLastEnvelope()
 }

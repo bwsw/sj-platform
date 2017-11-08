@@ -252,7 +252,7 @@ abstract class InputTaskEngine(manager: InputTaskManager,
     */
   private def doCheckpoint(): Unit = {
     logInfo("It's time to checkpoint.")
-    senderThread.checkpoint()
+    senderThread.prepareToCheckpoint()
     checkpointGroup.checkpoint()
     checkpointInitiated()
     prepareForNextCheckpoint()
