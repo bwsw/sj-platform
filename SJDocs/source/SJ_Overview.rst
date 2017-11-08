@@ -4,7 +4,7 @@ Stream Juggler Platform Overview
 Introduction to Stream Juggler Platform
 ----------------------------
 
-Stream Juggler Platform (**SJ-Platform**) is an open source, scalable solution for real-time and micro-batched unbounded streams processing. The system fits for building an event processing systems and allows a developer to construct connected pipelines for analyzing data streams. **Stream** is unbound sequence of events processed sequentially from the oldest ones to newest ones. SJ-Platform is built to be smooth and easy to understand and learn for an average developer who knows Scala language. The system doesn't require any specific knowledge of mathematical concepts like some competing require. Thus, it makes it easy for a common type engineer to solve stream processing tasks.
+Stream Juggler Platform (**SJ-Platform**) is an open source, scalable solution for real-time and micro-batched unbounded streams processing. The system fits for building an event processing systems and allows a developer to construct connected pipelines for analyzing data streams. **Stream** is unbound sequence of events processed sequentially from the oldest ones to newest ones. SJ-Platform is built to be smooth and easy to understand and learn for an average developer who knows Scala language. The system doesn't require any specific knowledge of mathematical concepts like some competing systems require. Thus, it makes it easy for a common type engineer to solve stream processing tasks.
 
 Basically, SJ-Platform is inspired by `Apache Samza <http://samza.apache.org/>`_, but has a lot of features which Samza doesn't provide, like exactly-once processing capability, integrated RESTful API and Web UI and lots of others.
 
@@ -31,7 +31,7 @@ The documentation corresponds to the Stream Juggler Platform Release 1.1.1. It i
 
 Preliminary Requirements to The Reader
 -------------------------------
-SJ-Platform is a quite complex system, but the tutorial tries to guide the reader as smooth as possible. So, there is quite a small amount of requirements to a reader. To achieve the success the reader must have knowledge of:
+SJ-Platform is a quite complex system, but the tutorial tries to guide the reader as smooth as possible. So, there is quite a small amount of requirements to a reader. To achieve the success the reader must be familiar with:
 
 1. scala programming language and generic data structures;
 2. basics of Docker.
@@ -66,7 +66,7 @@ The second is **Apache Kafka**. Apache Kafka is the de-facto standard for messag
 
 The third is **T-streams**. T-streams is Kafka-like message broker which is native to SJ-Platform and is used as internal data exchange bus inside the system.
 
-**JDBC/Elasticsearch/RESTful interface as an output destination for processing data**. Processed data are exported to JDBC-compatible database, Elasticsearch or RESTful interface.
+**JDBC/Elasticsearch/RESTful interface as an output destination for processing data**. Processed data are exported to JDBC-compatible database, Elasticsearch or a datastore with RESTful interface.
 
 **Performance metrics**. SJ-Platform supports embedded performance metrics which help system managers to observe the runtime performance of the system.
 
