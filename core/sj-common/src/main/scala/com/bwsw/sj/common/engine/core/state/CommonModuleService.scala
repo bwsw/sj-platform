@@ -57,8 +57,8 @@ abstract class CommonModuleService(protected val instance: Instance,
     logger.debug(s"The t-stream producers are added to checkpoint group.")
   }
 
-  def doCheckpoint(): Unit =
-    senderThread.checkpoint()
+  def prepareToCheckpoint(): Unit =
+    senderThread.prepareToCheckpoint()
 
   def isCheckpointInitiated: Boolean = environmentManager.isCheckpointInitiated
 

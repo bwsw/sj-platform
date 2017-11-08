@@ -58,10 +58,11 @@ abstract class OutputTaskEngine(manager: OutputTaskManager,
   private val environmentManager: OutputEnvironmentManager = createModuleEnvironmentManager()
   private val executor: OutputStreamingExecutor[AnyRef] = manager.getExecutor(environmentManager)
   private val entity: Entity[_] = executor.getOutputEntity
+  private val checkpointGroup = manager.createCheckpointGroup()
   val taskInputService: CallableTStreamCheckpointTaskInput[AnyRef] = new CallableTStreamCheckpointTaskInput[AnyRef](
     manager,
     blockingQueue,
-    manager.createCheckpointGroup(),
+    checkpointGroup,
     executor)
   private val outputProcessor: OutputProcessor[AnyRef] = OutputProcessor[AnyRef](
     outputStream,
@@ -142,7 +143,8 @@ abstract class OutputTaskEngine(manager: OutputTaskManager,
   protected def doCheckpoint(): Unit = {
     logger.info(s"Task: ${manager.taskName}. It's time to checkpoint.")
     outputProcessor.checkpoint()
-    taskInputService.doCheckpoint()
+    taskInputService.prepareToCheckpoint()
+    checkpointGroup.checkpoint()
     logger.debug(s"Task: ${manager.taskName}. Do group checkpoint.")
     prepareForNextCheckpoint()
     wasFirstCheckpoint = true

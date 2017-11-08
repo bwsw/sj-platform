@@ -61,7 +61,7 @@ class StatefulCommonModuleService(manager: CommonTaskManager,
     }
   }
   protected val senderThread = new TStreamsSenderThread(
-    manager.outputProducers, checkpointGroup, performanceMetrics, s"${manager.instance.moduleType}-${manager.taskName}-sender")
+    manager.outputProducers, performanceMetrics, s"${manager.instance.moduleType}-${manager.taskName}-sender")
   senderThread.start()
 
   private def createStateService() = {
@@ -91,13 +91,13 @@ class StatefulCommonModuleService(manager: CommonTaskManager,
   /**
     * Does group checkpoint of t-streams state consumers/producers
     */
-  override def doCheckpoint(): Unit = {
-    super.doCheckpoint()
+  override def prepareToCheckpoint(): Unit = {
     if (countOfCheckpoints != stateFullCheckpoint) {
       doCheckpointOfPartOfState()
     } else {
       doCheckpointOfFullState()
     }
+    super.prepareToCheckpoint()
   }
 
   /**
