@@ -26,9 +26,11 @@ import com.typesafe.config.Config
 /**
   * Provides methods for sending data into Kafka topic for test some application
   *
+  * @param config                  configuration of data sender
+  * @param messagesCountMultiplier multiplies count of messages sending by send()
   * @author Pavel Tomskikh
   */
-class KafkaBenchmarkDataSender(config: KafkaBenchmarkDataSenderConfig)
+class KafkaBenchmarkDataSender(config: KafkaBenchmarkDataSenderConfig, messagesCountMultiplier: Double)
   extends BenchmarkDataSender[KafkaBenchmarkDataSenderParameters] {
 
   override val warmingUpParameters = KafkaBenchmarkDataSenderParameters(10, 10)
@@ -61,7 +63,7 @@ class KafkaBenchmarkDataSender(config: KafkaBenchmarkDataSenderConfig)
 
     if (parameters.messagesCount > currentStorageSize) {
       val appendedMessages = parameters.messagesCount - currentStorageSize
-      sender.send(currentMessageSize, appendedMessages + appendedMessages / 10)
+      sender.send(currentMessageSize, (appendedMessages * messagesCountMultiplier).toInt)
       currentStorageSize = parameters.messagesCount
     }
   }
@@ -103,12 +105,14 @@ class KafkaBenchmarkDataSender(config: KafkaBenchmarkDataSenderConfig)
   }
 }
 
-object KafkaBenchmarkDataSender
+object KafkaBenchmarkDataSender extends KafkaBenchmarkDataSenderFactory
+
+class KafkaBenchmarkDataSenderFactory(messagesCountMultiplier: Double = 1.1)
   extends SenderFactory[KafkaBenchmarkDataSenderParameters, KafkaBenchmarkDataSenderConfig] {
 
   override def create(config: Config): (KafkaBenchmarkDataSender, KafkaBenchmarkDataSenderConfig) = {
     val senderConfig = new KafkaBenchmarkDataSenderConfig(config)
-    val sender = new KafkaBenchmarkDataSender(senderConfig)
+    val sender = new KafkaBenchmarkDataSender(senderConfig, messagesCountMultiplier)
 
     (sender, senderConfig)
   }

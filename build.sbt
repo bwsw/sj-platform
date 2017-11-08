@@ -141,6 +141,7 @@ lazy val regularStreamingEngine = Project(id = "sj-regular-streaming-engine",
     test in Test := (test in Test).dependsOn((Keys.`package` in Compile) in stubRegular).value
   )
   .dependsOn(engineCore)
+  .dependsOn(crudRest % "test")
 
 lazy val batchStreamingEngine = Project(id = "sj-batch-streaming-engine",
   base = file("./core/sj-batch-streaming-engine"))
@@ -150,6 +151,7 @@ lazy val batchStreamingEngine = Project(id = "sj-batch-streaming-engine",
     test in Test := (test in Test).dependsOn((Keys.`package` in Compile) in stubBatch).value
   )
   .dependsOn(engineCore)
+  .dependsOn(crudRest % "test")
 
 lazy val outputStreamingEngine = Project(id = "sj-output-streaming-engine",
   base = file("./core/sj-output-streaming-engine"))

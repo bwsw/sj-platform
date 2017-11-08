@@ -30,9 +30,8 @@ import com.typesafe.config.Config
   * @author Pavel Tomskikh
   */
 class TStreamsBenchmarkDataSenderConfig(override protected val config: Config) extends BenchmarkDataSenderConfig {
-  val zooKeeperAddress = config.getString(zooKeeperAddressConfig)
-  val prefix = config.getString(tStreamsPrefixConfig)
-  val token = config.getString(tStreamsTokenConfig)
-  val sizePerTransaction = config.getString(tStreamsSizePerTransaction).split(",").map(_.toLong)
-  val stream = "performance-benchmark-" + UUID.randomUUID().toString
+  val prefix: String = config.getString(tStreamsPrefixConfig)
+  val token: String = config.getString(tStreamsTokenConfig)
+  val sizePerTransaction: Array[Long] = config.getString(tStreamsSizePerTransaction).split(",").map(_.toLong)
+  val stream: String = "performance-benchmark-" + UUID.randomUUID().toString
 }

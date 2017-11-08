@@ -22,7 +22,6 @@ import java.util.concurrent.Callable
 
 import com.bwsw.common.SerializerInterface
 import com.bwsw.sj.common.dal.model.stream.StreamDomain
-import com.bwsw.sj.common.engine.core.entities.Envelope
 import com.bwsw.sj.common.engine.core.entities.{Envelope, EnvelopeInterface, WeightedBlockingQueue}
 import com.bwsw.sj.common.engine.core.managment.CommonTaskManager
 import com.bwsw.sj.common.utils.StreamLiterals

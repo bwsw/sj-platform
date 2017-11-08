@@ -104,7 +104,7 @@ And the first step is the system deployment.
 Step 1. Deployment 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Though SJ-Platform is quite a complex system and it requires a range of services to be deployed, no special skills are required for its setting up. 
+Though SJ-Platform is quite a complex system and it includes a range of services to be deployed, no special skills are required for its setting up. 
 
 There are three options to deploy the platform. Please, read the description for each option and choose the most convenient for you.
 
@@ -149,9 +149,7 @@ For the example task, the instructions are provided for the platform deployment 
 
 The deployment is performed via REST API.
 
-Alongside with Apache Mesos, the system works on the basis of the following core technologies: Apache Zookeeper, Apache Kafka, Docker, MongoDB, Hazelcast, Elasticsearch, SQL database, REST.
-
-To solve the example task we need to deploy:
+To solve the example task we need to deploy the following services:
 
 1. Apache Mesos - a cluster for all computations;
 2. Mesosphere Marathon - a framework for executing tasks on Mesos;
@@ -164,20 +162,18 @@ To solve the example task we need to deploy:
 9. Elasticsearch - as an external data storage;
 10. Kibana - to visualize Elasticsearch data.
 
-So, as a first step, you should deploy Mesos and other services.
+So, let's start with deploying Mesos and other services.
 
-1) Deploy Mesos, Marathon, Zookeeper. You can follow the instructions at the official `installation guide <http://www.bogotobogo.com/DevOps/DevOps_Mesos_Install.php>`_ .
+1) Deploy Mesos, Marathon, Zookeeper following the instructions at the official `installation guide <http://www.bogotobogo.com/DevOps/DevOps_Mesos_Install.php>`_ .
 
-Please, note, the deployment is described for one default Mesos-slave with available ports [31000-32000]. 
+Please, note, the deployment is described here for one default Mesos-slave with available ports [31000-32000]. 
 
-If you are planning to launch a module with a greater value of the "parallelizm" parameter, i.e. to run tasks on more than 1 nodes, you need to increase the "executor_registration_timeout" parameter for Mesos-slave.
-
-The requirements to Mesos-slave: 
+Mesos-slave must support Docker containerizer. The technical requirements to Mesos-slave are the following: 
 
 - 2 CPUs, 
 - 4096 memory.
 
-Mesos-slave must support Docker containerizer.
+.. note:: If you are planning to launch a module with a greater value of the "parallelizm" parameter, i.e. to run tasks on more than 1 nodes, you need to increase the "executor_registration_timeout" parameter for Mesos-slave.
 
 For Docker deployment follow the instructions at the official `installation guide <https://docs.docker.com/engine/installation/linux/docker-ce/ubuntu/#install-docker-ce>`_ .
 
@@ -478,7 +474,7 @@ Via the Marathon interface, make sure the services are deployed.
     curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"framework-principal\",\"value\": <principal>,\"domain\": \"configuration.system\"}" 
     curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"framework-secret\",\"value\": <secret>,\"domain\": \"configuration.system\"}" 
  
-6) Copy the demonstrational project repository::
+6) Copy the demonstrational task project from GitHub::
 
     cd ..
     git clone https://github.com/bwsw/sj-fping-demo.git

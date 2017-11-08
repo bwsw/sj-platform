@@ -34,7 +34,7 @@ import scaldi.Injector
   * @author Kseniya Mikhaleva
   */
 class RetrievableCompleteCheckpointTaskInput[T <: AnyRef](manager: CommonTaskManager,
-                                                          override val checkpointGroup: CheckpointGroup,
+                                                          checkpointGroup: CheckpointGroup,
                                                           envelopeDataSerializer: SerializerInterface,
                                                           lowWatermark: Int)
                                                          (implicit injector: Injector)

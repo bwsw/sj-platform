@@ -104,7 +104,7 @@ class CommonEngineSimulator[T <: AnyRef](executor: StreamingExecutor with StateH
     executor.onBeforeStateSave(isFullState)
 
     val result = simulationResult
-    manager.senderThread.checkpoint()
+    manager.senderThread.prepareToCheckpoint()
 
     result
   }

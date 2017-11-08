@@ -22,7 +22,6 @@ import java.io.Closeable
 
 import com.bwsw.sj.common.dal.model.stream.StreamDomain
 import com.bwsw.sj.common.engine.core.entities.Envelope
-import com.bwsw.tstreams.agents.group.CheckpointGroup
 
 import scala.collection.mutable
 
@@ -34,7 +33,6 @@ import scala.collection.mutable
   */
 abstract class CheckpointTaskInput[E <: Envelope](inputs: scala.collection.mutable.Map[StreamDomain, Array[Int]]) extends Closeable {
   private val lastEnvelopesByStreams: mutable.Map[(String, Int), Envelope] = createStorageOfLastEnvelopes()
-  val checkpointGroup: CheckpointGroup
 
   private def createStorageOfLastEnvelopes(): mutable.Map[(String, Int), Envelope] = {
     inputs.flatMap(x => x._2.map(y => ((x._1.name, y), new Envelope())))
@@ -53,8 +51,6 @@ abstract class CheckpointTaskInput[E <: Envelope](inputs: scala.collection.mutab
 
   protected def setConsumerOffset(envelope: E): Unit
 
-  def doCheckpoint(): Unit = {
+  def prepareToCheckpoint(): Unit =
     setConsumerOffsetToLastEnvelope()
-    checkpointGroup.checkpoint()
-  }
 }

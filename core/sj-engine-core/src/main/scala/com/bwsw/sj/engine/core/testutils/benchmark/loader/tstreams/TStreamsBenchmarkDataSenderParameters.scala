@@ -25,7 +25,7 @@ import com.bwsw.sj.engine.core.testutils.benchmark.loader.BenchmarkDataSenderPar
   *
   * @param transactionSize count of messages per transaction
   * @param messageSize     size of one message
-  * @param messagesCount    count of messages
+  * @param messagesCount   count of messages
   * @author Pavel Tomskikh
   */
 case class TStreamsBenchmarkDataSenderParameters(transactionSize: Long, messageSize: Long, messagesCount: Long)

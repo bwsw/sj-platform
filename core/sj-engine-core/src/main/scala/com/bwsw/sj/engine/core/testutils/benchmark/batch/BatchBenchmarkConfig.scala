@@ -23,12 +23,12 @@ import com.bwsw.sj.engine.core.testutils.benchmark.BenchmarkConfig
 import com.typesafe.config.Config
 
 /**
-  * Contains configurations of application in a batch mode
+  * Contains configurations of application in batch mode
   *
   * @author Pavel Tomskikh
   */
 class BatchBenchmarkConfig(config: Config) extends BenchmarkConfig(config) {
-  val batchSizes = config.getString(batchSizesConfig).split(",").map(_.toInt)
-  val windowSizes = config.getString(windowSizesConfig).split(",").map(_.toInt)
-  val slidingIntervals = config.getString(slidingIntervalsConfig).split(",").map(_.toInt)
+  val batchSizes: Array[Int] = config.getString(batchSizesConfig).split(",").map(_.toInt)
+  val windowSizes: Array[Int] = config.getString(windowSizesConfig).split(",").map(_.toInt)
+  val slidingIntervals: Array[Int] = config.getString(slidingIntervalsConfig).split(",").map(_.toInt)
 }
