@@ -47,7 +47,7 @@ import scala.collection.mutable
   */
 class CallableTStreamCheckpointTaskInput[T <: AnyRef](manager: TaskManager,
                                                       blockingQueue: WeightedBlockingQueue[EnvelopeInterface],
-                                                      override val checkpointGroup: CheckpointGroup,
+                                                      checkpointGroup: CheckpointGroup,
                                                       envelopeDataSerializer: SerializerInterface)
   extends CallableCheckpointTaskInput[TStreamEnvelope[T]](manager.inputs) {
 

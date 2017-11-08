@@ -22,7 +22,6 @@ import java.util.concurrent.{ArrayBlockingQueue, TimeUnit}
 
 import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
 import com.bwsw.sj.common.utils.EngineLiterals
-import com.bwsw.tstreams.agents.group.CheckpointGroup
 import com.bwsw.tstreams.agents.producer.{NewProducerTransactionPolicy, Producer, ProducerTransaction}
 import com.typesafe.scalalogging.Logger
 
@@ -32,13 +31,11 @@ import scala.collection.mutable
   * Thread for sending data to the T-Streams service
   *
   * @param producers          t-stream producers for saving data
-  * @param checkpointGroup    group of t-stream agents that have to make a checkpoint at the same time
   * @param performanceMetrics set of metrics that characterize performance of an input streaming module
   * @param threadName         name of new thread
   * @author Pavel Tomskikh
   */
 class TStreamsSenderThread(producers: Map[String, Producer],
-                           checkpointGroup: CheckpointGroup,
                            performanceMetrics: PerformanceMetrics,
                            threadName: String)
   extends Thread(threadName) {
@@ -119,8 +116,6 @@ class TStreamsSenderThread(producers: Map[String, Producer],
   }
 
   private def internalCheckpoint(): Unit = {
-    logger.debug(s"Thread $threadName. Do group checkpoint.")
-    checkpointGroup.checkpoint()
     synchronized {
       notify()
     }

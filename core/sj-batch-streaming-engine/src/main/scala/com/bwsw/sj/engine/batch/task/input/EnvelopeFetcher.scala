@@ -22,7 +22,6 @@ import java.util.concurrent.{BlockingQueue, Executors, LinkedBlockingQueue, Sche
 
 import com.bwsw.sj.common.engine.core.entities.Envelope
 import com.bwsw.sj.common.utils.EngineLiterals
-import com.bwsw.tstreams.agents.group.CheckpointGroup
 import com.google.common.util.concurrent.ThreadFactoryBuilder
 import com.typesafe.scalalogging.Logger
 
@@ -69,8 +68,6 @@ class EnvelopeFetcher(taskInput: RetrievableCheckpointTaskInput[Envelope], lowWa
   def registerEnvelope(envelope: Envelope): Unit = taskInput.registerEnvelope(envelope)
 
   def doCheckpoint(): Unit = taskInput.doCheckpoint()
-
-  def checkpointGroup: CheckpointGroup = taskInput.checkpointGroup
 
   def close(): Unit = taskInput.close()
 }

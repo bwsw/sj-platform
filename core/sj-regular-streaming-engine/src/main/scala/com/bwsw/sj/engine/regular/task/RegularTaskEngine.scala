@@ -127,6 +127,7 @@ abstract class RegularTaskEngine(manager: CommonTaskManager,
     logger.debug(s"Task: ${manager.taskName}. Do group checkpoint.")
     moduleService.doCheckpoint()
     taskInputService.doCheckpoint()
+    checkpointGroup.checkpoint()
     logger.debug(s"Task: ${manager.taskName}. Invoke onAfterCheckpoint() handler.")
     prepareForNextCheckpoint()
   }

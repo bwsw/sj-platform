@@ -245,6 +245,7 @@ class BatchTaskEngine(manager: CommonTaskManager,
     logger.debug(s"Do group checkpoint.")
     moduleService.doCheckpoint()
     envelopeFetcher.doCheckpoint()
+    checkpointGroup.checkpoint()
     logger.debug(s"Invoke onAfterCheckpoint() handler.")
   }
 }

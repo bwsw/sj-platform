@@ -20,7 +20,6 @@ package com.bwsw.sj.engine.core.simulation.state
 
 import com.bwsw.sj.common.engine.core.environment.TStreamsSenderThread
 import com.bwsw.sj.common.engine.core.reporting.PerformanceMetrics
-import com.bwsw.tstreams.agents.group.CheckpointGroup
 import org.mockito.Mockito.mock
 
 import scala.collection.mutable
@@ -34,7 +33,6 @@ import scala.collection.mutable
 class TStreamsSenderThreadMock(streams: Set[String])
   extends TStreamsSenderThread(
     Map.empty,
-    mock(classOf[CheckpointGroup]),
     mock(classOf[PerformanceMetrics]),
     "TStreamsSenderThreadMock") {
 

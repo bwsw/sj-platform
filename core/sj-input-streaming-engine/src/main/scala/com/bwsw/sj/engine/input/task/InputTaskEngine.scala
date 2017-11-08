@@ -94,7 +94,7 @@ abstract class InputTaskEngine(manager: InputTaskManager,
   addProducersToCheckpointGroup()
 
   private val senderThread = new TStreamsSenderThread(
-    producers, checkpointGroup, performanceMetrics, s"input-task-${manager.taskName}-sender")
+    producers, performanceMetrics, s"input-task-${manager.taskName}-sender")
   senderThread.start()
 
   private def createModuleEnvironmentManager(): InputEnvironmentManager = {
@@ -253,6 +253,7 @@ abstract class InputTaskEngine(manager: InputTaskManager,
   private def doCheckpoint(): Unit = {
     logInfo("It's time to checkpoint.")
     senderThread.checkpoint()
+    checkpointGroup.checkpoint()
     checkpointInitiated()
     prepareForNextCheckpoint()
   }
