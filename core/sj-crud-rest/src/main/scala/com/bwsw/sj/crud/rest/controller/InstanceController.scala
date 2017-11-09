@@ -56,8 +56,6 @@ class InstanceController(implicit injector: Injector) {
 
   private val logger = Logger(getClass)
   private val (zkHost, zkPort) = getZkProperties()
-  private val marathonUsername = settingsUtils.getFrameworkPrincipal()
-  private val marathonSecret = settingsUtils.getFrameworkSecret()
   private val serializer = inject[JsonSerializer]
   serializer.enableNullForPrimitives(false)
   private val jsonDeserializationErrorMessageCreator = inject[JsonDeserializationErrorMessageCreator]
@@ -232,7 +230,7 @@ class InstanceController(implicit injector: Injector) {
     }
   }
 
-  private def startInstance(instance: Instance) = {
+  private def startInstance(instance: Instance): Unit = {
     logger.debug(s"Starting application of instance ${instance.name}.")
 
     val instanceStarter = inject[InstanceStarterBuilder]
@@ -240,17 +238,19 @@ class InstanceController(implicit injector: Injector) {
     new Thread(instanceStarter).start()
   }
 
-  private def stopInstance(instance: Instance) = {
+  private def stopInstance(instance: Instance): Unit = {
     logger.debug(s"Stopping application of instance ${instance.name}.")
 
-    val instanceStopper = inject[InstanceStopperBuilder].apply(instance, settingsUtils.getMarathonConnect(), marathonUsername, marathonSecret)
+    val instanceStopper = inject[InstanceStopperBuilder].apply(
+      instance, settingsUtils.getMarathonConnect(), marathonUsername, marathonSecret)
     new Thread(instanceStopper).start()
   }
 
-  private def destroyInstance(instance: Instance) = {
+  private def destroyInstance(instance: Instance): Unit = {
     logger.debug(s"Destroying application of instance ${instance.name}.")
 
-    val instanceDestroyer = inject[InstanceDestroyerBuilder].apply(instance, settingsUtils.getMarathonConnect(), marathonUsername, marathonSecret)
+    val instanceDestroyer = inject[InstanceDestroyerBuilder].apply(
+      instance, settingsUtils.getMarathonConnect(), marathonUsername, marathonSecret)
     new Thread(instanceDestroyer).start()
   }
 
@@ -267,7 +267,7 @@ class InstanceController(implicit injector: Injector) {
       serializer.deserialize[InstanceApi](serialized)
   }
 
-  private def validateInstance(instance: Instance, specification: Specification) = {
+  private def validateInstance(instance: Instance, specification: Specification): Seq[String] = {
     val validatorClassConfig = s"${ConfigLiterals.systemDomain}.${instance.moduleType}-validator-class"
     val validatorClassName = configService.get(validatorClassConfig) match {
       case Some(configurationSetting) => configurationSetting.value
@@ -275,7 +275,9 @@ class InstanceController(implicit injector: Injector) {
         createMessage("rest.config.setting.notfound", validatorClassConfig))
     }
     val validatorClass = Class.forName(validatorClassName)
-    val validator = validatorClass.getConstructor(classOf[Injector]).newInstance(injector).asInstanceOf[InstanceValidator]
+    val validator =
+      validatorClass.getConstructor(classOf[Injector]).newInstance(injector).asInstanceOf[InstanceValidator]
+
     validator.validate(instance.asInstanceOf[validator.T], specification)
   }
 
@@ -294,4 +296,11 @@ class InstanceController(implicit injector: Injector) {
 
     (zkHost, zkPort)
   }
+
+
+  private def marathonUsername: Option[String] =
+    settingsUtils.getFrameworkPrincipal()
+
+  private def marathonSecret: Option[String] =
+    settingsUtils.getFrameworkSecret()
 }
