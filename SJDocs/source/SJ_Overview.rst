@@ -48,7 +48,7 @@ Short Features List for Impatient
 -------------------------------
 Major features implemented in SJ-Platform are listed in the following list:
 
-**Processes data exactly-once**. This is a very critical requirement which is important for many systems. SJ-Platform supports exactly-once mode across the pipeline.
+**Processes data exactly-once**. This is a very critical requirement which is important for many systems. SJ-Platform supports exactly-once processing mode in each module and across the pipeline.
 
 **Two kinds of processing - per-event and micro-batch**. These modes are widely used and cover requirements of all stream processing tasks.
 
