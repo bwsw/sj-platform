@@ -20,7 +20,7 @@ Through an example project, a user will get to know the system structure, its ke
 SJ-Platform Overview
 ----------------------------------
 
-In SJ-Platform the data streams pass a processor that handles their transformation and processing. A **processor** can be represented by a module or an array of modules. Configurations uploaded to the system determine the mode of data processing in these modules.
+In SJ-Platform the data streams pass a processor that handles their transformation and processing. A **processor** can be represented by a module or a set of modules. Configurations uploaded to the system determine the mode of data processing in these modules.
 
 The result data are exported to an external storage. It can be Elasticsearch, RESTful endpoint or JDBC-compatible data storages.
 
@@ -33,7 +33,7 @@ To configure and monitor the system, SJ-Platform provides a user with a comprehe
 
 Below an example of a real-life task solution will demonstrate the platform at work for better understanding of how the data processing can be performed on the platform. Thus, the tutorial will provide you with:
 
-1. a ready-to-use problem resolution of an example task on SJ-Platform base;
+1. a ready-to-use problem solution of an example task on SJ-Platform base;
 
 2. instructions on development, deployment and customization of your own code for your specific aims.
 
@@ -742,7 +742,7 @@ For the Example task
 
 For **sj-regex-input module**:
 
-Create an ‘echo-response’ output stream of the *sj-regex-input* module (consequently, an input stream of ps-process module). It will be used for keeping an IP and average time from ICMP echo-response and also a timestamp of the event::
+Create an ‘echo-response’ output stream of the *sj-regex-input* module (consequently, an input stream of the processing module). It will be used for keeping an IP and average time from ICMP echo-response and also a timestamp of the event::
 
  curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/echo-response.json"
 
@@ -939,15 +939,15 @@ Once the task is resolved and necessary data are aggregated, the instances can b
 
 A stopped instance can be restarted again if it is necessary.
 
-If there is no need for it anymore, a suspended instance can be deleted. On the basis of the uploaded modules and the whole created infrastructure (providers, services, streams) other instances can be created for other purposes.
+If there is no need for it anymore, a stopped instance can be deleted. On the basis of the uploaded modules and the whole created infrastructure (providers, services, streams) other instances can be created for other purposes.
 
 To stop instances in the example task the following requests should be sent.
 
-For suspending the **sj-regex-input module instance** send::
+To stop the **sj-regex-input module instance** send::
 
  curl --request GET "http://$address/v1/modules/input-streaming/pingstation-input/1.0/instance/pingstation-input/stop"
 
-For suspending the **ps-process module instances** send::
+To stop the **ps-process module instances** send::
 
  curl --request GET "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance/pingstation-process/stop "
 
@@ -955,7 +955,7 @@ For suspending the **ps-process module instances** send::
 
  curl --request GET "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance/pingstation-process-1h/stop "
 
-For suspending the **ps-output module instances** send::
+To stop the **ps-output module instances** send::
 
  curl --request GET "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance/pingstation-output/stop" 
 
@@ -963,7 +963,7 @@ For suspending the **ps-output module instances** send::
 
  curl --request GET "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance/pingstation-output-1h/stop" 
 
-In the UI, you will see the suspended instances with the “stopped” status.
+In the UI, you will see the stopped instances with the “stopped” status.
 
 .. figure:: _static/InstancesStopped.png
 
