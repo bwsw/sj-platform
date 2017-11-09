@@ -465,7 +465,7 @@ Via the Marathon interface, make sure the services are deployed.
 
 .. figure:: _static/ServicesOnMarathon.png
 
-4) Copy the SJ-Platform project from the GitHub repository::
+4) Copy the SJ-Platform repository from GitHub::
 
     git clone https://github.com/bwsw/sj-platform.git
 
@@ -474,7 +474,7 @@ Via the Marathon interface, make sure the services are deployed.
     curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"framework-principal\",\"value\": <principal>,\"domain\": \"configuration.system\"}" 
     curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"framework-secret\",\"value\": <secret>,\"domain\": \"configuration.system\"}" 
  
-6) Copy the demonstrational task project from GitHub::
+6) Copy the demonstrational task repository from GitHub::
 
     cd ..
     git clone https://github.com/bwsw/sj-fping-demo.git
