@@ -75,7 +75,7 @@ At the end of deploying you can see urls of all services.
 Description
 """""""""""""""""""
 
-After launching Vagrant you will get the access to Mesos, Marathon, the SJ-Platform REST API and UI. In the UI you will see all the platform entities created for the `fping demo <http://streamjuggler.readthedocs.io/en/develop/Tutorial.html>`_ project:
+After launching Vagrant you will get the access to Mesos, Marathon, the SJ-Platform REST API and UI. In the UI you will see all the platform entities created for the `fping demo <http://streamjuggler.readthedocs.io/en/develop/Tutorial.html#fping-example-task>`_ project:
 
 - configurations for modules;
 - modules;
