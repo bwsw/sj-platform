@@ -562,7 +562,7 @@
 			"data": null,
 			"dataMode": "params",
 			"version": 2,
-			"tests": "tests[\"Status code is 200\"] = responseCode.code === 200;\n\ntests[\"Body matches string\"] = responseBody.has(\"Instance 'integration-output' has not been found\");",
+			"tests": "tests[\"Status code is 404\"] = responseCode.code === 404;\n\ntests[\"Body matches string\"] = responseBody.has(\"Instance 'integration-output' has not been found\");",
 			"currentHelper": "normal",
 			"helperAttributes": {},
 			"time": 1494924457959,
