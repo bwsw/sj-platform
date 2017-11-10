@@ -335,7 +335,7 @@
 			"data": null,
 			"dataMode": "params",
 			"version": 2,
-			"tests": "tests[\"Body matches string\"] = responseBody.has(\"Instance 'jdbc' is being launched.\");\n\ntests[\"Status code is 200\"] = responseCode.code === 200;\n\nfunction pausecomp(millis)\n{\nvar date = new Date();\nvar curDate = null;\ndo { curDate = new Date(); \n}while(curDate-date < millis);\n}\npausecomp(10000)",
+			"tests": "tests[\"Body matches string\"] = responseBody.has(\"Instance 'jdbc' is being launched.\");\n\ntests[\"Status code is 200\"] = responseCode.code === 200;\n\nfunction pausecomp(millis)\n{\nvar date = new Date();\nvar curDate = null;\ndo { curDate = new Date(); \n}while(curDate-date < millis);\n}\npausecomp(30000)",
 			"currentHelper": "normal",
 			"helperAttributes": {},
 			"time": 1491460859388,
