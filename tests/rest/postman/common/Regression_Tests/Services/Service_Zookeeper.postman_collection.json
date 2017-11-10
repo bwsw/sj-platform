@@ -239,7 +239,7 @@
 			"tests": "tests[\"Status code is 201\"] = responseCode.code === 201;\n\ntests[\"Body matches string\"] = responseBody.has(\"Provider 'rest-zookeeper' has been created.\");",
 			"currentHelper": "normal",
 			"helperAttributes": "{}",
-			"rawModeData": "{\r\n     \"name\": \"rest-zookeeper\",\r\n     \"description\": \"example zooKeeper provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"provider.apache-zookeeper\",\r\n     \"hosts\": [\r\n        \"176.120.25.19:2181\"\r\n      ]\r\n}",
+			"rawModeData": "{\r\n     \"name\": \"rest-zookeeper\",\r\n     \"description\": \"example zooKeeper provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"provider.apache-zookeeper\",\r\n     \"hosts\": [\r\n        \"{{zookeeper-address}}\"\r\n      ]\r\n}",
 			"isFromCollection": true
 		},
 		{
@@ -446,7 +446,7 @@
 			"description": "",
 			"collectionId": "77281e4f-e264-85fe-7f2e-4e0181557d21",
 			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"rest-restful\",\r\n     \"description\": \"example restful provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"provider.restful\",\r\n     \"hosts\": [\r\n        \"176.120.25.19:3000\"\r\n      ]\r\n}"
+			"rawModeData": "{\r\n     \"name\": \"rest-restful\",\r\n     \"description\": \"example restful provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"provider.restful\",\r\n     \"hosts\": [\r\n        \"{{restful-address}}\"\r\n      ]\r\n}"
 		},
 		{
 			"id": "be581164-1809-339e-cc5d-dc5ffbfc01df",

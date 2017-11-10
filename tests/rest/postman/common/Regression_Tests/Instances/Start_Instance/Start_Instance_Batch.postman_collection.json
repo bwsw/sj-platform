@@ -204,7 +204,7 @@
 			"description": "",
 			"collectionId": "d36aefbe-ff25-c479-3ceb-0ce57312a1f7",
 			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"zookeeper-for-coord-serv\",\r\n     \"description\": \"example zooKeeper provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"provider.apache-zookeeper\",\r\n     \"hosts\": [\r\n        \"176.120.25.19:2181\"\r\n      ]\r\n}"
+			"rawModeData": "{\r\n     \"name\": \"zookeeper-for-coord-serv\",\r\n     \"description\": \"example zooKeeper provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"provider.apache-zookeeper\",\r\n     \"hosts\": [\r\n        \"{{zookeeper-address}}\"\r\n      ]\r\n}"
 		},
 		{
 			"id": "456aea62-5a14-febb-9488-90acfb8456bf",
@@ -318,7 +318,7 @@
 			"description": "",
 			"collectionId": "d36aefbe-ff25-c479-3ceb-0ce57312a1f7",
 			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"zookeeper-zkprovider-for-kafka\",\r\n     \"description\": \"example zooKeeper provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"provider.apache-zookeeper\",\r\n     \"hosts\": [\r\n        \"176.120.25.19:2181\"\r\n      ]\r\n}"
+			"rawModeData": "{\r\n     \"name\": \"zookeeper-zkprovider-for-kafka\",\r\n     \"description\": \"example zooKeeper provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"provider.apache-zookeeper\",\r\n     \"hosts\": [\r\n        \"{{zookeeper-address}}\"\r\n      ]\r\n}"
 		},
 		{
 			"id": "6b0e2aae-0a08-6152-4cad-752bb02e5cc7",
@@ -364,7 +364,7 @@
 			"description": "",
 			"collectionId": "d36aefbe-ff25-c479-3ceb-0ce57312a1f7",
 			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"kafka-for-serv\",\r\n     \"description\": \"example kafka provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"provider.apache-kafka\",\r\n     \"hosts\": [\r\n        \"176.120.25.19:9092\"\r\n      ]\r\n}"
+			"rawModeData": "{\r\n     \"name\": \"kafka-for-serv\",\r\n     \"description\": \"example kafka provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"provider.apache-kafka\",\r\n     \"hosts\": [\r\n        \"{{kafka-address}}\"\r\n      ]\r\n}"
 		},
 		{
 			"id": "856eac3c-961a-8ae5-a850-ec5c950a69b9",
@@ -526,7 +526,7 @@
 			"description": "",
 			"collectionId": "d36aefbe-ff25-c479-3ceb-0ce57312a1f7",
 			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"zookeeper-for-tstr-serv\",\r\n     \"description\": \"example zooKeeper provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"provider.apache-zookeeper\",\r\n     \"hosts\": [\r\n        \"176.120.25.19:2181\"\r\n      ]\r\n}"
+			"rawModeData": "{\r\n     \"name\": \"zookeeper-for-tstr-serv\",\r\n     \"description\": \"example zooKeeper provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"provider.apache-zookeeper\",\r\n     \"hosts\": [\r\n        \"{{zookeeper-address}}\"\r\n      ]\r\n}"
 		},
 		{
 			"id": "b89e2aff-407f-161b-b8cb-06cb689ac0a9",

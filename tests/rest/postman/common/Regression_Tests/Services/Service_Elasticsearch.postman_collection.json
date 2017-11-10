@@ -117,7 +117,7 @@
 			"description": "",
 			"collectionId": "58a218bd-013e-9842-448b-d079e2f3231d",
 			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"rest-elasticsearch\",\r\n     \"description\": \"example es provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"provider.elasticsearch\",\r\n     \"hosts\": [\r\n        \"176.120.25.19:9300\"\r\n      ]\r\n}"
+			"rawModeData": "{\r\n     \"name\": \"rest-elasticsearch\",\r\n     \"description\": \"example es provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"provider.elasticsearch\",\r\n     \"hosts\": [\r\n        \"{{elasticsearch-address}}\"\r\n      ]\r\n}"
 		},
 		{
 			"id": "23f47eb5-60c9-6772-76fb-5a84fafb369b",
@@ -200,7 +200,7 @@
 			"description": "",
 			"collectionId": "58a218bd-013e-9842-448b-d079e2f3231d",
 			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"restful\",\r\n     \"description\": \"example restful provider\",\r\n     \"type\": \"provider.restful\",\r\n     \"hosts\": [\r\n        \"176.120.25.19:3000\"\r\n      ]\r\n}"
+			"rawModeData": "{\r\n     \"name\": \"restful\",\r\n     \"description\": \"example restful provider\",\r\n     \"type\": \"provider.restful\",\r\n     \"hosts\": [\r\n        \"{{restful-address}}\"\r\n      ]\r\n}"
 		},
 		{
 			"id": "5664dd99-8dcb-6e5e-3a3b-7e9043c1a76c",

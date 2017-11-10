@@ -221,7 +221,7 @@
 			"description": "",
 			"collectionId": "faa62c09-318c-f60e-841d-fe1c95196a72",
 			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"kafka-example\",\r\n     \"description\": \"example kafka provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"provider.apache-kafka\",\r\n     \"hosts\": [\r\n        \"176.120.25.19:9092\"\r\n      ]\r\n}"
+			"rawModeData": "{\r\n     \"name\": \"kafka-example\",\r\n     \"description\": \"example kafka provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"provider.apache-kafka\",\r\n     \"hosts\": [\r\n        \"{{kafka-address}}\"\r\n      ]\r\n}"
 		},
 		{
 			"id": "5d22ba8b-5af8-a4a1-275d-6cf69d0ac12a",
@@ -264,7 +264,7 @@
 			"description": "",
 			"collectionId": "faa62c09-318c-f60e-841d-fe1c95196a72",
 			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"zookeeper-for-tstr-serv\",\r\n     \"description\": \"example zooKeeper provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"provider.apache-zookeeper\",\r\n     \"hosts\": [\r\n        \"176.120.25.19:2181\"\r\n      ]\r\n}"
+			"rawModeData": "{\r\n     \"name\": \"zookeeper-for-tstr-serv\",\r\n     \"description\": \"example zooKeeper provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"provider.apache-zookeeper\",\r\n     \"hosts\": [\r\n        \"{{zookeeper-address}}\"\r\n      ]\r\n}"
 		},
 		{
 			"id": "67a23cfa-ac4f-2630-b3e7-56d25342f055",
@@ -719,7 +719,7 @@
 			"description": "",
 			"collectionId": "faa62c09-318c-f60e-841d-fe1c95196a72",
 			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"rest-zookeeper\",\r\n     \"description\": \"example zooKeeper provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"provider.apache-zookeeper\",\r\n     \"hosts\": [\r\n        \"176.120.25.19:2181\"\r\n      ]\r\n}"
+			"rawModeData": "{\r\n     \"name\": \"rest-zookeeper\",\r\n     \"description\": \"example zooKeeper provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"provider.apache-zookeeper\",\r\n     \"hosts\": [\r\n        \"{{zookeeper-address}}\"\r\n      ]\r\n}"
 		},
 		{
 			"id": "d5df1c59-f600-197f-841b-ec9ace5e280c",

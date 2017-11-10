@@ -247,7 +247,7 @@
 			"description": "",
 			"collectionId": "d24aa0ec-61b4-9b37-f872-64ba63292c24",
 			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"zookeeper-for-zk\",\r\n     \"description\": \"example zooKeeper provider\",\r\n     \"login\": \"admin\",\r\n     \"password\": \"admin\",\r\n     \"type\": \"provider.apache-zookeeper\",\r\n     \"hosts\": [\r\n        \"176.120.25.19:2181\"\r\n      ]\r\n}"
+			"rawModeData": "{\r\n     \"name\": \"zookeeper-for-zk\",\r\n     \"description\": \"example zooKeeper provider\",\r\n     \"login\": \"admin\",\r\n     \"password\": \"admin\",\r\n     \"type\": \"provider.apache-zookeeper\",\r\n     \"hosts\": [\r\n        \"{{zookeeper-address}}\"\r\n      ]\r\n}"
 		},
 		{
 			"id": "45423b77-7d62-630b-05b1-e26b42c6eed7",
@@ -381,7 +381,7 @@
 			"description": "",
 			"collectionId": "d24aa0ec-61b4-9b37-f872-64ba63292c24",
 			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"zookeeper-for-tstr\",\r\n     \"description\": \"example zooKeeper provider\",\r\n     \"login\": \"admin\",\r\n     \"password\": \"admin\",\r\n     \"type\": \"provider.apache-zookeeper\",\r\n     \"hosts\": [\r\n        \"176.120.25.19:2181\"\r\n      ]\r\n}"
+			"rawModeData": "{\r\n     \"name\": \"zookeeper-for-tstr\",\r\n     \"description\": \"example zooKeeper provider\",\r\n     \"login\": \"admin\",\r\n     \"password\": \"admin\",\r\n     \"type\": \"provider.apache-zookeeper\",\r\n     \"hosts\": [\r\n        \"{{zookeeper-address}}\"\r\n      ]\r\n}"
 		},
 		{
 			"id": "6acd3834-a28a-4929-97f2-77010e0d718a",
@@ -660,7 +660,7 @@
 			"description": "",
 			"collectionId": "d24aa0ec-61b4-9b37-f872-64ba63292c24",
 			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"jdbc-for-jdbc\",\r\n     \"description\": \"example jdbc provider\",\r\n     \"login\": \"admin\",\r\n     \"password\": \"admin\",\r\n     \"type\": \"provider.sql-database\",\r\n     \"driver\":\"mysql\",\r\n     \"hosts\": [\r\n        \"176.120.25.19:3306\"\r\n      ]\r\n}"
+			"rawModeData": "{\r\n     \"name\": \"jdbc-for-jdbc\",\r\n     \"description\": \"example jdbc provider\",\r\n     \"login\": \"admin\",\r\n     \"password\": \"admin\",\r\n     \"type\": \"provider.sql-database\",\r\n     \"driver\":\"mysql\",\r\n     \"hosts\": [\r\n        \"{{mysql-address}}\"\r\n      ]\r\n}"
 		},
 		{
 			"id": "e302c438-bc93-b450-5c7e-491a3453834d",

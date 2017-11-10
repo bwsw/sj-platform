@@ -251,7 +251,7 @@
 			"description": "",
 			"collectionId": "7d0285e1-980e-6a6e-355e-ae6712b4abd1",
 			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"rest-zookeeper\",\r\n     \"description\": \"example zooKeeper provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"provider.apache-zookeeper\",\r\n     \"hosts\": [\r\n        \"176.120.25.19:2181\"\r\n      ]\r\n}"
+			"rawModeData": "{\r\n     \"name\": \"rest-zookeeper\",\r\n     \"description\": \"example zooKeeper provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"provider.apache-zookeeper\",\r\n     \"hosts\": [\r\n        \"{{zookeeper-address}}\"\r\n      ]\r\n}"
 		},
 		{
 			"id": "472ecc80-6b41-cdaa-1808-10de03421805",
@@ -480,7 +480,7 @@
 			"description": "",
 			"collectionId": "7d0285e1-980e-6a6e-355e-ae6712b4abd1",
 			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"rest-restful\",\r\n     \"description\": \"example restful provider\",\r\n     \"type\": \"provider.restful\",\r\n     \"hosts\": [\r\n        \"176.120.25.19:3000\"\r\n      ]\r\n}"
+			"rawModeData": "{\r\n     \"name\": \"rest-restful\",\r\n     \"description\": \"example restful provider\",\r\n     \"type\": \"provider.restful\",\r\n     \"hosts\": [\r\n        \"{{restful-address}}\"\r\n      ]\r\n}"
 		},
 		{
 			"id": "c7f5c0f4-affa-5914-f283-4628cc9aaa11",

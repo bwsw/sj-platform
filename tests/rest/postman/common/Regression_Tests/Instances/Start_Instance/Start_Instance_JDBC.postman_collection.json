@@ -107,7 +107,7 @@
 			"description": "",
 			"collectionId": "d4243b23-6266-2967-320d-aedf12734543",
 			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"zookeeper-for-zk\",\r\n     \"description\": \"example zooKeeper provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"provider.apache-zookeeper\",\r\n     \"hosts\": [\r\n        \"176.120.25.19:2181\"\r\n      ]\r\n}"
+			"rawModeData": "{\r\n     \"name\": \"zookeeper-for-zk\",\r\n     \"description\": \"example zooKeeper provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"provider.apache-zookeeper\",\r\n     \"hosts\": [\r\n        \"{{zookeeper-address}}\"\r\n      ]\r\n}"
 		},
 		{
 			"id": "140e2a40-fd52-afad-674e-83ecf9ace02b",
@@ -262,7 +262,7 @@
 			"description": "",
 			"collectionId": "d4243b23-6266-2967-320d-aedf12734543",
 			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"zookeeper-for-tstr\",\r\n     \"description\": \"example zooKeeper provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"provider.apache-zookeeper\",\r\n     \"hosts\": [\r\n        \"176.120.25.19:2181\"\r\n      ]\r\n}"
+			"rawModeData": "{\r\n     \"name\": \"zookeeper-for-tstr\",\r\n     \"description\": \"example zooKeeper provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"provider.apache-zookeeper\",\r\n     \"hosts\": [\r\n        \"{{zookeeper-address}}\"\r\n      ]\r\n}"
 		},
 		{
 			"id": "29dea76c-dd29-fe0f-e3d5-81e3ddf7e16b",
@@ -285,7 +285,7 @@
 			"description": "",
 			"collectionId": "d4243b23-6266-2967-320d-aedf12734543",
 			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"jdbc-for-jdbc\",\r\n     \"description\": \"example jdbc provider\",\r\n     \"login\": \"admin\",\r\n     \"password\": \"admin\",\r\n     \"type\": \"provider.sql-database\",\r\n      \"driver\":\"mysql\",\r\n     \"hosts\": [\r\n        \"176.120.25.19:3306\"\r\n      ]\r\n}"
+			"rawModeData": "{\r\n     \"name\": \"jdbc-for-jdbc\",\r\n     \"description\": \"example jdbc provider\",\r\n     \"login\": \"admin\",\r\n     \"password\": \"admin\",\r\n     \"type\": \"provider.sql-database\",\r\n      \"driver\":\"mysql\",\r\n     \"hosts\": [\r\n        \"{{mysql-address}}\"\r\n      ]\r\n}"
 		},
 		{
 			"id": "399c5740-c537-9ffb-e0c0-362ada2edc9a",

@@ -54,7 +54,7 @@
 			"description": "",
 			"collectionId": "ffc1b093-3ccd-a012-8746-8837d02102d6",
 			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"rest-ful\",\r\n     \"description\": \"example aerospike provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"provider.restful\",\r\n     \"hosts\": [\r\n        \"176.120.25.19:3000\"\r\n      ]\r\n}"
+			"rawModeData": "{\r\n     \"name\": \"rest-ful\",\r\n     \"description\": \"example aerospike provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"provider.restful\",\r\n     \"hosts\": [\r\n        \"{{restful-address}}\"\r\n      ]\r\n}"
 		},
 		{
 			"id": "082ad54b-500b-6882-8832-ea9bb1199dfd",

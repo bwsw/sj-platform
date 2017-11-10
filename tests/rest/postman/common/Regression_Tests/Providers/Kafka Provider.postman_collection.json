@@ -116,7 +116,7 @@
 			"description": "",
 			"collectionId": "9f900248-50ea-d8dd-92ab-9877a3cfb6e4",
 			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"kafka-example\",\r\n     \"description\": \"example kafka provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"provider.apache-kafka\",\r\n     \"hosts\": [\r\n        \"176.120.25.19:9092\"\r\n      ]\r\n}"
+			"rawModeData": "{\r\n     \"name\": \"kafka-example\",\r\n     \"description\": \"example kafka provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"provider.apache-kafka\",\r\n     \"hosts\": [\r\n        \"{{kafka-address}}\"\r\n      ]\r\n}"
 		},
 		{
 			"id": "754c3097-fe68-80e3-c29d-2b696a633b44",
