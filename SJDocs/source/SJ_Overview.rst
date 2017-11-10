@@ -4,7 +4,7 @@ Stream Juggler Platform Overview
 Introduction to Stream Juggler Platform
 ----------------------------
 
-Stream Juggler Platform (**SJ-Platform**) is an open source, scalable solution for stream and micro-batched processing of unbounded data streams. The system fits for building an event processing systems and allows a developer to construct connected pipelines for handling data streams. **Stream** is unbound sequence of events processed sequentially from the oldest ones to newest ones. SJ-Platform is built to be smooth and easy to understand and learn for an average developer who knows Scala language. The system doesn't require any specific knowledge of mathematical concepts like some competing systems require. Thus, it makes it easy for a common type engineer to solve stream processing tasks.
+Stream Juggler Platform (**SJ-Platform**) is an open source, scalable solution for stream and micro-batch processing of unbounded data streams. The system fits for building an event processing systems and allows a developer to construct connected pipelines for handling data streams. **Stream** is unbound sequence of events processed sequentially from the oldest ones to newest ones. SJ-Platform is built to be smooth and easy to understand and learn for an average developer who knows Scala language. The system doesn't require any specific knowledge of mathematical concepts like some competing systems require. Thus, it makes it easy for a common type engineer to solve stream processing tasks.
 
 Basically, SJ-Platform is inspired by `Apache Samza <http://samza.apache.org/>`_, but has a lot of features which Samza doesn't provide, like exactly-once processing capability, integrated RESTful API and Web UI and lots of others.
 
@@ -38,9 +38,17 @@ SJ-Platform is a quite complex system, but the tutorial tries to guide the reade
 
 Also, the reader should have working Linux host with 4-8GB of RAM and 4 CPU cores with Docker installed (in the tutorial the installation of Docker for Ubuntu 16.04 OS will be explained).
 
-In the tutorial we will demonstrate the functionality of SJ-Platform. It will train the reader to develop the modules for the platform using the example tasks, which are listed further:
+In the tutorial, we will demonstrate the functionality of SJ-Platform, the cases for using modules of different types and their interoperation in a pipeline.
 
-TODO PROBLEM DESCRIPTION
+Two demo projects will train the reader to develop the modules for the platform using the example of solving issues, which are listed further:
+
+- raw data transformation into a data stream,
+- data processing, filtering, aggregation,
+- result data storing and visualizing.
+
+The demonstrated examples of tasks are not trivial but they are illustrative enough in terms of the platform usage. The first demo intends collecting the aggregated information on the accessibility of nodes. In this case, the data source is a fping sensor. The Elasticsearch is chosen as a data storage.
+
+The second demo performs data collecting from a sFlow reporter on network monitoring and traffic computation. The result is stored in PostgreSQL.
 
 The problem is not a case of a "heavy" task but it includes some problems which are very specific to stream processing tasks and introduces all SJ-Platform functionality step-by-step without deep knowledge requirements of specific problem domains.
 
