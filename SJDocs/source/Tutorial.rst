@@ -14,90 +14,134 @@ This tutorial is aimed to present SJ-Platform and give a quick start for a user 
 
 The demo projects presented below are example tasks introduced to demonstrate how to run user's first SJ module. A step-by-step guidance will help to deploy the system in a local mode (minimesos) or at a cluster (Mesos) and to implement SJ-Platform to a real-life task. 
 
-Through an example project, a user will get to know the system structure, its key components and general concepts of the platform workflow.
+Through an example task, a user will get to know the system structure, its key components and general concepts of the platform workflow.
 
 
 SJ-Platform Overview
 ----------------------------------
 
-In SJ-Platform the data streams pass a processor that handles their transformation and processing. A **processor** can be represented by a module or a set of modules. Configurations uploaded to the system determine the mode of data processing in these modules.
+Stream Juggler Platform (**SJ-Platform**) provides a solution for stream and micro-batched processing of unbounded data streams.  A **processor** transforms and handles data streams in SJ-Platform. A processor can be represented by a processing module or a set of modules. Modules form a pipeline. Configurations uploaded to the system determine the mode of data processing in the pipeline. Let’s have a look at the platform from the perspective of a processing pipeline.
 
-The result data are exported to an external storage. It can be Elasticsearch, RESTful endpoint or JDBC-compatible data storages.
+Data Processing in SJ-Platform
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Alongside with a processing module the pipeline may include an input module that receives data and transforms them into streams, and an output module that exports the result.
+
+General processing workflow which the system allows implementing is illustrated in the scheme below:
+
+**Picture 1**:
+
+.. figure:: _static/ModulePipeline.png
+   :scale: 80%
+
+Green, yellow and purple blocks displayed in a rectangular area are managed and evaluated by SJ-Platform. They represent an input module, a processing module and an output module, respectively. The blocks outside the rectangular area represent external systems (a data source and a data store).
+
+The input module receives raw data and transforms them into a data stream of a proper type compatible with the processing module type. The processing module performs data aggregation, transformations, filtering and enriching and sends the result to the output module. In the output module, the processed data are transformed into entities appropriate for storing into an external storage of a specified type. It can be Elasticsearch, RESTful endpoint or JDBC-compatible data storages.
 
 A simplified structure of SJ-Platform can be presented as at the image below:
 
+**Picture 2**:
+
 .. figure:: _static/tutorialGeneral.png
    :align: center
+           
+The illustrated pipeline is a common scenario for a lot of different tasks.
 
-To configure and monitor the system, SJ-Platform provides a user with a comprehensive RESTful API instrumentation and Web UI.
+But the platform allows implementation of more complicated processing pipelines. So the pipeline can be expanded.  Several input modules can be included in the pipeline to accept the raw data and transform them for passing further to the processing stage.
 
-Below an example of a real-life task solution will demonstrate the platform at work for better understanding of how the data processing can be performed on the platform. Thus, the tutorial will provide you with:
+You can launch more than a single processing module. Data streams can be distributed among them in various ways.
 
-1. a ready-to-use problem solution of an example task on SJ-Platform base;
+A few output modules may receive the processed data and put them into a storage/storages.
 
-2. instructions on development, deployment and customization of your own code for your specific aims.
+To configure and monitor the system, SJ-Platform provides a user with a comprehensive RESTful API and Web UI.
+
+Further we will go through a couple of real-life tasks to demonstrate the platform workflow. It will help you to understand how the platform processes data. 
+
+Thus, the tutorial will provide you with a ready-to-use problem solution of example tasks on SJ-Platform base. Perform the steps to get aquainted with the platform functionality.
+
+If you would like to continue studying the platform, proceed with reading the documentation. There you will find instructions on development, deployment and customization of your own code for your specific aims.
+
+Examples Introduction
+--------------------------------------
+
+The example tasks that will be presented are different. But the steps we will perform to solve the tasks are common for both of them (see Picture 3). Before starting with the steps, it is important to note that to complete your job using SJ-Platform you should definitely know how the pipeline is going to look, what data format will be delivered into the system. The modules for data processing should be preliminarily created.
+
+**Picture 3**:
+
+.. figure:: _static/TutorialSteps.png
+   :align: center
+   
+What we are going to do for the examples is:
+
+1. Deploy Mesos and other services. We suggest deploying the platform to Mesos using Marathon. Among other services we will run:
+
+  - Apache Zookeeper - for coordination of task execution;
+  - Java - a computer software that provides a system for developing application software and deploying it in a cross-platform computing environment;
+  - Docker - a software container platform that allows a flexible system configuration;
+  - MongoDB - as a database;
+  - T-streams - as a message broker ensuring exactly-once data processing;
+  - REST API instrumentation - for accessing and monitoring the platform;
+  - Elasticsearch, PostgreSQL - as external data storages;
+  - Kibana - to visualize Elasticsearch data.
+ 
+2. Download and set up the platform and demo project. We'll set up the platform and the demo repositories downloading it from GitHub. 
+
+3. Upload configurations and engines. The configurations should be uploaded to determine module performance. Engines are necessary for modules as they handle data flow making it into streams.
+
+An **engine** is required to start a module. A module can not process data without an engine (that is a .jar file containing required configuration settings). In fact, this is a framework that launches a module.
+
+.. figure:: _static/engine.png
+   :scale: 110%
+   :align: center
+   
+We will upload an engine jar file per each module in a pipeline.
+
+4. Upload modules. Module is some code for processing data streams. In the example tasks we will upload ready-to-use modules of three types - input modules, processing modules (regular, batch) and output modules. 
+
+To solve your tasks, you may upload your custom modules in this step.
+
+5. Create streaming layer. The data are passed to and from a module in streams. Within the platform, T-streams are used for message transportation that allows exactly-once data exchange. The result data are exported from SJ-Platform to an external storage with streams of types corresponding to the type of that storage: Elasticsearch, SQL database or RESTful.
+
+   Streaming requires the infrastructure: providers and services. For both example tasks we will need Apache Zookeeper, Elasticsearch and SQL-database types of providers, and Apache Zookeeper, Elasticsearch, SQL-database and T-streams types of services. On the base of the infrastructure we will create streams of corresponding types.
+
+6. Create output destination. At this step all necessary tables and mapping should be created for storing the processed result.
+
+7. Create and launch instances. For each module we will create instances, that is a range of settings to perform an exact module type. Launching instances we will start data processing in the platform.
+
+8. Obtain and store the result. The result of processing will be stored to an external storage. Besides, in the fping example we will demonstrate visualisation of resulting data using Kibana.
+
+Now as you have general idea of the workscope to do, let's dive into the example tasks.
 
 .. _fping-example-task:
 
 Fping Example Task
 ----------------------------
 
-Let’s introduce an example task which illustrates the platform workflow in the real-world use.
+The first example task we'd like to introduce illustrates the platform workflow in the real-world use.
 
-The demonstration task is responsible for collecting of aggregated information on the accessibility of nodes. The node accessibility is to be checked using `fping <https://fping.org/>`_ utility. It checks accessibility of provided IPs sending a 64-bytes packet to each IP and waiting for a return packet. If the connections are good and the node can be accessed, a good return packet will be received. The amount of time is also returned for how long it takes for a packet to make the complete trip. On the basis of this information the processor calculates the average response time for each node per 1 minute. The amount of successful responses by IP per 1 minute is calculated by the processing module as well. The result is exported to an external data store.  
-
-Before providing a solution to the task, let’s have a look at the platform from the perspective of a processing pipeline.
-
-Processing
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-In SJ-Platform the data processing is handled in modules. These modules form a pipeline. Alongside with the processing module it may include an input module that receives data stream, and an output module that exports the result.
-
-General processing workflow which the system allows implementing is illustrated in the diagram below:
-
-.. figure:: _static/ModulePipeline.png
-   :scale: 80%
-
-Green, yellow and purple blocks displayed in a rectangular area are managed and evaluated by SJ-Platform. They represent an input module, a processing module and an output module, respectively. The blocks outside the rectangular area represent external systems.
-
-The input module receives raw data and transforms them into a data stream of a proper type compatible with the processing module type. In the fping demonstration example the input module is a regex input module. It processes input streams of strings using RegExp rules and convert them in Avro records.
-
-The processing module performs data aggregation, transformations, filtering and enriching and sends the result to the output module. In the fping demonstration example the data aggregation is performed with a regular-streaming module. 
-
-In the output module, the processed data are transformed into entities appropriate for storing into an external storage of a specified type. In the fping demonstration example the output module exports the result data into the Elasticsearch external data storage.
-           
-The illustrated pipeline is a common scenario for a lot of different tasks.
-
-But the platform allows implementation of more complicated processing pipelines. So the pipeline can be expanded.  Several input modules can be included in the pipeline to accept the raw data and transform them for passing further to the processing stage.
-
-You can launch more than a single processing module. The data streams can be distributed among them in various ways.
-
-A few output modules may receive the processed data and put them into a storage.
+The issue we are going to solve using our platform is to collect aggregated information on the accessibility of nodes using `fping <https://fping.org/>`_ utility. It checks accessibility of provided IPs sending a 64-bytes packet to each IP and waiting for a return packet. If the node can be accessed, a good return packet will be received. Also it returs the amount of time needed for a  package to reach the node and return back. On the basis of this information the processor calculates the average response time for each node per 1 minute. The amount of successful responses by IP per 1 minute is calculated by the processing module as well. The result is exported to an external data store.  
 
 In the example task solution the processing workflow is formed in the following way:
 
 .. figure:: _static/FPingDemo1.png
 
-This diagram demonstrates the processing workflow of the demo. As a quick reminder, the task is to collect the aggregated information on the accessibility of nodes.
-
-As you can see, the data come to a TCP input module through a pipeline of fping and netcat.
+This diagram demonstrates the processing workflow of the demo. As you can see, the data come to a TCP input module through a pipeline of fping and netcat. The TCP input module is a regular module that performs per-event processing. We provide two off-the-shelf modules - CSV and regex - for two most general input data formats. Fine more information about them at the '<http://streamjuggler.readthedocs.io/en/develop/SJ_Modules.html#input-module>'_ section. In the fping example task the input module is a regex input module. It processes an input stream which contains text data, using a set of regular expressions and then serialize them with Apache Avro.
 
 Then the input module parses ICMP echo responses (IP and response time are selected) and ICMP unreachable responses (IPs only are selected) and puts the parsed data into 'echo-response' stream and 'unreachable-response' stream, respectively.
 
-After that, the processing module aggregates response time and a total amount of echo/unreachable responses by IP per 1 minute and sends aggregated data to 'echo-response-1m' stream.
+After that, the processing module aggregates response time and a total amount of echo/unreachable responses by IP per 1 minute and sends aggregated data to 'echo-response-1m' stream. In the fping demonstration example the data aggregation is performed with the processing module of a regular-streaming type. 
 
-Two more processing modules are embedded into the pipeline to calculate responses per 3 minutes and per 1 hour. Correspondingly, 'echo-response-3m' and 'echo-response-1h' streams are created for those processing modules to put the aggregated data on echo-responses to.
+Two more processing modules are embedded into the pipeline to calculate responses per 3 minutes and per 1 hour. Correspondingly, 'echo-response-3m' and 'echo-response-1h' streams are created for these processing modules to put the aggregated data on echo-responses into.
 
-Finally, the output modules export aggregated data from echo-response streams to Elasticsearch. The result then can be visualized in a diagram using Kibana.
+Finally, the output module exports aggregated data from echo-response streams to Elasticsearch. The result is visualized using Kibana. 
 
 The data are fed to the system, passed from one module to another and exported from the system via streams. Read more about streams under the :ref:`Creating_Streams` section.
 
-In the demonstration project, the entities are added to the system via REST API as it is less time-consuming. 
-The added entities are easy-to-see via Web UI. Or send ‘GET’ API requests to return created entities in JSON. The platform entities can surely be created via the UI setting up necessary configurations in the creation forms for an each entity.
+Platform entities can be created via Web UI filling up all needed fields in corresponding forms. In the demonstration task, we suggest adding the entities to the system via REST API as it is the easiest and quickest way. You can use Web UI to see the added entities. 
 
 Now, having the general idea on the platform workflow, we can dive into solving an example task on the base of SJ-Platform. 
 
-And the first step is the system deployment.
+And we start with the system deployment.
 
 .. _Step1-Deployment:
 
@@ -112,7 +156,7 @@ There are three options to deploy the platform. Please, read the description for
 
 We suggest deploying the platform locally via Vagrant with VirtualBox as a provider. It takes up to 30 minutes. 
 
-The following technical requirements should be met:
+Minimum system requirements in this case are as follows:
 
 - At least 8 GB of free RAM;
 - VT-x must be enabled in BIOS;
@@ -121,72 +165,50 @@ The following technical requirements should be met:
 
 These requirements are provided for deployment on Ubuntu 16.04 OS.
 
-The platform is deployed with all entities necessary to demonstrate the solution for the example task: providers, services, streams, configurations. So the instructions below for creating entities can be omitted. You may read about platform components here in the deployment step details and see the result in the UI.
+The platform is deployed with all entities necessary to demonstrate the solution for the example task: providers, services, streams, configurations. So the instructions below for creating entities can be omitted. You may read about platform components here in the deployment steps (Step 1 - Step 6) and see the result in the UI.
 
 **Option 2.** Another option is to deploy the platform on a cluster. Currently, the deployment on `Mesos  <http://streamjuggler.readthedocs.io/en/develop/SJ_Deployment.html#mesos-deployment>`_ as a universal distributed computational engine is supported.
 
-The following technical requirements should be met:
+Minimum system requirements in this case are as follows:
 
 - working Linux host with 4-8 GB of RAM and 4 CPU cores; 
 - Docker installed (see `official documentation <https://docs.docker.com/engine/installation/linux/docker-ce/ubuntu/>`_);
-- cURL;
+- cURL installed;
 - sbt installed (see `official documentation <http://www.scala-sbt.org/download.html>`_).  
 
-The platform is deployed with no entities. Thus, the pipeline can be structured from scratch. 
+The platform is deployed with no entities. Thus, the pipeline should be built from scratch. 
 
-This tutorial provides step-by-step instructions for demo project deployment on Mesos. At first step, Mesos with all the services will be deployed. Then entities will be added to the platform. Finally, modules will be launched and results will be rendered in a diagram.
+This tutorial provides step-by-step instructions to deploy the demo project to Mesos using Marathon. At first step, Mesos with all the services will be deployed. Then entities will be added to the platform. Finally, modules will be launched and results will be visualised using Kibana.
 
 **Option 3.** Also, you can run SJ-Platform locally deploying it on `minimesos <http://streamjuggler.readthedocs.io/en/develop/SJ_Deployment.html#minimesos-deployment>`_ as a testing environment.
 
-The following systems are required on your computer: 
+Minimum system requirements in this case are as follows: 
 
 - git, 
 - sbt (see `official documentation <http://www.scala-sbt.org/download.html>`_), 
 - Docker (see `official documentation <https://docs.docker.com/engine/installation/linux/docker-ce/ubuntu/>`_),
 - cURL.
 
-For the example task, the instructions are provided for the platform deployment **on Mesos**.
+We provide instructions to deploy the platform **on Mesos** for the example task.
 
 The deployment is performed via REST API.
 
-To solve the example task we need to deploy the following services:
-
-1. Apache Mesos - a cluster for all computations;
-2. Mesosphere Marathon - a framework for executing tasks on Mesos;
-3. Apache Zookeeper - for coordination of task execution;
-4. Java - a computer software that provides a system for developing application software and deploying it in a cross-platform computing environment;
-5. Docker - a software container platform that allows a flexible system configuration;
-6. MongoDB - as a database;
-7. T-streams - as a message broker ensuringe exactly-once data processing;
-8. REST API instrumentation - for accessing and monitoring the platform;
-9. Elasticsearch - as an external data storage;
-10. Kibana - to visualize Elasticsearch data.
-
 So, let's start with deploying Mesos and other services.
 
-1) Deploy Mesos, Marathon, Zookeeper following the instructions at the official `installation guide <http://www.bogotobogo.com/DevOps/DevOps_Mesos_Install.php>`_ .
+1) Deploy Mesos, Marathon, Zookeeper. You can follow the instructions at the official `installation guide <http://www.bogotobogo.com/DevOps/DevOps_Mesos_Install.php>`_ .
 
-Please, note, the deployment is described here for one default Mesos-slave with available ports [31000-32000]. 
+To deploy Docker follow the instructions at the official `installation guide <https://docs.docker.com/engine/installation/linux/docker-ce/ubuntu/#install-docker-ce>`_ .
 
-Mesos-slave must support Docker containerizer. The technical requirements to Mesos-slave are the following: 
+Install Java 1.8. Find detailed instructions `here <https://tecadmin.net/install-oracle-java-8-ubuntu-via-ppa/>`_.
+
+Please, note, the deployment described here is for one default Mesos-slave with available ports [31000-32000]. Mesos-slave must support Docker containerizer. The technical requirements to Mesos-slave are the following: 
 
 - 2 CPUs, 
 - 4096 memory.
 
 .. note:: If you are planning to launch a module with a greater value of the "parallelizm" parameter, i.e. to run tasks on more than 1 nodes, you need to increase the "executor_registration_timeout" parameter for Mesos-slave.
 
-For Docker deployment follow the instructions at the official `installation guide <https://docs.docker.com/engine/installation/linux/docker-ce/ubuntu/#install-docker-ce>`_ .
-
-Start Mesos and the services. Make sure you have access to Mesos interface, Marathon interface, and Zookeeper is running. 
-
-Install Java::
-                                         
- sudo add-apt-repository ppa:webupd8team/java
- sudo apt-get update
- sudo apt-get install oracle-java8-installer
- sudo apt-get install oracle-java8-set-default
-
-Find detailed instructions `here <https://tecadmin.net/install-oracle-java-8-ubuntu-via-ppa/>`_.
+Start Mesos and the services. 
 
 2) Create JSON files and a configuration file. Please, name them as specified here.
 
@@ -302,7 +324,7 @@ Replace <zk_ip> and <zk_port> according to the Apache Zookeeper address.
    "mem":256
  } 
 
-**Config.properties**::
+**config.properties**::
 
  key=pingstation
  active.tokens.number=100
@@ -465,16 +487,20 @@ Via the Marathon interface, make sure the services are deployed.
 
 .. figure:: _static/ServicesOnMarathon.png
 
-4) Copy the SJ-Platform repository from GitHub::
+
+Step 2. SJ-Platform Setting Up 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+1) Copy the SJ-Platform repository from GitHub::
 
     git clone https://github.com/bwsw/sj-platform.git
 
-5) Add the settings if running the framework on Mesos needs principal/secret:: 
+2) Add the credential settings if Mesos requires that frameworks must be authenticated:: 
  
     curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"framework-principal\",\"value\": <principal>,\"domain\": \"configuration.system\"}" 
     curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"framework-secret\",\"value\": <secret>,\"domain\": \"configuration.system\"}" 
  
-6) Copy the demonstrational task repository from GitHub::
+3) Copy the demonstrational task repository from GitHub::
 
     cd ..
     git clone https://github.com/bwsw/sj-fping-demo.git
@@ -485,15 +511,9 @@ Now make sure you have access to the Web UI. You will see the platform is deploy
 
 Next, the infrastructure for the modules can be created.
 
-Step 2. Configurations and Engine Jars Uploading 
+Step 3. Configurations and Engine Jars Uploading 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-An **engine** is required to start a module. A module can not process data without an engine (that is a .jar file containing required configuration settings). In fact, this is a framework that launches the module executor.
-
-.. figure:: _static/engine.png
-   :scale: 110%
-   :align: center
-   
 To implement the processing workflow for the example task resolution the following JAR files should be uploaded:
 
 1. a JAR file per each module type  - input-streaming, regular-streaming, output-streaming;
@@ -528,16 +548,7 @@ Now engine JARs should appear in the UI under Custom Jars of the "Custom files" 
 Setup configurations for engines
 """"""""""""""""""""""""""""""""""""""""
 
-The configurations will be added to the system via REST. 
-
-The range of configurations includes required and optional ones. The full list of all configurations can be viewed at the :ref:`Configuration` page. 
-
-To resolve the example task it is enough to upload the required configurations only.
-
-For the Example Task
-""""""""""""""""""""""
-
-For solving the example task, we will upload the following configurations via REST:
+For the example task, we will upload the following configurations via REST:
 
 - session.timeout - Use when connecting to Apache Zookeeper in milliseconds (usually when we are dealing with T-streams consumers/producers and Kafka streams)
 
@@ -574,7 +585,7 @@ In the UI you can see the uploaded configurations under the “Configuration” 
 .. figure:: _static/ConfigurationsUploaded.png
 
 
-Step 3. Module Uploading 
+Step 4. Module Uploading 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Now as the system is deployed and necessary engines are added, modules can be uploaded to the system.
@@ -639,7 +650,7 @@ Now in the UI, you can see the uploaded modules under the ‘Modules’ tab.
 
 .. _Creating_Streams:
 
-Step 4. Creating Streaming Layer 
+Step 5. Creating Streaming Layer 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The raw data are fed to the platform from different sources. And within the platform, the data are passed to and from a module in streams. Thus, in the next step, the streams for data ingesting and exporting will be created.
@@ -780,7 +791,7 @@ All the created streams should be available now in the UI under the “Streams�
 
 .. figure:: _static/StreamsCreated.png
 
-Step 5. Create Output Destination
+Step 6. Create Output Destination
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 At this step all necessary indexes, tables and mapping should be created for storing the processed result.
@@ -796,7 +807,7 @@ Create the index and the mapping for Elasticsearch sending the PUT request::
  curl --request PUT "http://176.120.25.19:9200/pingstation" -H 'Content-Type: application/json' --data "@api-json/elasticsearch-index.json"
 
 
-Step 6. Creating Instances 
+Step 7. Creating Instances 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Once the system is deployed, configurations and modules are uploaded, the streaming layer with necessary infrastructure is created, an instance is to be created in the next step.
