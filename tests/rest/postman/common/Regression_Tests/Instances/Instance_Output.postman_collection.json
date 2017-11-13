@@ -521,7 +521,7 @@
 			"description": "",
 			"collectionId": "da36f05d-60bf-169c-98fb-69ee9c546ab7",
 			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"zookeeper-for-coordination-service\",\r\n     \"description\": \"example zooKeeper provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"provider.apache-zookeeper\",\r\n     \"hosts\": [\r\n        \"176.120.25.19:2181\"\r\n      ]\r\n}"
+			"rawModeData": "{\r\n     \"name\": \"zookeeper-for-coordination-service\",\r\n     \"description\": \"example zooKeeper provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"provider.apache-zookeeper\",\r\n     \"hosts\": [\r\n        \"{{zookeeper-address}}\"\r\n      ]\r\n}"
 		},
 		{
 			"id": "461fa9a8-beec-1f02-39f1-ea5eacc662ec",
@@ -835,7 +835,7 @@
 			"description": "",
 			"collectionId": "da36f05d-60bf-169c-98fb-69ee9c546ab7",
 			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"restjdbc\",\r\n     \"description\": \"example jdbc provider\",\r\n     \"login\": \"admin\",\r\n     \"password\": \"admin\",\r\n     \"type\": \"provider.sql-database\",\r\n     \"driver\":\"mysql\",\r\n     \"hosts\": [\r\n        \"176.120.25.19:3306\"\r\n      ]\r\n}"
+			"rawModeData": "{\r\n     \"name\": \"restjdbc\",\r\n     \"description\": \"example jdbc provider\",\r\n     \"login\": \"admin\",\r\n     \"password\": \"admin\",\r\n     \"type\": \"provider.sql-database\",\r\n     \"driver\":\"mysql\",\r\n     \"hosts\": [\r\n        \"{{mysql-address}}\"\r\n      ]\r\n}"
 		},
 		{
 			"id": "76afa91f-8ff8-f387-b64e-36b0e1e979fa",
@@ -1265,7 +1265,7 @@
 			"description": "to t-stream stream",
 			"collectionId": "da36f05d-60bf-169c-98fb-69ee9c546ab7",
 			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"zookeeper-for-tstr-service\",\r\n     \"description\": \"example zooKeeper provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"provider.apache-zookeeper\",\r\n     \"hosts\": [\r\n        \"176.120.25.19:2181\"\r\n      ]\r\n}"
+			"rawModeData": "{\r\n     \"name\": \"zookeeper-for-tstr-service\",\r\n     \"description\": \"example zooKeeper provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"provider.apache-zookeeper\",\r\n     \"hosts\": [\r\n        \"{{zookeeper-address}}\"\r\n      ]\r\n}"
 		},
 		{
 			"id": "ba552b43-8be7-6c7a-468b-316832bfd3fc",
@@ -1515,7 +1515,7 @@
 		{
 			"id": "dc5ab64d-f987-b98d-7bb9-d5fc12820ba3",
 			"headers": "",
-			"url": "176.120.25.19:9200/a1",
+			"url": "{{elasticsearch-rest-address}}/a1",
 			"pathVariables": {},
 			"preRequestScript": null,
 			"method": "PUT",
@@ -1596,7 +1596,7 @@
 		{
 			"id": "ebdf0756-291e-13ec-1953-aa79a2cdafab",
 			"headers": "",
-			"url": "176.120.25.19:9200/a1",
+			"url": "{{elasticsearch-rest-address}}/a1",
 			"pathVariables": {},
 			"preRequestScript": null,
 			"method": "DELETE",
@@ -1676,7 +1676,7 @@
 			"description": "",
 			"collectionId": "da36f05d-60bf-169c-98fb-69ee9c546ab7",
 			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"elasticsearch-for-es-service\",\r\n     \"description\": \"example es provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"provider.elasticsearch\",\r\n     \"hosts\": [\r\n        \"176.120.25.19:9300\"\r\n      ]\r\n}"
+			"rawModeData": "{\r\n     \"name\": \"elasticsearch-for-es-service\",\r\n     \"description\": \"example es provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"provider.elasticsearch\",\r\n     \"hosts\": [\r\n        \"{{elasticsearch-address}}\"\r\n      ]\r\n}"
 		},
 		{
 			"id": "ef635e66-d66e-16e6-b413-bc0c36e1e865",

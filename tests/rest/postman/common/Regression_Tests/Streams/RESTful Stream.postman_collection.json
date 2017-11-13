@@ -229,7 +229,7 @@
 			"description": "",
 			"collectionId": "21abea48-0d91-8ec3-6a68-03f262855cb9",
 			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"rest-ful\",\r\n     \"description\": \"example rest provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"provider.restful\",\r\n     \"hosts\": [\r\n        \"176.120.25.19:9300\"\r\n      ]\r\n}"
+			"rawModeData": "{\r\n     \"name\": \"rest-ful\",\r\n     \"description\": \"example rest provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"provider.restful\",\r\n     \"hosts\": [\r\n        \"{{elasticsearch-address}}\"\r\n      ]\r\n}"
 		},
 		{
 			"id": "6cde955d-eadc-bb7a-bcad-2c1ab0bd4380",
@@ -597,7 +597,7 @@
 			"description": "",
 			"collectionId": "21abea48-0d91-8ec3-6a68-03f262855cb9",
 			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"restjdbc\",\r\n     \"description\": \"example jdbc provider\",\r\n     \"login\": \"admin\",\r\n     \"password\": \"admin\",\r\n     \"type\": \"provider.sql-database\",\r\n     \"driver\":\"mysql\",\r\n     \"hosts\": [\r\n        \"176.120.25.19:3306\"\r\n      ]\r\n}"
+			"rawModeData": "{\r\n     \"name\": \"restjdbc\",\r\n     \"description\": \"example jdbc provider\",\r\n     \"login\": \"admin\",\r\n     \"password\": \"admin\",\r\n     \"type\": \"provider.sql-database\",\r\n     \"driver\":\"mysql\",\r\n     \"hosts\": [\r\n        \"{{mysql-address}}\"\r\n      ]\r\n}"
 		},
 		{
 			"id": "f75dc5ca-4b6a-c21e-bc7c-50a61875573c",

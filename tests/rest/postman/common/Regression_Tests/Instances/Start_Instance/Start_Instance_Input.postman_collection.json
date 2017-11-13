@@ -129,7 +129,7 @@
 			"data": [],
 			"dataMode": "raw",
 			"version": 2,
-			"tests": "tests[\"Body matches string\"] = responseBody.has(\"Instance 'integration-input' is being launched.\");\n\ntests[\"Status code is 200\"] = responseCode.code === 200;\n\nfunction pausecomp(millis)\n{\nvar date = new Date();\nvar curDate = null;\ndo { curDate = new Date(); \n}while(curDate-date < millis);\n}\npausecomp(10000)",
+			"tests": "tests[\"Body matches string\"] = responseBody.has(\"Instance 'integration-input' is being launched.\");\n\ntests[\"Status code is 200\"] = responseCode.code === 200;\n\nfunction pausecomp(millis)\n{\nvar date = new Date();\nvar curDate = null;\ndo { curDate = new Date(); \n}while(curDate-date < millis);\n}\npausecomp(30000)",
 			"currentHelper": "normal",
 			"helperAttributes": {},
 			"time": 1492664762436,
@@ -242,7 +242,7 @@
 			"description": "",
 			"collectionId": "f4a30a16-c8da-b0ad-7c57-829d17382342",
 			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"zookeeper-for-zk\",\r\n     \"description\": \"example zooKeeper provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"provider.apache-zookeeper\",\r\n     \"hosts\": [\r\n        \"176.120.25.19:2181\"\r\n      ]\r\n}"
+			"rawModeData": "{\r\n     \"name\": \"zookeeper-for-zk\",\r\n     \"description\": \"example zooKeeper provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"provider.apache-zookeeper\",\r\n     \"hosts\": [\r\n        \"{{zookeeper-address}}\"\r\n      ]\r\n}"
 		},
 		{
 			"id": "37599d01-c9cb-e1ad-741a-f49585723d64",
@@ -265,7 +265,7 @@
 			"description": "",
 			"collectionId": "f4a30a16-c8da-b0ad-7c57-829d17382342",
 			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"zookeeper-for-tstr\",\r\n     \"description\": \"example zooKeeper provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"provider.apache-zookeeper\",\r\n     \"hosts\": [\r\n        \"176.120.25.19:2181\"\r\n      ]\r\n}"
+			"rawModeData": "{\r\n     \"name\": \"zookeeper-for-tstr\",\r\n     \"description\": \"example zooKeeper provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"provider.apache-zookeeper\",\r\n     \"hosts\": [\r\n        \"{{zookeeper-address}}\"\r\n      ]\r\n}"
 		},
 		{
 			"id": "3dc28f23-5a6a-b060-1cbd-8545e9f802d7",

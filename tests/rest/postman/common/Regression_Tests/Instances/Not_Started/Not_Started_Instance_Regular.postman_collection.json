@@ -98,7 +98,7 @@
 			"description": "",
 			"collectionId": "cc53151c-1cd6-f38d-2a49-5a4660f1ed8f",
 			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"zookeeper-coord-serv\",\r\n     \"description\": \"example zooKeeper provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"provider.apache-zookeeper\",\r\n     \"hosts\": [\r\n        \"176.120.25.19:2181\"\r\n      ]\r\n}"
+			"rawModeData": "{\r\n     \"name\": \"zookeeper-coord-serv\",\r\n     \"description\": \"example zooKeeper provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"provider.apache-zookeeper\",\r\n     \"hosts\": [\r\n        \"{{zookeeper-address}}\"\r\n      ]\r\n}"
 		},
 		{
 			"id": "3803ee2e-8239-c90a-489e-5909552496b3",
@@ -180,7 +180,7 @@
 			"description": "",
 			"collectionId": "cc53151c-1cd6-f38d-2a49-5a4660f1ed8f",
 			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"zookeeper-tstr-input\",\r\n     \"description\": \"example zooKeeper provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"provider.apache-zookeeper\",\r\n     \"hosts\": [\r\n        \"176.120.25.19:2181\"\r\n      ]\r\n}"
+			"rawModeData": "{\r\n     \"name\": \"zookeeper-tstr-input\",\r\n     \"description\": \"example zooKeeper provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"provider.apache-zookeeper\",\r\n     \"hosts\": [\r\n        \"{{zookeeper-address}}\"\r\n      ]\r\n}"
 		},
 		{
 			"id": "52c9bede-3d51-f7c4-f72f-e98260918feb",
@@ -587,7 +587,7 @@
 			"description": "",
 			"collectionId": "cc53151c-1cd6-f38d-2a49-5a4660f1ed8f",
 			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"zookeeper-tstr-output\",\r\n     \"description\": \"example zooKeeper provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"provider.apache-zookeeper\",\r\n     \"hosts\": [\r\n        \"176.120.25.19:2181\"\r\n      ]\r\n}"
+			"rawModeData": "{\r\n     \"name\": \"zookeeper-tstr-output\",\r\n     \"description\": \"example zooKeeper provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"provider.apache-zookeeper\",\r\n     \"hosts\": [\r\n        \"{{zookeeper-address}}\"\r\n      ]\r\n}"
 		},
 		{
 			"id": "fb25aff8-80c5-2149-a2d0-be036fb6cc67",

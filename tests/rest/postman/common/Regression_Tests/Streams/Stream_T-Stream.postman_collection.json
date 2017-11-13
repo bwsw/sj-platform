@@ -247,7 +247,7 @@
 			"description": "",
 			"collectionId": "d172e894-4c4d-3247-d597-e1703c561adf",
 			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"zookeeper-for-coord-serv\",\r\n     \"description\": \"example zooKeeper provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"provider.apache-zookeeper\",\r\n     \"hosts\": [\r\n        \"176.120.25.19:2181\"\r\n      ]\r\n}"
+			"rawModeData": "{\r\n     \"name\": \"zookeeper-for-coord-serv\",\r\n     \"description\": \"example zooKeeper provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"provider.apache-zookeeper\",\r\n     \"hosts\": [\r\n        \"{{zookeeper-address}}\"\r\n      ]\r\n}"
 		},
 		{
 			"id": "4bf502b4-c361-46bd-555a-f2a1af29f98b",
@@ -579,7 +579,7 @@
 			"description": "",
 			"collectionId": "d172e894-4c4d-3247-d597-e1703c561adf",
 			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"rest-zookeeper\",\r\n     \"description\": \"example zooKeeper provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"provider.apache-zookeeper\",\r\n     \"hosts\": [\r\n        \"176.120.25.19:2181\"\r\n      ]\r\n}"
+			"rawModeData": "{\r\n     \"name\": \"rest-zookeeper\",\r\n     \"description\": \"example zooKeeper provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"provider.apache-zookeeper\",\r\n     \"hosts\": [\r\n        \"{{zookeeper-address}}\"\r\n      ]\r\n}"
 		},
 		{
 			"id": "c4d8f84a-17bc-3368-8873-b6bfbb531565",

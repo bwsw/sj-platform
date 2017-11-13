@@ -166,7 +166,7 @@
 		{
 			"id": "26ff100c-3fc7-0ee7-1836-d9e772282af2",
 			"headers": "",
-			"url": "176.120.25.19:9200/a1",
+			"url": "{{elasticsearch-rest-address}}/a1",
 			"pathVariables": {},
 			"preRequestScript": null,
 			"method": "DELETE",
@@ -245,12 +245,12 @@
 			"description": "",
 			"collectionId": "4928b2e3-3c1d-9bfb-dcb5-f2d38799ce60",
 			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"restjdbc\",\r\n     \"description\": \"example jdbc provider\",\r\n     \"login\": \"admin\",\r\n     \"password\": \"admin\",\r\n     \"type\": \"provider.sql-database\",\r\n     \"driver\":\"mysql\",\r\n     \"hosts\": [\r\n        \"176.120.25.19:3306\"\r\n      ]\r\n}"
+			"rawModeData": "{\r\n     \"name\": \"restjdbc\",\r\n     \"description\": \"example jdbc provider\",\r\n     \"login\": \"admin\",\r\n     \"password\": \"admin\",\r\n     \"type\": \"provider.sql-database\",\r\n     \"driver\":\"mysql\",\r\n     \"hosts\": [\r\n        \"{{mysql-address}}\"\r\n      ]\r\n}"
 		},
 		{
 			"id": "4a906dd0-8d50-82dc-7f93-4ca445bc47e0",
 			"headers": "",
-			"url": "176.120.25.19:9200/a1",
+			"url": "{{elasticsearch-rest-address}}/a1",
 			"pathVariables": {},
 			"preRequestScript": null,
 			"method": "PUT",
@@ -681,7 +681,7 @@
 			"description": "",
 			"collectionId": "4928b2e3-3c1d-9bfb-dcb5-f2d38799ce60",
 			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"rest-elasticsearch\",\r\n     \"description\": \"example es provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"provider.elasticsearch\",\r\n     \"hosts\": [\r\n        \"176.120.25.19:9300\"\r\n      ]\r\n}"
+			"rawModeData": "{\r\n     \"name\": \"rest-elasticsearch\",\r\n     \"description\": \"example es provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"provider.elasticsearch\",\r\n     \"hosts\": [\r\n        \"{{elasticsearch-address}}\"\r\n      ]\r\n}"
 		},
 		{
 			"id": "f1152f4e-7854-489b-4adc-92a18e5b3887",

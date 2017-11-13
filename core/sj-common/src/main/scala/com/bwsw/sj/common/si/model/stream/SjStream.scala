@@ -64,7 +64,8 @@ class SjStream(val streamType: String,
           errors ++= extractedErrors
         else {
           this.serviceDomain = serviceDomain.get
-          errors ++= validateSpecificFields()
+          if (errors.isEmpty)
+            errors ++= validateSpecificFields()
         }
 
       case None =>

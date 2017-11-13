@@ -56,7 +56,7 @@
 			"description": "",
 			"collectionId": "93c94efa-cdda-6d8e-2139-6bb742274fab",
 			"responses": [],
-			"rawModeData": "{\n     \"name\": \"es-example\",\n     \"description\": \"example es provider\",\n     \"login\": \"my_login\",\n     \"password\": \"my_pass\",\n     \"hosts\": [\n        \"176.120.25.19:9300\",\n        \"192.168.1.135:9300\"\n      ]\n}"
+			"rawModeData": "{\n     \"name\": \"es-example\",\n     \"description\": \"example es provider\",\n     \"login\": \"my_login\",\n     \"password\": \"my_pass\",\n     \"hosts\": [\n        \"{{elasticsearch-address}}\",\n        \"192.168.1.135:9300\"\n      ]\n}"
 		},
 		{
 			"id": "05b9494e-316c-3a89-5255-7abf7f09f2dd",
@@ -79,7 +79,7 @@
 			"description": "",
 			"collectionId": "93c94efa-cdda-6d8e-2139-6bb742274fab",
 			"responses": [],
-			"rawModeData": "{\n     \"name\": \"\",\n     \"description\": \"example es provider\",\n     \"login\": \"my_login\",\n     \"password\": \"my_pass\",\n     \"type\": \"provider.elasticsearch\",\n     \"hosts\": [\n        \"176.120.25.19:9300\",\n        \"192.168.1.135:9300\"\n      ]\n}"
+			"rawModeData": "{\n     \"name\": \"\",\n     \"description\": \"example es provider\",\n     \"login\": \"my_login\",\n     \"password\": \"my_pass\",\n     \"type\": \"provider.elasticsearch\",\n     \"hosts\": [\n        \"{{elasticsearch-address}}\",\n        \"192.168.1.135:9300\"\n      ]\n}"
 		},
 		{
 			"id": "0928569e-ebc1-b2b8-9e01-bd57b3ab8476",
@@ -125,7 +125,7 @@
 			"description": "",
 			"collectionId": "93c94efa-cdda-6d8e-2139-6bb742274fab",
 			"responses": [],
-			"rawModeData": "{\n     \"name\": \"es-example\",\n     \"description\": \"example es provider\",\n     \"login\": \"my_login\",\n     \"password\": \"my_pass\",\n     \"type\": \"\",\n     \"hosts\": [\n        \"176.120.25.19:9300\",\n        \"192.168.1.135:9300\"\n      ]\n}"
+			"rawModeData": "{\n     \"name\": \"es-example\",\n     \"description\": \"example es provider\",\n     \"login\": \"my_login\",\n     \"password\": \"my_pass\",\n     \"type\": \"\",\n     \"hosts\": [\n        \"{{elasticsearch-address}}\",\n        \"192.168.1.135:9300\"\n      ]\n}"
 		},
 		{
 			"id": "28120517-cd1a-51e3-5b60-98ff6acd42f4",
@@ -148,7 +148,7 @@
 			"description": "",
 			"collectionId": "93c94efa-cdda-6d8e-2139-6bb742274fab",
 			"responses": [],
-			"rawModeData": "{\n     \"name\": \"es-example\",\n     \"description\": \"example es provider\",\n     \"login\": \"my_login\",\n     \"password\": \"my_pass\",\n     \"type\": \"provider.elasticsearch\",\n     \"hosts\": [\n        \"176.120.25.19:9300\",\n        \"192.168.1.135:9300\"\n      ]\n}"
+			"rawModeData": "{\n     \"name\": \"es-example\",\n     \"description\": \"example es provider\",\n     \"login\": \"my_login\",\n     \"password\": \"my_pass\",\n     \"type\": \"provider.elasticsearch\",\n     \"hosts\": [\n        \"{{elasticsearch-address}}\",\n        \"192.168.1.135:9300\"\n      ]\n}"
 		},
 		{
 			"id": "3a3aacae-2b89-c235-a533-a7d251aeecee",
@@ -171,7 +171,7 @@
 			"description": "",
 			"collectionId": "93c94efa-cdda-6d8e-2139-6bb742274fab",
 			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"es-example\",\r\n     \"description\": \"example es provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"provider.elasticsearch\",\r\n     \"hosts\": [\r\n        \"176.120.25.19:9300\",\r\n        \"/home/user/provider/host\",\r\n        \"192.168.1.135:9300\"\r\n      ]\r\n}"
+			"rawModeData": "{\r\n     \"name\": \"es-example\",\r\n     \"description\": \"example es provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"provider.elasticsearch\",\r\n     \"hosts\": [\r\n        \"{{elasticsearch-address}}\",\r\n        \"/home/user/provider/host\",\r\n        \"192.168.1.135:9300\"\r\n      ]\r\n}"
 		},
 		{
 			"id": "4bc10302-7b52-7eb9-45eb-2667e20067b7",
@@ -262,7 +262,7 @@
 			"description": "",
 			"collectionId": "93c94efa-cdda-6d8e-2139-6bb742274fab",
 			"responses": [],
-			"rawModeData": "{\n     \"name\": \"es-example\",\n     \"description\": \"example es provider\",\n     \"login\": \"my_login\",\n     \"password\": \"my_pass\",\n     \"type\": \"provider.elasticsearch\",\n     \"hosts\": [\n        \"176.120.25.19:9300\",\n        -5,\n        \"192.168.1.135:9300\"\n      ]\n}"
+			"rawModeData": "{\n     \"name\": \"es-example\",\n     \"description\": \"example es provider\",\n     \"login\": \"my_login\",\n     \"password\": \"my_pass\",\n     \"type\": \"provider.elasticsearch\",\n     \"hosts\": [\n        \"{{elasticsearch-address}}\",\n        -5,\n        \"192.168.1.135:9300\"\n      ]\n}"
 		},
 		{
 			"id": "728167d9-803b-d993-42a6-0d32d7f40e97",
@@ -308,7 +308,7 @@
 			"description": "",
 			"collectionId": "93c94efa-cdda-6d8e-2139-6bb742274fab",
 			"responses": [],
-			"rawModeData": "{\n     \"name\": \"es-example\",\n     \"description\": \"example es provider\",\n     \"login\": \"my_login\",\n     \"password\": \"my_pass\",\n     \"type\": \"provider.elasticsearch\",\n     \"hosts\": [\n        \"176.120.25.19:9300\",\n        \"некорректный хост!\",\n        \"192.168.1.135:9300\"\n      ]\n}"
+			"rawModeData": "{\n     \"name\": \"es-example\",\n     \"description\": \"example es provider\",\n     \"login\": \"my_login\",\n     \"password\": \"my_pass\",\n     \"type\": \"provider.elasticsearch\",\n     \"hosts\": [\n        \"{{elasticsearch-address}}\",\n        \"некорректный хост!\",\n        \"192.168.1.135:9300\"\n      ]\n}"
 		},
 		{
 			"id": "7e071011-610f-12cb-9202-ca349373376b",
@@ -353,7 +353,7 @@
 			"description": "",
 			"collectionId": "93c94efa-cdda-6d8e-2139-6bb742274fab",
 			"responses": [],
-			"rawModeData": "{\n     \"name\": \"1es-example\",\n     \"description\": \"example es provider\",\n     \"login\": \"my_login\",\n     \"password\": \"my_pass\",\n     \"type\": \"provider.elasticsearch\",\n     \"hosts\": [\n        \"176.120.25.19:9300\",\n        \"192.168.1.135:9300\"\n      ]\n}"
+			"rawModeData": "{\n     \"name\": \"1es-example\",\n     \"description\": \"example es provider\",\n     \"login\": \"my_login\",\n     \"password\": \"my_pass\",\n     \"type\": \"provider.elasticsearch\",\n     \"hosts\": [\n        \"{{elasticsearch-address}}\",\n        \"192.168.1.135:9300\"\n      ]\n}"
 		},
 		{
 			"id": "9ac0fc8e-0ec2-8647-38d7-323c5ba12fa8",
@@ -445,7 +445,7 @@
 			"description": "",
 			"collectionId": "93c94efa-cdda-6d8e-2139-6bb742274fab",
 			"responses": [],
-			"rawModeData": "{\n     \"description\": \"example es provider\",\n     \"login\": \"my_login\",\n     \"password\": \"my_pass\",\n     \"type\": \"provider.elasticsearch\",\n     \"hosts\": [\n        \"176.120.25.19:9300\",\n        \"192.168.1.135:9300\"\n      ]\n}"
+			"rawModeData": "{\n     \"description\": \"example es provider\",\n     \"login\": \"my_login\",\n     \"password\": \"my_pass\",\n     \"type\": \"provider.elasticsearch\",\n     \"hosts\": [\n        \"{{elasticsearch-address}}\",\n        \"192.168.1.135:9300\"\n      ]\n}"
 		},
 		{
 			"id": "b6444604-d5e5-4e6d-e5e1-12b225f5a094",
@@ -537,7 +537,7 @@
 			"description": "",
 			"collectionId": "93c94efa-cdda-6d8e-2139-6bb742274fab",
 			"responses": [],
-			"rawModeData": "{\n     \"name\": \"es-example\",\n     \"description\": \"example es provider\",\n     \"login\": \"my_login\",\n     \"password\": \"my_pass\",\n     \"type\": \"provider.elasticsearch\",\n     \"hosts\": [\n        \"176.120.25.19:9300\"\n      ]\n}"
+			"rawModeData": "{\n     \"name\": \"es-example\",\n     \"description\": \"example es provider\",\n     \"login\": \"my_login\",\n     \"password\": \"my_pass\",\n     \"type\": \"provider.elasticsearch\",\n     \"hosts\": [\n        \"{{elasticsearch-address}}\"\n      ]\n}"
 		},
 		{
 			"id": "d00f3c9e-3b8b-705f-d7d9-67cb4c9d62e8",
@@ -606,7 +606,7 @@
 			"description": "",
 			"collectionId": "93c94efa-cdda-6d8e-2139-6bb742274fab",
 			"responses": [],
-			"rawModeData": "{\n     \"name\": \"es-example\",\n     \"description\": \"example es provider\",\n     \"login\": \"my_login\",\n     \"password\": \"my_pass\",\n     \"type\": \"1provider.elasticsearch\",\n     \"hosts\": [\n        \"176.120.25.19:9300\",\n        \"192.168.1.135:9300\"\n      ]\n}"
+			"rawModeData": "{\n     \"name\": \"es-example\",\n     \"description\": \"example es provider\",\n     \"login\": \"my_login\",\n     \"password\": \"my_pass\",\n     \"type\": \"1provider.elasticsearch\",\n     \"hosts\": [\n        \"{{elasticsearch-address}}\",\n        \"192.168.1.135:9300\"\n      ]\n}"
 		},
 		{
 			"id": "fb10a169-631a-e894-9b11-48850f624f31",

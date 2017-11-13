@@ -381,7 +381,7 @@
 			"description": "",
 			"collectionId": "1b9a7b41-d394-85c9-cb67-bd97ab1c6163",
 			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"zookeeper-for-zk\",\r\n     \"description\": \"example zooKeeper provider\",\r\n     \"login\": \"admin\",\r\n     \"password\": \"admin\",\r\n     \"type\": \"provider.apache-zookeeper\",\r\n     \"hosts\": [\r\n        \"176.120.25.19:2181\"\r\n      ]\r\n}"
+			"rawModeData": "{\r\n     \"name\": \"zookeeper-for-zk\",\r\n     \"description\": \"example zooKeeper provider\",\r\n     \"login\": \"admin\",\r\n     \"password\": \"admin\",\r\n     \"type\": \"provider.apache-zookeeper\",\r\n     \"hosts\": [\r\n        \"{{zookeeper-address}}\"\r\n      ]\r\n}"
 		},
 		{
 			"id": "83378288-7b91-dfef-7dca-7198a35cfc64",
@@ -404,7 +404,7 @@
 			"description": "",
 			"collectionId": "1b9a7b41-d394-85c9-cb67-bd97ab1c6163",
 			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"zookeeper-for-tstr\",\r\n     \"description\": \"example zooKeeper provider\",\r\n     \"login\": \"admin\",\r\n     \"password\": \"admin\",\r\n     \"type\": \"provider.apache-zookeeper\",\r\n     \"hosts\": [\r\n        \"176.120.25.19:2181\"\r\n      ]\r\n}"
+			"rawModeData": "{\r\n     \"name\": \"zookeeper-for-tstr\",\r\n     \"description\": \"example zooKeeper provider\",\r\n     \"login\": \"admin\",\r\n     \"password\": \"admin\",\r\n     \"type\": \"provider.apache-zookeeper\",\r\n     \"hosts\": [\r\n        \"{{zookeeper-address}}\"\r\n      ]\r\n}"
 		},
 		{
 			"id": "8493d2d8-def1-cc89-3304-d3d9c44b37ff",
@@ -590,7 +590,7 @@
 			"description": "",
 			"collectionId": "1b9a7b41-d394-85c9-cb67-bd97ab1c6163",
 			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"rest-ful\",\r\n     \"description\": \"example rest-ful provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"provider.restful\",\r\n     \"hosts\": [\r\n        \"176.120.25.19:3000\"\r\n      ]\r\n}"
+			"rawModeData": "{\r\n     \"name\": \"rest-ful\",\r\n     \"description\": \"example rest-ful provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"provider.restful\",\r\n     \"hosts\": [\r\n        \"{{restful-address}}\"\r\n      ]\r\n}"
 		},
 		{
 			"id": "dd80b960-95d3-18c2-e3cb-b39b046a2dc9",

@@ -67,7 +67,7 @@
 		{
 			"id": "19a082c8-bdc5-7807-2ae7-5119d7803be6",
 			"headers": "",
-			"url": "176.120.25.19:9200/a1",
+			"url": "{{elasticsearch-rest-address}}/a1",
 			"pathVariables": {},
 			"preRequestScript": null,
 			"method": "PUT",
@@ -188,7 +188,7 @@
 			"description": "",
 			"collectionId": "24a363cb-f67b-f41c-3d86-dadead9e1b81",
 			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"zookeeper-for-coordination-service\",\r\n     \"description\": \"example zooKeeper provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"provider.apache-zookeeper\",\r\n     \"hosts\": [\r\n        \"176.120.25.19:2181\"\r\n      ]\r\n}"
+			"rawModeData": "{\r\n     \"name\": \"zookeeper-for-coordination-service\",\r\n     \"description\": \"example zooKeeper provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"provider.apache-zookeeper\",\r\n     \"hosts\": [\r\n        \"{{zookeeper-address}}\"\r\n      ]\r\n}"
 		},
 		{
 			"id": "4cb5b6ed-52dd-3554-ef4c-c4074fc182df",
@@ -482,7 +482,7 @@
 			"description": "",
 			"collectionId": "24a363cb-f67b-f41c-3d86-dadead9e1b81",
 			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"elasticsearch-for-es-service\",\r\n     \"description\": \"example es provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"provider.elasticsearch\",\r\n     \"hosts\": [\r\n        \"176.120.25.19:9300\"\r\n      ]\r\n}"
+			"rawModeData": "{\r\n     \"name\": \"elasticsearch-for-es-service\",\r\n     \"description\": \"example es provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"provider.elasticsearch\",\r\n     \"hosts\": [\r\n        \"{{elasticsearch-address}}\"\r\n      ]\r\n}"
 		},
 		{
 			"id": "ab9bb880-9e42-aeab-7e8d-ec716d609a79",
@@ -591,7 +591,7 @@
 			"data": null,
 			"dataMode": "params",
 			"version": 2,
-			"tests": "tests[\"Body matches string\"] = responseBody.has(\"Instance 'integration-output' is being launched.\");\n\ntests[\"Status code is 200\"] = responseCode.code === 200;\n\nfunction pausecomp(millis)\n{\nvar date = new Date();\nvar curDate = null;\ndo { curDate = new Date(); \n}while(curDate-date < millis);\n}\npausecomp(10000)",
+			"tests": "tests[\"Body matches string\"] = responseBody.has(\"Instance 'integration-output' is being launched.\");\n\ntests[\"Status code is 200\"] = responseCode.code === 200;\n\nfunction pausecomp(millis)\n{\nvar date = new Date();\nvar curDate = null;\ndo { curDate = new Date(); \n}while(curDate-date < millis);\n}\npausecomp(30000)",
 			"currentHelper": "normal",
 			"helperAttributes": {},
 			"time": 1491453294166,
@@ -603,7 +603,7 @@
 		{
 			"id": "c8421e76-3f4f-f095-58f8-149885f62034",
 			"headers": "",
-			"url": "176.120.25.19:9200/a1",
+			"url": "{{elasticsearch-rest-address}}/a1",
 			"pathVariables": {},
 			"preRequestScript": null,
 			"method": "DELETE",
@@ -702,7 +702,7 @@
 			"description": "to t-stream stream",
 			"collectionId": "24a363cb-f67b-f41c-3d86-dadead9e1b81",
 			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"zookeeper-for-tstr-service\",\r\n     \"description\": \"example zooKeeper provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"provider.apache-zookeeper\",\r\n     \"hosts\": [\r\n        \"176.120.25.19:2181\"\r\n      ]\r\n}"
+			"rawModeData": "{\r\n     \"name\": \"zookeeper-for-tstr-service\",\r\n     \"description\": \"example zooKeeper provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"provider.apache-zookeeper\",\r\n     \"hosts\": [\r\n        \"{{zookeeper-address}}\"\r\n      ]\r\n}"
 		},
 		{
 			"id": "edb95b15-58e0-b1f3-1ad8-5304ffda6f0e",

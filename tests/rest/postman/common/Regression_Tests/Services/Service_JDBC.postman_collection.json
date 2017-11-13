@@ -172,7 +172,7 @@
 			"description": "",
 			"collectionId": "3828bd41-031e-cf26-e9ec-368dcd8106ea",
 			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"rest-jdbc\",\r\n     \"description\": \"example jdbc provider\",\r\n     \"login\": \"admin\",\r\n     \"password\": \"admin\",\r\n     \"type\": \"provider.sql-database\",\r\n     \"driver\":\"mysql\",\r\n     \"hosts\": [\r\n        \"176.120.25.19:3306\"\r\n      ]\r\n}",
+			"rawModeData": "{\r\n     \"name\": \"rest-jdbc\",\r\n     \"description\": \"example jdbc provider\",\r\n     \"login\": \"admin\",\r\n     \"password\": \"admin\",\r\n     \"type\": \"provider.sql-database\",\r\n     \"driver\":\"mysql\",\r\n     \"hosts\": [\r\n        \"{{mysql-address}}\"\r\n      ]\r\n}",
 			"collection_id": "3828bd41-031e-cf26-e9ec-368dcd8106ea"
 		},
 		{
@@ -240,7 +240,7 @@
 			"tests": "tests[\"Status code is 201\"] = responseCode.code === 201;\n\ntests[\"Body matches string\"] = responseBody.has(\"Provider 'kafka-rest' has been created.\");",
 			"currentHelper": "normal",
 			"helperAttributes": {},
-			"rawModeData": "{\r\n     \"name\": \"kafka-rest\",\r\n     \"description\": \"example kafka provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"provider.apache-kafka\",\r\n     \"hosts\": [\r\n        \"176.120.25.19:9092\"\r\n      ]\r\n}",
+			"rawModeData": "{\r\n     \"name\": \"kafka-rest\",\r\n     \"description\": \"example kafka provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"provider.apache-kafka\",\r\n     \"hosts\": [\r\n        \"{{kafka-address}}\"\r\n      ]\r\n}",
 			"collection_id": "3828bd41-031e-cf26-e9ec-368dcd8106ea"
 		},
 		{

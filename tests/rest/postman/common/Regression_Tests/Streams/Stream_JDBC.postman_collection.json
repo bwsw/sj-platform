@@ -84,7 +84,7 @@
 			"description": "",
 			"collectionId": "f44897ee-9775-a66d-8e5b-f7f06bbc9b7c",
 			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"restjdbc\",\r\n     \"description\": \"example jdbc provider\",\r\n     \"login\": \"admin\",\r\n     \"password\": \"admin\",\r\n     \"type\": \"provider.sql-database\",\r\n     \"driver\":\"mysql\",\r\n     \"hosts\": [\r\n        \"176.120.25.19:3306\"\r\n      ]\r\n}"
+			"rawModeData": "{\r\n     \"name\": \"restjdbc\",\r\n     \"description\": \"example jdbc provider\",\r\n     \"login\": \"admin\",\r\n     \"password\": \"admin\",\r\n     \"type\": \"provider.sql-database\",\r\n     \"driver\":\"mysql\",\r\n     \"hosts\": [\r\n        \"{{mysql-address}}\"\r\n      ]\r\n}"
 		},
 		{
 			"id": "279fde0e-6b43-d638-7423-9e8f1daeeb35",
@@ -337,7 +337,7 @@
 			"description": "",
 			"collectionId": "f44897ee-9775-a66d-8e5b-f7f06bbc9b7c",
 			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"rest-elasticsearch\",\r\n     \"description\": \"example es provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"provider.elasticsearch\",\r\n     \"hosts\": [\r\n        \"176.120.25.19:9300\"\r\n      ]\r\n}"
+			"rawModeData": "{\r\n     \"name\": \"rest-elasticsearch\",\r\n     \"description\": \"example es provider\",\r\n     \"login\": \"my_login\",\r\n     \"password\": \"my_pass\",\r\n     \"type\": \"provider.elasticsearch\",\r\n     \"hosts\": [\r\n        \"{{elasticsearch-address}}\"\r\n      ]\r\n}"
 		},
 		{
 			"id": "8b67559c-2fc9-b410-8f5c-c3f82e10a483",
