@@ -91,7 +91,7 @@ What we are going to do for the examples is:
  
 2. Download and set up the platform and demo project. We'll set up the platform and the demo repositories downloading it from GitHub. 
 
-3. Upload configurations and engines. The configurations should be uploaded to determine module performance.  The full list of all configurations can be viewed at the :ref:`Configuration` page. 
+3. Upload configurations and engines. The configurations should be uploaded to determine module performance. The full list of all configurations can be viewed at the :ref:`Configuration` page. 
 
    Engines are necessary for modules as they handle data flow making it into streams.
 
@@ -107,7 +107,11 @@ What we are going to do for the examples is:
 
 .. note:: Find more about engines at the :ref:`Engines` page.
 
-4. Upload modules. Module is some code for processing data streams. In the example tasks we will upload ready-to-use modules of three types - input modules, processing modules (regular, batch) and output modules. 
+4. Upload modules. Module is some code for processing data streams. A **module** is a JAR file, containing a module specification. Module's executor performs data transformation, aggregation, filtering.  In the example tasks we will upload ready-to-use modules of three types - input modules, processing modules (regular, batch) and output modules. 
+
+.. figure:: _static/moduleExecutorAndValidator.png
+   :scale: 120%
+   :align: center
 
    To solve your tasks, you may upload your custom modules in this step. 
    
@@ -618,14 +622,6 @@ Step 4. Module Uploading
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Now as the system is deployed and necessary engines are added, modules can be uploaded to the system.
-
-A **module** is a JAR file, containing a module specification. It handles data streams, performs data transformation, aggregation, filtering. 
-
-.. figure:: _static/moduleExecutorAndValidator.png
-   :scale: 120%
-   :align: center
-   
-.. note:: Find more about modules at the :ref:`Modules` page.  A hello-world on a custom module can be found at the :ref:`Custom_Module` section.
 
 For the stated example task we upload the following modules:
 
