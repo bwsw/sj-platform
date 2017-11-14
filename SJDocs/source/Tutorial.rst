@@ -75,30 +75,30 @@ What we are going to do for the examples is:
 
 1. Deploy Mesos and other services. We suggest deploying the platform to Mesos using Marathon. Among other services we will run:
 
-  - Apache Zookeeper - for coordination of task execution;
-  - Java - a computer software that provides a system for developing application software and deploying it in a cross-platform computing environment;
-  - Docker - a software container platform that allows a flexible system configuration;
-  - MongoDB - as a database;
-  - T-streams - as a message broker ensuring exactly-once data processing;
-  - REST API instrumentation - for accessing and monitoring the platform;
-  - Elasticsearch, PostgreSQL - as external data storages;
-  - Kibana - to visualize Elasticsearch data.
+   - Apache Zookeeper - for coordination of task execution;
+   - Java - a computer software that provides a system for developing application software and deploying it in a cross-platform computing environment;
+   - Docker - a software container platform that allows a flexible system configuration;
+   - MongoDB - as a database;
+   - T-streams - as a message broker ensuring exactly-once data processing;
+   - REST API instrumentation - for accessing and monitoring the platform;
+   - Elasticsearch, PostgreSQL - as external data storages;
+   - Kibana - to visualize Elasticsearch data.
  
 2. Download and set up the platform and demo project. We'll set up the platform and the demo repositories downloading it from GitHub. 
 
 3. Upload configurations and engines. The configurations should be uploaded to determine module performance. Engines are necessary for modules as they handle data flow making it into streams.
 
-An **engine** is required to start a module. A module can not process data without an engine (that is a .jar file containing required configuration settings). In fact, this is a framework that launches a module.
+   An **engine** is required to start a module. A module can not process data without an engine (that is a .jar file containing required configuration settings). In fact, this is a framework that launches a module.
 
 .. figure:: _static/engine.png
    :scale: 110%
    :align: center
    
-We will upload an engine jar file per each module in a pipeline.
+   We will upload an engine jar file per each module in a pipeline.
 
 4. Upload modules. Module is some code for processing data streams. In the example tasks we will upload ready-to-use modules of three types - input modules, processing modules (regular, batch) and output modules. 
 
-To solve your tasks, you may upload your custom modules in this step.
+   To solve your tasks, you may upload your custom modules in this step.
 
 5. Create streaming layer. The data are passed to and from a module in streams. Within the platform, T-streams are used for message transportation that allows exactly-once data exchange. The result data are exported from SJ-Platform to an external storage with streams of types corresponding to the type of that storage: Elasticsearch, SQL database or RESTful.
 
