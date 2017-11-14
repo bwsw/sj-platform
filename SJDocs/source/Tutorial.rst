@@ -20,9 +20,9 @@ Through an example task, a user will get to know the system structure, its key c
 SJ-Platform Overview
 ----------------------------------
 
-Stream Juggler Platform (**SJ-Platform**) provides a solution for stream and micro-batched processing of unbounded data streams.  A **processor** transforms and handles data streams in SJ-Platform.  Configurations uploaded to the system determine the mode of data processing in the pipeline. The result data are exported to an external storage.
+Stream Juggler Platform (**SJ-Platform**) provides a solution for stream and micro-batched processing of unbounded data streams.  A **processor** transforms and processes data streams in SJ-Platform.  Configurations uploaded to the system determine the mode of data processing in the pipeline. The result data are exported to an external storage.
 
-To configure and monitor the system, SJ-Platform provides a user with a comprehensive RESTful API instrumentation and Web UI.
+To configure and monitor the system, SJ-Platform provides a user with a comprehensive RESTful API and Web UI.
 
 A simplified structure of SJ-Platform can be presented as at the image below:
 
@@ -85,7 +85,7 @@ What we are going to do for the examples is:
    - Docker - a software container platform that allows a flexible system configuration;
    - MongoDB - as a database;
    - T-streams - as a message broker ensuring exactly-once data processing;
-   - REST API instrumentation - for accessing and monitoring the platform;
+   - RESTful API - for accessing and monitoring the platform;
    - Elasticsearch, PostgreSQL - as external data storages;
    - Kibana - to visualize Elasticsearch data.
  
@@ -100,6 +100,8 @@ What we are going to do for the examples is:
 .. figure:: _static/engine.png
    :scale: 110%
    :align: center
+   
+   Picture 4
    
    We will upload an engine jar file per each module in a pipeline.
 
@@ -116,6 +118,8 @@ What we are going to do for the examples is:
 .. figure:: _static/ModuleStreams.png
    :scale: 80%
    
+   Picture 5
+   
    Streaming requires the infrastructure: providers and services. For both example tasks we will need Apache Zookeeper, Elasticsearch and SQL-database types of providers, and Apache Zookeeper, Elasticsearch, SQL-database and T-streams types of services. On the base of the infrastructure we will create streams of corresponding types.
    
 .. note:: Find more about streams and the streaming infrastructure at the :ref:`Streaming` section.
@@ -127,6 +131,8 @@ What we are going to do for the examples is:
 .. figure:: _static/instance.png
    :scale: 120%
    :align: center
+   
+   Picture 6
    
 An instance is created with specific parameters and is set to particular streams.
 
@@ -143,13 +149,15 @@ Fping Example Task
 
 The first example task we'd like to introduce illustrates the platform workflow in the real-world use.
 
-The issue we are going to solve using our platform is to collect aggregated information on the accessibility of nodes using `fping <https://fping.org/>`_ utility. It checks accessibility of provided IPs sending a 64-bytes packet to each IP and waiting for a return packet. If the node can be accessed, a good return packet will be received. Also it returs the amount of time needed for a  package to reach the node and return back. On the basis of this information the processor calculates the average response time for each node per 1 minute. The amount of successful responses by IP per 1 minute is calculated by the processing module as well. The result is exported to an external data store.  
+The issue we are going to solve using our platform is to collect aggregated information on the accessibility of nodes using `fping <https://fping.org/>`_ utility. It checks accessibility of provided IPs sending a 64-bytes packet to each IP and waiting for a return packet. If the node can be accessed, a good return packet will be received. Also it returs the amount of time needed for a package to reach the node and return back. On the basis of this information the processor calculates the average response time for each node per 1 minute. The amount of successful responses by IP per 1 minute is calculated by the processing module as well. The result is exported to an external data store.  
 
 In the example task solution the processing workflow is formed in the following way:
 
 .. figure:: _static/FPingDemo1.png
-
-This diagram demonstrates the processing workflow of the demo. As you can see, the data come to a TCP input module through a pipeline of fping and netcat. The TCP input module is a regular module that performs per-event processing. We provide two off-the-shelf modules - CSV and regex - for two most general input data formats. Find more information about them at the :ref:`input-module` section. For the fping example task we will use a regex input module. It processes an input stream which contains text data, using a set of regular expressions and then serialize them with Apache Avro.
+   
+   Picture 7
+   
+This diagram demonstrates the processing workflow of the demo. As you can see, the data come to a TCP input module through a pipeline of fping and netcat. The TCP input module is a regular module that performs per-event processing. We provide two off-the-shelf modules - CSV and regex - for two most general input data formats. Find more information about them at the :ref:`input-module` section. For the fping example task we will use a regex input module. It processes an input stream which contains text data using a set of regular expressions, and then serializes them with Apache Avro.
 
 Then the input module parses ICMP echo responses (IP and response time are selected) and ICMP unreachable responses (IPs only are selected) and puts the parsed data into 'echo-response' stream and 'unreachable-response' stream, respectively.
 
@@ -213,7 +221,7 @@ Minimum system requirements in this case are as follows:
 - Docker (see `official documentation <https://docs.docker.com/engine/installation/linux/docker-ce/ubuntu/>`_),
 - cURL.
 
-We provide instructions to deploy the platform **on Mesos** for the example task.
+For the example task we provide instructions to deploy the platform **to Mesos** using Marathon.
 
 The deployment is performed via REST API.
 
@@ -221,24 +229,24 @@ So, let's start with deploying Mesos and other services.
 
 1) Deploy Mesos, Marathon, Zookeeper. You can follow the instructions at the official `installation guide <http://www.bogotobogo.com/DevOps/DevOps_Mesos_Install.php>`_ .
 
-To deploy Docker follow the instructions at the official `installation guide <https://docs.docker.com/engine/installation/linux/docker-ce/ubuntu/#install-docker-ce>`_ .
+   To deploy Docker follow the instructions at the official `installation guide <https://docs.docker.com/engine/installation/linux/docker-ce/ubuntu/#install-docker-ce>`_ .
 
-Install Java 1.8. Find detailed instructions `here <https://tecadmin.net/install-oracle-java-8-ubuntu-via-ppa/>`_.
+   Install Java 1.8. Find detailed instructions `here <https://tecadmin.net/install-oracle-java-8-ubuntu-via-ppa/>`_.
 
-Please, note, the deployment described here is for one default Mesos-slave with available ports [31000-32000]. Mesos-slave must support Docker containerizer. The technical requirements to Mesos-slave are the following: 
+   Please, note, the deployment described here is for one default Mesos-slave with available ports [31000-32000]. Mesos-slave must support Docker containerizer. The technical requirements to Mesos-slave are the following: 
 
-- 2 CPUs, 
-- 4096 memory.
+      - 2 CPUs, 
+      - 4096 memory.
 
-.. note:: If you are planning to launch a module with a greater value of the "parallelizm" parameter, i.e. to run tasks on more than 1 nodes, you need to increase the "executor_registration_timeout" parameter for Mesos-slave.
+.. note:: If you are planning to launch a module with a greater value of the "parallelizm" parameter, i.e. to run tasks on more than 1 node, you need to increase the "executor_registration_timeout" parameter for Mesos-slave.
 
-Start Mesos and the services. 
+   Start Mesos and the services. 
 
 2) Create JSON files and a configuration file. Please, name them as specified here.
 
-Replace <slave_advertise_ip> with the slave advertise IP.
+   Replace <slave_advertise_ip> with the slave advertise IP.
 
-Replace <zk_ip> and <zk_port> according to the Apache Zookeeper address.
+   Replace <zk_ip> and <zk_port> according to the Apache Zookeeper address.
 
 .. _mongo.json:
 
@@ -479,35 +487,35 @@ Replace <zk_ip> and <zk_port> according to the Apache Zookeeper address.
 
 3) Run the services on Marathon:
 
-**Mongo**::
+   **Mongo**::
  
- curl -X POST http://172.17.0.1:8080/v2/apps -H "Content-type: application/json" -d @mongo.json 
+      curl -X POST http://172.17.0.1:8080/v2/apps -H "Content-type: application/json" -d @mongo.json 
 
-**Elasticsearch**:
+   **Elasticsearch**:
 
-Please, note that command should be executed on Master-Slave machine::
+      Please, note that command should be executed on Master-slave machine::
 
- sudo sysctl -w vm.max_map_count=262144
+         sudo sysctl -w vm.max_map_count=262144
 
-Then launch Elasticsearch::
+   Then launch Elasticsearch::
 
- curl -X POST http://172.17.0.1:8080/v2/apps -H "Content-type: application/json" -d 
- @elasticsearch.json
+         curl -X POST http://172.17.0.1:8080/v2/apps -H "Content-type: application/json" -d 
+         @elasticsearch.json
 
-**SJ-rest**::
+   **SJ-rest**::
 
- сurl -X POST http://172.17.0.1:8080/v2/apps -H "Content-type: application/json" -d @sj-rest.json    
+      сurl -X POST http://172.17.0.1:8080/v2/apps -H "Content-type: application/json" -d @sj-rest.json    
     
-**T-Streams**::
+   **T-Streams**::
  
- curl -X POST http://172.17.0.1:8080/v2/apps -H "Content-type: application/json" -d @tts.json 
+      curl -X POST http://172.17.0.1:8080/v2/apps -H "Content-type: application/json" -d @tts.json 
 
-**Kibana**::
+   **Kibana**::
 
- curl -X POST http://172.17.0.1:8080/v2/apps -H "Content-type: application/json" -d @kibana.json
+      curl -X POST http://172.17.0.1:8080/v2/apps -H "Content-type: application/json" -d @kibana.json
 
 
-Via the Marathon interface, make sure the services are deployed.
+   Via the Marathon interface, make sure the services have a *running* status.
 
 .. figure:: _static/ServicesOnMarathon.png
 
@@ -530,17 +538,14 @@ Step 2. SJ-Platform Setting Up
     git clone https://github.com/bwsw/sj-fping-demo.git
     cd sj-fping-demo
 
-
-Now make sure you have access to the Web UI. You will see the platform is deployed but it is not completed with any entities yet. They will be added in the next steps.
-
-Next, the infrastructure for the modules can be created.
+Now make sure you have access to the Web UI. You will see the platform is deployed but there are no entities yet created. We will create them in next steps.
 
 Step 3. Configurations and Engine Jars Uploading 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To implement the processing workflow for the example task resolution the following JAR files should be uploaded:
 
-1. a JAR file per each module type  - input-streaming, regular-streaming, output-streaming;
+1. a JAR file per each module type: input-streaming, regular-streaming, output-streaming;
 
 2. a JAR file for Mesos framework that starts engines.
 
@@ -549,7 +554,7 @@ Thus, engines should be compiled and uploaded next.
 Upload Engine Jars
 """"""""""""""""""""""""
 
-Please, download the engine JARs for the three module types (input-streaming, regular-streaming, output-streaming) and the Mesos framework:: 
+Please, download the engine JARs for each module type (input-streaming, regular-streaming, output-streaming) and the Mesos framework:: 
 
  wget http://c1-ftp1.netpoint-dc.com/sj/1.0-SNAPSHOT/sj-mesos-framework.jar
  wget http://c1-ftp1.netpoint-dc.com/sj/1.0-SNAPSHOT/sj-input-streaming-engine.jar
@@ -574,17 +579,17 @@ Setup configurations for engines
 
 For the example task, we will upload the following configurations via REST:
 
-- session.timeout - Use when connecting to Apache Zookeeper in milliseconds (usually when we are dealing with T-streams consumers/producers and Kafka streams)
+- session.timeout -  use when connect to Apache Zookeeper (ms). Usually when we are dealing with T-streams consumers/producers and Apache Kafka streams.
 
-- current-framework - Indicates what file is used to run a framework. By this value, you can get a setting that contains a file name of framework jar.
+- current-framework - indicates which file is used to run a framework. By this value, you can get a setting that contains a file name of framework jar.
 
-- crud-rest-host - For the host on the which the rest has launched.
+- crud-rest-host - REST interface host.
 
-- crud-rest-port - For the port on the which the rest has launched.
+- crud-rest-port - REST interface port.
 
-- marathon-connect - Use to launch a framework that is responsible for running engine tasks and provides the information about launched tasks. It should start with 'http://'.
+- marathon-connect - Marathon adderess. Use to launch a framework that is responsible for running engine tasks and provides the information about launched tasks. It should start with 'http://'.
 
-- marathon-connect-timeout - Use when trying to connect by 'marathon-connect' (in milliseconds).
+- marathon-connect-timeout - use when trying to connect by 'marathon-connect' (ms).
 
 Send the next requests to upload the configurations. Please, replace <slave_advertise_ip> with the slave advertise IP and <marathon_address> with the address of Marathon::
 
@@ -622,9 +627,9 @@ A **module** is a JAR file, containing a module specification. It handles data s
    
 .. note:: Find more about modules at the :ref:`Modules` page.  A hello-world on a custom module can be found at the :ref:`Custom_Module` section.
 
-For the stated example task the following modules will be uploaded:
+For the stated example task we upload the following modules:
 
-- a TCP input module - *sj-regex-input* module - that accepts TCP input streams and transforms raw data to put them to T-streams and pass for processing;
+- a TCP input module - *sj-regex-input* module - that accepts TCP input streams and transforms raw data to put them to T-streams and transmit for processing;
 
 - a processing module - *ps-process* module - which is a regular-streaming module that processes data element-by-element.
 
@@ -671,7 +676,7 @@ Now in the UI, you can see the uploaded modules under the ‘Modules’ tab in U
 Step 5. Creating Streaming Layer 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The raw data are fed to the platform from different sources. And within the platform, the data are passed to and from a module in streams. Thus, in the next step, the streams for data ingesting and exporting will be created.
+The raw data are fed to the platform from different sources. And within the platform, the data are transported to and from modules via streams. Thus, in the next step, the streams for data ingesting and exporting will be created.
 
 Different modules require different stream types for input and output.
                    
@@ -681,16 +686,16 @@ In the example task solution the following stream types are implemented:
 
 2. T-streams streaming passes the data to and from the processing module;
 
-3. output modules export aggregated data and pass them in streams to Elasticsearch.
+3. output modules export aggregated data and transfer them in streams to Elasticsearch.
 
 .. figure:: _static/StreamsInPlatform.png
    :scale: 80%
 
-Prior to creating a stream, the infrastructure needs to be created for the streaming layer. The infrastructure for streams includes **providers** and **services**. This is a required presetting.
+Prior to creating a stream, we need to create infrastructure for the streaming layer. The infrastructure for streams includes **providers** and **services**. This is a required presetting.
 
 The types of providers and services are determined by the type of streams. Find more about types of providers and services at the :ref:`Streaming_Infrastructure` section.
 
-Below the steps for creating streaming infrastructure such as providers, services, and streams, via REST API can be found.
+There are steps below to create streaming infrastructure using REST API: providers, services, and streams.
 
 Set Up Streaming Infrastructure
 """""""""""""""""""""""""""""""""""""""
@@ -702,11 +707,10 @@ Besides, the Apache Zookeeper provider is required for T-streams service that is
 
 The provider and the service of Elasticsearch type are required by the Elasticsearch output streams to put the result into the Elasticsearch data storage.
 
-As a result, the following infrastructure is to be created:
+As a result, we have the following infrastructure to be created:
 
 - Providers of Apache Zookeeper and Elasticsearch types;
 - Services of Apache Zookeeper, T-streams and Elasticsearch types.
-
 
 1) Set up providers.
 
@@ -793,7 +797,7 @@ Step 6. Create Output Destination
 
 At this step all necessary indexes, tables and mapping should be created for storing the processed result.
 
-In the provided example task the result data are stored to the Elasticsearch data storage.
+In the provided example task the result data are saved to the Elasticsearch data storage.
 
 Thus, it is necessary to create the index and mapping for Elasticsearch.
 
@@ -805,13 +809,11 @@ Create the index and the mapping for Elasticsearch sending the PUT request::
 Step 7. Creating Instances 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Once the system is deployed, configurations and modules are uploaded, the streaming layer with necessary infrastructure is created, an instance is to be created in the next step.
+Once the system is deployed, configurations and modules are uploaded, the streaming layer with necessary infrastructure is created, we are going to create instances in the next step.
  
-For each module, an instance should be created.
+An individual instance should be created for each module.
 
-Creating Instances
-"""""""""""""""""""""""""""""
-For instance creation we will send the POST requests. See the instructions below for creating instances for the example task solution.
+See the instructions below for creating instances for the example task.
 
 To create an instance of the *sj-regex-input* module send the following request::
 
@@ -821,7 +823,7 @@ To create an instance of the *ps-process* module send the following request::
 
  curl --request POST "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance" -H 'Content-Type: application/json' --data "@api-json/instances/pingstation-process.json"
 
-Create two more instances for the *ps-process* module with different checkpoint intervals to process data every 3 minute and every hour. Remember to create them with different names::
+Create two more instances for the *ps-process* module with different checkpoint intervals to process data every 3 minutes and every hour. Remember to create them with different names::
 
  curl --request POST "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance" -H 'Content-Type: application/json' --data "@api-json/instances/pingstation-echo-process-3m.json"
 
@@ -848,19 +850,17 @@ Ready! The modules can be launched.
 Launching Instances
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-After the streaming layer with its infrastructure and instances are created you can start a module. 
+After the streaming layer with its infrastructure and instances are ready you can start a module. 
 
-The module starts working after it is launched. The input module starts receiving data, transforms the data for T-streams to pass them to the processing module. The processing module starts processing them and put to T-streams to pass them to the output module. The output module starts storing the result in a data storage. 
+The module starts working after its instance is launched. An input module begins to receive data, transforms the data for T-streams to transfer them to the processing module. A processing module begins to process them and put to T-streams to transfer them to the output module. An output module begins to store the result in a data storage. 
 
-In fact, it is not a module that is started. It is an instance of the module.
+In the example case, there are three modules and each of them has its own instances. Thus, these instances should be launched one by one. 
 
-In the example case, there are three modules (input-streaming, regular-streaming and output-streaming modules) and each of them has its own instances. Thus, these instances should be launched one by one. 
-
-For launching the **input module instance** send::
+To launch the **input module instance** send::
 
  curl --request GET "http://$address/v1/modules/input-streaming/pingstation-input/1.0/instance/pingstation-input/start"
-
-For launching the **processing module instances** send::
+ 
+To launch the **processing module instances** send::
 
  curl --request GET "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance/pingstation-process/start"
 
@@ -868,7 +868,7 @@ For launching the **processing module instances** send::
 
  curl --request GET "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance/pingstation-process-1h/start" 
 
-For launching the **output module instances** send::
+To launch the **output module instances** send::
 
  curl --request GET "http://$address/v1/modules/output-streaming/pingstation-output/1.0/instance/pingstation-output/start"
 
@@ -876,11 +876,11 @@ For launching the **output module instances** send::
 
  curl --request GET "http://$address/v1/modules/output-streaming/pingstation-output/1.0/instance/pingstation-output-1h/start" 
 
-If you have a look in the UI, you will see the launched instances with the “started” status.
+If you take a look at the UI, you will see the launched instances with the “started” status.
 
 .. figure:: _static/InstancesStarted.png
 
-To get a list of listening ports of input module instance send the request::
+To get a list of ports that are listened by the input module instance send the request::
 
  curl --request GET "http://$address/v1/modules/input-streaming/pingstation-input/1.0/instance/pingstation-input"
 
@@ -897,14 +897,14 @@ and look at the field named ‘tasks’, e.g. it may look as follows::
   }
  }
 
-And now you can **start a flow**. Please, replace `nc` with the host and port of your instance task::
+And now you can **start a flow**. Please, replace value of `nc` operands with the host and port of your instance task::
 
  fping -l -g 91.221.60.0/23 2>&1 | nc 176.120.25.19 31000
 
 See the Results 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To see the processing results saved in Elasticsearch, please, go to Kibana. There the aggregated data can be rendered in a diagram.
+To see the processing results saved in Elasticsearch, please, go to Kibana. There the aggregated data can be rendered on a plot.
 
 The result can be viewed while the module is working. A necessary auto-refresh interval can be set for the diagram to update the graph.
 
@@ -920,9 +920,10 @@ Select the parameters to show in the graph at the left-hand panel.
 
 The example below is compiled in Kibana v.5.5.1.
 
-It illustrates the average time of echo-responses by IPs per a selected period of time (e.g. 1 min). As you can see, different nodes have different average time of response. Some nodes respond faster than others. 
+It illustrates the average time of echo-responses by IPs per a selected period of time (e.g. 1 min). As you can see, different nodes have different average response times. Some nodes respond faster than others. 
 
 .. figure:: _static/Kibana.png
+   Picture 8
 
 Many other parameter combinations can be implemented to view the results.
 
@@ -969,11 +970,11 @@ Make sure the instances to be deleted are stopped and are not with one of the fo
 
 The instances of the modules can be deleted one by one. 
 
-For deleting the *sj-regex-input* module instance send::
+To delete the *sj-regex-input* module instance send::
 
  curl --request DELETE "http://$address/v1/modules/input-streaming/pingstation-input/1.0/instance/pingstation-input/"
 
-For deleting the *ps-process* module instance send::
+To delete the *ps-process* module instance send::
 
  curl --request DELETE "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance/pingstation-process/"
 
@@ -981,7 +982,7 @@ For deleting the *ps-process* module instance send::
 
  curl --request DELETE "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance/pingstation-process-1h/"
 
-For deleting the *ps-output* module instance send::
+To delete the *ps-output* module instance send::
 
  curl --request DELETE "http://$address/v1/modules/output-streaming/pingstation-output/1.0/instance/pingstation-output/"
 
@@ -1033,7 +1034,7 @@ For this demo project the following core systems and services are required:
 5. Docker - a software container platform that allows a flexible system configuration;
 6. MongoDB - as a database;
 7. T-streams - as a message broker ensuringe exactly-once data processing;
-8. REST API instrumentation - for accessing and monitoring the platform;
+8. RESTful API - for accessing and monitoring the platform;
 9. PostgreSQL - as a destination data store.
 
 For a start, perform the steps for platform deployment from the Step1-Deployment_ section.
@@ -1516,7 +1517,7 @@ Find more information about SJ-Platform and its entities at:
 
 :ref:`UI_Guide` - the instructions on platform monitoring via the Web UI.
 
-:ref:`REST_API` - the RESTful API instrumentation to configure and monitor the platform.
+:ref:`REST_API` - the RESTful API to configure and monitor the platform.
 
 
 
