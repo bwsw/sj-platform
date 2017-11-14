@@ -134,7 +134,7 @@ What we are going to do for the examples is:
    
    Picture 6
    
-An instance is created with specific parameters and is set to particular streams.
+An instance is created with specific parameters. It will use particular streams specified for it as input and output streams.
 
 Launching instances we will start data processing in the platform.
 
