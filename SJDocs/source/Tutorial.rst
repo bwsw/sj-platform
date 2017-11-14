@@ -239,8 +239,8 @@ So, let's start with deploying Mesos and other services.
 
    Please, note, the deployment described here is for one default Mesos-slave with available ports [31000-32000]. Mesos-slave must support Docker containerizer. The technical requirements to Mesos-slave are the following: 
 
-      - 2 CPUs, 
-      - 4096 memory.
+   - 2 CPUs, 
+   - 4096 memory.
 
 .. note:: If you are planning to launch a module with a greater value of the "parallelizm" parameter, i.e. to run tasks on more than 1 node, you need to increase the "executor_registration_timeout" parameter for Mesos-slave.
 
