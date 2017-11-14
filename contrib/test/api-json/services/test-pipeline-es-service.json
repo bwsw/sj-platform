@@ -1,0 +1,7 @@
+{
+  "name": "test-pipeline-es-service",
+  "description": "Elasticsearch service to test pipeline",
+  "provider": "test-pipeline-es-provider",
+  "index": "test-pipeline",
+  "type": "service.elasticsearch"
+}
