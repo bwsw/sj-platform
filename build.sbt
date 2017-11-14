@@ -4,12 +4,12 @@ val sjVersion = "1.0-SNAPSHOT"
 
 addCommandAlias("rebuild", ";clean; compile; package")
 
-artifact in (Compile, assembly) := {
-  val art = (artifact in (Compile, assembly)).value
+artifact in(Compile, assembly) := {
+  val art = (artifact in(Compile, assembly)).value
   art.copy(`classifier` = Some("assembly"))
 }
 
-addArtifact(artifact in (Compile, assembly), assembly)
+addArtifact(artifact in(Compile, assembly), assembly)
 
 val commonSettings = Seq(
   version := sjVersion,
@@ -267,3 +267,38 @@ lazy val flinkBatchBenchmarkTask = Project(id = "flink-batch-benchmark-task",
     scalaVersion := "2.11.8",
     libraryDependencies ++= Dependencies.flinkDependencies.value
   )
+
+
+lazy val testInput = Project(id = "sj-input-test",
+  base = file("./contrib/test/sj-input-test"))
+  .settings(commonSettings: _*)
+  .dependsOn(engineCore)
+
+lazy val testRegular = Project(id = "sj-regular-test",
+  base = file("./contrib/test/sj-regular-test"))
+  .settings(commonSettings: _*)
+  .dependsOn(engineCore)
+
+lazy val testBatch = Project(id = "sj-batch-test",
+  base = file("./contrib/test/sj-batch-test"))
+  .settings(commonSettings: _*)
+  .dependsOn(engineCore)
+
+lazy val testOutputES = Project(id = "sj-output-es-test",
+  base = file("./contrib/test/sj-output-es-test"))
+  .settings(commonSettings: _*)
+  .dependsOn(engineCore)
+
+lazy val testOutputJDBC = Project(id = "sj-output-jdbc-test",
+  base = file("./contrib/test/sj-output-jdbc-test"))
+  .settings(commonSettings: _*)
+  .dependsOn(engineCore)
+
+lazy val testOutputRest = Project(id = "sj-output-rest-test",
+  base = file("./contrib/test/sj-output-rest-test"))
+  .settings(commonSettings: _*)
+  .dependsOn(engineCore)
+
+lazy val pipelineTest = Project(id = "sj-pipeline-test",
+  base = file("./contrib/test"))
+  .aggregate(testInput, testRegular, testBatch, testOutputES, testOutputJDBC, testOutputRest)

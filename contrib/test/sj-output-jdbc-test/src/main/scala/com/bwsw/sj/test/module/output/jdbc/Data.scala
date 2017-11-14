@@ -16,17 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.sj.stubs.module.batch_streaming
+package com.bwsw.sj.test.module.output.jdbc
 
-import com.bwsw.sj.common.dal.model.instance.BatchInstanceDomain
-import com.bwsw.sj.common.dal.model.stream.StreamDomain
-import com.bwsw.sj.common.engine.core.batch.{BatchStreamingPerformanceMetrics, CountingBatchCollector}
+import com.bwsw.sj.common.engine.core.entities.OutputEnvelope
 
-class NumericalBatchCollector(instance: BatchInstanceDomain,
-                              performanceMetrics: BatchStreamingPerformanceMetrics,
-                              inputs: Array[StreamDomain])
-  extends CountingBatchCollector(instance, performanceMetrics, inputs, NumericalBatchCollector.batchSize)
+/**
+  * @author Pavel Tomskikh
+  */
+class Data(column: String, value: Int) extends OutputEnvelope {
+  override def getFieldsValue: Map[String, Int] = Map(column -> value)
+}
 
-object NumericalBatchCollector {
-  val batchSize = 2
+object Data {
+  val columnField = "column"
 }
