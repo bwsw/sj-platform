@@ -923,6 +923,7 @@ The example below is compiled in Kibana v.5.5.1.
 It illustrates the average time of echo-responses by IPs per a selected period of time (e.g. 1 min). As you can see, different nodes have different average response times. Some nodes respond faster than others. 
 
 .. figure:: _static/Kibana.png
+
    Picture 8
 
 Many other parameter combinations can be implemented to view the results.
