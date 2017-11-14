@@ -56,7 +56,7 @@ But the platform allows implementation of more complicated processing pipelines.
 
 You can launch more than a single processing module. Data streams can be distributed among them in various ways.
 
-A few output modules may receive the processed data and put them into a storage/storages. This case is described in the :ref:`sflow-example-task`.
+A few output modules may receive processed data and put them into a storage/storages. This case is described in the :ref:`sflow-example-task`.
 
 To configure and monitor the system, SJ-Platform provides a user with a comprehensive RESTful API and Web UI.
 
