@@ -703,7 +703,7 @@ At this step we will create the infrastructure: providers and services.
 
 In the example task pipeline the modules of three types take place - input-streaming, regular-streaming and output-streaming. For all types of modules, the Apache Zookeeper service is necessary. Thus, it is required to create the Apache Zookeeper provider.
 
-Besides, the Apache Zookeeper provider is required for T-streams service that is in its turn needed for streams of T-streams type within the system, and for instances of the input-streaming and the regular-streaming modules.
+Besides, the Apache Zookeeper provider is required for T-streams service. T-streams service is in its turn needed for streams of T-streams type within the system, and for instances of the input-streaming and the regular-streaming modules.
 
 The provider and the service of Elasticsearch type are required by the Elasticsearch output streams to put the result into the Elasticsearch data storage.
 
@@ -778,7 +778,7 @@ These streams are of T-streams type.
 
 For **ps-output module**:
 
-Create output streams of the output-streaming module named ‘es-echo-response-1m’, ‘es-echo-response-3m’, ‘es-echo-response-1h’. They will be used for keeping the aggregated information (per 1 minute, per 3 minutes and per 1 hour) from the previous stream including total amount of responses::
+Create output streams of the output-streaming module named ‘es-echo-response-1m’, ‘es-echo-response-3m’, ‘es-echo-response-1h’. They will be used for keeping the aggregated information (per 1 minute, per 3 minutes and per 1 hour) from the previous corresponding stream including total amount of responses::
 
  curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/es-echo-response-1m.json"
 
