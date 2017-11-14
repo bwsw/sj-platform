@@ -20,10 +20,22 @@ Through an example task, a user will get to know the system structure, its key c
 SJ-Platform Overview
 ----------------------------------
 
-Stream Juggler Platform (**SJ-Platform**) provides a solution for stream and micro-batched processing of unbounded data streams.  A **processor** transforms and handles data streams in SJ-Platform. A processor can be represented by a processing module or a set of modules. Modules form a pipeline. Configurations uploaded to the system determine the mode of data processing in the pipeline. Let’s have a look at the platform from the perspective of a processing pipeline.
+Stream Juggler Platform (**SJ-Platform**) provides a solution for stream and micro-batched processing of unbounded data streams.  A **processor** transforms and handles data streams in SJ-Platform.  Configurations uploaded to the system determine the mode of data processing in the pipeline. The result data are exported to an external storage.
+
+To configure and monitor the system, SJ-Platform provides a user with a comprehensive RESTful API instrumentation and Web UI.
+
+A simplified structure of SJ-Platform can be presented as at the image below:
+
+**Picture 2**:
+
+.. figure:: _static/tutorialGeneral.png
+   :align: center
+
+Let’s have a look at the platform from the perspective of a processing pipeline.
 
 Data Processing in SJ-Platform
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+A processor can be represented by a processing module or a set of modules. Modules form a pipeline.
 
 Alongside with a processing module the pipeline may include an input module that receives data and transforms them into streams, and an output module that exports the result.
 
@@ -37,14 +49,7 @@ General processing workflow which the system allows implementing is illustrated 
 Green, yellow and purple blocks displayed in a rectangular area are managed and evaluated by SJ-Platform. They represent an input module, a processing module and an output module, respectively. The blocks outside the rectangular area represent external systems (a data source and a data store).
 
 The input module receives raw data and transforms them into a data stream of a proper type compatible with the processing module type. The processing module performs data aggregation, transformations, filtering and enriching and sends the result to the output module. In the output module, the processed data are transformed into entities appropriate for storing into an external storage of a specified type. It can be Elasticsearch, RESTful endpoint or JDBC-compatible data storages.
-
-A simplified structure of SJ-Platform can be presented as at the image below:
-
-**Picture 2**:
-
-.. figure:: _static/tutorialGeneral.png
-   :align: center
-           
+          
 The illustrated pipeline is a common scenario for a lot of different tasks.
 
 But the platform allows implementation of more complicated processing pipelines. So the pipeline can be expanded.  Several input modules can be included in the pipeline to accept the raw data and transform them for passing further to the processing stage.
@@ -86,7 +91,9 @@ What we are going to do for the examples is:
  
 2. Download and set up the platform and demo project. We'll set up the platform and the demo repositories downloading it from GitHub. 
 
-3. Upload configurations and engines. The configurations should be uploaded to determine module performance. Engines are necessary for modules as they handle data flow making it into streams.
+3. Upload configurations and engines. The configurations should be uploaded to determine module performance.  The full list of all configurations can be viewed at the :ref:`Configuration` page. 
+
+Engines are necessary for modules as they handle data flow making it into streams.
 
    An **engine** is required to start a module. A module can not process data without an engine (that is a .jar file containing required configuration settings). In fact, this is a framework that launches a module.
 
@@ -96,19 +103,28 @@ What we are going to do for the examples is:
    
    We will upload an engine jar file per each module in a pipeline.
 
+.. note:: Find more about engines at the :ref:`Engines` page.
+
 4. Upload modules. Module is some code for processing data streams. In the example tasks we will upload ready-to-use modules of three types - input modules, processing modules (regular, batch) and output modules. 
 
-   To solve your tasks, you may upload your custom modules in this step.
+   To solve your tasks, you may upload your custom modules in this step. 
+   
+.. note:: Find more about modules at the :ref:`Modules` page.  A hello-world on a custom module can be found at the :ref:`Custom_Module` section.
 
-5. Create streaming layer. The data are passed to and from a module in streams. Within the platform, T-streams are used for message transportation that allows exactly-once data exchange. The result data are exported from SJ-Platform to an external storage with streams of types corresponding to the type of that storage: Elasticsearch, SQL database or RESTful.
+5. Create streaming layer. The data are passed to and from a module in streams. Within the platform, T-streams are used for message transportation allowing exactly-once data exchange. The result data are exported from SJ-Platform to an external storage with streams of types corresponding to the type of that storage: Elasticsearch, SQL database or RESTful.
 
+.. figure:: _static/ModuleStreams.png
+   :scale: 80%
+   
    Streaming requires the infrastructure: providers and services. For both example tasks we will need Apache Zookeeper, Elasticsearch and SQL-database types of providers, and Apache Zookeeper, Elasticsearch, SQL-database and T-streams types of services. On the base of the infrastructure we will create streams of corresponding types.
+   
+.. note:: Find more about streams and the streaming infrastructure at the :ref:`Streaming` section.
 
-6. Create output destination. At this step all necessary tables and mapping should be created for storing the processed result.
+6. Create output destination. At this step all necessary tables and mapping should be created for storing the processed result in an external data store.
 
-7. Create and launch instances. For each module we will create instances, that is a range of settings to perform an exact module type. Launching instances we will start data processing in the platform.
+7. Create and launch instances. For each module we will create instances. That is a range of settings to perform an exact module type. Launching instances we will start data processing in the platform.
 
-8. Obtain and store the result. The result of processing will be stored to an external storage. Besides, in the fping example we will demonstrate visualisation of resulting data using Kibana.
+8. Obtain and store the result. The result of processing will be stored to an external storage. Besides, in the fping example we will visualise resulting data using Kibana.
 
 Now as you have general idea of the workscope to do, let's dive into the example tasks.
 
