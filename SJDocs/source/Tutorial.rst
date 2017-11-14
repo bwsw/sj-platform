@@ -93,7 +93,7 @@ What we are going to do for the examples is:
 
 3. Upload configurations and engines. The configurations should be uploaded to determine module performance.  The full list of all configurations can be viewed at the :ref:`Configuration` page. 
 
-Engines are necessary for modules as they handle data flow making it into streams.
+   Engines are necessary for modules as they handle data flow making it into streams.
 
    An **engine** is required to start a module. A module can not process data without an engine (that is a .jar file containing required configuration settings). In fact, this is a framework that launches a module.
 
