@@ -62,7 +62,7 @@ To configure and monitor the system, SJ-Platform provides a user with a comprehe
 
 Further we will go through a couple of real-life tasks to demonstrate the platform workflow. It will help you to understand how the platform processes data. 
 
-Thus, the tutorial will provide you with a ready-to-use problem solution of example tasks on SJ-Platform base. Perform the steps to get acquainted with the platform functionality.
+Thus, the tutorial will provide you with a ready-to-use problem solution for example tasks on SJ-Platform base. Perform the steps to get acquainted with the platform functionality.
 
 If you would like to continue studying the platform, proceed with reading the documentation. There you will find instructions on development, deployment and customization of your own code for your specific aims.
 
@@ -169,7 +169,7 @@ Finally, the output module exports aggregated data from echo-response streams to
 
 The data are fed to the system, passed from one module to another and exported from the system via streams. Read more about streams under the :ref:`Creating_Streams` section.
 
-Platform entities can be created via Web UI filling up all needed fields in corresponding forms. In the demonstration task, we suggest adding the entities to the system via REST API as it is the easiest and quickest way. You can use Web UI to see the added entities. 
+Platform entities can be created via Web UI filling up all needed fields in corresponding forms. In the demonstration task, we suggest adding the entities to the system via REST API as it is the easiest and quickest way. You can use Web UI to see the created entities. 
 
 Now, having the general idea on the platform workflow, we can dive into solving an example task on the base of SJ-Platform. 
 
@@ -210,7 +210,7 @@ Minimum system requirements in this case are as follows:
 
 The platform is deployed with no entities. Thus, the pipeline should be built from scratch. 
 
-This tutorial provides step-by-step instructions to deploy the demo project to Mesos using Marathon. At first step, Mesos with all the services will be deployed. Then entities will be added to the platform. Finally, modules will be launched and results will be visualised using Kibana.
+This tutorial provides step-by-step instructions to deploy the demo project to Mesos using Marathon. At first step, Mesos with all the services will be deployed. Then entities will be created for the platform. Finally, modules will be launched and results will be visualised using Kibana.
 
 **Option 3.** Also, you can run SJ-Platform locally deploying it on `minimesos <http://streamjuggler.readthedocs.io/en/develop/SJ_Deployment.html#minimesos-deployment>`_ as a testing environment.
 
@@ -489,18 +489,18 @@ So, let's start with deploying Mesos and other services.
 
    **Mongo**::
  
-      curl -X POST http://172.17.0.1:8080/v2/apps -H "Content-type: application/json" -d @mongo.json 
+    curl -X POST http://172.17.0.1:8080/v2/apps -H "Content-type: application/json" -d @mongo.json 
 
    **Elasticsearch**:
 
-      Please, note that command should be executed on Master-slave machine::
+   Please, note that command should be executed on Master-slave machine::
 
-         sudo sysctl -w vm.max_map_count=262144
+    sudo sysctl -w vm.max_map_count=262144
 
    Then launch Elasticsearch::
 
-         curl -X POST http://172.17.0.1:8080/v2/apps -H "Content-type: application/json" -d 
-         @elasticsearch.json
+     curl -X POST http://172.17.0.1:8080/v2/apps -H "Content-type: application/json" -d 
+     @elasticsearch.json
 
    **SJ-rest**::
 
@@ -813,7 +813,7 @@ Once the system is deployed, configurations and modules are uploaded, the stream
  
 An individual instance should be created for each module.
 
-See the instructions below for creating instances for the example task.
+See the instructions below to create instances for the example task.
 
 To create an instance of the *sj-regex-input* module send the following request::
 
@@ -850,7 +850,7 @@ Ready! The modules can be launched.
 Launching Instances
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-After the streaming layer with its infrastructure and instances are ready you can start a module. 
+After the streaming layer (with its infrastructure) and instances are ready you can start a module. 
 
 The module starts working after its instance is launched. An input module begins to receive data, transforms the data for T-streams to transfer them to the processing module. A processing module begins to process them and put to T-streams to transfer them to the output module. An output module begins to store the result in a data storage. 
 
@@ -914,7 +914,7 @@ Then there will appear another data entry field called 'Time-field name'. You sh
 
 After that, click the Discover tab. 
 
-Choose a time interval of 'Last 15 minutes' in the top right corner of the page, as well as an auto-refresh interval of 45 seconds, as an example. Now a diagram can be compiled. 
+Choose a time interval of 'Last 15 minutes' in the top right corner of the page, as well as an auto-refresh interval of 45 seconds, as an example. Make a plot. 
 
 Select the parameters to show in the graph at the left-hand panel. 
 
