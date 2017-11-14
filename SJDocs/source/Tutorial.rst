@@ -577,7 +577,7 @@ Now engine JARs should appear in the UI under Custom Jars of the "Custom files" 
 Setup Configurations for Engines
 """"""""""""""""""""""""""""""""""""""""
 
-For the example task, we will upload the following configurations via REST:
+For the example task, we upload the following configurations via REST:
 
 - session.timeout -  use when connect to Apache Zookeeper (ms). Usually when we are dealing with T-streams consumers/producers and Apache Kafka streams.
 
