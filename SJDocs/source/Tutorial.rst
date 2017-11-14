@@ -107,7 +107,7 @@ What we are going to do for the examples is:
 
 .. note:: Find more about engines at the :ref:`Engines` page.
 
-4. Upload modules. Module is some code for processing data streams. A **module** is a JAR file, containing a module specification. Module's executor performs data transformation, aggregation, filtering.  In the example tasks we will upload ready-to-use modules of three types - input modules, processing modules (regular, batch) and output modules. 
+4. Upload modules. Module is some code for processing data streams. For a **module** we assemble a JAR file, containing a module specification. Module's executor performs data transformation, aggregation, filtering.  In the example tasks we will upload ready-to-use modules of three types - input modules, processing modules (regular, batch) and output modules. 
 
 .. figure:: _static/moduleExecutorAndValidator.png
    :scale: 120%
