@@ -26,10 +26,10 @@ To configure and monitor the system, SJ-Platform provides a user with a comprehe
 
 A simplified structure of SJ-Platform can be presented as at the image below:
 
-**Picture 2**:
-
 .. figure:: _static/tutorialGeneral.png
    :align: center
+
+   Picture 1
 
 Let’s have a look at the platform from the perspective of a processing pipeline.
 
@@ -41,11 +41,11 @@ Alongside with a processing module the pipeline may include an input module that
 
 General processing workflow which the system allows implementing is illustrated in the scheme below:
 
-**Picture 1**:
-
 .. figure:: _static/ModulePipeline.png
    :scale: 80%
-
+   
+   Picture 2
+   
 Green, yellow and purple blocks displayed in a rectangular area are managed and evaluated by SJ-Platform. They represent an input module, a processing module and an output module, respectively. The blocks outside the rectangular area represent external systems (a data source and a data store).
 
 The input module receives raw data and transforms them into a data stream of a proper type compatible with the processing module type. The processing module performs data aggregation, transformations, filtering and enriching and sends the result to the output module. In the output module, the processed data are transformed into entities appropriate for storing into an external storage of a specified type. It can be Elasticsearch, RESTful endpoint or JDBC-compatible data storages.
@@ -56,13 +56,13 @@ But the platform allows implementation of more complicated processing pipelines.
 
 You can launch more than a single processing module. Data streams can be distributed among them in various ways.
 
-A few output modules may receive the processed data and put them into a storage/storages.
+A few output modules may receive the processed data and put them into a storage/storages. This case is described in the :ref:`sflow-example-task`.
 
 To configure and monitor the system, SJ-Platform provides a user with a comprehensive RESTful API and Web UI.
 
 Further we will go through a couple of real-life tasks to demonstrate the platform workflow. It will help you to understand how the platform processes data. 
 
-Thus, the tutorial will provide you with a ready-to-use problem solution of example tasks on SJ-Platform base. Perform the steps to get aquainted with the platform functionality.
+Thus, the tutorial will provide you with a ready-to-use problem solution of example tasks on SJ-Platform base. Perform the steps to get acquainted with the platform functionality.
 
 If you would like to continue studying the platform, proceed with reading the documentation. There you will find instructions on development, deployment and customization of your own code for your specific aims.
 
@@ -71,11 +71,11 @@ Examples Introduction
 
 The example tasks that will be presented are different. But the steps we will perform to solve the tasks are common for both of them (see Picture 3). Before starting with the steps, it is important to note that to complete your job using SJ-Platform you should definitely know how the pipeline is going to look, what data format will be delivered into the system. The modules for data processing should be preliminarily created.
 
-**Picture 3**:
-
 .. figure:: _static/TutorialSteps.png
    :align: center
    
+   Picture 3
+
 What we are going to do for the examples is:
 
 1. Deploy Mesos and other services. We suggest deploying the platform to Mesos using Marathon. Among other services we will run:
@@ -141,13 +141,13 @@ In the example task solution the processing workflow is formed in the following 
 
 .. figure:: _static/FPingDemo1.png
 
-This diagram demonstrates the processing workflow of the demo. As you can see, the data come to a TCP input module through a pipeline of fping and netcat. The TCP input module is a regular module that performs per-event processing. We provide two off-the-shelf modules - CSV and regex - for two most general input data formats. Fine more information about them at the '<http://streamjuggler.readthedocs.io/en/develop/SJ_Modules.html#input-module>'_ section. In the fping example task the input module is a regex input module. It processes an input stream which contains text data, using a set of regular expressions and then serialize them with Apache Avro.
+This diagram demonstrates the processing workflow of the demo. As you can see, the data come to a TCP input module through a pipeline of fping and netcat. The TCP input module is a regular module that performs per-event processing. We provide two off-the-shelf modules - CSV and regex - for two most general input data formats. Find more information about them at the :ref:`input-module` section. For the fping example task we will use a regex input module. It processes an input stream which contains text data, using a set of regular expressions and then serialize them with Apache Avro.
 
 Then the input module parses ICMP echo responses (IP and response time are selected) and ICMP unreachable responses (IPs only are selected) and puts the parsed data into 'echo-response' stream and 'unreachable-response' stream, respectively.
 
-After that, the processing module aggregates response time and a total amount of echo/unreachable responses by IP per 1 minute and sends aggregated data to 'echo-response-1m' stream. In the fping demonstration example the data aggregation is performed with the processing module of a regular-streaming type. 
+After that, the instance of a processing module aggregates response time and a total amount of echo/unreachable responses by IP per 1 minute and sends aggregated data to 'echo-response-1m' stream. In the fping demonstration example the data aggregation is performed with the processing module of a regular-streaming type. 
 
-Two more processing modules are embedded into the pipeline to calculate responses per 3 minutes and per 1 hour. Correspondingly, 'echo-response-3m' and 'echo-response-1h' streams are created for these processing modules to put the aggregated data on echo-responses into.
+We add two more instances to the processing module to calculate responses per 3 minutes and per 1 hour. Correspondingly, 'echo-response-3m' and 'echo-response-1h' streams are created for these instances to put there the aggregated data on echo-responses.
 
 Finally, the output module exports aggregated data from echo-response streams to Elasticsearch. The result is visualized using Kibana. 
 
@@ -1140,9 +1140,16 @@ Via the Marathon interface, make sure the services are deployed and run properly
 
 Now look and make sure you have access to the Web UI. You will see the platform but it is not completed with any entities yet. They will be added in the next steps.
 
+Step 2. SJ-Platform Setting Up 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+1) Copy the SJ-Platform repository from GitHub::
+
+    git clone https://github.com/bwsw/sj-platform.git
+
 Next, the infrastructure for the module performance can be created.
 
-Step 2. Configurations and Engine Jars Uploading
+Step 3. Configurations and Engine Jars Uploading
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Download the engine jars::
@@ -1186,10 +1193,12 @@ You can see in the UI the configurations are uploaded:
 
 .. figure:: _static/sFlow_ConfigsUploaded.png
 
-Step 3. Modules Uploading
+Step 4. Module Uploading
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Now let's upload modules for data processing::
+Now let's upload modules for data processing. 
+
+First, copy the demo project repository from GitHub::
  
  cd ..
  git clone https://github.com/bwsw/sj-fping-demo.git
@@ -1238,7 +1247,7 @@ Now you can see the settings are added to the configuration list:
 Remember to replace <driver_name> in jdbc-sflow-provider.json_ when creating providers in the next step.
 
 
-Step 3. Streaming Creation
+Step 5. Creating Streaming Layer
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Let’s create streams to transport data from and to the modules.
@@ -1343,7 +1352,7 @@ See they have appeared in the UI:
 
 .. figure:: _static/sflow_Streams.png
 
-Step 4. Output SQL Tables Creation
+Step 6. Output SQL Tables Creation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 SQL tables for the output data should be created in the *sflow* database. To create tables::
@@ -1369,7 +1378,7 @@ SQL tables for the output data should be created in the *sflow* database. To cre
     txn BIGINT
  );
 
-Step 5. Creating Instances
+Step 7. Creating Instances
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 An instance should be created for each module as its individual performance. 
