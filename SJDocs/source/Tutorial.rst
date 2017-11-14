@@ -95,7 +95,7 @@ What we are going to do for the examples is:
 
    Engines are necessary for modules as they handle data flow making it into streams.
 
-   An **engine** is required to start a module. A module can not process data without an engine (that is a .jar file containing required configuration settings). In fact, this is a framework that launches a module.
+   An **engine** is required to start a module. A module can not process data without an engine. It is a .jar file for each type of modules that determins the way of data flow transformation into streams and back to the flow. In fact, this is a framework that launches a module.
 
 .. figure:: _static/engine.png
    :scale: 110%
@@ -122,7 +122,15 @@ What we are going to do for the examples is:
 
 6. Create output destination. At this step all necessary tables and mapping should be created for storing the processed result in an external data store.
 
-7. Create and launch instances. For each module we will create instances. That is a range of settings to perform an exact module type. Launching instances we will start data processing in the platform.
+7. Create and launch instances. For each module we will create instances. That is a range of settings to perform an exact module type. 
+
+.. figure:: _static/instance.png
+   :scale: 120%
+   :align: center
+   
+An instance is created with specific parameters and is set to particular streams.
+
+Launching instances we will start data processing in the platform.
 
 8. Obtain and store the result. The result of processing will be stored to an external storage. Besides, in the fping example we will visualise resulting data using Kibana.
 
@@ -477,7 +485,7 @@ Replace <zk_ip> and <zk_port> according to the Apache Zookeeper address.
 
 **Elasticsearch**:
 
-Please, note that `vm.max_map_count` should be a slave::
+Please, note that command should be executed on Master-Slave machine::
 
  sudo sysctl -w vm.max_map_count=262144
 
@@ -534,14 +542,14 @@ To implement the processing workflow for the example task resolution the followi
 
 1. a JAR file per each module type  - input-streaming, regular-streaming, output-streaming;
 
-2. a JAR file for Mesos framework that starts the engine.
+2. a JAR file for Mesos framework that starts engines.
 
 Thus, engines should be compiled and uploaded next.
  
 Upload Engine Jars
 """"""""""""""""""""""""
 
-Please, download the engine JARs for the three modules (input-streaming, regular-streaming, output-streaming) and the Mesos framework:: 
+Please, download the engine JARs for the three module types (input-streaming, regular-streaming, output-streaming) and the Mesos framework:: 
 
  wget http://c1-ftp1.netpoint-dc.com/sj/1.0-SNAPSHOT/sj-mesos-framework.jar
  wget http://c1-ftp1.netpoint-dc.com/sj/1.0-SNAPSHOT/sj-input-streaming-engine.jar
@@ -578,7 +586,7 @@ For the example task, we will upload the following configurations via REST:
 
 - marathon-connect-timeout - Use when trying to connect by 'marathon-connect' (in milliseconds).
 
-Send the next POST requests to upload the configurations. Please, replace <slave_advertise_ip> with the slave advertise IP and <marathon_address> with the address of Marathon::
+Send the next requests to upload the configurations. Please, replace <slave_advertise_ip> with the slave advertise IP and <marathon_address> with the address of Marathon::
 
  curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"session-timeout\",\"value\": \"7000\",\"domain\": \"configuration.apache-zookeeper\"}" 
  curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"current-framework\",\"value\": \"com.bwsw.fw-1.0\",\"domain\": \"configuration.system\"}" 
@@ -590,13 +598,13 @@ Send the next POST requests to upload the configurations. Please, replace <slave
  curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"marathon-connect-timeout\",\"value\": \"60000\",\"domain\": \"configuration.system\"}" 
 
 
-Send the next POST requests to upload configurations for module validators::
+Send the next requests to upload configurations for instance validators::
 
  curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"regular-streaming-validator-class\",\"value\": \"com.bwsw.sj.crud.rest.instance.validator.RegularInstanceValidator\",\"domain\": \"configuration.system\"}"
  curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"input-streaming-validator-class\",\"value\": \"com.bwsw.sj.crud.rest.instance.validator.InputInstanceValidator\",\"domain\": \"configuration.system\"}"
  curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"output-streaming-validator-class\",\"value\": \"com.bwsw.sj.crud.rest.instance.validator.OutputInstanceValidator\",\"domain\": \"configuration.system\"}"
 
-In the UI you can see the uploaded configurations under the “Configuration” tab of the main navigation.
+In the UI you can see the uploaded configurations under the “Configuration” tab of the main navigation bar.
 
 .. figure:: _static/ConfigurationsUploaded.png
 
@@ -606,7 +614,7 @@ Step 4. Module Uploading
 
 Now as the system is deployed and necessary engines are added, modules can be uploaded to the system.
 
-A **module** is a JAR file, containing a module specification and configurations.
+A **module** is a JAR file, containing a module specification. It handles data streams, performs data transformation, aggregation, filtering. 
 
 .. figure:: _static/moduleExecutorAndValidator.png
    :scale: 120%
@@ -622,15 +630,9 @@ For the stated example task the following modules will be uploaded:
 
 - an output module - *ps-output* module - that exports resulting data to Elasticsearch.
 
-Download the modules from the Sonatype repository and upload it to the system following the instructions for the example task.
+Please, follow these steps to build and upload the modules.
 
-
-For the Example Task
-"""""""""""""""""""""""""
-
-Please, follow these steps to build and upload the modules of pingstation demonstration task.
-
-To configure environment::
+First, configure the environment::
  
  cd sj-fping-demo
  
@@ -638,7 +640,7 @@ To configure environment::
 
 <host>:<port> — SJ-Platform REST host and port.
 
-**Module Downloading from Sonatype Repository**
+Now **download modules** from Sonatype Repository:
 
 - To download the *sj-regex-input* module from the sonatype repository::
 
@@ -652,7 +654,7 @@ To configure environment::
 
    curl “https://oss.sonatype.org/content/repositories/snapshots/com/bwsw/ps-output_2.12/1.0-SNAPSHOT/ps-output_2.12-1.0-SNAPSHOT.jar” -o ps-output-1.0.jar
 
-**Module Uploading**
+**Upload modules**
 
 Upload modules to the system::
 
@@ -660,7 +662,7 @@ Upload modules to the system::
  curl --form jar=@ps-process/target/scala-2.11/ps-process-1.0.jar http://$address/v1/modules
  curl --form jar=@ps-output/target/scala-2.11/ps-output-1.0.jar http://$address/v1/modules
 
-Now in the UI, you can see the uploaded modules under the ‘Modules’ tab.
+Now in the UI, you can see the uploaded modules under the ‘Modules’ tab in UI.
 
 .. figure:: _static/ModulesUploaded.png
 
@@ -673,23 +675,6 @@ The raw data are fed to the platform from different sources. And within the plat
 
 Different modules require different stream types for input and output.
                    
-A module receives data from input streams from TCP sockets or Apache Kafka. 
-
-Within the platform, the data are transported to and from modules via T-streams. It is a native streaming type for SJ-Platform that allows exactly-once data exchange between modules. 
-
-The result data are exported from SJ-Platform to an external storage with streams of types corresponding to the type of that storage: Elasticsearch, SQL database and RESTful.
-
-.. figure:: _static/ModuleStreams.png
-   :scale: 80%
-
-Prior to creating a stream, the infrastructure needs to be created for the streaming layer.
-
-The infrastructure for streams includes **providers** and **services**. This is a required presetting without which streaming will not be so flexible. 
-
-Streaming flexibility lies in a one-to-many connection between providers and services, services and streams. One provider works with many services (they can be of various types) as well as one service can provide several streams. These streams take necessary settings from the common infrastructure (providers and services). There is no need to duplicate the settings for each individual stream.
-
-The types of providers and services are determined by the type of streams. Find more about types of providers and services at the :ref:`Streaming_Infrastructure` section.
-
 In the example task solution the following stream types are implemented:
 
 1. TCP input stream feed the raw data into the system;
@@ -701,16 +686,15 @@ In the example task solution the following stream types are implemented:
 .. figure:: _static/StreamsInPlatform.png
    :scale: 80%
 
+Prior to creating a stream, the infrastructure needs to be created for the streaming layer. The infrastructure for streams includes **providers** and **services**. This is a required presetting.
+
+The types of providers and services are determined by the type of streams. Find more about types of providers and services at the :ref:`Streaming_Infrastructure` section.
+
 Below the steps for creating streaming infrastructure such as providers, services, and streams, via REST API can be found.
 
 Set Up Streaming Infrastructure
 """""""""""""""""""""""""""""""""""""""
 At this step we will create the infrastructure: providers and services.
-
-They can be of different types. The types of instances and streams in the pipeline determine the type of providers and services that are necessary for the particular case.
-
-For the Example Task
-"""""""""""""""""""""""
 
 In the example task pipeline the modules of three types take place - input-streaming, regular-streaming and output-streaming. For all types of modules, the Apache Zookeeper service is necessary. Thus, it is required to create the Apache Zookeeper provider.
 
@@ -726,35 +710,35 @@ As a result, the following infrastructure is to be created:
 
 1) Set up providers.
 
-- Apache Zookeeper for T-streams (‘echo-response’ and ‘unreachable-response’ streams) within the platform, as well as for Zookeeper service required for all types of instances::
+Before sending a request, please, note there is a default value of Elasticsearch IP (176.120.25.19) in json configuration files. So we need to change it appropriately via sed app before using.
 
-   sed -i 's/176.120.25.19:2181/<zookeeper_address>/g' api-json/providers/zookeeper-ps-provider.json
-   curl --request POST "http://$address/v1/providers" -H 'Content-Type: application/json' --data "@api-json/providers/zookeeper-ps-provider.json"
+   - Create Apache Zookeeper provider for ‘echo-response’ and ‘unreachable-response’ T-streams used within the platform, as well as for Apache Zookeeper service required for all types of instances::
 
-- Elasticsearch for output streaming (all ‘es-echo-response’ streams).
+    sed -i 's/176.120.25.19:2181/<zookeeper_address>/g' api-json/providers/zookeeper-ps-provider.json
+    curl --request POST "http://$address/v1/providers" -H 'Content-Type: application/json' --data "@api-json/providers/zookeeper-ps-provider.json"
 
-There is a default value of Elasticsearch IP (176.120.25.19) in json configuration files, so we need to change it appropriately via sed app before using::
+   - Create Elasticsearch provider for output streaming (all ‘es-echo-response’ streams)::
 
-   sed -i 's/176.120.25.19/elasticsearch.marathon.mm/g'  api-json/providers/elasticsearch-ps-provider.json
-   curl --request POST "http://$address/v1/providers" -H 'Content-Type: application/json' --data "@api-json/providers /elasticsearch-ps-provider.json"
+    sed -i 's/176.120.25.19/elasticsearch.marathon.mm/g'  api-json/providers/elasticsearch-ps-provider.json
+    curl --request POST "http://$address/v1/providers" -H 'Content-Type: application/json' --data "@api-json/providers /elasticsearch-ps-provider.json"
 
-The created providers are available in the UI under the “Providers” tab.
+   The created providers are available in the UI under the “Providers” tab.
 
 .. figure:: _static/ProvidersCreated.png
 
 2) Next, we will set up services:
 
-- Apache Zookeeper service for all modules::
+   - Apache Zookeeper service for all modules::
 
-   curl --request POST "http://$address/v1/services" -H 'Content-Type: application/json' --data "@api-json/services/zookeeper-ps-service.json"
+    curl --request POST "http://$address/v1/services" -H 'Content-Type: application/json' --data "@api-json/services/zookeeper-ps-service.json"
 
-- T-streams service for T-streams (all ‘echo-response’ streams and the ‘unreachable-response’ stream) within the system and for the instances of the input-streaming and the regular-streaming modules::
+   - T-streams service for T-streams (all ‘echo-response’ streams and the ‘unreachable-response’ stream) within the system and for the instances of the input-streaming and the regular-streaming modules::
 
-   curl --request POST "http://$address/v1/services" -H 'Content-Type: application/json' --data "@api-json/services/tstream-ps-service.json"
+    curl --request POST "http://$address/v1/services" -H 'Content-Type: application/json' --data "@api-json/services/tstream-ps-service.json"
 
-- Elasticsearch service for output streaming (all ‘es-echo-response’ streams) and the output-streaming module::
+   - Elasticsearch service for output streams (all ‘es-echo-response’ streams) and the output-streaming module::
 
-   curl --request POST "http://$address/v1/services" -H 'Content-Type: application/json' --data "@api-json/services/elasticsearch-ps-service.json"
+    curl --request POST "http://$address/v1/services" -H 'Content-Type: application/json' --data "@api-json/services/elasticsearch-ps-service.json"
 
 Please, make sure the created services have appeared in the UI under the “Services” tab.
 
@@ -762,18 +746,15 @@ Please, make sure the created services have appeared in the UI under the “Serv
 
 Creating Streams
 """"""""""""""""""""""""""""""
-Once streaming infrastructure is created, it is high time to create streams. Please, use the “POST” API requests below to create streams that will be used in the instances of input-streaming, regular-streaming and output-streaming modules.
-
-For the Example task
-""""""""""""""""""""""""
+Once the infrastructure is ready, it is time to create streams. 
 
 For **sj-regex-input module**:
 
-Create an ‘echo-response’ output stream of the *sj-regex-input* module (consequently, an input stream of the processing module). It will be used for keeping an IP and average time from ICMP echo-response and also a timestamp of the event::
+Create an ‘echo-response’ output stream of the input-streaming module (consequently, an input stream of the regular-streaming module). It will be used for keeping an IP and average time from ICMP echo-response and also a timestamp of the event::
 
  curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/echo-response.json"
 
-Create an ‘unreachable response’ output stream of the *sj-regex-input* module (consequently, an input stream of the processing module). It will be used for keeping an IP from ICMP unreachable response and also a timestamp of the event::
+Create one more output stream - an ‘unreachable response’ output stream - of the input-streaming module. It will be used for keeping an IP from ICMP unreachable response and also a timestamp of the event::
 
  curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/unreachable-response.json"
 
@@ -781,7 +762,7 @@ These streams are of T-streams type.
 
 For **ps-process module**:
 
-Create output streams of the *ps-process* module (consequently, an input stream of the output module) named ‘echo-response-1m’, ‘echo-response-3m’ and ‘echo-response-1h’. They will be used for keeping the aggregated information about the average time of echo responses, the total amount of echo responses, the total amount of unreachable responses and the timestamp for each IP (per 1 minute, per 3 minutes and per 1 hour)::
+Create output streams of the regular-streaming module (consequently, an input stream of the output-streaming module) named ‘echo-response-1m’, ‘echo-response-3m’ and ‘echo-response-1h’. They will be used for keeping the aggregated information about the average time of echo responses, the total amount of echo responses, the total amount of unreachable responses and the timestamp for each IP (per 1 minute, per 3 minutes and per 1 hour)::
 
  curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data   "@api-json/streams/echo-response-1m.json"
 
@@ -793,7 +774,7 @@ These streams are of T-streams type.
 
 For **ps-output module**:
 
-Create output streams of the *ps-output* module named ‘es-echo-response-1m’, ‘es-echo-response-3m’, ‘es-echo-response-1h’. They will be used for keeping the aggregated information (per 1 minute, per 3 minutes and per 1 hour) from the previous stream including total amount of responses::
+Create output streams of the output-streaming module named ‘es-echo-response-1m’, ‘es-echo-response-3m’, ‘es-echo-response-1h’. They will be used for keeping the aggregated information (per 1 minute, per 3 minutes and per 1 hour) from the previous stream including total amount of responses::
 
  curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/es-echo-response-1m.json"
 
@@ -812,8 +793,6 @@ Step 6. Create Output Destination
 
 At this step all necessary indexes, tables and mapping should be created for storing the processed result.
 
-For the Example task
-""""""""""""""""""""""""""""""""""""""
 In the provided example task the result data are stored to the Elasticsearch data storage.
 
 Thus, it is necessary to create the index and mapping for Elasticsearch.
@@ -827,14 +806,6 @@ Step 7. Creating Instances
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Once the system is deployed, configurations and modules are uploaded, the streaming layer with necessary infrastructure is created, an instance is to be created in the next step.
-
-A module uses a specific instance to personalize its work. An instance is a full range of settings to perform a specific executor type.
-
-.. figure:: _static/instance.png
-   :scale: 120%
-   :align: center
-   
-An instance is created with specific parameters and is set to particular streams.
  
 For each module, an instance should be created.
 
@@ -842,14 +813,11 @@ Creating Instances
 """""""""""""""""""""""""""""
 For instance creation we will send the POST requests. See the instructions below for creating instances for the example task solution.
 
-For the Example task
-"""""""""""""""""""""""
-
-For creating an instance of the *sj-regex-input* module send the following POST request::
+To create an instance of the *sj-regex-input* module send the following request::
 
  curl --request POST "http://$address/v1/modules/input-streaming/pingstation-input/1.0/instance" -H 'Content-Type: application/json' --data "@api-json/instances/pingstation-input.json"
 
-For creating an instance of the *ps-process* module send the following POST request::
+To create an instance of the *ps-process* module send the following request::
 
  curl --request POST "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance" -H 'Content-Type: application/json' --data "@api-json/instances/pingstation-process.json"
 
@@ -859,8 +827,7 @@ Create two more instances for the *ps-process* module with different checkpoint 
 
  curl --request POST "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance" -H 'Content-Type: application/json' --data "@api-json/instances/pingstation-echo-process-1h.json"
 
-
-For creating an instance of the *ps-output* module send the following POST request::
+To create an instance of the *ps-output* module send the following request::
 
  curl --request POST "http://$address/v1/modules/output-streaming/pingstation-output/1.0/instance" -H 'Content-Type: application/json' --data "@api-json/instances/pingstation-output.json"
  
