@@ -574,7 +574,7 @@ Now engine JARs should appear in the UI under Custom Jars of the "Custom files" 
 
 .. figure:: _static/EnginesUploaded.png
 
-Setup configurations for engines
+Setup Configurations for Engines
 """"""""""""""""""""""""""""""""""""""""
 
 For the example task, we will upload the following configurations via REST:
@@ -587,7 +587,7 @@ For the example task, we will upload the following configurations via REST:
 
 - crud-rest-port - REST interface port.
 
-- marathon-connect - Marathon adderess. Use to launch a framework that is responsible for running engine tasks and provides the information about launched tasks. It should start with 'http://'.
+- marathon-connect - Marathon address. Use to launch a framework that is responsible for running engine tasks and provides the information about launched tasks. It should start with 'http://'.
 
 - marathon-connect-timeout - use when trying to connect by 'marathon-connect' (ms).
 
