@@ -1,8 +1,8 @@
 {
-  "name": "test-pipeline-t-streams-service",
+  "name": "test-pipeline-t-streams",
   "description": "T-Streams service for pipeline test",
   "type": "service.t-streams",
-  "provider": "test-pipeline-zookeeper-provider",
+  "provider": "test-pipeline-zookeeper",
   "prefix": "<prefix>",
   "token": "<token>"
 }

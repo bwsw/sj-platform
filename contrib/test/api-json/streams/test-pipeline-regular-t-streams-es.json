@@ -1,0 +1,6 @@
+{
+  "name": "test-pipeline-regular-t-streams-es",
+  "description": "ES stream from batch for test pipeline",
+  "service": "test-pipeline-es",
+  "type": "stream.elasticsearch"
+}

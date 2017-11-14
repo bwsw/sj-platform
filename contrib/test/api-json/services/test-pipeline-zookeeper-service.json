@@ -1,7 +1,0 @@
-{
-  "name": "test-pipeline-zookeeper-service",
-  "description": "Zookeeper service for pipeline test",
-  "provider": "test-pipeline-zookeeper-provider",
-  "namespace": "test-pipeline",
-  "type": "service.apache-zookeeper"
-}

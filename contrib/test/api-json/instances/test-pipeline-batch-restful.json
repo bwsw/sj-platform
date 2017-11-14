@@ -1,0 +1,19 @@
+{
+  "name": "test-pipeline-batch-restful",
+  "description": "Output module for pipeline test",
+  "input": "test-pipeline-batch",
+  "output": "test-pipeline-batch-restful",
+  "checkpointMode": "every-nth",
+  "checkpointInterval": 5,
+  "parallelism": 1,
+  "startFrom": "oldest",
+  "perTaskCores": 0.1,
+  "perTaskRam": 256,
+  "jvmOptions": {
+    "-Xmx": "128m",
+    "-XX:MaxMetaspaceSize=": "196m",
+    "-XX:MaxDirectMemorySize=": "64m"
+  },
+  "coordinationService": "test-pipeline-zookeeper",
+  "performanceReportingInterval": 60000
+}

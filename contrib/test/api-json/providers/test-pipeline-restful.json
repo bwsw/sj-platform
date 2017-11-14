@@ -1,5 +1,5 @@
 {
-  "name": "test-pipeline-restful-provider",
+  "name": "test-pipeline-restful",
   "description": "RESTful provider for pipeline test",
   "type": "provider.restful",
   "hosts": [

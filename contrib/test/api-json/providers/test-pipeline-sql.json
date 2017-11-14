@@ -1,5 +1,5 @@
 {
-  "name": "test-pipeline-sql-provider",
+  "name": "test-pipeline-sql",
   "description": "SQL provider for pipeline test",
   "type": "provider.sql-database",
   "login": "<login>",

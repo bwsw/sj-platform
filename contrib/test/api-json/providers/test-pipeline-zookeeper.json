@@ -1,5 +1,5 @@
 {
-  "name": "test-pipeline-zookeeper-provider",
+  "name": "test-pipeline-zookeeper",
   "description": "Zookeeper provider for pipeline test",
   "type": "provider.apache-zookeeper",
   "hosts": [
