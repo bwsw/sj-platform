@@ -270,35 +270,35 @@ lazy val flinkBatchBenchmarkTask = Project(id = "flink-batch-benchmark-task",
 
 
 lazy val testInput = Project(id = "sj-input-test",
-  base = file("./contrib/test/sj-input-test"))
+  base = file("./tests/pipeline/sj-input-test"))
   .settings(commonSettings: _*)
   .dependsOn(engineCore)
 
 lazy val testRegular = Project(id = "sj-regular-test",
-  base = file("./contrib/test/sj-regular-test"))
+  base = file("./tests/pipeline/sj-regular-test"))
   .settings(commonSettings: _*)
   .dependsOn(engineCore)
 
 lazy val testBatch = Project(id = "sj-batch-test",
-  base = file("./contrib/test/sj-batch-test"))
+  base = file("./tests/pipeline/sj-batch-test"))
   .settings(commonSettings: _*)
   .dependsOn(engineCore)
 
 lazy val testOutputES = Project(id = "sj-output-es-test",
-  base = file("./contrib/test/sj-output-es-test"))
+  base = file("./tests/pipeline/sj-output-es-test"))
   .settings(commonSettings: _*)
   .dependsOn(engineCore)
 
 lazy val testOutputJDBC = Project(id = "sj-output-jdbc-test",
-  base = file("./contrib/test/sj-output-jdbc-test"))
+  base = file("./tests/pipeline/sj-output-jdbc-test"))
   .settings(commonSettings: _*)
   .dependsOn(engineCore)
 
 lazy val testOutputRest = Project(id = "sj-output-rest-test",
-  base = file("./contrib/test/sj-output-rest-test"))
+  base = file("./tests/pipeline/sj-output-rest-test"))
   .settings(commonSettings: _*)
   .dependsOn(engineCore)
 
 lazy val pipelineTest = Project(id = "sj-pipeline-test",
-  base = file("./contrib/test"))
+  base = file("./tests/pipeline"))
   .aggregate(testInput, testRegular, testBatch, testOutputES, testOutputJDBC, testOutputRest)
