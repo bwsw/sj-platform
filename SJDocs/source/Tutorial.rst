@@ -29,7 +29,7 @@ A simplified structure of SJ-Platform can be presented as at the image below:
 .. figure:: _static/tutorialGeneral.png
    :align: center
 
-   Picture 1
+   Picture 1.1
 
 Let’s have a look at the platform from the perspective of a processing pipeline.
 
@@ -44,7 +44,7 @@ General processing workflow which the system allows implementing is illustrated 
 .. figure:: _static/ModulePipeline.png
    :scale: 80%
    
-   Picture 2
+   Picture 1.2
    
 Green, yellow and purple blocks displayed in a rectangular area are managed and evaluated by SJ-Platform. They represent an input module, a processing module and an output module, respectively. The blocks outside the rectangular area represent external systems (a data source and a data store).
 
@@ -74,7 +74,7 @@ The example tasks that will be presented are different. But the steps we will pe
 .. figure:: _static/TutorialSteps.png
    :align: center
    
-   Picture 3
+   Picture 1.3
 
 What we are going to do for the examples is:
 
@@ -101,7 +101,7 @@ What we are going to do for the examples is:
    :scale: 110%
    :align: center
    
-   Picture 4
+   Picture 1.4
    
    We will upload an engine jar file per each module in a pipeline.
 
@@ -112,7 +112,9 @@ What we are going to do for the examples is:
 .. figure:: _static/moduleExecutorAndValidator.png
    :scale: 120%
    :align: center
-
+   
+   Picture 1.5
+   
    To solve your tasks, you may upload your custom modules in this step. 
    
 .. note:: Find more about modules at the :ref:`Modules` page.  A hello-world on a custom module can be found at the :ref:`Custom_Module` section.
@@ -122,7 +124,7 @@ What we are going to do for the examples is:
 .. figure:: _static/ModuleStreams.png
    :scale: 80%
    
-   Picture 5
+   Picture 1.6
    
    Streaming requires the infrastructure: providers and services. For both example tasks we will need Apache Zookeeper, Elasticsearch and SQL-database types of providers, and Apache Zookeeper, Elasticsearch, SQL-database and T-streams types of services. On the base of the infrastructure we will create streams of corresponding types.
    
@@ -136,7 +138,7 @@ What we are going to do for the examples is:
    :scale: 120%
    :align: center
    
-   Picture 6
+   Picture 1.7
    
 An instance is created with specific parameters. It will use particular streams specified for it as input and output streams.
 
@@ -159,7 +161,7 @@ In the example task solution the processing workflow is formed in the following 
 
 .. figure:: _static/FPingDemo1.png
    
-   Picture 7
+   Picture 1.8
    
 This diagram demonstrates the processing workflow of the demo. As you can see, the data come to a TCP input module through a pipeline of fping and netcat. The TCP input module is a regular module that performs per-event processing. We provide two off-the-shelf modules - CSV and regex - for two most general input data formats. Find more information about them at the :ref:`input-module` section. For the fping example task we will use a regex input module. It processes an input stream which contains text data using a set of regular expressions, and then serializes them with Apache Avro.
 
@@ -248,7 +250,7 @@ So, let's start with deploying Mesos and other services.
 
 2) Create JSON files and a configuration file. Please, name them as specified here.
 
-   Replace <slave_advertise_ip> with the slave advertise IP.
+   Replace <slave_advertise_ip> with Mesos-slave IP.
 
    Replace <zk_ip> and <zk_port> according to the Apache Zookeeper address.
 
@@ -523,6 +525,8 @@ So, let's start with deploying Mesos and other services.
 
 .. figure:: _static/ServicesOnMarathon.png
 
+   Picture 1.8
+
 
 Step 2. SJ-Platform Setting Up 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -578,6 +582,8 @@ Now engine JARs should appear in the UI under Custom Jars of the "Custom files" 
 
 .. figure:: _static/EnginesUploaded.png
 
+   Picture 1.9
+
 Setup Configurations for Engines
 """"""""""""""""""""""""""""""""""""""""
 
@@ -616,6 +622,8 @@ Send the next requests to upload configurations for instance validators::
 In the UI you can see the uploaded configurations under the “Configuration” tab of the main navigation bar.
 
 .. figure:: _static/ConfigurationsUploaded.png
+
+   Picture 1.10
 
 
 Step 4. Module Uploading 
@@ -667,6 +675,8 @@ Now in the UI, you can see the uploaded modules under the ‘Modules’ tab in U
 
 .. figure:: _static/ModulesUploaded.png
 
+   Picture 1.11
+
 .. _Creating_Streams:
 
 Step 5. Creating Streaming Layer 
@@ -686,6 +696,8 @@ In the example task solution the following stream types are implemented:
 
 .. figure:: _static/StreamsInPlatform.png
    :scale: 80%
+   
+   Picture 1.12
 
 Prior to creating a stream, we need to create infrastructure for the streaming layer. The infrastructure for streams includes **providers** and **services**. This is a required presetting.
 
@@ -726,6 +738,8 @@ The created providers are available in the UI under the “Providers” tab.
 
 .. figure:: _static/ProvidersCreated.png
 
+   Picture 1.13
+
 2) Next, we will set up services:
 
 - Apache Zookeeper service for all modules::
@@ -743,6 +757,8 @@ The created providers are available in the UI under the “Providers” tab.
 Please, make sure the created services have appeared in the UI under the “Services” tab.
 
 .. figure:: _static/ServicesCreated.png
+
+   Picture 1.14
 
 Creating Streams
 """"""""""""""""""""""""""""""
@@ -787,6 +803,8 @@ These streams are of Elasticsearch type (as the external storage in the pipeline
 All the created streams should be available now in the UI under the “Streams” tab.
 
 .. figure:: _static/StreamsCreated.png
+
+   Picture 1.15
 
 Step 6. Create Output Destination
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -841,6 +859,8 @@ The created instances should be available now in UI under the “Instances” ta
 
 .. figure:: _static/InstancesCreated.png
 
+   Picture 1.16
+
 Ready! The modules can be launched.
 
 Launching Instances
@@ -875,6 +895,8 @@ To launch the **output module instances** send::
 If you take a look at the UI, you will see the launched instances with the “started” status.
 
 .. figure:: _static/InstancesStarted.png
+
+   Picture 1.17
 
 To get a list of ports that are listened by the input module instance send the request::
 
@@ -920,7 +942,7 @@ It illustrates the average time of echo-responses by IPs per a selected period o
 
 .. figure:: _static/Kibana.png
 
-   Picture 8
+   Picture 1.18
 
 Many other parameter combinations can be implemented to view the results.
 
@@ -959,6 +981,8 @@ In the UI, you will see the stopped instances with the “stopped” status.
 
 .. figure:: _static/InstancesStopped.png
 
+   Picture 1.19
+
 Deleting Instance
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 A stopped instance can be deleted if there is no need for it anymore. An instance of a specific module can be deleted via REST API by sending a DELETE request (as described below). Or instance deleting action is available in the UI under the “Instances” tab.
@@ -994,7 +1018,7 @@ Via the UI you can make sure the instances are deleted.
 Sflow Example Task
 -------------------------
 
-There is another example of the platform performance. It represents the processing workflow developed for the demonstration task that is responsible for collecting `sFlow <https://sflow.org/>`_ information. The aggregated information can be valuable for monitoring the current traffic and predicting of possible problems. The solution represents a scalable system for aggregation and analysis of big data in continuous streams. That is extreamly important for large computer systems and platforms.
+There is another example of the platform performance. It represents the processing workflow developed for the demonstration task that is responsible for collecting `sFlow <http://www.sflow.org/>`_ information. The aggregated information can be valuable for monitoring the current traffic and predicting of possible problems. The solution represents a scalable system for aggregation of big data in continuous streams. That is extreamly important for large computer systems and platforms.
 
 The suggested processing pipeline includes an input module, a batch processing module and an output module. Within the platform, the data are transported with T-streams.
 
@@ -1007,10 +1031,18 @@ The processed data are stored in the PostgreSQL database. It is exported from th
 A complete pipeline can be rendered as in the diagram below:
 
 .. figure:: _static/SflowDemo.png
+   
+   Picture 2.1
 
-Green, yellow, purple and red blocks are managed and evaluated by SJ-Platform. These are the *'sflow-csv-input'* module, the *'sflow-process'* module, the *'sflow-src-ip-output'* and the *'sflow-src-dst-output'* modules and the *'sflow-fallback-output'* module, respectively.
+Green, yellow, purple and red blocks within the SJ-Platform scope rectangular area are managed and evaluated by SJ-Platform. 
 
-The blocks beyond the SJ-Platform area represent external systems. The data come to the CSV input module from the sFlow reporter. It sends sFlow records in CSV format to the input module. Then the input module parses CSV-lines into avro records and puts the parsed data into the *'sflow-avro'* stream of T-streams type. After that, the batch processing module parses avro records into sFlow records, and then:
+These are:
+- *'sflow-csv-input'* module - a regular input module that transforms CSV data into T-streams;
+- *'sflow-process'* module - a process module for micro-batch data processing;
+- *'sflow-src-ip-output'* and *'sflow-src-dst-output'* modules - two output modules that store processed data from T-streams into PostgreSQL;
+- *'sflow-fallback-output'* module - an output module to store incorrect data to a separate table in PostgreSQL.
+
+The blocks beyond the SJ-Platform area represent external systems. The data come to the CSV input module from the sFlow reporter. It sends sFlow records in CSV format to the input module. Then the input module serialises CSV-lines with Apache Avro and puts the data into the *'sflow-avro'* stream of T-streams type. After that, the batch processing module uses parsed data to:
 
 - computes traffic for the source IP and puts it in *'src-ip-stream'*;
 - computes traffic between the source and the destination and puts it in *'src-dst-stream'*.
@@ -1044,7 +1076,7 @@ For a start, perform the steps for platform deployment from the Step1-Deployment
 - sj-rest.json_
 - config.properties
   
-  For the sFlow demostrational project the config.properties.json has the following content (remember to replace <zk_ip> with a valid Apache Zookeeper IP)::
+  For the sFlow demostrational project the `config.properties.json` has the following content (remember to replace <zk_ip> with a valid Apache Zookeeper IP)::
   
    key=sflow
    active.tokens.number=100
@@ -1103,7 +1135,7 @@ For a start, perform the steps for platform deployment from the Step1-Deployment
 
 Via the Marathon interface, make sure the services are deployed and run properly.
 
-Now look and make sure you have access to the Web UI. You will see the platform but it is not completed with any entities yet. They will be added in the next steps.
+Make sure you have access to the Web UI. You will see the platform but it is not completed with any entities yet. They will be added in the next steps.
 
 Step 2. SJ-Platform Setting Up 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1124,7 +1156,7 @@ Download the engine jars::
  wget http://c1-ftp1.netpoint-dc.com/sj/1.0-SNAPSHOT/sj-batch-streaming-engine.jar
  wget http://c1-ftp1.netpoint-dc.com/sj/1.0-SNAPSHOT/sj-output-streaming-engine.jar
 
-And upload them to the system. Please, replace <host>:<port> with the SJ-Platform REST host and port::
+And upload them to the system. Please, replace <slave_advertise_ip> with Mesos-slave IP::
 
  address=<slave_advertise_ip>:31080
  
@@ -1137,7 +1169,9 @@ Check out in the UI the engines are uploaded:
 
 .. figure:: _static/sFlow_EnginesUploaded.png
 
-Setup settings for the engines. Please, replace <slave_advertise_ip> with the IP of the REST and <marathon_address> with the address of Marathon::
+   Picture 2.2
+
+Setup settings for the engines. Please, replace <slave_advertise_ip> with Mesos-slave IP and <marathon_address> with the address of Marathon::
 
  curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"session-timeout\",\"value\": \"7000\",\"domain\": \"configuration.apache-zookeeper\"}" 
  curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"current-framework\",\"value\": \"com.bwsw.fw-1.0\",\"domain\": \"configuration.system\"}" 
@@ -1158,6 +1192,8 @@ You can see in the UI the configurations are uploaded:
 
 .. figure:: _static/sFlow_ConfigsUploaded.png
 
+   Picture 2.3
+
 Step 4. Module Uploading
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -1166,7 +1202,7 @@ Now let's upload modules for data processing.
 First, copy the demo project repository from GitHub::
  
  cd ..
- git clone https://github.com/bwsw/sj-fping-demo.git
+ git clone https://github.com/bwsw/sj-sflow-demo.git
  cd sj-sflow-demo
  sbt assembly
 
@@ -1191,6 +1227,8 @@ The uploaded modules have appeared in the UI:
 
 .. figure:: _static/sFlow_Modules.png
 
+   Picture 2.4
+
 Now upload the GeoIP database which is required for the processing module::
 
  curl "http://download.maxmind.com/download/geoip/database/asnum/GeoIPASNum.dat.gz" -O
@@ -1205,12 +1243,13 @@ Then, upload and configure JDBC driver (determine <driver_name>)::
  curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"driver.<driver_name>.class\",\"value\": \"org.postgresql.Driver\",\"domain\": \"configuration.sql-database\"}" 
  curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"driver.<driver_name>.prefix\",\"value\": \"jdbc:postgresql\",\"domain\": \"configuration.sql-database\"}"
 
+We will use the value of <driver_name> in jdbc-sflow-provider.json_ when creating providers in the next step.
+
 Now you can see the settings are added to the configuration list:
 
 .. figure:: _static/sFlow_SQLsettings.png
 
-Remember to replace <driver_name> in jdbc-sflow-provider.json_ when creating providers in the next step.
-
+   Picture 2.5
 
 Step 5. Creating Streaming Layer
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1227,11 +1266,13 @@ Services of three types are required: T-streams, Apache Zookeeper and SQL-databa
 Providers creation
 '''''''''''''''''''''''''
 
-For creation of providers you should create json files with the following content:
+To create providers you should create json files with the content specified below. 
+
+.. note:: Please, replace the placeholders in the json files: <login>, <password>, <host> and <port>. Remove "login" and "password" fields if you do not need authentication to an appropriate server.
 
 .. _jdbc-sflow-provider.json:
 
-**jdbc-sflow-provider.json**::
+**jdbc-sflow-provider.json** (replace <driver_name> with the value specified for JDBC driver in the previous step)::
 
  { 
 
@@ -1258,8 +1299,6 @@ For creation of providers you should create json files with the following conten
    ]
  }
   
-.. note:: Please, replace the placeholders in the json files: <login>, <password>, <host> and <port>. Remove "login" and "password" fields if you do not need authentication to an appropriate server.
-
 Then create providers::
 
  curl --request POST "http://$address/v1/providers" -H 'Content-Type: application/json' --data "@api-json/providers/jdbc-sflow-provider.json" 
@@ -1268,6 +1307,8 @@ Then create providers::
 Check out they have appeared in the UI:
 
 .. figure:: _static/sflow_Providers.png
+
+   Picture 2.6
 
 Services creation
 '''''''''''''''''''''''''
@@ -1284,6 +1325,8 @@ Check out the services have appeared in the UI:
 
 .. figure:: _static/sflow_Services.png
 
+   Picture 2.7
+
 Streams creation
 ''''''''''''''''''''''''''
 
@@ -1299,17 +1342,20 @@ Run the following commands::
  curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/sflow-avro.json"
  curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/sflow-fallback.json"
 
-To create output streams of the processing module that will be used for keeping information about the source and the destination IP addresses and traffic run the following commands::
+To create output streams of the processing module that will be used for keeping information about: 
 
- curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/src-ip-stream.json"
- curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/src-dst-stream.json"
+1) traffic for the source IP,
+2) traffic between the source IP and destination::
 
-To create output streams of the output modules that will be used for storing information to the database run the following commands::
+    curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/src-ip-stream.json"
+    curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/src-dst-stream.json"
+
+To create output streams of the output modules that will be used for storing result data to the datastorage run the following commands::
 
  curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/src-ip-data.json"
  curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/src-dst-data.json"
 
-To create an output stream of the fallback-output module that will be used for storing incorrect inputs to the database run the command below::
+To create an output stream of the fallback-output module that will be used for saving incorrect inputs to the datastorage run the command below::
 
  curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/fallback-data.json
  
@@ -1317,8 +1363,11 @@ See they have appeared in the UI:
 
 .. figure:: _static/sflow_Streams.png
 
+   Picture 2.8
+
 Step 6. Output SQL Tables Creation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+At this step you are expected to have PostgreSQL running with `sflow` database in it. 
 
 SQL tables for the output data should be created in the *sflow* database. To create tables::
 
@@ -1346,9 +1395,9 @@ SQL tables for the output data should be created in the *sflow* database. To cre
 Step 7. Creating Instances
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-An instance should be created for each module as its individual performance. 
+An instance should be created for each module as its specific implementation. 
 
-In the demo case, there are three output modules. Thus, we will create three instances for the output.
+In the demo case, we will create one instance for the input module, one instance for the processing module. As there are three output modules. Thus, we will create three instances for the output.
 
 To create an instance of the input module::
 
@@ -1370,6 +1419,8 @@ To create an instance of the fallback-output module::
 View them in the UI:
 
 .. figure:: _static/sflow_Instances.png
+
+   Picture 2.9
 
 Launching Instances
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -1411,6 +1462,8 @@ and look at the field named ``tasks``. It may look as follows::
 Or, in the UI, click at the input module instance in the "Instances" section and unfold the **Tasks** section of the *Instance Details* panel:
 
 .. figure:: _static/sflow_InstancesStarted.png
+
+   Picture 2.10
 
 And now you can start the flow (replace <host> and <port> by values for the input module task host and port)::
 
@@ -1495,7 +1548,7 @@ To delete output module instances::
  curl --request DELETE "http://$address/v1/modules/output-streaming/sflow-src-ip-output/1.0/instance/sflow-src-ip-output/"
  curl --request DELETE "http://$address/v1/modules/output-streaming/sflow-src-dst-output/1.0/instance/sflow-src-dst-output/"
 
-To launch the fallback-output module instance::
+To delete the fallback-output module instance::
 
  curl --request DELETE "http://$address/v1/modules/output-streaming/sflow-fallback-output/1.0/instance/sflow-fallback-output/"
  
