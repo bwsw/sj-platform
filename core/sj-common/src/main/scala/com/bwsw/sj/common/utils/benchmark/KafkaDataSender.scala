@@ -20,41 +20,37 @@ package com.bwsw.sj.common.utils.benchmark
 
 import java.util.Properties
 
+import com.bwsw.common.ObjectSerializer
 import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
 
 import scala.util.Random
 
 /**
-  * Choose random words, concatenates them, and sends to a kafka server
+  * Sends data to a kafka server
   *
-  * @param address   address a kafka server
-  * @param topic     name of topic
-  * @param words     available words
-  * @param separator separator between words
+  * @param address address a kafka server
   * @author Pavel Tomskikh
   */
-class KafkaDataSender(address: String, topic: String, words: Seq[String], separator: String) {
-  require(separator.length == 1, "separator must contain exactly one symbol")
-
-  private val stringSerializerClass = "org.apache.kafka.common.serialization.StringSerializer"
+class KafkaDataSender(address: String) {
   private val producerProps = new Properties
   producerProps.put("bootstrap.servers", address)
-  producerProps.put("key.serializer", stringSerializerClass)
-  producerProps.put("value.serializer", stringSerializerClass)
 
   /**
-    * Generates data and send it to a kafka server
+    * Generates random words, concatenates them and sends into Kafka topic
     *
-    * @param messageSize  size of one message
-    * @param messages     count of messages
-    * @param firstMessage message that will be sent first
+    * @param messageSize size of one message
+    * @param messages    count of messages
+    * @param words       available words
+    * @param separator   separator between words
+    * @param topic       Kafka topic
     */
-  def send(messageSize: Long, messages: Long, firstMessage: Option[String] = None): Unit = {
-    val producer = new KafkaProducer[String, String](producerProps)
+  def send(messageSize: Long, messages: Long, words: Seq[String], separator: String, topic: String): Unit = {
+    require(separator.length == 1, "separator must contain exactly one symbol")
 
-    firstMessage.foreach { message =>
-      producer.send(new ProducerRecord[String, String](topic, message))
-    }
+    val stringSerializerClass = "org.apache.kafka.common.serialization.StringSerializer"
+    producerProps.put("key.serializer", stringSerializerClass)
+    producerProps.put("value.serializer", stringSerializerClass)
+    val producer = new KafkaProducer[String, String](producerProps)
 
     (0l until messages).foreach { _ =>
       var message = words(Random.nextInt(words.length))
@@ -64,6 +60,27 @@ class KafkaDataSender(address: String, topic: String, words: Seq[String], separa
       val record = new ProducerRecord[String, String](topic, message)
       producer.send(record)
     }
+
+    producer.close()
+  }
+
+  /**
+    * Sends data into Kafka topic
+    *
+    * @param elements data
+    * @param topic    Kafka topic
+    */
+  def send(elements: Iterable[AnyRef], topic: String): Unit = {
+    val byteArraySerializerClass = "org.apache.kafka.common.serialization.ByteArraySerializer"
+    producerProps.put("key.serializer", byteArraySerializerClass)
+    producerProps.put("value.serializer", byteArraySerializerClass)
+    val producer = new KafkaProducer[Array[Byte], Array[Byte]](producerProps)
+    val objectSerializer = new ObjectSerializer
+
+    elements
+      .map(objectSerializer.serialize)
+      .map(bytes => new ProducerRecord[Array[Byte], Array[Byte]](topic, bytes))
+      .foreach(producer.send)
 
     producer.close()
   }

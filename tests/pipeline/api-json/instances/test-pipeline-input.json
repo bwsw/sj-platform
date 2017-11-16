@@ -1,0 +1,24 @@
+{
+  "name": "test-pipeline-input",
+  "description" : "Input module for pipeline test",
+  "parallelism": 1,
+  "perTaskCores": 0.1,
+  "perTaskRam": 256,
+  "jvmOptions": {
+    "-Xmx": "128m",
+    "-XX:MaxMetaspaceSize=": "196m",
+    "-XX:MaxDirectMemorySize=": "64m"
+  },
+  "coordinationService": "test-pipeline-zookeeper",
+  "performanceReportingInterval": 60000,
+  "checkpointMode": "every-nth",
+  "checkpointInterval": 5,
+  "outputs": [
+    "test-pipeline-input-t-streams"
+  ],
+  "lookupHistory": 1000,
+  "queueMaxSize": 50000,
+  "defaultEvictionPolicy": "LFU",
+  "evictionPolicy": "expanded-time",
+  "duplicateCheck" : true
+}

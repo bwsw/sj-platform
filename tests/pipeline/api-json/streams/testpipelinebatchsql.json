@@ -1,0 +1,6 @@
+{
+  "name": "testpipelinebatchsql",
+  "description": "SQL output stream from batch for pipeline test",
+  "service": "test-pipeline-sql",
+  "type": "stream.sql-database"
+}

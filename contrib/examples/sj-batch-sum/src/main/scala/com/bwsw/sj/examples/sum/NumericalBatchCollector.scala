@@ -20,40 +20,9 @@ package com.bwsw.sj.examples.sum
 
 import com.bwsw.sj.common.dal.model.instance.BatchInstanceDomain
 import com.bwsw.sj.common.dal.model.stream.StreamDomain
-import com.bwsw.sj.common.engine.core.batch.{BatchCollector, BatchStreamingPerformanceMetrics}
-import com.bwsw.sj.common.engine.core.entities.Envelope
-import com.typesafe.scalalogging.Logger
-
-import scala.collection.mutable
+import com.bwsw.sj.common.engine.core.batch.{BatchStreamingPerformanceMetrics, CountingBatchCollector}
 
 class NumericalBatchCollector(instance: BatchInstanceDomain,
                               performanceMetrics: BatchStreamingPerformanceMetrics,
                               inputs: Array[StreamDomain])
-  extends BatchCollector(instance, performanceMetrics, inputs) {
-
-  private val logger = Logger(this.getClass)
-  private val countOfEnvelopesPerStream = mutable.Map(instance.getInputsWithoutStreamMode.map(x => (x, 0)): _*)
-  private val everyNthCount = 1
-
-  def getBatchesToCollect(): Seq[String] = {
-    countOfEnvelopesPerStream.filter(x => x._2 == everyNthCount).keys.toSeq
-  }
-
-  def afterEnvelopeReceive(envelope: Envelope): Unit = {
-    increaseCounter(envelope)
-  }
-
-  private def increaseCounter(envelope: Envelope) = {
-    countOfEnvelopesPerStream(envelope.stream) += 1
-    logger.debug(s"Increase count of envelopes of stream: ${envelope.stream} to: ${countOfEnvelopesPerStream(envelope.stream)}.")
-  }
-
-  def prepareForNextCollecting(streamName: String): Unit = {
-    resetCounter(streamName)
-  }
-
-  private def resetCounter(streamName: String) = {
-    logger.debug(s"Reset a counter of envelopes to 0.")
-    countOfEnvelopesPerStream(streamName) = 0
-  }
-}
+  extends CountingBatchCollector(instance, performanceMetrics, inputs, 1)

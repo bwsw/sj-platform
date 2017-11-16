@@ -16,17 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.bwsw.sj.stubs.module.batch_streaming
+package com.bwsw.sj.test.module.output.rest
 
-import com.bwsw.sj.common.dal.model.instance.BatchInstanceDomain
-import com.bwsw.sj.common.dal.model.stream.StreamDomain
-import com.bwsw.sj.common.engine.core.batch.{BatchStreamingPerformanceMetrics, CountingBatchCollector}
+import com.bwsw.sj.common.engine.StreamingValidator
 
-class NumericalBatchCollector(instance: BatchInstanceDomain,
-                              performanceMetrics: BatchStreamingPerformanceMetrics,
-                              inputs: Array[StreamDomain])
-  extends CountingBatchCollector(instance, performanceMetrics, inputs, NumericalBatchCollector.batchSize)
-
-object NumericalBatchCollector {
-  val batchSize = 2
-}
+/**
+  * @author Pavel Tomskikh
+  */
+class Validator extends StreamingValidator

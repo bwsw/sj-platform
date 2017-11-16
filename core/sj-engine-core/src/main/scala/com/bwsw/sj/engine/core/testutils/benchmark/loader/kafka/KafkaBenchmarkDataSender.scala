@@ -35,7 +35,7 @@ class KafkaBenchmarkDataSender(config: KafkaBenchmarkDataSenderConfig, messagesC
 
   override val warmingUpParameters = KafkaBenchmarkDataSenderParameters(10, 10)
   private val client: KafkaClient = new KafkaClient(Array(config.zooKeeperAddress))
-  private val sender = new KafkaDataSender(config.kafkaAddress, config.topic, config.words, " ")
+  private val sender = new KafkaDataSender(config.kafkaAddress)
   private var currentMessageSize: Long = 0
   private var currentStorageSize: Long = 0
 
@@ -63,7 +63,12 @@ class KafkaBenchmarkDataSender(config: KafkaBenchmarkDataSenderConfig, messagesC
 
     if (parameters.messagesCount > currentStorageSize) {
       val appendedMessages = parameters.messagesCount - currentStorageSize
-      sender.send(currentMessageSize, (appendedMessages * messagesCountMultiplier).toInt)
+      sender.send(
+        messageSize = currentMessageSize,
+        messages = (appendedMessages * messagesCountMultiplier).toInt,
+        words = config.words,
+        separator = " ",
+        topic = config.topic)
       currentStorageSize = parameters.messagesCount
     }
   }

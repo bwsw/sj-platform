@@ -1,0 +1,31 @@
+{
+  "name": "sj-output-jdbc-test",
+  "description": "Output-module to test whole pipeline",
+  "version": "1.0",
+  "author": "Pavel Tomskikh",
+  "license": "Apache 2.0",
+  "inputs": {
+    "cardinality": [
+      1,
+      1
+    ],
+    "types": [
+      "stream.t-streams"
+    ]
+  },
+  "outputs": {
+    "cardinality": [
+      1,
+      1
+    ],
+    "types": [
+      "stream.sql-database"
+    ]
+  },
+  "module-type": "output-streaming",
+  "engine-name": "com.bwsw.output.streaming.engine",
+  "engine-version": "1.0",
+  "validator-class": "com.bwsw.sj.test.module.output.jdbc.Validator",
+  "executor-class": "com.bwsw.sj.test.module.output.jdbc.Executor",
+  "entity-class": "com.bwsw.sj.test.module.output.jdbc.Data"
+}
