@@ -915,7 +915,7 @@ and look at the field named ‘tasks’, e.g. it may look as follows::
   }
  }
 
-And now you can **start a flow**. Please, replace value of `nc` operands with the host and port of your instance task::
+And now you can **start the processing pipeline**. Please, replace value of `nc` operands with the host and port of the instance task::
 
  fping -l -g 91.221.60.0/23 2>&1 | nc 176.120.25.19 31000
 
