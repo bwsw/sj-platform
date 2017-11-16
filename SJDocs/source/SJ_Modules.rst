@@ -5,7 +5,7 @@ Modules: Types, Structure, Pipeline
 
 .. contents:: Contents
    
-A **module** is a processor that handles events in data streams. In fact, it is a JAR file, containing a module specification and configurations.
+A **module** is a processor that handles events in data streams.
 
 It includes:
 
@@ -34,15 +34,17 @@ This method returns a tuple of values that contains:
 Executor
 ---------------------
 
-An executor is a key component that performs the data processing. It receives the data flow and processes it in correspondence with the parameters of module specification. It utilizes an instance/instances for processing. An instance is a full range of settings for an exact module. 
+An executor is a key module component that performs the data processing. It receives the data flow and processes it in correspondence with the parameters of module specification. It utilizes an instance/instances for processing. An instance is a full range of settings for an exact module. 
 
 Data Processing Flow in Modules
 ---------------------------------
 In general, data processing in modules can be generally described in a simple scheme.
 
-A module is started at the moment it gets data from an engine. The engine is a .jar file containing required configuration settings. It serializes/deserializes the flow of data into a proper format suitable for processing/storing. The engine is started via a Mesos framework. The framework then renders the statistics on task execution for a started instance.
+A module is started at the moment it gets data from an engine. The engine is the base of the system. It provides basic I/O functionalities.
 
-A module is uploaded into the engine. 
+The engine is started via a Mesos framework. The framework provides destributed task dispatching. It then renders the statistics on task execution.
+
+The engine uses a module for data processing. A module is uploaded into the engine. 
 
 .. figure:: _static/engine.png
    :scale: 120%
