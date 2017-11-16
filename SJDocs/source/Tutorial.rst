@@ -1237,7 +1237,7 @@ Now upload the GeoIP database which is required for the processing module::
  gunzip GeoIPASNum.dat.gz
  curl --form file=@GeoIPASNum.dat http://$address/v1/custom/files
 
-Then, upload and configure JDBC driver (determine <driver_name>)::
+Then, upload and configure JDBC driver (determine <driver_name> - it can be any name containing letters, digits or hyphens)::
 
  curl "https://jdbc.postgresql.org/download/postgresql-42.0.0.jar" -O
  curl --form file=@postgresql-42.0.0.jar http://$address/v1/custom/files
@@ -1446,8 +1446,6 @@ To launch the fallback-output module instance::
 
  curl --request GET "http://$address/v1/modules/output-streaming/sflow-fallback-output/1.0/instance/sflow-fallback-output/start"
 
-Pay attention to the host and port of the input module. This host and port should be specified when starting the flow of data. 
-
 To get the list of ports the input module listens, send the following command::
 
  curl --request GET "http://$address/v1/modules/input-streaming/com.bwsw.input.csv/1.0/instance/sflow-csv-input"
@@ -1467,7 +1465,7 @@ Or, in the UI, click at the input module instance in the "Instances" section and
 
    Picture 2.10
 
-And now you can start the flow (replace <host> and <port> by values for the input module task host and port)::
+And now you can start the processing pipeline (replace <host> and <port> by values for the input module task host and port)::
 
  python send_sflow.py -p <port> -h <host> sflow_example.csv
  
