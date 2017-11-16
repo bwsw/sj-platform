@@ -43,6 +43,7 @@ General processing workflow which the system allows implementing is illustrated 
 
 .. figure:: _static/ModulePipeline.png
    :scale: 80%
+   :align: center
    
    Picture 1.2
    
@@ -123,6 +124,7 @@ What we are going to do for the examples is:
 
 .. figure:: _static/ModuleStreams.png
    :scale: 80%
+   :align: center
    
    Picture 1.6
    
@@ -160,6 +162,7 @@ The issue we are going to solve using our platform is to collect aggregated info
 In the example task solution the processing workflow is formed in the following way:
 
 .. figure:: _static/FPingDemo1.png
+   :align: center
    
    Picture 1.8
    
@@ -524,7 +527,7 @@ So, let's start with deploying Mesos and other services.
    Via the Marathon interface, make sure the services have a *running* status.
 
 .. figure:: _static/ServicesOnMarathon.png
-
+   :align: center
    Picture 1.8
 
 
@@ -581,7 +584,8 @@ Now upload the engine JARs. Please, change <slave_advertise_ip> to the slave adv
 Now engine JARs should appear in the UI under Custom Jars of the "Custom files" navigation tab.
 
 .. figure:: _static/EnginesUploaded.png
-
+   :align: center
+   
    Picture 1.9
 
 Setup Configurations for Engines
@@ -622,7 +626,8 @@ Send the next requests to upload configurations for instance validators::
 In the UI you can see the uploaded configurations under the “Configuration” tab of the main navigation bar.
 
 .. figure:: _static/ConfigurationsUploaded.png
-
+   :align: center
+   
    Picture 1.10
 
 
@@ -674,7 +679,8 @@ Upload modules to the system::
 Now in the UI, you can see the uploaded modules under the ‘Modules’ tab in UI.
 
 .. figure:: _static/ModulesUploaded.png
-
+   :align: center
+   
    Picture 1.11
 
 .. _Creating_Streams:
@@ -696,6 +702,7 @@ In the example task solution the following stream types are implemented:
 
 .. figure:: _static/StreamsInPlatform.png
    :scale: 80%
+   :align: center
    
    Picture 1.12
 
@@ -737,7 +744,8 @@ Before sending a request, please, note there is a default value of Elasticsearch
 The created providers are available in the UI under the “Providers” tab.
 
 .. figure:: _static/ProvidersCreated.png
-
+   :align: center
+   
    Picture 1.13
 
 2) Next, we will set up services:
@@ -757,7 +765,8 @@ The created providers are available in the UI under the “Providers” tab.
 Please, make sure the created services have appeared in the UI under the “Services” tab.
 
 .. figure:: _static/ServicesCreated.png
-
+   :align: center
+   
    Picture 1.14
 
 Creating Streams
@@ -803,7 +812,8 @@ These streams are of Elasticsearch type (as the external storage in the pipeline
 All the created streams should be available now in the UI under the “Streams” tab.
 
 .. figure:: _static/StreamsCreated.png
-
+   :align: center
+   
    Picture 1.15
 
 Step 6. Create Output Destination
@@ -858,7 +868,8 @@ Change the ‘output’ values to ‘es-echo-response-3m’ and ‘es-echo-respo
 The created instances should be available now in UI under the “Instances” tab. There they will appear with the “ready” status.
 
 .. figure:: _static/InstancesCreated.png
-
+   :align: center
+   
    Picture 1.16
 
 Ready! The modules can be launched.
@@ -895,7 +906,8 @@ To launch the **output module instances** send::
 If you take a look at the UI, you will see the launched instances with the “started” status.
 
 .. figure:: _static/InstancesStarted.png
-
+   :align: center
+   
    Picture 1.17
 
 To get a list of ports that are listened by the input module instance send the request::
@@ -941,7 +953,8 @@ The example below is compiled in Kibana v.5.5.1.
 It illustrates the average time of echo-responses by IPs per a selected period of time (e.g. 1 min). As you can see, different nodes have different average response times. Some nodes respond faster than others. 
 
 .. figure:: _static/Kibana.png
-
+   :align: center
+   
    Picture 1.18
 
 Many other parameter combinations can be implemented to view the results.
@@ -980,7 +993,8 @@ To stop the **ps-output module instances** send::
 In the UI, you will see the stopped instances with the “stopped” status.
 
 .. figure:: _static/InstancesStopped.png
-
+   :align: center
+   
    Picture 1.19
 
 Deleting Instance
@@ -1031,6 +1045,7 @@ Processed data are saved in the PostgreSQL database. Output module with the stre
 A complete pipeline can be rendered as in the diagram below:
 
 .. figure:: _static/SflowDemo.png
+   :align: center
    
    Picture 2.1
 
@@ -1170,7 +1185,8 @@ And upload them to the system. Please, replace <slave_advertise_ip> with Mesos-s
 Check out in the UI the engines are uploaded:
 
 .. figure:: _static/sFlow_EnginesUploaded.png
-
+   :align: center
+   
    Picture 2.2
 
 Setup settings for the engines. Please, replace <slave_advertise_ip> with Mesos-slave IP and <marathon_address> with the address of Marathon::
@@ -1193,7 +1209,8 @@ Setup settings for the engines. Please, replace <slave_advertise_ip> with Mesos-
 You can see in the UI the configurations are uploaded:
 
 .. figure:: _static/sFlow_ConfigsUploaded.png
-
+   :align: center
+   
    Picture 2.3
 
 Step 4. Module Uploading
@@ -1228,6 +1245,7 @@ Next, set up the output modules::
 Now you can see the uploaded modules in the UI:
 
 .. figure:: _static/sFlow_Modules.png
+   :align: center
 
    Picture 2.4
 
@@ -1250,7 +1268,8 @@ We will use the value of <driver_name> in jdbc-sflow-provider.json_ when creatin
 Now you can see the settings are added to the configuration list:
 
 .. figure:: _static/sFlow_SQLsettings.png
-
+   :align: center
+   
    Picture 2.5
 
 Step 5. Creating Streaming Layer
@@ -1307,7 +1326,8 @@ Then create providers::
 Check out they have appeared in the UI:
 
 .. figure:: _static/sflow_Providers.png
-
+   :align: center
+   
    Picture 2.6
 
 Once providers are created, we can create services.
@@ -1326,7 +1346,8 @@ To create services::
 Check out the services have appeared in the UI:
 
 .. figure:: _static/sflow_Services.png
-
+   :align: center
+   
    Picture 2.7
 
 Streams creation
@@ -1364,7 +1385,8 @@ Fourthly, we create an output stream of the fallback-output module to save incor
 Check out that they have appeared in the UI:
 
 .. figure:: _static/sflow_Streams.png
-
+   :align: center
+   
    Picture 2.8
 
 Step 6. Output SQL Tables Creation
@@ -1421,7 +1443,8 @@ To create an instance of the fallback-output module::
 View them in the UI:
 
 .. figure:: _static/sflow_Instances.png
-
+   :align: center
+   
    Picture 2.9
 
 Launching Instances
@@ -1462,7 +1485,8 @@ and look at the field named ``tasks``. It may look as follows::
 Or, in the UI, click at the input module instance in the "Instances" section and unfold the **Tasks** section of the *Instance Details* panel:
 
 .. figure:: _static/sflow_InstancesStarted.png
-
+   :align: center
+   
    Picture 2.10
 
 And now you can start the processing pipeline (replace <host> and <port> by values for the input module task host and port)::
