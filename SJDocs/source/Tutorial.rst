@@ -1018,15 +1018,15 @@ Via the UI you can make sure the instances are deleted.
 Sflow Example Task
 -------------------------
 
-There is another example of the platform performance. It represents the processing workflow developed for the demonstration task that is responsible for collecting `sFlow <http://www.sflow.org/>`_ information. The aggregated information can be valuable for monitoring the current traffic and predicting of possible problems. The solution represents a scalable system for aggregation of big data in continuous streams. That is extreamly important for large computer systems and platforms.
+This is another example of the platform functionality. It represents the processing workflow developed for the demonstration task that is responsible for collecting `sFlow <http://www.sflow.org/>`_ information. The aggregated information can be valuable for monitoring the current traffic and predicting of possible problems. The solution represents a scalable system for aggregation of big data in continuous streams. That is extreamly important for large computer systems and platforms.
 
 The suggested processing pipeline includes an input module, a batch processing module and an output module. Within the platform, the data are transported with T-streams.
 
-As an external data source, an sFlow reporter takes place. It sends data to the system in CSV format.
+An sFlow reporter is an external data source in our example task. It sends data to the system in CSV format.
 
-The CSV data are transformed by the input module and sent for processing to the batch processing module. The data that can not be parsed by the input module are sent to the output module for incorrect data without processing.
+The CSV data are transformed by the input module and sent for processing to the batch processing module. The data that can not be parsed by the input module are treated as incorrect and sent straight to the output module without processing.
 
-The processed data are stored in the PostgreSQL database. It is exported from the platform via the output module with the streams of SQL-database type.
+Processed data are saved in the PostgreSQL database. Output module with the streams of SQL-database type exports it from the platform.
 
 A complete pipeline can be rendered as in the diagram below:
 
@@ -1042,10 +1042,10 @@ These are:
 - *'sflow-src-ip-output'* and *'sflow-src-dst-output'* modules - two output modules that store processed data from T-streams into PostgreSQL;
 - *'sflow-fallback-output'* module - an output module to store incorrect data to a separate table in PostgreSQL.
 
-The blocks beyond the SJ-Platform area represent external systems. The data come to the CSV input module from the sFlow reporter. It sends sFlow records in CSV format to the input module. Then the input module serialises CSV-lines with Apache Avro and puts the data into the *'sflow-avro'* stream of T-streams type. After that, the batch processing module uses parsed data to:
+The blocks beyond the SJ-Platform area represent external systems. Data come to the CSV input module from the sFlow reporter. It sends sFlow records in CSV format to the input module. Then the input module serialises CSV-lines with Apache Avro and puts the data into the *'sflow-avro'* stream of T-streams type. After that, the batch processing module uses parsed data to:
 
-- computes traffic for the source IP and puts it in *'src-ip-stream'*;
-- computes traffic between the source and the destination and puts it in *'src-dst-stream'*.
+- computes traffic for the source IP and puts it into *'src-ip-stream'*;
+- computes traffic between the source and the destination and puts it into *'src-dst-stream'*.
 
 Finally, the *'sflow-src-ip-output'* module just displaces data from *'src-ip-stream'*  to the *'srcipdata'* table in PostgreSQL. The *'sflow-src-dst-output'* module displaces data from *'src-dst-stream'*  to the *'srcdstdata'*  table.
 
@@ -1058,12 +1058,12 @@ For this demo project the following core systems and services are required:
 
 1. Apache Mesos - a cluster for all computations;
 2. Mesosphere Marathon - a framework for executing tasks on Mesos;
-3. Apache Zookeeper - for coordination of task execution;
+3. Apache Zookeeper - to coordinate task executions;
 4. Java - a computer software that provides a system for developing application software and deploying it in a cross-platform computing environment;
 5. Docker - a software container platform that allows a flexible system configuration;
 6. MongoDB - as a database;
-7. T-streams - as a message broker ensuringe exactly-once data processing;
-8. RESTful API - for accessing and monitoring the platform;
+7. T-streams - as a message broker ensuring exactly-once data processing;
+8. RESTful API - to access and monitor the platform;
 9. PostgreSQL - as a destination data store.
 
 For a start, perform the steps for platform deployment from the Step1-Deployment_ section.
@@ -1135,7 +1135,7 @@ For a start, perform the steps for platform deployment from the Step1-Deployment
 
 Via the Marathon interface, make sure the services are deployed and run properly.
 
-Make sure you have access to the Web UI. You will see the platform but it is not completed with any entities yet. They will be added in the next steps.
+Make sure you have access to the Web UI. You will see the platform but there are no entities yet. We will add them further.
 
 Step 2. SJ-Platform Setting Up 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1144,10 +1144,12 @@ Step 2. SJ-Platform Setting Up
 
     git clone https://github.com/bwsw/sj-platform.git
 
-Next, the infrastructure for the module performance can be created.
+We will upload configurations for the platfom and engine JARs for modules in the next step.
 
 Step 3. Configurations and Engine Jars Uploading
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+We upload an engine JAR file for each type of module and for Mesos framework.
 
 Download the engine jars::
 
@@ -1223,7 +1225,7 @@ Next, set up the output modules::
  curl --form jar=@sflow-output/src-dst/target/scala-2.12/sflow-src-dst-output-1.0.jar http://$address/v1/modules
  curl --form jar=@sflow-fallback-output/target/scala-2.12/sflow-fallback-output-1.0.jar http://$address/v1/modules
  
-The uploaded modules have appeared in the UI:
+Now you can see the uploaded modules in the UI:
 
 .. figure:: _static/sFlow_Modules.png
 
@@ -1259,9 +1261,7 @@ Let’s create streams to transport data from and to the modules.
 Creating Infrastructure
 """""""""""""""""""""""""""""""
 
-The streaming needs the infrastructure - providers and services. Two types of providers are necessary for the demonstration task: Apache Zookeeper and SQL database. 
-
-Services of three types are required: T-streams, Apache Zookeeper and SQL-database.
+The streaming needs the infrastructure - providers and services. We need the following providers for the demonstration task: Apache Zookeeper and SQL database. And the following services: T-streams, Apache Zookeeper and SQL-database.
 
 Providers creation
 '''''''''''''''''''''''''
@@ -1310,10 +1310,12 @@ Check out they have appeared in the UI:
 
    Picture 2.6
 
+Once providers are created, we can create services.
+
 Services creation
 '''''''''''''''''''''''''
 
-Once providers are created, we can create services. Services of three types are required: T-streams, Apache Zookeeper and SQL-database.
+Services of three types are required: T-streams, Apache Zookeeper and SQL-database.
 
 To create services::
 
@@ -1332,17 +1334,17 @@ Streams creation
 
 Now you can create streams that will be used by the instances of input, processing, output and fallback-output modules.
 
-First, we will create output streams of the input module:
+First, we create output streams of the input module:
 
-- sflow-avro — the stream for correctly parsed sFlow records;
-- sflow-fallback — the stream for incorrect inputs.
+- *'sflow-avro'* — the stream for correctly parsed sFlow records;
+- *'sflow-fallback'* — the stream for incorrect inputs.
 
 Run the following commands::
 
  curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/sflow-avro.json"
  curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/sflow-fallback.json"
 
-To create output streams of the processing module that will be used for keeping information about: 
+Secondly, we create output streams of the processing module to keep information about:
 
 1) traffic for the source IP,
 2) traffic between the source IP and destination::
@@ -1350,16 +1352,16 @@ To create output streams of the processing module that will be used for keeping 
     curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/src-ip-stream.json"
     curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/src-dst-stream.json"
 
-To create output streams of the output modules that will be used for storing result data to the datastorage run the following commands::
+Thirdly, we create output streams of the output modules to save information to the database. Use the following commands::
 
  curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/src-ip-data.json"
  curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/src-dst-data.json"
 
-To create an output stream of the fallback-output module that will be used for saving incorrect inputs to the datastorage run the command below::
+Fourthly, we create an output stream of the fallback-output module to save incorrect inputs to the database. Use the following commands::
 
  curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/fallback-data.json
  
-See they have appeared in the UI:
+Check out that they have appeared in the UI:
 
 .. figure:: _static/sflow_Streams.png
 
@@ -1397,7 +1399,7 @@ Step 7. Creating Instances
 
 An instance should be created for each module as its specific implementation. 
 
-In the demo case, we will create one instance for the input module, one instance for the processing module. As there are three output modules. Thus, we will create three instances for the output.
+In the demonstrational case, we will create one instance for the input module, one instance for the processing module. As there are three output modules. Thus, we will create three instances for the output.
 
 To create an instance of the input module::
 
@@ -1425,7 +1427,7 @@ View them in the UI:
 Launching Instances
 ~~~~~~~~~~~~~~~~~~~~~~
 
-Now you can launch every instance.
+Now you can launch each instance.
 
 To launch the input module instance::
 
@@ -1435,7 +1437,7 @@ To launch the processing module instance::
 
  curl --request GET "http://$address/v1/modules/batch-streaming/sflow-process/1.0/instance/sflow-process/start"
 
-To launch output module instances::
+To launch the output module instances::
 
  curl --request GET "http://$address/v1/modules/output-streaming/sflow-src-ip-output/1.0/instance/sflow-src-ip-output/start"
  curl --request GET "http://$address/v1/modules/output-streaming/sflow-src-dst-output/1.0/instance/sflow-src-dst-output/start"
@@ -1446,7 +1448,7 @@ To launch the fallback-output module instance::
 
 Pay attention to the host and port of the input module. This host and port should be specified when starting the flow of data. 
 
-To get the list of listening ports of the input module send the following command::
+To get the list of ports the input module listens, send the following command::
 
  curl --request GET "http://$address/v1/modules/input-streaming/com.bwsw.input.csv/1.0/instance/sflow-csv-input"
 
@@ -1472,7 +1474,7 @@ And now you can start the flow (replace <host> and <port> by values for the inpu
 See the Results
 ~~~~~~~~~~~~~~~~~~
 
-To see the results execute the query in the database::
+To see the results execute the following queries in the output database::
 
  SELECT * FROM srcipdata;
  SELECT * FROM srcdstdata;
@@ -1509,27 +1511,27 @@ You should see a table similar to the one below::
 Instance Shutdown
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To stop the input module instance::
+To stop the input module instance execute::
 
  curl --request GET "http://$address/v1/modules/input-streaming/com.bwsw.input.csv/1.0/instance/sflow-csv-input/stop"
 
-To stop the processing module instance::
+To stop the processing module instance execute::
 
  curl --request GET "http://$address/v1/modules/batch-streaming/sflow-process/1.0/instance/sflow-process/stop"
 
-To stop the output module instances::
+To stop the output module instances execute::
  
  curl --request GET "http://$address/v1/modules/output-streaming/sflow-src-ip-output/1.0/instance/sflow-src-ip-output/stop"
  curl --request GET "http://$address/v1/modules/output-streaming/sflow-src-dst-output/1.0/instance/sflow-src-dst-output/stop"
  
-To stop the fallback-output module instance::
+To stop the fallback-output module instance execute::
 
  curl --request GET "http://$address/v1/modules/output-streaming/sflow-fallback-output/1.0/instance/sflow-fallback-output/stop"
  
 Deleting Instances
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-A stopped instance can be deleted if there is no need for it anymore. An instance of a specific module can be deleted via REST API by sending a DELETE request (as described below). Or an instance deleting action is available in the UI under the “Instances” tab.
+A stopped instance can be deleted if there is no need for it anymore. An instance of a specific module can be deleted via REST API by sending a DELETE request (as described below). An instance deleting action is also available in the UI in the “Instances” section.
 
 Make sure the instances to be deleted are stopped and are not with one of the following statuses: «starting», «started», «stopping», «deleting».
 
@@ -1552,7 +1554,7 @@ To delete the fallback-output module instance::
 
  curl --request DELETE "http://$address/v1/modules/output-streaming/sflow-fallback-output/1.0/instance/sflow-fallback-output/"
  
-Via the UI you can make sure the instances are deleted.
+You can check the UI to make sure the instances are deleted.
 
 More Information
 -------------------
