@@ -49,23 +49,17 @@ The *Core* is composed of prerequisites for the platform. These are the services
 
 - Resource management is fulfilled via `Apache Mesos <http://mesos.apache.org/>`_ that allows to run the system at scale and to support different types of workloads.
 
-- To start applicable services in the Mesos cloud we use `Docker <http://mesos.apache.org/documentation/latest/docker-containerizer/>`_
+- To start applicable services in the Mesos we use `Docker <http://mesos.apache.org/documentation/latest/docker-containerizer/>`_
 
-- The support for Mesos containers and Docker is provided by `Marathon <https://mesosphere.github.io/marathon/>`_ that allows running long-life tasks as well.
-
-- For starting periodic tasks `Chronos <https://mesos.github.io/chronos/>`_ is used.
+- `Marathon <https://mesosphere.github.io/marathon/>`_ allows running long-life tasks on Mesos.
 
 - To perform leader election in case the currently leading Marathon instance fails `Apache Zookeeper <https://zookeeper.apache.org/>`_ is used. Zookeeper is also responsible for instance task synchronization for a Batch module.
 
-- For base service search `Mesos+Consul <https://github.com/CiscoCloud/mesos-consul>`_ is used.
+- Data sources for the platform are `Netty <https://netty.io/>`_ and `T-streams <https://t-streams.com>`_ libraries and `Apache Kafka <https://kafka.apache.org/>`_. 
 
-- Data sources for the platform are `Netty <https://netty.io/>`_ and `T-streams <https://t-streams.com>`_ libraries and `Apache Kafka <https://kafka.apache.org/>`_. For starting Kafka we use `Kafka on Mesos <https://github.com/mesos/kafka>`_.
+- The outcoming data are stored to Elasticsearch, JDBC-compatible or RESTful external storages.
 
-- The outcoming data are stored to Elasticsearch, JDBC or REST external storages.
-
-- We use `MongoDB <https://www.mongodb.com/>`_ as a document database that provides high performance and availability. All created platform entities (Providers, Services, Streams, Instances, etc.), as well as configurations are stored here. To start MongoDB in Mesos we use `MongoDB-Marathon Docker <https://hub.docker.com/r/tobilg/mongodb-marathon/>`_
-
-- For external access, a custom-container on `NGINX <https://www.nginx.com>`_ is used. 
+- We use `MongoDB <https://www.mongodb.com/>`_ as a document database that provides high performance and availability. All created platform entities (Providers, Services, Streams, Instances, etc.), as well as configurations are stored here. 
 
 The platform kernel is coded in Scala.
 
