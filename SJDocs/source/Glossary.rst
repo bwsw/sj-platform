@@ -38,7 +38,7 @@ Executor
   A part of a module that performs data processing.
 
 Instance 
-  A set of settings determining the work of engine-module collaboration.
+  A set of settings determining the collaborative work of an engine and a module.
  
 Input 
   A stream that is fed to the system input.
