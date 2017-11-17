@@ -3,11 +3,11 @@
 SJ-Platform Architecture
 ==============================
 
-A good data processing system needs to be fault-tolerant and scalable; it needs to support micro-batch and event-by-event data processing and must be extensible. All these aspects are fulfilled in the Stream Juggler Platform via its architecture. 
+A good data processing system needs to be fault-tolerant and scalable; it needs to support micro-batch and event-by-event data processing and must be extensible. All these aspects are fulfilled in the Stream Juggler Platform due to its architecture. 
 
-The Stream Juggler Platform is an integrated processing system. It means the system includes all the parts required to achieve goals: parts for computation, administration, components for processing pipeline building. These ready-to-use components can be rearranged in different pipelines. That allows building sophisticated processing graphs to customize the system.
+The Stream Juggler Platform is an integrated processing system. It means the system includes all the parts required to achieve goals: parts for computation, administration, components for processing pipeline building. These components can be rearranged in different pipelines. That allows building sophisticated processing graphs to customize the system.
 
-SJ-Platform's architecture is designed so that exactly-once processing is performed not only within a single processing block but throughout the entire platform, starting from the moment streams of events are fed to the system and up to the moment the output data are stored in conventional data storage.
+SJ-Platform's architecture is designed so that exactly-once processing is performed not only within a single processing block but throughout the entire platform, starting from the moment streams of events are fed to the system and up to the moment the output data are saved in conventional data storage.
 
 The approach based on loosely coupled blocks with exactly-once processing support throughout the entire pipeline allows for decomposing data processing in order to provide better modularity, performance management and simplicity in development.
 
@@ -24,7 +24,7 @@ The platform features presented above have conditioned the architecture develope
 .. figure:: _static/genCon.png
     :align: center
 
-1) **Processing** component for data computation,
+1) **Processing** component for launching data computation,
 2) **Streaming** component for data transportation,
 3) **Core** component for task execution,
 4) **API/UI** component for administration.
@@ -37,9 +37,9 @@ The events enter the processor in streams from a list of supported interfaces - 
     :align: center
     :scale: 80%
 
-SJ-Platform provides a developer with the comprehensive **API** and **UI** that allow him to develop, customize and manage the event processing pipeline.
+SJ-Platform provides a user with the comprehensive **API** and **UI** that allow him/her to develop, customize and manage the event processing pipeline.
 
-The core component is presented with Apache Mesos and other services that simplify the deployment and operation and support best industrial practices. 
+The core component is presented with services that simplify the deployment and operation and support best industrial practices. 
 
 Platform Components
 ------------------------
@@ -61,22 +61,17 @@ The *Core* is composed of prerequisites for the platform. These are the services
 
 - We use `MongoDB <https://www.mongodb.com/>`_ as a document database that provides high performance and availability. All created platform entities (Providers, Services, Streams, Instances, etc.), as well as configurations are stored here. 
 
-The platform kernel is coded in Scala.
+SJ-Platform uses Scala for the backend and Node JS for the frontend.
 
-The UI is presented via Node JS.
+The *Processing component* is provided by the Stream Juggler Platform. At this layer, the data processing itself is performed via modules. In fact, the platform represents a pipeline of modules.
 
+The major one is the **processing module** that perform data processing inside the pipeline. Two types of processing modules exist in SJ-Platform:
 
-The *Processing component* is provided by the Stream Juggler Platform. At this layer, the data processing itself is performed via modules, or processors. In fact, the platform represents a pipeline of modules.
+- Regular – the most generic module which receives event, transforms data and sends them to the next processing step.
 
-The major one is the **Pipeline Stream Processor** (PSP) that handles data processing inside the pipeline. Two types of PSP exist in SJ-Platform:
+- Batch – a module which is used to implement streaming joins and processing where algorithm must observe a range of input messages rather than current one.
 
-- Regular – the most generic processor which receives event, does some data transformation and sends transformation to the next processing step.
-
-- Windowed (Batch) – the processor which organizes incoming data into batches and processing is done with a sliding window. Windowed PSP may be used to implement streaming joins and processing where algorithm must observe a range of input messages rather than current one.
-
-PSP receives data from Apache Kafka and T-streams. 
-
-If data can be passed from other sources, there is the need in an input module. The **Input Stream Processor** (ISP) handles external inputs, does data deduplication, transforms raw data into objects for T-streams. Currently, the platform supports the TCP Input Stream Processor.
+Processing module receives data from Apache Kafka and T-streams. You also can use TCP, but you will need an input module. The **input module** handles external inputs, does data deduplication, transforms raw data into objects for T-streams. 
 
 To receive the result of processing an output module is required. The **Output Stream Processor** (OSP) handles external output from event processing pipeline to external data destinations (Elasticsearch, SQL database, REST).
 
