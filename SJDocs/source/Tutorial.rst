@@ -43,6 +43,7 @@ General processing workflow which the system allows implementing is illustrated 
 
 .. figure:: _static/ModulePipeline.png
    :scale: 80%
+   :align: center
    
    Picture 1.2
    
@@ -95,7 +96,9 @@ What we are going to do for the examples is:
 
    Engines are necessary for modules as they handle data flow making it into streams.
 
-   An **engine** is required to start a module. A module can not process data without an engine. It is a .jar file for each type of modules that determins the way of data flow transformation into streams and back to the flow. In fact, this is a framework that launches a module.
+   An **engine** is required to start a module. A module can not process data without an engine.
+   
+   It is a base of the system that provides the I/O functionality. It uses module settings for data processing.
 
 .. figure:: _static/engine.png
    :scale: 110%
@@ -107,7 +110,7 @@ What we are going to do for the examples is:
 
 .. note:: Find more about engines at the :ref:`Engines` page.
 
-4. Upload modules. Module is some code for processing data streams. For a **module** we assemble a JAR file, containing a module specification. Module's executor performs data transformation, aggregation, filtering.  In the example tasks we will upload ready-to-use modules of three types - input modules, processing modules (regular, batch) and output modules. 
+4. Upload modules. Module is a programm mofule processing data streams. For a **module** we assemble a JAR file, containing a module specification. Module's executor performs data transformation, aggregation, filtering.  
 
 .. figure:: _static/moduleExecutorAndValidator.png
    :scale: 120%
@@ -115,14 +118,19 @@ What we are going to do for the examples is:
    
    Picture 1.5
    
+   In the example tasks we will upload ready-to-use modules of three types - input modules, processing modules (regular, batch) and output modules. 
+   
    To solve your tasks, you may upload your custom modules in this step. 
    
 .. note:: Find more about modules at the :ref:`Modules` page.  A hello-world on a custom module can be found at the :ref:`Custom_Module` section.
 
-5. Create streaming layer. The data are passed to and from a module in streams. Within the platform, T-streams are used for message transportation allowing exactly-once data exchange. The result data are exported from SJ-Platform to an external storage with streams of types corresponding to the type of that storage: Elasticsearch, SQL database or RESTful.
+5. Create streaming layer. Modules exchange data via streams. 
+
+Within the platform, T-streams are used for message transportation allowing exactly-once data exchange. The result data are exported from SJ-Platform to an external storage with streams of types corresponding to the type of that storage: Elasticsearch, SQL database or RESTful.
 
 .. figure:: _static/ModuleStreams.png
    :scale: 80%
+   :align: center
    
    Picture 1.6
    
@@ -132,7 +140,7 @@ What we are going to do for the examples is:
 
 6. Create output destination. At this step all necessary tables and mapping should be created for storing the processed result in an external data store.
 
-7. Create and launch instances. For each module we will create instances. That is a range of settings to perform an exact module type. 
+7. Create and launch instances. For each module we will create instances. It is a set of settings determining collaborative work of an engine and a module.
 
 .. figure:: _static/instance.png
    :scale: 120%
@@ -160,6 +168,7 @@ The issue we are going to solve using our platform is to collect aggregated info
 In the example task solution the processing workflow is formed in the following way:
 
 .. figure:: _static/FPingDemo1.png
+   :align: center
    
    Picture 1.8
    
@@ -244,9 +253,10 @@ So, let's start with deploying Mesos and other services.
    - 2 CPUs, 
    - 4096 memory.
 
-.. note:: If you are planning to launch a module with a greater value of the "parallelizm" parameter, i.e. to run tasks on more than 1 node, you need to increase the "executor_registration_timeout" parameter for Mesos-slave.
+.. note:: If you are planning to process data in a parallel mode (set the `parallelizm` parameter to a value greater than 1), you need to increase the `executor_registration_timeout` parameter for Mesos-slave.
 
-   Start Mesos and the services. 
+     
+     Start Mesos and the services. 
 
 2) Create JSON files and a configuration file. Please, name them as specified here.
 
@@ -524,7 +534,7 @@ So, let's start with deploying Mesos and other services.
    Via the Marathon interface, make sure the services have a *running* status.
 
 .. figure:: _static/ServicesOnMarathon.png
-
+   :align: center
    Picture 1.8
 
 
@@ -581,7 +591,8 @@ Now upload the engine JARs. Please, change <slave_advertise_ip> to the slave adv
 Now engine JARs should appear in the UI under Custom Jars of the "Custom files" navigation tab.
 
 .. figure:: _static/EnginesUploaded.png
-
+   :align: center
+   
    Picture 1.9
 
 Setup Configurations for Engines
@@ -622,7 +633,8 @@ Send the next requests to upload configurations for instance validators::
 In the UI you can see the uploaded configurations under the “Configuration” tab of the main navigation bar.
 
 .. figure:: _static/ConfigurationsUploaded.png
-
+   :align: center
+   
    Picture 1.10
 
 
@@ -674,7 +686,8 @@ Upload modules to the system::
 Now in the UI, you can see the uploaded modules under the ‘Modules’ tab in UI.
 
 .. figure:: _static/ModulesUploaded.png
-
+   :align: center
+   
    Picture 1.11
 
 .. _Creating_Streams:
@@ -696,6 +709,7 @@ In the example task solution the following stream types are implemented:
 
 .. figure:: _static/StreamsInPlatform.png
    :scale: 80%
+   :align: center
    
    Picture 1.12
 
@@ -737,7 +751,8 @@ Before sending a request, please, note there is a default value of Elasticsearch
 The created providers are available in the UI under the “Providers” tab.
 
 .. figure:: _static/ProvidersCreated.png
-
+   :align: center
+   
    Picture 1.13
 
 2) Next, we will set up services:
@@ -757,7 +772,8 @@ The created providers are available in the UI under the “Providers” tab.
 Please, make sure the created services have appeared in the UI under the “Services” tab.
 
 .. figure:: _static/ServicesCreated.png
-
+   :align: center
+   
    Picture 1.14
 
 Creating Streams
@@ -803,7 +819,8 @@ These streams are of Elasticsearch type (as the external storage in the pipeline
 All the created streams should be available now in the UI under the “Streams” tab.
 
 .. figure:: _static/StreamsCreated.png
-
+   :align: center
+   
    Picture 1.15
 
 Step 6. Create Output Destination
@@ -858,7 +875,8 @@ Change the ‘output’ values to ‘es-echo-response-3m’ and ‘es-echo-respo
 The created instances should be available now in UI under the “Instances” tab. There they will appear with the “ready” status.
 
 .. figure:: _static/InstancesCreated.png
-
+   :align: center
+   
    Picture 1.16
 
 Ready! The modules can be launched.
@@ -895,7 +913,8 @@ To launch the **output module instances** send::
 If you take a look at the UI, you will see the launched instances with the “started” status.
 
 .. figure:: _static/InstancesStarted.png
-
+   :align: center
+   
    Picture 1.17
 
 To get a list of ports that are listened by the input module instance send the request::
@@ -915,7 +934,7 @@ and look at the field named ‘tasks’, e.g. it may look as follows::
   }
  }
 
-And now you can **start a flow**. Please, replace value of `nc` operands with the host and port of your instance task::
+And now you can **start the processing pipeline**. Please, replace value of `nc` operands with the host and port of the instance task::
 
  fping -l -g 91.221.60.0/23 2>&1 | nc 176.120.25.19 31000
 
@@ -941,7 +960,8 @@ The example below is compiled in Kibana v.5.5.1.
 It illustrates the average time of echo-responses by IPs per a selected period of time (e.g. 1 min). As you can see, different nodes have different average response times. Some nodes respond faster than others. 
 
 .. figure:: _static/Kibana.png
-
+   :align: center
+   
    Picture 1.18
 
 Many other parameter combinations can be implemented to view the results.
@@ -980,7 +1000,8 @@ To stop the **ps-output module instances** send::
 In the UI, you will see the stopped instances with the “stopped” status.
 
 .. figure:: _static/InstancesStopped.png
-
+   :align: center
+   
    Picture 1.19
 
 Deleting Instance
@@ -1022,7 +1043,7 @@ This is another example of the platform functionality. It represents the process
 
 The suggested processing pipeline includes an input module, a batch processing module and an output module. Within the platform, the data are transported with T-streams.
 
-An sFlow reporter is an external data source in our example task. It sends data to the system in CSV format.
+A sFlow reporter is an external data source in our example task. It sends data to the system in CSV format.
 
 The CSV data are transformed by the input module and sent for processing to the batch processing module. The data that can not be parsed by the input module are treated as incorrect and sent straight to the output module without processing.
 
@@ -1031,6 +1052,7 @@ Processed data are saved in the PostgreSQL database. Output module with the stre
 A complete pipeline can be rendered as in the diagram below:
 
 .. figure:: _static/SflowDemo.png
+   :align: center
    
    Picture 2.1
 
@@ -1039,7 +1061,7 @@ Green, yellow, purple and red blocks within the SJ-Platform scope rectangular ar
 These are:
 - *'sflow-csv-input'* module - a regular input module that transforms CSV data into T-streams;
 - *'sflow-process'* module - a process module for micro-batch data processing;
-- *'sflow-src-ip-output'* and *'sflow-src-dst-output'* modules - two output modules that store processed data from T-streams into PostgreSQL;
+- *'sflow-src-ip-output'* and *'sflow-src-dst-output'* modules - two output modules that export processed data via T-streams to PostgreSQL;
 - *'sflow-fallback-output'* module - an output module to store incorrect data to a separate table in PostgreSQL.
 
 The blocks beyond the SJ-Platform area represent external systems. Data come to the CSV input module from the sFlow reporter. It sends sFlow records in CSV format to the input module. Then the input module serialises CSV-lines with Apache Avro and puts the data into the *'sflow-avro'* stream of T-streams type. After that, the batch processing module uses parsed data to:
@@ -1170,7 +1192,8 @@ And upload them to the system. Please, replace <slave_advertise_ip> with Mesos-s
 Check out in the UI the engines are uploaded:
 
 .. figure:: _static/sFlow_EnginesUploaded.png
-
+   :align: center
+   
    Picture 2.2
 
 Setup settings for the engines. Please, replace <slave_advertise_ip> with Mesos-slave IP and <marathon_address> with the address of Marathon::
@@ -1193,7 +1216,8 @@ Setup settings for the engines. Please, replace <slave_advertise_ip> with Mesos-
 You can see in the UI the configurations are uploaded:
 
 .. figure:: _static/sFlow_ConfigsUploaded.png
-
+   :align: center
+   
    Picture 2.3
 
 Step 4. Module Uploading
@@ -1228,6 +1252,7 @@ Next, set up the output modules::
 Now you can see the uploaded modules in the UI:
 
 .. figure:: _static/sFlow_Modules.png
+   :align: center
 
    Picture 2.4
 
@@ -1237,7 +1262,7 @@ Now upload the GeoIP database which is required for the processing module::
  gunzip GeoIPASNum.dat.gz
  curl --form file=@GeoIPASNum.dat http://$address/v1/custom/files
 
-Then, upload and configure JDBC driver (determine <driver_name>)::
+Then, upload and configure JDBC driver (determine <driver_name> - it can be any name containing letters, digits or hyphens)::
 
  curl "https://jdbc.postgresql.org/download/postgresql-42.0.0.jar" -O
  curl --form file=@postgresql-42.0.0.jar http://$address/v1/custom/files
@@ -1250,13 +1275,14 @@ We will use the value of <driver_name> in jdbc-sflow-provider.json_ when creatin
 Now you can see the settings are added to the configuration list:
 
 .. figure:: _static/sFlow_SQLsettings.png
-
+   :align: center
+   
    Picture 2.5
 
 Step 5. Creating Streaming Layer
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Let’s create streams to transport data from and to the modules.
+Let’s create streams to transfer data from and to the modules.
 
 Creating Infrastructure
 """""""""""""""""""""""""""""""
@@ -1307,7 +1333,8 @@ Then create providers::
 Check out they have appeared in the UI:
 
 .. figure:: _static/sflow_Providers.png
-
+   :align: center
+   
    Picture 2.6
 
 Once providers are created, we can create services.
@@ -1326,7 +1353,8 @@ To create services::
 Check out the services have appeared in the UI:
 
 .. figure:: _static/sflow_Services.png
-
+   :align: center
+   
    Picture 2.7
 
 Streams creation
@@ -1364,7 +1392,8 @@ Fourthly, we create an output stream of the fallback-output module to save incor
 Check out that they have appeared in the UI:
 
 .. figure:: _static/sflow_Streams.png
-
+   :align: center
+   
    Picture 2.8
 
 Step 6. Output SQL Tables Creation
@@ -1397,7 +1426,7 @@ SQL tables for the output data should be created in the *sflow* database. To cre
 Step 7. Creating Instances
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-An instance should be created for each module as its specific implementation. 
+An instance should be created for each module. It is a set of settings determining the collaborative work of a module and an engine. 
 
 In the demonstrational case, we will create one instance for the input module, one instance for the processing module. As there are three output modules. Thus, we will create three instances for the output.
 
@@ -1421,7 +1450,8 @@ To create an instance of the fallback-output module::
 View them in the UI:
 
 .. figure:: _static/sflow_Instances.png
-
+   :align: center
+   
    Picture 2.9
 
 Launching Instances
@@ -1446,8 +1476,6 @@ To launch the fallback-output module instance::
 
  curl --request GET "http://$address/v1/modules/output-streaming/sflow-fallback-output/1.0/instance/sflow-fallback-output/start"
 
-Pay attention to the host and port of the input module. This host and port should be specified when starting the flow of data. 
-
 To get the list of ports the input module listens, send the following command::
 
  curl --request GET "http://$address/v1/modules/input-streaming/com.bwsw.input.csv/1.0/instance/sflow-csv-input"
@@ -1464,10 +1492,11 @@ and look at the field named ``tasks``. It may look as follows::
 Or, in the UI, click at the input module instance in the "Instances" section and unfold the **Tasks** section of the *Instance Details* panel:
 
 .. figure:: _static/sflow_InstancesStarted.png
-
+   :align: center
+   
    Picture 2.10
 
-And now you can start the flow (replace <host> and <port> by values for the input module task host and port)::
+And now you can start the processing pipeline (replace <host> and <port> by values for the input module task host and port)::
 
  python send_sflow.py -p <port> -h <host> sflow_example.csv
  
@@ -1533,7 +1562,7 @@ Deleting Instances
 
 A stopped instance can be deleted if there is no need for it anymore. An instance of a specific module can be deleted via REST API by sending a DELETE request (as described below). An instance deleting action is also available in the UI in the “Instances” section.
 
-Make sure the instances to be deleted are stopped and are not with one of the following statuses: «starting», «started», «stopping», «deleting».
+Make sure the instances you are going delete are stopped and are not with one of the following statuses: «starting», «started», «stopping», «deleting».
 
 The instances of the modules can be deleted one by one. 
 
@@ -1545,7 +1574,7 @@ To delete the process module instance::
 
  curl --request DELETE "http://$address/v1/modules/batch-streaming/sflow-process/1.0/instance/sflow-process/"
 
-To delete output module instances::
+To delete the output module instances::
 
  curl --request DELETE "http://$address/v1/modules/output-streaming/sflow-src-ip-output/1.0/instance/sflow-src-ip-output/"
  curl --request DELETE "http://$address/v1/modules/output-streaming/sflow-src-dst-output/1.0/instance/sflow-src-dst-output/"
