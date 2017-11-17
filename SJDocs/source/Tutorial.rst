@@ -140,7 +140,7 @@ Within the platform, T-streams are used for message transportation allowing exac
 
 6. Create output destination. At this step all necessary tables and mapping should be created for storing the processed result in an external data store.
 
-7. Create and launch instances. For each module we will create instances. It is a set of settings determining operation of engine-module collaboration.
+7. Create and launch instances. For each module we will create instances. It is a set of settings determining collaborative work of an engine and a module.
 
 .. figure:: _static/instance.png
    :scale: 120%
