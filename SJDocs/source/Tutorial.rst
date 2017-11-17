@@ -253,7 +253,7 @@ So, let's start with deploying Mesos and other services.
    - 2 CPUs, 
    - 4096 memory.
 
-.. note:: If you are planning to launch a module with a greater value of the "parallelizm" parameter, i.e. to run tasks on more than 1 node, you need to increase the "executor_registration_timeout" parameter for Mesos-slave.
+.. note:: If you are planning to process data in a parallel mode (set the `parallelizm` parameter to a value greater than 1), you need to increase the `executor_registration_timeout` parameter for Mesos-slave.
 
      
      Start Mesos and the services. 
