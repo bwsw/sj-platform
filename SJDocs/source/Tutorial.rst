@@ -1043,7 +1043,7 @@ This is another example of the platform functionality. It represents the process
 
 The suggested processing pipeline includes an input module, a batch processing module and an output module. Within the platform, the data are transported with T-streams.
 
-An sFlow reporter is an external data source in our example task. It sends data to the system in CSV format.
+A sFlow reporter is an external data source in our example task. It sends data to the system in CSV format.
 
 The CSV data are transformed by the input module and sent for processing to the batch processing module. The data that can not be parsed by the input module are treated as incorrect and sent straight to the output module without processing.
 
@@ -1061,7 +1061,7 @@ Green, yellow, purple and red blocks within the SJ-Platform scope rectangular ar
 These are:
 - *'sflow-csv-input'* module - a regular input module that transforms CSV data into T-streams;
 - *'sflow-process'* module - a process module for micro-batch data processing;
-- *'sflow-src-ip-output'* and *'sflow-src-dst-output'* modules - two output modules that store processed data from T-streams into PostgreSQL;
+- *'sflow-src-ip-output'* and *'sflow-src-dst-output'* modules - two output modules that export processed data via T-streams to PostgreSQL;
 - *'sflow-fallback-output'* module - an output module to store incorrect data to a separate table in PostgreSQL.
 
 The blocks beyond the SJ-Platform area represent external systems. Data come to the CSV input module from the sFlow reporter. It sends sFlow records in CSV format to the input module. Then the input module serialises CSV-lines with Apache Avro and puts the data into the *'sflow-avro'* stream of T-streams type. After that, the batch processing module uses parsed data to:
@@ -1282,7 +1282,7 @@ Now you can see the settings are added to the configuration list:
 Step 5. Creating Streaming Layer
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Let’s create streams to transport data from and to the modules.
+Let’s create streams to transfer data from and to the modules.
 
 Creating Infrastructure
 """""""""""""""""""""""""""""""
@@ -1426,7 +1426,7 @@ SQL tables for the output data should be created in the *sflow* database. To cre
 Step 7. Creating Instances
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-An instance should be created for each module as its specific implementation. 
+An instance should be created for each module. It is a set of settings determining the collaborative work of a module and an engine. 
 
 In the demonstrational case, we will create one instance for the input module, one instance for the processing module. As there are three output modules. Thus, we will create three instances for the output.
 
@@ -1562,7 +1562,7 @@ Deleting Instances
 
 A stopped instance can be deleted if there is no need for it anymore. An instance of a specific module can be deleted via REST API by sending a DELETE request (as described below). An instance deleting action is also available in the UI in the “Instances” section.
 
-Make sure the instances to be deleted are stopped and are not with one of the following statuses: «starting», «started», «stopping», «deleting».
+Make sure the instances you are going delete are stopped and are not with one of the following statuses: «starting», «started», «stopping», «deleting».
 
 The instances of the modules can be deleted one by one. 
 
