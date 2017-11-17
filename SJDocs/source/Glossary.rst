@@ -32,7 +32,7 @@ Event
   Minimal data unit in a stream.
 
 Exactly-once processing 
-  The system processes events in a stream only once
+  The system processes events in a stream only once.
 
 Executor
   A part of a module that performs data processing.
