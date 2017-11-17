@@ -96,7 +96,9 @@ What we are going to do for the examples is:
 
    Engines are necessary for modules as they handle data flow making it into streams.
 
-   An **engine** is required to start a module. A module can not process data without an engine. It is a .jar file for each type of modules that determins the way of data flow transformation into streams and back to the flow. In fact, this is a framework that launches a module.
+   An **engine** is required to start a module. A module can not process data without an engine.
+   
+   It is a base of the system that provides the I/O functionality. It uses module settings for data processing.
 
 .. figure:: _static/engine.png
    :scale: 110%
@@ -108,7 +110,7 @@ What we are going to do for the examples is:
 
 .. note:: Find more about engines at the :ref:`Engines` page.
 
-4. Upload modules. Module is some code for processing data streams. For a **module** we assemble a JAR file, containing a module specification. Module's executor performs data transformation, aggregation, filtering.  In the example tasks we will upload ready-to-use modules of three types - input modules, processing modules (regular, batch) and output modules. 
+4. Upload modules. Module is a programm mofule processing data streams. For a **module** we assemble a JAR file, containing a module specification. Module's executor performs data transformation, aggregation, filtering.  
 
 .. figure:: _static/moduleExecutorAndValidator.png
    :scale: 120%
@@ -116,11 +118,15 @@ What we are going to do for the examples is:
    
    Picture 1.5
    
+   In the example tasks we will upload ready-to-use modules of three types - input modules, processing modules (regular, batch) and output modules. 
+   
    To solve your tasks, you may upload your custom modules in this step. 
    
 .. note:: Find more about modules at the :ref:`Modules` page.  A hello-world on a custom module can be found at the :ref:`Custom_Module` section.
 
-5. Create streaming layer. The data are passed to and from a module in streams. Within the platform, T-streams are used for message transportation allowing exactly-once data exchange. The result data are exported from SJ-Platform to an external storage with streams of types corresponding to the type of that storage: Elasticsearch, SQL database or RESTful.
+5. Create streaming layer. Modules exchange data via streams. 
+
+Within the platform, T-streams are used for message transportation allowing exactly-once data exchange. The result data are exported from SJ-Platform to an external storage with streams of types corresponding to the type of that storage: Elasticsearch, SQL database or RESTful.
 
 .. figure:: _static/ModuleStreams.png
    :scale: 80%
@@ -134,7 +140,7 @@ What we are going to do for the examples is:
 
 6. Create output destination. At this step all necessary tables and mapping should be created for storing the processed result in an external data store.
 
-7. Create and launch instances. For each module we will create instances. That is a range of settings to perform an exact module type. 
+7. Create and launch instances. For each module we will create instances. It is a set of settings determining operation of engine-module collaboration.
 
 .. figure:: _static/instance.png
    :scale: 120%
@@ -249,7 +255,8 @@ So, let's start with deploying Mesos and other services.
 
 .. note:: If you are planning to launch a module with a greater value of the "parallelizm" parameter, i.e. to run tasks on more than 1 node, you need to increase the "executor_registration_timeout" parameter for Mesos-slave.
 
-   Start Mesos and the services. 
+     
+     Start Mesos and the services. 
 
 2) Create JSON files and a configuration file. Please, name them as specified here.
 
