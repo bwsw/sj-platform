@@ -23,22 +23,22 @@ Database service
   The database provided by an exact provider.
 
 Engine
-  Uses module settings to handle data flow making it into streams.
+  A base of the system. It provides basic I/O functionality. It uses module settings to process data.
 
 Envelope
-  A container for messages or events with data records.
+  A specialized fundamental data structure, containing data and metadata that allow exactly-once processing.
 
 Event 
   Minimal data unit in a stream.
 
-Exactly once processing 
+Exactly-once processing 
   The system processes events in a stream only once
 
 Executor
   A part of a module that performs data processing.
 
 Instance 
-  A full range of settings to perform an exact executor type.
+  A set of settings determining the work of engine-module collaboration.
  
 Input 
   A stream that is fed to the system input.
