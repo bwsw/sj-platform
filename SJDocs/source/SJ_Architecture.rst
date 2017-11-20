@@ -9,9 +9,9 @@ The Stream Juggler Platform is an integrated processing system. It means the sys
 
 SJ-Platform's architecture is designed so that exactly-once processing is performed not only within a single processing block but throughout the entire platform, starting from the moment streams of events are fed to the system and up to the moment the output data are saved in conventional data storage.
 
-The approach based on loosely coupled blocks with exactly-once processing support throughout the entire pipeline allows to decompose data processing providing better modularity, performance management and simplicity in development.
+The approach based on loosely coupled blocks with exactly-once processing support throughout the entire pipeline allows a user to decompose data processing providing better modularity, performance management and simplicity in development.
 
-In this section, we will take a closer look into the system components, their functions within the data flow pipeline.
+In this section, we will take a closer look at the system components, their functions within the data flow pipeline.
 
 But first of all, let's get the general idea of the platform structure and concepts.
 
@@ -59,9 +59,9 @@ The *Core* is composed of prerequisites for the platform. These are the services
 
 - Data sources for the platform are `Netty <https://netty.io/>`_ and `T-streams <https://t-streams.com>`_ libraries and `Apache Kafka <https://kafka.apache.org/>`_. 
 
-- System saves the outcoming data to Elasticsearch, JDBC-compatible or RESTful external storages.
+- The system saves the outcoming data to Elasticsearch, JDBC-compatible or RESTful external storages.
 
-- We use `MongoDB <https://www.mongodb.com/>`_ as a document database that provides high performance and availability. All created platform entities (Providers, Services, Streams, Instances, etc.), as well as configurations are stored here. 
+- We use `MongoDB <https://www.mongodb.com/>`_ as a document database that provides high performance and availability. All created platform entities (Providers, Services, Streams, Instances, etc.), as well as configurations, are stored here. 
 
 SJ-Platform's backend is written in Scala. The UI is based on Angular 4.0. REST API is written in Akka HTTP.
 
@@ -75,7 +75,7 @@ The major one is the **processing module** that performs data processing. Two ty
 
 - Batch – a module which is used to implement streaming joins and processing where algorithm must observe a range of input messages rather than current one. A batch is a minimum data set for a module to collect the events in the stream. Batches are collected in a window. The data is processed applying the idea of a sliding window. 
 
-Processing module receives data to process from Apache Kafka and T-streams. You also can use TCP as a source, but you will need an input module in this case. The **input module** handles external inputs, does data deduplication, transforms raw data into objects for T-streams. 
+The processing module receives data to process from Apache Kafka and T-streams. You also can use TCP as a source, but you will need an input module in this case. The **input module** handles external inputs, does data deduplication, transforms raw data into objects for T-streams. 
 
 To receive the result of processing an output module is required. The **output module** puts the processed data from event processing pipeline to external data destinations (Elasticsearch, SQL database, RESTful).
 
@@ -104,7 +104,7 @@ Within the platform, the data are transported to and from modules via *transacti
 
 API/UI Component
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-The *Web UI* allows administranting of the platform. It is based on Angular 4.0. The platform  provides REST API that allows interacting with the platform, monitoring and managing module statuses (its starting or stopping), retrieving configuration information.
+The *Web UI* allows administrating of the platform. It is based on Angular 4.0. The platform  provides REST API that allows interacting with the platform, monitoring and managing module statuses (its starting or stopping), retrieving configuration information.
 
 .. tip:: More information about the UI in the platform can be found in the :ref:`UI_Guide` and the :ref:`REST_API`.
 
@@ -115,9 +115,9 @@ Each SJ-Platform component contributes to its outstanding features.
 
 SJ-Platform performs **stream processing**. That means the system can handle events as soon as they are available inside the system without specific delay. **Micro-batch data processing** can be also performed in the platform.
 
-Streams can be very intensive and all events can not be handled by a single server of arbitrary performance. The system allows **scaling** the computations horizontally to handle increasing demands.
+Streams can be very intensive and all events cannot be handled by a single server of arbitrary performance. The system allows **scaling** the computations horizontally to handle increasing demands.
 
-The events are guaranteed to be processed **exactly-once**. The key idea of exactly-once processing lies in a group **checkpoint**. That means all producers and consumers of a stream are bunched into a group and do a checkpoint automatically fixing the current state. Moreover, a user can initialises a checkpoint whenever it is necessary.
+The events are guaranteed to be processed **exactly-once**. The key idea of exactly-once processing lies in a group **checkpoint**. That means all producers and consumers of a stream are bunched into a group and do a checkpoint automatically fixing the current state. Moreover, a user can initialize a checkpoint whenever it is necessary.
 
 Saving the variables in a state fulfills the idea of SJ-Platform`s **fault-tolerance**. In the case of a live data stream processing failure, the variables stored in the state are recovered and the module is restarted.
 
@@ -144,6 +144,6 @@ Every component deployed to the Stream Juggler Platform contributes to the main 
 - Variety 
     The SJ-Platform components are ready-to-use and can be reorganized in various pipelines. Besides, the system is compatible with different types of data sources, data storages, services and systems. Stream Juggler Platform easily integrates with in-memory grid systems, for example, Hazelcast, Apache Ignite.
 
-The systems is available under Apache License v2. 
+The system is available under Apache License v2. 
     
     
