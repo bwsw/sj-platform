@@ -578,7 +578,7 @@ The output executor provides the following methods that does not perform any wor
 2. ``getOutputEntity``:
     It is invoked once when module running. This method returns the current working entity, i.e. fields and types. This method must be overridden. 
 
-A type is assigned to an output envelope that corresponds to the type of an external storage (Elasticsearch, JDBC, REST).
+A type is assigned to an output envelope that corresponds to the type of an external storage (Elasticsearch, SQL database, RESTful).
 
 To see a flow chart on how these methods intercommunicate, please, visit the :ref:`Output_Streaming_Engine` section.
 
