@@ -5,9 +5,9 @@ Modules: Types, Structure, Pipeline
 
 .. contents:: Contents
    
-A **module** is a processor that handles events in data streams.
+A **module** is a processor that handles events in data streams. It works within an engine that receives raw data and sends them to the module executor. A module uses instances as a range of settings determining the collaborative work of an engine and a module. 
 
-It includes:
+A module includes:
 
 - an executor that processes data streams,
 - a validator to check an instance.
@@ -23,50 +23,46 @@ Below you will find more information on each of these two components.
 Streaming Validator
 -------------------------
 
-It provides two methods:
+Streaming validator provides two methods:
 
-1. to validate ``options`` parameter of the running module specification.
-2. to validate instance of the running module specification.
+1. to validate ``options`` parameter of the module.
+2. to validate an instance of the module. The method is used when you try to create a new instance of a specific module, and if the validation method returns false value the instance will not be created.
 
 Each of these two methods returns a tuple of values that contains:
 
 - The value that indicates if the validation is sucessful or not;
 
-- The value that is a list of errors in case of the validation failures (it is an empty list by default). It is used when you try to create a new instance of a specific module, and if the validation method returns false value the instance will not be created.
+- The value that is a list of errors in case of the validation failures (it is an empty list by default). 
 
 Executor
 ---------------------
 
-An executor is a key module component that performs the data processing. It receives the data flow and processes it in correspondence with the requirements of module specification. It utilizes an instance/instances for processing. An instance is a full range of settings for an exact module. 
+An executor is a key module component that performs the data processing. It receives the data and processes them in correspondence with the requirements of module specification. It utilizes an instance/instances for processing. An instance is a full range of settings for an exact module. It determins the work of an engine and a module.
 
 Data Processing Flow in Modules
 ---------------------------------
 In general, data processing in modules can be generally described in a simple scheme.
 
-A module is started at the moment it gets data from an engine. The engine is the base of the system. It provides basic I/O functionalities.
-
-The engine is started via a Mesos framework. The framework provides destributed task dispatching. It then renders the statistics on task execution.
-
-The engine uses a module for data processing. A module is uploaded into the engine. 
+The base of the system is the engine: it provides basic I/O functionalities. It is started via a Mesos framework which is a framework that provides distributed task dispatching and then the statistics on task execution. The engine performs data processing using an uploaded module. 
 
 .. figure:: _static/engine.png
    :scale: 120%
    :align: center
    
-The engine receives raw data and sends them to the module executor. The executor starts data processing and returns the resulting data back to the engine where they are serialized to be put into the stream or a storage.
+After its uploading, the engine receives raw data and sends them to the module executor. The executor starts data processing and returns the resulting data back to the engine where they are deserialized to be passed into the stream or a storage.
 
 Module Types
 --------------
 
 The platform supports 4 types of modules:
 
-1. *Input* - handles external inputs, does data deduplication, transforms raw data to objects. 
+1. *Input- streaming* - handles external inputs, does data deduplication, transforms raw data to objects. 
 
-2. *Output* — handles the data outcoming from event processing pipeline to external data destinations (Elasticsearch, JDBC, etc.).
+2. *Output-streaming* - handles the data outcoming from event processing pipeline to external data destinations (Elasticsearch, JDBC, etc.).
 
-3. *Regular* (base type) - a generic processor which receives an event, does some data transformation and sends transformation to the next processing step. 
+3. *Regular-streaming* (base type) - a generic processor which receives an event, does some data transformation and sends transformation to the next processing step. 
 
-4. *Batch* — a module which is used to implement streaming joins and processing where algorithm must observe a range of input messages rather than current one.  A batch is a minimum data set for a module to collect the events in the stream. Batches are collected in a window. The data is processed applying the idea of a sliding window.
+4. *Batch-streaming* - a module which is used to implement streaming joins and processing where algorithm must observe a range of input messages rather than current one.  A batch is a minimum data set for a module to collect the events in the stream. Batches are collected in a window. The data is processed in the batch module applying the idea of a sliding window.
 
 The modules can be strung in a pipeline as illustrated below:
 
@@ -76,16 +72,15 @@ At this page each module is described in detail. You will find more information 
 
 .. _input-module:
 
-Input Module
-~~~~~~~~~~~~~~~~~~~
-An input type of modules handles external input streams, does data deduplication, transforms raw data to objects. 
+Modules of Input Type
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Modules of the input type handle external input streams, does data deduplication, transforms raw data to objects. 
 
-In the SJ-Platform the TCP Input Stream processor is currently implemented in the input module.
-
+In the SJ-Platform the TCP Input module is currently implemented.
 .. figure:: _static/InputModuleStructure1.png
   :scale: 80 %
 
-It performs the transformation of the streams incoming via TCP into T-streams. T-streams are persistent streams designed for exactly-once processing (so they include a transactional producer, a consumer and a subscriber). Find more information about T-streams at `the site <http://t-streams.com>`_ .
+It performs the transformation of the streams incoming via TCP into T-streams. T-streams are persistent streams designed for exactly-once processing (so they include a transactional producer, a consumer and a subscriber). Find more information about T-streams `here <http://t-streams.com>`_.
 
 In the diagram below you can see the illustrated data flow for the input module.
 
