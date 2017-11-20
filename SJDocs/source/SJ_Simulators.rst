@@ -204,7 +204,7 @@ Batch Engine Simulator
 
 It is a class for testing implementation of :ref:`batch-module` (Executor).
 
-Simulator imitates the behavior of the :ref:`Batch_Streaming_Engine` (stateful mode): it sends envelopes to the Executor, allows invoking checkpoint's handlers, gets data from output streams and state.
+The simulator imitates the behavior of the :ref:`Batch_Streaming_Engine` (stateful mode): it sends envelopes to the Executor, allows invoking checkpoint's handlers, gets data from output streams and state.
 
 To use simulator you need add this dependency to the ``build.sbt``::
 
@@ -234,33 +234,33 @@ Provided methods
  - ``consumerName`` - the name of a consumer ('default-consumer-name' by default).
 
 * ``prepareKafka(entity: T, stream: String): Long`` - creates *one* kafka envelope ('KafkaEnvelope[T]' type) and saves it in a local buffer. Returns ID of that envelope.
- * ``entity`` - incoming data
- * ``stream`` - the name of a stream with incoming data.
+ - ``entity`` - incoming data
+ - ``stream`` - the name of a stream with incoming data.
 
 * ``prepareKafka(entities: Seq[T], stream: String): Seq[Long]`` - creates a *list* of kafka envelopes ('KafkaEnvelope[T]' type) - *one* envelope for *one* element from ``entities``, and saves it in a local buffer. Returns a list of envelopes IDs.
- * ``entities`` - the list of incoming data
- * ``stream`` - the name of a stream of incoming data
+ - ``entities`` - the list of incoming data
+ - ``stream`` - the name of a stream of incoming data
 
 * ``process(batchesNumberBeforeIdle: Int = 0,``
         
-        ``&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; window: Int,``
+        ``window: Int,``
         
-        ``&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; slidingInterval: Int,``
+        ``slidingInterval: Int,``
         
-        ``&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; saveFullState: Boolean = false,``
+        ``saveFullState: Boolean = false,``
         
-        ``&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; removeProcessedEnvelopes: Boolean = true): BatchSimulationResult`` - sends all envelopes from local buffer and returns output streams, state and envelopes that haven't been processed (see :ref:`Batch-Simulation-Result`). This method retrieves batches using ``batchCollector``, creates a window repository and invoke ``onWindow``, ``onEnter``, ``onLeaderEnter``, ``onBeforeCheckpoint``, ``onBeforeStateSave`` methods of Executor for *every* created window repository. At the end of this method all envelopes will be removed from ``batchCollector``.
- * ``batchesNumberBeforeIdle`` - the number of retrieved batches between invocations of ``executor.onIdle()`` ('0' by default). '0' means that ``executor.onIdle()`` will never be called.
- * ``window`` - count of batches that will be contained into a window (see "Batch-streaming instance fields" at :ref:`Rest-API-Instance-Create`.
- * ``slidingInterval`` - the interval at which a window will be shifted (count of processed batches that will be removed from the window) (see "Batch-streaming instance fields" at :ref:`Rest-API-Instance-Create`.
- * ``saveFullState`` - the flag denoting that the full state ('true') or partial changes of state ('false') are going to be saved after every checkpoint.
- * ``removeProcessedEnvelopes`` - indicates that all processed envelopes will be removed from a local buffer after processing.
+        ``removeProcessedEnvelopes: Boolean = true): BatchSimulationResult`` - sends all envelopes from local buffer and returns output streams, state and envelopes that haven't been processed (see :ref:`Batch-Simulation-Result`). This method retrieves batches using ``batchCollector``, creates a window repository and invoke ``onWindow``, ``onEnter``, ``onLeaderEnter``, ``onBeforeCheckpoint``, ``onBeforeStateSave`` methods of Executor for *every* created window repository. At the end of this method all envelopes will be removed from ``batchCollector``.
+ - ``batchesNumberBeforeIdle`` - the number of retrieved batches between invocations of ``executor.onIdle()`` ('0' by default). '0' means that ``executor.onIdle()`` will never be called.
+ -``window`` - count of batches that will be contained into a window (see "Batch-streaming instance fields" at :ref:`Rest-API-Instance-Create`.
+ - ``slidingInterval`` - the interval at which a window will be shifted (count of processed batches that will be removed from the window) (see "Batch-streaming instance fields" at :ref:`Rest-API-Instance-Create`.
+ - ``saveFullState`` - the flag denoting that the full state ('true') or partial changes of state ('false') are going to be saved after every checkpoint.
+ - ``removeProcessedEnvelopes`` - indicates that all processed envelopes will be removed from a local buffer after processing.
 
 * ``beforeCheckpoint(isFullState: Boolean): SimulationResult`` - imitates the behavior of the :ref:`Batch_Streaming_Engine` before checkpoint: invokes ``executor.onBeforeCheckpoint()``, then invokes ``executor.onBeforeStateSave(isFullState)`` and returns output streams and state (see :ref:`Simulation-Result`).
- * ``isFullState`` - the flag denotes that there was saved the full state ('true') or partial changes of state ('false').
+ - ``isFullState`` - the flag denotes that there was saved the full state ('true') or partial changes of state ('false').
 
 * ``timer(jitter: Long): SimulationResult`` - imitates that a timer went out (invokes ``executor.onTimer(jitter)``).
- * ``jitter`` - delay between a real response time and an invocation of this handler.
+ - ``jitter`` - the delay between a real response time and an invocation of this handler.
 
 * ``clear()`` - removes all envelopes from a local buffer.
 
