@@ -23,18 +23,21 @@ Below you will find more information on each of these two components.
 Streaming Validator
 -------------------------
 
-It provides a method to validate ``options`` or ``InstanceMetadata`` parameter of the running module specification.
+It provides two methods:
 
-This method returns a tuple of values that contains:
+1. to validate ``options`` parameter of the running module specification.
+2. to validate instance of the running module specification.
 
-- The value that indicates whether ``options`` or ``InstanceMetadata`` is proper or not (the "true" value is set by default). 
+Each of these two methods returns a tuple of values that contains:
 
-- The value that is a list of errors in case of the validation failure (it is an empty list by default). It is used when you try to create a new instance of a specific module, and if the validation method returns false value the instance will not be created.
+- The value that indicates if the validation is sucessful or not;
+
+- The value that is a list of errors in case of the validation failures (it is an empty list by default). It is used when you try to create a new instance of a specific module, and if the validation method returns false value the instance will not be created.
 
 Executor
 ---------------------
 
-An executor is a key module component that performs the data processing. It receives the data flow and processes it in correspondence with the parameters of module specification. It utilizes an instance/instances for processing. An instance is a full range of settings for an exact module. 
+An executor is a key module component that performs the data processing. It receives the data flow and processes it in correspondence with the requirements of module specification. It utilizes an instance/instances for processing. An instance is a full range of settings for an exact module. 
 
 Data Processing Flow in Modules
 ---------------------------------
@@ -50,20 +53,20 @@ The engine uses a module for data processing. A module is uploaded into the engi
    :scale: 120%
    :align: center
    
-The engine receives raw data and sends them to the module executor. The executor starts data processing and returns the resulting data back to the engine where they are deserialized to be put into the stream or a storage.
+The engine receives raw data and sends them to the module executor. The executor starts data processing and returns the resulting data back to the engine where they are serialized to be put into the stream or a storage.
 
 Module Types
 --------------
 
 The platform supports 4 types of modules:
 
-1. *Input-streaming* - It handles external inputs, does data deduplication, transforms raw data to objects. 
+1. *Input* - handles external inputs, does data deduplication, transforms raw data to objects. 
 
-2. *Output-streaming* — It handles the data outcoming from event processing pipeline to external data destinations (Elasticsearch, JDBC, etc.).
+2. *Output* — handles the data outcoming from event processing pipeline to external data destinations (Elasticsearch, JDBC, etc.).
 
-3. *Regular-streaming* (base type) - a generic processor which receives an event, does some data transformation and sends transformation to the next processing step. 
+3. *Regular* (base type) - a generic processor which receives an event, does some data transformation and sends transformation to the next processing step. 
 
-4. *Batch-streaming* — It organizes incoming data into batches and processing is performed with sliding window. Batch module may be used to implement streaming joins and processing where algorithm must observe the range of input messages rather than a current one. 
+4. *Batch* — a module which is used to implement streaming joins and processing where algorithm must observe a range of input messages rather than current one.  A batch is a minimum data set for a module to collect the events in the stream. Batches are collected in a window. The data is processed applying the idea of a sliding window.
 
 The modules can be strung in a pipeline as illustrated below:
 
@@ -82,7 +85,7 @@ In the SJ-Platform the TCP Input Stream processor is currently implemented in th
 .. figure:: _static/InputModuleStructure1.png
   :scale: 80 %
 
-It performs the transformation of the streams incoming from TCP into T-streams. T-streams are persistent streams designed for exactly-once processing (so they include a transactional producer, a consumer and a subscriber). Find more information about T-streams at `the site <http://t-streams.com>`_ .
+It performs the transformation of the streams incoming via TCP into T-streams. T-streams are persistent streams designed for exactly-once processing (so they include a transactional producer, a consumer and a subscriber). Find more information about T-streams at `the site <http://t-streams.com>`_ .
 
 In the diagram below you can see the illustrated data flow for the input module.
 
@@ -91,7 +94,7 @@ In the diagram below you can see the illustrated data flow for the input module.
 
 All input data elements are going as a flow of bytes to particular interface provided by Task Engine. That flow is going straight to Streaming Executor and is converted to an object called an Input Envelope. 
 
-An **envelope** is a container for messages or events with data records.
+An **envelope** is a specialized fundamental data structure containing data and metadata that allow exactly-once processing.
 
 The Input Envelope then goes to Task Engine which serializes it to a stream of bytes and then sends to T-Streams. 
 
@@ -168,7 +171,9 @@ The Stream Juggler Platform offers two examples of Input Module implementation. 
 CSV Input Module
 """""""""""""""""""""""
 
-This module extends *InputStreamingExecutor* interface. Its aim is to process CSV lines and create ``InputEnvelope`` instance which stores all data as AvroRecord inside.
+It extends *InputStreamingExecutor* interface. Its aim is to process CSV lines and create ``InputEnvelope`` instance which saves each line as AvroRecord inside.
+
+This module is provided via Sonatype repository.
 
 Module configuration is located in the ``options`` field of instance configuration (see :ref:`REST_API_Instance_Create`).
 
@@ -188,7 +193,7 @@ Module configuration is located in the ``options`` field of instance configurati
 
 .. note:: `*` - required field.
 
-This module puts ``"org.apache.avro.generic.GenericRecord":https://avro.apache.org/docs/1.8.1/api/java/org/apache/avro/generic/GenericRecord.html`` in output streams. The executor in the next module must be ``GenericRecord`` type, e.g::
+This module puts `org.apache.avro.generic.GenericRecord <https://avro.apache.org/docs/1.8.1/api/java/org/apache/avro/generic/GenericRecord.html>`_ in output streams. The executor of the next module must take Record type as a parameter, e.g::
 
  class Executor(manager: ModuleEnvironmentManager) extends BatchStreamingExecutor[Record](manager) {
  ...
@@ -211,7 +216,9 @@ E.g. for ``"fields": ["f1", "f2", "f3"]``)::
 Regex Input Module
 """"""""""""""""""""""""
 
-This module is provided via Sonatype repository and it extends *InputStreamingExecutor* interface. Its aim is to process input stream of strings using RegExp rules and create `InputEnvelope` instance which stores all data as ``AvroRecord`` inside. Thus, it takes the free-form data, filter and convert them into Avro Records.
+It extends *InputStreamingExecutor* interface. Its aim is to process input stream of strings using a set of regular expressions rules and create `InputEnvelope` instance which stores each line as AvroRecord inside. Thus, it takes the free-form data, filter and convert them into Avro Records.
+
+This module is provided via Sonatype repository.
 
 **Policy**
 
@@ -225,14 +232,14 @@ Regex input module uses the following policies:
 2. check-every
       To each data portion the regular expressions from the list of rules are applied. When matched, the data are converted to Avro Record and put into the output stream. Matching process will continue using the next rule.
  
-If none of the rules is matched, data are converted to unified fallback avro record and put into the fallback stream.
+      If none of the rules is matched, data are converted to unified fallback avro record and put into the fallback stream.
 
 **Configuration**
 
 Module configuration is located in the "options" field of instance configuration (:ref:`REST_API_Instance_Create`).
 The configuration contains a three-tier structure that consists of the following levels: options (0-level), rules (1-level), fields (2-level).
 
-**Options**
+**"options"**
 
 .. csv-table:: 
  :header: "Field Name", "Format", "Description", "Example"
@@ -244,7 +251,7 @@ The configuration contains a three-tier structure that consists of the following
  "fallbackStream*", "String", "Name of an output stream for lines that are not matched to any regex (from the 'rules' field)", "fallback-output"
  "rules*", "List[Rule]", "List of rules that defines: regex, an output stream and avro record structure", "`-`"
 
-**Rules**
+**Rule**
 
 .. csv-table:: 
  :header: "Field Name", "Format", "Description", "Example"
@@ -256,7 +263,7 @@ The configuration contains a three-tier structure that consists of the following
  "distribution", "List[String]", "Set of fields that define in which partition of an output stream a record will be put. Partition computed as hash(fields) mod partitions_number. If this field is not defined, the module uses the Round Robin policy for partition distribution.", "['month','year']"
  "fields*", "List[Field]", "List of fields used for creation the avro record scheme", "`-`"
 
-**Fields**
+**Field**
 
 .. csv-table:: 
  :header: "Field Name", "Format", "Description", "Example"
@@ -325,7 +332,7 @@ The diagram below represents the dataflow in the regular module.
 .. figure:: _static/RegularModuleDataflow2.png
   :scale: 80 %
 
-The TaskEngine of a regular module receives data from T-streams. It deserializes the flow of bytes to TStreamsEnvelope[T] (where [T] is a type of messages in the envelope) which is then put to the StreamingExecutor.
+The TaskEngine of a regular module receives data from T-streams. It deserializes the flow of bytes to TStreamsEnvelope[T] (where [T] is a type of messages in the envelope) which is then passed to the StreamingExecutor.
 
 The StreamingExecutor processes the received data and sends them to the TaskEngine as a result data.
 
@@ -368,7 +375,9 @@ Each envelope has a type parameter that defines the type of data in the envelope
 .. 8) "onAfterStateSave": 
     It is invoked after every saving of the state. Inside the method there is a flag denoting the full state (true) or partial changes of state (false) have(s) been saved
 
-The module may have a state. A state is a sort of a key-value storage and can be used to keep some global module variables related to processing. These variables are persisted and are recovered after a fail. In case of a fail (when something is going wrong in one of the methods described above) a whole module will be restarted. And the work will start on `onInit` method invocation.
+The module may have a state. A state is a sort of a key-value storage and can be used to keep some global module variables related to processing. These variables are persisted and are recovered after a fail. 
+
+In case of a fail (when something is going wrong in one of the methods described above) a whole module will be restarted. And the work will start on `onInit` method invocation.
 
 Inside of the module there is a manager allowing to get an access to: 
 
@@ -451,7 +460,7 @@ Let's take a look at the main points:
 
 The module allows to transform the data aggregated from input streams applying the idea of a sliding window. 
 
-A window is a period of time that is multiple of a batch and during which the batches of input events are collected into a queue for further transformation.
+A window is a period of time that is multiple of a batch and during which the batches of input events are collected into a queue for further transformation. Or a window can be set to a number of batches. The window closes once it is full, i.e. the set number of batches is collected.
 
 The diagram below is a simple illustration of how a sliding window operation looks like.
 
@@ -525,8 +534,13 @@ The following handlers are used for synchronizing the tasks' work. It can be use
 
 To see a flow chart about how these methods intercommunicate see the :ref:`Batch_Streaming_Engine` section.
 
-The Batch module can either have a state or not. A state is a sort of a key-value storage and can be used to keep some global module variables related to processing. These variables are persisted and are recovered after a fail. A fail means that something is going wrong in one of the methods described above. In this case a whole module will be restarted. And the work will start on onInit method invocation.
-There is a manager inside module which grants access to:
+The Batch module can either have a state or not. A state is a sort of a key-value storage and can be used to keep some global module variables related to processing. These variables are persisted and are recovered after a fail. 
+
+A fail means that something is going wrong in one of the methods described above. In this case a whole module will be restarted. And the work will start on onInit method invocation.
+
+The state is performed alongside with the checkpoint. At a checkpoint the data received after processing is checked for completeness. The checkpoint is an event that provides an exactly-once processing. 
+
+There is a manager inside the module which grants access to:
 
 - output that was defined within the instance (by calling ``getPartitionedOutput()`` or ``getRoundRobinOutput()``),
 - timer (by ``calling setTimer()``)
@@ -534,8 +548,6 @@ There is a manager inside module which grants access to:
 - list of output names (by calling ``getStreamsByTags()``). Every output contains its own set of tags which are used to retrieve it.
 - initiation of checkpoint (by calling ``initiateCheckpoint()``)
 
-A Batch and a Regular modules may have a state. A state is a sort of a key-value storage that can be used to keep some global module variables related to processing. These variables are persisted and are recovered after a fail. A fail means that something is going wrong in one of the methods used in an executor. In this case a whole module will be restarted. 
-The state is performed alongside with the checkpoint. At a checkpoint the data received after processing is checked for completeness. The checkpoint is an event that provides an exactly-once processing. 
 
 .. _output-module:
 
@@ -577,7 +589,7 @@ Modules` performance is determined with the work of engine. Engines of different
 Please, find more information about engines at the :ref:`Engines` page.
 
 
-Prerequisites For Modules. Streaming Components.
+Prerequisites For Modules. Streaming Component.
 --------------------------------------------------
 
 A module requires the following elements to be created for its performance:
@@ -592,14 +604,22 @@ A module requires the following elements to be created for its performance:
 
 The type of module requires a specific type of instance to create. An instance is a full range of settings to perform an exact executor type. These settings are specified via UI or REST API and determine the mode of the module operation: data stream type the module is going to work with, a checkpoint concept, the settings of state and parallelism, other options, etc.
 
-As stated above, modules process the data arranged in streams. The Stream Juggler Platform supports *Kafka* and *T-stream* type of streams. And when the Kafka streams are a well-known type of streaming introduced by Apache Kafka, the T-streams are intentionally designed for the Stream Juggler platform as a complement for Apache Kafka. The T-streams have more features than Kafka and make exactly-once processing possible. Find more about T-streams at the `site <http://t-streams.com>`_ .
+As stated above, modules process the data arranged in streams. The Stream Juggler Platform supports *Apache Kafka* and *T-stream* type of streams. And when the Apache Kafka streams are a well-known type of streaming introduced by Apache Kafka, the T-streams are intentionally designed for the Stream Juggler platform as a complement for Apache Kafka. The T-streams have more features than Kafka and make exactly-once processing possible. Find more about T-streams at the `site <http://t-streams.com>`_ .
 
-To transform data into a stream of exact type you need to create a service and a provider for this service. The type of a service and a provider is determined by the type of a stream you need for the module.
+To create streams of exact type in the platform you need to create a service and a provider for this service. The type of a service and a provider is determined by the type of a stream you need for the module.
 
-For example, a Batch module that receives data from Kafka will require a Kafka service (KfkQ) and two provider types for it: Kafka and ZooKeeper. 
+For example, a Batch module that receives data from Kafka will require an Apache Kafka service and two provider types for it: Apache Kafka and Apache ZooKeeper. 
 
-The diagram below may help you to understand the dependency of instances in the platform.
+The schema below may help you to understand the dependency of entities in the platform.
 
 .. figure:: _static/InstanceCorrelation1.png
 
-The data elements in a stream are assembled in partitions. A partition is a part of a data stream allocated for convenience in operation. The streams with many partitions allow to handle the idea of parallelism properly. In such case, an engine divides existing partitions fairly among executors and it enables to scale the data processing.  
+The data elements in a stream are assembled in partitions. A partition is a part of a data stream allocated for convenience in processing. The streams with many partitions allow handling the idea of parallelism properly. In such case, an engine divides existing partitions fairly among module's tasks. It allows scaling of the data processing.
+
+The number of tasks is determined in module's instance(-s). An  instance is a set of settings determining the collaborative work of an engine and a module. Each module type requires a specific type of an instance: input, regular or batch, output. In the schema above you can see that each instance type requires a proper type of streams, and thus providers and services of a correct type as well.
+
+We hope this information will help you to select the most appropriate types of entities in the system to build a pipeline for smooth data stream processing.
+
+
+
+
