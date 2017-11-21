@@ -8,7 +8,7 @@ The Stream Juggler Platform offers two examples of TCP Input Module implementati
 CSV Input Module
 --------------------------
 
-It extends *InputStreamingExecutor* interface. Its aim is to process CSV lines and create ``InputEnvelope`` instance which saves each line as AvroRecord inside.
+This module extends the *InputStreamingExecutor* interface. Its aim is to process CSV lines and create ``InputEnvelope`` instance which saves each line as AvroRecord inside.
 
 This module is provided via Sonatype repository.
 
@@ -53,7 +53,7 @@ E.g. for ``"fields": ["f1", "f2", "f3"]``)::
 Regex Input Module
 --------------------------
 
-It extends *InputStreamingExecutor* interface. Its aim is to process input stream of strings using a set of regular expressions rules and create `InputEnvelope` instance which stores each line as AvroRecord inside. Thus, it takes the free-form data, filter and convert them into Avro Records.
+This module extends the *InputStreamingExecutor* interface. Its aim is to process input stream of strings using a set of regular expressions rules and create `InputEnvelope` instance which stores each line as AvroRecord inside. Thus, it takes the free-form data, filter and convert them into Avro Records.
 
 This module is provided via Sonatype repository.
 
