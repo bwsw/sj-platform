@@ -108,7 +108,7 @@ What we are going to do for the examples is:
    
 .. note:: Find more about engines at the :ref:`Engines` page.
 
-4. Upload modules. Module is a programm mofule processing data streams. For a **module** we assemble a JAR file, containing a module specification. Module's executor performs data transformation, aggregation, filtering.  
+4. Upload modules. Module is a program module processing data streams. For a **module** we assemble a JAR file, containing a module specification. Module's executor performs data transformation, aggregation, filtering.  
 
 .. figure:: _static/moduleExecutorAndValidator.png
    :scale: 120%
@@ -116,15 +116,13 @@ What we are going to do for the examples is:
    
    Picture 1.5
    
-   In the example tasks we will upload ready-to-use modules of three types - input modules, processing modules (regular, batch) and output modules. 
+In the example tasks we will upload ready-to-use modules of three types - input modules, processing modules (regular, batch) and output modules. 
    
-   To solve your tasks, you may upload your custom modules in this step. 
+To solve your tasks, you may upload your custom modules in this step. 
    
 .. note:: Find more about modules at the :ref:`Modules` page.  A hello-world on a custom module can be found at the :ref:`Custom_Module` section.
 
-5. Create streaming layer. Modules exchange data via streams. 
-
-Within the platform, T-streams are used for message transportation allowing exactly-once data exchange. The result data are exported from SJ-Platform to an external storage with streams of types corresponding to the type of that storage: Elasticsearch, SQL database or RESTful.
+5. Create streaming layer. Modules exchange data via streams. Within the platform, T-streams are used for message transportation allowing exactly-once data exchange. The result data are exported from SJ-Platform to an external storage with streams of types corresponding to the type of that storage: Elasticsearch, SQL database or RESTful.
 
 .. figure:: _static/ModuleStreams.png
    :scale: 80%
@@ -132,7 +130,7 @@ Within the platform, T-streams are used for message transportation allowing exac
    
    Picture 1.6
    
-   Streaming requires the infrastructure: providers and services. For both example tasks we will need Apache Zookeeper, Elasticsearch and SQL-database types of providers, and Apache Zookeeper, Elasticsearch, SQL-database and T-streams types of services. On the base of the infrastructure we will create streams of corresponding types.
+Streaming requires the infrastructure: providers and services. For both example tasks we will need Apache Zookeeper, Elasticsearch and SQL-database types of providers, and Apache Zookeeper, Elasticsearch, SQL-database and T-streams types of services. On the base of the infrastructure we will create streams of corresponding types.
    
 .. note:: Find more about streams and the streaming infrastructure at the :ref:`Streaming` section.
 
