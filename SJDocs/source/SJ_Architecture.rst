@@ -9,7 +9,7 @@ The Stream Juggler Platform is an integrated processing system. It means the sys
 
 SJ-Platform's architecture is designed so that exactly-once processing is performed not only within a single processing block but throughout the entire platform, starting from the moment streams of events are fed to the system and up to the moment the output data are saved in conventional data storage.
 
-The approach based on loosely coupled blocks with exactly-once processing support throughout the entire pipeline allows a user to decompose data processing providing better modularity, performance management and simplicity in development.
+The approach based on loosely coupled blocks with exactly-once processing support throughout the entire pipeline allows a user to decompose data processing. It provides better modularity, performance management and simplicity in development.
 
 In this section, we will take a closer look at the system components, their functions within the data flow pipeline.
 
@@ -73,7 +73,7 @@ The major one is the **processing module** that performs data processing. Two ty
 
 - Regular – the most generic module which receives events, transforms data and sends them to the next processing step.
 
-- Batch – a module which is used to implement streaming joins and processing where algorithm must observe a range of input messages rather than current one. A batch is a minimum data set for a module to collect the events in the stream. Batches are collected in a window. The data is processed applying the idea of a sliding window. 
+- Batch – a module which is used to implement streaming joins and processing where algorithm must observe a range of input messages rather than current one. A batch is a minimum data set for a module to collect the events in the stream. Batches are collected in a window. In SJ-Platform the data is processed applying the method of a sliding window. 
 
 The processing module receives data to process from Apache Kafka and T-streams. You also can use TCP as a source, but you will need an input module in this case. The **input module** handles external inputs, does data deduplication, transforms raw data into objects for T-streams. 
 
@@ -90,7 +90,7 @@ At the Processing platform component, the ingested data are transformed into str
 
 Streaming Component
 ~~~~~~~~~~~~~~~~~~~~~
-The *Streaming component* is essential in SJ-Platform. The data are fed to the system, transferred between modules and exported to an external storage via streams. Streaming makes possible such platform features as exactly-once processing, parallelism, fault-tolerance, horizontal scalability.
+The *Streaming component* is essential in SJ-Platform. The data are fed to the system, transferred between modules and exported to an external storage via streams. Streams make possible such platform features as exactly-once processing, parallelism, fault-tolerance, horizontal scalability.
 
 The data can be received from different sources. Currently, the platform supports obtaining data from Apache Kafka and via TCP.
 
@@ -104,7 +104,9 @@ Within the platform, the data are transported to and from modules via *transacti
 
 API/UI Component
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-The *Web UI* allows administrating of the platform. It is based on Angular 4.0. The platform  provides REST API that allows interacting with the platform, monitoring and managing module statuses (its starting or stopping), retrieving configuration information.
+The *Web UI* allows administrating of the platform. It is based on Angular 4.0. 
+
+Also the platform provides *REST API* that allows interacting with the platform, monitoring and managing module statuses (its starting or stopping), retrieving configuration information.
 
 .. tip:: More information about the UI in the platform can be found in the :ref:`UI_Guide` and the :ref:`REST_API`.
 
@@ -119,9 +121,9 @@ Streams can be very intensive and all events cannot be handled by a single serve
 
 The events are guaranteed to be processed **exactly-once**. The key idea of exactly-once processing lies in a group **checkpoint**. That means all producers and consumers of a stream are bunched into a group and do a checkpoint automatically fixing the current state. Moreover, a user can initialize a checkpoint whenever it is necessary.
 
-Saving the variables in a state fulfills the idea of SJ-Platform`s **fault-tolerance**. In the case of a live data stream processing failure, the variables stored in the state are recovered and the module is restarted.
+SJ-Platform fulfills the idea **fault-tolerance** as its architecture prevents the whole system from stopping operation completely in case of processing failure in one module or an instance. In the case of a live data stream processing failure, the module is restarted by Marathon. Within the module, if several tasks are set in module's instance parameters and one of the tasks fails the whole system does not stop processing. The task is restarted.
 
-The streaming layer allows handling the idea of **parallelism** through multi-partitioning. The data elements in a stream are assembled in partitions.  A **partition** is a part of a data stream allocated for convenience in processing. Upon creation, every stream gets a name and a certain amount of partitions. The parallelism is enabled by dividing existing partitions fairly among modules' tasks and it enables to scale the data processing.
+The streaming layer allows handling the idea of **parallelism** through multi-partitioning. The data elements in a stream are assembled in partitions.  A **partition** is a part of a data stream allocated for convenience in stream processing. Upon creation, every stream gets a name and a certain amount of partitions. The parallelism is enabled by dividing existing partitions fairly among module's instance tasks and thus scaling the data processing.
 
 The general structure of SJ-Platform can be rendered as at the scheme below where all the mentioned above  components are presented in detail:
 
