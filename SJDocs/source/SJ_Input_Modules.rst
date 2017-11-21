@@ -82,7 +82,7 @@ The configuration contains a three-tier structure that consists of the following
  :header: "Field Name", "Format", "Description", "Example"
  :widths: 15, 10, 25, 40
  
- "lineSeparator *", "String", "String that separates lines", "\n"
+ "lineSeparator *", "String", "String that separates lines", "`\n`"
  "policy*", "String", "Defines the behavior of the module", "first-match-win"
  "encoding*", "String", "Name of input encoding", "UTF-8"
  "fallbackStream*", "String", "Name of an output stream for lines that are not matched to any regex (from the 'rules' field)", "fallback-output"
