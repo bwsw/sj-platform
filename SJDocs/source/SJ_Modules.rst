@@ -77,6 +77,7 @@ Modules of Input Type
 Modules of the input-streaming type handle external input streams, does data deduplication, transforms raw data to objects. 
 
 In the SJ-Platform the TCP Input module is currently implemented.
+
 .. figure:: _static/InputModuleStructure1.png
   :scale: 80 %
 
@@ -85,7 +86,7 @@ It performs the transformation of the streams incoming via TCP into T-streams. T
 In the diagram below you can see the illustration of dataflow for the input module.
 
 .. figure:: _static/InputModuleDataflow1.png
-  :scale: 80 %
+   :scale: 80 %
 
 All input data elements are going as a flow of bytes to particular interface provided by Task Engine. That flow is going straight to Streaming Executor and is converted to an object called an Input Envelope. 
 
