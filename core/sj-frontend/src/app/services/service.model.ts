@@ -12,8 +12,6 @@ export class ServiceModel extends BaseModel {
   prefix: string;
   token: string;
   index: string;
-  login: string;
-  password: string;
   basePath: string = '/';
   httpVersion: string = '1.1';
   headers: Object;
