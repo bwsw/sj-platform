@@ -228,11 +228,11 @@ In case of a fail (when something is going wrong in one of the methods described
 
 Inside of the module there is a manager allowing to get an access to: 
 
-- an output that is defined within the instance (by calling "getPartitionedOutput()" or "getRoundRobinOutput()"),
-- timer (by calling "setTimer()")
-- state (by calling "getState()") if it is a stateful module
-- list of output names (by calling "getStreamsByTags()"). Every output contains its own set of tags which are used to retrieve it. 
-- initiation of checkpoint (by calling "initiateCheckpoint()").
+- an output that is defined within the instance (by calling ``getPartitionedOutput()`` or ``getRoundRobinOutput()``),
+- timer (by calling ``setTimer()``)
+- state (by calling ``getState()``) if it is a stateful module
+- list of output names (by calling ``getStreamsByTags()``). Every output contains its own set of tags which are used to retrieve it. 
+- initiation of checkpoint (by calling ``initiateCheckpoint()``).
 
 To see a flow chart on how these methods intercommunicate see the :ref:`Regular_Streaming_Engine` section.
 
@@ -331,30 +331,30 @@ The executor of the batch module provides the following methods that does not pe
 1) ``onInit``: 
     It is invoked only once, when a module is launched. This method can be used to initialize some auxiliary variables or check the state variables on existence and if it's necessary to create them. Thus, you should do preparation of the executor before usage.
 
-Example of the checking a state variable::
+    Example of the checking a state variable::
  
-  if (!state.isExist(<variable_name>)) state.set(<variable_name>, <variable_value>)
+     if (!state.isExist(<variable_name>)) state.set(<variable_name>, <variable_value>)
   
-``<variable_name>`` should be of the String type
+   ``<variable_name>`` should be of the String type
 
-``<variable_value>`` can be of any type (be careful when you will cast a state variable value to a particular data type)
+   ``<variable_value>`` can be of any type (be careful when you will cast a state variable value to a particular data type)
 
 2) ``onWindow``: 
     It is invoked when a window for each input stream is collected (a list of input streams are defined within the instance). These collected windows are accessible via a window repository within the method. A window consists of batches, a batch consists of envelopes (messages). There are two possible data types of envelopes - that's why you should cast the envelope inside the method. Each envelope has a type parameter that defines the type of message data.
 
-Example of a message casting to a particular data type::
+    Example of a message casting to a particular data type::
 
-  val allWindows = windowRepository.getAll()
-  allWindows.flatMap(x => x._2.batches).flatMap(x => 
-  x.envelopes).foreach {
-  case kafkaEnvelope: KafkaEnvelope[Integer @unchecked] => //here there is an access to certain fields such as offset and data of integer type
-  case tstreamEnvelope: TStreamEnvelope[Integer @unchecked] => //here there is an access to certain fields such as txnUUID, consumerName and data (array of integers)
-  }
+     val allWindows = windowRepository.getAll()
+     allWindows.flatMap(x => x._2.batches).flatMap(x => 
+     x.envelopes).foreach {
+     case kafkaEnvelope: KafkaEnvelope[Integer @unchecked] => //here there is an access to certain fields such as offset and data of integer type
+     case tstreamEnvelope: TStreamEnvelope[Integer @unchecked] => //here there is an access to certain fields such as txnUUID, consumerName and data (array of integers)
+     }
 
-.. note:: The data type of the envelope can be "KafkaEnvelope" data type or "TStreamEnvelope" data type. If you specify in an instance the inputs of the only one of this data types you shouldn't match the envelope like in the  example above and cast right the envelope to a particular data type::
-
-  val tstreamEnvelope =
-  envelope.asInstanceOf[TStreamEnvelope[Integer]]
+    The data type of the envelope can be "KafkaEnvelope" data type or "TStreamEnvelope" data type. If you specify in an instance the inputs of the only one of this data types you shouldn't match the envelope like in the  example above and cast right the envelope to a particular data type::
+          
+     val tstreamEnvelope =            
+     envelope.asInstanceOf[TStreamEnvelope[Integer]]
 
 3) ``onBeforeCheckpoint``: 
     It is invoked before every checkpoint
