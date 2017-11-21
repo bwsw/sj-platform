@@ -23,6 +23,8 @@ The platform features presented above have conditioned the architecture develope
 
 .. figure:: _static/genCon.png
     :align: center
+    
+    Picture 1.1
 
 1) **Processing** component for launching data computation,
 2) **Streaming** component for data transportation,
@@ -37,6 +39,8 @@ The events enter the processing module in streams from a list of supported inter
     :align: center
     :scale: 80%
 
+    Picture 1.2
+    
 SJ-Platform provides a user with the comprehensive **API** and **UI** that allow him/her to develop, customize and manage the event processing pipeline.
 
 The core component is presented with services that simplify the deployment and operation and support best industrial practices. 
@@ -82,8 +86,11 @@ To receive the result of processing an output module is required. The **output m
 So the pipeline may look like at the following scheme:
 
 .. figure:: _static/ModuleStructure3.png
+   :align: center
    :scale: 80%
 
+   Picture 1.3
+    
 In the Processing platform component, the ingested data are transformed into streams, processed and sent to an external storage.  Data transformation and computation are the two major tasks of this component.
 
 .. tip:: More information on modules you can find at the :ref:`Modules` page.
@@ -128,13 +135,19 @@ The streaming layer allows handling the idea of **parallelism** through multi-pa
 The general structure of SJ-Platform can be rendered as at the scheme below where all the mentioned above  components are presented in detail:
 
 .. figure:: _static/SJ_General2.png
+   :align: center
 
+   Picture 1.4
+    
 The diagram below represents the interconnections between platform components. 
 
 SJ-Platform uses a range of data sources and data storages. A client operates the platform via UI/REST API. And he/she uploads a custom module to the platform with a set of configurations. The platform runs the module via an "executable" engine on Mesos and Marathon. And the module uses MongoDB as a data store.
 
 .. figure:: _static/SJComponentDiagram.png
-
+    :align: center
+   
+    Picture 1.5
+    
 Every component deployed to the Stream Juggler Platform contributes to the main idea of hitting three V-s of data processing:
 
 - Volume 
