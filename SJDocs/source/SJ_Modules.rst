@@ -190,22 +190,22 @@ In the Regular module the executor provides the following methods that does not 
 1) ``onInit``: 
         It is invoked only once, when a module is launched. This method can be used to initialize some auxiliary variables, or check the state variables on existence and create them if necessary . Thus, you should do preparation of the executor before usage.
 
-Example of the checking a state variable::
+	Example of the checking a state variable::
 
- if (!state.isExist(<variable_name>)) state.set(<variable_name>, <variable_value>)
+ 	 if (!state.isExist(<variable_name>)) state.set(<variable_name>, <variable_value>)
 
-``<variable_name>`` must have the String type
+	``<variable_name>`` must have the String type
 
-``<variable_value>`` can be any type (a user must be careful when casting a state variable value to a particular data type)
+	``<variable_value>`` can be any type (a user must be careful when casting a state variable value to a particular data type)
 
 2) ``onMessage``: 
     It is invoked for every received message from one of the inputs that are defined within the instance. There are two possible data types of input sources - that's why there are two methods with appropriate signatures::
     
-``def onMessage(envelope: TStreamEnvelope[T]): Unit``
+	def onMessage(envelope: TStreamEnvelope[T]): Unit
 
-``def onMessage(envelope: KafkaEnvelope[T]): Unit``
+	def onMessage(envelope: KafkaEnvelope[T]): Unit
  
-Each envelope has a type parameter that defines the type of data in the envelope.
+    Each envelope has a type parameter that defines the type of data in the envelope.
 
 .. note:: The data type of the envelope can be only "KafkaEnvelope" data type or "TStreamEnvelope" data type. A user may specify one of them or both, depending on which type(s) is(are) used. 
 
