@@ -98,7 +98,7 @@ What we are going to do for the examples is:
 
    An **engine** is required to start a module. A module can not process data without an engine.
    
-   It is a base of the system that provides the I/O functionality. It uses module settings for data processing.
+   It is a base of the system that provides the I/O functionality. It uses module settings for data processing.  We will upload an engine jar file per each module in a pipeline.
 
 .. figure:: _static/engine.png
    :scale: 110%
@@ -106,8 +106,6 @@ What we are going to do for the examples is:
    
    Picture 1.4
    
-   We will upload an engine jar file per each module in a pipeline.
-
 .. note:: Find more about engines at the :ref:`Engines` page.
 
 4. Upload modules. Module is a programm mofule processing data streams. For a **module** we assemble a JAR file, containing a module specification. Module's executor performs data transformation, aggregation, filtering.  
