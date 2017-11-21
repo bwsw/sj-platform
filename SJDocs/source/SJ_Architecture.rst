@@ -84,7 +84,7 @@ So the pipeline may look like at the following scheme:
 .. figure:: _static/ModuleStructure3.png
    :scale: 80%
 
-At the Processing platform component, the ingested data are transformed into streams, processed and sent to an external storage.  Data transformation and computation are the two major tasks of this component.
+In the Processing platform component, the ingested data are transformed into streams, processed and sent to an external storage.  Data transformation and computation are the two major tasks of this component.
 
 .. tip:: More information on modules you can find at the :ref:`Modules` page.
 
@@ -106,7 +106,7 @@ API/UI Component
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 The *Web UI* allows administrating of the platform. It is based on Angular 4.0. 
 
-Also the platform provides *REST API* that allows interacting with the platform, monitoring and managing module statuses (its starting or stopping), retrieving configuration information.
+Also, the platform provides *REST API* that allows interacting with the platform, monitoring and managing module statuses (its starting or stopping), retrieving configuration information.
 
 .. tip:: More information about the UI in the platform can be found in the :ref:`UI_Guide` and the :ref:`REST_API`.
 
@@ -115,7 +115,7 @@ Platform Features
 
 Each SJ-Platform component contributes to its outstanding features.
 
-SJ-Platform performs **stream processing**. That means the system can handle events as soon as they are available inside the system without specific delay. **Micro-batch data processing** can be also performed in the platform.
+SJ-Platform performs **stream processing**. That means the system can handle events as soon as they are available inside the system without specific delay. **Micro-batch data processing** can be also performed in the system.
 
 Streams can be very intensive and all events cannot be handled by a single server of arbitrary performance. The system allows **scaling** the computations horizontally to handle increasing demands.
 
