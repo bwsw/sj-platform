@@ -60,7 +60,7 @@ The platform supports 4 types of modules:
 
 2. *Output-streaming* - handles the data outcoming from event processing pipeline to external data destinations (Elasticsearch, SQL database, etc.).
 
-3. *Regular-streaming* (base type) - a generic processor which receives an event, does some data transformation and sends transformation to the next processing step. 
+3. *Regular-streaming* (base type) - a generic module which receives an event, does some data transformation and sends transformation to the next processing step. 
 
 4. *Batch-streaming* - a module which is used to implement streaming joins and processing where algorithm must observe a range of input messages rather than current one.  A batch is a minimum data set for a module to collect the events in the stream. Batches are collected in a window. The data is processed in the batch module applying the idea of a sliding window.
 
