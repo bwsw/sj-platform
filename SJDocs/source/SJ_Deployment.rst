@@ -1,5 +1,3 @@
-.. _Platform_Deployment:
-
 Platform Deployment on Cluster 
 =====================================
 
