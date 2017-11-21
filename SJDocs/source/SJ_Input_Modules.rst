@@ -82,11 +82,11 @@ The configuration contains a three-tier structure that consists of the following
  :header: "Field Name", "Format", "Description", "Example"
  :widths: 15, 10, 25, 40
  
- "lineSeparator *", "String", "String that separates lines", "`\n`"
+ "lineSeparator *", "String", "String that separates lines", "``\n``"
  "policy*", "String", "Defines the behavior of the module", "first-match-win"
  "encoding*", "String", "Name of input encoding", "UTF-8"
  "fallbackStream*", "String", "Name of an output stream for lines that are not matched to any regex (from the 'rules' field)", "fallback-output"
- "rules*", "List[Rule]", "List of rules that defines: regex, an output stream and avro record structure", "`-`"
+ "rules*", "List[Rule]", "List of rules that defines: regex, an output stream and avro record structure", "``-``"
 
 **Rule**
 
@@ -98,7 +98,7 @@ The configuration contains a three-tier structure that consists of the following
  "outputStream*", "String", "Name of output stream for successful converted data", "output-stream"
  "uniqueKey", "List[String]", "Set of field names which uniquely identifies a record (all record fields by default)","['day','month']"
  "distribution", "List[String]", "Set of fields that define in which partition of an output stream a record will be put. Partition computed as hash(fields) mod partitions_number. If this field is not defined, the module uses the Round Robin policy for partition distribution.", "['month','year']"
- "fields*", "List[Field]", "List of fields used for creation the avro record scheme", "`-`"
+ "fields*", "List[Field]", "List of fields used for creation the avro record scheme", "``-``"
 
 **Field**
 
