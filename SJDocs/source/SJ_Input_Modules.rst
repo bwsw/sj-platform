@@ -21,7 +21,7 @@ Module configuration is located in the ``options`` field of instance configurati
  "outputStream*", "String", "Name of output stream for Avro Records", "s1" 
  "fallbackStream*", "String", "Name of output stream for incorrect CSV-lines", "s2" 
  "fields*", "List[String]", "Names of record fields", "['f1', 'f2', 'f3']" 
- "lineSeparator*", "String", "String which separates lines", "\n" 
+ "lineSeparator*", "String", "String which separates lines", "``\n``" 
  "encoding*", "tring", "Name of input encoding", "UTF-8" 
  "uniqueKey", "List[String]", "Set of field names which uniquely identifies a record (all record fields by default)", "['f1', 'f3']" 
  "fieldSeparator", "String", "A delimiter to use for separating entries (',' by default)", ";" 
