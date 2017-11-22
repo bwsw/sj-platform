@@ -16,6 +16,8 @@ A module includes:
    :scale: 120%
    :align: center
 
+   Picture 1.1
+   
 Below you will find more information on each of these two components.
 
 .. _validator:
@@ -49,6 +51,8 @@ The base of the system is an engine: it provides basic I/O functionalities. It i
    :scale: 120%
    :align: center
    
+   Picture 1.2
+   
 After its uploading, the engine receives raw data and sends them to the module executor. The executor starts data processing and returns the resulting data back to the engine where they are deserialized to be passed into the stream or a storage.
 
 Module Types
@@ -67,7 +71,10 @@ The platform supports 4 types of modules:
 The modules can be strung in a pipeline as illustrated below:
 
 .. figure:: _static/ModulePipeline1.png
+   :align: center
 
+   Picture 1.3 
+  
 At this page each module is described in detail. You will find more information on the methods provided by module executors as well as entities' description.
 
 .. _input-module:
@@ -80,13 +87,19 @@ In the SJ-Platform the TCP Input module is currently implemented.
 
 .. figure:: _static/InputModuleStructure1.png
   :scale: 80 %
+  :align: center
 
+  Picture 1.4
+  
 It performs the transformation of the streams incoming via TCP into T-streams. T-streams are persistent streams designed for exactly-once processing (so they include a transactional producer, a consumer and a subscriber). Find more information about T-streams `here <http://t-streams.com>`_.
 
 In the diagram below you can see the illustration of dataflow for the input module.
 
 .. figure:: _static/InputModuleDataflow1.png
    :scale: 80 %
+   :align: center
+
+   Picture 1.5
 
 All input data elements are going as a flow of bytes to particular interface provided by Task Engine. That flow is going straight to Streaming Executor and is converted to an object called an Input Envelope. 
 
@@ -172,12 +185,18 @@ The most generic modules in the system are modules of a regular-streaming type. 
 
 .. figure:: _static/RegularModule3.png
   :scale: 80 %
+  :align: center
+
+  Picture 1.6
 
 The diagram below represents the dataflow in the regular module.
 
 .. figure:: _static/RegularModuleDataflow2.png
   :scale: 80 %
+  :align: center
 
+  Picture 1.7
+  
 The TaskEngine of a regular module receives data from T-streams. It deserializes the flow of bytes to TStreamsEnvelope[T] (where [T] is a type of messages in the envelope) which is then passed to the StreamingExecutor.
 
 The StreamingExecutor processes the received data and sends them to the TaskEngine as a result data.
@@ -312,7 +331,10 @@ The diagram below is a simple illustration of how a sliding window operation loo
 
 .. figure:: _static/BatchModule1.png
    :scale: 120 %
+   :align: center
 
+   Picture 1.8
+  
 As shown in the figure, every time the window slides over an input stream, the batches of events that fall within the window are combined and operated upon to produce the transformed data of the windowed stream. It is important that any window operation needs to specify the parameters:
 
 - *batch size* — The quantity of events within a batch, or a period of time during which the events are collected in one batch.
@@ -403,6 +425,9 @@ Modules of an output type are responsilbe for saving of output data to external 
 
 .. figure:: _static/OutputModule1.png
   :scale: 80 %
+  :align: center
+
+  Picture 1.9
   
 They transform the result of data processing received from T-streams and passe them to an external data storage. They allow to transform one data item from incoming streaming into one and more data output items.
 
@@ -410,7 +435,10 @@ The diagram below illustrates the dataflow in an output module.
 
 .. figure:: _static/OutputModuleDataflow1.png
   :scale: 80 %
+  :align: center
 
+  Picture 1.10
+  
 The TaskEngine deserializes the stream of bytes from T-Streams to TStreamsEnvelope[T] (where [T] is a type of messages in the envelope) and sends it to the StreamingExecutor. The StreamingExecutor returns Entities back to the TaskEngine. 
 
 They are then put to an external datastorage.
@@ -464,6 +492,9 @@ Once you have determined the types of instances in the pipeline and the types of
 The schema below may help you to understand the dependency of entities in the platform.
 
 .. figure:: _static/InstanceCorrelation1.png
+  :align: center
+
+  Picture 1.11
 
 We hope this information will help you to select the most appropriate types of entities in the system to build a pipeline for smooth data stream processing.
 
