@@ -30,14 +30,14 @@ Streaming validator provides two methods:
 
 Each of these two methods returns a tuple of values that contains:
 
-- The value that indicates if the validation is sucessful or not;
+- The value that indicates if the validation is sucсessful or not;
 
 - The value that is a list of errors in case of the validation failures (it is an empty list by default). 
 
 Executor
 ---------------------
 
-An executor is a key module component that performs the data processing. It receives the data and processes them in correspondence with the requirements of module specification. It utilizes an instance/instances for processing. An instance is a full range of settings for an exact module. It determins the work of an engine and a module.
+An executor is a key module component that performs the data processing. It receives data and processes them in correspondence with the requirements of module specification. It utilizes an instance/instances for processing. An instance is a full range of settings for an exact module. It determins the coordinated work of an engine and a module.
 
 Data Processing Flow in Modules
 ---------------------------------
@@ -62,7 +62,7 @@ The platform supports 4 types of modules:
 
 3. *Regular-streaming* (base type) - a generic module which receives an event, does some data transformation and sends transformation to the next processing step. 
 
-4. *Batch-streaming* - a module which is used to implement streaming joins and processing where algorithm must observe a range of input messages rather than current one.  A batch is a minimum data set for a module to collect the events in the stream. Batches are collected in a window. The data is processed in the batch module applying the idea of a sliding window.
+4. *Batch-streaming* - a module which is used to implement streaming joins and processing where algorithm must observe a range of input messages rather than current one.  A batch is a minimum data set for a module to collect the events in the stream. Batches are collected in a window. The data is processed in the batch module applying the method of a sliding window.
 
 The modules can be strung in a pipeline as illustrated below:
 
@@ -97,13 +97,13 @@ The Input Envelope then goes to Task Engine which serializes it to a stream of b
 An input module executor provides the following methods with default implementation (which can be overridden)f.
 
 1) ``tokenize``: 
-      It is invoked every time when a new portion of data is received. It processes a flow of bytes to determine the beginning and the end of the Interval (significant set of bytes in incoming flow of bytes). By default it returns None value (meaning that it is impossible to determine an Interval). If Interval detected, method should return it (indexes of the first and the last elements of the interval in the flow of bytes). The resulting interval can either contain message or not.
+      It is invoked every time when a new portion of data is received. It processes a flow of bytes to determine the beginning and the end of the Interval (significant set of bytes in incoming flow of bytes). By default it returns None value (meaning that it is impossible to determine an Interval). If Interval detected, method should return it (indices of the first and the last elements of the interval in the flow of bytes). The resulting interval can either contain message or not.
 
 2) ``parse``: 
      This method is invoked once the "tokenize" method returns an Interval. It processes both a buffer with incoming data (a flow of bytes) and an Interval (an output of "tokenize" method). Its purpose is to define whether the Interval contains a message or meaningless data. Default return value is None. The same value should be returned if Interval contains meaningless data. If Interval contains a message, the "InputEnvelope" value should be returned.
 
 3) ``createProcessedMessageResponse``:
-      It is invoked after each call of the parse method. Its purpose is to create response to the source of data - the instance of InputStreamingResponse.
+      It is invoked after each call of the "parse" method. Its purpose is to create response to the source of data - the instance of InputStreamingResponse.
 
       The parameters of the method are:
 
@@ -127,7 +127,6 @@ An input module executor provides the following methods with default implementat
   	  InputStreamingResponse(message, sendResponsesNow)
  	 }
 
-
 4) ``createCheckpointResponse``: 
       It is invoked on checkpoint's finish. It's purpose is to create response for data source to inform that checkpoint has been done. It returns an instance of ``InputStreamingResponse``.
 
@@ -140,7 +139,7 @@ An input module executor provides the following methods with default implementat
 
 There is a manager inside the module which allows to:
 
- - retrieve a list of output names by a set of tags (by calling ``getStreamsByTags()``) 
+ - retrieve a list of output stream names by a set of tags (by calling ``getStreamsByTags()``) 
 
  - initiate checkpoint at any time (by calling ``initiateCheckpoint()``) which would be performed only at the end of processing step (check diagram at the :ref:`Input_Streaming_Engine` page)
 
@@ -369,7 +368,7 @@ The executor of the batch module provides the following methods that does not pe
 .. 8) "onAfterStateSave": 
     It is invoked after every saving of the state. Inside the method there is a flag denoting the full state (true) or partial changes of state (false) have(s) been saved
 
-The following handlers are used for synchronizing the tasks' work. It can be useful when using shared memory, e.g. Hazelcast or any other, at data aggregation.
+When several tasks are set for an instance (the "parallelism" parameter is larger than 1), it can be important to exchange data between tasks at the exact moment. We suggest using shared memory for it, e.g. Hazelcast or any other. In this case, the following handlers are used for synchronizing the tasks' work: 
  
 1) ``onEnter``: The system awaits for every task to finish the ``onWindow`` method and then the ``onEnter`` method of all tasks is invoked.
 
@@ -405,7 +404,7 @@ Modules of an output type are responsilbe for saving of output data to external 
 .. figure:: _static/OutputModule1.png
   :scale: 80 %
   
-It transforms the result of data processing received from T-streams and passes them to an external data storage. It allows to transform one data item from incoming streaming into one and more data output items.
+They transform the result of data processing received from T-streams and passe them to an external data storage. They allow to transform one data item from incoming streaming into one and more data output items.
 
 The diagram below illustrates the dataflow in an output module.
 
@@ -430,7 +429,7 @@ To see a flow chart on how these methods intercommunicate, please, visit the :re
 
 A detailed manual on how to write a module you may find at the :ref:`hello-world-module` page.
 
-Modules` performance is determined by the work of engine. Engines of different types (Input, Regular/Batch, Output) have different structure, components and the workflow corresponding to the type of a module. 
+Modules` performance is determined by the work of an engine. Engines of different types (Input, Regular/Batch, Output) have different structure, components and the workflow corresponding to the type of a module. 
 
 Please, find more information about engines at the :ref:`Engines` page.
 
@@ -448,21 +447,23 @@ A module requires the following elements to be created for its performance:
 
 - Instance
 
-The type of module requires a specific type of instance to be created. An instance is a full range of settings determining the work of an engine and a module. These settings are specified via UI or REST API and determine the mode of the module operation: data stream type the module is going to work with, a checkpoint concept, the settings of state and parallelism, other options, etc.
+The type of module requires a specific type of instance to be created. An  instance is a set of settings determining the collaborative work of an engine and a module.  These settings are specified via UI or REST API and determine the mode of the module operation: data stream type the module is going to work with, a checkpoint concept, the settings of state and parallelism, other options, etc. Each module type requires a specific type of an instance: input, regular or batch, output. In the schema below you can see that each instance type requires a proper type of streams, and thus providers and services of a correct type as well.
 
-As stated above, modules process the data arranged in streams. The Stream Juggler Platform supports *Apache Kafka* and *T-stream* types of streams. And when the Apache Kafka streams are a well-known type of streaming introduced by Apache Kafka, the T-streams are intentionally designed for the Stream Juggler platform as a complement for Apache Kafka. The T-streams have more features than Kafka and make exactly-once processing possible. Find more about T-streams at the `site <http://t-streams.com>`_ .
+The Stream Juggler Platform supports *Apache Kafka* and *T-stream* types of streams. And when the Apache Kafka streams are a well-known type of streaming introduced by Apache Kafka, the T-streams are intentionally designed for the Stream Juggler platform as a complement for Apache Kafka. The T-streams have more features than Kafka and make exactly-once processing possible. Find more about T-streams at the `site <http://t-streams.com>`_ .
 
 To create streams of exact type in the platform you need to create a service and a provider for this service. The types of a service and a provider are determined by the type of a stream you need for the module.
 
-For example, a Batch module that receives data from Kafka will require an Apache Kafka service and two provider types for it: Apache Kafka and Apache ZooKeeper. 
+For example, you have decided to include a Batch module as a processing module in your pipeline. You will need to create a batch instance for it. An instance of a batch type requires *Apache ZooKeeper service*.
+
+An instance of a batch type will receive data from Apache Kafka. Thus, it will require an *Apache Kafka service*. 
+
+Apache Kafka service will require two provider types for it: *Apache Kafka* and *Apache ZooKeeper*.
+
+Once you have determined the types of instances in the pipeline and the types of streaming components, you can start building the infrastructure. Firstly, create two providers of *Apache Kafka* and *Apache ZooKeeper* types. Secondly, create services of *Apache Kafka* and *Apache ZooKeeper* types. Thirdly, create streams of *Apache Kafka*. 
 
 The schema below may help you to understand the dependency of entities in the platform.
 
 .. figure:: _static/InstanceCorrelation1.png
-
-The data elements in a stream are assembled in partitions. A partition is a part of a data stream allocated for convenience in processing. The streams with many partitions allow handling the idea of parallelism properly. In such case, an engine divides existing partitions fairly among module's tasks. It allows scaling of the data processing.
-
-The number of tasks is determined in module's instance(-s). An  instance is a set of settings determining the collaborative work of an engine and a module. Each module type requires a specific type of an instance: input, regular or batch, output. In the schema above you can see that each instance type requires a proper type of streams, and thus providers and services of a correct type as well.
 
 We hope this information will help you to select the most appropriate types of entities in the system to build a pipeline for smooth data stream processing.
 
