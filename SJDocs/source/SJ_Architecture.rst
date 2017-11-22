@@ -9,7 +9,7 @@ The Stream Juggler Platform is an integrated processing system. It means the sys
 
 SJ-Platform's architecture is designed so that exactly-once processing is performed not only within a single processing block but throughout the entire platform, starting from the moment streams of events are fed to the system and up to the moment the output data are saved in conventional data storage.
 
-The approach based on loosely coupled blocks with exactly-once processing support throughout the entire pipeline allows a user to decompose data processing. It provides better modularity, performance management and simplicity in development.
+The approach is based on loosely coupled blocks with exactly-once processing support throughout the entire pipeline. It allows a user to decompose data processing providing better modularity, performance management and simplicity in development.
 
 In this section, we will take a closer look at the system components, their functions within the data flow pipeline.
 
@@ -97,7 +97,7 @@ In the Processing platform component, the ingested data are transformed into str
 
 Streaming Component
 ~~~~~~~~~~~~~~~~~~~~~
-The *Streaming component* is essential in SJ-Platform. The data are fed to the system, transferred between modules and exported to an external storage via streams. Streams make possible such platform features as exactly-once processing, parallelism, fault-tolerance, horizontal scalability.
+The *Streaming component* is essential in SJ-Platform. The data are fed to the system, transferred between modules and exported to an external storage via streams. Stream usage makes possible such platform features as exactly-once processing and parallelism.
 
 The data can be received from different sources. Currently, the platform supports obtaining data from Apache Kafka and via TCP.
 
@@ -111,7 +111,7 @@ Within the platform, the data are transported to and from modules via *transacti
 
 API/UI Component
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-The *Web UI* allows administrating of the platform. It is based on Angular 4.0. 
+The *Web UI* allows managing and administrating of the platform. It is based on Angular 4.0. 
 
 Also, the platform provides *REST API* that allows interacting with the platform, monitoring and managing module statuses (its starting or stopping), retrieving configuration information.
 
@@ -130,7 +130,7 @@ The events are guaranteed to be processed **exactly-once**. The key idea of exac
 
 SJ-Platform fulfills the idea **fault-tolerance** as its architecture prevents the whole system from stopping operation completely in case of processing failure in one module or an instance. In the case of a live data stream processing failure, the module is restarted by Marathon. Within the module, if several tasks are set in module's instance parameters and one of the tasks fails, the whole system does not stop processing. The task is restarted.
 
-The streaming layer allows handling the idea of **parallelism** through multi-partitioning. The data elements in a stream are assembled in partitions.  A **partition** is a part of a data stream allocated for convenience in stream processing. Upon creation, every stream gets a name and a certain amount of partitions. The parallelism is enabled by dividing existing partitions fairly among module's instance tasks and thus scaling the data processing.
+The streaming layer allows handling the idea of **parallelism** through multi-partitioning. A **partition** is a part of a data stream allocated for convenience in stream processing.  Upon creation, every stream gets a certain amount of partitions. The parallelism is enabled by dividing existing partitions fairly among module's instance tasks and thus scaling the data processing.
 
 The general structure of SJ-Platform can be rendered as at the scheme below where all the mentioned above  components are presented in detail:
 
