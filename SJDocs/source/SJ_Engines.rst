@@ -5,10 +5,9 @@ Engines: types, workflow
 
 .. Contents::
 
-An **engine** is the base of the system. It provides basic I/O functionalities. It is started via a Mesos framework which provides distributed task dispatching and then the statistics on task execution. The engine performs data processing using an uploaded module. 
+An **engine** is the base of the system. It provides basic I/O functionalities. It is started via a Mesos framework which provides distributed task dispatching and then the statistics on task execution. 
 
-
-An engine is required to start a module. A module can not process data streams without an engine (that is a .jar file containing necessary configuration settings) that launches the module ingesting raw data and sends the processed data further in the pipeline.
+The engine performs data processing using an uploaded module. After its uploading, the engine receives raw data and sends them to the module executor. At this moment a module starts working. Module's executor starts data processing and returns the resulting data back to the engine where they are deserialized to be passed into the stream or a storage.
 
 Engine Types
 ----------------------
@@ -27,13 +26,13 @@ Input Streaming Engine
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 Input streaming engine is required to run an input module (currently TCP Input Stream Module); it handles external inputs, does data deduplication, transforms raw data to objects. 
 
-Here is the engine processing flow.
+Here is the engine processing flowchart.
 
 .. figure:: _static/InputEngine.jpg
 
 Input module waits for new events (messages) from the TCP channel. A wait time period (‘event-wait-time’) is 1000 ms by default. Once a new data portion is received, the “tokenize” method determins the beginning and the end of the Interval (i.e. significant set of bytes in the incoming flow of bytes). 
 
-Once an Interval is set the buffer of incoming data is validated to define whether the Interval contains a message or meaningless data. If the buffer of incoming data is determined as a message it is checked for duplication and a key/id is assigned to it. At this stage the location where the data will be passed is attributed to the message (this is T-streams for the input module). The message is processed and passed further into T-streams after a checkpoint is done.
+Once an Interval is set the buffer of incoming data is validated to define whether the Interval contains a message or meaningless data. If the buffer of incoming data is determined as a message it is checked for duplication and a key/id is assigned to it. At this stage the destination where the data will be passed to is attributed to the message (this is T-streams for the input module). The message is processed and passed further into T-streams after a checkpoint is done.
 
 Via T-streams the message is sent further in the pipeline to the next stage of processing (to a Regular/Batch module).
 
@@ -51,9 +50,9 @@ The processing flow for Regular Engine is presented below.
 
 The diagram represents two types of processing:
 
-- for a stateless mode of processing (the left schema). The module does not have a state that means it does not aggregate the incoming data via state mechanism. On each checkpoint the data are sent to the Output module.
+- for a stateless mode of processing (the left schema). The module does not have a state that means it does not aggregate the incoming data via state mechanism. On each checkpoint the data are sent further in the pipeline.
 
-- for a statefull mode of processing (the right schema). For stateful processing the state is saved at the same moment the checkpoint is performed. Regular module gets data from Input module element by element and aggregate it via state mechanism. On each checkpoint all aggregated data will be sent to Output module and the state will be cleared.
+- for a statefull mode of processing (the right schema). For stateful processing the state is saved at the same moment the checkpoint is performed. Regular module gets data element by element and aggregate it via state mechanism. On each checkpoint all aggregated data will be sent further in the pipeline and the state will be cleared.
 
 Once a module is launched the ‘onInit’ method performs some preparations for the module, for example initializes some auxiliary variables, or checks the state variables on existence.
 Then a new message is received. The incoming data are ingested via T-streams or Apache Kafka. The messages are processed by two methods appropriate for T-streams or Apache Kafka messages.
@@ -78,7 +77,7 @@ The processing flow for Batch engine is presented below.
 
 The diagram represents two types of processing:
 
-- for a stateless mode of processing (the left schema): The module does not have a state that means it does not aggregate the incoming data via state mechanism. On each checkpoint the data are sent to the Output module.
+- for a stateless mode of processing (the left schema): The module does not have a state that means it does not aggregate the incoming data via state mechanism. On each checkpoint the data are sent further in the pipeline.
 
 - for a statefull mode of processing (the right schema). For stateful processing the state is saved at the same moment the checkpoint is performed. Batch module gets data from Input module batch by batch and aggregate it via state mechanism. On each checkpoint all aggregated data will be sent to Output module and the state will be cleared.
 
