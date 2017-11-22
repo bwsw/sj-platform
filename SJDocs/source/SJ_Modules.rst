@@ -5,7 +5,7 @@ Modules: Types, Structure, Pipeline
 
 .. contents:: Contents
    
-A **module** is a processor that handles events in data streams. It works within an engine that receives raw data and sends them to the module executor. A module uses instances as a range of settings determining the collaborative work of an engine and a module. 
+A **module** is a processor that handles events of data streams. It works within an engine that receives raw data and sends them to the module executor. A module uses instances as a range of settings determining the collaborative work of an engine and a module. 
 
 A module includes:
 
@@ -66,7 +66,7 @@ The platform supports 4 types of modules:
 
 3. *Regular-streaming* (base type) - a generic module which receives an event, does some data transformation and sends transformation to the next processing step. 
 
-4. *Batch-streaming* - a module which is used to implement streaming joins and processing where algorithm must observe a range of input messages rather than current one.  A batch is a minimum data set for a module to collect the events in the stream. Batches are collected in a window. The data is processed in the batch module applying the method of a sliding window.
+4. *Batch-streaming* - a module where the processing algorithm must observe a range of input messages rather than the current one (as it is in the regular-streaming type). For each stream input messages are collected into batches. Then batches are collected in a window. Windows of several streams are transferred to the module. Thus, the module allows processing of data from several streams at the same time. 
 
 The modules can be strung in a pipeline as illustrated below:
 
@@ -103,7 +103,7 @@ In the diagram below you can see the illustration of dataflow for the input modu
 
 All input data elements are going as a flow of bytes to particular interface provided by Task Engine. That flow is going straight to Streaming Executor and is converted to an object called an Input Envelope. 
 
-An **envelope** is a specialized fundamental data structure containing data and metadata that allow exactly-once processing.
+An **envelope** is a specialized fundamental data structure containing data and metadata. The latter is required for exactly-once processing.
 
 The Input Envelope then goes to Task Engine which serializes it to a stream of bytes and then sends to T-Streams. 
 
