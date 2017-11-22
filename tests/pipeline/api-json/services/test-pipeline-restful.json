@@ -1,0 +1,7 @@
+{
+  "name": "test-pipeline-restful",
+  "description": "RESTful service to test pipeline",
+  "provider": "test-pipeline-restful",
+  "basePath": "/test-pipeline",
+  "type": "service.restful"
+}

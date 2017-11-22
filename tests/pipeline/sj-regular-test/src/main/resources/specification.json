@@ -1,0 +1,31 @@
+{
+  "name": "sj-regular-test",
+  "description": "Regular-module to test whole pipeline",
+  "version": "1.0",
+  "author": "Pavel Tomskikh",
+  "license": "Apache 2.0",
+  "inputs": {
+    "cardinality": [
+      1,
+      10
+    ],
+    "types": [
+      "stream.apache-kafka",
+      "stream.t-streams"
+    ]
+  },
+  "outputs": {
+    "cardinality": [
+      1,
+      10
+    ],
+    "types": [
+      "stream.t-streams"
+    ]
+  },
+  "module-type": "regular-streaming",
+  "engine-name": "com.bwsw.regular.streaming.engine",
+  "engine-version": "1.0",
+  "validator-class": "com.bwsw.sj.test.module.regular.Validator",
+  "executor-class": "com.bwsw.sj.test.module.regular.Executor"
+}

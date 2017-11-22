@@ -1,0 +1,32 @@
+{
+  "name": "sj-batch-test",
+  "description": "Batch-module to test whole pipeline",
+  "version": "1.0",
+  "author": "Pavel Tomskikh",
+  "license": "Apache 2.0",
+  "inputs": {
+    "cardinality": [
+      1,
+      10
+    ],
+    "types": [
+      "stream.apache-kafka",
+      "stream.t-streams"
+    ]
+  },
+  "outputs": {
+    "cardinality": [
+      1,
+      10
+    ],
+    "types": [
+      "stream.t-streams"
+    ]
+  },
+  "module-type": "batch-streaming",
+  "engine-name": "com.bwsw.batch.streaming.engine",
+  "engine-version": "1.0",
+  "validator-class": "com.bwsw.sj.test.module.batch.Validator",
+  "executor-class": "com.bwsw.sj.test.module.batch.Executor",
+  "batch-collector-class": "com.bwsw.sj.test.module.batch.BatchCollector"
+}

@@ -1,0 +1,30 @@
+{
+  "name": "sj-input-test",
+  "description": "Input-module to test whole pipeline",
+  "version": "1.0",
+  "author": "Pavel Tomskikh",
+  "license": "Apache 2.0",
+  "inputs": {
+    "cardinality": [
+      0,
+      0
+    ],
+    "types": [
+      "input"
+    ]
+  },
+  "outputs": {
+    "cardinality": [
+      1,
+      10
+    ],
+    "types": [
+      "stream.t-streams"
+    ]
+  },
+  "module-type": "input-streaming",
+  "engine-name": "com.bwsw.input.streaming.engine",
+  "engine-version": "1.0",
+  "validator-class": "com.bwsw.sj.test.module.input.Validator",
+  "executor-class": "com.bwsw.sj.test.module.input.Executor"
+}

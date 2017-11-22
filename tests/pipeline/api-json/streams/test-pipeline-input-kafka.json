@@ -1,0 +1,8 @@
+{
+  "name": "test-pipeline-input-kafka",
+  "description": "Input stream for pipeline test",
+  "service": "test-pipeline-kafka",
+  "partitions": 1,
+  "type": "stream.apache-kafka",
+  "replicationFactor": 1
+}
