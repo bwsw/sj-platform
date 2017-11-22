@@ -5,13 +5,14 @@ Engines: types, workflow
 
 .. Contents::
 
-An engine is a framework that performs processing of streams. It runs an application code and handles data from an input stream providing results to an output stream.
+An **engine** is the base of the system. It provides basic I/O functionalities. It is started via a Mesos framework which provides distributed task dispatching and then the statistics on task execution. The engine performs data processing using an uploaded module. 
+
 
 An engine is required to start a module. A module can not process data streams without an engine (that is a .jar file containing necessary configuration settings) that launches the module ingesting raw data and sends the processed data further in the pipeline.
 
 Engine Types
 ----------------------
-The types of the engines correspond to the types of :ref:`Modules` in the platform: 
+The types of the engines correspond to the types of modules in the platform (see :ref:`Modules`): 
 
 1. *Input Streaming Engine* 
 2. *Output Streaming Engine*  

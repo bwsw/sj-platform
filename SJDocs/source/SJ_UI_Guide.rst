@@ -6,7 +6,7 @@ UI Guide
 Overview
 --------
 
-The Stream Juggler Platform is a real time stream processing platform designed for building both simple and complex event processing (CEP). 
+The Stream Juggler Platform is a stream processing platform designed for building both simple and complex event processing (CEP). 
 
 Stream Juggler uses Apache Mesos, Kafka and T-streams to construct scalable and flexible processing algorithms. Stream Juggler functions on the same principle as Apache Samza, but enables exactly-once processing and provides an integrated solution with a RESTful interface, JavaScript UI and an ad hoc repository for modules, services, streams and other data processing pipeline components.
 
@@ -24,29 +24,25 @@ If you are a developer and are willing to use the platform you need to know of s
 - Apache Zookeeper
 - MongoDB
 - Apache Kafka (as an input source)
-- an external storage (Elasticsearch, JDBC, etc.).
+- an external storage (Elasticsearch, SQL database, etc.).
 
-.. tip:: Find more about SJ-Platform architecture at :ref:`Architecture`.
-
-There are required configurations and engines for launching a module. Find more information about that in the `Configuration`_ and the :ref:`Custom_Files` sections of this document. 
+.. tip:: Find more about SJ-Platform architecture at :ref:`Architecture`. Follow the :ref:`Platform_Deployment` instructions to set up the services.
 
 Once everything is ready, you can move to the Stream Juggler Platform.
 
-The SJ-Platform allows to upload your custom module for data stream processing with prerequisite engines and configuration settings. 
+SJ-Platform allows working with your own module created exactly to meet your requirements and and to solve your task. How to create a module is described in detail in the :ref:`Custom_Module` section.
 
-For correct performance a module requires creating a stream/streams with its service(-s) and service providers.
+A module utilizes an instance/instances, i.e. a full range of settings for collaborative work of an engine and a module. See more information on a module structure at :ref:`Modules`.
 
-The diagram below may help you to understand the dependency of entity types in the platform.
+The SJ-Platform allows to upload your custom module for data stream processing with prerequisite engines and configuration settings. They are required for launching a module and determining processing in it. They are provided by SJ-Platform and can be uploaded from the project repository on `GitHub <https://github.com/bwsw/sj-platform/tree/master>`_. Find more information about uploading configurations in the `Configuration`_ and the :ref:`Custom_Files` sections of this document.
+
+For correct performance a module requires creating a stream/streams with its service(-s) and service providers. The :ref:`Streaming` section describes the streaming component of the system in detail.
+
+Once you know what types of modules and instances you are including into the pipeline, you can decide on what type of streams and providers and services for them you need create. The diagram below may help you to understand the dependency of entity types in the platform.
 
 .. figure:: _static/InstanceCorrelation1.png
 
-For example, if you want to create a regular module that will process Apache Kafka input data streams you have to create an Apache Kafka service with a Kafka and a ZooKeeper providers for it.
-
-A module can not process data streams without uploading an engine (that is a .jar file) that launches the module and contains required configuration settings. More information about these settings can be found in the `Configuration`_ and the :ref:`Custom Files` sections of this document.
-
-An executor of the module utilizes an instance/instances, i.e. a full range of settings for an exact handler/executor.
-
-See more information on the platform structure and architecture at the :ref:`Architecture` section. A module structure you can find at :ref:`Modules`.
+For example, if you want to create a regular module that will process Apache Kafka input data streams you have to create an Apache Kafka service with a Apache Kafka and a Apache ZooKeeper providers for it.
 
 Below you will find the information on uploading your module via UI and starting data processing.
 
@@ -57,9 +53,9 @@ Configuration
 
 So, the first step is to upload necessary configurations to the platform.
 
-Here the basic settings necessary for the platform are described. Besides, the flow of Configuration addition to the system is clarified here.
+Here the basic settings necessary for the platform are described. Besides, how to add configurations to the system is clarified here.
 
-Configurations are the settings required for the modules start working.
+Configurations are the settings required for the system working.
  
 The configurations can be added under the *Configuration* tab of the main navigation bar. Please, click at "Add Settings" in the upper-right corner above the list and fill in the form (the information on the required settings can be found in the table_ below):
 
@@ -94,14 +90,14 @@ Please, find the required config settings in the table below and make sure they 
   :header: "Config Domain","Name", "Description", "Example"
   :widths: 15, 20, 50, 15
 
-  "system", "crud-rest-host", "A host on which the rest has launched", "localhost"
-  "system", "crud-rest-port", "A port on which the rest has launched", "8080"
-  "system", "marathon-connect", "Use to launch a framework responsible for running engine tasks and provides the information about applications that run on Mesos. Must begin with 'http://'.", "http://stream-juggler.z1.netpoint-dc.com:8080"
-  "system", "marathon-connect-timeout", "Use when trying to connect by marathon-connect (in milliseconds).", "60000"
-  "system", "current-framework", "Indicates what file is used to run a framework. By this value you can get a setting that contains a file name of framework jar.", "com.bwsw.fw-0.1"
+  "system", "crud-rest-host", " REST interface host", "localhost"
+  "system", "crud-rest-port", " REST interface port", "8080"
+  "system", "marathon-connect", " Marathon address. Use to launch a framework responsible for running engine tasks and provides the information about applications that run on Mesos. Must begin with 'http://'.", "http://stream-juggler.z1.netpoint-dc.com:8080"
+  "system", "marathon-connect-timeout", "use when trying to connect by 'marathon-connect' (ms).", "60000"
+  "system", "current-framework", " indicates which file is used to run a framework. By this value, you can get a setting that contains a file name of framework jar.", "com.bwsw.fw-0.1"
   "system", "low-watermark", "A number of preloaded messages for batch engine processing.", "1000"
-  "kafka", "subscriber-timeout", "The time, in milliseconds, spent waiting in poll if data are not available. Must not be negative", "100"
-  "zk", "session.timeout", "Use when connecting to zookeeper in milliseconds (usually when we are dealing with t-streams consumers/producers)", "3000"
+  "kafka", "subscriber-timeout", "the period of time (ms) spent waiting in poll if data are not available. Must not be negative", "100"
+  "zk", "session.timeout", "use when connect to Apache Zookeeper (ms). Usually when we are dealing with T-streams consumers/producers and Apache Kafka streams.", "3000"
 .. "system", "current-transaction-generator", "Indicates what jar is used for running transaction generators. By this value you can get configuration setting that contains file name of transaction generator jar.", "com.bwsw.tg-0.1"
   "system", "transaction-generator-client-retry-period", "Time for connecting attempt to TG-server", "500"
   "system", "transaction-generator-server-retry-period", "Time for attempt to lock a server as master on ZK", "500"
@@ -124,11 +120,11 @@ The range of optional settings is presented below. They have default values in t
 
 .. note::  In general 'framework-backoff-seconds', 'framework-backoff-factor' and 'framework-max-launch-delay-seconds' configure exponential backoff behavior when launching potentially sick apps. This prevents sandboxes associated with consecutively failing tasks from filling up the hard disk on Mesos slaves. The backoff period is multiplied by the factor for each consecutive failure until it reaches maxLaunchDelaySeconds. This applies also to tasks that are killed due to failing too many health checks.
 
-Сonfiguration domain named 'kafka' contains properties used to create a Kafka consumer. 
+Сonfiguration domain named 'configuration.apache-kafka' contains properties used to create an Apache Kafka consumer. 
 
-.. note:: You must not define properties such as 'bootstrap.servers', 'enable.auto.commit', 'key.deserializer' and 'value.deserializer' to avoid a crashing of system
+.. note:: You must not define properties such as 'bootstrap.servers', 'enable.auto.commit', 'key.deserializer' and 'value.deserializer' in order to avoid a crashing of the system.
 
-Сonfiguration domain named 't-streams' contains properties used for a T-streams consumer/producer. 
+Сonfiguration domain named 'configuration.t-streams' contains properties used for a T-streams consumer/producer. 
 
 .. note:: You must not define properties such as 'producer.bind-host', 'producer.bind-port', 'consumer.subscriber.bind-host' and 'consumer.subscriber.bind-port' to avoid a crashing of system. 
 
@@ -147,7 +143,7 @@ A **provider** is a part of streaming infrastructure. That is the provider of se
 
 .. figure:: _static/CreateProvider1.png
 
-Please, in the *Providers* section, press the «Create provider» button and fill in the form where general fields and specific fields should be completed:
+Please, in the *Providers* section, press «Create provider» and fill in the form where general fields and specific fields should be completed:
 
 **General fileds:**
 
@@ -168,7 +164,7 @@ Select from the drop-down a type of the provider you are aimed to create. The fo
 
  - SQL database.
 
-The type of the provider is determined with the type of the instance you want to create and work with at the end.
+The type of the provider is determined with the type of the stream and the instance you want to create and work with at the end.
 
 - *Name* *
        Enter a name of the provider here. It should be unique, must contain digits, lowercase letters or hyphens and start with a letter. 
@@ -224,13 +220,13 @@ The list of providers can be filtered by its type and/or a name using the search
 Services
 --------
 
-The next step is to create services. These are services to tranform input data into a stream of an exact type. 
+The next step is to create services. **Services** are a part of streaming infrastructure. These are services to tranform input data into a stream of an exact type. 
 
 Under the *Services* section of the main navigation bar you will find the list of services.
 
 .. figure:: _static/CreateService1.png
 
-Please, press the «Create Service» button and fill in the form where general and specific fields should be completed:
+Please, press «Create Service» and fill in the form where general and specific fields should be completed:
 
 **General fields:**
 
@@ -385,7 +381,7 @@ Under the *Streams* section of the main navigation bar you will find the list of
 
 .. figure:: _static/CreateStreams1.png
 
-Please, press the «Create Stream» button and fill in the form where generals and specific fields should be completed:
+Please, press the «Create Stream» button and fill in the form where general and specific fields should be completed:
 
 **General fields:**
 
@@ -513,16 +509,14 @@ The list of streams can be filtered by its type and/or a name using the search t
 Modules
 -------
 
-In the next section — *Modules* — you can upload and manage your own module(s). 
+In the next section — *Modules* — you can upload and manage your own module(s). How to create a module is described in detail in the :ref:`Custom_Module` section.
 
 The platform supports 4 types of modules:
 
-1. input-streaming
-2. regular-streaming (base type)
-3. batch-streaming
-4. output-streaming
-
-A module must be a `.jar` file containing classes and specifications.
+1. Input-streaming
+2. Regular-streaming (base type)
+3. Batch-streaming
+4. Output-streaming
 
 In the table below the *specification fields* that should be specified in the module are described:
 
@@ -533,11 +527,11 @@ In the table below the *specification fields* that should be specified in the mo
    "name*", "String", "The unique name for a module"
    "description", "String", "The description for a module"
    "version*", "String", "The module version"
-   "author","String", "The module author"
-   "license","String", "The software license type for a module"
-   "inputs*","IOstream","The specification for the inputs of a module"
-   "outputs*","IOstream", "The specification for the outputs of a module"
-   "module-type*","String", "The type of a module. One of [input-streaming, output-streaming,         batch-streaming, regular-streaming]"
+   "author", "String", "The module author"
+   "license", "String", "The software license type for a module"
+   "inputs*", "IOstream","The specification for the inputs of a module"
+   "outputs*", "IOstream", "The specification for the outputs of a module"
+   "module-type*", "String", "The type of a module. One of [input-streaming, output-streaming, batch-streaming, regular-streaming]"
    "engine-name*", "String", "The name of the computing core of a module"
    "engine-version*", "String", "The version of the computing core of a module"
    "validator-class*", "String", "The absolute path to class that is responsible for a validation of launch options"
@@ -555,27 +549,27 @@ IOstream for inputs and outputs has the following structure:
 
 Before uploading a module make sure an engine of corresponding type is uploaded.
 
-An **engine** is a worker that performs processing of streams. It runs an application code and handles data from an input stream providing results to an output stream.
+An **engine**  is a basic platform component providing basic I/O functionality. It runs an application code and handles data from an input stream providing results to an output stream.
 
 Currently the following **engine types** are supported in the SJ-Platform:
 
 1. TCP Input Engine
-        It gets packages of data from TCP, handles them and produces series of events to T-stream streams. It can be used to program arbitrary TCP protocol recognition.
+        It gets packages of data via TCP, handles them and produces series of events to T-streams. It can be used to program arbitrary TCP protocol recognition.
 2. Regular Processing Engine 
-        It gets events from Kafka or T-stream input streams and produces results to T-Stream output streams.
-3. Windowed Processing Engine 
+        It gets events from Apache Kafka or T-stream input streams and produces results to T-Stream output streams.
+3. Batch Processing Engine 
         It gets events from T-stream input streams, organizes them in batches and produces the results to T-stream output streams.
 4. Output Engine   
          - ElasticSearch Output Engine - allows creating output endpoint and place processing results to Elasticsearch index.   
-	 - JDBC Output Engine  - allows creating output endpoint and place processing results to 			MySQL, PostgreSQL, Oracle tables.
+	 - SQL database Output Engine  - allows creating output endpoint and place processing results to 			MySQL, PostgreSQL, Oracle tables.
 
-Engines should be uploaded as a .jar file under the `Custom files`_ section in the "Custom Jars" tab.
+Engines should be uploaded as a .JAR file under the `Custom files`_ section in the "Custom Jars" tab.
 
 After an engine is uploaded and a corresponding config settings file appears in the «Configuration» section, a module can be uploaded.
 
 .. note:: Read more about necessary configuration settings in the `Configuration`_ section below.
 
-Click the "Upload Module" button and select a `.jar` file in the window to upload.  Press "Open" and wait for a few seconds till the module is uploaded.
+Click the "Upload Module" button and select a .JAR file in the window to upload.  Press "Open" and wait for a few seconds till the module is uploaded.
 
 If the module is uploaded correctly a success message appears and the uploaded module is in the list of modules.
 
@@ -598,14 +592,14 @@ The list of modules can be filtered by its type and/or a name using the search t
 Custom Files
 -------------
 
-A *Custom Files* section is a section where a user can upload custom .jar files and other files that can be necessary for correct module performance.
+A *Custom Files* section is a section where a user can upload custom .JAR files and other files that can be necessary for correct module performance.
 
 Here you can find two tabs: **Custom Jars** and **Custom files**. Below you will find more information for each of these tabs.
 
 Custom Jars
 ~~~~~~~~~~~
 
-Under the «Custom Jars» tab the engine .jar files can be uploaded that are necessary for module performance. Click the "Upload Jar" button and select the .jar file to upload from your computer. Click "Open" in the modal window and wait for a few seconds before the .jar is uploaded. If it is uploaded successfully a success message appears above the file list and the uploaded .jar is added to the list of jars.
+Under the «Custom Jars» tab the engine .JAR files can be uploaded that are necessary for module performance. Click the "Upload Jar" button and select the .JAR file to upload from your computer. Click "Open" in the modal window and wait for a few seconds before the .JAR is uploaded. If it is uploaded successfully a success message appears above the file list and the uploaded .JAR is added to the list of jars.
 
 The following actions can be performed with the files in the list:
 
@@ -637,21 +631,19 @@ The list of files can be filtered by its name using the search tool above the li
 
 Instances
 ---------
-Module uses a specific instance to personalize its work.
-
-**Instance** is a full range of settings to perform an exact executor type.
+Module uses a specific **instance** as a full set of settings that determine the collaborative work of an engine and a module.
 
 Before creating an instance make sure all necessary *configuration* *settings* are added to the system.
 
 .. note:: Read more about necessary configuration settings in the `Configuration`_ section below.
 
-Under the *Instances* section of the main navigation menu there is a list of instances.  In the upper-right corner click the "Create Instance" button and choose the module from the drop-down. This is the module an instance will be created for. 
+Under the *Instances* section of the main navigation menu there is a list of instances.  In the upper-right corner click "Create Instance" and choose the module from the drop-down. This is the module an instance will be created for. 
 
 .. figure:: _static/CreateInstance_Type1.png
 
-The type of module will determine the type of instance that will be created: input-streaming, regular streaming, batch-streaming or output-streaming. 
+The type of module will determine the type of instance that will be created: input-streaming, regular-streaming, batch-streaming or output-streaming. 
 
-Each type of instance requires specific settings to be filled in alongside with general settings equal for all instances. This settings are to be specfied in the form appearing after selecting a module type.
+Each type of instance requires specific settings to be filled in alongside with general settings equal for all instances. This settings are to be specified in the form appearing after selecting a module type.
 
 Please, review the tables with general and specific fields description below.
 
@@ -802,6 +794,7 @@ Click «Create» at the bottom and see the instance is in the list of instances 
 
 Click "Cancel" to drop all the specified settings. The instance will not be created then.
 
+**Instance Details**
 
 Details of an instance are displayed to the right when clicking the instance in the list. 
 

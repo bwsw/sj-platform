@@ -290,24 +290,6 @@
             </div>
           </fieldset>
 
-          <!-- Login -->
-          <fieldset *ngIf="newService.type === 'service.elasticsearch'" class="form-group row">
-            <label class="col-sm-2 col-form-label">Login</label>
-            <div class="col-sm-10">
-              <input [(ngModel)]="newService.login" name="serviceLogin" type="text" class="form-control"
-                     placeholder="Enter service login" placeholder="Enter service login">
-            </div>
-          </fieldset>
-
-          <!-- Password -->
-          <fieldset *ngIf="newService.type === 'service.elasticsearch'" class="form-group row">
-            <label class="col-sm-2 col-form-label">Password</label>
-            <div class="col-sm-10">
-              <input [(ngModel)]="newService.password" name="servicePassword" type="text"
-                     class="form-control" placeholder="Enter service password">
-            </div>
-          </fieldset>
-
           <!-- ZK Provider -->
           <fieldset *ngIf="newService.type === 'service.apache-kafka'" class="form-group row">
             <label class="col-sm-2 col-form-label required">ZK provider</label>
@@ -367,12 +349,6 @@
             <ul>
               <li *ngFor="let host of currentServiceProvider.hosts">{{host}}</li>
             </ul>
-          </li>
-          <li *ngIf="currentServiceProvider.login">
-            <span class="title">Login:</span>{{currentServiceProvider.login}}
-          </li>
-          <li *ngIf="currentServiceProvider.password">
-            <span class="title">Password:</span>{{currentServiceProvider.password}}
           </li>
         </ul>
       </div>
