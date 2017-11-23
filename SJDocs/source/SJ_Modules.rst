@@ -325,7 +325,7 @@ Let's take a look at the main points:
 
 The module allows to transform the data aggregated from input streams applying the idea of a sliding window. 
 
-A window is a period of time that is multiple of a batch and during which the batches of input events are collected into a queue for further transformation. Or a window can be set to a number of batches. The window closes once it is full, i.e. the set number of batches is collected. The collected batches are transferred further for processing and the window slides forward for the set interval. This is a sliding window method.
+A window size can be set to a number of batches. The window closes once it is full, i.e. the set number of batches is collected. The collected batches are transferred further for processing and the window slides forward for the set interval. This is a sliding window method.
 
 The diagram below is a simple illustration of how a sliding window operation looks like.
 
@@ -392,9 +392,9 @@ The executor of the batch module provides the following methods that does not pe
 
 When running a module in parallel mode (the instance "parallelism" parameter is greater than 1), it can be important to exchange data between tasks at the exact moment. You should use shared memory for it, e.g. Hazelcast or any other. In this case, the following handlers are used for synchronizing the tasks' work: 
  
-1) ``onEnter``: The system awaits for every task to finish the ``onWindow`` method and then the ``onEnter`` method of all tasks is invoked.
+1) ``onEnter``: The system awaits every task to finish the ``onWindow`` method and then the ``onEnter`` method of all tasks is invoked.
 
-2) ``onLeaderEnter``: The system awaits for every task to finish the ``onEnter`` method and then the ``onLeaderEnter`` method of a leader task is invoked.
+2) ``onLeaderEnter``: The system awaits every task to finish the ``onEnter`` method and then the ``onLeaderEnter`` method of a leader task is invoked.
 
 .. 3) "onLeave": It is invoked by every task and waits for a leader-task stop processing
 
@@ -421,7 +421,7 @@ There is a manager inside the module which grants access to:
 Modules of Output Type
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-Modules of an output type are responsilbe for saving of output data to external data destinations (Elasticsearch, SQL database, RESTful).
+Modules of an output type are responsible for saving of output data to external data destinations (Elasticsearch, SQL database, RESTful).
 
 .. figure:: _static/OutputModule1.png
   :scale: 80 %
