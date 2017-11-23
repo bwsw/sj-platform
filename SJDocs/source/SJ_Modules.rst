@@ -66,7 +66,7 @@ The platform supports 4 types of modules:
 
 3. *Regular-streaming* (base type) - a generic module which receives an event, does some data transformation and sends transformation to the next processing step. 
 
-4. *Batch-streaming* - a module where the processing algorithm must observe a range of input messages rather than the current one (as it is in the regular-streaming type). For each stream input messages are collected into batches. Then batches are collected in a window. Windows of several streams are transferred to the module. Thus, the module allows processing of data from several streams at the same time. 
+4. *Batch-streaming* - a module where the processing algorithm must observe a range of input messages rather than the current one (as it is in the regular-streaming type). For each stream input messages are collected into batches. Then batches are collected in a window. Windows of several streams are transferred to the module for processing. Thus, the module allows processing of data from several streams at the same time. 
 
 The modules can be strung in a pipeline as illustrated below:
 
@@ -390,7 +390,7 @@ The executor of the batch module provides the following methods that does not pe
 .. 8) "onAfterStateSave": 
     It is invoked after every saving of the state. Inside the method there is a flag denoting the full state (true) or partial changes of state (false) have(s) been saved
 
-When several tasks are set for an instance (the "parallelism" parameter is larger than 1), it can be important to exchange data between tasks at the exact moment. We suggest using shared memory for it, e.g. Hazelcast or any other. In this case, the following handlers are used for synchronizing the tasks' work: 
+When running a module in parallel mode (the instance "parallelism" parameter is greater than 1), it can be important to exchange data between tasks at the exact moment. You should use shared memory for it, e.g. Hazelcast or any other. In this case, the following handlers are used for synchronizing the tasks' work: 
  
 1) ``onEnter``: The system awaits for every task to finish the ``onWindow`` method and then the ``onEnter`` method of all tasks is invoked.
 
