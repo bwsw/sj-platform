@@ -62,11 +62,11 @@ The platform supports 4 types of modules:
 
 1. *Input-streaming* - handles external inputs, does data deduplication, transforms raw data to objects. 
 
-2. *Output-streaming* - handles the data outcoming from event processing pipeline to external data destinations (Elasticsearch, SQL database, etc.).
+2. *Regular-streaming* (base type) - the most generic module which receives events, transforms data element by element and sends them to the next processing step.
 
-3. *Regular-streaming* (base type) - a generic module which receives an event, does some data transformation and sends transformation to the next processing step. 
+3. *Batch-streaming* - a module where the processing algorithm must observe a range of input messages rather than the current one (as it is in the regular-streaming type). For each stream input messages are collected into batches. Then batches are collected in a window. Windows of several streams are transferred to the module for processing. Thus, the module allows processing of data from several streams at the same time. In SJ-Platform the data is processed applying the method of a sliding window.
 
-4. *Batch-streaming* - a module where the processing algorithm must observe a range of input messages rather than the current one (as it is in the regular-streaming type). For each stream input messages are collected into batches. Then batches are collected in a window. Windows of several streams are transferred to the module for processing. Thus, the module allows processing of data from several streams at the same time. 
+4. *Output* - handles the data outcoming from event processing pipeline to external data destinations (Elasticsearch, SQL database, RESTful).
 
 The modules can be strung in a pipeline as illustrated below:
 
@@ -390,7 +390,7 @@ The executor of the batch module provides the following methods that does not pe
 .. 8) "onAfterStateSave": 
     It is invoked after every saving of the state. Inside the method there is a flag denoting the full state (true) or partial changes of state (false) have(s) been saved
 
-When running a module in parallel mode (the instance "parallelism" parameter is greater than 1), it can be important to exchange data between tasks at the exact moment. You should use shared memory for it, e.g. Hazelcast or any other. In this case, the following handlers are used for synchronizing the tasks' work: 
+When running a module in a parallel mode (the instance "parallelism" parameter is greater than 1), you may need to exchange data between tasks at the exact moment. You should use shared memory for it, e.g. Hazelcast or any other. In this case, the following handlers are used for synchronizing the tasks' work: 
  
 1) ``onEnter``: The system awaits every task to finish the ``onWindow`` method and then the ``onEnter`` method of all tasks is invoked.
 
@@ -406,7 +406,7 @@ The Batch module can either have a state or not. A state is a sort of a key-valu
 
 A fail means that something is going wrong in one of the methods described above. In this case a whole module will be restarted. And the work will start with the onInit method call.
 
-The save of the state operation is performed alongside with the checkpoint. At a checkpoint the data received after processing is checked for completeness. The checkpoint is an event that provides an exactly-once processing. 
+Saving of the state is performed alongside with the checkpoint. At a checkpoint the data received after processing is checked for completeness. The checkpoint is an event that provides an exactly-once processing. 
 
 There is a manager inside the module which grants access to:
 
