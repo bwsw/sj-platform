@@ -128,9 +128,9 @@ Streams can be very intensive and all events cannot be handled by a single serve
 
 The events are guaranteed to be processed **exactly-once**. The key idea of exactly-once processing lies in a group **checkpoint**. That means all producers and consumers of a stream are bunched into a group and do a checkpoint automatically fixing the current state. Moreover, a user can initialize a checkpoint whenever it is necessary.
 
-SJ-Platform fulfills the idea **fault-tolerance** as its architecture prevents the whole system from stopping operation completely in case of processing failure in one module or an instance. In the case of a live data stream processing failure, the module is restarted by Marathon. Within the module, if several tasks are set in module's instance parameters and one of the tasks fails, the whole system does not stop processing. The task is restarted.
-
 The streaming layer allows handling the idea of **parallelism** through multi-partitioning. A **partition** is a part of a data stream allocated for convenience in stream processing.  Upon creation, every stream gets a certain amount of partitions. The parallelism is enabled by dividing existing partitions fairly among module's instance tasks and thus scaling the data processing.
+
+SJ-Platform fulfills the idea of **fault-tolerance** as its architecture prevents the whole system from stopping operation completely in case of module failure. In such case when a live data stream processing fails in one module, the module is restarted by Marathon. Within the module, if the module runs in a parallel mode (several tasks are set in module's instance parameters) and one of the tasks fails, the whole system does not stop processing. The task is restarted.
 
 The general structure of SJ-Platform can be rendered as at the scheme below where all the mentioned above  components are presented in detail:
 
@@ -139,7 +139,7 @@ The general structure of SJ-Platform can be rendered as at the scheme below wher
 
    Picture 1.4
     
-The diagram below represents the interconnections between platform components. 
+To understand the interconnections between platform components look at the diagram below. 
 
 SJ-Platform uses a range of data sources and data storages. A client operates the platform via UI/REST API. And he/she uploads a custom module to the platform with a set of configurations. The platform runs the module via an "executable" engine on Mesos and Marathon. And the module uses MongoDB as a data store.
 
