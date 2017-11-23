@@ -16,6 +16,7 @@ Simulator imitates the behavior of the :ref:`Input_Streaming_Engine`: it sends b
 
 To use the simulator you need to add the dependency to the ``build.sbt``::
 
+ resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots" 
  libraryDependencies += "com.bwsw" %% "sj-engine-simulators" % "1.0-SNAPSHOT" % "test"
 
 Constructor arguments
