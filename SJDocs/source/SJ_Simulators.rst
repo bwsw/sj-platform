@@ -388,7 +388,7 @@ It is a class for testing an implementation of :ref:`output-module` (Executor).
 
 Simulator imitates the behavior of the :ref:`Output_Streaming_Engine`: it sends transactions to the Executor, gets output envelopes from it and builds requests for loading data to an output service. Simulator uses :ref:`Output_Request_Builder` to build requests.
 
-To use the simulator you need add the dependency to the ``build.sbt``::
+To use the simulator you need to add the dependency to the ``build.sbt``::
  
  libraryDependencies += "com.bwsw" %% "sj-engine-simulators" % "1.0-SNAPSHOT" % "test"
 
@@ -399,12 +399,11 @@ Constructor arguments
  :widths: 25, 25, 50 
 
  "executor", "OutputStreamingExecutor[IT]", "Implementation of :ref:`output-module` under testing"
- "outputRequestBuilder", ":ref:`Output_Request_Builder` [OT]", "Builder of requests for output service"
+ "outputRequestBuilder", ":ref:`Output_Request_Builder`[OT]", "Builder of requests for output service"
  "manager", "OutputEnvironmentManager", "Instance of the OutputEnvironmentManager used by Executor"
 
 .. important:: * IT - the type of data received by Executor
-   * OT - the type of requests that ``outputRequestBuilder`` creates. The type depends on the type of output service (see "Request format" column of the table in :ref:`Output_Request_Builder` ).
-
+   * OT - the type of requests that ``outputRequestBuilder`` creates. The type depends on the type of output service (see "Request format" column of the table in :ref:`Output_Request_Builder` section).
 
 Simulator provides the following methods:
 
