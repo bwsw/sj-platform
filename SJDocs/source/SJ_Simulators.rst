@@ -14,7 +14,7 @@ It is a class for testing an implementation of an `input module <http://streamju
 
 Simulator imitates the behavior of the :ref:`Input_Streaming_Engine`: it sends byte buffer to Executor, gets input envelopes from it, checks envelopes for duplicates (if it is necessary), and builds :ref:`Input_Engine_Simulator_Output_Data`.
 
-To use the simulator you need add the dependency to the ``build.sbt``::
+To use the simulator you need to add the dependency to the ``build.sbt``::
 
  libraryDependencies += "com.bwsw" %% "sj-engine-simulators" % "1.0-SNAPSHOT" % "test"
 
@@ -25,11 +25,11 @@ Constructor arguments
  :widths: 25, 25, 50  
 
  "executor*", "InputStreamingExecutor[T]", "Implementation of `input module <http://streamjuggler.readthedocs.io/en/develop/SJ_Modules.html#input-module>`_ under testing"
- "evictionPolicy*", "InputInstanceEvictionPolicy", "A field of an instance (:ref:`REST_API_Instance_Create`)"
+ "evictionPolicy*", "InputInstanceEvictionPolicy", "A field of an instance (see :ref:`REST_API_Instance_Create`)"
  "separator", "String", "Delimeter between data records (empty string by default)"
  "charset", "Charset", "Encoding of incoming data (UTF-8 by default)"
 
-.. note:: `*` - required field
+.. note:: `*` - a required field
 .. important:: T - is a type of data created by Executor 
 
 The data record is a string that will be parsed by ``executor.parse()`` to some entity.
@@ -38,7 +38,7 @@ The simulator provides the following methods:
 
 * ``prepare(record: String)`` - writes one data record to a byte buffer.
 * ``prepare(records: Seq[String])`` - writes a collection of data records to a byte buffer.
-* ``process(duplicateCheck: Boolean, clearBuffer: Boolean = true): Seq[OutputData[T]]`` - sends byte buffer to the executor as long as it can tokenize the buffer. The ``duplicateCheck`` argument indicates that every envelope has to be checked on duplication, the ``clearBuffer`` argument indicates that byte buffer with data records has to be cleared after processing ('true' by default). Method returns list of :ref:`Input_Engine_Simulator_Output_Data`.
+* ``process(duplicateCheck: Boolean, clearBuffer: Boolean = true): Seq[OutputData[T]]`` - sends byte buffer to the executor as long as it can tokenize the buffer. The ``duplicateCheck`` argument indicates that every envelope has to be checked on duplication. The ``clearBuffer`` argument indicates that byte buffer with data records has to be cleared after processing ('true' by default). The method returns list of :ref:`Input_Engine_Simulator_Output_Data`.
 * ``clear()`` - clears a byte buffer with data records.
 
 .. _Input_Engine_Simulator_Output_Data:
@@ -53,7 +53,7 @@ This simulator provides information on the processing of incoming data by the  `
  :widths: 25, 25, 50  
 
  "inputEnvelope", "Option[InputEnvelope[T]]", "Result of the ``executor.parse()`` method"
- "isNotDuplicate", "Option[Boolean]", "Indicates that ``inputEnvelope`` is not a duplicate if ``inputEnvelope`` is defined; otherwise it is 'None' "
+ "isNotDuplicate", "Option[Boolean]", "Indicates that ``inputEnvelope`` is not a duplicate if ``inputEnvelope`` is defined; otherwise it is 'None'"
  "response", "InputStreamingResponse", "Response that will be sent to a client after an ``inputEnvelope`` has been processed"
 
 .. important:: T - is a type of data created by Executor 
@@ -95,10 +95,11 @@ Regular Engine Simulator
 
 It is a class for testing implementation of :ref:`regular-module` (Executor).
 
-The simulator imitates the behavior of the :ref:`Regular_Streaming_Engine` (stateful mode): it sends envelopes to Executor, allows for invoking checkpoint's handlers, gets data from output streams and state.
+The simulator imitates the behavior of the :ref:`Regular_Streaming_Engine` (stateful mode): it sends envelopes to Executor, allows invoking checkpoint's handlers, gets data from output streams and state.
 
 To use the simulator you need add the dependency to the ``build.sbt``::
  
+ resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots" 
  libraryDependencies += "com.bwsw" %% "sj-engine-simulators" % "1.0-SNAPSHOT" % "test"
 
 Constructor arguments
@@ -108,8 +109,8 @@ Constructor arguments
  :header: "Argument", "Type", "Description"
  :widths: 25, 25, 50 
 
- "executor", "RegularStreamingExecutor[T]", "Implementation of a :ref:`regular-module` under testing"   
- "manager", "ModuleEnvironmentManagerMock", "Mock for StatefulModuleEnvironmentManager (see Module-Environment-Manager-Mock_)"
+ "executor", "RegularStreamingExecutor[T]", "Implementation of :ref:`regular-module` under testing"   
+ "manager", "ModuleEnvironmentManagerMock", "Mock for StatefulModuleEnvironmentManager (see :ref:`Module-Environment-Manager-Mock`)"
 
 .. important:: T - the type of data received by Executor.
 
@@ -174,7 +175,8 @@ If you want to see what the executor puts into an output stream and to the state
  val stateStorage = new StateStorage(stateService)
  val options = ""
  val output = new TStreamStreamDomain("out", mock(classOf[TStreamServiceDomain]), 3, tags = Array("output"))
- val manager = new ModuleEnvironmentManagerMock(stateStorage, options, Array(output))
+ val tStreamsSenderThreadMock = new TStreamsSenderThreadMock(Set(output.name))
+ val manager = new ModuleEnvironmentManagerMock(stateStorage, options, Array(output), tStreamsSenderThreadMock)
  val executor: RegularStreamingExecutor[String] = new SomeExecutor(manager)
  val tstreamInput = "t-stream-input"
  val kafkaInput = "kafka-input"
@@ -206,8 +208,9 @@ It is a class for testing implementation of :ref:`batch-module` (Executor).
 
 The simulator imitates the behavior of the :ref:`Batch_Streaming_Engine` (stateful mode): it sends envelopes to the Executor, allows invoking checkpoint's handlers, gets data from output streams and state.
 
-To use simulator you need add this dependency to the ``build.sbt``::
+To use simulator you need to add this dependency to the ``build.sbt``::
 
+ resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots" 
  libraryDependencies += "com.bwsw" %% "sj-engine-simulators" % "1.0-SNAPSHOT" % "test"
 
 Constructor arguments
@@ -216,8 +219,8 @@ Constructor arguments
  :header: "Argument", "Type", "Description"
  :widths: 25, 25, 50 
 
- "executor", "BatchStreamingExecutor[T]", "Implementation of :ref:`batch-module` under test"
- "manager", "ModuleEnvironmentManagerMock", "Mock for StatefulModuleEnvironmentManager (see Module-Environment-Manager-Mock_)"
+ "executor", "BatchStreamingExecutor[T]", "Implementation of :ref:`batch-module` under testing"
+ "manager", "ModuleEnvironmentManagerMock", "Mock for StatefulModuleEnvironmentManager (see :ref:`Module-Environment-Manager-Mock`)"
  "batchCollector", "BatchCollector", "Implementation of :ref:`Batch-Collector`"
 
 .. important:: T - the type of data received by Executor
@@ -252,7 +255,7 @@ Provided methods
         ``removeProcessedEnvelopes: Boolean = true): BatchSimulationResult`` - sends all envelopes from local buffer and returns output streams, state and envelopes that haven't been processed (see :ref:`Batch-Simulation-Result`). This method retrieves batches using ``batchCollector``, creates a window repository and invoke ``onWindow``, ``onEnter``, ``onLeaderEnter``, ``onBeforeCheckpoint``, ``onBeforeStateSave`` methods of Executor for *every* created window repository. At the end of this method all envelopes will be removed from ``batchCollector``.
  - ``batchesNumberBeforeIdle`` - the number of retrieved batches between invocations of ``executor.onIdle()`` ('0' by default). '0' means that ``executor.onIdle()`` will never be called.
  -``window`` - count of batches that will be contained into a window (see "Batch-streaming instance fields" at :ref:`Rest-API-Instance-Create`.
- - ``slidingInterval`` - the interval at which a window will be shifted (count of processed batches that will be removed from the window) (see "Batch-streaming instance fields" at :ref:`Rest-API-Instance-Create`.
+ - ``slidingInterval`` - the interval at which a window will be shifted (count of processed batches that will be removed from the window) (see "Batch-streaming instance fields" at :ref:`Rest-API-Instance-Create`).
  - ``saveFullState`` - the flag denoting that the full state ('true') or partial changes of state ('false') are going to be saved after every checkpoint.
  - ``removeProcessedEnvelopes`` - indicates that all processed envelopes will be removed from a local buffer after processing.
 
@@ -267,9 +270,9 @@ Provided methods
 Batch Simulation Result
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-After invocation of method ``process`` some envelopes could remain not processed by Executor when there are not enough batches for collecting windows.
+After invocation of the ``process`` method some envelopes could remain not processed by Executor when there are not enough batches for completing a window.
 
-``case class BatchSimulationResult(simulationResult: SimulationResult, remainingEnvelopes: Seq[Envelope])`` - contains output streams, state (see :ref:`Simulation-Result` (``simulationResult``) and envelopes that haven't been processed (``remainingEnvelopes``).
+``case class BatchSimulationResult(simulationResult: SimulationResult, remainingEnvelopes: Seq[Envelope])`` - contains output streams, state (see :ref:`Simulation-Result`) (``simulationResult``) and envelopes that haven't been processed (``remainingEnvelopes``).
 
 Usage Example
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -310,7 +313,7 @@ E.g. you implement your own Executor that takes strings and calculates their len
   }
  }
  
-If you want to see what the Executor puts in output stream and state after processing, Batch Engine Simulator can be used in the following way::
+If you want to see what the Executor puts into output stream and into the state after processing, Batch Engine Simulator can be used in the following way::
 
  val stateSaver = mock(classOf[StateSaverInterface])
  val stateLoader = new StateLoaderMock
@@ -318,7 +321,8 @@ If you want to see what the Executor puts in output stream and state after proce
  val stateStorage = new StateStorage(stateService)
  val options = ""
  val output = new TStreamStreamDomain("out", mock(classOf[TStreamServiceDomain]), 3, tags = Array("output"))
- val manager = new ModuleEnvironmentManagerMock(stateStorage, options, Array(output))
+ val tStreamsSenderThreadMock = new TStreamsSenderThreadMock(Set(output.name))
+ val manager = new ModuleEnvironmentManagerMock(stateStorage, options, Array(output), tStreamsSenderThreadMock)
  val executor: BatchStreamingExecutor[String] = new SomeExecutor(manager)
  val tstreamInput = new TStreamStreamDomain("t-stream-input", mock(classOf[TStreamServiceDomain]), 1)
  val kafkaInput = new KafkaStreamDomain("kafka-input", mock(classOf[KafkaServiceDomain]), 1, 1)
@@ -479,7 +483,7 @@ Simulation Result
 
 ``case class StreamData(stream: String, partitionDataList: Seq[PartitionData])`` - contains data elements that has been sent in an output stream.
 
-``case class SimulationResult(streamDataList: Seq[StreamData], state: Map[String, Any])`` - contains data elements for each output stream and a state at a certain time point.
+``case class SimulationResult(streamDataList: Seq[StreamData], state: Map[String, Any])`` - contains data elements for each output stream and the state at a certain point in time.
 
 .. _Module-Environment-Manager-Mock:
 
@@ -496,21 +500,41 @@ Constructor arguments:
  :header: "Argument", "Type", "Description"
  :widths: 15, 15, 30 
 
- "stateStorage", "StateStorage", "A storage of state"
- "options", "String", "User defined options from instance"
+ "stateStorage", "StateStorage", "A storage of the state"
+ "options", "String", "User-defined options from an instance"
  "outputs", "Array[TStreamStreamDomain]", "The list of output streams from an instance"
+ "senderThread", "TStreamsSenderThreadMock", "The mock for thread for sending data to the T-Streams service (described below)"
  "fileStorage", 	"FileStorage", 	"A file storage (mocked by default)"
+
+TStreamsSenderThread Mock
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Contains a collection of output elements (see :ref:`Simulation-Result`).
+
+Constructor arguments:
+
+.. csv-table:: 
+ :header: "Argument", "Type", "Description"
+ :widths: 15, 15, 30 
+ 
+ "streams", "Set[String]", "storage of state"
+
+Provided methods:
+
+* ``def getStreamDataList: Seq[StreamData]`` - returns streams with data.
+* ``def prepareToCheckpoint(): Unit`` - removes data from streams.
 
 
 Module Output Mocks
 ~~~~~~~~~~~~~~~~~~~~~~
+They puts data into TStreamsSenderThreadMock.
 
-Module Output Mocks have a buffer that contains output elements (see Simulation-Result_).
+.. Module Output Mocks have a buffer that contains output elements (see Simulation-Result_).
 
-Provided methods:
+.. Provided methods:
 
-* ``getOutputElements: mutable.Buffer[OutputElement]`` - returns a buffer with output elements.
-* ``clear()`` - removes all output elements from a buffer.
+.. * ``getOutputElements: mutable.Buffer[OutputElement]`` - returns a buffer with output elements.
+.. * ``clear()`` - removes all output elements from a buffer.
 
 .. _PartitionedOutputMock:
 
@@ -521,9 +545,10 @@ The mock for ``PartitionedOutput`` provides an output stream that puts data into
 
 Provided methods:
 
-* ``put(data: AnyRef, partition: Int)`` - creates an output element with  `data` and `partition` and puts it in a buffer.
+* ``put(data: AnyRef, partition: Int)`` - puts data into a specific partition.
 
 .. _RoundRobinOutputMock:
+
 Round Robin Output Mock
 """"""""""""""""""""""""""""""
 
@@ -531,4 +556,4 @@ The mock for ``RoundRobinOutput`` provides an output stream that puts data using
 
 Provided methods:
 
-* ``put(data: AnyRef)`` - creates an output element with `data` and next partition then puts it in a buffer.
+* ``put(data: AnyRef)`` - puts data into a next partition.
