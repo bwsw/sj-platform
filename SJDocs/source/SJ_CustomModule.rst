@@ -16,15 +16,15 @@ As a simple refresher, processing modules in the Stream Juggler Platform can be 
 1. Input module - It handles external inputs, does data deduplication, transforms raw data to objects.
 2. Processing module:
 
-- Regular-streaming - A generic module which receives an event, does some data transformation and sends it to the next processing step.
-- Batch-streaming - It organizes incoming data into batches and processing is performed with sliding window. Batch module may be used to implement streaming joins and processing where algorithm must observe the range of input messages rather than a current one.
+- Regular-streaming - the most generic module which receives events, transforms data element by element and sends them to the next processing step.
+- Batch-streaming - a module where the processing algorithm must observe a range of input messages rather than the current one (as it is in the regular-streaming type). For each stream input messages are collected into batches. Then batches are collected in a window. Windows of several streams are transferred to the module for processing. Thus, the module allows processing of data from several streams at the same time. In SJ-Platform the data is processed applying the method of a sliding window.
 
 3. Output module - It handles the data outcoming from event processing pipeline to external data destinations (Elasticsearch, SQL database, etc.).
 
 The workflow of the SJ-Platform implies the structure:
 
-1. As incoming information can be fed to a processing module from T-streams or APache Kafka, the input module is necessary at the first step of ingesting data to transform it from TCP into T-streams. If you want to process the data from Apache Kafka, the input module is not required.
-2. A processing module performs the main transformation and calculation of data. It accepts data via T-streams and Apache Kafka. The processed data are put into T-streams only. So an output module is required in the next step.
+1. The processing module receives data for processing from Apache Kafka and T-streams. You also can use TCP as a source, but you will need an input module in this case. The **input module** handles external inputs, does data deduplication, transforms raw data into objects for T-streams. 
+2. A processing module performs the main transformation and calculation of data. It accepts data via T-streams and Apache Kafka. The processed data are put into T-streams only. So an output module is required in the next step as we can not get the result data right from T-streams and put them into an external storage.
 3. An output module is necessary to transform the data from T-streams into the result data of the type appropriate for the external storage.
 
 .. figure:: _static/ModulePipeline1.png
