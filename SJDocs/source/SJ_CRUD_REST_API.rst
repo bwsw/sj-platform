@@ -422,8 +422,6 @@ Elasticsearch
    "description", "String", "Service description.", ""
    "index*", "String", "Elasticsearch index.", ""
    "provider*", "String", "Provider name.", "Provider can be of 'provider.elasticsearch' type only."
-   "login", "String", "User name.", ""
-   "password", "String", "User password.", ""
    "creationDate", "String", "The time when a service has been created.", ""
 
 Apache Kafka 
