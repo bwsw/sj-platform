@@ -5,27 +5,49 @@ Custom Module Development Guide
 
 .. Contents::
 
-Under this section how to write your own module for the Stream Juggler Platform will be described.
+In this section, we describe how to write your own module for the Stream Juggler platform.
 
-The Stream Juggler Platform is a platform for your custom module implementation. It allows to adjust the system to your custom aims. Creation of a custom module will not become a challenge for a practicing developer or a programmer as no special tools or services are necessary.
+The Stream Juggler Platform is a platform for your custom module implementation. It allows adjusting the system to your custom aims. Creation of a custom module will not become a challenge for an average developer who knows Scala language as no special tools or services are necessary.
 
-Prior to the module development, please, take a look at the platform :ref:`Architecture` and :ref:`Modules`.
+Prior to the module development, please, take a look at the :ref:`Architecture` and :ref:`Modules` sections.
 
-As a simple refresher, processing modules in the Stream Juggler Platform can be of the following types:
+As a simple refresher, there are three types of modules in the Stream Juggler Platform::
 
-1. Input module - It handles external inputs, does data deduplication, transforms raw data to objects.
-2. Processing module:
+1. **Input module**
+   
+   Functions: data deduplication, transformation of raw data into objects.
+   
+   It works with the stream types:
+    
+    - input stream type: TCP
+    - output stream type: T-streams
+   
+2. **Processing module**
+   
+   Functions: data transformation and calculation
 
-- Regular-streaming - the most generic module which receives events, transforms data element by element and sends them to the next processing step.
-- Batch-streaming - a module where the processing algorithm must observe a range of input messages rather than the current one (as it is in the regular-streaming type). For each stream input messages are collected into batches. Then batches are collected in a window. Windows of several streams are transferred to the module for processing. Thus, the module allows processing of data from several streams at the same time. In SJ-Platform the data is processed applying the method of a sliding window.
+   It works with the stream types:
 
-3. Output module - It handles the data outcoming from event processing pipeline to external data destinations (Elasticsearch, SQL database, etc.).
+    - input stream type: T-streams, Apache Kafka
+    - output stream type: T-streams
+
+   - **Regular-streaming** processing module: processes data event by event;
+   - **Batch-streaming** processing module: organizes data into batches and processes it with the sliding window method.
+      
+3. **Output module**
+
+   Functions: saving data to external datastorages (Elasticsearch, SQL database, RESTful).
+   
+   It works with the stream types:
+   
+    - input stream type: T-streams
+    - output stream type: depends on external datastorages (Currently Elasticsearch, SQL database, RESTful types of datastorages are supported). 
 
 The workflow of the SJ-Platform implies the structure:
 
 1. The processing module receives data for processing from Apache Kafka and T-streams. You also can use TCP as a source, but you will need an input module in this case. The **input module** handles external inputs, does data deduplication, transforms raw data into objects for T-streams. 
-2. A processing module performs the main transformation and calculation of data. It accepts data via T-streams and Apache Kafka. The processed data are put into T-streams only. So an output module is required in the next step as we can not get the result data right from T-streams and put them into an external storage.
-3. An output module is necessary to transform the data from T-streams into the result data of the type appropriate for the external storage.
+2. A **processing module** performs the main transformation and calculation of data. It accepts data via T-streams and Apache Kafka. The processed data are put into T-streams only. So an output module is required in the next step as we can not get the result data right from T-streams and put them into an external storage.
+3. An **output module** is necessary to transfer the data from T-streams into the result data of the type appropriate for the external storage.
 
 .. figure:: _static/ModulePipeline1.png
 
@@ -33,7 +55,7 @@ Below you will find the instructions on custom module creation in Scala.
 
 Before Starting With Modules
 --------------------------------------------------
-The instructions below are given for assembling a .jar file via sbt in Scala.
+The instructions below are given for assembling a .JAR file via sbt in Scala.
 
 It is meant that all necessary services are deployed for the module and you know for sure:
 
@@ -48,58 +70,53 @@ A :ref:`hello-world-module` is presented as a tutorial on a module development.
 
 Input Streaming Custom Module
 ---------------------------------
-1) Create a new sbt project depending on sj-engine-core library, i.e. use the latest version from https://mvnrepository.com/artifact/com.bwsw in your `build.sbt` file.
-2) Create an executor class inheriting ``InputStreamingExecutor`` class and override some methods if necessary (:ref:`input-module`)
-3) Create a validator class inheriting ``StreamingValidator`` class and override the validate method if necessary (:ref:`validator`)
-4) Create `specification.json` in a resources folder and fill it in as shown in the example (:ref:`Json_schema`).
-5) Assemble a jar of your module by calling sbt instruction from the project folder, e.g. 'sbt my-input-module/assembly'
-6) Upload the module (via UI or REST)
-7) Create an instance of the module (via UI or REST)
+1) Create a new sbt project depending on sj-engine-core library, i.e. use the latest version from https://mvnrepository.com/artifact/com.bwsw in your `build.sbt` file.  Also mark this dependency as provided. This prevents it from being included in the assembly JAR. For example:: 
+ 
+ libraryDependencies += "com.bwsw" %% "sj-engine-core" % "1.0" % "provided"
+ 
+2) Create an executor class inheriting the ``InputStreamingExecutor`` class and override the necessary methods (:ref:`input-module`).
+3) Create a validator class inheriting the ``StreamingValidator`` class and override the validate method if necessary (:ref:`validator`).
+4) Create `specification.json` in a resources folder and fill it in as shown in the example (:ref:`Json_example_input`).
+5) Assemble a jar of your module by calling sbt instruction from the project folder, e.g. 'sbt my-input-module/assembly'.
+6) Upload the module (via UI or REST).
+7) Create an instance of the module (via UI or REST).
 8) Launch the instance. 
 
 .. tip:: You can use a module simulator for preliminary testing of executor work (:ref:`Input_Engine_Simulator`).
 
 Regular Streaming Custom Module
 ---------------------------------
-1) Create a new sbt project depending on sj-engine-core library, i.e. use the latest version from https://mvnrepository.com/artifact/com.bwsw in your build.sbt file.
-2) Create an executor class inheriting ``RegularStreamingExecutor`` class and override some methods if necessary (:ref:`regular-module`)
-3) Create a validator class inheriting ``StreamingValidator`` class and override the validate method if necessary (:ref:`validator`)
-4) Create `specification.json` in a resources folder and fill it in as shown in the example (:ref:`Json_schema`). 
-5) Assemble a jar of your module by calling sbt instruction from project folder, e.g. 'sbt my-regular-module/assembly' 
-6) Upload the module (via REST or UI)
-7) Create an instance of the module (via REST or UI)
+1) Create a new sbt project with dependency on the sj-engine-core library, i.e. use the latest version from https://mvnrepository.com/artifact/com.bwsw in your build.sbt file.
+2) Create an executor class inheriting ``RegularStreamingExecutor`` class and override some methods if necessary (:ref:`regular-module`).
+3) Create a validator class inheriting ``StreamingValidator`` class and override the validate method if necessary (:ref:`validator`).
+4) Create `specification.json` in a resources folder and fill it in as shown in the example (:ref:`.. Json_example_regular`). 
+5) Assemble a jar of your module by calling sbt instruction from project folder, e.g. 'sbt my-regular-module/assembly'. 
+6) Upload the module (via REST or UI).
+7) Create an instance of the module (via REST or UI).
 8) Launch the instance. 
 
 .. tip:: You can use a module simulator for preliminary testing of executor work (:ref:`Regular_Engine_Simulator`).
 
 Batch Streaming Custom Module
 ------------------------------------
-1) Create a new sbt project depending on sj-engine-core library, i.e. use the latest version from https://mvnrepository.com/artifact/com.bwsw in your build.sbt file.
-2) Create an executor class inheriting ``BatchStreamingExecutor`` class and override some methods if necessary (:ref:`batch-module`)
-3) Create a batch collector inheriting ``BatchCollector`` class and override the required methods (:ref:`Batch-Collector`)
-4) Create a validator class inheriting ``StreamingValidator`` class and override the validate method if necessary (:ref:`validator`)
-5) Create `specification.json` in a resources folder and fill it in as shown in the example (:ref:`Json_schema`).
-6) Assemble a jar of your module by calling sbt instruction from project folder, e.g. 'sbt my-batch-module/assembly' 
-7) Upload the module (via REST or UI)
-8) Create an instance of the module (via REST or UI)
+1) Create a new sbt project with dependency on the sj-engine-core library, i.e. use the latest version from https://mvnrepository.com/artifact/com.bwsw in your build.sbt file.
+2) Create an executor class inheriting ``BatchStreamingExecutor`` class and override some methods if necessary (:ref:`batch-module`).
+3) Create a batch collector inheriting ``BatchCollector`` class and override the required methods (:ref:`Batch-Collector`).
+4) Create a validator class inheriting ``StreamingValidator`` class and override the validate method if necessary (:ref:`validator`).
+5) Create `specification.json` in a resources folder and fill it in as shown in the example (:ref:`Json_example_batch`).
+6) Assemble a jar of your module by calling sbt instruction from project folder, e.g. 'sbt my-batch-module/assembly' .
+7) Upload the module (via REST or UI).
+8) Create an instance of the module (via REST or UI).
 9) Launch the instance. 
 
 .. tip:: You can use a module simulator for preliminary testing of executor work (:ref:`Batch_Engine_Simulator`).
 
 Output Streaming Custom Module
 -----------------------------------------------
-1) Create a new sbt project depending on sj-engine-core library, i.e. use the latest version from https://mvnrepository.com/artifact/com.bwsw in your build.sbt file.
-2) Create an executor class inheriting ``OutputStreamingExecutor`` class and override some of methods if necessary (:ref:`output-module`)
+1) Create a new sbt project with dependency on the sj-engine-core library, i.e. use the latest version from https://mvnrepository.com/artifact/com.bwsw in your build.sbt file.
+2) Create an executor class inheriting ``OutputStreamingExecutor`` class and overrid the necessary methods (:ref:`output-module`)
 3) Create a validator class inheriting ``StreamingValidator`` class and override the validate method if necessary (:ref:`validator`)
-4) Create `specification.json` in a resources folder and fill it in as shown in the example (:ref:`Json_schema`).
-
-.. note:: Stream types for output-streaming module:
- 
- - stream.t-stream (only for incoming streams)
- - elasticsearch-output (output stream)
- - jdbc-output (output stream)
- - rest-output (output stream)
-
+4) Create `specification.json` in a resources folder and fill it in as shown in the example (:ref:`Json_example_output`).
 5) Create class of entity that extends ``OutputEnvelope``. Override method ``getFieldsValue``.
 6) Assemble a jar of your module by calling sbt instruction from the project folder, e.g. 'sbt my-output-module/assembly' 
 7) Create an index in Elasticsearch and the index mapping, or a table in a database, or deploy some REST service. Name of index is provided in Elasticsearch service. A table name and a document type is a stream name. A full URL to entities of the REST service is "http://<host>:<port><basePath>/<stream-name>"
@@ -147,13 +164,13 @@ We process them via awk utility, just adding current system time to the end of t
  91.221.61.133 : [0], 84 bytes, 0.40 ms (0.40 avg, 0% loss) 1499143417151
  <...>
 
-There could be error messages as output of fping utility which are sent to stdout, that's why all of them look like::
+There could be error messages as output of fping utility which are sent to stdout, that's why all of them look as follows::
 
  ICMP Unreachable (Communication with Host Prohibited) from 91.221.61.59 for ICMP Echo sent to 91.221.61.59 1499143409313
  ICMP Unreachable (Communication with Host Prohibited) from 91.221.61.215 for ICMP Echo sent to 91.221.61.215 1499143417152
  <...>
 
-As we can see, awk processes them too - so there is also a timestamp in the ends of error lines.
+As we can see, awk processes them too - so there is also a timestamp at the end of error lines.
 
 So, there could be 2 types of lines:
 
@@ -292,7 +309,7 @@ If we look deeper into the structure, we will see the following data flow:
 
 .. figure:: _static/SJStructure.png
 
-All input data elements are going as a flow of bytes to particular interface provided by `InputTaskEngine`. That flow is going straight to `RegexInputModule` (which extends `InputStreamingExecutor` interface) and is converted to an `InputEnvelope` instance which stores all data as ``AvroRecord`` inside. 
+All input data elements are going as a flow of bytes to particular interface provided by `InputTaskEngine`. That flow is going straight to `RegexInputModule` (which provides `InputStreamingExecutor` interface) and is converted to an `InputEnvelope` instance which stores all data as `Record` (provided by the Apache Avro library) inside. 
 
 An `InputEnvelope` instance then goes to `InputTaskEngine` which serializes it to the stream of bytes and then sends to T-Streams. 
 
@@ -307,7 +324,7 @@ Then `OutputTaskEngine` deserializes the stream of bytes from T-Streams to TStre
 Input module 
 """"""""""""""""""
 
-Input module is `RegexInputExecutor` (it extends `InputStreamingExecutor`) and it is provided via Sonatype repository. Its purpose (in general) is to process input stream of strings using regexp rules provided by a user and create `InputEnvelope` objects as a result.
+Input module is `RegexInputExecutor` (it contains `InputStreamingExecutor`) and it is provided via Sonatype repository. Its purpose (in general) is to process input stream of strings using regexp rules provided by a user and create `InputEnvelope` objects as a result.
 
 The rules are described in `pingstation-input.json`. As we can see, there are rules for each type of input records and each has its own value in the `outputStream` fields: "echo-response" and "unreachable-response". 
 
@@ -636,6 +653,6 @@ This file describes the module. Examples of description can be found at :ref:`Js
 More Code
 ------------------------
 
-The custom module example above represents one of custom implications of a demo Regex module. It is described in the :ref:`fping-example-task` section of the Tutorial. You can download this module from the `GitHub repository <https://github.com/bwsw/sj-fping-demo>`_. 
+More module examples you can find at the GitHub `fping example project <https://github.com/bwsw/sj-fping-demo>`_ and `sFlow example project <https://github.com/bwsw/sj-sflow-demo>`_ repositories.
 
-At the :ref:`sflow-example-task` of the Tutorial you can find another example of a custom module - a CSV input module. There a demo task is presented. It performs the data collecting for processing of sflow information. A demo CSV input module is available at the `GitHub repository <https://github.com/bwsw/sj-sflow-demo/tree/develop>`_
+
