@@ -401,11 +401,11 @@ Constructor arguments
  :widths: 25, 25, 50 
 
  "executor", "OutputStreamingExecutor[IT]", "Implementation of :ref:`output-module` under testing"
- "outputRequestBuilder", ":ref:`Output_Request_Builder`[OT]", "Builder of requests for output service"
+ "outputRequestBuilder", "OutputRequestBuilder[OT] (see :ref:`Output_Request_Builder`)", "Builder of requests for output service"
  "manager", "OutputEnvironmentManager", "Instance of the OutputEnvironmentManager used by Executor"
 
 .. important:: * IT - the type of data received by Executor
-   * OT - the type of requests that ``outputRequestBuilder`` creates. The type depends on the type of output service (see "Request format" column of the table in :ref:`Output_Request_Builder` section).
+   * OT - the type of requests that ``outputRequestBuilder`` creates. The type depends on the type of output service (see "Request format" column of the table in the :ref:`Output_Request_Builder` section).
 
 Simulator provides the following methods:
 
@@ -433,7 +433,7 @@ The are three implementations of the ``OutputRequestBuilder`` for each type of o
 
  "EsRequestBuilder", "String", Elasticsearch"
  "JdbcRequestBuilder", "PreparedStatementMock", "SQL database"
- "RestRequestBuilder", "org.eclipse.jetty.client.api.Request', "RESTful service"
+ "RestRequestBuilder", "org.eclipse.jetty.client.api.Request", "RESTful service"
 
 .. note:: Constructors of the ``EsRequestBuilder`` and the ``JdbcRequestBuilder`` takes the ``outputEntity`` argument. It should be created using the ``executor.getOutputEntity`` method.
 
@@ -480,11 +480,11 @@ Under this section the class of objects used for Simulators with states is descr
 Simulation Result
 ~~~~~~~~~~~~~~~~~~~~
 
-``case class PartitionData(partition: Int, dataList: Seq[AnyRef])`` - contains data elements that has been sent in a partition of an output stream.
+``case class SimulationResult(streamDataList: Seq[StreamData], state: Map[String, Any])`` - contains data elements for each output stream and the state at a certain point in time.
 
 ``case class StreamData(stream: String, partitionDataList: Seq[PartitionData])`` - contains data elements that has been sent in an output stream.
 
-``case class SimulationResult(streamDataList: Seq[StreamData], state: Map[String, Any])`` - contains data elements for each output stream and the state at a certain point in time.
+``case class PartitionData(partition: Int, dataList: Seq[AnyRef])`` - contains data elements that has been sent in a partition of an output stream.
 
 .. _Module-Environment-Manager-Mock:
 
