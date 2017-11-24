@@ -87,7 +87,7 @@ Input Streaming Custom Module
 Regular Streaming Custom Module
 ---------------------------------
 1) Create a new sbt project with dependency on the sj-engine-core library, i.e. use the latest version from https://mvnrepository.com/artifact/com.bwsw in your build.sbt file.
-2) Create an executor class inheriting ``RegularStreamingExecutor`` class and override some methods if necessary (:ref:`regular-module`).
+2) Create an executor class inheriting ``RegularStreamingExecutor`` class and override the necessary methods (:ref:`regular-module`).
 3) Create a validator class inheriting ``StreamingValidator`` class and override the validate method if necessary (:ref:`validator`).
 4) Create `specification.json` in a resources folder and fill it in as shown in the example (:ref:`.. Json_example_regular`). 
 5) Assemble a jar of your module by calling sbt instruction from project folder, e.g. 'sbt my-regular-module/assembly'. 
@@ -100,7 +100,7 @@ Regular Streaming Custom Module
 Batch Streaming Custom Module
 ------------------------------------
 1) Create a new sbt project with dependency on the sj-engine-core library, i.e. use the latest version from https://mvnrepository.com/artifact/com.bwsw in your build.sbt file.
-2) Create an executor class inheriting ``BatchStreamingExecutor`` class and override some methods if necessary (:ref:`batch-module`).
+2) Create an executor class inheriting ``BatchStreamingExecutor`` class and override the necessary methods (:ref:`batch-module`).
 3) Create a batch collector inheriting ``BatchCollector`` class and override the required methods (:ref:`Batch-Collector`).
 4) Create a validator class inheriting ``StreamingValidator`` class and override the validate method if necessary (:ref:`validator`).
 5) Create `specification.json` in a resources folder and fill it in as shown in the example (:ref:`Json_example_batch`).
@@ -119,7 +119,7 @@ Output Streaming Custom Module
 4) Create `specification.json` in a resources folder and fill it in as shown in the example (:ref:`Json_example_output`).
 5) Create class of entity that extends ``OutputEnvelope``. Override method ``getFieldsValue``.
 6) Assemble a jar of your module by calling sbt instruction from the project folder, e.g. 'sbt my-output-module/assembly' 
-7) Create an index in Elasticsearch and the index mapping, or a table in a database, or deploy some REST service. Name of index is provided in Elasticsearch service. A table name and a document type is a stream name. A full URL to entities of the REST service is "http://<host>:<port><basePath>/<stream-name>"
+7) Create an index in Elasticsearch and the index mapping, or a table in a database, or deploy some REST service. Name of index is provided in Elasticsearch service. Both a table name and a document type is a stream name. A full URL to entities of the REST service is "http://<host>:<port><basePath>/<stream-name>"
 8) Upload the module (via Rest API or UI)
 9) Create an instance of the module  (via Rest API or UI)
 10) Launch the instance. 
@@ -138,15 +138,15 @@ Prerequisites
 First of all you should:
 
 - follow the deployment process described in :ref:`Minimesos_deployment` up to Point 9 inclusive
-- OR follow the deployment process described :ref:`Mesos_deployment` up to Point 7 inclusive
+- OR follow the deployment process described in :ref:`Mesos_deployment` up to Point 7 inclusive
 
-And remember <ip> of the machine that everything is deployed on and <port> of deployed SJ-REST (in Minimesos deployment it is written in Point 7 in variable `$address`, in Mesos deployment it is written in Point 4 in variable `$address`).
+And remember <ip> of the machine where everything is deployed on and the <port> of deployed SJ-REST (in Minimesos deployment it is written in Point 7 in variable `$address`, in Mesos deployment it is written in Point 4 in variable `$address`).
 
 Task description 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Then we postulate the task to be resolved.
+Let's describe the task to be resolved.
 
-In this example we are going to write the system to aggregate information about nodes accessibility. Raw data are provided by fping utility.
+In this example we are going to develop the system to aggregate information about nodes accessibility. Raw data are provided by fping utility.
 
 An example of fping utility usage::
 
