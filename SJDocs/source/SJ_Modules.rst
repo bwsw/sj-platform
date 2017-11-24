@@ -325,7 +325,7 @@ Let's take a look at the main points:
 
 The module allows to transform the data aggregated from input streams applying the idea of a sliding window. 
 
-A window size can be set to a number of batches. The window closes once it is full, i.e. the set number of batches is collected. The collected batches are transferred further for processing and the window slides forward for the set interval. This is a sliding window method.
+A window size is equal to a number of batches. The window closes once it is full, i.e. the set number of batches is collected. The collected batches are transferred further for processing and the window slides forward for the set interval. This is a sliding window method.
 
 The diagram below is a simple illustration of how a sliding window operation looks like.
 
