@@ -7,7 +7,7 @@ A good data processing system needs to be fault-tolerant and scalable; it needs 
 
 The Stream Juggler Platform is an integrated processing system. It means the system includes all the parts required to achieve goals: components for computation, administration. These parts can be rearranged in different pipelines. That allows building sophisticated processing graphs to customize the system.
 
-SJ-Platform's architecture is designed so that exactly-once processing is performed not only within a single processing block but throughout the entire platform, starting from the moment streams of events are fed to the system and up to the moment the output data are saved in conventional data storage. This approach based on loosely coupled blocks allows a user to decompose data processing. It provides better modularity, performance management and simplicity in development.
+SJ-Platform's architecture is designed so that exactly-once processing is performed not only within a single processing block but throughout the entire platform, starting from the moment streams of events are fed to the system and up to the moment the output data are saved in conventional data storage. This approach based on loosely coupled blocks allows a user to decompose data processing. User can combine decomposed blocks to create different processing piplines for a wide verity of tasks. It provides better modularity, performance management and simplicity in development.
 
 In this section, we will take a closer look at the system components, their functions within the data flow pipeline.
 
@@ -126,9 +126,9 @@ Streams can be very intensive and all events cannot be handled by a single serve
 
 The events are guaranteed to be processed **exactly-once**. The key idea of exactly-once processing lies in a group **checkpoint**. That means all producers and consumers of a stream are bunched into a group and do a checkpoint automatically fixing the current state. Moreover, a user can initialize a checkpoint whenever it is necessary.
 
-The idea of **parallelism** is implemented via multi-partitioning in streams. A **partition** is a part of a data stream allocated for convenience in stream processing.  Upon creation, every stream gets a certain amount of partitions. The parallelism is enabled by dividing existing partitions fairly among module's instance tasks and thus scaling the data processing.
+The idea of **parallelism** is implemented via multi-partitioning in streams. A **partition** is a part of a data stream allocated for convenience in stream processing.  Upon creation, every stream gets a certain amount of partitions. The parallelism is enabled by dividing existing partitions fairly among the tasks of module instance and thus scaling the data processing.
 
-SJ-Platform fulfills the idea of **fault-tolerance** as its architecture prevents the whole system from stopping operation completely in case of module failure. In such case when a live data stream processing fails in one module, the module is restarted by Marathon. Within the module, if the module runs in a parallel mode (several tasks are set in module's instance parameters) and one of the tasks fails, the whole system does not stop processing. The task is restarted.
+SJ-Platform fulfills the idea of **fault-tolerance** as its architecture prevents the whole system from stopping operation completely in case of module failure. In such case when a live data stream processing fails in one module, the module is restarted by Marathon. Within the module, if it runs in a parallel mode (several tasks are set in the parameters of module instance) and one of the tasks fails, the whole system does not stop processing. The task is restarted.
 
 The general structure of SJ-Platform can be rendered as at the scheme below where all the mentioned above  components are presented in detail:
 
