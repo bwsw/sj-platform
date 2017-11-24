@@ -103,7 +103,7 @@ In the diagram below you can see the illustration of dataflow for the input modu
 
 All input data elements are going as a flow of bytes to particular interface provided by Task Engine. That flow is going straight to Streaming Executor and is converted to an object called an Input Envelope. 
 
-An **envelope** is a specialized fundamental data structure containing data and metadata. The latter is required for exactly-once processing.
+An **envelope** is a specialized fundamental data structure containing data and metadata. The metadata is required for exactly-once processing.
 
 The Input Envelope then goes to Task Engine which serializes it to a stream of bytes and then sends to T-Streams. 
 
