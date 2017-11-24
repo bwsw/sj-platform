@@ -25,7 +25,7 @@ Constructor arguments
  :header: "Argument", "Type", "Description"
  :widths: 25, 25, 50  
 
- "executor*", "InputStreamingExecutor[T]", "Implementation of `input module <http://streamjuggler.readthedocs.io/en/develop/SJ_Modules.html#input-module>`_ under testing"
+ "executor*", "InputStreamingExecutor[T]", "Implementation of an `input module <http://streamjuggler.readthedocs.io/en/develop/SJ_Modules.html#input-module>`_ under testing"
  "evictionPolicy*", "InputInstanceEvictionPolicy", "A field of an instance (see :ref:`REST_API_Instance_Create`)"
  "separator", "String", "Delimeter between data records (empty string by default)"
  "charset", "Charset", "Encoding of incoming data (UTF-8 by default)"
@@ -94,7 +94,7 @@ For more complicated examples see: `sj-csv-input-test <https://github.com/bwsw/s
 Regular Engine Simulator
 ------------------------------
 
-It is a class for testing implementation of :ref:`regular-module` (Executor).
+It is a class for testing implementation of a `regular module <http://streamjuggler.readthedocs.io/en/develop/SJ_Modules.html#regular-module>`_ (Executor).
 
 The simulator imitates the behavior of the :ref:`Regular_Streaming_Engine` (stateful mode): it sends envelopes to Executor, allows invoking checkpoint's handlers, gets data from output streams and state.
 
@@ -110,7 +110,7 @@ Constructor arguments
  :header: "Argument", "Type", "Description"
  :widths: 25, 25, 50 
 
- "executor", "RegularStreamingExecutor[T]", "Implementation of :ref:`regular-module` under testing"   
+ "executor", "RegularStreamingExecutor[T]", "Implementation of a `regular module <http://streamjuggler.readthedocs.io/en/develop/SJ_Modules.html#regular-module>`_ under testing"   
  "manager", "ModuleEnvironmentManagerMock", "Mock for StatefulModuleEnvironmentManager (see :ref:`Module-Environment-Manager-Mock`)"
 
 .. important:: T - the type of data received by Executor.
@@ -190,7 +190,7 @@ If you want to see what the executor puts into an output stream and to the state
 
  val envelopesNumberBeforeIdle = 2
  val results = simulator.process(envelopesNumberBeforeIdle)
- println(results)</code></pre>
+ println(results)
 
 ``println(results)`` will print::
  
@@ -205,7 +205,7 @@ For more complicated examples see `sj-fping-process-test <https://github.com/bws
 Batch Engine Simulator
 -------------------------------
 
-It is a class for testing implementation of :ref:`batch-module` (Executor).
+It is a class for testing implementation of a `batch module <http://streamjuggler.readthedocs.io/en/develop/SJ_Modules.html#batch-module>`_ (Executor).
 
 The simulator imitates the behavior of the :ref:`Batch_Streaming_Engine` (stateful mode): it sends envelopes to the Executor, allows invoking checkpoint's handlers, gets data from output streams and state.
 
@@ -220,7 +220,7 @@ Constructor arguments
  :header: "Argument", "Type", "Description"
  :widths: 25, 25, 50 
 
- "executor", "BatchStreamingExecutor[T]", "Implementation of :ref:`batch-module` under testing"
+ "executor", "BatchStreamingExecutor[T]", "Implementation of a `batch module <http://streamjuggler.readthedocs.io/en/develop/SJ_Modules.html#batch-module>`_ under testing"
  "manager", "ModuleEnvironmentManagerMock", "Mock for StatefulModuleEnvironmentManager (see :ref:`Module-Environment-Manager-Mock`)"
  "batchCollector", "BatchCollector", "Implementation of :ref:`Batch-Collector`"
 
@@ -385,7 +385,7 @@ For more complicated examples see `sj-sflow-process-test <https://github.com/bws
 Output Engine Simulator
 ----------------------------
 
-It is a class for testing an implementation of :ref:`output-module` (Executor). 
+It is a class for testing an implementation of the `output module <http://streamjuggler.readthedocs.io/en/develop/SJ_Modules.html#output-module>`_ (Executor). 
 
 Simulator imitates the behavior of the :ref:`Output_Streaming_Engine`: it sends transactions to the Executor, gets output envelopes from it and builds requests for loading data to an output service. Simulator uses :ref:`Output_Request_Builder` to build requests.
 
@@ -400,7 +400,7 @@ Constructor arguments
  :header: "Argument", "Type", "Description"
  :widths: 25, 25, 50 
 
- "executor", "OutputStreamingExecutor[IT]", "Implementation of :ref:`output-module` under testing"
+ "executor", "OutputStreamingExecutor[IT]", "Implementation of the `output module <http://streamjuggler.readthedocs.io/en/develop/SJ_Modules.html#output-module>`_ under testing"
  "outputRequestBuilder", "OutputRequestBuilder[OT] (see :ref:`Output_Request_Builder`)", "Builder of requests for output service"
  "manager", "OutputEnvironmentManager", "Instance of the OutputEnvironmentManager used by Executor"
 
