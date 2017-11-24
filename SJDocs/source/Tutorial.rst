@@ -12,9 +12,7 @@ Introduction
 
 This tutorial is aimed to present SJ-Platform and give a quick start for a user to see the platform at work.
 
-The demo projects presented below are example tasks introduced to demonstrate how to run user's first SJ module. A step-by-step guidance will help to deploy the system in a local mode (minimesos) or at a cluster (Mesos) and to implement SJ-Platform to a real-life task. 
-
-Through an example task, a user will get to know the system structure, its key components and general concepts of the platform workflow.
+The demo projects presented below are example tasks introduced to demonstrate how to run user's first SJ module. A step-by-step guidance will help to deploy the system in a local mode (minimesos) or at a cluster (Mesos) and to implement SJ-Platform to a real-life task. A user will get to know the system structure, its key components and general concepts of the platform workflow.
 
 
 SJ-Platform Overview
@@ -47,7 +45,7 @@ General processing workflow which the system allows implementing is illustrated 
    
    Picture 1.2
    
-Green, yellow and purple blocks displayed in a rectangular area are managed and evaluated by SJ-Platform. They represent an input module, a processing module and an output module, respectively. The blocks outside the rectangular area represent external systems (a data source and a data store).
+Green, yellow and purple blocks displayed in a rectangular area are managed and evaluated by SJ-Platform. They represent an input module, a processing module and an output module, respectively. The blocks outside the rectangular area represent external systems (a data source and a data storage).
 
 The input module receives raw data and transforms them into a data stream of a proper type compatible with the processing module type. The processing module performs data aggregation, transformations, filtering and enriching and sends the result to the output module. In the output module, the processed data are transformed into entities appropriate for storing into an external storage of a specified type. It can be Elasticsearch, RESTful endpoint or JDBC-compatible data storages.
           
