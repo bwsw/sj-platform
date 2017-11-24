@@ -34,6 +34,8 @@ SJ-Platform's backend is written in Scala. The UI is based on Angular 4.0. REST 
 
 Below, you will find necessary instructions to run the services. Two ways of deployment are described next - on cluster (Mesos) and locally (on minimesos). The steps to deploy services, SJ-Platform, entities for the platform are provided on the base of a demo task.
 
+.. _Mesos_deployment:
+
 Mesos Deployment
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -541,6 +543,8 @@ Now the data can be delevered into the system. The instance(-s) starts data proc
 You can view, monitor and manage instance performance via the UI.
 
 The processed data will be displayed through Kibana in a diagram. For more detail please refer to the View_Results_ section below.
+
+.. _Minimesos_deployment:
 
 Minimesos Deployment
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
