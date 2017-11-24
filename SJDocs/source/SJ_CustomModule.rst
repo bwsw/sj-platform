@@ -72,7 +72,7 @@ Input Streaming Custom Module
 ---------------------------------
 1) Create a new sbt project depending on sj-engine-core library, i.e. use the latest version from https://mvnrepository.com/artifact/com.bwsw in your `build.sbt` file.  Also mark this dependency as provided. This prevents it from being included in the assembly JAR. For example:: 
  
- libraryDependencies += "com.bwsw" %% "sj-engine-core" % "1.0" % "provided"
+    libraryDependencies += "com.bwsw" %% "sj-engine-core" % "1.0" % "provided"
  
 2) Create an executor class inheriting the ``InputStreamingExecutor`` class and override the necessary methods (:ref:`input-module`).
 3) Create a validator class inheriting the ``StreamingValidator`` class and override the validate method if necessary (:ref:`validator`).
@@ -119,7 +119,7 @@ Output Streaming Custom Module
 4) Create `specification.json` in a resources folder and fill it in as shown in the example (:ref:`Json_example_output`).
 5) Create class of entity that extends ``OutputEnvelope``. Override method ``getFieldsValue``.
 6) Assemble a jar of your module by calling sbt instruction from the project folder, e.g. 'sbt my-output-module/assembly' 
-7) Create an index in Elasticsearch and the index mapping, or a table in a database, or deploy some REST service. Name of index is provided in Elasticsearch service. Both a table name and a document type is a stream name. A full URL to entities of the REST service is "http://<host>:<port><basePath>/<stream-name>"
+7) Create an index in Elasticsearch and the index mapping, or a table in a database, or deploy some REST service. Name of index is provided in Elasticsearch service. Both a table name and a document type is a stream name. A full URL to entities of the REST service is "`http://<host>:<port><basePath>/<stream-name>`"
 8) Upload the module (via Rest API or UI)
 9) Create an instance of the module  (via Rest API or UI)
 10) Launch the instance. 
@@ -176,38 +176,38 @@ So, there could be 2 types of lines:
 
 * Normal answer::
  
- 91.221.61.133 : [0], 84 bytes, 0.40 ms (0.40 avg, 0% loss) 1499143417151
+   91.221.61.133 : [0], 84 bytes, 0.40 ms (0.40 avg, 0% loss) 1499143417151
 
-And we are interested only in three values from it: 
+  And we are interested only in three values from it: 
 
- - IP (91.221.60.77), 
- - response time (0.40 ms), 
- - timestamp (1499143417151)
+  - IP (91.221.60.77), 
+  - response time (0.40 ms), 
+  - timestamp (1499143417151)
 
 * Error answer::
 
- ICMP Unreachable (Communication with Host Prohibited) from 91.221.61.59 for ICMP Echo sent to 91.221.61.59 1499143409313
+   ICMP Unreachable (Communication with Host Prohibited) from 91.221.61.59 for ICMP Echo sent to 91.221.61.59 1499143409313
 
-And we are interested only in two values from it: 
+  And we are interested only in two values from it: 
    
-* IP (91.221.61.59), 
-* timestamp (1499143409313)
+  * IP (91.221.61.59), 
+  * timestamp (1499143409313)
 
-Everything we receive from 'fping + awk' pipe is going to our configured stream-juggler module, which aggregates all data for every needed amount of time, e.g. for 1 minute, and provides output like::
+Everything we receive from 'fping + awk' pipe is going to our configured stream-juggler module, which aggregates all data for every needed amount of time, e.g. for 1 minute, and provides an output like::
 
  <timestamp of last response> <ip> <average response time> <total amount of successful packets> <total amount of unreachable responses> <total amount of packets sent>
  
-for all IPs it has received data about at that particular minute.
+for all IPs for which it has received data at that particular minute.
 
-All output data are to be sent into Elasticsearch to store them and have an ability to show on plot (via Kibana).
+All output data are going to be sent into Elasticsearch to store them and have an ability to show on plot (via Kibana).
 
 Basic classes description 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Let's create classes for the described input and output data of stream-juggler module.
 
-As we can see, there are common fields in 'fping + awk' output normal and error records: IP and timestamp.
+As we can see, there are common fields - IP and timestamp - in 'fping + awk' outgoing records. Both for normal and error records.
 
-So, we can create abstract common class::
+So, we can create an abstract common class::
 
  abstract class PingResponse {
   val ts: Long
@@ -219,7 +219,7 @@ And then extend it by ``EchoResponse`` and ``UnreachableResponse`` classes::
  case class EchoResponse(ts: Long, ip: String, time: Double) extends PingResponse
  case class UnreachableResponse(ts: Long, ip: String) extends PingResponse
 
-There was two classes for input records. But we need to aggregate data inside our module, so let's create internal class - `PingState`::
+There were two classes for input records. But we need to aggregate data inside our module, so let's create internal class - `PingState`::
 
  case class PingState(lastTimeStamp: Long = 0, totalTime: Double = 0, totalSuccessful: Long = 0, totalUnreachable: Long = 0) {
 
@@ -309,13 +309,13 @@ If we look deeper into the structure, we will see the following data flow:
 
 .. figure:: _static/SJStructure.png
 
-All input data elements are going as a flow of bytes to particular interface provided by `InputTaskEngine`. That flow is going straight to `RegexInputModule` (which provides `InputStreamingExecutor` interface) and is converted to an `InputEnvelope` instance which stores all data as `Record` (provided by the Apache Avro library) inside. 
+All input data elements are going as a flow of bytes to particular interface provided by `InputTaskEngine`. That flow is going straight to `RegexInputExecutor` (which provides the `InputStreamingExecutor` interface) and is converted to an `InputEnvelope` instance which stores all data as `Record` (provided by the Apache Avro library) inside. 
 
-An `InputEnvelope` instance then goes to `InputTaskEngine` which serializes it to the stream of bytes and then sends to T-Streams. 
+An `InputEnvelope` instance then goes back to `InputTaskEngine` which serializes it to the stream of bytes and then sends to T-Streams. 
 
 `RegularTaskEngine` deserializes the flow of bytes to `TStreamsEnvelope[AvroRecord]` which is then put to `RegularStreamingExecutor`. 
 
-`RegularStreamingExecutor` processes the received data and returns them as a result stream of strings. 
+`RegularStreamingExecutor` processes the received data and returns them as a resulting stream of strings. 
 
 `RegularTaskEngine` serializes all the received data to the flow of bytes and puts it back to T-Streams. 
 
@@ -324,23 +324,23 @@ Then `OutputTaskEngine` deserializes the stream of bytes from T-Streams to TStre
 Input module 
 """"""""""""""""""
 
-Input module is `RegexInputExecutor` (it contains `InputStreamingExecutor`) and it is provided via Sonatype repository. Its purpose (in general) is to process input stream of strings using regexp rules provided by a user and create `InputEnvelope` objects as a result.
+Input module is `RegexInputExecutor` (it contains the `InputStreamingExecutor`) and it is provided via Sonatype repository. Its purpose (in general) is to process an input stream of strings using regexp rules provided by a user and create `InputEnvelope` objects as a result.
 
 The rules are described in `pingstation-input.json`. As we can see, there are rules for each type of input records and each has its own value in the `outputStream` fields: "echo-response" and "unreachable-response". 
 
-So, `InputEnvelope` objects will be put into two corresponding streams.
+So, the `InputEnvelope` objects are put into two corresponding streams.
 
 
 Regular module
 """"""""""""""""""""""
 
-Data from both of these streams will be sent to Regular module. We choose Regular module because we need to process each input element separately. So we define an Executor class which extends `RegularStreamingExecutor`::
+The data from both of these streams is sent to a Regular module. We choose the Regular module instead of the Batch one because we need to process each input element separately. So we define an Executor class which extends `RegularStreamingExecutor`::
 
  class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecutor[Record](manager)
 
-A manager (of `ModuleEnvironmentManager` type) here is just a source of information and a point of access to several useful methods: get output, get state (for stateful modules to store some global variables), etc. We use Record (avro record) type here as a generic type because output elements of input module are stored as avro records.
+A manager (of `ModuleEnvironmentManager` type) here is just a source of information and a point of access to several useful methods: get output stream, get state (for stateful modules to store some global variables), etc. We use Record (avro record) type here as a generic type because output elements of the input module are stored as Avro records.
 
-The data will be received from two streams, each of them will have its own name, so let's create the following object to store their names::
+The data is received from two streams, each of them will have its own name, so let's create the following object to store their names::
 
  object StreamNames {
   val unreachableResponseStream = "unreachable-response"
@@ -351,7 +351,7 @@ And just import it inside our class::
 
  import StreamNames._
 
-Regular module will get data from Input module element by element and aggregate it via state mechanism. On each checkpoint all aggregated data will be sent to Output module and the state will be cleared.
+The regular module gets data from the Input module element by element and aggregate them via the state mechanism. On each checkpoint all aggregated data are sent to the Output module and the state will be cleared.
 
 So we need to obtain the state in our class::
 
@@ -359,18 +359,18 @@ So we need to obtain the state in our class::
 
 To describe the whole logic we need to override the following methods:
 
-- onMessage(envelope: TStreamEnvelope[T]) - to get and process messages
-- onBeforeCheckpoint() - to send everything gained further
-- deserialize(bytes: Array[Byte]) - to deserialize flow of bytes from T-Streams into AvroRecord correctly
+- onMessage(envelope: TStreamEnvelope[T]) - to get and process messages;
+- onBeforeCheckpoint() - to send everything gained further;
+- deserialize(bytes: Array[Byte]) - to deserialize flow of bytes from T-Streams into AvroRecord correctly.
 
 Validator 
 ++++++++++++++++++
 
-An instance contains an ``options`` field of String type. That field is used to send some configuration into module (for example, via this field regexp rules are passed to `InputModule`). This field is described in json-file for a particular module.
+An instance contains an ``options`` field of String type. This field is used to send some configuration into the module (for example, via this field regexp rules are passed to `InputModule`). This field is described in json-file for a particular module.
 
 When this field is used, its validation is handled with Validator class. So it is necessary to describe the Validator class here.
 
-Input module uses an ``options`` field to pass Avro Schema to Regular module. That's why we create Validator class in the following way (with constant field in singleton ``OptionsLiterals`` object)::
+The Input module uses an ``options`` field to pass Avro Schema to Regular module. That's why we create Validator class in the following way (with constant field in singleton ``OptionsLiterals`` object)::
 
  object OptionsLiterals {
   val schemaField = "schema"
@@ -514,7 +514,7 @@ A ``onBeforeCheckpoint`` method calling condition is described in 'pingstation-i
 
 So we can see it will be called after each 10 responses received in the ``onMessage`` method.
 
-First of all we need to obtain an output object to send all data into. In this example we will use ``RoundRobinOutput`` because it is not important for us in this example how data would be spread out of partitions::
+First of all we need to obtain an output object to send all data into. In this example we will use ``RoundRobinOutput`` because it is not important for us in this example how data would be spread out among partitions::
 
  val outputName: String = manager.outputs.head.name
  val output: RoundRobinOutput = manager.getRoundRobinOutput(outputName)
