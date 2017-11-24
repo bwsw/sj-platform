@@ -25,7 +25,7 @@ Constructor arguments
  :header: "Argument", "Type", "Description"
  :widths: 25, 25, 50  
 
- "executor*", "InputStreamingExecutor[T]", "Implementation of an `input module <http://streamjuggler.readthedocs.io/en/develop/SJ_Modules.html#input-module>`_ under testing"
+ "executor*", "InputStreamingExecutor[T]", "Implementation of the `input module <http://streamjuggler.readthedocs.io/en/develop/SJ_Modules.html#input-module>`_ under testing"
  "evictionPolicy*", "InputInstanceEvictionPolicy", "A field of an instance (see :ref:`REST_API_Instance_Create`)"
  "separator", "String", "Delimeter between data records (empty string by default)"
  "charset", "Charset", "Encoding of incoming data (UTF-8 by default)"
@@ -110,7 +110,7 @@ Constructor arguments
  :header: "Argument", "Type", "Description"
  :widths: 25, 25, 50 
 
- "executor", "RegularStreamingExecutor[T]", "Implementation of a `regular module <http://streamjuggler.readthedocs.io/en/develop/SJ_Modules.html#regular-module>`_ under testing"   
+ "executor", "RegularStreamingExecutor[T]", "Implementation of the `regular module <http://streamjuggler.readthedocs.io/en/develop/SJ_Modules.html#regular-module>`_ under testing"   
  "manager", "ModuleEnvironmentManagerMock", "Mock for StatefulModuleEnvironmentManager (see :ref:`Module-Environment-Manager-Mock`)"
 
 .. important:: T - the type of data received by Executor.
@@ -220,7 +220,7 @@ Constructor arguments
  :header: "Argument", "Type", "Description"
  :widths: 25, 25, 50 
 
- "executor", "BatchStreamingExecutor[T]", "Implementation of a `batch module <http://streamjuggler.readthedocs.io/en/develop/SJ_Modules.html#batch-module>`_ under testing"
+ "executor", "BatchStreamingExecutor[T]", "Implementation of the `batch module <http://streamjuggler.readthedocs.io/en/develop/SJ_Modules.html#batch-module>`_ under testing"
  "manager", "ModuleEnvironmentManagerMock", "Mock for StatefulModuleEnvironmentManager (see :ref:`Module-Environment-Manager-Mock`)"
  "batchCollector", "BatchCollector", "Implementation of :ref:`Batch-Collector`"
 
