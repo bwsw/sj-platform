@@ -26,7 +26,7 @@ Engine
   A base of the system. It provides basic I/O functionality. It uses module settings to process data.
 
 Envelope
-  A specialized fundamental data structure, containing data and metadata that allow exactly-once processing.
+  A specialized fundamental data structure, containing data and metadata. The metadata is required for exactly-once processing.
 
 Event 
   Minimal data unit in a stream.
