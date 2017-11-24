@@ -7,7 +7,7 @@ A good data processing system needs to be fault-tolerant and scalable; it needs 
 
 The Stream Juggler Platform is an integrated processing system. It means the system includes all the parts required to achieve goals: components for computation, administration. These parts can be rearranged in different pipelines. That allows building sophisticated processing graphs to customize the system.
 
-SJ-Platform's architecture is designed so that exactly-once processing is performed not only within a single processing block but throughout the entire platform, starting from the moment streams of events are fed to the system and up to the moment the output data are saved in conventional data storage. This approach based on loosely coupled blocks allows a user to decompose data processing. A user can combine the decomposed blocks to create different processing piplines for a wide variety of tasks. It provides better modularity, performance management and simplicity in development.
+SJ-Platform's architecture is designed so that exactly-once processing is performed not only within a single processing block but throughout the entire platform, starting from the moment streams of events are fed to the system and up to the moment the output data are saved in conventional data storage. This approach based on loosely coupled blocks allows a user to combine the decomposed blocks to create different processing pipelines for a wide variety of tasks. It provides better modularity, performance management and simplicity in development.
 
 In this section, we will take a closer look at the system components, their functions within the data flow pipeline.
 
