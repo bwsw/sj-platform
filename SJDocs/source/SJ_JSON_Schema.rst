@@ -118,6 +118,45 @@ Below you will find a Json schema for specification file of a module::
   ]
  }
  
+.. _Json_example_input:
+
+An example of valid specification for an **input** module::
+
+ {
+  "name": "InputModule",
+  "description": "Universal demux module by BW",
+  "version": "1.0",
+  "author": "John Smith",
+  "license": "Apache 1.0",
+  "inputs": {
+    "cardinality": [
+      0,
+      0
+    ],
+    "types": [
+      "input"
+    ]
+  },
+  "outputs": {
+    "cardinality": [
+      1,
+      1
+    ],
+    "types": [
+      "stream.t-streams"
+    ]
+  },
+  "module-type": "input-streaming",
+  "engine-name": "com.bwsw.input.streaming.engine",
+  "engine-version": "1.0",
+  
+  "validator-class": "com.bwsw.sj.stubs.module.input_streaming.Validator",
+  "executor-class": "com.bwsw.sj.stubs.module.input_streaming.Executor"
+
+ }
+ 
+.. _Json_example_regular:
+ 
 An example of valid specification for a **regular** module::
 
  {
@@ -153,6 +192,7 @@ An example of valid specification for a **regular** module::
   "executor-class": "com.bw-sw.sj.Executor" 
  }
 
+.. _Json_example_batch:
 
 An example of valid specification for a **batch** module::
 
@@ -190,42 +230,7 @@ An example of valid specification for a **batch** module::
   "batch-collector-class": "com.bwsw.sj.stubs.module.windowed_streaming.NumericalBatchCollector"
  }
 
-
-An example of valid specification for an **input** module::
-
- {
-  "name": "InputModule",
-  "description": "Universal demux module by BW",
-  "version": "1.0",
-  "author": "John Smith",
-  "license": "Apache 1.0",
-  "inputs": {
-    "cardinality": [
-      0,
-      0
-    ],
-    "types": [
-      "input"
-    ]
-  },
-  "outputs": {
-    "cardinality": [
-      1,
-      1
-    ],
-    "types": [
-      "stream.t-streams"
-    ]
-  },
-  "module-type": "input-streaming",
-  "engine-name": "com.bwsw.input.streaming.engine",
-  "engine-version": "1.0",
-  
-  "validator-class": "com.bwsw.sj.stubs.module.input_streaming.Validator",
-  "executor-class": "com.bwsw.sj.stubs.module.input_streaming.Executor"
-
- }
-
+.. _Json_example_output:
 
 An example of valid specification for an **output** module::
 
