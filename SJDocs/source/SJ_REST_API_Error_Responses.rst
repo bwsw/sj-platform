@@ -148,8 +148,6 @@ Possible error responses for **Apache Kafka** service creation:
  "'Provider' attribute is required.", "The Provider field is not completed."
  "Provider '<service_provider>' does not exist.", "All fields are completed following the requirements except the 'Provider' field (the provider specified in the service does not exist)."
  "'Provider' must be of type: 'provider.apache-kafka' ('<service_provider_type>' is given instead).", "All fields are completed following the requirements except the 'Provider' field (a provider of incorrect type is specified."
- "'zkNamespace' attribute is required.", "The zkNamespace field is not completed."
- "Service has incorrect 'zkNamespace': '<service_zk-namespace>'. A name must contain digits, lowercase letters or underscore. The first symbol must be a letter.", "All fields are completed following the requirements except the 'zkNamespace' field."
  "'zkProvider' attribute is required.", "The zkProvider field is not completed."
  "Zookeeper provider '<service_zk-provider>' does not exist.", "All fields are completed following the requirements except the 'zkProvider' field (the zk provider specified in the service does not exist.)"
  "'zkProvider' must be of type: 'zookeeper' ('<service_zk-provider_type>' is given instead).", "All fields are completed following the requirements except the 'zkProvider' field (the specified provider is not of a zookeeper type)."
