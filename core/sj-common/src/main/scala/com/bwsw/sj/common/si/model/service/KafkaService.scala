@@ -21,7 +21,6 @@ package com.bwsw.sj.common.si.model.service
 import java.util.Date
 
 import com.bwsw.sj.common.dal.model.service.KafkaServiceDomain
-import com.bwsw.sj.common.rest.utils.ValidationUtils.isAlphaNumericWithUnderscore
 import com.bwsw.sj.common.utils.ProviderLiterals
 import scaldi.Injector
 
@@ -30,7 +29,6 @@ import scala.collection.mutable.ArrayBuffer
 class KafkaService(name: String,
                    provider: String,
                    val zkProvider: String,
-                   val zkNamespace: String,
                    description: String,
                    serviceType: String,
                    creationDate: String)
@@ -48,9 +46,7 @@ class KafkaService(name: String,
         description = this.description,
         provider = providerRepository.get(this.provider).get,
         zkProvider = providerRepository.get(this.zkProvider).get,
-        zkNamespace = this.zkNamespace,
-        creationDate = new Date()
-      )
+        creationDate = new Date())
 
     modelService
   }
@@ -81,21 +77,6 @@ class KafkaService(name: String,
               if (zkProviderFormDB.providerType != ProviderLiterals.zookeeperType) {
                 errors += createMessage("entity.error.must.one.type.other.given", "zkProvider", ProviderLiterals.zookeeperType, zkProviderFormDB.providerType)
               }
-          }
-        }
-    }
-
-    // 'zkNamespace' field
-    Option(this.zkNamespace) match {
-      case None =>
-        errors += createMessage("entity.error.attribute.required", "zkNamespace")
-      case Some(x) =>
-        if (x.isEmpty) {
-          errors += createMessage("entity.error.attribute.required", "zkNamespace")
-        }
-        else {
-          if (!isAlphaNumericWithUnderscore(x)) {
-            errors += createMessage("entity.error.incorrect.service.namespace", "zkNamespace", x)
           }
         }
     }

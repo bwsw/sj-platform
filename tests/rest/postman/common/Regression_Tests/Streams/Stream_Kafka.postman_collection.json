@@ -174,7 +174,7 @@
 			"description": "",
 			"collectionId": "faa62c09-318c-f60e-841d-fe1c95196a72",
 			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"rest-kafka\",\r\n     \"description\": \"example kafka provider\",\r\n     \"provider\": \"kafka-example\",\r\n     \"zkProvider\": \"rest-zookeeper\",\r\n     \"type\": \"service.apache-kafka\",\r\n     \"zkNamespace\": \"a1\"\r\n}",
+			"rawModeData": "{\r\n     \"name\": \"rest-kafka\",\r\n     \"description\": \"example kafka provider\",\r\n     \"provider\": \"kafka-example\",\r\n     \"zkProvider\": \"rest-zookeeper\",\r\n     \"type\": \"service.apache-kafka\"\r\n}",
 			"isFromCollection": true
 		},
 		{

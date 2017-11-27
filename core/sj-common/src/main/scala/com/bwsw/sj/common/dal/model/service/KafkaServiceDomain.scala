@@ -28,7 +28,6 @@ class KafkaServiceDomain(name: String,
                          description: String,
                          provider: ProviderDomain,
                          @ReferenceField(value = "zk-provider") val zkProvider: ProviderDomain,
-                         @PropertyField("zk-namespace") val zkNamespace: String,
                          creationDate: Date)
   extends ServiceDomain(name, description, provider, ServiceLiterals.kafkaType, creationDate) {
 

@@ -397,7 +397,7 @@
 			"description": "",
 			"collectionId": "dc54bfc7-766e-23ad-9204-e400a2f7d0c2",
 			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"kafka-for-input-stream\",\r\n     \"description\": \"example kafka provider\",\r\n     \"provider\": \"kafka-for-serv\",\r\n     \"zkProvider\": \"zookeeper-zkprovider-for-kafka\",\r\n     \"type\": \"service.apache-kafka\",\r\n     \"zkNamespace\": \"a1\"\r\n}"
+			"rawModeData": "{\r\n     \"name\": \"kafka-for-input-stream\",\r\n     \"description\": \"example kafka provider\",\r\n     \"provider\": \"kafka-for-serv\",\r\n     \"zkProvider\": \"zookeeper-zkprovider-for-kafka\",\r\n     \"type\": \"service.apache-kafka\"\r\n}"
 		},
 		{
 			"id": "b3f748d0-04c6-d4c9-226d-3edc94f10abc",
