@@ -3,7 +3,7 @@
 Json schema for module specification 
 ===========================================
 
-Below you will find a Json schema for specification file of a module::
+A Json schema for a specification file of a module looks as presented below::
 
  {
   "$schema": "http://json-schema.org/draft-04/schema#",
@@ -118,9 +118,17 @@ Below you will find a Json schema for specification file of a module::
   ]
  }
  
+Json Example For Each Module Type 
+=====================================
+
+Below you will find an example for the Json schema for each module type.
+
 .. _Json_example_input:
 
-An example of valid specification for an **input** module::
+Input Module
+----------------------
+
+An example of a valid specification for an **input** module::
 
  {
   "name": "InputModule",
@@ -156,8 +164,11 @@ An example of valid specification for an **input** module::
  }
  
 .. _Json_example_regular:
- 
-An example of valid specification for a **regular** module::
+
+Regular Module
+----------------------
+
+An example of a valid specification for a **regular** module::
 
  {
   "name": "com.bw-sw.sj.demux",
@@ -194,7 +205,10 @@ An example of valid specification for a **regular** module::
 
 .. _Json_example_batch:
 
-An example of valid specification for a **batch** module::
+Batch Module
+----------------------
+
+An example of a valid specification for a **batch** module::
 
  {
   "name": "BatchModule",
@@ -232,7 +246,10 @@ An example of valid specification for a **batch** module::
 
 .. _Json_example_output:
 
-An example of valid specification for an **output** module::
+Output Module
+----------------------
+
+An example of a valid specification for an **output** module::
 
  {
   "name": "OutputModule",
