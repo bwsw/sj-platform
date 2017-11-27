@@ -262,7 +262,7 @@ Please, press «Create Service» and fill in the form where general and specific
 - *Namespace* *
              Please, specify a namespace here. It must contain digits, lowercase letters or underscore and start with a letter. 
 
-- *Http scheme* *
+.. - *Http scheme* *
             Select the scheme of HTTP protocol from the dropdown ("http" is set by default). 
 	     
 **Elasticsearch Service Type**
@@ -282,7 +282,7 @@ Please, press «Create Service» and fill in the form where general and specific
 
        Please, specify a password of the services here. 
 
-- *Http scheme* *
+.. - *Http scheme* *
              Select the scheme of HTTP protocol from the dropdown ("http" is set by default). 
 	     
 **Apache Kafka Service Type**
@@ -292,12 +292,12 @@ Please, press «Create Service» and fill in the form where general and specific
 
        Please, select a zookeeper provider for the services here. 
 
-- *ZK namespace* *
+.. - *ZK namespace* *
         This field is required for filling in.
 
         Please, specify a zookeeper namespace for the services here. 
 	
-- *Http scheme* *
+.. - *Http scheme* *
             Select the scheme of HTTP protocol from the dropdown ("http" is set by default). 
 	     
 **T-streams Service Type**
@@ -316,7 +316,7 @@ Please, press «Create Service» and fill in the form where general and specific
 
         Please, enter a token for the services here. 
 
-- *Http scheme* *
+.. - *Http scheme* *
              Select the scheme of HTTP protocol from the dropdown ("http" is set by default). 
 	     
 **SQL database Service Type**
@@ -326,7 +326,7 @@ Please, press «Create Service» and fill in the form where general and specific
 
         Please, enter a database name for the services here. 
 
-- *Http scheme* *
+.. - *Http scheme* *
         Select 'http' or 'https' from the dropdown.
 	     
 **RESTful Service Type**
