@@ -10,7 +10,7 @@ Four types of simulators are provided - one per each module type. Choose which y
 Input Engine Simulator
 -----------------------------
 
-It is a class for testing an implementation of an `input module <http://streamjuggler.readthedocs.io/en/develop/SJ_Modules.html#input-module>`_ (Executor).
+It is a class for testing the implementation of an `input module <http://streamjuggler.readthedocs.io/en/develop/SJ_Modules.html#input-module>`_ (Executor).
 
 Simulator imitates the behavior of the :ref:`Input_Streaming_Engine`: it sends byte buffer to Executor, gets input envelopes from it, checks envelopes for duplicates (if it is necessary), and builds :ref:`Input_Engine_Simulator_Output_Data`.
 
@@ -62,7 +62,7 @@ This simulator provides information on the processing of incoming data by the  `
 Usage example
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-E.g. you implement your own Executor that splits byte buffer by a comma and tries parsing it to 'Integer'::
+E.g. you implement your own Executor that splits byte buffer by a comma and tries to parse it to 'Integer'::
 
  class SomeExecutor(manager: InputEnvironmentManager) extends InputStreamingExecutor[Integer](manager) {
   override def tokenize(buffer: ByteBuf): Option[Interval] = { ... }
@@ -86,7 +86,6 @@ If you want to see what is returned by Executor after processing, Input Engine S
  val outputDataList = simulator.process(duplicateCheck = true)
  println(outputDataList)
 
-
 For more complicated examples see: `sj-csv-input-test <https://github.com/bwsw/sj-platform/blob/develop/contrib/sj-platform/sj-csv-input/src/test/scala/com/bwsw/sj/module/input/csv/CSVInputExecutorTests.scala>`_, `sj-regex-input-test <https://github.com/bwsw/sj-platform/blob/develop/contrib/sj-platform/sj-regex-input/src/test/scala/com/bwsw/sj/module/input/regex/RegexInputExecutorTests.scala>`_.
 
 .. _Regular_Engine_Simulator:
@@ -94,11 +93,11 @@ For more complicated examples see: `sj-csv-input-test <https://github.com/bwsw/s
 Regular Engine Simulator
 ------------------------------
 
-It is a class for testing implementation of a `regular module <http://streamjuggler.readthedocs.io/en/develop/SJ_Modules.html#regular-module>`_ (Executor).
+It is a class for testing the implementation of a `regular module <http://streamjuggler.readthedocs.io/en/develop/SJ_Modules.html#regular-module>`_ (Executor).
 
 The simulator imitates the behavior of the :ref:`Regular_Streaming_Engine` (stateful mode): it sends envelopes to Executor, allows invoking checkpoint's handlers, gets data from output streams and state.
 
-To use the simulator you need add the dependency to the ``build.sbt``::
+To use the simulator you need to add the dependency to the ``build.sbt``::
  
  resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots" 
  libraryDependencies += "com.bwsw" %% "sj-engine-simulators" % "1.0-SNAPSHOT" % "test"
@@ -118,18 +117,18 @@ Constructor arguments
 Provided methods
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-* ``prepareState(state: Map[String, Any])`` - loads state in a state storage
- * ``state`` - key/value map
+* ``prepareState(state: Map[String, Any])`` - loads state in a state storage.
+ * ``state`` - key/value map.
 * ``prepareTstream(entities: Seq[T], stream: String, consumerName: String = "default-consumer-name"): Long`` - creates *one* t-stream envelope (``TStreamEnvelope[T]`` type) and saves it in a local buffer. Returns ID of the envelope.
- * ``entities`` - list of incoming data
- * ``stream`` - name of a stream with incoming data
- * ``consumerName`` - name of a consumer ('default-consumer-name' by default)
+ * ``entities`` - list of incoming data elements.
+ * ``stream`` - name of a stream with incoming data.
+ * ``consumerName`` - name of a consumer ('default-consumer-name' by default).
 * ``prepareKafka(entity: T, stream: String): Long`` - creates *one* kafka envelope (``KafkaEnvelope[T]`` type) and saves it in a local buffer. Returns ID of that envelope.
- * ``entity`` - incoming data
- * ``stream`` - name of a stream with incoming data
+ * ``entity`` - an incoming data element.
+ * ``stream`` - name of a stream with incoming data.
 * ``prepareKafka(entities: Seq[T], stream: String): Seq[Long]`` - creates a *list* of kafka envelopes (``KafkaEnvelope[T]`` type) - *one* envelope for *one* element from ``entities``, and saves it in a local buffer. Returns a list of envelope IDs.
- * ``entities`` - list of incoming data
- * ``stream`` - name of a stream with incoming data
+ * ``entities`` - list of incoming data elements.
+ * ``stream`` - name of a stream with incoming data.
 * ``process(envelopesNumberBeforeIdle: Int = 0, clearBuffer: Boolean = true): SimulationResult`` - sends all envelopes from local buffer and returns output streams and state (see :ref:`Simulation-Result`).
  * ``envelopesNumberBeforeIdle`` - number of envelopes after which ``executor.onIdle()`` will be invoked ('0' by default). '0' means that ``executor.onIdle()`` will never be called.
  * ``clearBuffer`` - indicates that all envelopes will be removed from a local buffer after processing.
@@ -205,9 +204,9 @@ For more complicated examples see `sj-fping-process-test <https://github.com/bws
 Batch Engine Simulator
 -------------------------------
 
-It is a class for testing implementation of a `batch module <http://streamjuggler.readthedocs.io/en/develop/SJ_Modules.html#batch-module>`_ (Executor).
+It is a class for testing the implementation of a `batch module <http://streamjuggler.readthedocs.io/en/develop/SJ_Modules.html#batch-module>`_ (Executor).
 
-The simulator imitates the behavior of the :ref:`Batch_Streaming_Engine` (stateful mode): it sends envelopes to the Executor, allows invoking checkpoint's handlers, gets data from output streams and state.
+The simulator imitates the behavior of the :ref:`Batch_Streaming_Engine` (stateful mode): it collects data elements in batches, then collects batches in a window, sends data in a window to the Executor, allows invoking checkpoint's handlers, gets data from output streams and state.
 
 To use simulator you need to add this dependency to the ``build.sbt``::
 
@@ -221,7 +220,7 @@ Constructor arguments
  :widths: 25, 25, 50 
 
  "executor", "BatchStreamingExecutor[T]", "Implementation of the `batch module <http://streamjuggler.readthedocs.io/en/develop/SJ_Modules.html#batch-module>`_ under testing"
- "manager", "ModuleEnvironmentManagerMock", "Mock for StatefulModuleEnvironmentManager (see :ref:`Module-Environment-Manager-Mock`)"
+ "manager", "ModuleEnvironmentManagerMock", "Mock for `StatefulModuleEnvironmentManager` (see :ref:`Module-Environment-Manager-Mock`)"
  "batchCollector", "BatchCollector", "Implementation of :ref:`Batch-Collector`"
 
 .. important:: T - the type of data received by Executor
@@ -233,17 +232,17 @@ Provided methods
  - ``state`` - key/value map.
 
 * ``prepareTstream(entities: Seq[T], stream: String, consumerName: String = "default-consumer-name"): Long`` - creates *one* t-stream envelope (``TStreamEnvelope[T]`` type) and saves it in a local buffer. Returns ID of the envelope.
- - ``entities`` - the list of incoming data.
+ - ``entities`` - the list of incoming data elements.
  - ``stream`` - the name of a stream with incoming data.
  - ``consumerName`` - the name of a consumer ('default-consumer-name' by default).
 
 * ``prepareKafka(entity: T, stream: String): Long`` - creates *one* kafka envelope ('KafkaEnvelope[T]' type) and saves it in a local buffer. Returns ID of that envelope.
- - ``entity`` - incoming data
+ - ``entity`` - an incoming data element.
  - ``stream`` - the name of a stream with incoming data.
 
 * ``prepareKafka(entities: Seq[T], stream: String): Seq[Long]`` - creates a *list* of kafka envelopes ('KafkaEnvelope[T]' type) - *one* envelope for *one* element from ``entities``, and saves it in a local buffer. Returns a list of envelopes IDs.
- - ``entities`` - the list of incoming data
- - ``stream`` - the name of a stream of incoming data
+ - ``entities`` - the list of incoming data elements.
+ - ``stream`` - the name of a stream of incoming data.
 
 * ``process(batchesNumberBeforeIdle: Int = 0,``
         
@@ -253,10 +252,10 @@ Provided methods
         
         ``saveFullState: Boolean = false,``
         
-        ``removeProcessedEnvelopes: Boolean = true): BatchSimulationResult`` - sends all envelopes from local buffer and returns output streams, state and envelopes that haven't been processed (see :ref:`Batch-Simulation-Result`). This method retrieves batches using ``batchCollector``, creates a window repository and invoke ``onWindow``, ``onEnter``, ``onLeaderEnter``, ``onBeforeCheckpoint``, ``onBeforeStateSave`` methods of Executor for *every* created window repository. At the end of this method all envelopes will be removed from ``batchCollector``.
+        ``removeProcessedEnvelopes: Boolean = true): BatchSimulationResult`` - sends all envelopes from local buffer and returns output streams, state and envelopes that haven't been processed (see :ref:`Batch-Simulation-Result`). This method retrieves batches using ``batchCollector``, creates a window repository and invokes ``onWindow``, ``onEnter``, ``onLeaderEnter``, ``onBeforeCheckpoint``, ``onBeforeStateSave`` methods of Executor for *every* created window repository. At the end of this method all envelopes will be removed from ``batchCollector``.
  - ``batchesNumberBeforeIdle`` - the number of retrieved batches between invocations of ``executor.onIdle()`` ('0' by default). '0' means that ``executor.onIdle()`` will never be called.
- -``window`` - count of batches that will be contained into a window (see "Batch-streaming instance fields" at :ref:`Rest-API-Instance-Create`.
- - ``slidingInterval`` - the interval at which a window will be shifted (count of processed batches that will be removed from the window) (see "Batch-streaming instance fields" at :ref:`Rest-API-Instance-Create`).
+ -``window`` - count of batches that will be contained into a window (see :ref:`Batch-streaming_instance_fields`).
+ - ``slidingInterval`` - the interval at which a window will be shifted (count of processed batches that will be removed from the window) (see :ref:`Batch-streaming_instance_fields`).
  - ``saveFullState`` - the flag denoting that the full state ('true') or partial changes of state ('false') are going to be saved after every checkpoint.
  - ``removeProcessedEnvelopes`` - indicates that all processed envelopes will be removed from a local buffer after processing.
 
@@ -267,6 +266,8 @@ Provided methods
  - ``jitter`` - the delay between a real response time and an invocation of this handler.
 
 * ``clear()`` - removes all envelopes from a local buffer.
+
+.. _Batch-Simulation-Result:
 
 Batch Simulation Result
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -385,7 +386,7 @@ For more complicated examples see `sj-sflow-process-test <https://github.com/bws
 Output Engine Simulator
 ----------------------------
 
-It is a class for testing an implementation of the `output module <http://streamjuggler.readthedocs.io/en/develop/SJ_Modules.html#output-module>`_ (Executor). 
+It is a class for testing the implementation of the `output module <http://streamjuggler.readthedocs.io/en/develop/SJ_Modules.html#output-module>`_ (Executor). 
 
 Simulator imitates the behavior of the :ref:`Output_Streaming_Engine`: it sends transactions to the Executor, gets output envelopes from it and builds requests for loading data to an output service. Simulator uses :ref:`Output_Request_Builder` to build requests.
 
@@ -407,20 +408,20 @@ Constructor arguments
 .. important:: * IT - the type of data received by Executor
    * OT - the type of requests that ``outputRequestBuilder`` creates. The type depends on the type of output service (see "Request format" column of the table in the :ref:`Output_Request_Builder` section).
 
-Simulator provides the following methods:
+The simulator provides the following methods:
 
-* ``prepare(entities: Seq[IT], stream: String = "default-input-stream", consumerName: String = "default-consumer-name"): Long`` - takes a collection of data (``entities`` argument), creates one transaction (TStreamEnvelope[IT] type) with stream name "stream", saves them in a local buffer and returns ID of the transaction. The ``consumerName`` argument has a default value ("default-consumer-name"). You should define it only if the executor uses ``consumerName`` from TStreamEnvelope. Default value of the ``stream`` argument is "default-input-stream".
+* ``prepare(entities: Seq[IT], stream: String = "default-input-stream", consumerName: String = "default-consumer-name"): Long`` - takes a collection of data (``entities`` argument), creates one transaction (TStreamEnvelope[IT] type) with the ``stream`` stream name, saves them in a local buffer and returns ID of the transaction. The ``consumerName`` argument has a default value ("default-consumer-name"). You should define it only if the executor uses ``consumerName`` from TStreamEnvelope.
 * ``process(clearBuffer: Boolean = true): Seq[OT]`` - sends all transactions from local buffer to Executor by calling the ``onMessage`` method for each transaction, gets output envelopes and builds requests for output services. The ``clearBuffer`` argument indicates that local buffer with transactions have to be cleared after processing. That argument has a default value "true".
 * ``clear()`` - clears local buffer that contains transactions.
 
-Simulator has a ``beforeFirstCheckpoint`` flag that indicates that the first checkpoint has not been performed. Before the first checkpoint Simulator builds a delete request for each incoming transaction (in the ``process`` method). ``beforeFirstCheckpoint`` can be changed automatically, when Executor calls ``manager.initiateCheckpoint()``, or manually.
+Simulator has a ``beforeFirstCheckpoint`` flag that indicates that the first checkpoint has not been performed. Before the first checkpoint Simulator builds a delete request for each incoming transaction (in the ``process`` method). ``beforeFirstCheckpoint`` can be changed automatically by calling ``manager.initiateCheckpoint()`` inside the Executor, or manually.
 
 .. _Output_Request_Builder:
 
 Output Request Builder
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Output Request Builder provides the following methods for building requests for output service from output envelope:
+It provides the following methods to build requests based on an output envelope for a specific output service:
 
 * ``buildInsert`` - builds a request to insert data
 * ``buildDelete`` - builds a request to delete data
@@ -493,9 +494,10 @@ Module Environment Manager Mock
 
 It is a mock for ``StatefulModuleEnvironmentManager``. 
 
-It creates :ref:`PartitionedOutputMock` instead of ``PartitionedOutput`` and :ref:`RoundRobinOutputMock` instead of ``RoundRobinOutput``.
+It creates :ref:`PartitionedOutputMock` and :ref:`RoundRobinOutputMock` to save the information on where the data are transferred.
 
-Constructor arguments:
+Constructor arguments
+"""""""""""""""""""""""""""""""""
 
 .. csv-table:: 
  :header: "Argument", "Type", "Description"
@@ -542,7 +544,7 @@ They puts data into TStreamsSenderThreadMock.
 Partitioned Output Mock
 """"""""""""""""""""""""""""""""
 
-The mock for ``PartitionedOutput`` provides an output stream that puts data into a specific partition.
+The mock of an output stream that puts data into a specific partition.
 
 Provided methods:
 
@@ -553,7 +555,7 @@ Provided methods:
 Round Robin Output Mock
 """"""""""""""""""""""""""""""
 
-The mock for ``RoundRobinOutput`` provides an output stream that puts data using the round-robin policy.
+The mock of an output stream that puts data using the round-robin policy.
 
 Provided methods:
 
