@@ -323,7 +323,7 @@ Let's take a look at the main points:
 
 .(5) - when a batch has been collected then reset the number of envelopes for this batch. 
 
-The module allows to transform the data aggregated from input streams applying the idea of a sliding window. 
+The module allows transformation of the data aggregated from input streams applying the sliding window method. 
 
 A window size is equal to a number of batches. The window closes once it is full, i.e. the set number of batches is collected. The collected batches are transferred further for processing and the window slides forward for the set interval. This is a sliding window method.
 
@@ -372,7 +372,7 @@ The executor of the batch module provides the following methods that does not pe
      case tstreamEnvelope: TStreamEnvelope[Integer @unchecked] => //here there is an access to certain fields such as txnUUID, consumerName and data (array of integers)
      }
 
-    The data type of the envelope can be "KafkaEnvelope" data type or "TStreamEnvelope" data type. If you specify in an instance the inputs of the only one of this data types you shouldn't match the envelope like in the  example above and cast right the envelope to a particular data type::
+    The data type of the envelope can be "KafkaEnvelope" data type or "TStreamEnvelope" data type. If you specify the inputs of the only one of this data types in an instance, you shouldn't match the envelope like in the example above and cast right the envelope to a particular data type::
           
      val tstreamEnvelope =            
      envelope.asInstanceOf[TStreamEnvelope[Integer]]
