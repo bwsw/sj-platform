@@ -74,15 +74,15 @@ Input Streaming Custom Module
  
     libraryDependencies += "com.bwsw" %% "sj-engine-core" % "1.0" % "provided"
  
-2) Create an executor class inheriting the ``InputStreamingExecutor`` class and override the necessary methods (:ref:`input-module`).
-3) Create a validator class inheriting the ``StreamingValidator`` class and override the validate method if necessary (:ref:`validator`).
-4) Create `specification.json` in a resources folder and fill it in as shown in the example (:ref:`Json_example_input`).
+2) Create an executor class inheriting the ``InputStreamingExecutor`` class and override the necessary methods (see :ref:`input-module`).
+3) Create a validator class inheriting the ``StreamingValidator`` class and override the validate method if necessary (see :ref:`validator`).
+4) Create `specification.json` in a resources folder and fill it in as shown in the example (see :ref:`Json_example_input`).
 5) Assemble a jar of your module by calling sbt instruction from the project folder, e.g. 'sbt my-input-module/assembly'.
 6) Upload the module (via UI or REST).
 7) Create an instance of the module (via UI or REST).
 8) Launch the instance. 
 
-.. tip:: You can use a module simulator for preliminary testing of executor work (:ref:`Input_Engine_Simulator`).
+.. tip:: You can use a module simulator for preliminary testing of executor work (see :ref:`Input_Engine_Simulator`).
 
 Regular Streaming Custom Module
 ---------------------------------
@@ -90,15 +90,15 @@ Regular Streaming Custom Module
  
     libraryDependencies += "com.bwsw" %% "sj-engine-core" % "1.0" % "provided"
     
-2) Create an executor class inheriting ``RegularStreamingExecutor`` class and override the necessary methods (:ref:`regular-module`).
-3) Create a validator class inheriting ``StreamingValidator`` class and override the validate method if necessary (:ref:`validator`).
-4) Create `specification.json` in a resources folder and fill it in as shown in the example (:ref:`.. Json_example_regular`). 
+2) Create an executor class inheriting ``RegularStreamingExecutor`` class and override the necessary methods (see :ref:`regular-module`).
+3) Create a validator class inheriting ``StreamingValidator`` class and override the validate method if necessary (see :ref:`validator`).
+4) Create `specification.json` in a resources folder and fill it in as shown in the example (see :ref:`Json_example_regular`). 
 5) Assemble a jar of your module by calling sbt instruction from project folder, e.g. 'sbt my-regular-module/assembly'. 
 6) Upload the module (via REST or UI).
 7) Create an instance of the module (via REST or UI).
 8) Launch the instance. 
 
-.. tip:: You can use a module simulator for preliminary testing of executor work (:ref:`Regular_Engine_Simulator`).
+.. tip:: You can use a module simulator for preliminary testing of executor work (see :ref:`Regular_Engine_Simulator`).
 
 Batch Streaming Custom Module
 ------------------------------------
@@ -106,16 +106,16 @@ Batch Streaming Custom Module
  
     libraryDependencies += "com.bwsw" %% "sj-engine-core" % "1.0" % "provided"
 
-2) Create an executor class inheriting ``BatchStreamingExecutor`` class and override the necessary methods (:ref:`batch-module`).
-3) Create a batch collector inheriting ``BatchCollector`` class and override the required methods (:ref:`Batch-Collector`).
-4) Create a validator class inheriting ``StreamingValidator`` class and override the validate method if necessary (:ref:`validator`).
-5) Create `specification.json` in a resources folder and fill it in as shown in the example (see :ref:`Json_example_batch` ).
+2) Create an executor class inheriting ``BatchStreamingExecutor`` class and override the necessary methods (see :ref:`batch-module`).
+3) Create a batch collector inheriting ``BatchCollector`` class and override the required methods (see :ref:`Batch-Collector`).
+4) Create a validator class inheriting ``StreamingValidator`` class and override the validate method if necessary (see :ref:`validator`).
+5) Create `specification.json` in a resources folder and fill it in as shown in the example (see :ref:`Json_example_batch`).
 6) Assemble a jar of your module by calling sbt instruction from project folder, e.g. 'sbt my-batch-module/assembly' .
 7) Upload the module (via REST or UI).
 8) Create an instance of the module (via REST or UI).
 9) Launch the instance. 
 
-.. tip:: You can use a module simulator for preliminary testing of executor work (:ref:`Batch_Engine_Simulator`).
+.. tip:: You can use a module simulator for preliminary testing of executor work (see :ref:`Batch_Engine_Simulator`).
 
 Output Streaming Custom Module
 -----------------------------------------------
@@ -123,9 +123,9 @@ Output Streaming Custom Module
  
     libraryDependencies += "com.bwsw" %% "sj-engine-core" % "1.0" % "provided"
 
-2) Create an executor class inheriting ``OutputStreamingExecutor`` class and overrid the necessary methods (:ref:`output-module`)
-3) Create a validator class inheriting ``StreamingValidator`` class and override the validate method if necessary (:ref:`validator`)
-4) Create `specification.json` in a resources folder and fill it in as shown in the example (:ref:`Json_example_output`).
+2) Create an executor class inheriting ``OutputStreamingExecutor`` class and overrid the necessary methods (see :ref:`output-module`)
+3) Create a validator class inheriting ``StreamingValidator`` class and override the validate method if necessary (see :ref:`validator`)
+4) Create `specification.json` in a resources folder and fill it in as shown in the example (see :ref:`Json_example_output`).
 5) Create class of entity that extends ``OutputEnvelope``. Override method ``getFieldsValue``.
 6) Assemble a jar of your module by calling sbt instruction from the project folder, e.g. 'sbt my-output-module/assembly' 
 7) Create an index in Elasticsearch and the index mapping, or a table in a database, or deploy some REST service. Name of index is provided in Elasticsearch service. Both a table name and a document type is a stream name. A full URL to entities of the REST service is "`http://<host>:<port><basePath>/<stream-name>`"
@@ -347,7 +347,7 @@ The data from both of these streams is sent to a Regular module. We choose the R
 
  class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecutor[Record](manager)
 
-A manager (of `ModuleEnvironmentManager` type) here is just a source of information and a point of access to several useful methods: get output stream, get state (for stateful modules to store some global variables), etc. We use Record (avro record) type here as a generic type because output elements of the input module are stored as Avro records.
+A manager (of `ModuleEnvironmentManager` type) here is just a source of information and a point of access to several useful methods: get output stream, get state (for stateful modules to store some global variables), etc. We use Record (Apache Avro) type here as a generic type because output elements of the input module are stored as Avro records.
 
 The data is received from two streams, each of them will have its own name, so let's create the following object to store their names::
 
@@ -370,7 +370,7 @@ To describe the whole logic we need to override the following methods:
 
 - onMessage(envelope: TStreamEnvelope[T]) - to get and process messages;
 - onBeforeCheckpoint() - to send everything gained further;
-- deserialize(bytes: Array[Byte]) - to deserialize flow of bytes from T-Streams into AvroRecord correctly.
+- deserialize(bytes: Array[Byte]) - to deserialize flow of bytes from T-Streams into Record (Apache Avro) correctly.
 
 Validator 
 ++++++++++++++++++
@@ -428,7 +428,7 @@ We obtain envelopes from both of them and the name of the stream is stored in th
 	// if we receive something we don't need
  }
 
-The ``envelope.data.head`` field contains all data we need and its type is avro record. 
+The ``envelope.data.head`` field contains all data we need and its type is Record (Apache Avro). 
 
 So the next step is obvious - we will use Try scala type to cope with possibility of a wrong or a corrupted envelope::
 
@@ -530,7 +530,7 @@ First of all we need to obtain an output object to send all data into. In this e
 
 In ``manager.outputs`` all output streams are returned. In this project there would be only one output stream, so we just get its name. And then we obtain ``RoundRobinOutput`` object for this stream via ``getRoundRobinOutput``.
 
-Then we will use a ``state.getAll()`` method to obtain all data we collect right now. 
+Then we use the ``state.getAll()`` method to obtain all data we've collected. 
 
 It returns Map[String, Any]. We use the following code to process all elements::
 
@@ -560,13 +560,13 @@ It returns Map[String, Any]. We use the following code to process all elements::
 deserialize
 +++++++++++++++++++
 
-This method is called when we need to correctly deserialize the flow of bytes from T-Streams into AvroRecord.
+This method is called when we need to correctly deserialize the flow of bytes from T-Streams into Record (Apache Avro).
 
-There is ``AvroSerializer`` class which shall be used for this purpose. But due to the features of Avro format we need `avroSchema` to do that properly. 
+There is an ``AvroSerializer`` class which shall be used for this purpose. But due to the features of Avro format we need an `avroSchema` to do that properly. 
 
 Avro schema is stored into ``manager.options`` field. 
 
-So, the next code listing shows the way of creating ``AvroSerialiser`` and obtaining avro scheme::
+So, the following code listing shows the way of creating ``AvroSerialiser`` and obtaining an avro scheme::
 
  private val jsonSerializer: JsonSerializer = new JsonSerializer
  private val mapOptions: Map[String, Any] = jsonSerializer.deserialize[Map[String, Any]](manager.options)
@@ -592,7 +592,7 @@ Manager here (of ``OutputEnvironmentManager`` type) is also a point of access to
 
 Type of data sent by Regular module is String that's why this type is used as a template type.
 
-We will need to override two methods:
+We need to override two methods:
 
 - ``onMessage(envelope: TStreamEnvelope[String])`` - to get and process messages
 - ``getOutputEntity()`` - to return format of output records
@@ -600,7 +600,7 @@ We will need to override two methods:
 Validator 
 +++++++++++++
 
-Validator class here is empty due to absence of extra information on how we need to process data from Regular module.
+The Validator class here is empty due to the absence of extra information on how we need to process data from the Regular module.
 
 onMessage 
 +++++++++++++
@@ -625,7 +625,7 @@ The full code of this method is listed below::
 
 All data are in the 'envelope' data field. 
 
-So, for each record in this field we create a new ``PingMetrics`` instance and fill in all corresponding fields. Then just return sequence of these objects.
+So, for each record in this field we create a new ``PingMetrics`` instance and fill in all corresponding fields. Then just return a sequence of these objects.
 
 getOutputEntity 
 ++++++++++++++++++
@@ -636,9 +636,9 @@ Signature of the method looks like::
 
 It returns instances of Entity[String] - that class contains metadata on ``OutputEnvelope`` structure: map (field name -> field type) (Map[String, NamedType[T]]).
 
-In file 'es-echo-response-1m.json' we use `elasticsearch-output` string as a value of the ``type`` field. It means that we will use Elasticsearch as output of our sj-module. Other possible variants are REST and JDBC.
+In the 'es-echo-response-1m.json' file we use the elasticsearch-output string as a value of the ``type`` field. It means that we use Elasticsearch as output of our SJ-module. Other possible variants are REST and JDBC.
 
-So, for Elasticsearch destination type we shall use appropriate builder in 'getOutputEntity' (there are three of them - one for each type) and just describe all fields we have::
+So, for Elasticsearch destination type we shall use an appropriate builder in 'getOutputEntity' (there are three of them - one for each type) and just describe all fields we have::
 
  override def getOutputEntity: Entity[String] = {
 	val entityBuilder = new ElasticsearchEntityBuilder()
@@ -656,7 +656,7 @@ So, for Elasticsearch destination type we shall use appropriate builder in 'getO
 specification.json 
 +++++++++++++++++++++
 
-This file describes the module. Examples of description can be found at :ref:`Json_schema`.
+This file describes the module. Examples of description can be found at the :ref:`Json_schema` section.
 
 
 More Code
