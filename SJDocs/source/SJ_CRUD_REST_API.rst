@@ -2169,7 +2169,8 @@ Request format::
 Instance fields
 """""""""""""""""""
 
-**General instance fields**
+General instance fields
++++++++++++++++++++++++++++++++++
 
 .. csv-table:: 
   :header: "Field name", "Format",  "Description", "Example"
@@ -2187,7 +2188,8 @@ Instance fields
   "environmentVariables", "Jobject", "Using in framework", "{ 'LIBPROCESS_IP' : '176.1.0.17' }"
   "performanceReportingInterval", "Long", "Interval for creating report of performance metrics of module in ms (60000 by default)",  "5000696"
 
-**Input-streaming instance fields**
+Input-streaming instance fields
++++++++++++++++++++++++++++++++++++++++++
 
 .. csv-table:: 
   :header: "Field name", "Format",  "Description", "Example"
@@ -2204,7 +2206,8 @@ Instance fields
   "backupCount", "Int", "The number of backup copies you want to have (0 by default, maximum 6). Sync backup operations have a blocking cost which may lead to latency issues. You can skip this field if you do not want your entries to be backed up, e.g. if performance is more important than backing up.",  2 
   "asyncBackupCount", "Int", "Flag points an every envelope (an envelope key) has to be checked on duplication or not (0 by default). The backup operations are performed at some point in time (non-blocking operation). You can skip this field if you do not want your entries to be backed up, e.g. if performance is more important than backing up.", 3 
 
-**Regular-streaming instance fields**
+Regular-streaming instance fields
++++++++++++++++++++++++++++++++++++++++
 
 .. csv-table::  
   :header: "Field name", "Format",  "Description", "Example"
@@ -2219,7 +2222,10 @@ Instance fields
   "stateFullCheckpoint", "Int", "Interval for full checkpoint (100 by default)", "5"
   "eventWaitTime", "Long", "Idle timeout, when not messages (1000 by default)", 10000
 
-**Batch-streaming instance fields**
+.. _Batch-streaming_instance_fields:
+
+Batch-streaming instance fields
++++++++++++++++++++++++++++++++++++++
 
 .. csv-table:: 
  :header: "Field name", "Format",  "Description", "Example"
@@ -2235,7 +2241,8 @@ Instance fields
   "stateFullCheckpoint", "Int", "Interval for full checkpoint (100 by default)", 5 
   "eventWaitTime", "Long", "Idle timeout, when not messages (1000 by default)", 10000 
 
-**Output-streaming instance fields**
+Output-streaming instance fields
++++++++++++++++++++++++++++++++++++++++
 
 .. csv-table:: 
   :header: "Field name", "Format",  "Description", "Example"
