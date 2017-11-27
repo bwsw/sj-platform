@@ -562,7 +562,7 @@ deserialize
 
 This method is called when we need to correctly deserialize the flow of bytes from T-Streams into Record (Apache Avro).
 
-There is an ``AvroSerializer`` class which shall be used for this purpose. But due to the features of Avro format we need an `avroSchema` to do that properly. 
+There is an ``AvroSerializer`` class which shall be used for this purpose. But due to the features of Avro format we need a schema to do that properly. 
 
 Avro schema is stored into ``manager.options`` field. 
 
