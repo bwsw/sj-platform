@@ -133,7 +133,7 @@ Provided methods
  * ``envelopesNumberBeforeIdle`` - number of envelopes after which ``executor.onIdle()`` will be invoked ('0' by default). '0' means that ``executor.onIdle()`` will never be called.
  * ``clearBuffer`` - indicates that all envelopes will be removed from a local buffer after processing.
 * ``beforeCheckpoint(isFullState: Boolean): SimulationResult`` - imitates the behavior of the :ref:`Regular_Streaming_Engine` before checkpoint: invokes ``executor.onBeforeCheckpoint()``, then invokes ``executor.onBeforeStateSave(isFullState)`` and returns output streams and state (see :ref:`Simulation-Result`).
- * ``isFullState`` - a flag denoting that either the full state ('true') or a partial change of state ('false') have been saved. 
+ * ``isFullState`` - a flag denoting that either the full state ('true') or a partial change of state ('false') is going to be saved. 
 * ``timer(jitter: Long): SimulationResult`` - imitates that a timer went out (invokes ``executor.onTimer(jitter)``).
  * ``jitter`` - a delay between a real response time and an invocation of this handler.
 * ``clear()`` - removes all envelopes from a local buffer.
@@ -244,23 +244,15 @@ Provided methods
  - ``entities`` - the list of incoming data elements.
  - ``stream`` - the name of a stream of incoming data.
 
-* ``process(batchesNumberBeforeIdle: Int = 0,``
-        
-        ``window: Int,``
-        
-        ``slidingInterval: Int,``
-        
-        ``saveFullState: Boolean = false,``
-        
-        ``removeProcessedEnvelopes: Boolean = true): BatchSimulationResult`` - sends all envelopes from local buffer and returns output streams, state and envelopes that haven't been processed (see :ref:`Batch-Simulation-Result`). This method retrieves batches using ``batchCollector``, creates a window repository and invokes ``onWindow``, ``onEnter``, ``onLeaderEnter``, ``onBeforeCheckpoint``, ``onBeforeStateSave`` methods of Executor for *every* created window repository. At the end of this method all envelopes will be removed from ``batchCollector``.
+* ``process(batchesNumberBeforeIdle: Int = 0, window: Int, slidingInterval: Int, saveFullState: Boolean = false, removeProcessedEnvelopes: Boolean = true): BatchSimulationResult`` - sends all envelopes from local buffer and returns output streams, state and envelopes that haven't been processed (see :ref:`Batch-Simulation-Result`). This method retrieves batches using ``batchCollector``. Then it creates a window repository and invokes the Executor methods for every stage of the processing cycle. The methods are invoked in the following order: ``onWindow``, ``onEnter``, ``onLeaderEnter``, ``onBeforeCheckpoint``, ``onBeforeStateSave``. At the end of this method all envelopes will be removed from ``batchCollector``.
  - ``batchesNumberBeforeIdle`` - the number of retrieved batches between invocations of ``executor.onIdle()`` ('0' by default). '0' means that ``executor.onIdle()`` will never be called.
- -``window`` - count of batches that will be contained into a window (see :ref:`Batch-streaming_instance_fields`).
+ - ``window`` - count of batches that will be contained into a window (see :ref:`Batch-streaming_instance_fields`).
  - ``slidingInterval`` - the interval at which a window will be shifted (count of processed batches that will be removed from the window) (see :ref:`Batch-streaming_instance_fields`).
  - ``saveFullState`` - the flag denoting that either the full state ('true') or a partial change of the state ('false') is going to be saved after every checkpoint.
  - ``removeProcessedEnvelopes`` - indicates that all processed envelopes will be removed from a local buffer after processing.
 
 * ``beforeCheckpoint(isFullState: Boolean): SimulationResult`` - imitates the behavior of the :ref:`Batch_Streaming_Engine` before checkpoint: invokes ``executor.onBeforeCheckpoint()``, then invokes ``executor.onBeforeStateSave(isFullState)`` and returns output streams and state (see :ref:`Simulation-Result`).
- - ``isFullState`` - the flag denoting that either the full state ('true') or partial changes of state ('false') have been saved.
+ - ``isFullState`` - the flag denoting that either the full state ('true') or partial changes of state ('false') is going to be saved.
 
 * ``timer(jitter: Long): SimulationResult`` - imitates that a timer went out (invokes ``executor.onTimer(jitter)``).
  - ``jitter`` - the delay between a real response time and an invocation of this handler.
@@ -315,7 +307,7 @@ E.g. you have your own Executor that takes strings and calculates their length::
   }
  }
  
-If you want to see what the Executor puts into output stream and into the state after processing, Batch Engine Simulator can be used in the following way::
+If you want to see what the Executor puts into an output stream and into the state after processing, Batch Engine Simulator can be used in the following way::
 
  val stateSaver = mock(classOf[StateSaverInterface])
  val stateLoader = new StateLoaderMock
@@ -483,9 +475,9 @@ Simulation Result
 
 ``case class SimulationResult(streamDataList: Seq[StreamData], state: Map[String, Any])`` - contains data elements for each output stream and the state at a certain point in time.
 
-``case class StreamData(stream: String, partitionDataList: Seq[PartitionData])`` - contains data elements that has been sent in an output stream.
+``case class StreamData(stream: String, partitionDataList: Seq[PartitionData])`` - contains data items that have been sent to an output stream.
 
-``case class PartitionData(partition: Int, dataList: Seq[AnyRef])`` - contains data elements that has been sent in a partition of an output stream.
+``case class PartitionData(partition: Int, dataList: Seq[AnyRef])`` - contains data elements that have been sent to an output stream partition.
 
 .. _Module-Environment-Manager-Mock:
 
@@ -504,7 +496,7 @@ Constructor arguments
  :widths: 15, 15, 30 
 
  "stateStorage", "StateStorage", "A storage of the state"
- "options", "String", "User-defined options from an instance"
+ "options", "String", "User-defined instance options"
  "outputs", "Array[TStreamStreamDomain]", "The list of output streams from an instance"
  "senderThread", "TStreamsSenderThreadMock", "The mock for thread for sending data to the T-Streams service (described below)"
  "fileStorage", 	"FileStorage", 	"A file storage (mocked by default)"
