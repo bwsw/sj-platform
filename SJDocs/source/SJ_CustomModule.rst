@@ -662,6 +662,6 @@ This file describes the module. Examples of description can be found at the :ref
 More Code
 ------------------------
 
-More module examples you can find at the GitHub `fping example project <https://github.com/bwsw/sj-fping-demo>`_ and `sFlow example project <https://github.com/bwsw/sj-sflow-demo>`_ repositories.
+More module examples you can find at the `fping example project <https://github.com/bwsw/sj-fping-demo>`_ and `sFlow example project <https://github.com/bwsw/sj-sflow-demo>`_ GitHub repositories.
 
 
