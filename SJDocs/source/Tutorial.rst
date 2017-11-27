@@ -247,11 +247,11 @@ So, let's start with deploying Mesos and other services.
    - 2 CPUs, 
    - 4096 memory.
 
+Start Mesos and the services. 
+
 .. note:: If you are planning to process data in a parallel mode (set the `parallelizm` parameter to a value greater than 1), you need to increase the `executor_registration_timeout` parameter for Mesos-slave.
 
-     
-     Start Mesos and the services. 
-
+    
 2) Create JSON files and a configuration file. Please, name them as specified here.
 
    Replace <slave_advertise_ip> with Mesos-slave IP.
