@@ -62,7 +62,7 @@ This simulator provides information on the processing of incoming data by the  `
 Usage example
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-E.g. you implement your own Executor that splits byte buffer by a comma and tries to parse it to 'Integer'::
+E.g. you have your own Executor that splits byte buffer by a comma and tries to parse it into 'Integer'::
 
  class SomeExecutor(manager: InputEnvironmentManager) extends InputStreamingExecutor[Integer](manager) {
   override def tokenize(buffer: ByteBuf): Option[Interval] = { ... }
@@ -117,23 +117,23 @@ Constructor arguments
 Provided methods
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-* ``prepareState(state: Map[String, Any])`` - loads state in a state storage.
+* ``prepareState(state: Map[String, Any])`` - loads state into a state storage.
  * ``state`` - key/value map.
-* ``prepareTstream(entities: Seq[T], stream: String, consumerName: String = "default-consumer-name"): Long`` - creates *one* t-stream envelope (``TStreamEnvelope[T]`` type) and saves it in a local buffer. Returns ID of the envelope.
+* ``prepareTstream(entities: Seq[T], stream: String, consumerName: String = "default-consumer-name"): Long`` - creates *one* t-stream envelope (``TStreamEnvelope[T]`` type) and saves it in a local buffer. Returns an ID of the envelope.
  * ``entities`` - list of incoming data elements.
  * ``stream`` - name of a stream with incoming data.
  * ``consumerName`` - name of a consumer ('default-consumer-name' by default).
-* ``prepareKafka(entity: T, stream: String): Long`` - creates *one* kafka envelope (``KafkaEnvelope[T]`` type) and saves it in a local buffer. Returns ID of that envelope.
+* ``prepareKafka(entity: T, stream: String): Long`` - creates *one* kafka envelope (``KafkaEnvelope[T]`` type) and saves it in a local buffer. Returns an ID of that envelope.
  * ``entity`` - an incoming data element.
  * ``stream`` - name of a stream with incoming data.
-* ``prepareKafka(entities: Seq[T], stream: String): Seq[Long]`` - creates a *list* of kafka envelopes (``KafkaEnvelope[T]`` type) - *one* envelope for *one* element from ``entities``, and saves it in a local buffer. Returns a list of envelope IDs.
+* ``prepareKafka(entities: Seq[T], stream: String): Seq[Long]`` - creates a *list* of kafka envelopes (``KafkaEnvelope[T]`` type) - *one* envelope for *each* element from ``entities``, and saves it in a local buffer. Returns a list of envelopes' IDs.
  * ``entities`` - list of incoming data elements.
  * ``stream`` - name of a stream with incoming data.
 * ``process(envelopesNumberBeforeIdle: Int = 0, clearBuffer: Boolean = true): SimulationResult`` - sends all envelopes from local buffer and returns output streams and state (see :ref:`Simulation-Result`).
  * ``envelopesNumberBeforeIdle`` - number of envelopes after which ``executor.onIdle()`` will be invoked ('0' by default). '0' means that ``executor.onIdle()`` will never be called.
  * ``clearBuffer`` - indicates that all envelopes will be removed from a local buffer after processing.
 * ``beforeCheckpoint(isFullState: Boolean): SimulationResult`` - imitates the behavior of the :ref:`Regular_Streaming_Engine` before checkpoint: invokes ``executor.onBeforeCheckpoint()``, then invokes ``executor.onBeforeStateSave(isFullState)`` and returns output streams and state (see :ref:`Simulation-Result`).
- * ``isFullState`` - a flag denoting that the full state ('true') or partial changes of state ('false') have been saved. 
+ * ``isFullState`` - a flag denoting that either the full state ('true') or a partial change of state ('false') have been saved. 
 * ``timer(jitter: Long): SimulationResult`` - imitates that a timer went out (invokes ``executor.onTimer(jitter)``).
  * ``jitter`` - a delay between a real response time and an invocation of this handler.
 * ``clear()`` - removes all envelopes from a local buffer.
@@ -141,7 +141,7 @@ Provided methods
 Usage Example
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-E.g. you implement your own Executor that takes strings and calculates their length::
+E.g. you have your own Executor that takes strings and calculates their length::
 
  class SomeExecutor(manager: ModuleEnvironmentManager) extends RegularStreamingExecutor[String](manager) {
   private val state = manager.getState
@@ -197,7 +197,7 @@ If you want to see what the executor puts into an output stream and to the state
 
 The ``mock`` method is from the ``org.mockito.Mockito.mock`` library.
 
-For more complicated examples see `sj-fping-process-test <https://github.com/bwsw/sj-fping-demo/blob/develop/ps-process/src/test/scala/com/bwsw/sj/examples/pingstation/module/regular/ExecutorTests.scala>`_.
+To see more complicated examples, please, visit `sj-fping-process-test <https://github.com/bwsw/sj-fping-demo/blob/develop/ps-process/src/test/scala/com/bwsw/sj/examples/pingstation/module/regular/ExecutorTests.scala>`_.
 
 .. _Batch_Engine_Simulator:
 
@@ -228,19 +228,19 @@ Constructor arguments
 Provided methods
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-* ``prepareState(state: Map[String, Any])`` - loads state in a state storage.
+* ``prepareState(state: Map[String, Any])`` - loads state into a state storage.
  - ``state`` - key/value map.
 
-* ``prepareTstream(entities: Seq[T], stream: String, consumerName: String = "default-consumer-name"): Long`` - creates *one* t-stream envelope (``TStreamEnvelope[T]`` type) and saves it in a local buffer. Returns ID of the envelope.
+* ``prepareTstream(entities: Seq[T], stream: String, consumerName: String = "default-consumer-name"): Long`` - creates *one* t-stream envelope (``TStreamEnvelope[T]`` type) and saves it in a local buffer. Returns an ID of the envelope.
  - ``entities`` - the list of incoming data elements.
  - ``stream`` - the name of a stream with incoming data.
  - ``consumerName`` - the name of a consumer ('default-consumer-name' by default).
 
-* ``prepareKafka(entity: T, stream: String): Long`` - creates *one* kafka envelope ('KafkaEnvelope[T]' type) and saves it in a local buffer. Returns ID of that envelope.
+* ``prepareKafka(entity: T, stream: String): Long`` - creates *one* kafka envelope ('KafkaEnvelope[T]' type) and saves it in a local buffer. Returns an ID of that envelope.
  - ``entity`` - an incoming data element.
  - ``stream`` - the name of a stream with incoming data.
 
-* ``prepareKafka(entities: Seq[T], stream: String): Seq[Long]`` - creates a *list* of kafka envelopes ('KafkaEnvelope[T]' type) - *one* envelope for *one* element from ``entities``, and saves it in a local buffer. Returns a list of envelopes IDs.
+* ``prepareKafka(entities: Seq[T], stream: String): Seq[Long]`` - creates a *list* of kafka envelopes ('KafkaEnvelope[T]' type) - *one* envelope for *each* element from ``entities``, and saves it in a local buffer. Returns a list of envelopes' IDs.
  - ``entities`` - the list of incoming data elements.
  - ``stream`` - the name of a stream of incoming data.
 
@@ -256,11 +256,11 @@ Provided methods
  - ``batchesNumberBeforeIdle`` - the number of retrieved batches between invocations of ``executor.onIdle()`` ('0' by default). '0' means that ``executor.onIdle()`` will never be called.
  -``window`` - count of batches that will be contained into a window (see :ref:`Batch-streaming_instance_fields`).
  - ``slidingInterval`` - the interval at which a window will be shifted (count of processed batches that will be removed from the window) (see :ref:`Batch-streaming_instance_fields`).
- - ``saveFullState`` - the flag denoting that the full state ('true') or partial changes of state ('false') are going to be saved after every checkpoint.
+ - ``saveFullState`` - the flag denoting that either the full state ('true') or a partial change of the state ('false') is going to be saved after every checkpoint.
  - ``removeProcessedEnvelopes`` - indicates that all processed envelopes will be removed from a local buffer after processing.
 
 * ``beforeCheckpoint(isFullState: Boolean): SimulationResult`` - imitates the behavior of the :ref:`Batch_Streaming_Engine` before checkpoint: invokes ``executor.onBeforeCheckpoint()``, then invokes ``executor.onBeforeStateSave(isFullState)`` and returns output streams and state (see :ref:`Simulation-Result`).
- - ``isFullState`` - the flag denotes that there was saved the full state ('true') or partial changes of state ('false').
+ - ``isFullState`` - the flag denoting that either the full state ('true') or partial changes of state ('false') have been saved.
 
 * ``timer(jitter: Long): SimulationResult`` - imitates that a timer went out (invokes ``executor.onTimer(jitter)``).
  - ``jitter`` - the delay between a real response time and an invocation of this handler.
@@ -279,7 +279,7 @@ After invocation of the ``process`` method some envelopes could remain not proce
 Usage Example
 ~~~~~~~~~~~~~~~~~~~~~~
 
-E.g. you implement your own Executor that takes strings and calculates their length::
+E.g. you have your own Executor that takes strings and calculates their length::
 
  class SomeExecutor(manager: ModuleEnvironmentManager) extends BatchStreamingExecutor[String](manager) {
   private val state = manager.getState
@@ -359,7 +359,7 @@ If you want to see what the Executor puts into output stream and into the state 
 
 The ``mock`` method is from the ``org.mockito.Mockito.mock`` library.
 
-``SomeBatchCollector`` is an example of ``BatchCollector`` implementation. The ``getBatchesToCollect`` method returns all nonempty batches, ``afterEnvelopeReceive`` counts envelopes in batches, ``prepareForNextCollecting`` resets counters. 
+``SomeBatchCollector`` is an example of the ``BatchCollector`` implementation. The ``getBatchesToCollect`` method returns all nonempty batches, ``afterEnvelopeReceive`` counts envelopes in batches, ``prepareForNextCollecting`` resets counters. 
 
 Accumulation of batches is implemented in ``BatchCollector``::
 
@@ -379,7 +379,7 @@ Accumulation of batches is implemented in ``BatchCollector``::
     countOfEnvelopesPerStream(streamName) = 0
  }
 
-For more complicated examples see `sj-sflow-process-test <https://github.com/bwsw/sj-sflow-demo/blob/develop/sflow-process/src/test/scala/com/bwsw/sj/examples/sflow/module/process/ExecutorTests.scala>`_.
+For more complicated examples, please, visit `sj-sflow-process-test <https://github.com/bwsw/sj-sflow-demo/blob/develop/sflow-process/src/test/scala/com/bwsw/sj/examples/sflow/module/process/ExecutorTests.scala>`_.
 
 .. _Output_Engine_Simulator:
 
@@ -410,11 +410,11 @@ Constructor arguments
 
 The simulator provides the following methods:
 
-* ``prepare(entities: Seq[IT], stream: String = "default-input-stream", consumerName: String = "default-consumer-name"): Long`` - takes a collection of data (``entities`` argument), creates one transaction (TStreamEnvelope[IT] type) with the ``stream`` stream name, saves them in a local buffer and returns ID of the transaction. The ``consumerName`` argument has a default value ("default-consumer-name"). You should define it only if the executor uses ``consumerName`` from TStreamEnvelope.
+* ``prepare(entities: Seq[IT], stream: String = "default-input-stream", consumerName: String = "default-consumer-name"): Long`` - takes a collection of data (``entities`` argument), creates one transaction (TStreamEnvelope[IT] type) with the stream name that equals to the value of the ``stream`` parameter, saves them in a local buffer and returns an ID of the transaction. The ``consumerName`` argument has a default value ("default-consumer-name"). You should define it only if the executor uses ``consumerName`` from TStreamEnvelope.
 * ``process(clearBuffer: Boolean = true): Seq[OT]`` - sends all transactions from local buffer to Executor by calling the ``onMessage`` method for each transaction, gets output envelopes and builds requests for output services. The ``clearBuffer`` argument indicates that local buffer with transactions have to be cleared after processing. That argument has a default value "true".
 * ``clear()`` - clears local buffer that contains transactions.
 
-Simulator has a ``beforeFirstCheckpoint`` flag that indicates that the first checkpoint has not been performed. Before the first checkpoint Simulator builds a delete request for each incoming transaction (in the ``process`` method). ``beforeFirstCheckpoint`` can be changed automatically by calling ``manager.initiateCheckpoint()`` inside the Executor, or manually.
+Simulator has the ``beforeFirstCheckpoint`` flag that indicates that the first checkpoint operation has not been performed. Before the first checkpoint operation the Simulator builds a delete request for each incoming transaction (in the ``process`` method). ``beforeFirstCheckpoint`` can be changed automatically by calling ``manager.initiateCheckpoint()`` inside the Executor, or manually.
 
 .. _Output_Request_Builder:
 
@@ -441,7 +441,7 @@ The are three implementations of the ``OutputRequestBuilder`` for each type of o
 Usage example
 ~~~~~~~~~~~~~~~~~~~~
 
-E.g. you implement your own Executor, that takes pairs (Integer, String) and puts them in Elasticsearch::
+E.g. you have your own Executor, that takes pairs (Integer, String) and puts them in Elasticsearch::
 
  class SomeExecutor(manager: OutputEnvironmentManager) 
   extends OutputStreamingExecutor[(Integer, String)](manager) {
@@ -468,9 +468,9 @@ If you want to see what Executor returns after processing and what requests are 
  println(requestsAfterFirstCheckpoint)
 
 
-``requestsBeforeFirstCheckpoint`` will contain delete and insert requests, ``requestsAfterFirstCheckpoint``  will contain insert requests only.
+``requestsBeforeFirstCheckpoint`` will contain delete and insert requests, ``requestsAfterFirstCheckpoint``  will contain insertion requests only.
 
-For more complicated examples see: `sj-fping-output-test <https://github.com/bwsw/sj-fping-demo/blob/develop/ps-output/src/test/scala/com/bwsw/sj/examples/pingstation/module/output/ExecutorTests.scala>`_, `sj-sflow-output-test <https://github.com/bwsw/sj-sflow-demo/blob/develop/sflow-output/src-dst/src/test/scala/com/bwsw/sj/examples/sflow/module/output/srcdst/ExecutorTests.scala.>`_
+To see more complicated examples, please, examine the following sections: `sj-fping-output-test <https://github.com/bwsw/sj-fping-demo/blob/develop/ps-output/src/test/scala/com/bwsw/sj/examples/pingstation/module/output/ExecutorTests.scala>`_, `sj-sflow-output-test <https://github.com/bwsw/sj-sflow-demo/blob/develop/sflow-output/src-dst/src/test/scala/com/bwsw/sj/examples/sflow/module/output/srcdst/ExecutorTests.scala>`_
 
 Objects For Simulators With States
 -------------------------------------
