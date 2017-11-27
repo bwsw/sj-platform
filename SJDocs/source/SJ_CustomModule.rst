@@ -70,7 +70,7 @@ A :ref:`hello-world-module` is presented as a tutorial on a module development.
 
 Input Streaming Custom Module
 ---------------------------------
-1) Create a new sbt project depending on sj-engine-core library, i.e. use the latest version from https://mvnrepository.com/artifact/com.bwsw in your `build.sbt` file.  Also mark this dependency as provided. This prevents it from being included in the assembly JAR. For example:: 
+1) Create a new sbt project depending on sj-engine-core library, i.e. use the latest version from the  ` Apache Maven repository <https://mvnrepository.com/artifact/com.bwsw>`_ in your `build.sbt` file.  Also mark this dependency as provided. This prevents it from being included in the assembly JAR. For example:: 
  
     libraryDependencies += "com.bwsw" %% "sj-engine-core" % "1.0" % "provided"
  
@@ -86,7 +86,10 @@ Input Streaming Custom Module
 
 Regular Streaming Custom Module
 ---------------------------------
-1) Create a new sbt project with dependency on the sj-engine-core library, i.e. use the latest version from https://mvnrepository.com/artifact/com.bwsw in your build.sbt file.
+1) Create a new sbt project with dependency on the sj-engine-core library, i.e. use the latest version from the ` Apache Maven repository <https://mvnrepository.com/artifact/com.bwsw>`_ in your `build.sbt` file. Also mark this dependency as provided. This prevents it from being included in the assembly JAR. For example:: 
+ 
+    libraryDependencies += "com.bwsw" %% "sj-engine-core" % "1.0" % "provided"
+    
 2) Create an executor class inheriting ``RegularStreamingExecutor`` class and override the necessary methods (:ref:`regular-module`).
 3) Create a validator class inheriting ``StreamingValidator`` class and override the validate method if necessary (:ref:`validator`).
 4) Create `specification.json` in a resources folder and fill it in as shown in the example (:ref:`.. Json_example_regular`). 
@@ -99,11 +102,14 @@ Regular Streaming Custom Module
 
 Batch Streaming Custom Module
 ------------------------------------
-1) Create a new sbt project with dependency on the sj-engine-core library, i.e. use the latest version from https://mvnrepository.com/artifact/com.bwsw in your build.sbt file.
+1) Create a new sbt project with dependency on the sj-engine-core library, i.e. use the latest version from the  ` Apache Maven repository <https://mvnrepository.com/artifact/com.bwsw>`_ in your `build.sbt` file. Also mark this dependency as provided. This prevents it from being included in the assembly JAR. For example:: 
+ 
+    libraryDependencies += "com.bwsw" %% "sj-engine-core" % "1.0" % "provided"
+
 2) Create an executor class inheriting ``BatchStreamingExecutor`` class and override the necessary methods (:ref:`batch-module`).
 3) Create a batch collector inheriting ``BatchCollector`` class and override the required methods (:ref:`Batch-Collector`).
 4) Create a validator class inheriting ``StreamingValidator`` class and override the validate method if necessary (:ref:`validator`).
-5) Create `specification.json` in a resources folder and fill it in as shown in the example (:ref:`Json_example_batch`).
+5) Create `specification.json` in a resources folder and fill it in as shown in the example (see :ref:`Json_example_batch` ).
 6) Assemble a jar of your module by calling sbt instruction from project folder, e.g. 'sbt my-batch-module/assembly' .
 7) Upload the module (via REST or UI).
 8) Create an instance of the module (via REST or UI).
@@ -113,7 +119,10 @@ Batch Streaming Custom Module
 
 Output Streaming Custom Module
 -----------------------------------------------
-1) Create a new sbt project with dependency on the sj-engine-core library, i.e. use the latest version from https://mvnrepository.com/artifact/com.bwsw in your build.sbt file.
+1) Create a new sbt project with dependency on the sj-engine-core library, i.e. use the latest version from the  ` Apache Maven repository <https://mvnrepository.com/artifact/com.bwsw>`_ in your `build.sbt` file. Also mark this dependency as provided. This prevents it from being included in the assembly JAR. For example:: 
+ 
+    libraryDependencies += "com.bwsw" %% "sj-engine-core" % "1.0" % "provided"
+
 2) Create an executor class inheriting ``OutputStreamingExecutor`` class and overrid the necessary methods (:ref:`output-module`)
 3) Create a validator class inheriting ``StreamingValidator`` class and override the validate method if necessary (:ref:`validator`)
 4) Create `specification.json` in a resources folder and fill it in as shown in the example (:ref:`Json_example_output`).
