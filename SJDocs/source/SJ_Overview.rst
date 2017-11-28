@@ -68,7 +68,7 @@ Major features implemented in SJ-Platform are listed in the following list:
 
 **Use of Apache Kafka, T-streams or TCP as an input source of events**. External systems feed SJ-Platform with events via a list of supported interfaces. Right now it supports several of them. 
 
-The first is **TCP**. The method allows developers design custom protocol to receive events from external systems, deduplicate them and place into processing pipeline.
+The first is **TCP**. The method allows developers to design a custom protocol to receive events from external systems, deduplicate them and place into processing pipeline.
 
 The second is **Apache Kafka**. Apache Kafka is the de-facto standard for message queueing, so we support it in SJ-Platform providing 3rd party applications with common integration interface.
 
