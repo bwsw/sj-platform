@@ -461,6 +461,7 @@ Modules` performance is determined by the work of an engine. Engines of differen
 
 Please, find more information about engines at the :ref:`Engines` page.
 
+.. _Entities_Correlation:
 
 Prerequisites For Modules. Streaming Component.
 --------------------------------------------------
