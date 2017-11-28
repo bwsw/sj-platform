@@ -8,7 +8,6 @@ export class ServiceModel extends BaseModel {
   namespace: string;
   provider: string;
   zkProvider: string;
-  zkNamespace: string;
   prefix: string;
   token: string;
   index: string;

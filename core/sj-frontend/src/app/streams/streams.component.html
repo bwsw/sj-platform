@@ -263,9 +263,6 @@
           <li *ngIf="currentStreamService.type === 'service.apache-kafka' && currentStreamService.zkProvider">
             <span class="title">ZK provider:</span>{{currentStreamService.zkProvider}}
           </li>
-          <li *ngIf="currentStreamService.type === 'service.apache-kafka' && currentStreamService.zkNamespace">
-            <span class="title">ZK namespace:</span>{{currentStreamService.zkNamespace}}
-          </li>
           <li *ngIf="currentStreamService.type === 'service.restful' && currentStreamService.httpVersion">
             <span class="title">Http version:</span>{{currentStreamService.httpVersion}}
           </li>
