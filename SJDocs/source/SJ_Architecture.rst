@@ -103,7 +103,7 @@ Using **TCP** as an input source a custom protocol can be used for receiving eve
 
 SJ-Platform supports **Apache Kafka** as a standard message broker providing a common interface for the integration of many applications.
 
-Within the platform, the data are transported to and from modules via *transactional streams* or **T-streams**. It is a message broker and a Scala library which is native to SJ-Platform and designed primarily for exactly-once processing  (so it includes a transactional producer, a consumer and a subscriber). 
+Within the platform, the data are transported to and from modules via *transactional streams* or **T-streams**. It is a message broker which is native to SJ-Platform and designed primarily for exactly-once processing  (so it includes a transactional producer, a consumer and a subscriber). 
 
 .. tip:: More information on T-streams as well as streaming infrastructure in SJ-Platform can be found at the :ref:`Streaming` page. 
 
