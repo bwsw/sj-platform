@@ -497,6 +497,48 @@ The schema below may help you to understand the dependency of entities in the pl
 
   Picture 1.11
 
+The table below explains what types of streams may serve as input or output streams for particular instance types:
+
+===============  ================================================  ===============================================
+Instance type    Input stream                                      Output stream
+===============  ================================================  ===============================================
+*Input*            TCP                                               T-streams 
+
+                                                                      **Providers**: Apache Zookeeper
+                                       
+                                                                      **Services**: T-streams, Apache Zookeeper
+
+*Regular/Batch*    T-streams                                         T-streams
+               
+                    **Providers**: Apache Zookeeper                   **Providers**: Apache Zookeeper
+
+                    **Services**: T-streams, Apache Zookeeper         **Services**: T-streams, Apache Zookeeper
+               
+                   Apache Kafka
+              
+                    **Providers**: Apache Zookeeper, Apache Kafka
+ 
+                    **Services**: Apache Zookeeper, Apache Kafka
+
+*Output*           T-streams                                         Elasticsearch
+
+                    **Providers**: Apache Zookeeper                     **Providers**: Elasticsearch
+                 
+                    **Services**: T-streams, Apache Zookeeper           **Services**:  Elasticsearch, Apache Zookeeper
+
+                                                                     SQL database
+
+                                                                       **Providers**:  SQL database
+
+                                                                       **Services**: SQL database, Apache Zookeeper 
+                                                                   
+                                                                     RESTful
+                                                                   
+                                                                       **Providers**: RESTful
+
+                                                                       **Services**: RESTful,  Apache Zookeeper 
+===============  ================================================  ===============================================
+
 We hope this information will help you to select the most appropriate types of entities in the system to build a pipeline for smooth data stream processing.
 
 
