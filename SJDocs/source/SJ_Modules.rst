@@ -64,7 +64,7 @@ The platform supports 4 types of modules:
 
 2. *Regular-streaming* (base type) - the most generic module which receives events, transforms data element by element and sends them to the next processing step.
 
-3. *Batch-streaming* - a module where the processing algorithm must observe a range of input messages rather than the current one (as it is in the regular-streaming type). For each stream input messages are collected into batches. Then batches are collected in a window. Windows of several streams are transferred to the module for processing. Thus, the module allows processing of data from several streams at the same time. In SJ-Platform the data is processed applying the sliding window method.
+3. *Batch-streaming* - a module where the processing algorithm must observe a range of input messages rather than the current one (as it is in the regular-streaming type). For each stream input messages are collected into batches. Then batches are collected in a window. Windows of several streams are transferred to the module for processing. Thus, the module allows processing of data from several streams at the same time. In SJ-Platform the data are processed using sliding window.
 
 4. *Output* - handles the data outcoming from event processing pipeline to external data destinations (Elasticsearch, SQL database, RESTful).
 
