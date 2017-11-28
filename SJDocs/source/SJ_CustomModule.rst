@@ -579,7 +579,7 @@ So, the following code listing shows the way of creating ``AvroSerialiser`` and 
 specification.json
 ++++++++++++++++++++++
 
-This file describes the module. Examples of description can be found here :ref:`Json_schema`.
+This file describes the module. Examples of the description can be found at the :ref:`Json_schema` section.
 
 Output module 
 """"""""""""""""""
