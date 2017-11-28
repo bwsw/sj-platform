@@ -197,7 +197,7 @@ If you want to see what the executor puts into an output stream and to the state
 
 The ``mock`` method is from the ``org.mockito.Mockito.mock`` library.
 
-To see more complicated examples, please, visit `sj-fping-process-test <https://github.com/bwsw/sj-fping-demo/blob/develop/ps-process/src/test/scala/com/bwsw/sj/examples/pingstation/module/regular/ExecutorTests.scala>`_.
+To see more complicated examples, please, visit `fping example project repository <https://github.com/bwsw/sj-fping-demo/blob/develop/ps-process/src/test/scala/com/bwsw/sj/examples/pingstation/module/regular/ExecutorTests.scala>`_.
 
 .. _Batch_Engine_Simulator:
 
@@ -244,7 +244,8 @@ Provided methods
  - ``entities`` - the list of incoming data elements.
  - ``stream`` - the name of a stream of incoming data.
 
-* ``process(batchesNumberBeforeIdle: Int = 0, window: Int, slidingInterval: Int, saveFullState: Boolean = false, removeProcessedEnvelopes: Boolean = true): BatchSimulationResult`` - sends all envelopes from local buffer and returns output streams, state and envelopes that haven't been processed (see :ref:`Batch-Simulation-Result`). This method retrieves batches using ``batchCollector``. Then it creates a window repository and invokes the Executor methods for every stage of the processing cycle. The methods are invoked in the following order: ``onWindow``, ``onEnter``, ``onLeaderEnter``, ``onBeforeCheckpoint``, ``onBeforeStateSave``. At the end of this method all envelopes will be removed from ``batchCollector``.
+* ``process(batchesNumberBeforeIdle: Int = 0, window: Int, slidingInterval: Int, saveFullState: Boolean = false,`` 
+  ``removeProcessedEnvelopes: Boolean = true): BatchSimulationResult`` - sends all envelopes from local buffer and returns output streams, state and envelopes that haven't been processed (see :ref:`Batch-Simulation-Result`). This method retrieves batches using ``batchCollector``. Then it creates a window repository and invokes the Executor methods for every stage of the processing cycle. The methods are invoked in the following order: ``onWindow``, ``onEnter``, ``onLeaderEnter``, ``onBeforeCheckpoint``, ``onBeforeStateSave``. At the end of this method all envelopes will be removed from ``batchCollector``.
  - ``batchesNumberBeforeIdle`` - the number of retrieved batches between invocations of ``executor.onIdle()`` ('0' by default). '0' means that ``executor.onIdle()`` will never be called.
  - ``window`` - count of batches that will be contained into a window (see :ref:`Batch-streaming_instance_fields`).
  - ``slidingInterval`` - the interval at which a window will be shifted (count of processed batches that will be removed from the window) (see :ref:`Batch-streaming_instance_fields`).
@@ -371,7 +372,7 @@ Accumulation of batches is implemented in ``BatchCollector``::
     countOfEnvelopesPerStream(streamName) = 0
  }
 
-For more complicated examples, please, visit `sj-sflow-process-test <https://github.com/bwsw/sj-sflow-demo/blob/develop/sflow-process/src/test/scala/com/bwsw/sj/examples/sflow/module/process/ExecutorTests.scala>`_.
+For more complicated examples, please, visit `sFlow example project repository <https://github.com/bwsw/sj-sflow-demo/blob/develop/sflow-process/src/test/scala/com/bwsw/sj/examples/sflow/module/process/ExecutorTests.scala>`_.
 
 .. _Output_Engine_Simulator:
 
@@ -462,7 +463,7 @@ If you want to see what Executor returns after processing and what requests are 
 
 ``requestsBeforeFirstCheckpoint`` will contain delete and insert requests, ``requestsAfterFirstCheckpoint``  will contain insertion requests only.
 
-To see more complicated examples, please, examine the following sections: `sj-fping-output-test <https://github.com/bwsw/sj-fping-demo/blob/develop/ps-output/src/test/scala/com/bwsw/sj/examples/pingstation/module/output/ExecutorTests.scala>`_, `sj-sflow-output-test <https://github.com/bwsw/sj-sflow-demo/blob/develop/sflow-output/src-dst/src/test/scala/com/bwsw/sj/examples/sflow/module/output/srcdst/ExecutorTests.scala>`_
+To see more complicated examples, please, examine the following sections: `fping example project repository <https://github.com/bwsw/sj-fping-demo/blob/develop/ps-output/src/test/scala/com/bwsw/sj/examples/pingstation/module/output/ExecutorTests.scala>`_, `sj example project repository <https://github.com/bwsw/sj-sflow-demo/blob/develop/sflow-output/src-dst/src/test/scala/com/bwsw/sj/examples/sflow/module/output/srcdst/ExecutorTests.scala>`_
 
 Objects For Simulators With States
 -------------------------------------
