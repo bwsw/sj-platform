@@ -75,7 +75,7 @@ The major one is the **processing module** that performs data processing. Two ty
 
 - Regular – the most generic module which receives events, transforms data element by element and sends them to the next processing step.
 
-- Batch – a module where the processing algorithm must observe a range of input messages rather than the current one (as it is in the regular module). For each stream input messages are collected into batches. Then batches are collected in a window. Windows of several streams are transferred to the module for processing. Thus, the module allows processing of data from several streams at the same time.  In SJ-Platform the data is processed applying sliding window.
+- Batch – a module where the processing algorithm must observe a range of input messages rather than the current one (as it is in the regular module). For each stream input messages are collected into batches. Then batches are collected in a window. Windows of several streams are transferred to the module for processing. Thus, the module allows processing of data from several streams at the same time.  In SJ-Platform the data are processed using sliding window.
 
 The processing module receives data for processing from Apache Kafka and T-streams. You also can use TCP as a source, but you will need an input module in this case. The **input module** handles external inputs, does data deduplication, transforms raw data into objects for T-streams. 
 
