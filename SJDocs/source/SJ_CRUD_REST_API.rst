@@ -436,7 +436,6 @@ Apache Kafka
   "description", "String", "Service description", ""
   "provider*", "String", "Provider name.", "Provider can be of 'provider.apache-kafka' type only."
   "zkProvider*", "String", "zk provider name.", "zkProvider can be of 'provider.apache-zookeeper' type only."
-  "zkNamespace*", "String", "Namespace.", ""
   "creationDate", "String", "The time when a service has been created.", ""
 
 T-streams 

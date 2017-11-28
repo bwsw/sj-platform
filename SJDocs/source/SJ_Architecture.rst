@@ -124,7 +124,7 @@ SJ-Platform performs **stream processing**. That means the system can handle eve
 
 Streams can be very intensive and all events cannot be handled by a single server of arbitrary performance. The system allows **scaling** the computations horizontally to handle increasing demands.
 
-The events are guaranteed to be processed **exactly-once**. The key idea of exactly-once processing lies in a group **checkpoint**. That means all producers and consumers of a stream are bunched into a group and do a checkpoint automatically fixing the current state. Moreover, a user can initialize a checkpoint whenever it is necessary.
+The events are guaranteed to be processed **exactly-once**. The key idea of exactly-once processing lies in a group **checkpoint**. That means all producers and consumers of a stream are bunched into a group and do a checkpoint automatically fixing the current state. Moreover, a user can initialize a checkpoint after any stage of the processing cycle.
 
 The idea of **parallelism** is implemented via multi-partitioning in streams. A **partition** is a part of a data stream allocated for convenience in stream processing.  Upon creation, every stream gets a certain amount of partitions. The parallelism is enabled by dividing existing partitions fairly among the tasks of module instance and thus scaling the data processing.
 
