@@ -485,7 +485,7 @@ Simulation Result
 Module Environment Manager Mock
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-It is a mock for ``StatefulModuleEnvironmentManager``. 
+It is a mock to manage the environment of a module (regular or batch) that has got a state. 
 
 It creates :ref:`PartitionedOutputMock` and :ref:`RoundRobinOutputMock` to save the information on where the data are transferred.
 
