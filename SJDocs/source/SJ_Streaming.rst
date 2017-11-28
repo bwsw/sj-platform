@@ -10,11 +10,37 @@ Stream Conception in SJ-Platform
 
 The streaming component is essential in SJ-Platform. The data are fed to the system, transferred between modules and exported to an external storage via streams.
 
-There are two kinds of streams in SJ-Platform:
+The system receives data via TCP or Apache Kafka. Within SJ-Platform the data are transferred between modules via T-streams. The results are exported to an external storage via output streams which type is determined by the type of the storage. For now, Elasticsearch, SQL database and RESTful output stream types are supported. 
 
-- An input stream - a stream which provides new events. SJ-Platform supports the following input stream types: TCP, Apache Kafka and T-Streams.
+The table below shows what types of streams are required for particular module types.
 
-- An output stream - a stream which is a destination for results. Within SJ-Platform the results are written into T-Streams. To export the processed data from T-streams you should use an output module and an external storage. The type of output streams to save the result data into this storage is determined by the type of the storage. For now, Elasticsearch, SQL database and RESTful output stream types are supported.
+===============  ================================================  ===============================================
+Module type      Input stream                                      Output stream
+===============  ================================================  ===============================================
+*Input*            TCP                                               T-streams 
+                                                  
+                                       
+                                                                      
+
+*Regular/Batch*    T-streams                                         T-streams
+               
+                   
+                   Apache Kafka
+              
+                  
+
+*Output*           T-streams                                         Elasticsearch
+
+                   
+
+                                                                     SQL database
+
+                                                                        
+                                                                   
+                                                                     RESTful
+                                                                   
+===============  ================================================  ===============================================
+
 
 Input Streams
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -22,9 +48,7 @@ The data can be received from different sources. Currently, the platform support
 
 SJ-Platform supports `Apache Kafka <https://kafka.apache.org/documentation/>`_ as a standard providing a common interface for the integration of many applications.
 
-Using TCP as an input source a custom protocol can be applied for receiving events, deduplicating them and putting into the processing pipeline. 
-
-But in case of using TCP as a source, there arises a need in an input module to transform the input data into a stream to bring them to processing. At the project `repository <https://github.com/bwsw/sj-platform/tree/develop>`_ two input modules are available for users - a CSV input module and a Regex input module - that transform data flow of CSV/regex type to message format acceptable for T-streams. 
+In case of using TCP as a source, there arises a need in an input module to transform the input data into a stream and transfer them for further processing. At the project `repository <https://github.com/bwsw/sj-platform/tree/develop>`_ two input modules are available for users - a CSV input module and a Regex input module - that transform text data into a message format acceptable for T-streams. 
 
 Within the platform, the data are transported to and from modules via *transactional streams* or T-streams. It is a message broker and a Scala library native to SJ-Platform and designed primarily for exactly-once processing (so it includes a transactional Producer, a Consumer and a Subscriber). More information on T-streams can be found at the `project site <http://t-streams.com/>`_. Some general information on T-streams you can find below.
 
@@ -82,61 +106,16 @@ A **provider** is a service provider for data transformation into a stream.
 
 A **service** is a service to transform data into a stream of an exact type.
 
-They can be of different types. The types of instances and streams in the pipeline determine the type of providers and services that are necessary in the particular case.
+They can be of different types. The types of modules and streams in the pipeline determine the type of providers and services that are necessary in the particular case.
 
-The diagram of platform entities interconnections can be useful in selecting the necessary types of providers and services.
+The diagram of platform entities interconnections can be useful in selecting the necessary types of providers and services. Please, visit the :ref:`Entities_Correlation` section for more information.
 
-.. figure:: _static/InstanceCorrelation1.png
-
-Firstly, decide what types of instances will perform data transformation and processing in the pipeline. 
-
-Determined instance types will help to clarify which streams are required for these particular instances.
+Firstly, decide what types of modules will perform data transformation and processing in the pipeline. The determined module types will help to clarify which streams are required for them.
 
 Secondly, find in the diagram what services are necessary for these types of streams. 
 
 Finally, when services are determined, it is easy to see what types of providers should be created. 
 
-The table below explains what types of streams may serve as input or output streams for particular instances:
-
-===============  ================================================  ===============================================
-Instance          Input stream                                     Output stream
-===============  ================================================  ===============================================
-*Input*            TCP                                               T-streams 
-
-                                                                      **Providers**: Apache Zookeeper
-                                       
-                                                                      **Services**: T-streams, Apache Zookeeper
-
-*Regular/Batch*    T-streams                                         T-streams
-               
-                    **Providers**: Apache Zookeeper                   **Providers**: Apache Zookeeper
-
-                    **Services**: T-streams, Apache Zookeeper         **Services**: T-streams, Apache Zookeeper
-               
-                   Apache Kafka
-              
-                    **Providers**: Apache Zookeeper, Apache Kafka
- 
-                    **Services**: Apache Zookeeper, Apache Kafka
-
-*Output*           T-streams                                         Elasticsearch
-
-                    **Providers**: Apache Zookeeper                     **Providers**: Elasticsearch
-                 
-                    **Services**: T-streams, Apache Zookeeper           **Services**:  Elasticsearch, Apache Zookeeper
-
-                                                                     SQL database
-
-                                                                       **Providers**:  SQL database
-
-                                                                       **Services**: SQL database, Apache Zookeeper 
-                                                                   
-                                                                     RESTful
-                                                                   
-                                                                       **Providers**: RESTful
-
-                                                                       **Services**: RESTful,  Apache Zookeeper 
-===============  ================================================  ===============================================
 
 Start creating the infrastructure from providers, then proceed with services and then streams. 
 
