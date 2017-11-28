@@ -27,7 +27,7 @@ As a simple refresher, there are three types of modules in the Stream Juggler Pl
    Functions: data transformation and calculation.
 
    - **Regular-streaming** processing module: processes data event by event;
-   - **Batch-streaming** processing module: organizes data into batches and processes it with the sliding window method.
+   - **Batch-streaming** processing module: organizes data into batches and processes it using sliding window.
 
    A processing module works with the stream types:
 
