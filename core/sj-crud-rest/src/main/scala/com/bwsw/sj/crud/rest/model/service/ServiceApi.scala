@@ -82,7 +82,6 @@ class ServiceApiCreator {
         new KfkQServiceApi(
           name = kafkaService.name,
           zkProvider = kafkaService.zkProvider,
-          zkNamespace = kafkaService.zkNamespace,
           provider = kafkaService.provider,
           description = Option(kafkaService.description),
           creationDate = kafkaService.creationDate

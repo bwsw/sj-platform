@@ -3,6 +3,5 @@
   "description": "Kafka service for pipeline test",
   "zkProvider": "test-pipeline-zookeeper",
   "provider": "test-pipeline-kafka",
-  "zkNamespace": "testpipeline",
   "type": "service.apache-kafka"
 }

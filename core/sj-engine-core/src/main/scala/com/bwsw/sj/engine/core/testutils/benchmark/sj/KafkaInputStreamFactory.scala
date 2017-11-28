@@ -48,7 +48,6 @@ class KafkaInputStreamFactory(override val name: String, kafkaAddress: String) e
       description = "Kafka service for benchmark",
       provider = provider,
       zkProvider = benchmarkPreparation.zooKeeperProvider,
-      zkNamespace = benchmarkPreparation.zkNamespace,
       creationDate = new Date())
 
     val stream = new KafkaStreamDomain(

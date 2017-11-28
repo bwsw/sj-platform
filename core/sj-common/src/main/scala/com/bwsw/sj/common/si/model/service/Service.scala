@@ -162,7 +162,6 @@ class ServiceCreator {
         new KafkaService(
           name = kafkaService.name,
           zkProvider = kafkaService.zkProvider.name,
-          zkNamespace = kafkaService.zkNamespace,
           provider = kafkaService.provider.name,
           description = kafkaService.description,
           serviceType = kafkaService.serviceType,

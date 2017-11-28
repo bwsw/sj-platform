@@ -1026,7 +1026,7 @@
 			"tests": "tests[\"Status code is 201\"] = responseCode.code === 201;\n\ntests[\"Body matches string\"] = responseBody.has(\"Service 'rest-kafka' has been created.\");",
 			"currentHelper": "normal",
 			"helperAttributes": {},
-			"rawModeData": "{\r\n     \"name\": \"rest-kafka\",\r\n     \"description\": \"example kafka provider\",\r\n     \"provider\": \"kafka-example\",\r\n     \"zkProvider\": \"rest-zookeeper\",\r\n     \"type\": \"service.apache-kafka\",\r\n     \"zkNamespace\": \"a1\"\r\n}"
+			"rawModeData": "{\r\n     \"name\": \"rest-kafka\",\r\n     \"description\": \"example kafka provider\",\r\n     \"provider\": \"kafka-example\",\r\n     \"zkProvider\": \"rest-zookeeper\",\r\n     \"type\": \"service.apache-kafka\"\r\n}"
 		},
 		{
 			"id": "67596bd4-355e-d339-528a-23a06b72a9f6",

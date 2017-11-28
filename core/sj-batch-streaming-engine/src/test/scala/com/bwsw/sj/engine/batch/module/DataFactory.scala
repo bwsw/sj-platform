@@ -123,8 +123,8 @@ object DataFactory {
     serviceManager.save(zkService)
 
     val kafkaProv = providerService.get(kafkaProviderName).get
-    val kafkaService = new KafkaServiceDomain(kafkaServiceName, kafkaServiceName, kafkaProv, zookeeperProvider,
-      testNamespace, new Date())
+    val kafkaService = new KafkaServiceDomain(
+      kafkaServiceName, kafkaServiceName, kafkaProv, zookeeperProvider, new Date())
     serviceManager.save(kafkaService)
 
     serviceManager.save(tstrqService)

@@ -26,7 +26,6 @@ import scaldi.Injector
 class KfkQServiceApi(name: String,
                      provider: String,
                      val zkProvider: String,
-                     val zkNamespace: String,
                      description: Option[String] = Some(RestLiterals.defaultDescription),
                      @JsonProperty("type") serviceType: Option[String] = Some(ServiceLiterals.kafkaType),
                      creationDate: String)
@@ -39,7 +38,6 @@ class KfkQServiceApi(name: String,
         description = this.description.getOrElse(RestLiterals.defaultDescription),
         provider = this.provider,
         zkProvider = this.zkProvider,
-        zkNamespace = this.zkNamespace,
         serviceType = this.serviceType.getOrElse(ServiceLiterals.kafkaType),
         creationDate =  this.creationDate
       )

@@ -6,7 +6,6 @@
 		"5ecd6528-687b-9866-9054-1b2ab9d7fa70",
 		"5394d979-4334-4578-e6eb-d1573ad392b7",
 		"0d27ab57-573d-fc53-3ee9-fc7541e4152c",
-		"ebd60464-5582-ca84-5f34-51d8ea0b9062",
 		"ac8f34d8-8e49-3112-3940-fa1f2d42cbc4",
 		"d2ef7713-fb7c-0bc2-6b92-67fc2ef9fe7e",
 		"59c8848c-3970-c82a-c64d-4cee05af00ea",
@@ -14,8 +13,6 @@
 		"752795d6-630f-ee77-98a5-7e075395304b",
 		"7d228447-7a6a-a6bb-5fcb-a8b25d7cb47f",
 		"6dc183cd-bc5b-f238-8926-273fec1d7c37",
-		"4015f452-92f2-1abd-9ad6-d99e11b887d2",
-		"0c41daa7-0886-a602-d1bc-748c9e7b16b4",
 		"02ccc621-79a6-d711-d5c4-72a0499ef7a3",
 		"c52e9072-9b16-1660-8739-7ed74cdd95d7",
 		"b8d1e794-352d-f700-ac52-a13c00dc3cc6",
@@ -68,7 +65,7 @@
 			"description": "",
 			"collectionId": "69c979e1-03b5-d5bd-1f61-ac88ec976ad5",
 			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"rest-kafka1\",\r\n     \"description\": \"example kafka provider\",\r\n     \"provider\": \"kafka-rest\",\r\n     \"zkProvider\": \"rest-jdbc\",\r\n     \"type\": \"service.apache-kafka\",\r\n     \"zkNamespace\": \"a1\"\r\n}"
+			"rawModeData": "{\r\n     \"name\": \"rest-kafka1\",\r\n     \"description\": \"example kafka provider\",\r\n     \"provider\": \"kafka-rest\",\r\n     \"zkProvider\": \"rest-jdbc\",\r\n     \"type\": \"service.apache-kafka\"\r\n}"
 		},
 		{
 			"id": "02ccc621-79a6-d711-d5c4-72a0499ef7a3",
@@ -88,27 +85,7 @@
 			"description": "",
 			"collectionId": "69c979e1-03b5-d5bd-1f61-ac88ec976ad5",
 			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"rest-kafka1\",\r\n     \"description\": \"example kafka provider\",\r\n     \"provider\": \"kafka-rest\",\r\n\r\n     \"type\": \"service.apache-kafka\",\r\n     \"zkNamespace\": \"a1\"\r\n}"
-		},
-		{
-			"id": "0c41daa7-0886-a602-d1bc-748c9e7b16b4",
-			"headers": "",
-			"url": "{{address}}/v1/services",
-			"preRequestScript": null,
-			"pathVariables": {},
-			"method": "POST",
-			"data": [],
-			"dataMode": "raw",
-			"version": 2,
-			"tests": "tests[\"Status code is 400\"] = responseCode.code === 400;\n\ntests[\"Body matches string\"] = responseBody.has(\"'zkNamespace' attribute is required.\");",
-			"currentHelper": "normal",
-			"helperAttributes": {},
-			"time": 1489390609941,
-			"name": "Service_5.1.7.Empty_zk-namespace",
-			"description": "",
-			"collectionId": "69c979e1-03b5-d5bd-1f61-ac88ec976ad5",
-			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"rest-kafka1\",\r\n     \"description\": \"example kafka provider\",\r\n     \"provider\": \"kafka-rest\",\r\n     \"zkProvider\": \"rest-zookeeper\",\r\n     \"type\": \"service.apache-kafka\",\r\n     \"zkNamespace\": \"\"\r\n} "
+			"rawModeData": "{\r\n     \"name\": \"rest-kafka1\",\r\n     \"description\": \"example kafka provider\",\r\n     \"provider\": \"kafka-rest\",\r\n\r\n     \"type\": \"service.apache-kafka\"\r\n}"
 		},
 		{
 			"id": "0d27ab57-573d-fc53-3ee9-fc7541e4152c",
@@ -128,7 +105,7 @@
 			"description": "",
 			"collectionId": "69c979e1-03b5-d5bd-1f61-ac88ec976ad5",
 			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"1rest-kafka\",\r\n     \"description\": \"example kafka provider\",\r\n     \"provider\": \"kafka-rest\",\r\n     \"zkProvider\": \"rest-zookeeper\",\r\n     \"type\": \"service.apache-kafka\",\r\n     \"zkNamespace\": \"a1\"\r\n}"
+			"rawModeData": "{\r\n     \"name\": \"1rest-kafka\",\r\n     \"description\": \"example kafka provider\",\r\n     \"provider\": \"kafka-rest\",\r\n     \"zkProvider\": \"rest-zookeeper\",\r\n     \"type\": \"service.apache-kafka\"\r\n}"
 		},
 		{
 			"id": "14751f56-3f2d-bd41-63ef-c7f8232d6e13",
@@ -168,7 +145,7 @@
 			"description": "",
 			"collectionId": "69c979e1-03b5-d5bd-1f61-ac88ec976ad5",
 			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"rest-kafka\",\r\n     \"description\": \"example kafka provider\",\r\n     \"provider\": \"kafka-rest\",\r\n     \"zkProvider\": \"rest-zookeeper\",\r\n     \"type\": \"service.apache-kafka\",\r\n     \"zkNamespace\": \"a1\"\r\n}"
+			"rawModeData": "{\r\n     \"name\": \"rest-kafka\",\r\n     \"description\": \"example kafka provider\",\r\n     \"provider\": \"kafka-rest\",\r\n     \"zkProvider\": \"rest-zookeeper\",\r\n     \"type\": \"service.apache-kafka\"\r\n}"
 		},
 		{
 			"id": "1d0a3194-dab8-e7ba-1810-a3b9f7c21fd9",
@@ -230,26 +207,6 @@
 			"collectionId": "69c979e1-03b5-d5bd-1f61-ac88ec976ad5",
 			"responses": [],
 			"rawModeData": ""
-		},
-		{
-			"id": "4015f452-92f2-1abd-9ad6-d99e11b887d2",
-			"headers": "",
-			"url": "{{address}}/v1/services",
-			"preRequestScript": null,
-			"pathVariables": {},
-			"method": "POST",
-			"data": [],
-			"dataMode": "raw",
-			"version": 2,
-			"tests": "tests[\"Status code is 400\"] = responseCode.code === 400;\n\ntests[\"Body matches string\"] = responseBody.has(\"'zkNamespace' attribute is required\");",
-			"currentHelper": "normal",
-			"helperAttributes": {},
-			"time": 1489390219096,
-			"name": "Service_5.1.21.Empty_zk-namespace (empty_string)",
-			"description": "",
-			"collectionId": "69c979e1-03b5-d5bd-1f61-ac88ec976ad5",
-			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"rest-kafka1\",\r\n     \"description\": \"example kafka provider\",\r\n     \"provider\": \"kafka-rest\",\r\n     \"zkProvider\": \"rest-zookeeper\",\r\n     \"type\": \"service.apache-kafka\"\r\n}"
 		},
 		{
 			"id": "4149fd96-aaa4-de20-3162-5ad70e4c15f5",
@@ -336,7 +293,7 @@
 			"description": "",
 			"collectionId": "69c979e1-03b5-d5bd-1f61-ac88ec976ad5",
 			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"rest-kafka1\",\r\n     \"description\": \"example kafka provider\",\r\n     \"provider\": \"kafka-rest\",\r\n     \"zkProvider\": \"rest-zookeeper\",\r\n\r\n     \"zkNamespace\": \"a1\"\r\n}"
+			"rawModeData": "{\r\n     \"name\": \"rest-kafka1\",\r\n     \"description\": \"example kafka provider\",\r\n     \"provider\": \"kafka-rest\",\r\n     \"zkProvider\": \"rest-zookeeper\"\r\n\r\n}"
 		},
 		{
 			"id": "5ecd6528-687b-9866-9054-1b2ab9d7fa70",
@@ -379,7 +336,7 @@
 			"description": "",
 			"collectionId": "69c979e1-03b5-d5bd-1f61-ac88ec976ad5",
 			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"rest-kafka1\",\r\n     \"description\": \"example kafka provider\",\r\n     \"provider\": \"kafka-rest111\",\r\n     \"zkProvider\": \"rest-zookeeper\",\r\n     \"type\": \"service.apache-kafka\",\r\n     \"zkNamespace\": \"a1\"\r\n}"
+			"rawModeData": "{\r\n     \"name\": \"rest-kafka1\",\r\n     \"description\": \"example kafka provider\",\r\n     \"provider\": \"kafka-rest111\",\r\n     \"zkProvider\": \"rest-zookeeper\",\r\n     \"type\": \"service.apache-kafka\"\r\n}"
 		},
 		{
 			"id": "6dc183cd-bc5b-f238-8926-273fec1d7c37",
@@ -399,7 +356,7 @@
 			"description": "",
 			"collectionId": "69c979e1-03b5-d5bd-1f61-ac88ec976ad5",
 			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"rest-kafka1\",\r\n     \"description\": \"example kafka provider\",\r\n     \"provider\": \"\",\r\n     \"zkProvider\": \"rest-zookeeper\",\r\n     \"type\": \"service.apache-kafka\",\r\n     \"zkNamespace\": \"a1\"\r\n}"
+			"rawModeData": "{\r\n     \"name\": \"rest-kafka1\",\r\n     \"description\": \"example kafka provider\",\r\n     \"provider\": \"\",\r\n     \"zkProvider\": \"rest-zookeeper\",\r\n     \"type\": \"service.apache-kafka\"\r\n}"
 		},
 		{
 			"id": "7319cffe-41bc-280f-08b6-7a46239778ba",
@@ -442,7 +399,7 @@
 			"description": "",
 			"collectionId": "69c979e1-03b5-d5bd-1f61-ac88ec976ad5",
 			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"rest-kafka1\",\r\n     \"description\": \"example kafka provider\",\r\n     \"provider\": \"kafka-rest\",\r\n     \"zkProvider\": \"rest-zookeeper\",\r\n     \"type\": \"1service.apache-kafka\",\r\n     \"zkNamespace\": \"a1\"\r\n}"
+			"rawModeData": "{\r\n     \"name\": \"rest-kafka1\",\r\n     \"description\": \"example kafka provider\",\r\n     \"provider\": \"kafka-rest\",\r\n     \"zkProvider\": \"rest-zookeeper\",\r\n     \"type\": \"1service.apache-kafka\"\r\n}"
 		},
 		{
 			"id": "7d228447-7a6a-a6bb-5fcb-a8b25d7cb47f",
@@ -462,7 +419,7 @@
 			"description": "",
 			"collectionId": "69c979e1-03b5-d5bd-1f61-ac88ec976ad5",
 			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"rest-kafka1\",\r\n     \"description\": \"example kafka provider\",\r\n     \r\n     \"zkProvider\": \"rest-zookeeper\",\r\n     \"type\": \"service.apache-kafka\",\r\n     \"zkNamespace\": \"a1\"\r\n}"
+			"rawModeData": "{\r\n     \"name\": \"rest-kafka1\",\r\n     \"description\": \"example kafka provider\",\r\n     \r\n     \"zkProvider\": \"rest-zookeeper\",\r\n     \"type\": \"service.apache-kafka\"\r\n}"
 		},
 		{
 			"id": "82d17caa-3d75-e8ad-ec0f-a8b45c1dbe1f",
@@ -528,7 +485,7 @@
 			"description": "",
 			"collectionId": "69c979e1-03b5-d5bd-1f61-ac88ec976ad5",
 			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"rest-kafka1\",\r\n     \"description\": \"example kafka provider\",\r\n     \"provider\": \"rest-jdbc\",\r\n     \"zkProvider\": \"rest-zookeeper\",\r\n     \"type\": \"service.apache-kafka\",\r\n     \"zkNamespace\": \"a1\"\r\n}"
+			"rawModeData": "{\r\n     \"name\": \"rest-kafka1\",\r\n     \"description\": \"example kafka provider\",\r\n     \"provider\": \"rest-jdbc\",\r\n     \"zkProvider\": \"rest-zookeeper\",\r\n     \"type\": \"service.apache-kafka\"\r\n}"
 		},
 		{
 			"id": "abc39bda-6740-0f91-3370-58a3b0132a51",
@@ -571,7 +528,7 @@
 			"description": "",
 			"collectionId": "69c979e1-03b5-d5bd-1f61-ac88ec976ad5",
 			"responses": [],
-			"rawModeData": "{\r\n\r\n     \"description\": \"example kafka provider\",\r\n     \"provider\": \"kafka-rest\",\r\n     \"zkProvider\": \"rest-zookeeper\",\r\n     \"type\": \"service.apache-kafka\",\r\n     \"zkNamespace\": \"a1\"\r\n}"
+			"rawModeData": "{\r\n\r\n     \"description\": \"example kafka provider\",\r\n     \"provider\": \"kafka-rest\",\r\n     \"zkProvider\": \"rest-zookeeper\",\r\n     \"type\": \"service.apache-kafka\"\r\n}"
 		},
 		{
 			"id": "b52810f3-d989-1d18-5fe2-6dfc47449327",
@@ -611,7 +568,7 @@
 			"description": "",
 			"collectionId": "69c979e1-03b5-d5bd-1f61-ac88ec976ad5",
 			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"rest-kafka1\",\r\n     \"description\": \"example kafka provider\",\r\n     \"provider\": \"kafka-rest\",\r\n     \"zkProvider\": \"rest-zookeeper1111\",\r\n     \"type\": \"service.apache-kafka\",\r\n     \"zkNamespace\": \"a1\"\r\n}"
+			"rawModeData": "{\r\n     \"name\": \"rest-kafka1\",\r\n     \"description\": \"example kafka provider\",\r\n     \"provider\": \"kafka-rest\",\r\n     \"zkProvider\": \"rest-zookeeper1111\",\r\n     \"type\": \"service.apache-kafka\"\r\n}"
 		},
 		{
 			"id": "c4345748-18b2-5b43-64a6-daf30c9ad6f8",
@@ -652,7 +609,7 @@
 			"description": "",
 			"collectionId": "69c979e1-03b5-d5bd-1f61-ac88ec976ad5",
 			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"rest-kafka1\",\r\n     \"description\": \"example kafka provider\",\r\n     \"provider\": \"kafka-rest\",\r\n     \"zkProvider\": \"\",\r\n     \"type\": \"service.apache-kafka\",\r\n     \"zkNamespace\": \"a1\"\r\n}"
+			"rawModeData": "{\r\n     \"name\": \"rest-kafka1\",\r\n     \"description\": \"example kafka provider\",\r\n     \"provider\": \"kafka-rest\",\r\n     \"zkProvider\": \"\",\r\n     \"type\": \"service.apache-kafka\"\r\n}"
 		},
 		{
 			"id": "c8c4d136-9dcd-07af-f754-ab8926ad145b",
@@ -693,7 +650,7 @@
 			"description": "",
 			"collectionId": "69c979e1-03b5-d5bd-1f61-ac88ec976ad5",
 			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"\",\r\n     \"description\": \"example kafka provider\",\r\n     \"provider\": \"kafka-rest\",\r\n     \"zkProvider\": \"rest-zookeeper\",\r\n     \"type\": \"service.apache-kafka\",\r\n     \"zkNamespace\": \"a1\"\r\n}"
+			"rawModeData": "{\r\n     \"name\": \"\",\r\n     \"description\": \"example kafka provider\",\r\n     \"provider\": \"kafka-rest\",\r\n     \"zkProvider\": \"rest-zookeeper\",\r\n     \"type\": \"service.apache-kafka\"\r\n}"
 		},
 		{
 			"id": "dca2d1c3-a3ae-0275-4276-5a553ea8b744",
@@ -713,7 +670,7 @@
 			"description": "",
 			"collectionId": "69c979e1-03b5-d5bd-1f61-ac88ec976ad5",
 			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"rest-kafka1\",\r\n     \"description\": \"example kafka provider\",\r\n     \"provider\": \"kafka-rest\",\r\n     \"zkProvider\": \"rest-zookeeper\",\r\n     \"type\": \"\",\r\n     \"zkNamespace\": \"a1\"\r\n}"
+			"rawModeData": "{\r\n     \"name\": \"rest-kafka1\",\r\n     \"description\": \"example kafka provider\",\r\n     \"provider\": \"kafka-rest\",\r\n     \"zkProvider\": \"rest-zookeeper\",\r\n     \"type\": \"\"\r\n}"
 		},
 		{
 			"id": "e0814d58-9787-544a-8765-30d13d103136",
@@ -733,7 +690,7 @@
 			"description": "",
 			"collectionId": "69c979e1-03b5-d5bd-1f61-ac88ec976ad5",
 			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"rest-kafka\",\r\n     \"description\": \"example kafka provider\",\r\n     \"provider\": \"kafka-rest\",\r\n     \"zkProvider\": \"rest-zookeeper\",\r\n     \"type\": \"service.apache-kafka\",\r\n     \"zkNamespace\": \"a1\"\r\n}"
+			"rawModeData": "{\r\n     \"name\": \"rest-kafka\",\r\n     \"description\": \"example kafka provider\",\r\n     \"provider\": \"kafka-rest\",\r\n     \"zkProvider\": \"rest-zookeeper\",\r\n     \"type\": \"service.apache-kafka\"\r\n}"
 		},
 		{
 			"id": "e53e1004-2625-f756-fa83-8cbb5615c35e",
@@ -755,26 +712,6 @@
 			"currentHelper": "normal",
 			"helperAttributes": {},
 			"rawModeData": ""
-		},
-		{
-			"id": "ebd60464-5582-ca84-5f34-51d8ea0b9062",
-			"headers": "",
-			"url": "{{address}}/v1/services",
-			"preRequestScript": null,
-			"pathVariables": {},
-			"method": "POST",
-			"data": [],
-			"dataMode": "raw",
-			"version": 2,
-			"tests": "tests[\"Status code is 400\"] = responseCode.code === 400;\n\ntests[\"Body matches string\"] = responseBody.has(\"Service has incorrect 'zkNamespace': '1a1'. Name must contain digits, lowercase letters or underscore. First symbol must be a letter.\");",
-			"currentHelper": "normal",
-			"helperAttributes": {},
-			"time": 1493177866358,
-			"name": "Service_5.1.3.Wrong_zk-namespace",
-			"description": "",
-			"collectionId": "69c979e1-03b5-d5bd-1f61-ac88ec976ad5",
-			"responses": [],
-			"rawModeData": "{\r\n     \"name\": \"rest-kafka\",\r\n     \"description\": \"example kafka provider\",\r\n     \"provider\": \"kafka-rest\",\r\n     \"zkProvider\": \"rest-zookeeper\",\r\n     \"type\": \"service.apache-kafka\",\r\n     \"zkNamespace\": \"1a1\"\r\n}"
 		},
 		{
 			"id": "f2b950ca-df7b-d022-1280-f7e056776507",
