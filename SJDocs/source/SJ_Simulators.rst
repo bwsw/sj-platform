@@ -133,7 +133,7 @@ Provided methods
  * ``envelopesNumberBeforeIdle`` - number of envelopes after which ``executor.onIdle()`` will be invoked ('0' by default). '0' means that ``executor.onIdle()`` will never be called.
  * ``clearBuffer`` - indicates that all envelopes will be removed from a local buffer after processing.
 * ``beforeCheckpoint(isFullState: Boolean): SimulationResult`` - imitates the behavior of the :ref:`Regular_Streaming_Engine` before checkpoint: invokes ``executor.onBeforeCheckpoint()``, then invokes ``executor.onBeforeStateSave(isFullState)`` and returns output streams and state (see :ref:`Simulation-Result`).
- * ``isFullState`` - a flag denoting that either the full state ('true') or a partial change of state ('false') is going to be saved. 
+ * ``isFullState`` - this flag is denoting that either the full state ('true') or a partial change of state ('false') is going to be saved. 
 * ``timer(jitter: Long): SimulationResult`` - imitates that a timer went out (invokes ``executor.onTimer(jitter)``).
  * ``jitter`` - a delay between a real response time and an invocation of this handler.
 * ``clear()`` - removes all envelopes from a local buffer.
@@ -248,11 +248,11 @@ Provided methods
  - ``batchesNumberBeforeIdle`` - the number of retrieved batches between invocations of ``executor.onIdle()`` ('0' by default). '0' means that ``executor.onIdle()`` will never be called.
  - ``window`` - count of batches that will be contained into a window (see :ref:`Batch-streaming_instance_fields`).
  - ``slidingInterval`` - the interval at which a window will be shifted (count of processed batches that will be removed from the window) (see :ref:`Batch-streaming_instance_fields`).
- - ``saveFullState`` - the flag denoting that either the full state ('true') or a partial change of the state ('false') is going to be saved after every checkpoint.
+ - ``saveFullState`` - the flag is denoting that either the full state ('true') or a partial change of the state ('false') is going to be saved after every checkpoint.
  - ``removeProcessedEnvelopes`` - indicates that all processed envelopes will be removed from a local buffer after processing.
 
 * ``beforeCheckpoint(isFullState: Boolean): SimulationResult`` - imitates the behavior of the :ref:`Batch_Streaming_Engine` before checkpoint: invokes ``executor.onBeforeCheckpoint()``, then invokes ``executor.onBeforeStateSave(isFullState)`` and returns output streams and state (see :ref:`Simulation-Result`).
- - ``isFullState`` - the flag denoting that either the full state ('true') or partial changes of state ('false') is going to be saved.
+ - ``isFullState`` - the flag is denoting that either the full state ('true') or partial changes of state ('false') is going to be saved.
 
 * ``timer(jitter: Long): SimulationResult`` - imitates that a timer went out (invokes ``executor.onTimer(jitter)``).
  - ``jitter`` - the delay between a real response time and an invocation of this handler.
