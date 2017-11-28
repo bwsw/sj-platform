@@ -8,30 +8,30 @@ SJ-Platform enables scalable, high-throughput, fault-tolerant stream processing 
 Stream Conception in SJ-Platform 
 -------------------------------------------
 
-The streaming component is essential in SJ-Platform. The data are fed to the system, transported between modules and exported to an external storage via streams.
+The streaming component is essential in SJ-Platform. The data are fed to the system, transferred between modules and exported to an external storage via streams.
 
 There are two kinds of streams in SJ-Platform:
 
-- An input stream - a stream which provides new events. The following input stream types are supported in SJ-Platform: TCP, Apache Kafka and T-Streams.
+- An input stream - a stream which provides new events. SJ-Platform supports the following input stream types: TCP, Apache Kafka and T-Streams.
 
-- An output stream - a stream which is a destination for results. Within SJ-Platform the results are written into T-Streams. To export the processed data from T-streams additional output streams are required. They are created for an output module and correspond to the type of the external storage. For now, Elasticsearch, SQL database and RESTful output stream types are supported.
+- An output stream - a stream which is a destination for results. Within SJ-Platform the results are written into T-Streams. To export the processed data from T-streams you should use an output module and an external storage. The type of output streams to save the result data into this storage is determined by the type of the storage. For now, Elasticsearch, SQL database and RESTful output stream types are supported.
 
 Input Streams
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-The data can be received from different sources. Currently, the platform supports obtaining data from Apache Kafka and TCP sockets.
+The data can be received from different sources. Currently, the platform supports obtaining data from Apache Kafka and via TCP connections.
 
-SJ-Platform supports `Apache Kafka <https://kafka.apache.org/documentation/>`_ as a standard providing a common interface for integration for most applications.
+SJ-Platform supports `Apache Kafka <https://kafka.apache.org/documentation/>`_ as a standard providing a common interface for the integration of many applications.
 
 Using TCP as an input source a custom protocol can be applied for receiving events, deduplicating them and putting into the processing pipeline. 
 
-But in case TCP is used as a source, there arises a need in an input module to transform the input data into a stream to bring them to processing. At the project `repository <https://github.com/bwsw/sj-platform/tree/develop>`_ two input modules are available for users - a CSV input module and a Regex input module - that transform data flow of CSV/regex type to message format acceptable for T-streams. 
+But in case of using TCP as a source, there arises a need in an input module to transform the input data into a stream to bring them to processing. At the project `repository <https://github.com/bwsw/sj-platform/tree/develop>`_ two input modules are available for users - a CSV input module and a Regex input module - that transform data flow of CSV/regex type to message format acceptable for T-streams. 
 
-Within the platform, the data are transported to and from modules via *transactional streams* or T-streams. It is a message broker and a Scala library native to SJ-Platform and designed primarily for exactly-once processing (so it includes a transactional producer, a consumer and a subscriber). More information on T-streams can be found at the `project site <http://t-streams.com/>`_. Some general information on T-streams you can find below.
+Within the platform, the data are transported to and from modules via *transactional streams* or T-streams. It is a message broker and a Scala library native to SJ-Platform and designed primarily for exactly-once processing (so it includes a transactional Producer, a Consumer and a Subscriber). More information on T-streams can be found at the `project site <http://t-streams.com/>`_. Some general information on T-streams you can find below.
 
 About T-Streams
 """"""""""""""""""""""""
 
-The easiest way to try T-streams and dive into basic operations with T-streams is to download `T-streams-hello <http://t-streams.com/getting-started/>`_. The demo shows the basic operation mode between a producer and a subscriber.
+The easiest way to try T-streams and dive into basic operations with T-streams is to download `T-streams-hello <http://t-streams.com/getting-started/>`_. This demo shows the basic operation mode between a Producer and a Subscriber.
 
 The T-streams architecture is not complicated. T-streams consist of partitions. Each partition holds a number of transactions with data elements inside. 
 
@@ -41,13 +41,13 @@ Data elements are time-sorted within a transaction.
 
 Consumers and Producers use transactions to write or read data from T-streams. The transaction is also a basic recovery element. This means, that in case of a crash, Consumers and Producers can recover from a transaction.
 
-Consumer iterates over transactions from earliest to the latest and reads data from every transaction. Every Consumer works in a specific T-stream and specific partitions. Consumer implements polling approach of processing.  After a transaction (or transaction set) is handled properly, the consumer does checkpoint which means that even in case of a crash or for another reason that consumer will start processing the transaction which is the next to the processed one.
+Consumer iterates over transactions from earliest to the latest and reads data from every transaction. Every Consumer works in a specific T-stream and specific partitions. Consumer implements polling approach of processing.  After a transaction (or transaction set) is handled properly, the consumer does checkpoint which means that even in case of a crash or for another reason the consumer will start processing the transaction which is the next to the processed one.
 
 Producers open transactions in a strictly ordered mode. Consumers and Subscribers always process transactions in the same order they have been opened. Producer can checkpoint or cancel transactions in an arbitrary way, but Subscriber will start handling them once the first (the earliest) one is checkpointed. 
 
-For the strictly ordered way of transaction opening a master producer is responsible. A master is registered per each transaction in Apache Zookeeper. The master generates a new transaction, registers it in Apache Zookeeper, and returns the transaction ID to a Producer. Producer fills the transaction with data from the storage server. Then, it sends checkpoint or cancels to the server commit log and the transaction is checkpointed or canceled. 
+A master Producer is responsible for the strictly ordered way of transaction opening. A master is registered for each transaction in Apache Zookeeper. The master generates a new transaction, registers it in Apache Zookeeper, and returns the transaction ID to a Producer. Producer fills the transaction with data from the storage server. Then, it sends checkpoint or cancels to the server commit log and the transaction is checkpointed or canceled. 
 
-Finally, storage server commit logs are played, and the results are stored to RocksDB. 
+Finally, storage server commit logs are played, and the results are saved to RocksDB. 
 
 Checkpoint Group
 """""""""""""""""""""
@@ -65,11 +65,11 @@ The processed data are put into T-streams.
 
 The data are retrieved from T-streams with the help of an output module. The output module puts the data from T-streams to the streams of the type which is suitable for the type of the external data storage.
 
-The following types of output streams are supported in SJ-Platform:
+SJ-Platform supports the following types of output streams:
 
-- Elasticsearch, to store data to Elasticsearch;
-- SQL database, to store data to JDBC-compatible databases;
-- RESTful, to store data to a RESTful storage.
+- Elasticsearch, to save data to Elasticsearch;
+- SQL database, to save data to JDBC-compatible databases;
+- RESTful, to save data to a RESTful storage.
 
 .. _Streaming_Infrastructure:
 
