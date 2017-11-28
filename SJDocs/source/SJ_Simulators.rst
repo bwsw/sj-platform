@@ -86,7 +86,7 @@ If you want to see what is returned by Executor after processing, Input Engine S
  val outputDataList = simulator.process(duplicateCheck = true)
  println(outputDataList)
 
-For more complicated examples see: `sj-csv-input-test <https://github.com/bwsw/sj-platform/blob/develop/contrib/sj-platform/sj-csv-input/src/test/scala/com/bwsw/sj/module/input/csv/CSVInputExecutorTests.scala>`_, `sj-regex-input-test <https://github.com/bwsw/sj-platform/blob/develop/contrib/sj-platform/sj-regex-input/src/test/scala/com/bwsw/sj/module/input/regex/RegexInputExecutorTests.scala>`_.
+For more examples, please, visit: `sj-csv-input-test <https://github.com/bwsw/sj-platform/blob/develop/contrib/sj-platform/sj-csv-input/src/test/scala/com/bwsw/sj/module/input/csv/CSVInputExecutorTests.scala>`_, `sj-regex-input-test <https://github.com/bwsw/sj-platform/blob/develop/contrib/sj-platform/sj-regex-input/src/test/scala/com/bwsw/sj/module/input/regex/RegexInputExecutorTests.scala>`_.
 
 .. _Regular_Engine_Simulator:
 
@@ -133,7 +133,7 @@ Provided methods
  * ``envelopesNumberBeforeIdle`` - number of envelopes after which ``executor.onIdle()`` will be invoked ('0' by default). '0' means that ``executor.onIdle()`` will never be called.
  * ``clearBuffer`` - indicates that all envelopes will be removed from a local buffer after processing.
 * ``beforeCheckpoint(isFullState: Boolean): SimulationResult`` - imitates the behavior of the :ref:`Regular_Streaming_Engine` before checkpoint: invokes ``executor.onBeforeCheckpoint()``, then invokes ``executor.onBeforeStateSave(isFullState)`` and returns output streams and state (see :ref:`Simulation-Result`).
- * ``isFullState`` - this flag is denoting that either the full state ('true') or a partial change of state ('false') is going to be saved. 
+ * ``isFullState`` - the flag denotes that either the full state ('true') or a partial change of state ('false') is going to be saved. 
 * ``timer(jitter: Long): SimulationResult`` - imitates that a timer went out (invokes ``executor.onTimer(jitter)``).
  * ``jitter`` - a delay between a real response time and an invocation of this handler.
 * ``clear()`` - removes all envelopes from a local buffer.
@@ -197,7 +197,7 @@ If you want to see what the executor puts into an output stream and to the state
 
 The ``mock`` method is from the ``org.mockito.Mockito.mock`` library.
 
-To see more complicated examples, please, visit `fping example project repository <https://github.com/bwsw/sj-fping-demo/blob/develop/ps-process/src/test/scala/com/bwsw/sj/examples/pingstation/module/regular/ExecutorTests.scala>`_.
+To see more examples, please, visit `fping example project repository <https://github.com/bwsw/sj-fping-demo/blob/develop/ps-process/src/test/scala/com/bwsw/sj/examples/pingstation/module/regular/ExecutorTests.scala>`_.
 
 .. _Batch_Engine_Simulator:
 
@@ -206,7 +206,7 @@ Batch Engine Simulator
 
 It is a class for testing the implementation of a `batch module <http://streamjuggler.readthedocs.io/en/develop/SJ_Modules.html#batch-module>`_ (Executor).
 
-The simulator imitates the behavior of the :ref:`Batch_Streaming_Engine` (stateful mode): it collects data elements in batches, then collects batches in a window, sends data in a window to the Executor, allows invoking checkpoint's handlers, gets data from output streams and state.
+The simulator imitates the behavior of the :ref:`Batch_Streaming_Engine` (stateful mode): it collects envelopes in batches, then collects batches in a window, sends data in a window to the Executor, allows invoking checkpoint's handlers, gets data from output streams and state.
 
 To use simulator you need to add this dependency to the ``build.sbt``::
 
@@ -249,11 +249,11 @@ Provided methods
  - ``batchesNumberBeforeIdle`` - the number of retrieved batches between invocations of ``executor.onIdle()`` ('0' by default). '0' means that ``executor.onIdle()`` will never be called.
  - ``window`` - count of batches that will be contained into a window (see :ref:`Batch-streaming_instance_fields`).
  - ``slidingInterval`` - the interval at which a window will be shifted (count of processed batches that will be removed from the window) (see :ref:`Batch-streaming_instance_fields`).
- - ``saveFullState`` - the flag is denoting that either the full state ('true') or a partial change of the state ('false') is going to be saved after every checkpoint.
+ - ``saveFullState`` - the flag denotes that either the full state ('true') or a partial change of the state ('false') is going to be saved after every checkpoint.
  - ``removeProcessedEnvelopes`` - indicates that all processed envelopes will be removed from a local buffer after processing.
 
 * ``beforeCheckpoint(isFullState: Boolean): SimulationResult`` - imitates the behavior of the :ref:`Batch_Streaming_Engine` before checkpoint: invokes ``executor.onBeforeCheckpoint()``, then invokes ``executor.onBeforeStateSave(isFullState)`` and returns output streams and state (see :ref:`Simulation-Result`).
- - ``isFullState`` - the flag is denoting that either the full state ('true') or partial changes of state ('false') is going to be saved.
+ - ``isFullState`` - the flag denotes that either the full state ('true') or partial changes of state ('false') are going to be saved.
 
 * ``timer(jitter: Long): SimulationResult`` - imitates that a timer went out (invokes ``executor.onTimer(jitter)``).
  - ``jitter`` - the delay between a real response time and an invocation of this handler.
@@ -372,7 +372,7 @@ Accumulation of batches is implemented in ``BatchCollector``::
     countOfEnvelopesPerStream(streamName) = 0
  }
 
-For more complicated examples, please, visit `sFlow example project repository <https://github.com/bwsw/sj-sflow-demo/blob/develop/sflow-process/src/test/scala/com/bwsw/sj/examples/sflow/module/process/ExecutorTests.scala>`_.
+For more examples, please, visit `sFlow example project repository <https://github.com/bwsw/sj-sflow-demo/blob/develop/sflow-process/src/test/scala/com/bwsw/sj/examples/sflow/module/process/ExecutorTests.scala>`_.
 
 .. _Output_Engine_Simulator:
 
@@ -463,7 +463,7 @@ If you want to see what Executor returns after processing and what requests are 
 
 ``requestsBeforeFirstCheckpoint`` will contain delete and insert requests, ``requestsAfterFirstCheckpoint``  will contain insertion requests only.
 
-To see more complicated examples, please, examine the following sections: `fping example project repository <https://github.com/bwsw/sj-fping-demo/blob/develop/ps-output/src/test/scala/com/bwsw/sj/examples/pingstation/module/output/ExecutorTests.scala>`_, `sj example project repository <https://github.com/bwsw/sj-sflow-demo/blob/develop/sflow-output/src-dst/src/test/scala/com/bwsw/sj/examples/sflow/module/output/srcdst/ExecutorTests.scala>`_
+To see more examples, please, examine the following sections: `fping example project repository <https://github.com/bwsw/sj-fping-demo/blob/develop/ps-output/src/test/scala/com/bwsw/sj/examples/pingstation/module/output/ExecutorTests.scala>`_, `sj example project repository <https://github.com/bwsw/sj-sflow-demo/blob/develop/sflow-output/src-dst/src/test/scala/com/bwsw/sj/examples/sflow/module/output/srcdst/ExecutorTests.scala>`_
 
 Objects For Simulators With States
 -------------------------------------
@@ -487,7 +487,7 @@ Module Environment Manager Mock
 
 It is a mock to manage the environment of a module (regular or batch) that has got a state. 
 
-It creates :ref:`PartitionedOutputMock` and :ref:`RoundRobinOutputMock` to save the information on where the data are transferred.
+It creates :ref:`PartitionedOutputMock` and :ref:`RoundRobinOutputMock` to save the information on where the data would be transferred.
 
 Constructor arguments
 """""""""""""""""""""""""""""""""
@@ -498,22 +498,23 @@ Constructor arguments
 
  "stateStorage", "StateStorage", "A storage of the state"
  "options", "String", "User-defined instance options"
- "outputs", "Array[TStreamStreamDomain]", "The list of output streams from an instance"
+ "outputs", "Array[TStreamStreamDomain]", "The list of instance output streams"
  "senderThread", "TStreamsSenderThreadMock", "The mock for thread for sending data to the T-Streams service (described below)"
  "fileStorage", 	"FileStorage", 	"A file storage (mocked by default)"
 
-TStreamsSenderThread Mock
+T-streams Sender Thread Mock
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Contains a collection of output elements (see :ref:`Simulation-Result`).
 
-Constructor arguments:
+Constructor arguments
+""""""""""""""""""""""""""""
 
 .. csv-table:: 
  :header: "Argument", "Type", "Description"
  :widths: 15, 15, 30 
  
- "streams", "Set[String]", "storage of state"
+ "streams", "Set[String]", "Storage of the state"
 
 Provided methods:
 
