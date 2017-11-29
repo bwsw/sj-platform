@@ -67,7 +67,7 @@ Transactions are used to write or read data from T-streams. The transaction is a
 
 Transactions are iterated from the earliest to the latest and data are read from every transaction. After a transaction (or transaction set) is handled properly, the checkpoint is performed which means that even in case of a crash or for another reason the processing will continue with the transaction which is the next to the processed one.
 
-T-streams allows exactly-once processing due to a checkpoint group. The **CheckpointGroup** is a special entity which allows a developer to do atomic checkpoint for a group of producers and consumers. Several producers and consumers can be bunched up into a group, which can do a checkpoint atomically. This means  all producers and consumers in that group fix the current state. This is the key component of exactly-once data processing in SJ-Platform Find more information in the `official documentation <http://t-streams.com/docs/architecture/#Agents>`_. 
+T-streams allows exactly-once processing due to a checkpoint group. The **CheckpointGroup** is a special entity which allows a developer to do atomic checkpoint for a group of producers and consumers. Several producers and consumers can be bunched up into a group, which can do a checkpoint atomically. This means  all producers and consumers in that group fix the current state. This is the key component of exactly-once data processing in SJ-Platform. Find more information in the `official documentation <http://t-streams.com/docs/architecture/#Agents>`_. 
 
 Output streams
 ~~~~~~~~~~~~~~~~~~~~~~
