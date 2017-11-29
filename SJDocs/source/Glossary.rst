@@ -5,7 +5,7 @@ Glossary
   :sorted:
   
 Batch 
-  A minimum time interval during which a handler collect events in a stream.
+  A minimum data set for a handler to collect events in a stream.
 
 Configurations 
   Settings required for the module performance. 
