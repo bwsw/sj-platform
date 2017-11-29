@@ -502,7 +502,7 @@ The table below explains what types of streams may serve as input or output stre
 ===============  ================================================  ===============================================
 Instance type    Input stream                                      Output stream
 ===============  ================================================  ===============================================
-*Input*            TCP                                               T-streams 
+*Input*            TCP (provided by Input Streaming Engine)         T-streams 
 
                                                                       **Providers**: Apache Zookeeper
                                        
