@@ -120,7 +120,7 @@ To solve your tasks, you may upload your custom modules in this step.
    
    Picture 1.6
    
-Streaming requires the infrastructure: providers and services. This is a  necessary presetting without which streaming will not be so flexible. Streaming flexibility lies in the one-to-many connection between providers and services, streams and modules. One provider works with many services (of various types). One type of streams can be used by different module instances. These streams take necessary settings from the common infrastructure (providers and services). There is no need to duplicate the settings for each individual stream.
+Streaming requires the infrastructure: providers and services. These are necessary API entites without which streaming will not be so flexible. Streaming flexibility lies in the one-to-many connection between providers and services, streams and modules. One provider works with many services (of various types). One type of streams can be used by different module instances. These streams take necessary settings from the common infrastructure (providers and services). There is no need to duplicate the settings for each individual stream.
 
 For both example tasks we will need Apache Zookeeper, Elasticsearch and SQL-database types of providers, and Apache Zookeeper, Elasticsearch, SQL-database and T-streams types of services. On the base of the infrastructure we will create streams of corresponding types.
    
