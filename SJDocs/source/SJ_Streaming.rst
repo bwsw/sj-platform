@@ -10,9 +10,9 @@ Stream Conception in SJ-Platform
 
 The streaming component is essential in SJ-Platform. The data are fed to the system, transferred between modules and exported to an external storage via streams.
 
-The system receives data via TCP or Apache Kafka. Within SJ-Platform the data are transferred between modules via T-streams. The results are exported to an external storage via output streams which type is determined by the type of the storage. For now, Elasticsearch, SQL database and RESTful output stream types are supported. 
+The system receives data via **TCP** or **Apache Kafka**. Within SJ-Platform the data are transferred between modules via **T-streams**. The results are exported to an external storage via output streams which type is determined by the type of the storage. For now, **Elasticsearch**, **SQL-database** and **RESTful** output stream types are supported. 
 
-The table below shows what types of streams are required for particular module types.
+The table below shows what types of streams are required as input/output streams for a particular module type.
 
 ===============  ================================================  ===============================================
 Module type      Input stream                                      Output stream
@@ -48,30 +48,24 @@ The data can be received from different sources. Currently, the platform support
 
 SJ-Platform supports `Apache Kafka <https://kafka.apache.org/documentation/>`_ as a standard providing a common interface for the integration of many applications.
 
-In case of using TCP as a source, there arises a need in an input module to transform the input data into a stream and transfer them for further processing. At the project `repository <https://github.com/bwsw/sj-platform/tree/develop>`_ two input modules are available for users - a CSV input module and a Regex input module - that transform text data into a message format acceptable for T-streams. 
-
-Within the platform, the data are transported to and from modules via *transactional streams* or T-streams. It is a message broker and a Scala library native to SJ-Platform and designed primarily for exactly-once processing (so it includes a transactional Producer, a Consumer and a Subscriber). More information on T-streams can be found at the `project site <http://t-streams.com/>`_. Some general information on T-streams you can find below.
+In case of using TCP as a source, there arises a need in an input module to transform the input data into a stream and transfer them for further processing. At the project `repository <https://github.com/bwsw/sj-platform/tree/develop>`_ two ready-to-use input modules are available for users - a CSV input module and a Regex input module - that transform text data into a message format acceptable for T-streams. 
 
 About T-Streams
-""""""""""""""""""""""""
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Within the platform, the data are transferred to and from modules via *transactional streams* or T-streams. It is a message broker which is native to SJ-Platform and designed primarily for exactly-once processing. More information on T-streams can be found at the `project site <http://t-streams.com/>`_. Some general information on T-streams you can find below.
 
 The easiest way to try T-streams and dive into basic operations with T-streams is to download `T-streams-hello <http://t-streams.com/getting-started/>`_. This demo shows the basic operation mode between a Producer and a Subscriber.
 
-The T-streams architecture is not complicated. T-streams consist of partitions. Each partition holds a number of transactions with data elements inside. 
+The image below illustrates the data design format in T-streams. The stream consists of partitions. Each partition holds a number of transactions with data elements inside. 
 
 .. figure:: _static/t-streams-organization.png
 
 Data elements are time-sorted within a transaction. 
 
-Consumers and Producers use transactions to write or read data from T-streams. The transaction is also a basic recovery element. This means, that in case of a crash, Consumers and Producers can recover from a transaction.
+Transactions are used to write or read data from T-streams. The transaction is also a basic recovery element. This means, that in case of a crash, the processing can recover from a transaction.
 
-Consumer iterates over transactions from earliest to the latest and reads data from every transaction. Every Consumer works in a specific T-stream and specific partitions. Consumer implements polling approach of processing.  After a transaction (or transaction set) is handled properly, the consumer does checkpoint which means that even in case of a crash or for another reason the consumer will start processing the transaction which is the next to the processed one.
-
-Producers open transactions in a strictly ordered mode. Consumers and Subscribers always process transactions in the same order they have been opened. Producer can checkpoint or cancel transactions in an arbitrary way, but Subscriber will start handling them once the first (the earliest) one is checkpointed. 
-
-A master Producer is responsible for the strictly ordered way of transaction opening. A master is registered for each transaction in Apache Zookeeper. The master generates a new transaction, registers it in Apache Zookeeper, and returns the transaction ID to a Producer. Producer fills the transaction with data from the storage server. Then, it sends checkpoint or cancels to the server commit log and the transaction is checkpointed or canceled. 
-
-Finally, storage server commit logs are played, and the results are saved to RocksDB. 
+Consumer iterates over transactions from earliest to the latest and reads data from every transaction. After a transaction (or transaction set) is handled properly, the checkpoint is performed which means that even in case of a crash or for another reason the processing will continue with the transaction which is the next to the processed one.
 
 Checkpoint Group
 """""""""""""""""""""
@@ -87,9 +81,9 @@ Output streams are streams which are a destination for results.
 
 The processed data are put into T-streams.
 
-The data are retrieved from T-streams with the help of an output module. The output module puts the data from T-streams to the streams of the type which is suitable for the type of the external data storage.
+The data are retrieved from T-streams using an output module. The output module puts the data from T-streams to the streams of the type which is suitable for the type of the external data storage.
 
-SJ-Platform supports the following types of output streams:
+For now, SJ-Platform supports the following types of output streams:
 
 - Elasticsearch, to save data to Elasticsearch;
 - SQL database, to save data to JDBC-compatible databases;
@@ -100,7 +94,7 @@ SJ-Platform supports the following types of output streams:
 Streaming Infrastructure
 -----------------------------------
 
-Streams need infrastructure: providers and services. This is a required presetting without which streaming will not be so flexible. Streaming flexibility lies in the one-to-many connection between providers and services, services and streams. One provider works with many services (they can be of various types) as well as one service can provide several streams. These streams take necessary settings from the common infrastructure (providers and services). There is no need to duplicate the settings for each individual stream.
+Streams need infrastructure: providers and services. This is a required presetting without which streaming will not be so flexible. Streaming flexibility lies in the one-to-many connection between providers and services, streams and modules. One provider works with many services (of various types). One stream type can be used by different module instances. Different types of streams and instances can be created on the base of a common infrastructure. There is no need to duplicate the settings for each individual entity.
 
 A **provider** is a service provider for data transformation into a stream.
 
@@ -112,14 +106,13 @@ The diagram of platform entities interconnections can be useful in selecting the
 
 Firstly, decide what types of modules will perform data transformation and processing in the pipeline. The determined module types will help to clarify which streams are required for them.
 
-Secondly, find in the diagram what services are necessary for these types of streams. 
+Secondly, find in the diagram at :ref:`Entities_Correlation` what services are necessary for these types of streams. 
 
 Finally, when services are determined, it is easy to see what types of providers should be created. 
 
-
 Start creating the infrastructure from providers, then proceed with services and then streams. 
 
-Detailed instructions on stream creation can be found in the :ref:`Tutorial` (for creating infrastructure via REST API) or in the `UI Guide <http://streamjuggler.readthedocs.io/en/develop/SJ_UI_Guide.html>`_ for creating through the Web UI.
+Detailed instructions on stream creation can be found in the :ref:`Tutorial` (for creating infrastructure via REST API) or in the `UI Guide <http://streamjuggler.readthedocs.io/en/develop/SJ_UI_Guide.html>`_ for creating streams through the Web UI.
 
 
 
