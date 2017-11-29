@@ -206,7 +206,7 @@ Batch Engine Simulator
 
 It is a class for testing the implementation of a `batch module <http://streamjuggler.readthedocs.io/en/develop/SJ_Modules.html#batch-module>`_ (Executor).
 
-The simulator imitates the behavior of the :ref:`Batch_Streaming_Engine` (stateful mode): it collects envelopes in batches, then collects batches in a window, sends data in a window to the Executor, allows invoking checkpoint's handlers, gets data from output streams and state.
+The simulator imitates the behavior of the :ref:`Batch_Streaming_Engine` (stateful mode): it collects data envelopes in batches, then collects batches in a window, sends data in a window to the Executor, allows invoking checkpoint's handlers, gets data from output streams and state.
 
 To use simulator you need to add this dependency to the ``build.sbt``::
 
