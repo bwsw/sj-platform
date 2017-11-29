@@ -97,7 +97,7 @@ A **service** is a service to transform data into a stream of an exact type.
 
 They can be of different types. The types of modules and streams in the pipeline determine the type of providers and services that are necessary in the particular case.
 
-The diagram of platform entities interconnections can be useful in selecting the necessary types of providers and services. Please, visit the :ref:`Entities_Correlation` section for more information.
+The diagram for interconnections of the platform entities can be useful in selecting the types of providers and services. Please, visit the :ref:`Entities_Correlation` section for more information.
 
 Firstly, decide what types of modules will perform data transformation and processing in the pipeline. The determined module types will help to clarify which streams are required for them.
 
@@ -107,7 +107,7 @@ Finally, when services are determined, it is easy to see what types of providers
 
 Start creating the infrastructure from providers, then proceed with services and then streams. 
 
-Detailed instructions on stream creation can be found in the :ref:`Tutorial` (for creating infrastructure via REST API) or in the `UI Guide <http://streamjuggler.readthedocs.io/en/develop/SJ_UI_Guide.html>`_ for creating streams through the Web UI.
+Detailed instructions on stream creation can be found in the :ref:`Tutorial` (for creating infrastructure via REST API) or in the `UI Guide section <http://streamjuggler.readthedocs.io/en/develop/SJ_UI_Guide.html>`_ for creating streams through the Web UI.
 
 
 
