@@ -47,28 +47,19 @@ General processing workflow which the system allows implementing is illustrated 
    
 Green, yellow and purple blocks displayed in a rectangular area are managed and evaluated by SJ-Platform. They represent an input module, a processing module and an output module, respectively. The blocks outside the rectangular area represent external systems (a data source and a data storage).
 
-The input module receives raw data and transforms them into a data stream of a proper type compatible with the processing module type. The processing module performs data aggregation, transformations, filtering and enriching and sends the result to the output module. In the output module, the processed data are transformed into entities appropriate for storing into an external storage of a specified type. It can be Elasticsearch, RESTful endpoint or JDBC-compatible data storages.
-          
-The illustrated pipeline is a common scenario for a lot of different tasks.
+The input module receives raw data and transforms them into a data stream of a proper type compatible with the processing module type. The processing module performs data aggregation, transformations, filtering and enriching, and sends the result to the output module. In the output module, the processed data are transformed into entities appropriate for storing into an external storage of a specified type. It can be Elasticsearch, RESTful endpoint or JDBC-compatible data storages. The illustrated pipeline is a common scenario for a lot of different tasks. 
 
-But the platform allows implementation of more complicated processing pipelines. So the pipeline can be expanded.  Several input modules can be included in the pipeline to accept the raw data and transform them for passing further to the processing stage.
+But the platform allows implementation of more complicated processing pipelines. So the pipeline can be extended.  Several input modules can be included in the pipeline to receive the raw data and transform them for passing further to the processing stage. You can launch more than a single processing module. Data streams can be distributed among them in various ways. A few output modules may receive processed data and put them into a storage/storages. This case is described in the :ref:`sflow-example-task`.
 
-You can launch more than a single processing module. Data streams can be distributed among them in various ways.
-
-A few output modules may receive processed data and put them into a storage/storages. This case is described in the :ref:`sflow-example-task`.
-
-To configure and monitor the system, SJ-Platform provides a user with a comprehensive RESTful API and Web UI.
-
-Further we will go through a couple of real-life tasks to demonstrate the platform workflow. It will help you to understand how the platform processes data. 
-
-Thus, the tutorial will provide you with a ready-to-use problem solution for example tasks on SJ-Platform base. Perform the steps to get acquainted with the platform functionality.
+To configure and monitor the system, SJ-Platform provides a user with a comprehensive RESTful API and Web UI. Further we will go through a couple of real-life tasks to demonstrate the platform workflow. It will help you to understand how the platform processes data. This tutorial will provide you with a ready-to-use problem solution on the base of SJ-Platform. Perform the steps for the example tasks to get acquainted with the platform functionality.
 
 If you would like to continue studying the platform, proceed with reading the documentation. There you will find instructions on development, deployment and customization of your own code for your specific aims.
 
 Examples Introduction
 --------------------------------------
 
-The example tasks that will be presented are different. But the steps we will perform to solve the tasks are common for both of them (see Picture 3). Before starting with the steps, it is important to note that to complete your job using SJ-Platform you should definitely know how the pipeline is going to look, what data format will be delivered into the system. The modules for data processing should be preliminarily created.
+The example tasks that will be presented are different. But the steps we will perform to solve the tasks are common for both of them (see Picture 3). 
+.. Before starting with the steps, it is important to note that to complete your job using SJ-Platform you should definitely know how the pipeline is going to look, what data format will be delivered into the system. The modules for data processing should be preliminarily created.
 
 .. figure:: _static/TutorialSteps.png
    :align: center
@@ -134,7 +125,7 @@ For both example tasks we will need Apache Zookeeper, Elasticsearch and SQL-data
    
 .. note:: Find more about streams and the streaming infrastructure at the :ref:`Streaming` section.
 
-6. Create output destination. At this step all necessary tables and mapping should be created for storing the processed result in an external data store.
+6. Create output destination. At this step all necessary tables and mapping should be created for storing the processed result in an external data storage.
 
 7. Create and launch instances. For each module we will create instances. It is a set of settings determining collaborative work of an engine and a module.
 
@@ -159,7 +150,7 @@ Fping Example Task
 
 The first example task we'd like to introduce illustrates the platform workflow in the real-world use.
 
-The issue we are going to solve using our platform is to collect aggregated information on the accessibility of nodes using `fping <https://fping.org/>`_ utility. It checks accessibility of provided IPs sending a 64-bytes packet to each IP and waiting for a return packet. If the node can be accessed, a good return packet will be received. Also it returs the amount of time needed for a package to reach the node and return back. On the basis of this information the processor calculates the average response time for each node per 1 minute. The amount of successful responses by IP per 1 minute is calculated by the processing module as well. The result is exported to an external data store.  
+The issue we are going to solve using our platform is to collect aggregated information on the accessibility of nodes using `fping <https://fping.org/>`_ utility. It checks accessibility of provided IPs sending a 64-bytes packet to each IP and waiting for a return packet. If the node can be accessed, a good return packet will be received. Also it returs the amount of time needed for a package to reach the node and return back. On the basis of this information the processor calculates the average response time for each node per 1 minute. The amount of successful responses by IP per 1 minute is calculated by the processing module as well. The result is exported to an external data storage.  
 
 In the example task solution the processing workflow is formed in the following way:
 
@@ -568,14 +559,14 @@ Thus, engines should be compiled and uploaded next.
 Upload Engine Jars
 """"""""""""""""""""""""
 
-Please, download the engine JARs for each module type (input-streaming, regular-streaming, output-streaming) and the Mesos framework:: 
+Please, download the engines' JARs for each module type (input-streaming, regular-streaming, output-streaming) and the Mesos framework:: 
 
  wget http://c1-ftp1.netpoint-dc.com/sj/1.0-SNAPSHOT/sj-mesos-framework.jar
  wget http://c1-ftp1.netpoint-dc.com/sj/1.0-SNAPSHOT/sj-input-streaming-engine.jar
  wget http://c1-ftp1.netpoint-dc.com/sj/1.0-SNAPSHOT/sj-regular-streaming-engine.jar
  wget http://c1-ftp1.netpoint-dc.com/sj/1.0-SNAPSHOT/sj-output-streaming-engine.jar
 
-Now upload the engine JARs. Please, change <slave_advertise_ip> to the slave advertise IP::
+Now upload the engines' JARs. Please, change <slave_advertise_ip> to the slave advertise IP::
 
  address=address=<slave_advertise_ip>:31080
 
@@ -584,7 +575,7 @@ Now upload the engine JARs. Please, change <slave_advertise_ip> to the slave adv
  curl --form jar=@sj-regular-streaming-engine.jar http://$address/v1/custom/jars
  curl --form jar=@sj-output-streaming-engine.jar http://$address/v1/custom/jars
 
-Now engine JARs should appear in the UI under Custom Jars of the "Custom files" navigation tab.
+Now the JARs should appear in the UI under Custom Jars of the "Custom files" navigation tab.
 
 .. figure:: _static/EnginesUploaded.png
    :align: center
@@ -679,7 +670,7 @@ Upload modules to the system::
  curl --form jar=@ps-process/target/scala-2.11/ps-process-1.0.jar http://$address/v1/modules
  curl --form jar=@ps-output/target/scala-2.11/ps-output-1.0.jar http://$address/v1/modules
 
-Now in the UI, you can see the uploaded modules under the ‘Modules’ tab in UI.
+Now in the UI, you can see the uploaded modules under the ‘Modules’ tab.
 
 .. figure:: _static/ModulesUploaded.png
    :align: center
@@ -713,7 +704,7 @@ Prior to creating a stream, we need to create infrastructure for the streaming l
 
 The types of providers and services are determined by the type of streams. Find more about types of providers and services at the :ref:`Streaming_Infrastructure` section.
 
-There are steps below to create streaming infrastructure using REST API: providers, services, and streams.
+Perform the steps below to create streaming infrastructure: providers, services, and streams.
 
 Set Up Streaming Infrastructure
 """""""""""""""""""""""""""""""""""""""
@@ -836,7 +827,7 @@ Create the index and the mapping for Elasticsearch sending the PUT request::
 Step 7. Creating Instances 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Once the system is deployed, configurations and modules are uploaded, the streaming layer with necessary infrastructure is created, we are going to create instances in the next step.
+Once the system is deployed, configurations and modules are uploaded, the streaming layer with necessary infrastructure is created, we can create instances in the next step.
  
 An individual instance should be created for each module.
 
@@ -1086,7 +1077,7 @@ For this demo project the following core systems and services are required:
 6. MongoDB - as a database;
 7. T-streams - as a message broker ensuring exactly-once data processing;
 8. RESTful API - to access and monitor the platform;
-9. PostgreSQL - as a destination data store.
+9. PostgreSQL - as a destination data storage.
 
 For a start, perform the steps for platform deployment from the Step1-Deployment_ section.
 
