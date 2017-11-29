@@ -16,12 +16,12 @@ Every stream processing system must be fast and scalable. This is the most impor
 
 SJ-Platform stands on shoulders of well-known technologies which simplify the deployment and operation and support best industrial practices. Core SJ-Platform technologies are mentioned in the following list:
 
-1. `Apache Mesos <http://mesos.apache.org>`_ - universal distributed computational engine;
-2. `Apache Zookeeper <http://zookeeper.apache.org>`_ - distributed configuration and coordination broker;
-3. `Apache Kafka <http://kafka.apache.org>`_ - high-performance message broker;
-4. `Mesosphere Marathon <https://mesosphere.github.io/marathon/>`_ - universal framework for executing tasks on Mesos;
-5. `MongoDB <https://www.mongodb.com/>`_ - highly available document database;
-6. `Hazelcast <https://hazelcast.com/>`_ - leading in-memory grid.
+1. `Apache Mesos <http://mesos.apache.org>`_ - a universal distributed computational engine;
+2. `Apache Zookeeper <http://zookeeper.apache.org>`_ - a distributed configuration and a coordination broker;
+3. `Apache Kafka <http://kafka.apache.org>`_ - a high-performance message broker;
+4. `Mesosphere Marathon <https://mesosphere.github.io/marathon/>`_ - a universal framework for executing tasks on Mesos;
+5. `MongoDB <https://www.mongodb.com/>`_ - a highly available document database;
+6. `Hazelcast <https://hazelcast.com/>`_ - a leading in-memory grid.
 
 Further, in the documentation, we explain how, why and when technologies mentioned above are used in the system.
 
@@ -72,7 +72,7 @@ The first is **TCP**. The method allows developers to design a custom protocol t
 
 The second is **Apache Kafka**. Apache Kafka is the de-facto standard for message queueing, so we support it in SJ-Platform providing 3rd party applications with common integration interface.
 
-The third is **T-streams**. T-streams is Kafka-like message broker which is native to SJ-Platform and is used as internal data exchange bus inside the system.
+The third is **T-streams**. T-streams is a Kafka-like message broker which is native to SJ-Platform and is used as internal data exchange bus inside the system.
 
 **JDBC/Elasticsearch/RESTful interface as an output destination for processing data**. Processed data are exported to JDBC-compatible database, Elasticsearch or a datastore with the RESTful interface.
 
