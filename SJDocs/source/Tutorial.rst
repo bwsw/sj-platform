@@ -112,7 +112,7 @@ To solve your tasks, you may upload your custom modules in this step.
    
 .. note:: Find more about modules at the :ref:`Modules` page.  A hello-world on a custom module can be found at the :ref:`Custom_Module` section.
 
-5. Create streaming layer. Modules exchange data via streams. Within the platform, T-streams are used for message transportation allowing exactly-once data exchange. The result data are exported from SJ-Platform to an external storage with streams of types corresponding to the type of that storage: Elasticsearch, SQL database or RESTful.
+5. Create the streaming layer. Modules exchange data via streams. Within the platform, T-streams are used for message transportation allowing exactly-once data exchange. The result data are exported from SJ-Platform to an external storage with streams of types corresponding to the type of that storage: Elasticsearch, SQL database or RESTful.
 
 .. figure:: _static/ModuleStreams.png
    :scale: 80%
