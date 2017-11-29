@@ -83,7 +83,7 @@ Transaction
   A separate atomic operations with events.
 
 T-streams
-  (transactional streams); a Scala library and infrastructure components which implement transactional messaging.
+  (transactional streams); a Scala library providing an infrastructure component which implements transactional messaging.
 
 Typed stream 
   A stream the avro schema for which is specified.
