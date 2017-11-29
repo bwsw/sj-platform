@@ -89,7 +89,7 @@ For now, SJ-Platform supports the following types of output streams:
 Streaming Infrastructure
 -----------------------------------
 
-Streams need infrastructure: providers and services. This are required API entities without which streaming will not be so flexible. Streaming flexibility lies in the one-to-many connection between providers and services, streams and modules. One provider works with many services (of various types). One stream type can be used by different module instances. Different types of streams and instances can be created on the base of a common infrastructure. There is no need to duplicate the settings for each individual entity.
+Streams need infrastructure: providers and services. These are required API entities without which streaming will not be so flexible. Streaming flexibility lies in the one-to-many connection between providers and services, streams and modules. One provider works with many services (of various types). One stream type can be used by different module instances. Different types of streams and instances can be created on the base of a common infrastructure. There is no need to duplicate the settings for each individual entity.
 
 A **provider** is a service provider for data transformation into a stream.
 
