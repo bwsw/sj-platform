@@ -55,7 +55,7 @@ About T-Streams
 
 Within the platform, the data are transferred to and from modules via *transactional streams* or T-streams. It is a message broker which is native to SJ-Platform and designed primarily for exactly-once processing. More information on T-streams can be found at the `project site <http://t-streams.com/>`_. Some general information on T-streams you can find below.
 
-The easiest way to try T-streams and dive into basic operations with T-streams is to download `T-streams-hello <http://t-streams.com/getting-started/>`_. This demo shows the basic operation mode between a Producer and a Subscriber.
+The easiest way to try T-streams and dive into basic operations with T-streams is to download `T-streams-hello <http://t-streams.com/getting-started/>`_.  It demonstrates basic operations which help to understand how to use T-streams in general. 
 
 The image below illustrates the data design format in T-streams. The stream consists of partitions. Each partition holds a number of transactions with data elements inside. 
 
@@ -65,7 +65,7 @@ Data elements are time-sorted within a transaction.
 
 Transactions are used to write or read data from T-streams. The transaction is also a basic recovery element. This means, that in case of a crash, the processing can recover from a transaction.
 
-Consumer iterates over transactions from earliest to the latest and reads data from every transaction. After a transaction (or transaction set) is handled properly, the checkpoint is performed which means that even in case of a crash or for another reason the processing will continue with the transaction which is the next to the processed one.
+Transactions are iterated from the earliest to the latest and data are read from every transaction. After a transaction (or transaction set) is handled properly, the checkpoint is performed which means that even in case of a crash or for another reason the processing will continue with the transaction which is the next to the processed one.
 
 Checkpoint Group
 """""""""""""""""""""
