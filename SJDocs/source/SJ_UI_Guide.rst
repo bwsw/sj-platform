@@ -27,7 +27,7 @@ SJ-Platform allows you to work with your own module, created in accordance with 
 
 A module utilizes an instance/instances, i.e. a full range of settings for collaborative work of an engine and a module. See more information on a module structure at :ref:`Modules`.
 
-The SJ-Platform allows you to upload your custom module for data stream processing with prerequisite engines and configuration settings. They are required to launch a module and define the processing in it. They are provided by SJ-Platform and can be uploaded from the `Maven repository <http://www.scala-sbt.org/1.x/docs/Using-Sonatype.html#Maven+configuration+tips%E2%80%99n%E2%80%99tricks>`_. Find more information about uploading configurations in the `Configuration`_ and the :ref:`CustomFiles` sections of this document.
+The SJ-Platform allows you to upload your custom module for data stream processing with prerequisite engines and configuration settings. They are required to launch a module and define the processing in it. They are provided by SJ-Platform and can be uploaded from the `Maven repository <http://www.scala-sbt.org/1.x/docs/Using-Sonatype.html#cMaven+configuration+tips%E2%80%99n%E2%80%99tricks>`_. Find more information about uploading configurations in the `Configuration`_ and the :ref:`CustomFiles` sections of this document.
 
 For correct module interaction a stream/streams are required. The :ref:`Streaming` section describes the streaming component of the system in detail.
 
@@ -191,7 +191,7 @@ The type of the provider is determined with the type of the stream and the insta
        
 .. note:: Required fields are marked with an asterisk (*)
 
-Click «Create» berlow and see the provider appeared in the providers list. Provider details are displayed to the right when clicking the provider in the list. 
+Click "Create" below and see the provider appeared in the providers list. Provider details are displayed to the right when clicking the provider in the list. 
 
 .. figure:: _static/Providers_list1.png
 
@@ -201,7 +201,7 @@ You can perform the following actions on each provider in the list:
 
 #. **View** provider`s name, date of creation, description.
 
-#. **Delete** a provider clicking at the corresponding icon in the Action block near the name of the provider you want to delete. 
+#. **Delete** a provider clicking on the corresponding icon in the Action block near the name of the provider you want to delete. 
 
 .. note:: A provider that is connected with a service can not be deleted.
 
@@ -252,7 +252,7 @@ Please, press «Create Service» and fill out the form with general and specific
 **Apache Zookeeper Service Type**
 
 - *Namespace* *
-             Please, specify a namespace here. It must consist of digits, lowercase letters or underscore and start with a letter. 
+        Please, specify a namespace here. It must consist of digits, lowercase letters or underscore and start with a letter. 
 
 .. - *Http scheme* *
             Select the scheme of HTTP protocol from the dropdown ("http" is set by default). 
@@ -260,8 +260,7 @@ Please, press «Create Service» and fill out the form with general and specific
 **Apache Kafka Service Type**
 
 - *ZK provider* *
-       
-       Please, select a zookeeper provider for the service here. 
+        Please, select a zookeeper provider for the service here. 
 
 .. - *ZK namespace* *
         This field is required for filling in.
@@ -274,13 +273,11 @@ Please, press «Create Service» and fill out the form with general and specific
 **T-streams Service Type**
 
 - *Prefix* *
-        
         Here a ZooKeeper path where metadata of transactions, streams are located should be specified.
 
         Please, enter a prefix for the service here. 
 
 - *Token* *
-        
         A token is a unique key for getting access to the service. It must contain no more than 32 symbols.
 
         Please, enter a token for the service here. 
@@ -291,7 +288,6 @@ Please, press «Create Service» and fill out the form with general and specific
 **Elasticsearch Service Type**
 
 -  *Index* *
-        
         Please, specify an index of the service here. It must consist of digits, lowercase letters or underscore and start with a letter. 
 
 .. - *Login*
@@ -311,7 +307,6 @@ Please, press «Create Service» and fill out the form with general and specific
 **SQL database Service Type**
 
 - *Database* *name* *
-        
         Please, enter a database name for the service here. 
 
 .. - *Http scheme* *
@@ -333,7 +328,7 @@ Please, press «Create Service» and fill out the form with general and specific
 	
 .. note:: Required fields are marked with an asterisk (*)
 
-Click «Create» below and you will see that the service appeared in the services list. Details of a service are displayed to the right when clicking the service in the list. 
+Click "Create" below and you will see that the service appeared in the services list. Details of a service are displayed to the right when clicking the service in the list. 
 
 .. figure:: _static/ServicesList1.png
 
@@ -343,11 +338,11 @@ You can perform the following actions on each service in the list:
 
 1. **View** service`s name and description, the date of creation.
 
-2. **View** a provider for the service and get the provider`s information in a pop-up window by clicking at the active provider`s name in the «Provider» column.
+2. **View** a provider for the service and get the provider`s information in a pop-up window by clicking on the active provider`s name in the «Provider» column.
 
 .. figure:: _static/ServicesList_ProviderInfo1.png
 
-3. **Delete** a service clicking at the corresponding icon in the Action block near the name of the services you want to delete.
+3. **Delete** a service clicking on the corresponding icon in the Action block near the name of the services you want to delete.
 
 .. note:: A service used by one of the streams can not be deleted.
 
@@ -359,17 +354,19 @@ Streams
 
 The next step is to create a data stream. A stream is a sequence of events happening randomly at irregular intervals.
 
-There are two kinds of streams in the SJ-Platform.
+There are three kinds of streams in the SJ-Platform:
 
-:An input stream: It is a stream which provides new events. There are two different input stream types in the SJ-Platform: Apache Kafka and T-Streams.
+:Input streams: These are streams which provide new events to the system. There are two input stream types in the SJ-Platform: TCP or Apache Kafka.
 
-:An output stream: It is a stream which is a destination point for results. There is one output stream type supported within the SJ-Platform: T-Streams. Besides, three types of output streams are available for sending the processed data into different external storages: RESTful, SQL database and Elasticsearch.
+:Internal streams: These are streams using which modules exchange data within the system. The only type of streams used for it is T-streams.
+
+:Output streams: These are streams which are a destination point for results. Three types of output streams are available for sending the processed data into different external storages: RESTful, SQL database and Elasticsearch.
 
 Under the *Streams* section of the main navigation bar you will find the list of streams.
 
 .. figure:: _static/CreateStreams1.png
 
-Please, press the «Create Stream» button and fill in the form where general and specific fields should be completed:
+Please, press «Create Stream» and fill in the form where general and specific fields should be completed:
 
 **General fields:**
 
@@ -377,15 +374,15 @@ Please, press the «Create Stream» button and fill in the form where general an
 
 Select from the dropdown a type of a stream:
 
-- T-streams — It is an input stream of the T-stream type
+ - T-streams — It is an input stream of the T-stream type
 
-- Apache Kafka - It is an input stream of the Kafka type
+ - Apache Kafka - It is an input stream of the Kafka type
 
-- SQL database -It is an output stream of the SQL database type
+ - SQL database -It is an output stream of the SQL database type
  
-- Elasticsearch - It is an output stream of the Elasticsearch type
+ - Elasticsearch - It is an output stream of the Elasticsearch type
  
-- RESTful - It is an output stream of the REST type
+ - RESTful - It is an output stream of the REST type
 
 .. figure:: _static/CreateStream_Type1.png
 
@@ -467,14 +464,14 @@ Select from the dropdown a type of a stream:
 **Elasticsearch Stream Type**
 
 - *Force create*
-        This field indicates if a stream should be removed and re-created by force (if it exists). Set it «True» or «False». It is set as «False» by default.
+        This field indicates if a stream should be removed and re-created by force (if it exists). Set it «True» or "False". It is set as "False" by default.
 
 - *Tags*
         Enter a tag\tags for the stream here.
 
 .. note:: Required fields are marked with an asterisk (*)
 
-Click «Create» at the bottom and see the stream is in the list of streams now. Details of the node are displayed to the right when clicking the stream in the list. 
+Click "Create" at the bottom and see the stream is in the list of streams now. Details of the node are displayed to the right when clicking the stream in the list. 
 
 .. figure:: _static/StreamsList1.png
 
@@ -484,11 +481,11 @@ In the list of streams the following actions can be performed:
 
 1. **View** a stream` name, description, date of creation.
 
-2. **View** a service for the stream and get the service`s information in a pop-up window by clicking at the active service`s name in the «Service» column.
+2. **View** a service for the stream and get the service`s information in a pop-up window by clicking on the active service`s name in the "Service" column.
 
 .. figure:: _static/StreamsList_ServiceInfo1.png
 
-3. **Delete** a stream clicking at the corresponding icon in the Actions block near the name of the stream you want to delete.
+3. **Delete** a stream clicking on the corresponding icon in the Actions block near the name of the stream you want to delete.
 
 .. note:: A stream used by any instance can not be deleted.
 
@@ -551,7 +548,7 @@ Currently the following **engine types** are supported in the SJ-Platform:
          - ElasticSearch Output Engine - allows creating output endpoint and place processing results to Elasticsearch index.   
 	 - SQL database Output Engine  - allows creating output endpoint and place processing results to 			MySQL, PostgreSQL, Oracle tables.
 
-Engines should be uploaded as a .JAR file under the `Custom files`_ section in the "Custom Jars" tab.
+Engines should be uploaded as a .JAR file under the :ref:`CustomFiles` section in the "Custom Jars" tab.
 
 After an engine is uploaded and a corresponding config settings file appears in the «Configuration» section, a module can be uploaded.
 
@@ -567,9 +564,9 @@ In the list of modules the following actions can be performed:
 
 1. **View** a module name, type, version and size, the date of uploading.
 
-2. **Download** a module to your computer by clicking at the download icon in the Actions block near the name of the module you want to download. You need only to specify a folder where to store the module to and click the «Save» button.
+2. **Download** a module to your computer by clicking on the download icon in the Actions block near the name of the module you want to download. You need only to specify a folder where to store the module to and click the "Save" button.
 
-3. **Delete** a module clicking at the corresponding icon in the Actions block near the name of the module you want to delete.
+3. **Delete** a module clicking on the corresponding icon in the Actions block near the name of the module you want to delete.
 
 .. note:: A module used by any instance can not be deleted.
 
@@ -593,9 +590,9 @@ The following actions can be performed with the files in the list:
 
 1. **View** a jar name, version and size, the date of uploading.
 
-2. **Download** a jar file to your computer by clicking at the download icon in the Actions block near the name of the jar you want to download. You need only to specify a folder where to store the jar to and click the «Save» button.
+2. **Download** a jar file to your computer by clicking on the download icon in the Actions block near the name of the jar you want to download. You need only to specify a folder where to store the jar to and click the "Save" button.
 
-3. **Delete** a jar clicking at the corresponding icon in the Actions block near the name of the jar you want to delete
+3. **Delete** a jar clicking on the corresponding icon in the Actions block near the name of the jar you want to delete
 
 The list of jars can be filtered by its name using the search tool above the list.
 
@@ -603,19 +600,17 @@ The list of jars can be filtered by its name using the search tool above the lis
 Custom Files
 ~~~~~~~~~~~~
 
-Under the «Custom files» tab any other files that are necessary for module/engine performance can be uploaded. Click the "Upload file" button and select the file to upload from your computer. Click "Open" in the modal window and wait for a few seconds before the file is uploaded. If it is uploaded successfully a success message appears above the file list and the uploaded file is added to the list of files.
+Under the "Custom files" tab any other files that are necessary for module/engine performance can be uploaded. Click the "Upload file" button and select the file to upload from your computer. Click "Open" in the modal window and wait for a few seconds before the file is uploaded. If it is uploaded successfully a success message appears above the file list and the uploaded file is added to the list of files.
 
 The following actions can be performed with the files in the list:
 
 1. **View** a file name, description, upload date and size
 
-2. **Download** a file to your computer by clicking at the download icon in the Actions block near the name of the file you want to download. You need only to specify a folder where to store the file to and click the «Save» button.
+2. **Download** a file to your computer by clicking on the download icon in the Actions block near the name of the file you want to download. You need only to specify a folder where to store the file to and click the "Save" button.
 
-3. **Delete** a file clicking at the corresponding icon in the Actions block near the name of the file you want to delete
+3. **Delete** a file clicking on the corresponding icon in the Actions block near the name of the file you want to delete
 
 The list of files can be filtered by its name using the search tool above the list.
-
-
 
 Instances
 ---------
@@ -778,7 +773,7 @@ Please, review the tables with general and specific fields description below.
      Value must be 'newest' (the system reads nothing, waits for new events), 'oldest' (the system reads all input stream events) or datetime (that requires specifying a timestamp and means the system reads events from the stream starting from the specified moment).
      
 ..  "InputAvroSchema", "Avro schema for input objects. Requires if input object is instance of 'org.apache.avro.generic.GenericRecord':https://avro.apache.org/docs/1.8.1/api/java/org/apache/avro/generic/GenericRecord.html@.", "{'type':'record', 'name':'rec', 'fields':[{'name':'f1','type':string'}]}
-Click «Create» at the bottom and see the instance is in the list of instances now. 
+Click "Create" at the bottom and see the instance is in the list of instances now. 
 
 Click "Cancel" to drop all the specified settings. The instance will not be created then.
 
@@ -806,17 +801,17 @@ Please, note, the details of an Instance show not only the instance settings but
     For a started instance the task name and address (host and port) is specified in the *Instance details* panel.
 In the list of instances the following actions can be performed:
 
-1. **Start** an instance by clicking the «Start» button in the Actions section. The instance status will first change to «Starting» and in a few seconds to «Started». That means the instance is launched and is working now.
-2. **Stop** the instance that has been started i.e. has the «Started» status. Click at the «Stop» button and wait for a while till the status changes to «Stopping» and then to «Stopped».
+1. **Start** an instance by clicking the "Start" button in the Actions section. The instance status will first change to "Starting" and in a few seconds to "Started". That means the instance is launched and is working now.
+2. **Stop** the instance that has been started i.e. has the "Started" status. Click at the "Stop" button and wait for a while till the status changes to "Stopping" and then to "Stopped".
 3. **Clone** an instance. This fuтction enables instance creation by copying the settings of an existing instance. Just tick the "Clone instance" icon in the Actions block near the name of the instance you want to clone.
 
 .. figure:: _static/CreateInstance_Clone2.png
 
-The form will show the settings of the selected instance. They can be edited and saved by clicking at the "Create" button. The new instance will appear in the list of instances.
+The form will show the settings of the selected instance. They can be edited and saved by clicking on the "Create" button. The new instance will appear in the list of instances.
 
-4. **Delete** a stream clicking at the corresponding icon in the Actions block near the name of the stream you want to delete.
+4. **Delete** a stream clicking on the corresponding icon in the Actions block near the name of the stream you want to delete.
 
-.. note:: An instance with statuses «Starting», «Started», «Stopping», «Deleting» can not be deleted.
+.. note:: An instance with statuses "Starting", "Started", "Stopping", "Deleting" can not be deleted.
 
 4. **View** an instance`s name and status. An instance may have the following statuses:
      
