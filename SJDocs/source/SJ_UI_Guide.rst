@@ -27,17 +27,15 @@ SJ-Platform allows you to work with your own module, created in accordance with 
 
 A module utilizes an instance/instances, i.e. a full range of settings for collaborative work of an engine and a module. See more information on a module structure at :ref:`Modules`.
 
-The SJ-Platform allows you to upload your custom module for data stream processing with prerequisite engines and configuration settings. They are required to launch a module and determine the processing in it. They are provided by SJ-Platform and can be uploaded from the `Maven repository <http://www.scala-sbt.org/1.x/docs/Using-Sonatype.html#Maven+configuration+tips%E2%80%99n%E2%80%99tricks>`_. Find more information about uploading configurations in the `Configuration`_ and the :ref:`CustomFiles` sections of this document.
+The SJ-Platform allows you to upload your custom module for data stream processing with prerequisite engines and configuration settings. They are required to launch a module and define the processing in it. They are provided by SJ-Platform and can be uploaded from the `Maven repository <http://www.scala-sbt.org/1.x/docs/Using-Sonatype.html#Maven+configuration+tips%E2%80%99n%E2%80%99tricks>`_. Find more information about uploading configurations in the `Configuration`_ and the :ref:`CustomFiles` sections of this document.
 
-For correct module interconnection a stream/streams are required. The :ref:`Streaming` section describes the streaming component of the system in detail.
+For correct module interaction a stream/streams are required. The :ref:`Streaming` section describes the streaming component of the system in detail.
 
-Once you know what types of modules and instances you are going to include into the pipeline, you can decide on what type of streams and providers and services you need create. The diagram below may help you to understand the dependency of entity types in the platform.
+Once you know what types of modules and instances you need to include into the pipeline, you can choose types of streams, providers and services which you need to create for them. Look at the diagram in the :ref:`Entities_Correlation` section. It may help you to understand the dependency of entity types in the platform.
 
-.. figure:: _static/InstanceCorrelation1.png
+For example, if you want to create a regular module that will process Apache Kafka input data streams you have to create Apache Kafka service with Apache Kafka and Apache Zookeeper providers for it.
 
-For example, if you want to create a regular module that will process Apache Kafka input data streams you have to create an Apache Kafka service with a Apache Kafka and a Apache ZooKeeper providers for it.
-
-Below you will find the information on uploading your module via UI and starting data processing.
+Below you will find the information on uploading your module via the UI and launching data processing.
 
 .. _Configuration:
 
@@ -46,11 +44,11 @@ Configuration
 
 So, the first step is to upload necessary configurations to the platform.
 
-Here the basic settings necessary for the platform are described. Besides, how to add configurations to the system is clarified here.
+Here are the basic settings required for the platform. In addition, we explain how to add configurations to the system.
 
-Configurations are the settings required for the system working.
+Configurations are the settings necessary for the system work.
  
-The configurations can be added under the *Configuration* tab of the main navigation bar. Please, click at "Add Settings" in the upper-right corner above the list and fill in the form (the information on the required settings can be found in the table_ below):
+The configurations can be added under the *Configuration* tab of the main navigation bar. Please, click "Add Settings" in the upper-right corner above the list and fill in the form (the information on the required settings can be found in the table_ below):
 
 1. *Name* *
         Enter a setting name here. 
@@ -61,11 +59,11 @@ The configurations can be added under the *Configuration* tab of the main naviga
 	
 	
 3. *Domain* *
-        Select a domain from the drop-down. 
+        Select a domain from the drop-down list. 
 	
 .. note:: Required fields are marked with an asterisk (*).
 
-Once the fields are correctly filled in, click at the "Create" button and see the setting has appeared in the list of settings.
+Once the fields are correctly filled in, click the "Create" button and see the parameter appeared in the list of settings.
 
 Click "Cancel" to drop all the specified settings. The configuration will not be created then.
 
@@ -83,14 +81,14 @@ Please, find the required configurations in the table below and make sure they a
   :header: "Config Domain","Name", "Description", "Example"
   :widths: 15, 20, 50, 15
 
-  "system", "crud-rest-host", " REST interface host", "localhost"
-  "system", "crud-rest-port", " REST interface port", "8080"
-  "system", "marathon-connect", " Marathon address. Use to launch a framework responsible for running engine tasks and provides the information about applications that run on Mesos. Must begin with 'http://'.", "http://stream-juggler.z1.netpoint-dc.com:8080"
-  "system", "marathon-connect-timeout", "use when trying to connect by 'marathon-connect' (ms).", "60000"
-  "system", "current-framework", " indicates which file is used to run a framework. By this value, you can get a setting that contains a file name of framework jar.", "com.bwsw.fw-0.1"
+  "system", "crud-rest-host", "REST interface host", "localhost"
+  "system", "crud-rest-port", "REST interface port", "8080"
+  "system", "marathon-connect", "Marathon address. Use to launch a framework which is responsible for running engine tasks and provides the information about applications that run on Mesos. Must begin with 'http://'.", "http://stream-juggler.z1.netpoint-dc.com:8080"
+  "system", "marathon-connect-timeout", "Use when trying to connect by 'marathon-connect' (ms).", "60000"
+  "system", "current-framework", "Indicates which file is used to run a framework. By this value, you can get a setting that contains a file name of framework jar.", "com.bwsw.fw-0.1"
   "system", "low-watermark", "A number of preloaded messages for batch engine processing.", "1000"
-  "kafka", "subscriber-timeout", "the period of time (ms) spent waiting in poll if data are not available. Must not be negative", "100"
-  "zk", "session.timeout", "use when connect to Apache Zookeeper (ms). Usually when we are dealing with T-streams consumers/producers and Apache Kafka streams.", "3000"
+  "kafka", "subscriber-timeout", "The period of time (ms) spent waiting in poll if data are not available. Must not be negative", "100"
+  "zk", "session.timeout", "Use when connect to Apache Zookeeper (ms). Usually when we are dealing with T-streams consumers/producers and Apache Kafka streams.", "3000"
 .. "system", "current-transaction-generator", "Indicates what jar is used for running transaction generators. By this value you can get configuration setting that contains file name of transaction generator jar.", "com.bwsw.tg-0.1"
   "system", "transaction-generator-client-retry-period", "Time for connecting attempt to TG-server", "500"
   "system", "transaction-generator-server-retry-period", "Time for attempt to lock a server as master on ZK", "500"
@@ -116,13 +114,13 @@ The range of optional settings is presented below. They have default values in t
 
 Сonfiguration domain named 'configuration.apache-kafka' contains properties used to create an Apache Kafka consumer (see `the official documentation <https://kafka.apache.org/documentation/#consumerconfigs>`_). 
 
-.. note:: You must not define properties such as 'bootstrap.servers', 'enable.auto.commit', 'key.deserializer' and 'value.deserializer' in order to avoid a crashing of the system.
+.. note:: You must not define properties such as 'bootstrap.servers', 'enable.auto.commit', 'key.deserializer' and 'value.deserializer' in order to avoid a system crash.
 
 Сonfiguration domain named 'configuration.t-streams' contains properties used for a T-streams consumer/producer. 
 
-.. note:: You must not define properties such as 'producer.bind-host', 'producer.bind-port', 'consumer.subscriber.bind-host' and 'consumer.subscriber.bind-port' to avoid a crashing of system. 
+.. note:: You must not define properties such as 'producer.bind-host', 'producer.bind-port', 'consumer.subscriber.bind-host' and 'consumer.subscriber.bind-port' to avoid a system crash. 
 
-To see the properties list click this link for a `producer <http://t-streams.com/docs/a2-api/tstreams-factory-api/#TSF_DictionaryProducer_keyset>`_, for a `consumer <http://t-streams.com/docs/a2-api/tstreams-factory-api/#TSF_DictionaryConsumer_keyset>`_ (you should use the textual constants to create a configuration).
+To see the properties list check the following links: for a `producer <http://t-streams.com/docs/a2-api/tstreams-factory-api/#TSF_DictionaryProducer_keyset>`_ and for a `consumer <http://t-streams.com/docs/a2-api/tstreams-factory-api/#TSF_DictionaryConsumer_keyset>`_ (you should use the textual constants to create a configuration).
 
 For each uploaded custom jar a new configuration is added in the following format:: 
 
@@ -146,7 +144,7 @@ Please, in the *Providers* section, press «Create provider» and fill in the fo
 .. figure:: _static/CreateProvider_Type1.png
 
 
-Select from the drop-down list a type of the provider you are aimed to create. The following options are available:
+Select a type of the provider you are going to create from the drop-down list. The following options are available:
 
  - Elasticsearch;
   
@@ -158,17 +156,17 @@ Select from the drop-down list a type of the provider you are aimed to create. T
 
  - SQL database.
 
-The type of the provider is determined with the type of the stream and the instance you want to create and work with at the end.
+The type of the provider is determined with the type of the stream and the instance you want to create.
 
 - *Name* *
-       Enter a name of the provider here. It should be unique, must contain digits, lowercase letters or hyphens and start with a letter. 
+       Enter a name of the provider here. It should be unique, must consist of digits, lowercase letters or hyphens and start with a letter. 
 
 - *Description* 
        Enter a description for the provider here.
 
 - *Hosts* *
        Enter a provider host that is an endpoint of a physical service.
-       Add more hosts clicking at the «Add Host» button and entering host names in the appeared lines.
+       Add more hosts by clicking the «Add Host» button and enter host names in the lines that appear.
 
 **Specific fields:**
 
@@ -181,7 +179,7 @@ The type of the provider is determined with the type of the stream and the insta
        Enter a password for the provider if necessary.
 
 - *Driver* * 
-       Enter a provider driver name for SQL-database provider type. 
+       Enter a provider driver name for the SQL-database provider type. 
 
 **Elasticsearch Provider Type**
 
@@ -193,13 +191,13 @@ The type of the provider is determined with the type of the stream and the insta
        
 .. note:: Required fields are marked with an asterisk (*)
 
-Click «Create» at the bottom and see the provider is in the list of providers now. Details of the node are displayed to the right when clicking the provider in the list. 
+Click «Create» berlow and see the provider appeared in the providers list. Provider details are displayed to the right when clicking the provider in the list. 
 
 .. figure:: _static/Providers_list1.png
 
 Click "Cancel" to drop provider creation.
 
-In the list of providers the following actions can be performed:
+You can perform the following actions on each provider in the list:
 
 #. **View** provider`s name, date of creation, description.
 
@@ -220,19 +218,19 @@ Under the *Services* section of the main navigation bar you will find the list o
 
 .. figure:: _static/CreateService1.png
 
-Please, press «Create Service» and fill in the form where general and specific fields should be completed:
+Please, press «Create Service» and fill out the form with general and specific fields:
 
 **General fields:**
 
 - *Type* *
         Select from the dropdown a type of the service:
 
-- Elasticsearch
-- SQL database
-- T-streams
-- Apache Kafka
-- Apache Zookeeper
-- RESTful
+ - Elasticsearch
+ - SQL database
+ - T-streams
+ - Apache Kafka
+ - Apache Zookeeper
+ - RESTful
 
 .. figure:: _static/CreateService_Type1.png
 
@@ -247,7 +245,7 @@ Please, press «Create Service» and fill in the form where general and specific
 
        Select a provider for the service here. 
  
-       The range of providers available in the dropdown is determined by the chosen service type.
+       Providers available in the dropdown are determined by the chosen service type.
 
 **Specific fields:**
 
@@ -331,19 +329,19 @@ Please, press «Create Service» and fill in the form where general and specific
         Enter a path to the storage.
 	
 - *Headers*
-	Enter extra HTTP headers. The values in the object must be of String type only. 
+	Enter extra HTTP headers. The values in the JSON format must be of a String type only. 
 	
 .. note:: Required fields are marked with an asterisk (*)
 
-Click «Create» at the bottom and see the service is in the list of services now. Details of a service are displayed to the right when clicking the service in the list. 
+Click «Create» below and you will see that the service appeared in the services list. Details of a service are displayed to the right when clicking the service in the list. 
 
 .. figure:: _static/ServicesList1.png
 
 Click "Cancel" to drop all the specified settings. The service will not be created then.
 
-In the list of services the following actions can be performed:
+You can perform the following actions on each service in the list:
 
-1. **View** service` name and description, the date of creation.
+1. **View** service`s name and description, the date of creation.
 
 2. **View** a provider for the service and get the provider`s information in a pop-up window by clicking at the active provider`s name in the «Provider» column.
 
