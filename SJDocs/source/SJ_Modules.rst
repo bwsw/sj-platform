@@ -323,9 +323,9 @@ Let's take a look at the main points:
 
 .(5) - when a batch has been collected then reset the number of envelopes for this batch. 
 
-The module allows transformation of the data aggregated from input streams applying the sliding window method. 
+The module allows transformation of the data aggregated from input streams applying the sliding window. 
 
-A window size is equal to a number of batches. The window closes once it is full, i.e. the set number of batches is collected. The collected batches are transferred further for processing and the window slides forward for the set interval. This is a sliding window method.
+A window size is equal to a number of batches. The window closes once it is full, i.e. the set number of batches is collected. The collected batches are transferred further for processing and the window slides forward for the set interval. This is the sliding window technique.
 
 The diagram below is a simple illustration of how a sliding window operation looks like.
 
