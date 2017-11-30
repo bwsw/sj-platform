@@ -3,42 +3,35 @@
 UI Guide
 =======================
 
-Overview
---------
-
-The Stream Juggler Platform is a stream processing platform designed for building both simple and complex event processing (CEP). 
-
-Stream Juggler uses Apache Mesos, Kafka and T-streams to construct scalable and flexible processing algorithms. Stream Juggler functions on the same principle as Apache Samza, but enables exactly-once processing and provides an integrated solution with a RESTful interface, JavaScript UI and an ad hoc repository for modules, services, streams and other data processing pipeline components.
-
 .. contents:: Contents
 
 Get Started
 -----------
 
-The Stream Juggler Platform has a user-friendly UI to create a processing sequence of arbitrary complexity, watch it in action and manage it using pre-created modules with flexible functionality. 
+The Stream Juggler Platform has a user-friendly UI to create a processing sequence of arbitrary complexity, monitor it in action and manage it using pre-created modules with flexible functionality. 
 
-If you are a developer and are willing to use the platform you need to know of some prerequisites for the platform. Make sure the following services are preliminarily deployed:
+If you are a developer and you want to use the platform you need to know of some prerequisites for the platform. Make sure the following services are preliminarily deployed:
 
 - Mesos
 - Marathon 
 - Apache Zookeeper
 - MongoDB
-- Apache Kafka (as an input source)
-- an external storage (Elasticsearch, SQL database, etc.).
+- Apache Kafka as an input source (optional)
+- an external storage: Elasticsearch, SQL database or RESTful (optional).
 
 .. tip:: Find more about SJ-Platform architecture at :ref:`Architecture`. Follow the :ref:`Platform_Deployment` instructions to set up the services.
 
-Once everything is ready, you can move to the Stream Juggler Platform.
+Once everything is ready, you can proceed to the Stream Juggler Platform.
 
-SJ-Platform allows working with your own module created exactly to meet your requirements and and to solve your task. How to create a module is described in detail in the :ref:`Custom_Module` section.
+SJ-Platform allows you to work with your own module, created in accordance with your requirements in order to solve your problem. How to create a module is described in detail in the :ref:`Custom_Module` section.
 
 A module utilizes an instance/instances, i.e. a full range of settings for collaborative work of an engine and a module. See more information on a module structure at :ref:`Modules`.
 
-The SJ-Platform allows to upload your custom module for data stream processing with prerequisite engines and configuration settings. They are required for launching a module and determining processing in it. They are provided by SJ-Platform and can be uploaded from the project repository on `GitHub <https://github.com/bwsw/sj-platform/tree/master>`_. Find more information about uploading configurations in the `Configuration`_ and the :ref:`Custom_Files` sections of this document.
+The SJ-Platform allows you to upload your custom module for data stream processing with prerequisite engines and configuration settings. They are required to launch a module and determine the processing in it. They are provided by SJ-Platform and can be uploaded from the `Maven repository <http://www.scala-sbt.org/1.x/docs/Using-Sonatype.html#Maven+configuration+tips%E2%80%99n%E2%80%99tricks>`_. Find more information about uploading configurations in the `Configuration`_ and the :ref:`CustomFiles` sections of this document.
 
-For correct performance a module requires creating a stream/streams with its service(-s) and service providers. The :ref:`Streaming` section describes the streaming component of the system in detail.
+For correct module interconnection a stream/streams are required. The :ref:`Streaming` section describes the streaming component of the system in detail.
 
-Once you know what types of modules and instances you are including into the pipeline, you can decide on what type of streams and providers and services for them you need create. The diagram below may help you to understand the dependency of entity types in the platform.
+Once you know what types of modules and instances you are going to include into the pipeline, you can decide on what type of streams and providers and services you need create. The diagram below may help you to understand the dependency of entity types in the platform.
 
 .. figure:: _static/InstanceCorrelation1.png
 
@@ -74,13 +67,13 @@ The configurations can be added under the *Configuration* tab of the main naviga
 
 Once the fields are correctly filled in, click at the "Create" button and see the setting has appeared in the list of settings.
 
-Click "Cancel" to drop all the specified settings. The configuration will not be added then.
+Click "Cancel" to drop all the specified settings. The configuration will not be created then.
 
-The list of configurations added to the platform can be viewed under the *Configuration* section of the main navigation bar. 
+The list of configurations created in the system can be viewed under the *Configuration* section of the main navigation bar. 
 
 It can be filtered by its type and/or a name using the search tool above the list.
  
-Please, find the required config settings in the table below and make sure they are added to your platform so that your modules could work.
+Please, find the required configurations in the table below and make sure they are added to your platform so that your modules could work.
 
 .. _table:
 
@@ -117,10 +110,11 @@ The range of optional settings is presented below. They have default values in t
   "system", "framework-backoff-seconds", "Seconds for first delay after crash", "7"
   "system", "framework-backoff-factor", "Factor for backoffSeconds parameter of following delays", "7.0"
   "system", "framework-max-launch-delay-seconds", "Max seconds for delay", "600"
+  "system", "output-processor-parallelism", "A number of threads used to write data to an external datastorage (Elasticsearch or RESTful)", "8"
 
 .. note::  In general 'framework-backoff-seconds', 'framework-backoff-factor' and 'framework-max-launch-delay-seconds' configure exponential backoff behavior when launching potentially sick apps. This prevents sandboxes associated with consecutively failing tasks from filling up the hard disk on Mesos slaves. The backoff period is multiplied by the factor for each consecutive failure until it reaches maxLaunchDelaySeconds. This applies also to tasks that are killed due to failing too many health checks.
 
-Сonfiguration domain named 'configuration.apache-kafka' contains properties used to create an Apache Kafka consumer. 
+Сonfiguration domain named 'configuration.apache-kafka' contains properties used to create an Apache Kafka consumer (see `the official documentation <https://kafka.apache.org/documentation/#consumerconfigs>`_). 
 
 .. note:: You must not define properties such as 'bootstrap.servers', 'enable.auto.commit', 'key.deserializer' and 'value.deserializer' in order to avoid a crashing of the system.
 
@@ -139,7 +133,7 @@ Providers
 ---------
 Once all necessary configurations are added, a provider can be created.  
 
-A **provider** is a part of streaming infrastructure. That is the provider of services for input data transformation into a stream.
+A **provider** is a part of streaming infrastructure. This is an entity which contains general information to access a physical service (Apache Kafka, Apache Zookeeper, T-streams, Elasticsearch, SQL-database, RESTful).
 
 .. figure:: _static/CreateProvider1.png
 
@@ -152,7 +146,7 @@ Please, in the *Providers* section, press «Create provider» and fill in the fo
 .. figure:: _static/CreateProvider_Type1.png
 
 
-Select from the drop-down a type of the provider you are aimed to create. The following options are available:
+Select from the drop-down list a type of the provider you are aimed to create. The following options are available:
 
  - Elasticsearch;
   
@@ -173,29 +167,29 @@ The type of the provider is determined with the type of the stream and the insta
        Enter a description for the provider here.
 
 - *Hosts* *
-       Enter a provider host that determines a file location.
+       Enter a provider host that is an endpoint of a physical service.
        Add more hosts clicking at the «Add Host» button and entering host names in the appeared lines.
 
 **Specific fields:**
 
 **SQL database Provider Type**
 
-- *Login* *
+- *Login* 
        Enter a provider login here if necessary
         
-- *Password* *
+- *Password* 
        Enter a password for the provider if necessary.
 
 - *Driver* * 
-       Enter a provider driver for SQL database provider type. 
+       Enter a provider driver name for SQL-database provider type. 
 
 **Elasticsearch Provider Type**
 
-- *Login* *
-       Enter a provider login here.
+- *Login* 
+       Enter a provider login if necessary.
        
-- *Password* *
-       Enter a password for the provider.
+- *Password*
+       Enter a password for the provider if necessary.
        
 .. note:: Required fields are marked with an asterisk (*)
 
@@ -203,7 +197,7 @@ Click «Create» at the bottom and see the provider is in the list of providers 
 
 .. figure:: _static/Providers_list1.png
 
-Click "Cancel" to drop all the specified settings. The provider will not be created then.
+Click "Cancel" to drop provider creation.
 
 In the list of providers the following actions can be performed:
 
@@ -220,7 +214,7 @@ The list of providers can be filtered by its type and/or a name using the search
 Services
 --------
 
-The next step is to create services. **Services** are a part of streaming infrastructure. These are services to tranform input data into a stream of an exact type. 
+The next step is to create services. **Services** are a part of streaming infrastructure. This is an entity which contains specific information to access a physical service (Apache Kafka, Apache Zookeeper, T-streams, Elasticsearch, SQL-database, RESTful).
 
 Under the *Services* section of the main navigation bar you will find the list of services.
 
@@ -243,15 +237,15 @@ Please, press «Create Service» and fill in the form where general and specific
 .. figure:: _static/CreateService_Type1.png
 
 - *Name* *
-       Enter a name of the services.  It must contain digits, lowercase letters or hyphens and start with a letter.
+       Enter a name of the services. It must consist of digits, lowercase letters or hyphens and start with a letter.
 
 - *Description*
-       Provide a description for the services here if necessary.
+       Provide a description for the service here if necessary.
 
 - *Provider* *
        This field appears once the service type is chosen.
 
-       Select a provider for the services here. 
+       Select a provider for the service here. 
  
        The range of providers available in the dropdown is determined by the chosen service type.
 
@@ -260,37 +254,16 @@ Please, press «Create Service» and fill in the form where general and specific
 **Apache Zookeeper Service Type**
 
 - *Namespace* *
-             Please, specify a namespace here. It must contain digits, lowercase letters or underscore and start with a letter. 
+             Please, specify a namespace here. It must consist of digits, lowercase letters or underscore and start with a letter. 
 
 .. - *Http scheme* *
             Select the scheme of HTTP protocol from the dropdown ("http" is set by default). 
-	     
-**Elasticsearch Service Type**
 
--  *Index* *
-        This field is required for filling in.
-
-        Please, specify an index of the services here. It must contain digits, lowercase letters or underscore and start with a letter. 
-
-- *Login*
-        This field is not required for filling in.
-
-        Please, specify a login of the services here. 
-
-- *Password*
-       The field is not required for filling in.
-
-       Please, specify a password of the services here. 
-
-.. - *Http scheme* *
-             Select the scheme of HTTP protocol from the dropdown ("http" is set by default). 
-	     
 **Apache Kafka Service Type**
 
 - *ZK provider* *
-       This field is required for filling in.
-
-       Please, select a zookeeper provider for the services here. 
+       
+       Please, select a zookeeper provider for the service here. 
 
 .. - *ZK namespace* *
         This field is required for filling in.
@@ -303,28 +276,45 @@ Please, press «Create Service» and fill in the form where general and specific
 **T-streams Service Type**
 
 - *Prefix* *
-        This field is required for filling in.
-
+        
         Here a ZooKeeper path where metadata of transactions, streams are located should be specified.
 
-        Please, enter a prefix for the services here. 
+        Please, enter a prefix for the service here. 
 
 - *Token* *
-        This field is required for filling in.
-
+        
         A token is a unique key for getting access to the service. It must contain no more than 32 symbols.
 
-        Please, enter a token for the services here. 
+        Please, enter a token for the service here. 
+
+.. - *Http scheme* *
+             Select the scheme of HTTP protocol from the dropdown ("http" is set by default). 
+
+**Elasticsearch Service Type**
+
+-  *Index* *
+        
+        Please, specify an index of the service here. It must consist of digits, lowercase letters or underscore and start with a letter. 
+
+.. - *Login*
+        This field is not required for filling in.
+
+        Please, specify a login of the services here. 
+
+.. - *Password*
+       The field is not required for filling in.
+
+       Please, specify a password of the services here. 
 
 .. - *Http scheme* *
              Select the scheme of HTTP protocol from the dropdown ("http" is set by default). 
 	     
+
 **SQL database Service Type**
 
 - *Database* *name* *
-        This field required for filling in.
-
-        Please, enter a database name for the services here. 
+        
+        Please, enter a database name for the service here. 
 
 .. - *Http scheme* *
         Select 'http' or 'https' from the dropdown.
@@ -355,7 +345,7 @@ In the list of services the following actions can be performed:
 
 1. **View** service` name and description, the date of creation.
 
-2. **View** a provider for the service and get the provider`s information in a pop-up window by clicking at the active provider`s name in the «Providers» column.
+2. **View** a provider for the service and get the provider`s information in a pop-up window by clicking at the active provider`s name in the «Provider» column.
 
 .. figure:: _static/ServicesList_ProviderInfo1.png
 
@@ -587,7 +577,7 @@ In the list of modules the following actions can be performed:
 
 The list of modules can be filtered by its type and/or a name using the search tool above the list.
 
-.. _Custom_Files:
+.. _CustomFiles:
 
 Custom Files
 -------------
