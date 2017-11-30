@@ -10,7 +10,7 @@ Stream Conception in SJ-Platform
 
 The streaming component is essential in SJ-Platform. The data are fed to the system, transferred between modules and exported to an external storage via streams.
 
-The system receives data via **TCP** or **Apache Kafka**. Within SJ-Platform the data are transferred between modules via **T-streams**. The results are exported to an external storage via output streams which type is determined by the type of the storage. For now, **Elasticsearch**, **SQL-database** and **RESTful** output stream types are supported. 
+The system receives data via **TCP** or **Apache Kafka**. Within SJ-Platform modules exchange data via **T-streams**. The results are exported to an external storage via output streams which type is determined by the type of the storage. For now, **Elasticsearch**, **SQL-database** and **RESTful** output stream types are supported. 
 
 The table below shows what types of streams are required as input/output streams for a particular module type.
 
@@ -50,7 +50,7 @@ SJ-Platform supports `Apache Kafka <https://kafka.apache.org/documentation/>`_ a
 
 In case of using TCP as a source, there arises a need in an input module to transform the input data into a stream and transfer them for further processing. At the project `repository <https://github.com/bwsw/sj-platform/tree/develop>`_ two ready-to-use input modules are available for users - a CSV input module and a Regex input module - that transform text data into a message format acceptable for T-streams. 
 
-T-Streams Within The Platform
+Internal Streams
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Within the platform, the data are transferred to and from modules via *transactional streams* or T-streams. It is a message broker which is native to SJ-Platform and designed primarily for exactly-once processing. More information on T-streams can be found at the `project site <http://t-streams.com/>`_. Some general information on T-streams you can find below.
@@ -89,13 +89,13 @@ For now, SJ-Platform supports the following types of output streams:
 Streaming Infrastructure
 -----------------------------------
 
-Streams need infrastructure: providers and services. These are required API entities without which streaming will not be so flexible. Streaming flexibility lies in the one-to-many connection between providers and services, streams and modules. One provider works with many services (of various types). One stream type can be used by different module instances. Different types of streams and instances can be created on the base of a common infrastructure. There is no need to duplicate the settings for each individual entity.
+Streams need infrastructure: providers and services. They make streams flexible. Streaming flexibility lies in the one-to-many connection between providers and services, streams and modules. One provider works with many services (of various types). One stream type can be used by different module instances. Different types of streams and instances can be created on the base of a common infrastructure. There is no need to duplicate the settings for each individual entity.
 
-A **provider** is a service provider for data transformation into a stream.
+A **provider** is an entity which contains general information to access a physical service.
 
-A **service** is a service to transform data into a stream of an exact type.
+A **service** is an entity which contains specific information to access a physical service.
 
-They can be of different types. The types of modules and streams in the pipeline determine the type of providers and services that are necessary in the particular case.
+They can be of different types. The types of modules and streams in the pipeline determine the type of providers and services that are necessary in a particular case.
 
 The diagram for interconnections of the platform entities can be useful in selecting the types of providers and services. Please, visit the :ref:`Entities_Correlation` section for more information.
 
