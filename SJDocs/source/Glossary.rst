@@ -80,7 +80,7 @@ T-streams
   (transactional streams); a Scala library providing an infrastructure component which implements transactional messaging.
 
 Window 
-  A set of elements on an unbounded stream. Sliding windows are implemented by a batch module in the system. Batches collected in a window are transferred further for processing and the window slides forward for the set sliding interval.
+  A set of elements on an unbounded stream. Grouping elements in a batch allows processing a series of events at one time. It is important in case the processing of events in a stream depends on these events or on events in another stream.  
   
 
 
