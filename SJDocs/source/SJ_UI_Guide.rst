@@ -819,7 +819,7 @@ In the list of instances the following actions can be performed:
 
 1. **Start** an instance by clicking the "Start" button in the Actions section. The instance status will first change to "Starting" and in a few seconds to "Started". That means the instance is launched and is working now.
 2. **Stop** the instance that has been started i.e. has the "Started" status. Click at the "Stop" button and wait for a while till the status changes to "Stopping" and then to "Stopped".
-3. **Clone** an instance. This function enables instance creation by copying the settings of an existing instance. Just tick the "Clone instance" icon in the Actions block near the name of the instance you want to clone.
+3. **Clone** an instance. This function enables instance creation by copying the settings of an existing instance. Just click "Clone instance" in the Actions block near the name of the instance you want to clone.
 
 .. figure:: _static/CreateInstance_Clone2.png
 
