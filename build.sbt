@@ -1,5 +1,6 @@
 import sbt.url
 
+name := "sj"
 val sjVersion = "1.0-SNAPSHOT"
 
 addCommandAlias("rebuild", ";clean; compile; package")
@@ -12,7 +13,6 @@ artifact in(Compile, assembly) := {
 addArtifact(artifact in(Compile, assembly), assembly)
 
 val commonSettings = Seq(
-  name := "sj",
   organization := "com.bwsw",
   version := sjVersion,
   scalaVersion := Dependencies.Versions.scala,
