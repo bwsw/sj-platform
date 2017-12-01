@@ -677,7 +677,7 @@ Please, review the lists with general and specific fields description below.
     Amount of RAM for task (1024 by default).
     
 - JVM Options
-    Json with jvm-options. It is important to emphasize that Mesos deletes a task if it uses more memory than it is specified in the ``perTaskRam`` parameter. There are no default options.  We recommend the following options for launching modules, thay fit the ``perTaskRam: 192``::
+    Json with jvm-options. It is important to emphasize that Mesos deletes a task if it uses more memory than it is specified in the ``perTaskRam`` parameter. There are no default options.  We recommend the following options for launching modules, they fit the ``perTaskRam: 192``::
      
      "jvmOptions" : {
      "-Xmx": "32m",
