@@ -44,11 +44,15 @@ Configuration
 
 So, the first step is to upload necessary configurations to the platform.
 
-Here are the basic settings required for the platform. In addition, we explain how to add configurations to the system.
+These are the basic settings required for the platform. In addition, here we will explain how to add configurations to the system.
 
 Configurations are the settings necessary for the system work.
  
-The configurations can be added under the *Configuration* tab of the main navigation bar. Please, click "Add Settings" in the upper-right corner above the list and fill in the form (the information on the required settings can be found in the table_ below):
+The configurations can be added under the *Configuration* tab of the main navigation bar. 
+
+.. figure:: _static/Configurations.png
+
+Please, click "Add Settings" in the upper-right corner above the list and fill in the form (the information on the required settings can be found in the table_ below):
 
 1. *Name* *
         Enter a setting name here. 
@@ -133,9 +137,13 @@ Once all necessary configurations are added, a provider can be created.
 
 A **provider** is a part of streaming infrastructure. This is an entity which contains general information to access a physical service (Apache Kafka, Apache Zookeeper, T-streams, Elasticsearch, SQL-database, RESTful).
 
-.. figure:: _static/CreateProvider1.png
+Under the "Providers" section of the main navigation bar you can see the list of providers, manage them, view the details.
 
-Please, in the *Providers* section, press «Create provider» and fill in the form where general fields and specific fields should be completed:
+.. figure:: _static/Providers.png
+
+Press "Create provider" and fill in the form where general fields and specific fields should be completed:
+
+.. figure:: _static/CreateProvider1.png
 
 **General fileds:**
 
@@ -191,7 +199,7 @@ The type of the provider is determined with the type of the stream and the insta
        
 .. note:: Required fields are marked with an asterisk (*)
 
-Click "Create" below and see the provider appeared in the providers list. Provider details are displayed to the right when clicking the provider in the list. 
+Click "Create" below and see the provider appeared in the providers list. Provider details are displayed to the right when clicking a provider in the list. 
 
 .. figure:: _static/Providers_list1.png
 
@@ -216,9 +224,11 @@ The next step is to create services. **Services** are a part of streaming infras
 
 Under the *Services* section of the main navigation bar you will find the list of services.
 
-.. figure:: _static/CreateService1.png
+.. figure:: _static/Services.png
 
-Please, press «Create Service» and fill out the form with general and specific fields:
+Please, press "Create Service" and fill out the form with general and specific fields:
+
+.. figure:: _static/CreateService1.png
 
 **General fields:**
 
@@ -338,7 +348,7 @@ You can perform the following actions on each service in the list:
 
 1. **View** service`s name and description, the date of creation.
 
-2. **View** a provider for the service and get the provider`s information in a pop-up window by clicking on the active provider`s name in the «Provider» column.
+2. **View** a provider for the service and get the provider`s information in a pop-up window by clicking on the active provider`s name in the "Provider" column.
 
 .. figure:: _static/ServicesList_ProviderInfo1.png
 
@@ -362,9 +372,11 @@ There are three kinds of streams in the SJ-Platform:
 
 Under the *Streams* section of the main navigation bar you will find the list of streams.
 
-.. figure:: _static/CreateStreams1.png
+.. figure:: _static/Streams.png
 
 Please, press "Create Stream" and fill in the form where general and specific fields should be completed:
+
+.. figure:: _static/CreateStreams1.png
 
 **General fields:**
 
@@ -492,7 +504,11 @@ The list of streams can be filtered by its type and/or a name using the search t
 Modules
 -------
 
-In the next section — *Modules* — you can upload and manage your own module(s). How to create a module is described in detail in the :ref:`Custom_Module` section.
+In the next section — *Modules* — you can upload and manage your own module(s). 
+
+.. figure:: _static/ModulesList.png
+
+How to create a module is described in detail in the :ref:`Custom_Module` section.
 
 The platform supports 4 types of modules:
 
@@ -558,6 +574,10 @@ If the module is uploaded correctly a success message appears and the uploaded m
 
 .. figure:: _static/Module_Uploaded1.png
 
+Module details are displayed to the right when clicking a module in the list. 
+
+.. figure:: _static/ModuleDetails.png
+
 In the list of modules the following actions can be performed:
 
 1. **View** a module name, type, version and size, the date of uploading.
@@ -576,6 +596,8 @@ Custom Files
 -------------
 
 A *Custom Files* section is a section where a user can upload custom .JAR files and other files that can be necessary for correct module work.
+
+.. figure:: _static/CustomFilesList.png
 
 Here you can find two tabs: **Custom Jars** and **Custom files**. Below you will find more information for each of these tabs.
 
