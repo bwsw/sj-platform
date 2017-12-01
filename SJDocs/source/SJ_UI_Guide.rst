@@ -420,7 +420,7 @@ Select from the dropdown a type of a stream:
         Enter a number of partitions. It must be a positive integer.
 
 - *Force create*
-        This field indicates if a stream should be removed and re-created by force (if it exists). Set it "True" or "False". It is set as "False" by default.
+        This field indicates if a stream should be removed and re-created by force (if it physically exists). Set it "True" or "False". It is set as "False" by default.
 
 - *Tags*
         Enter a tag\tags for the stream here.
@@ -438,7 +438,7 @@ Select from the dropdown a type of a stream:
         Enter a number of partitions. It must be a positive integer.
 
 - *Force create*
-        This field indicates if a stream should be removed and re-created by force (if it exists). Set it "True" or "False". It is set as "False" by default.
+        This field indicates if a stream should be removed and re-created by force (if it physically exists). Set it "True" or "False". It is set as "False" by default.
 
 - *Tags*
         Enter a tag\tags for the stream here.
@@ -454,7 +454,7 @@ Select from the dropdown a type of a stream:
         Enter a number of partitions. It must be a positive integer.
 
 - *Force create*
-        This field indicates if a stream should be removed and re-created by force (if it exists). Set it "True" or "False". It is set as "False" by default.
+        This field indicates if a stream should be removed and re-created by force (if it physically exists). Set it "True" or "False". It is set as "False" by default.
 
 - *Tags*
         Enter a tag\tags for the stream here.
@@ -462,7 +462,7 @@ Select from the dropdown a type of a stream:
 **Elasticsearch Stream Type**
 
 - *Force create*
-        This field indicates if a stream should be removed and re-created by force (if it exists). Set it "True" or "False". It is set as "False" by default.
+        This field indicates if a stream should be removed and re-created by force (if it physically exists). Set it "True" or "False". It is set as "False" by default.
 
 - *Tags*
         Enter a tag\tags for the stream here.
