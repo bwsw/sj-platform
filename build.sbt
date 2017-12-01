@@ -1,5 +1,5 @@
-name := "sj"
-scalaVersion := Dependencies.Versions.scala
+import sbt.url
+
 val sjVersion = "1.0-SNAPSHOT"
 
 addCommandAlias("rebuild", ";clean; compile; package")
@@ -12,29 +12,15 @@ artifact in(Compile, assembly) := {
 addArtifact(artifact in(Compile, assembly), assembly)
 
 val commonSettings = Seq(
+  name := "sj",
+  organization := "com.bwsw",
   version := sjVersion,
-  publishMavenStyle := true,
-  pomIncludeRepository := { _ => false },
   scalaVersion := Dependencies.Versions.scala,
   scalacOptions ++= Seq(
     "-unchecked",
     "-deprecation",
     "-feature"
   ),
-
-  pomExtra := (
-    <scm>
-      <url>git@github.com:bwsw/sj-platform.git</url>
-      <connection>scm:git@github.com:bwsw/sj-platform.git</connection>
-    </scm>
-      <developers>
-        <developer>
-          <id>bitworks</id>
-          <name>Bitworks Software, Ltd.</name>
-          <url>http://bitworks.software/</url>
-        </developer>
-      </developers>
-    ),
 
   resolvers += "Sonatype OSS Releases" at "https://oss.sonatype.org/content/repositories/snapshots",
   resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/service/local/staging/deploy/maven2",
@@ -61,13 +47,30 @@ val commonSettings = Seq(
 
   fork in run := true,
   fork in Test := true,
+
+  pomIncludeRepository := { _ => false },
+
   licenses := Seq("Apache 2" -> url("http://www.apache.org/licenses/LICENSE-2.0")),
+
   homepage := Some(url("http://stream-juggler.com/")),
-  pomIncludeRepository := { _ => false },
-  parallelExecution in Test := false,
-  organization := "com.bwsw",
+
+  scmInfo := Some(
+    ScmInfo(
+      url("https://github.com/bwsw/sj-platform.git"),
+      "scm:git@github.com:bwsw/sj-platform.git"
+    )
+  ),
+
+  developers := List(
+    Developer(
+      "bitworks",
+      "Bitworks Software, Ltd.",
+      "bitworks@bw-sw.com",
+      url = url("http://bitworks.software/")
+    )
+  ),
+
   publishMavenStyle := true,
-  pomIncludeRepository := { _ => false },
 
   publishTo := version { (v: String) =>
     val nexus = "https://oss.sonatype.org/"
@@ -78,6 +81,8 @@ val commonSettings = Seq(
   }.value,
 
   publishArtifact in Test := false,
+
+  parallelExecution in Test := false,
   concurrentRestrictions in Global += Tags.limit(Tags.Test, 1)
 )
 
