@@ -50,7 +50,7 @@ Configurations are the settings necessary for the system work.
  
 The configurations can be added under the *Configuration* tab of the main navigation bar. 
 
-.. figure:: _static/Configurations.png
+.. figure:: _static/Configurations1.png
 
 Please, click "Add Settings" in the upper-right corner above the list and fill in the form (the information on the required settings can be found in the table_ below):
 
@@ -139,7 +139,7 @@ A **provider** is a part of streaming infrastructure. This is an entity which co
 
 Under the "Providers" section of the main navigation bar you can see the list of providers, manage them, view the details.
 
-.. figure:: _static/Providers.png
+.. figure:: _static/Providers1.png
 
 Press "Create provider" and fill in the form where general fields and specific fields should be completed:
 
@@ -224,7 +224,7 @@ The next step is to create services. **Services** are a part of streaming infras
 
 Under the *Services* section of the main navigation bar you will find the list of services.
 
-.. figure:: _static/Services.png
+.. figure:: _static/Services1.png
 
 Please, press "Create Service" and fill out the form with general and specific fields:
 
