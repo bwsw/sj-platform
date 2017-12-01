@@ -797,6 +797,7 @@ Please, note, the details of an Instance show not only the instance settings but
    The stages include:
 
     - state - An instance status: 
+    
     	- ready
     	- starting
     	- started
