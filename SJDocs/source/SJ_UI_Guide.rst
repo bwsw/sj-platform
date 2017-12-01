@@ -735,7 +735,7 @@ Please, review the tables with general and specific fields description below.
 **Batch-streaming instance fields**
 
 - Outputs* 
-     Names of output streams (must be stream.t-stream only).
+     Names of output streams (must be of the `stream.t-stream` type only).
 
 - Window 
     Number of batches that will be contained in a window (1 by default). Must be greater than zero.
