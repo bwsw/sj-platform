@@ -362,7 +362,7 @@ The list of services can be filtered by its type and/or a name using the search 
 Streams
 ----------
 
-The next step is to create a data stream. A stream is a sequence of events happening randomly at irregular intervals.
+The next step is to create a data stream. A stream is a sequence of events that occur randomly at irregular intervals.
 
 There are three kinds of streams in the SJ-Platform:
 
@@ -382,13 +382,13 @@ Please, press "Create Stream" and fill in the form where general and specific fi
 
 - *Type* *
 
-Select from the dropdown a type of a stream:
+Select from a type of a stream the drop down list:
 
- - T-streams — It is an input stream of the T-stream type
+ - T-streams - It is an input stream of the T-stream type
 
  - Apache Kafka - It is an input stream of the Kafka type
 
- - SQL database -It is an output stream of the SQL database type
+ - SQL database - It is an output stream of the SQL database type
  
  - Elasticsearch - It is an output stream of the Elasticsearch type
  
@@ -397,9 +397,9 @@ Select from the dropdown a type of a stream:
 .. figure:: _static/CreateStream_Type1.png
 
 - *Name* *
-        Enter a stream name here. It must contain lowercase letters, digits or hyphens only.
+        Enter a stream name here. It must consist of lowercase letters, digits or hyphens only.
 	
-	For 'jdbc-output' stream a name must contain lowercase letters, digits or underscores.
+	For the 'SQL database' stream type a name must consist of lowercase letters, digits or underscores.
 
 - *Description*
         Provide a description for the stream here if necessary.
@@ -414,12 +414,12 @@ Select from the dropdown a type of a stream:
 **T-streams Stream Type**
 
 - *Partitions count* *
-        Partitions is a part of data stream. Partitions are a special conception which handle regular queues in multi-queues, e.g. a stream with one partition is a queue, but a stream with two partitions is like a two different queues.  Using streams with many partitions allows to parallelize the processing.
+        A partition is a part of data stream. Partitions are a special conception which handle regular queues in multi-queues, e.g. a stream with one partition is a queue, but a stream with two partitions is like a two different queues.  Using streams with many partitions allows to parallelize the processing.
 
         Enter a number of partitions. It must be a positive integer.
 
 - *Force create*
-        This field indicates if a stream should be removed and re-created by force (if it physically exists). Set it "True" or "False". It is set as "False" by default.
+        This field indicates if a stream should be removed and re-created by force (if it physically exists). Set it "True" or "False". The default value is "False".
 
 - *Tags*
         Enter a tag/tags for the stream here.
@@ -427,57 +427,57 @@ Select from the dropdown a type of a stream:
 **Apache Kafka Stream Type**
 
 - *Partitions count* *
-        Partitions is a part of data stream. Partitions are a special conception which handle regular queues in multi-queues, e.g. a stream with one partition is a queue, but a stream with two partitions is like a two different queues. Using streams with many partitions allows to handle parallelism properly as engine instances divide existing partitions fairly.
+        A partition is a part of data stream. Partitions are a special conception which handle regular queues in multi-queues, e.g. a stream with one partition is a queue, but a stream with two partitions is like a two different queues. Using streams with many partitions allows to handle parallelism properly as engine instances divide existing partitions fairly.
 
         Enter a number of partitions. It must be a positive integer.
 
 - *Force create*
-        This field indicates if a stream should be removed and re-created by force (if it physically exists). Set it "True" or "False". It is set as "False" by default.
+        This field indicates if a stream should be removed and re-created by force (if it physically exists). Set it "True" or "False". The default value is "False".
 
 - *Tags*
-        Enter a tag\tags for the stream here.
+        Enter a tag/tags for the stream here.
 	
 - *Replication* *Factor* *
-       `Replication factor <https://kafka.apache.org/documentation/#replication>`_ is the number of Zookeeper nodes to utilize.
+       `Replication factor <https://kafka.apache.org/documentation/#replication>`_ is the number of Zookeeper nodes to use.
 
        Enter a replication factor here. It must be an integer.
        
 **SQL database Stream Type**
 
 - *Partitions count* *
-        Partitions is a part of data stream. Partitions are a special conception which handle regular queues in multi-queues, e.g. a stream with one partition is a queue, but a stream with two partitions is like a two different queues. Using streams with many partitions allows to handle parallelism properly as engine instances divide existing partitions fairly.
+        A partition is a part of data stream. Partitions are a special conception which handle regular queues in multi-queues, e.g. a stream with one partition is a queue, but a stream with two partitions is like a two different queues. Using streams with many partitions allows to handle parallelism properly as engine instances divide existing partitions fairly.
 
         Enter a number of partitions. It must be a positive integer.
 
 - *Force create*
-        This field indicates if a stream should be removed and re-created by force (if it physically exists). Set it "True" or "False". It is set as "False" by default.
+        This field indicates if a stream should be removed and re-created by force (if it physically exists). Set it "True" or "False". The default value is "False".
 
 - *Tags*
-        Enter a tag\tags for the stream here.
+        Enter a tag/tags for the stream here.
 	
 - *Primary*
-       Enter a primary key here. It is a primary key field name used in sql database.
+       Name of primary key field in sql database.
 
 **RESTful Stream Type**
 
 - *Partitions count* *
-        Partitions is a part of data stream. Partitions are a special conception which handle regular queues in multi-queues, e.g. a stream with one partition is a queue, but a stream with two partitions is like a two different queues. Using streams with many partitions allows to handle parallelism properly as engine instances divide existing partitions fairly.
+        A partition is a part of data stream. Partitions are a special conception which handle regular queues in multi-queues, e.g. a stream with one partition is a queue, but a stream with two partitions is like a two different queues. Using streams with many partitions allows to handle parallelism properly as engine instances divide existing partitions fairly.
 
         Enter a number of partitions. It must be a positive integer.
 
 - *Force create*
-        This field indicates if a stream should be removed and re-created by force (if it physically exists). Set it "True" or "False". It is set as "False" by default.
+        This field indicates if a stream should be removed and re-created by force (if it physically exists). Set it "True" or "False". The default value is "False".
 
 - *Tags*
-        Enter a tag\tags for the stream here.
+        Enter a tag/tags for the stream here.
 		
 **Elasticsearch Stream Type**
 
 - *Force create*
-        This field indicates if a stream should be removed and re-created by force (if it physically exists). Set it "True" or "False". It is set as "False" by default.
+        This field indicates if a stream should be removed and re-created by force (if it physically exists). Set it "True" or "False". The default value is "False".
 
 - *Tags*
-        Enter a tag\tags for the stream here.
+        Enter a tag/tags for the stream here.
 
 .. note:: Required fields are marked with an asterisk (*)
 
@@ -489,7 +489,7 @@ Click "Cancel" to drop all the specified settings. The stream will not be create
 
 In the list of streams the following actions can be performed:
 
-1. **View** a stream` name, description, date of creation.
+1. **View** stream`s name, description, date of creation.
 
 2. **View** a service for the stream and get the service`s information in a pop-up window by clicking on the active service`s name in the "Service" column.
 
@@ -519,24 +519,28 @@ The platform supports 4 types of modules:
 
 In the table below the *specification fields* that should be specified in the module are described:
 
+.. tip:: IOstream - is an input/output stream.
+
 .. csv-table:: Specification fields
    :header: "Field", "Format", "Description"
    :widths: 25, 20, 40
 
-   "name*", "String", "The unique name for a module"
+   "name*", "String", "The unique name of the module"
    "description", "String", "The description for a module"
    "version*", "String", "The module version"
    "author", "String", "The module author"
    "license", "String", "The software license type for a module"
    "inputs*", "IOstream","The specification for the inputs of a module"
    "outputs*", "IOstream", "The specification for the outputs of a module"
-   "module-type*", "String", "The type of a module. One of [input-streaming, output-streaming, batch-streaming, regular-streaming]"
+   "module-type*", "String", "The type of a module. One of the following: [input-streaming, output-streaming, batch-streaming, regular-streaming]"
    "engine-name*", "String", "The name of the computing core of a module"
    "engine-version*", "String", "The version of the computing core of a module"
    "validator-class*", "String", "The absolute path to class that is responsible for a validation of launch options"
    "executor-class*", "String", "The absolute path to class that is responsible for a running of module"
    "batch-collector-class**", "String", "The absolute path to class that is responsible for a batch collecting of batch-streaming module"
-   
+
+.. note:: * - a required field, ** - a required field for a batch-streaming module.
+
 IOstream for inputs and outputs has the following structure:
 
 .. csv-table:: **IOstream fields**
@@ -544,7 +548,9 @@ IOstream for inputs and outputs has the following structure:
   :widths: 20, 20, 60
 
   "cardinality*", "Array[Int]", "The boundary of interval in which a number of inputs can change. Must contain 2 items."
-  "types*", "Array[String]", "The enumeration of types of inputs. Can contain only [stream.t-streams, stream.apache-kafka, stream.elasticsearch, stream.sql-database, stream.restful, input]"
+  "types*", "Array[String]", "The enumeration of types of inputs. Can contain only [stream.t-streams, stream.apache-kafka, stream.elasticsearch, stream.sql-database, stream.restful, input]."
+
+.. note:: * - a required field.
 
 Before uploading a module make sure an engine of corresponding type is uploaded.
 
@@ -560,13 +566,13 @@ Currently the following **engine types** are supported in the SJ-Platform:
         It gets events from T-stream input streams, organizes them in batches and produces the results to T-stream output streams.
 4. Output Engine   
          - ElasticSearch Output Engine - allows creating output endpoint and place processing results to Elasticsearch.   
-	 - SQL database Output Engine  - allows creating output endpoint and place processing results to 			MySQL, PostgreSQL, Oracle.
+	 - SQL-database Output Engine  - allows creating output endpoint and place processing results to 			MySQL, PostgreSQL, Oracle.
 
 Engines should be uploaded as a .JAR file under the :ref:`CustomFiles` section in the "Custom Jars" tab.
 
 After an engine is uploaded and the corresponding configurations appear in the "Configuration" section, a module can be uploaded.
 
-.. note:: Read more about necessary configurations in the `Configuration`_ section below.
+.. note:: Read more about necessary configurations in the `Configuration`_ section.
 
 Click the "Upload Module" button and select a .JAR file in the window to upload.  Press "Open" and wait for a few seconds till the module is uploaded.
 
@@ -595,7 +601,7 @@ The list of modules can be filtered by its type and/or a name using the search t
 Custom Files
 -------------
 
-A *Custom Files* section is a section where a user can upload custom .JAR files and other files that can be necessary for correct module work.
+A *Custom Files* section is a section where a user can upload custom .JAR files and other files that may be required for the module to function correctly.
 
 .. figure:: _static/CustomFilesList.png
 
@@ -604,7 +610,7 @@ Here you can find two tabs: **Custom Jars** and **Custom files**. Below you will
 Custom Jars
 ~~~~~~~~~~~
 
-Under the "Custom Jars" tab the engine .JAR files can be uploaded that are necessary for module performance. Click the "Upload Jar" button and select the .JAR file to upload from your computer. Click "Open" in the modal window and wait for a few seconds before the .JAR is uploaded. If it is uploaded successfully a success message appears above the file list and the uploaded .JAR is added to the list of jars.
+Under the "Custom Jars" tab the engine .JAR files can be uploaded that are required for the module to function correctly. Click the "Upload Jar" button and select the .JAR file to upload from your computer. Click "Open" in the modal window and wait for a few seconds before the .JAR is uploaded. If it is uploaded successfully a success message appears above the file list and the uploaded .JAR is added to the list of jars.
 
 The following actions can be performed with the files in the list:
 
@@ -628,7 +634,7 @@ The following actions can be performed with the files in the list:
 
 2. **Download** a file to your computer by clicking on the download icon in the Actions block near the name of the file you want to download. You need only to specify a folder where to store the file to and click the "Save" button.
 
-3. **Delete** a file clicking on the corresponding icon in the Actions block near the name of the file you want to delete
+3. **Delete** a file by clicking on the corresponding icon in the Actions block near the name of the file you want to delete.
 
 The list of files can be filtered by its name using the search tool above the list.
 
@@ -638,31 +644,31 @@ Module uses a specific **instance** as a full set of settings that determine the
 
 Before creating an instance make sure all necessary *configuration* *settings* are added to the system.
 
-.. note:: Read more about necessary configuration settings in the `Configuration`_ section below.
+.. note:: Read more about necessary configuration settings in the `Configuration`_ section.
 
-Under the *Instances* section of the main navigation menu there is a list of instances.  In the upper-right corner click "Create Instance" and choose the module from the drop-down list. This is the module an instance will be created for. 
+Under the *Instances* section of the main navigation menu there is a list of instances.  In the upper-right corner click "Create Instance" and choose the module from the drop-down list. An instance will be created for the selected module.
 
 .. figure:: _static/CreateInstance_Type1.png
 
-The type of module will determine the type of instance that will be created: input-streaming, regular-streaming, batch-streaming or output-streaming. 
+The type of module determines the type of instance that will be created: input-streaming, regular-streaming, batch-streaming or output-streaming. 
 
-Each type of instance requires specific settings to be filled in alongside with general settings equal for all instances. This settings are to be specified in the form appearing after selecting a module type.
+Each type of instance requires specific settings to be filled in alongside with general settings common for all instances. These settings are to be specified in the form that appears after selecting a module type.
 
-Please, review the tables with general and specific fields description below.
+Please, review the lists with general and specific fields description below.
 
 **General fields**
  
 - Name *
-    A unique name of an instance. Must contain only letters, digits or hyphens, and starts with a letter.
+    A unique name of an instance. Must consist of only letters, digits or hyphens, and start with a letter.
     
 - Description
-    Description of an instance
+    Description of an instance.
     
 - Parallelism
-    This field determines the number of tasks that will process the data stream. For load reduction and the performance enhancement Parallelism should be over 1. Value may be integer or `max` string. If `max`, then parallelism equals minimum count of partitions of streams (1 by default). For an input streaming instance it should not exceed the total number of back-ups (Backup count + Async-backup-count)
+    This field determines the number of tasks that will process the data stream. To reduce the load and increase processing speed, the Parallelism parameter value should be larger than 1. Value may be integer or "max" string. If "max", then parallelism equals to the minimum count of stream partitions (1 by default). For an input streaming instance it should not exceed the total number of back-ups (Backup count + Async-backup-count)
     
 - Options
-    JSON with options for the module. Validates by implementation of the Streaming Validator method in the module. That field can be set as required according to the Validator. 
+    JSON with options for the module. It is validated by implementation of the Streaming Validator method in the module. That field can be set as required according to the Validator. 
     
 - Per-Task-Cores
     Quantity of cores for task (1 by default).
@@ -671,7 +677,7 @@ Please, review the tables with general and specific fields description below.
     Amount of RAM for task (1024 by default).
     
 - JVM Options
-    Json with jvm-options. It is important to emphasize that Mesos deletes a task if it uses more memory than it is specified in the ``perTaskRam`` parameter. There are no default options.  We recommend the following options for launching modules, thay fit the Per-Task-Ram = 192::
+    Json with jvm-options. It is important to emphasize that Mesos deletes a task if it uses more memory than it is specified in the ``perTaskRam`` parameter. There are no default options.  We recommend the following options for launching modules, thay fit the ``perTaskRam: 192``::
      
      "jvmOptions" : {
      "-Xmx": "32m",
@@ -679,13 +685,13 @@ Please, review the tables with general and specific fields description below.
      "-XX:MaxMetaspaceSize=": "96m" 
      },
     
-    In general, the sum of the following parameters: `Xmx`, `XX:MaxDirectMemorySize` and `XX:MaxMetaspaceSize` should be less than `Per-Task-Ram`; `XX:MaxMetaspaceSize` must be grater or larger than `Xmx` by 32m.
+    In general, the sum of the following parameters: `Xmx`, `XX:MaxDirectMemorySize` and `XX:MaxMetaspaceSize` should be less than `Per-Task-Ram`; `XX:MaxMetaspaceSize` must be greater than `Xmx` by 32m.
 
 - Node Attributes
-    JSON with map `attributes <http://mesos.apache.org/documentation/latest/attributes-resources/#attributes>`_ for framework. While the master determines how many resources are offered to each framework, the frameworks' schedulers select which of the offered resources to use.
+    JSON-map with `attributes <http://mesos.apache.org/documentation/latest/attributes-resources/#attributes>`_ for framework. While the master determines how many resources are offered to each framework, the frameworks' schedulers select which of the offered resources to use.
     
 - Coordination Service*
-    Service name of Apache ZooKeeper service required for instance launching syncronization to avoid conflicts at Mesos resources usage.
+    Name of the Apache Zookeeper service required for instance launching syncronization to avoid conflicts at Mesos resources usage.
     
 -  Environment Variables
     Variables used in the framework.
@@ -702,7 +708,7 @@ Please, review the tables with general and specific fields description below.
        Interval for performing the checkpoint. If Checkpoint Mode is  'time-interval' the value is set in ms.  If Checkpoint Mode is 'every-nth' the value is the number of events after which the checkpoint is done.
        
 - Outputs*
-       Names of output streams (must be of the `stream.t-streams` type only).
+       Names of output streams (must be of the 'stream.t-streams' type only).
        
 - Duplicate Check
        The flag points if an envelope (defined by an envelope key) has to be checked for duplication or not. False by default.
@@ -734,10 +740,10 @@ Please, review the tables with general and specific fields description below.
      Interval for performing the checkpoint. If Checkpoint Mode is  'time-interval' the value is set in ms.  If Checkpoint Mode is 'every-nth' the value is the number of events after which the checkpoint is done.
      
 - Inputs*
-     Names of input streams. Requires an input mode: 'full' (if you want each task to process all partitions of the stream) or 'split' (if you want to divide stream's partitions among the tasks; it is a default value). The stream should exist in the system (it should be of `stream.t-streams` or `stream.apache-kafka` type).
+     Names of input streams. Requires an input mode: 'full' (if you want each task to process all partitions of the stream) or 'split' (if you want to divide stream's partitions among the tasks; it is a default value). The stream should exist in the system (it should be of 'stream.t-streams' or 'stream.apache-kafka' type).
      
 - Outputs*
-     Names of output streams (should be of the `stream.t-stream` type only).
+     Names of output streams (should be of the 'stream.t-stream' type only).
      
 - Start From
      Value must be 'newest' (the system does not read the history, waits for new events), 'oldest' (the system reads all input stream events) or datetime (that requires specifying a timestamp and means the system reads events from the stream starting from the specified moment). If an instance have Apache Kafka input streams, then 'Start from' must be 'oldest' or 'newest' ('newest' is default).
@@ -757,7 +763,7 @@ Please, review the tables with general and specific fields description below.
 **Batch-streaming instance fields**
 
 - Outputs* 
-     Names of output streams (must be of the `stream.t-stream` type only).
+     Names of output streams (must be of the `stream.t-streams` type only).
 
 - Window 
     Number of batches that will be contained in a window (1 by default). Must be greater than zero.
@@ -766,7 +772,7 @@ Please, review the tables with general and specific fields description below.
     The interval at which a window will be shifted (count of batches that will be removed from the window after its processing). Must be greater than zero and less than or equal to the window (1 by default)
    
 - Inputs*
-    Names of input streams. Requires an input mode: 'full' (if you want each task to process all partitions of the stream) or 'split' (if you want to divide stream's partitions among the tasks; it is a default value). The stream should exist in the system (it should be of `stream.t-streams` or `stream.apache-kafka` type).
+    Names of input streams. Requires an input mode: 'full' (if you want each task to process all partitions of the stream) or 'split' (if you want to divide stream's partitions among the tasks; it is a default value). The stream should exist in the system (it should be of 'stream.t-streams' or 'stream.apache-kafka' type).
     
 - Start From 
     Value must be 'newest' (the system reads nothing, waits for new events), 'oldest' (the system reads all input stream events) or datetime (that requires specifying a timestamp and means the system reads events from the stream starting from the specified moment). If an instance have Apache Kafka input streams, then 'Start from' must be 'oldest' or 'newest' ('newest' is default).
