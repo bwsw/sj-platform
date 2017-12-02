@@ -79,11 +79,11 @@ The major one is the **processing module** that performs data processing. Two ty
 
 The processing module receives data for processing from Apache Kafka and T-streams. You also can use TCP as a source, but you will need an input module in this case. The **input module** handles external inputs, does data deduplication, transforms raw data into objects for T-streams. 
 
-To receive the result of processing an output module is required. The **output module** puts the processed data from event processing pipeline to external data destinations (Elasticsearch, SQL database, RESTful).
+To receive the result of processing an output module is required. The **output module** puts the processed data from event processing pipeline to external data destinations (Elasticsearch, SQL-database, RESTful).
 
 So the pipeline may look like at the following scheme:
 
-.. figure:: _static/ModuleStructure3.png
+.. figure:: _static/ModuleStructure4.png
    :align: center
    :scale: 80%
 
