@@ -7,7 +7,7 @@ A JSON schema for module specification should contain the following *specificati
 
 .. tip:: IOstream - is an input/output stream.
 
-.. csv-table:: Specification fields
+.. csv-table:: **Specification fields**
    :header: "Field", "Format", "Description"
    :widths: 25, 20, 40
 
