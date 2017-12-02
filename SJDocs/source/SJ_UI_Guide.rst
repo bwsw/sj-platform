@@ -557,7 +557,7 @@ In the list of modules the following actions can be performed:
 
 1. **View** a module name, type, version and size, the date of uploading.
 
-2. **Download** a module to your computer by clicking on the download icon in the Actions column in the line for the module you want to download. You need only to specify a folder where to store the module to and click the "Save" button.
+2. **Download** a module to your computer by clicking on the download icon |download-icon.png| in the Actions column in the line for the module you want to download. You need only to specify a folder where to store the module to and click the "Save" button.
 
 3. **Delete** a module by clicking on the corresponding icon in the Actions column in the line for the module you want to delete.
 
