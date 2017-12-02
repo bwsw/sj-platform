@@ -482,20 +482,35 @@ The Stream Juggler Platform supports *Apache Kafka* and *T-stream* types of stre
 
 To create streams of exact type in the platform you need to create a service and a provider for this service. The types of a service and a provider are determined by the type of a stream you need for the module.
 
-For example, you have decided to include a Batch module as a processing module in your pipeline. You will need to create a batch instance for it. An instance of a batch type requires *Apache ZooKeeper service*.
+For example, you have decided to include a Batch module as a processing module in your pipeline. You will need to create a batch instance for it. An instance of a batch type requires *Apache Zookeeper service*.
 
+.. figure:: _static/Inst-Serv.png
+  :align: center
+  
+  Picture 1.11
+  
 An instance of a batch type will receive data from Apache Kafka. Thus, it will require an *Apache Kafka service*. 
 
+.. figure:: _static/Inst-Stream-Serv.png
+  :align: center
+  
+  Picture 1.12
+  
 Apache Kafka service will require two provider types for it: *Apache Kafka* and *Apache ZooKeeper*.
 
-Once you have determined the types of instances in the pipeline and the types of streaming components, you can start building the infrastructure. Firstly, create two providers of *Apache Kafka* and *Apache ZooKeeper* types. Secondly, create services of *Apache Kafka* and *Apache ZooKeeper* types. Thirdly, create streams of *Apache Kafka*. 
+.. figure:: _static/Inst-Stream-Serv-Prov.png
+  :align: center
+
+  Picture 1.12
+  
+Once you have determined the types of instances in the pipeline and the types of streaming components, you can start building the infrastructure. Firstly, create two providers of *Apache Kafka* and *Apache Zookeeper* types. Secondly, create services of *Apache Kafka* and *Apache Zookeeper* types. Thirdly, create streams of *Apache Kafka*. Finally, create an instance of a batch module.
 
 The schema below may help you to understand the dependency of entities in the platform.
 
 .. figure:: _static/InstanceCorrelation1.png
   :align: center
 
-  Picture 1.11
+  Picture 1.13
 
 The table below explains what types of streams may serve as input or output streams for particular instance types:
 
