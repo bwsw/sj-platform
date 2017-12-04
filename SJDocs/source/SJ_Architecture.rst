@@ -141,7 +141,7 @@ To understand the interconnections between platform components look at the diagr
 
 SJ-Platform uses a range of data sources and data storages. A client operates the platform via UI/REST API. And he/she uploads a custom module to the platform with a set of configurations. The platform runs the module via an "executable" engine on Mesos and Marathon. And the module uses MongoDB as a data store.
 
-.. figure:: _static/SJСomponentDiagram1.png
+.. figure:: _static/SJСomponentDiagram2.png
     :align: center
    
     Picture 1.5
