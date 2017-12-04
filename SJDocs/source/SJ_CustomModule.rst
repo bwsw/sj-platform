@@ -372,8 +372,6 @@ To describe the whole logic we need to override the following methods:
 - onBeforeCheckpoint() - to send everything gained further;
 - deserialize(bytes: Array[Byte]) - to deserialize flow of bytes from T-Streams into Record (Apache Avro) correctly.
 
-.. _Validator:
-
 Validator 
 ++++++++++++++++++
 
@@ -417,7 +415,7 @@ onMessage
 
 The ``onMessage`` method is called every time the Executor receives an envelope.
 
-As we remember, there are two possible types of envelopes: echo-response and unreachable-response, which are stored in two different streams. 
+As we remember, there are two possible types of envelopes in our example: echo-response and unreachable-response, which are stored in two different streams. 
 
 We obtain envelopes from both of them and the name of the stream is stored in the ``envelope.stream`` field::
 
