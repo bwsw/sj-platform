@@ -782,31 +782,23 @@ These streams are of T-streams type.
 
 For **ps-process module**:
 
-Create output streams of the regular-streaming module (consequently, an input stream of the output-streaming module) named ‘echo-response-1m’, ‘echo-response-3m’ and ‘echo-response-1h’. They will be used for keeping the aggregated information about the average time of echo responses, the total amount of echo responses, the total amount of unreachable responses and the timestamp for each IP (per 1 minute, per 3 minutes and per 1 hour)::
+Create an output stream of the regular-streaming module (consequently, an input stream of the output-streaming module) named ‘echo-response-1m’. It will be used for keeping the aggregated information about the average time of echo responses, the total amount of echo responses, the total amount of unreachable responses and the timestamp for each IP (per 1 minute)::
 
  curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data   "@api-json/streams/echo-response-1m.json"
 
- curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/echo-response-3m.json"
-
- curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/echo-response-1h.json"
-
-These streams are of T-streams type.
+This stream is of the T-streams type.
 
 For **ps-output module**:
 
-Create output streams of the output-streaming module named ‘es-echo-response-1m’, ‘es-echo-response-3m’, ‘es-echo-response-1h’. They will be used for keeping the aggregated information (per 1 minute, per 3 minutes and per 1 hour) from the previous corresponding stream including total amount of responses::
+Create an output stream of the output-streaming module named ‘es-echo-response-1m’. It will be used for keeping the aggregated information (per 1 minute) from the previous stream including total amount of responses::
 
  curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/es-echo-response-1m.json"
 
- curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/es-echo-response-3m.json"
-
- curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/es-echo-response-1h.json"
- 
-These streams are of Elasticsearch type (as the external storage in the pipeline is Elasticsearch).
+This stream is of the Elasticsearch type (as the external storage in the pipeline is Elasticsearch).
 
 All the created streams should be available now in the UI under the “Streams” tab.
 
-.. figure:: _static/StreamsCreated.png
+.. figure:: _static/StreamsCreated1.png
    :align: center
    
    Picture 1.15
@@ -842,27 +834,13 @@ To create an instance of the *ps-process* module send the following request::
 
  curl --request POST "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance" -H 'Content-Type: application/json' --data "@api-json/instances/pingstation-process.json"
 
-Create two more instances for the *ps-process* module with different checkpoint intervals to process data every 3 minutes and every hour. Remember to create them with different names::
-
- curl --request POST "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance" -H 'Content-Type: application/json' --data "@api-json/instances/pingstation-echo-process-3m.json"
-
- curl --request POST "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance" -H 'Content-Type: application/json' --data "@api-json/instances/pingstation-echo-process-1h.json"
-
 To create an instance of the *ps-output* module send the following request::
 
  curl --request POST "http://$address/v1/modules/output-streaming/pingstation-output/1.0/instance" -H 'Content-Type: application/json' --data "@api-json/instances/pingstation-output.json"
  
-Create two more instances to receive data from the instances processing data every 3 minutes and every hour. Remember to create the JSON files with different names. Change the ‘input’ values to ‘echo-response-3m’ and ‘echo-response-1h’ respectively to receive data from these streams. 
-
-Change the ‘output’ values to ‘es-echo-response-3m’ and ‘es-echo-response-1h’ correspondingly to put the result data to these streams:: 
-
- curl --request POST "http://$address/v1/modules/output-streaming/pingstation-output/1.0/instance" -H 'Content-Type: application/json' --data "@api-json/instances/pingstation-output-3m.json"
-
- curl --request POST "http://$address/v1/modules/output-streaming/pingstation-output/1.0/instance" -H 'Content-Type: application/json' --data "@api-json/instances/pingstation-output-1h.json"
-
 The created instances should be available now in UI under the “Instances” tab. There they will appear with the “ready” status.
 
-.. figure:: _static/InstancesCreated.png
+.. figure:: _static/InstancesCreated1.png
    :align: center
    
    Picture 1.16
@@ -886,21 +864,13 @@ To launch the **processing module instances** send::
 
  curl --request GET "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance/pingstation-process/start"
 
- curl --request GET "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance/pingstation-process-3m/start"
-
- curl --request GET "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance/pingstation-process-1h/start" 
-
 To launch the **output module instances** send::
 
  curl --request GET "http://$address/v1/modules/output-streaming/pingstation-output/1.0/instance/pingstation-output/start"
 
- curl --request GET "http://$address/v1/modules/output-streaming/pingstation-output/1.0/instance/pingstation-output-3m/start"
-
- curl --request GET "http://$address/v1/modules/output-streaming/pingstation-output/1.0/instance/pingstation-output-1h/start" 
-
 If you take a look at the UI, you will see the launched instances with the “started” status.
 
-.. figure:: _static/InstancesStarted.png
+.. figure:: _static/InstancesStarted1.png
    :align: center
    
    Picture 1.17
@@ -958,6 +928,42 @@ It illustrates the average time of echo-responses by IPs per a selected period o
 
 Many other parameter combinations can be implemented to view the results.
 
+Customization
+~~~~~~~~~~~~~~~~
+The platform allows to customize the pipeline. For example, you can change the data aggregation interval adding more instances. You can create one instance with the 3-minute aggregation interval and another instance with 1-hour aggregation interval.
+
+1. Each instance needs an input stream and an output stream. You can create streams on the base of the existing providers and services. Remember to create the JSON files with different names, e.g. 'echo-response-3m' as *ps-process* output stream aggregating data per 3 minutes, 'echo-response-1h' as *ps-process* output stream aggregating data per 1 hour::
+ 
+    curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/echo-response-3m.json"
+
+    curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/echo-response-1h.json"
+    
+   Create output streams for the *ps-output* module with new names, e.g. 'es-echo-response-3m' exporting result data  aggregated per 3 minutes, 'es-echo-response-1h' exporting result data aggregated per 1 hour:: 
+  
+     curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/es-echo-response-3m.json"
+
+     curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/es-echo-response-1h.json"
+
+2. Create two more instances for the *ps-process* module with different checkpoint intervals to process data every 3 minutes and every hour. Remember to create them with different names. In our example we create 'pingstation-echo-process-3m' and 'pingstation-echo-process-1h' instances with ‘output’ values ‘echo-response-3m’ and ‘echo-response-1h’ correspondingly::
+
+    curl --request POST "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance" -H 'Content-Type: application/json' --data "@api-json/instances/pingstation-echo-process-3m.json"
+
+    curl --request POST "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance" -H 'Content-Type: application/json' --data "@api-json/instances/pingstation-echo-process-1h.json"
+ 
+3. Create two more instances for the *ps-output* module with different checkpoint intervals to receive data aggregated for every 3 minutes and for every hour.
+
+   Create the JSON files with different names. Change the ‘input’ values to ‘echo-response-3m’ and ‘echo-response-1h’ respectively to receive data from these streams. Change the ‘output’ values to ‘es-echo-response-3m’ and ‘es-echo-response-1h’ correspondingly to put the result data to these streams:: 
+
+    curl --request POST "http://$address/v1/modules/output-streaming/pingstation-output/1.0/instance" -H 'Content-Type: application/json' --data "@api-json/instances/pingstation-output-3m.json"
+
+    curl --request POST "http://$address/v1/modules/output-streaming/pingstation-output/1.0/instance" -H 'Content-Type: application/json' --data "@api-json/instances/pingstation-output-1h.json"
+ 
+4. Launch the instances as described in the `Launching_Instances`_ section. Remember to change the instance names for the new ones::
+ 
+     curl --request GET "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance/<new instance name>/start"
+     
+     curl --request GET "http://$address/v1/modules/output-streaming/pingstation-output/1.0/instance/<new instance name>/start"
+
 Instance Shutdown 
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -969,29 +975,29 @@ If there is no need for it anymore, a stopped instance can be deleted. On the ba
 
 To stop instances in the example task the following requests should be sent.
 
-To stop the **sj-regex-input module instance** send::
+To stop the *sj-regex-input* module instance send::
 
  curl --request GET "http://$address/v1/modules/input-streaming/pingstation-input/1.0/instance/pingstation-input/stop"
 
-To stop the **ps-process module instances** send::
+To stop the *ps-process* module instance send::
 
  curl --request GET "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance/pingstation-process/stop "
 
- curl --request GET "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance/pingstation-process-3m/stop "
+.. curl --request GET "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance/pingstation-process-3m/stop "
 
- curl --request GET "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance/pingstation-process-1h/stop "
+.. curl --request GET "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance/pingstation-process-1h/stop "
 
-To stop the **ps-output module instances** send::
+To stop the *ps-output* module instances send::
 
  curl --request GET "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance/pingstation-output/stop" 
 
- curl --request GET "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance/pingstation-output-3m/stop"  
+.. curl --request GET "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance/pingstation-output-3m/stop"  
 
- curl --request GET "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance/pingstation-output-1h/stop" 
+.. curl --request GET "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance/pingstation-output-1h/stop" 
 
 In the UI, you will see the stopped instances with the “stopped” status.
 
-.. figure:: _static/InstancesStopped.png
+.. figure:: _static/InstancesStopped1.png
    :align: center
    
    Picture 1.19
@@ -1012,7 +1018,7 @@ To delete the *ps-process* module instance send::
 
  curl --request DELETE "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance/pingstation-process/"
 
- сurl --request DELETE "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance/pingstation-process-3m/" 
+.. сurl --request DELETE "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance/pingstation-process-3m/" 
 
  curl --request DELETE "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance/pingstation-process-1h/"
 
@@ -1020,7 +1026,7 @@ To delete the *ps-output* module instance send::
 
  curl --request DELETE "http://$address/v1/modules/output-streaming/pingstation-output/1.0/instance/pingstation-output/"
 
- curl --request DELETE "http://$address/v1/modules/output-streaming/pingstation-output/1.0/instance/pingstation-output-3m/"
+.. curl --request DELETE "http://$address/v1/modules/output-streaming/pingstation-output/1.0/instance/pingstation-output-3m/"
 
  curl --request DELETE "http://$address/v1/modules/output-streaming/pingstation-output/1.0/instance/pingstation-output-1h/"
 
