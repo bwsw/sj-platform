@@ -49,7 +49,7 @@ The workflow of the SJ-Platform implies the structure:
 2. A **processing module** performs the main transformation and calculation of data. It accepts data via T-streams and Apache Kafka. The processed data are put into T-streams only. So an output module is required in the next step as we can not get the result data right from T-streams and put them into an external storage.
 3. An **output module** is necessary to transfer the data from T-streams into the result data of the type appropriate for the external storage.
 
-.. figure:: _static/ModulePipeline1.png
+.. figure:: _static/ModuleStructure4.png
 
 Below you will find the instructions on custom module creation in Scala.
 
