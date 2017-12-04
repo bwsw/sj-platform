@@ -46,7 +46,7 @@ Module type      Input stream                                      Output stream
 
 Input Streams
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-The data can be received from different sources. Currently, the platform supports obtaining data from Apache Kafka and via TCP connections.
+The data can be received by the system from different sources. Currently, the platform supports obtaining data from Apache Kafka and via TCP connections.
 
 SJ-Platform supports `Apache Kafka <https://kafka.apache.org/documentation/>`_ as a standard providing a common interface for the integration of many applications.
 
