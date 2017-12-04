@@ -50,6 +50,7 @@ The workflow of the SJ-Platform implies the structure:
 3. An **output module** is necessary to transfer the data from T-streams into the result data of the type appropriate for the external storage.
 
 .. figure:: _static/ModuleStructure4.png
+  :scale: 80 %
 
 Below you will find the instructions on custom module creation in Scala.
 
