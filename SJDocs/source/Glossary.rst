@@ -8,7 +8,7 @@ Batch
   A minimum data set to collect events of a stream.
 
 Configurations 
-  Settings required for the platform work. 
+  Settings used for the system work. 
 
 Checkpoint
   A saved "snapshot" of processed data at a specific time. The system saves the information about all consumed/recorded data by a module at that particular time, and in case of failure it restores a module work to the stage it was before the problem appeared.   
@@ -26,7 +26,7 @@ Event
   Minimal data unit of a stream.
 
 Exactly-once processing 
-  The system processes events of a stream only once.
+  The processing of stream events only once.
 
 Executor
   A part of a module that performs data processing.
