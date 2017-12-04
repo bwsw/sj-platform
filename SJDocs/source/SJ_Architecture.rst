@@ -133,6 +133,7 @@ SJ-Platform fulfills the idea of **fault-tolerance** as its architecture prevent
 The general structure of SJ-Platform can be rendered as at the scheme below where all the mentioned above  components are presented in detail:
 
 .. figure:: _static/SJ_General3.png
+   :scale: 80 %
    :align: center
 
    Picture 1.4
