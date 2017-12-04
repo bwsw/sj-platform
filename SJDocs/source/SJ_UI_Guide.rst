@@ -639,7 +639,7 @@ Please, review the lists with general and specific fields description below.
     This field determines the number of tasks that will process the data stream. To reduce the load and increase performance, the Parallelism parameter value should be larger than 1. Value may be integer or "max" string. If "max", then parallelism equals to the minimum count of stream partitions (1 by default). For an input streaming instance it should not exceed the total number of back-ups (Backup count + Async-backup-count)
     
 - Options
-    JSON with options for the module. It is validated by implementation of the Streaming Validator method in the module. That field can be set as required according to the Validator. 
+    JSON with options for the module. It is validated by implementation of the Streaming Validator method in the module. This field must contain valid values according to the :ref:`Validator`. 
     
 - Per-Task-Cores
     Quantity of cores for task (1 by default).
