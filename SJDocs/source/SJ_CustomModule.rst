@@ -372,6 +372,8 @@ To describe the whole logic we need to override the following methods:
 - onBeforeCheckpoint() - to send everything gained further;
 - deserialize(bytes: Array[Byte]) - to deserialize flow of bytes from T-Streams into Record (Apache Avro) correctly.
 
+.. _Validator:
+
 Validator 
 ++++++++++++++++++
 
