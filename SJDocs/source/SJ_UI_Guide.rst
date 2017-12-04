@@ -517,7 +517,7 @@ The platform supports 4 types of modules:
 3. Batch-streaming
 4. Output-streaming
 
-Each of these types require specific fields in its JSON file. Look at the :ref:`Json_schema` page to find the specification field description and exmples of JSON for 4 module types.
+Each of these types require specific fields in its JSON file. Look at the :ref:`Json_schema` page to find the specification field description and examples of JSON for 4 module types.
 
 Before uploading a module make sure an engine of corresponding type is uploaded.
 
@@ -557,7 +557,9 @@ In the list of modules the following actions can be performed:
 
 1. **View** a module name, type, version and size, the date of uploading.
 
-2. **Download** a module to your computer by clicking on the download icon |download-icon.png| in the Actions column in the line for the module you want to download. You need only to specify a folder where to store the module to and click the "Save" button.
+2. **Download** a module to your computer by clicking the download icon |download-icon| in the Actions column in the line for the module you want to download. You need only to specify a folder where to store the module to and click the "Save" button.
+
+.. |download-icon| image:: _static/download-icon.png
 
 3. **Delete** a module by clicking on the corresponding icon in the Actions column in the line for the module you want to delete.
 
@@ -658,7 +660,7 @@ Please, review the lists with general and specific fields description below.
     In general, the sum of the following parameters: ``Xmx``, ``XX:MaxDirectMemorySize`` and ``XX:MaxMetaspaceSize`` should be less than ``Per-Task-Ram``; ``XX:MaxMetaspaceSize`` must be greater than ``Xmx`` by 32m.
 
 - Node Attributes
-    JSON-map with `attributes <http://mesos.apache.org/documentation/latest/attributes-resources/#attributes>`_ for framework. While the master determines how many resources are offered to each framework, the frameworks' schedulers select which of the offered resources to use.
+    JSON-map with `attributes <http://mesos.apache.org/documentation/latest/attributes-resources/#attributes>`_ for framework. While Mesos Master determines how many resources are offered to each framework, the frameworks' schedulers select which of the offered resources to use. You can assign "+" or "-"  to an attribute of Mesos resources. Resources with "+" attributes are added to the list of resources used for task launching. Resources with "-" attributes are not included into this list. In case the list of attributes is empty, the range of offered resources is determined by Mesos. Find more about Mesos resources in `the official documentation <http://mesos.apache.org/documentation/latest/architecture/>`_.
     
 - Coordination Service*
     Name of the Apache Zookeeper service required for instance launching syncronization to avoid conflicts at Mesos resources usage.
