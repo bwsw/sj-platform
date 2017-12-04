@@ -329,7 +329,8 @@ A window size is equal to a number of batches. The window closes once it is full
 
 The diagram below is a simple illustration of how a sliding window operation looks like.
 
-.. figure:: _static/BatchModule1.png
+
+.. figure:: _static/BatchModule3.png
    :scale: 120 %
    :align: center
 
