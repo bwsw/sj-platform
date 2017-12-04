@@ -70,7 +70,8 @@ The platform supports 4 types of modules:
 
 The modules can be strung in a pipeline as illustrated below:
 
-.. figure:: _static/ModulePipeline1.png
+.. figure:: _static/ModuleStructure4.png
+   :scale: 80 %
    :align: center
 
    Picture 1.3 
@@ -329,9 +330,8 @@ A window size is equal to a number of batches. The window closes once it is full
 
 The diagram below is a simple illustration of how a sliding window operation looks like.
 
-
 .. figure:: _static/BatchModule3.png
-   :scale: 120 %
+   :scale: 80 %
    :align: center
 
    Picture 1.8
