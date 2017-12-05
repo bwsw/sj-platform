@@ -680,7 +680,7 @@ Please, review the lists with general and specific fields description below.
        Interval for performing the checkpoint. If Checkpoint Mode is  'time-interval' the value is set in ms.  If Checkpoint Mode is 'every-nth' the value is the number of events after which the checkpoint is done.
        
   - Outputs*
-       Names of output streams (must be of the 'stream.t-streams' type only). You can add several output streams by clicking "Add Output" and selecting an output stream name from the drop-down list.
+       Names of output streams (must be of the 'T-streams' type only). You can add several output streams by clicking "Add Output" and selecting an output stream name from the drop-down list.
        
   - Duplicate Check
        The flag determines if an envelope (defined by an envelope key) has to be checked for duplication or not. False by default.
@@ -701,7 +701,11 @@ Please, review the lists with general and specific fields description below.
        The number of backup copies you want to have (0 by default, maximum 6). Sync backup operations have a blocking cost which may lead to latency issues. You can skip this field if you do not want your entries to be backed up, e.g. if performance is more important than backing up.
 
   - Async-Backup-Count
-       The flag determines if an envelope (defined by an envelope key) has to be checked for duplication or not (0 by default). The backup operations are performed at some point in time (non-blocking operation). You can skip this field if you do not want your entries to be backed up, e.g. if performance is more important than backing up.
+       The flag determines if an envelope (defined by an envelope key) has to be checked for duplication or not (0 by default). The backup operations are performed at some point in time (non-blocking operation). 
+       
+.. note:: Backups increase memory usage since they are also kept in memory.
+
+.. figure:: _static/Create_InputInst.png
 
  **Regular-streaming instance fields**
 
@@ -712,51 +716,59 @@ Please, review the lists with general and specific fields description below.
      Interval for performing the checkpoint. If Checkpoint Mode is  'time-interval' the value is set in ms.  If Checkpoint Mode is 'every-nth' the value is the number of events after which the checkpoint is done.
      
   - Inputs*
-     Names of input streams. Requires an input mode to be one of the following: 'full' (if you want each task to process all partitions of the stream) or 'split' (if you want to divide stream's partitions among the tasks; it is a default value). The stream should exist in the system (it should be of 'stream.t-streams' or 'stream.apache-kafka' type).
+     Names of input streams. Requires an input mode to be one of the following: 'full' (if you want each task to process all partitions of the stream) or 'split' (if you want to divide stream's partitions among the tasks; it is a default value). The stream should exist in the system (it should be of 'T-streams' or 'Apache Kafka' type).
      You can add several input streams by clicking "Add Input" and selecting an input stream name from the drop-down list.
      
-  - Outputs*
-     Names of output streams (should be of the 'stream.t-stream' type only). You can add several output streams by clicking "Add Output" and selecting an output stream name from the drop-down list.
+.. figure:: _static/Create_RegInst_AddInputs.png
+ 
+- Outputs*
+     Names of output streams (should be of the 'T-stream' type only). You can add several output streams by clicking "Add Output" and selecting an output stream name from the drop-down list.
      
-  - Start From
+- Start From
      Value must be 'newest' (the system does not read the historical data, waits for new events), 'oldest' (the system reads all input stream events) or datetime (that requires specifying a timestamp and means the system reads events from the stream starting from the specified moment). If input streams of the instance are of Apache Kafka type, then 'Start from' must be 'oldest' or 'newest' ('newest' is default).
 
-  - State Management
-     Must be 'ram' or 'none' ('none' is default).
+- State Management
+      Allows to manage stateful processing. Available values: 'ram' or 'none' ('none' is default). If 'none', no state is available. Selecting 'ram', you will save the state to the system memory.
      
-  - State Full Checkpoint
-     Interval for full checkpoint (100 by default).
+- State Full Checkpoint
+     Interval for full checkpoint (100 ms by default).
      
-  - Event-Wait-Idle Time
-     Idle timeout, when no new messages appear (1000 is default).
-     
+- Event-Wait-Idle Time
+     Idle timeout, when no new messages appear (1000 ms is default).
+
+.. figure:: _static/Create_RegInst.png
+
  **Batch-streaming instance fields**
 
   - Inputs*
-     Names of input streams. Requires an input mode to be one of the following: 'full' (if you want each task to process all partitions of the stream) or 'split' (if you want to divide stream's partitions among the tasks; it is a default value). The stream should exist in the system (it should be of 'stream.t-streams' or 'stream.apache-kafka' type).
+     Names of input streams. Requires an input mode to be one of the following: 'full' (if you want each task to process all partitions of the stream) or 'split' (if you want to divide stream's partitions among the tasks; it is a default value). The stream should exist in the system (it should be of 'T-streams' or 'Apache Kafka' type).
      You can add several input streams by clicking "Add Input" and selecting an input stream name from the drop-down list.	
 
-  - Outputs* 
-     Names of output streams (must be of the 'stream.t-streams' type only).
+.. figure:: _static/Create_BatchInst_AddInputs.png
 
-  - Window 
+- Outputs* 
+     Names of output streams (must be of the 'T-streams' type only).  You can add several input streams by clicking "Add Input" and selecting an input stream name from the drop-down list.
+
+- Window 
      Number of batches that will be contained in a window (1 by default). Must be greater than zero.
     
-  - Sliding Interval
+- Sliding Interval
     The interval at which a window will be shifted (count of batches that will be removed from the window after its processing). Must be greater than zero and less than or equal to the window (1 by default)
      
-  - State Management
-     Must be 'ram' or 'none' ('none' is default).
+- State Management
+     Allows to manage stateful processing. Available values: 'ram' or 'none' ('none' is default). If 'none', no state is available. Selecting 'ram', you will save the state to the system memory.
      
-  - State Full Checkpoint
-     Interval for full checkpoint (100 is default).
+- State Full Checkpoint
+    An interval for full checkpoint (100 ms is default).
     
-  - Start From 
+- Start From 
      Value must be 'newest' (the system does not read the historical data, waits for new events), 'oldest' (the system reads all input stream events) or datetime (that requires specifying a timestamp and means the system reads events from the stream starting from the specified moment). If input streams of the instance are of Apache Kafka type, then 'Start from' must be 'oldest' or 'newest' ('newest' is default).
     
-  - Event-Wait-Time
-     Idle timeout, when there are no messages (1000 by default).
-    
+- Event-Wait-Time
+     Idle timeout, when there are no messages (1000 ms by default).
+
+.. figure:: _static/Create_BatchInst.png
+
  **Output-streaming instance fields**
    
   - Checkpoint Mode*
@@ -769,11 +781,13 @@ Please, review the lists with general and specific fields description below.
       Name of an input stream. Must be of the 't-stream' type only. Stream for this type of module has the 'split' mode only. Stream must exist in the system.
       
   - Output* 
-     Name of an output stream (must be of 'streams.sql-database', 'streams.elasticsearch' or 'streams.restful' type).
+     Name of an output stream (must be of 'SQL-database', 'Elasticsearch' or 'RESTful' type).
      
   - Start From
      Value must be 'newest' (the system does not read the historical data, waits for new events), 'oldest' (the system reads all input stream events) or datetime (that requires specifying a timestamp and means the system reads events from the stream starting from the specified moment).
-     
+
+.. figure:: _static/Create_OutputInst.png
+
 ..  "InputAvroSchema", "Avro schema for input objects. Requires if input object is instance of 'org.apache.avro.generic.GenericRecord':https://avro.apache.org/docs/1.8.1/api/java/org/apache/avro/generic/GenericRecord.html@.", "{'type':'record', 'name':'rec', 'fields':[{'name':'f1','type':string'}]}
 Click "Create" at the bottom and see the instance is in the list of instances now. 
 
@@ -788,7 +802,7 @@ Details of an instance are displayed to the right when clicking the instance in 
 The system additionally shows the following fields in the Instance details:
 
 - Stages
-   Stages display information about the current status of the framework that starts Instance. It allows you to follow starting or stopping of the instance.
+   Stages display information about the current status of the framework that starts Instance. It allows you to follow starting or stopping procedures of the instance.
    
    The stages include:
 
@@ -831,7 +845,7 @@ The form will show the settings of the selected instance. They can be edited and
 
 - starting - a recently launched instance but yet not started (right after the "Start" button is pushed);
 
-- started - the launched instance that started working;
+- started - the launched instance that has started its work;
 
 - stopping - an instance that is being stopped; 
 
@@ -843,7 +857,7 @@ The form will show the settings of the selected instance. They can be edited and
 
 - error - an error is detected when stopping the instance.
 
-If an instance is stuck in the 'failed' or the 'error' statuses, you should use the following instruction:
+If an instance repeatedly gets 'failed' or the 'error' statuses after being launched, you should follow the instructions:
 
 1) Check that all of the following settings exist (see the table_ for more information on Configuration):
 
@@ -853,22 +867,22 @@ If an instance is stuck in the 'failed' or the 'error' statuses, you should use 
 - current-framework (domain: system)
 
 2) Check that the rest address specified in the 'crud-rest-host' and 'crud-rest-port' is available;
-3) Check that the marathon address specified in the 'marathon-connect' is available;
+3) Check that the 'marathon-connect' is specified and the marathon address is available;
 4) Check that there is a setting with name specified in the 'current-framework' and also a file with name and version (divide 'current-framework' by '-') is uploaded.
 
 If all described above is correct, but the "failed" or the "error" status still takes place, please contact the support team.
 
-The *statistics* on the task execution are also available from the list of instances. 
+The *information* on the task execution are also available from the list of instances. 
 
-Click the "Information" icon |stats-icon| next to the Instance name you want to get the statistics for. 
+Click the "Information" icon |stats-icon| next to the Instance name you want to get the information for. 
 
 .. figure:: _static/FrameworkStatsIcon1.png
 
-A window will pop-up to show the stats. 
+A window will pop-up to show the information. 
 
 .. figure:: _static/FrameworkStats.png
 
-It displays the following information for each task in the list:
+It displays the list of tasks with the following information for each task in the list:
 
 - Task name.
 - State - Task status.
@@ -878,7 +892,7 @@ It displays the following information for each task in the list:
 - Last node - Name of node that was used by a task before the status change (task failure).
 - Node - Name of node used by the task.
 
-These data are the statistic from the Mesos framework that starts a module. The statistics are aggregated for started instances. 
+These data are the information from the Mesos framework that starts a module. The information is displayed for started instances. 
 
 The list of instances can be filtered by its type and/or a name using the search tool above the list.
 
