@@ -847,6 +847,8 @@ The created instances should be available now in UI under the “Instances” ta
 
 Ready! The modules can be launched.
 
+.. _fping_Launch_Instances:
+
 Launching Instances
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -958,11 +960,13 @@ The platform allows to customize the pipeline. For example, you can change the d
 
     curl --request POST "http://$address/v1/modules/output-streaming/pingstation-output/1.0/instance" -H 'Content-Type: application/json' --data "@api-json/instances/pingstation-output-1h.json"
  
-4. Launch the instances as described in the `Launching_Instances`_ section. Remember to change the instance names for the new ones::
+4. Launch the instances as described in the :ref:`fping_Launch_Instances` section. Remember to change the instance names for the new ones::
  
-     curl --request GET "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance/<new instance name>/start"
+     curl --request GET "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance/pingstation-echo-process-3m/start"
+     curl --request GET "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance/pingstation-echo-process-1h/start"
      
-     curl --request GET "http://$address/v1/modules/output-streaming/pingstation-output/1.0/instance/<new instance name>/start"
+     curl --request GET "http://$address/v1/modules/output-streaming/pingstation-output/1.0/instance/pingstation-output-3m/start"
+     curl --request GET "http://$address/v1/modules/output-streaming/pingstation-output/1.0/instance/pingstation-output-1h/start"
 
 Instance Shutdown 
 ~~~~~~~~~~~~~~~~~~~~~~~~~
