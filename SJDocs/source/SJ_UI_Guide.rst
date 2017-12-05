@@ -559,7 +559,7 @@ In the list of modules the following actions can be performed:
 
 2. **Download** a module to your computer by clicking the download icon |download-icon| in the Actions column in the line for the module you want to download. You need only to specify a folder where to store the module to and click the "Save" button.
 
-3. **Delete** a module by clicking on the corresponding icon in the Actions column in the line for the module you want to delete.
+3. **Delete** a module by clicking the corresponding icon |delete-icon| in the Actions column in the line for the module you want to delete.
 
 .. note:: A module used by any instance can not be deleted.
 
