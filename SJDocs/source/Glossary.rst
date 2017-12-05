@@ -70,7 +70,7 @@ State storage service
 Stream  
   A sequence of events happening randomly at irregular intervals. Streams in SJ-Platform differ by a physical service (that provides or stores data) and by purpose. According to a physical service the types of streams existing in SJ-Platform are: Apache Kafka, T-streams, Elasticsearch, SQL-database, RESTful. According to stream purpose they are: input streams, internal streams and output streams.
   
-  - **Input stream** - sequence of data elements from data source. May be of types: T-streams, Apacha Kafka.
+  - **Input stream** - sequence of data elements from data source. May be of types: T-streams, Apache Kafka.
   - **Internal stream** - sequence of data elements transferred between system modules. May be of type: T-streams.
   - **Output stream** - sequence of data elements which is saved in data storage. May be of types: T-streams, Elasticsearch, SQL database, RESTful.
   
