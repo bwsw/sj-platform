@@ -58,7 +58,7 @@ After its uploading, the engine receives raw data and sends them to the module e
 Module Types
 --------------
 
-The platform supports 4 types of modules:
+The system supports 4 types of modules:
 
 1. *Input-streaming* - handles external inputs, does data deduplication, transforms raw data to objects. 
 
@@ -479,9 +479,9 @@ A module requires the following elements to be created for its performance:
 
 The type of module requires a specific type of instance to be created. An  instance is a set of settings determining the collaborative work of an engine and a module.  These settings are specified via UI or REST API and determine the mode of the module operation: data stream type the module is going to work with, a checkpoint concept, the settings of state and parallelism, other options, etc. Each module type requires a specific type of an instance: input, regular or batch, output. In the schema below you can see that each instance type requires a proper type of streams, and thus providers and services of a correct type as well.
 
-The Stream Juggler Platform supports *Apache Kafka* and *T-stream* types of streams. And when the Apache Kafka streams are a well-known type of streaming introduced by Apache Kafka, the T-streams are intentionally designed for the Stream Juggler platform as a complement for Apache Kafka. The T-streams have more features than Kafka and make exactly-once processing possible. Find more about T-streams at the `site <http://t-streams.com>`_ .
+The Stream Juggler Platform supports *Apache Kafka* and *T-stream* types of streams. And when the Apache Kafka streams are a well-known type of streaming introduced by Apache Kafka, the T-streams are intentionally designed for the Stream Juggler Platform as a complement for Apache Kafka. The T-streams have more features than Kafka and make exactly-once processing possible. Find more about T-streams at the `site <http://t-streams.com>`_ .
 
-To create streams of exact type in the platform you need to create a service and a provider for this service. The types of a service and a provider are determined by the type of a stream you need for the module.
+To create streams of exact type in the system you need to create a service and a provider for this service. The types of a service and a provider are determined by the type of a stream you need for the module.
 
 For example, you have decided to include a Batch module as a processing module in your pipeline. You will need to create a batch instance for it. An instance of a batch type requires *Apache Zookeeper service*.
 
@@ -506,7 +506,7 @@ Apache Kafka service will require two provider types for it: *Apache Kafka* and 
   
 Once you have determined the types of instances in the pipeline and the types of streaming components, you can start building the infrastructure. Firstly, create two providers of *Apache Kafka* and *Apache Zookeeper* types. Secondly, create services of *Apache Kafka* and *Apache Zookeeper* types. Thirdly, create streams of *Apache Kafka*. Finally, create an instance of a batch module.
 
-The schema below may help you to understand the dependency of entities in the platform.
+The schema below may help you to understand the dependency of entities in the system.
 
 .. figure:: _static/InstanceCorrelation1.png
   :align: center
