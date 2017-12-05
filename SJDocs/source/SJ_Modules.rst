@@ -45,7 +45,7 @@ Data Processing Flow in Modules
 ---------------------------------
 In general, data processing in modules can be described in a simple scheme.
 
-The base of the system is an engine: it provides basic I/O functionalities. It is started via a Mesos framework which provides distributed task dispatching and then the statistics on task execution. The engine performs data processing using an uploaded module. 
+The base of the system is an engine: it provides basic I/O functionalities. It is started via a Mesos framework which provides distributed task dispatching and then the information on task execution. The engine performs data processing using an uploaded module. 
 
 .. figure:: _static/engine.png
    :scale: 120%
