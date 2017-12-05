@@ -209,7 +209,7 @@ You can perform the following actions on each provider in the list:
 
 #. **View** provider`s name, date of creation, description.
 
-#. **Delete** a provider clicking on the corresponding icon |delete-icon| in the Action block near the name of the provider you want to delete. 
+#. **Delete** a provider clicking on the corresponding icon |delete-icon| in the Action column for the provider you want to delete. 
 
 .. note:: A provider that is connected with a service can not be deleted.
 
@@ -352,7 +352,7 @@ You can perform the following actions on each service in the list:
 
 .. figure:: _static/ServicesList_ProviderInfo1.png
 
-3. **Delete** a service clicking on the corresponding icon |delete-icon| in the Action block near the name of the services you want to delete.
+3. **Delete** a service clicking on the corresponding icon |delete-icon| in the Action column for the service you want to delete.
 
 .. note:: A service used by one of the streams can not be deleted.
 
@@ -495,7 +495,7 @@ In the list of streams the following actions can be performed:
 
 .. figure:: _static/StreamsList_ServiceInfo1.png
 
-3. **Delete** a stream by clicking on the corresponding icon |delete-icon| in the Actions column near the name of the stream you want to delete.
+3. **Delete** a stream by clicking on the corresponding icon |delete-icon| in the Actions column for the stream you want to delete.
 
 .. note:: A stream used by any instance can not be deleted.
 
@@ -585,9 +585,9 @@ The following actions can be performed with the files in the list:
 
 1. **View** a jar name, version and size, the date of uploading.
 
-2. **Download** a jar file to your computer by clicking on the download icon |download-icon| in the Actions column near the name of the jar you want to download. You need only to specify a folder where to store the jar to and click the "Save" button.
+2. **Download** a jar file to your computer by clicking on the download icon |download-icon| in the Actions column for the JAR file you want to download. You need only to specify a folder where to store the JAR and click the "Save" button.
 
-3. **Delete** a jar by clicking on the corresponding icon |delete-icon| in the Actions column near the name of the jar you want to delete
+3. **Delete** a jar by clicking on the corresponding icon |delete-icon| in the Actions column for the JAR file you want to delete.
 
 The list of jars can be filtered by its name using the search tool above the list.
 
@@ -601,9 +601,9 @@ The following actions can be performed with the files in the list:
 
 1. **View** a file name, description, upload date and size
 
-2. **Download** a file to your computer by clicking on the download icon |download-icon| in the Actions column near the name of the file you want to download. You need only to specify a folder where to store the file to and click the "Save" button.
+2. **Download** a file to your computer by clicking on the download icon |download-icon| in the Actions column for the file you want to download. You need only to specify a folder where to store the file to and click the "Save" button.
 
-3. **Delete** a file by clicking on the corresponding icon |delete-icon| in the Actions column near the name of the file you want to delete.
+3. **Delete** a file by clicking on the corresponding icon |delete-icon| in the Actions column for the file you want to delete.
 
 The list of files can be filtered by its name using the search tool above the list.
 
@@ -829,17 +829,17 @@ In the list of instances the following actions can be performed:
 
 1. **Start** an instance by clicking the "Start" button in the Actions column. The instance status will first change to "Starting" and in a few seconds to "Started". That means the instance is launched and is working now.
 2. **Stop** the instance that has been started i.e. has the "Started" status. Click the "Stop" button and wait for a while untill the status changes to "Stopping" and then to "Stopped".
-3. **Clone** an instance. This function enables instance creation by copying the settings of an existing instance. Just click "Clone instance" |clone-icon| in the Actions column near the name of the instance you want to clone.
+3. **Clone** an instance. This function enables instance creation by copying the settings of an existing instance. Just click "Clone instance" |clone-icon| in the Actions column for the instance you want to clone.
 
 .. figure:: _static/CreateInstance_Clone2.png
 
 The form will show the settings of the selected instance. They can be edited and saved by clicking the "Create" button. A new instance will appear in the list of instances.
 
-4. **Delete** a stream by clicking the corresponding button |delete-icon| in the Actions column near the name of the stream you want to delete.
+4. **Delete** an instace by clicking the corresponding button |delete-icon| in the Actions column for the instance you want to delete.
 
 .. note:: An instance with statuses "Starting", "Started", "Stopping", "Deleting" can not be deleted.
 
-4. **View** an instance`s name and status. An instance may have the following statuses:
+5. **View** instance`s name and status. An instance may have the following statuses:
      
 - ready - a newly created instance and yet not started;
 
