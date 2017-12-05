@@ -31,20 +31,20 @@ Exactly-once processing
 Executor
   A part of a module that performs data processing.
 
+External data source 
+   An external system which provides data for processing.
+
+External data storage 
+   An external system which stores resulting data after processing.
+
 Instance 
   A set of settings determining the collaborative work of an engine and a module.
  
-Input 
-  A stream that is fed to the system. 
-
 Metric 
   A numeric value received as a result of aggregation.
 
 Module 
   A key program component in the system that contains the logic of data processing and settings validation.
-
-Output 
-  A stream that goes out of the system.
 
 Partition 
   A part of a data stream allocated for convenience in stream processing.
@@ -65,13 +65,17 @@ State
   A sort of a key-value storage for user data which is used to keep some global module variables related to processing. These variables are persisted and are recovered after a failure. 
 
 State storage service  
-  A service responsible for storing data state into a specified location (determined by an instance parameter). It is performed together with the checkpoint.
+  A service responsible for storing data state into a specified location (determined by instance settings). It is performed together with the checkpoint.
 
 Stream  
-  A sequence of events happening randomly at irregular intervals.
-
-.. Task
-  The actual data processing.
+  A sequence of events happening randomly at irregular intervals. Streams in SJ-Platform differ by a phisical service (that provides or stores data) and by purpose. According to a physical service the types of streams existing in SJ-Platform are: Apache Kafka, T-streams, Elasticsearch, SQL-database, RESTful. According to stream purpose they are: input streams, internal streams and output streams.
+  
+  - **Input stream** - sequence of data elements from data source. May be of types: T-streams, Apacha Kafka.
+  - **Internal stream** - sequence of data elements transferred between system modules. May be of type: T-streams.
+  - **Output stream** - sequence of data elements which is saved in data storage. May be of types: T-streams, Elasticsearch, SQL database, RESTful.
+  
+Task
+  It is a Mesos term and, in general, it means a piece of work to be done. Within the system, a task is a logical part of an instance. Each task does the same work that is provided by a module. They are executed separately from each other.
 
 Transaction 
   A part of a partition consisting of events.
@@ -80,7 +84,7 @@ T-streams
   (transactional streams); a Scala library providing an infrastructure component which implements transactional messaging.
 
 Window 
-  A set of elements on an unbounded stream. Grouping elements in a batch allows processing a series of events at one time. It is important in case the processing of events in a stream depends on other events of this stream or on events in another stream.  
+  A set of batches on an unbounded stream. Grouping batches allows processing a series of events at one time. It is important in case the processing of events in a stream depends on other events of this stream or on events in another stream.  
   
 
 
