@@ -5,9 +5,9 @@ Custom Module Development Guide
 
 .. Contents::
 
-In this section, we describe how to write your own module for the Stream Juggler platform.
+In this section, we describe how to write your own module for the Stream Juggler Platform.
 
-The Stream Juggler Platform is a platform for your custom module implementation. It allows adjusting the system to your custom aims. Creation of a custom module will not become a challenge for an average developer who knows Scala language as no special tools or services are necessary.
+The Stream Juggler Platform is a system for your custom module implementation. It allows adjusting the system to your custom aims. Creation of a custom module will not become a challenge for an average developer who knows Scala language as no special tools or services are necessary.
 
 Prior to the module development, please, take a look at the :ref:`Architecture` and :ref:`Modules` sections.
 
