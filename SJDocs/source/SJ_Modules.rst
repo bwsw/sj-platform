@@ -467,7 +467,7 @@ Please, find more information about engines at the :ref:`Engines` page.
 Prerequisites For Modules. Streaming Component.
 --------------------------------------------------
 
-A module requires the following elements to be created for its performance:
+A module requires the following elements to be created for its work:
 
 - Provider
 
@@ -477,9 +477,9 @@ A module requires the following elements to be created for its performance:
 
 - Instance
 
-The type of module requires a specific type of instance to be created. An  instance is a set of settings determining the collaborative work of an engine and a module.  These settings are specified via UI or REST API and determine the mode of the module operation: data stream type the module is going to work with, a checkpoint concept, the settings of state and parallelism, other options, etc. Each module type requires a specific type of an instance: input, regular or batch, output. In the schema below you can see that each instance type requires a proper type of streams, and thus providers and services of a correct type as well.
+The type of module requires a specific type of instance to be created. An  instance is a set of settings determining the collaborative work of an engine and a module.  These settings are specified via UI or REST API and determine the mode of the module operation: data stream type the module is going to work with, a checkpoint concept, the settings of state and parallelism. Each module type requires an instance of a specific type: input, regular or batch, output. In the schema below you can see that each instance type requires a proper type of streams, and thus providers and services of a correct type as well.
 
-The Stream Juggler Platform supports *Apache Kafka* and *T-stream* types of streams. And when the Apache Kafka streams are a well-known type of streaming introduced by Apache Kafka, the T-streams are intentionally designed for the Stream Juggler Platform as a complement for Apache Kafka. The T-streams have more features than Kafka and make exactly-once processing possible. Find more about T-streams at the `site <http://t-streams.com>`_ .
+The Stream Juggler Platform supports *Apache Kafka* and *T-stream* types of streams. And while the Apache Kafka streams are a well-known type of streaming introduced by Apache Software Foundation, the T-streams are intentionally designed for the Stream Juggler Platform as a complement for Apache Kafka. The T-streams have more features than Kafka and make exactly-once processing possible. Find more about T-streams at the `site <http://t-streams.com>`_ .
 
 To create streams of exact type in the system you need to create a service and a provider for this service. The types of a service and a provider are determined by the type of a stream you need for the module.
 
