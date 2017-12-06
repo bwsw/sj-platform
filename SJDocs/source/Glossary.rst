@@ -68,7 +68,7 @@ State storage service
   A service responsible for storing data state into a specified location (determined by instance settings). It is performed together with the checkpoint.
 
 Stream  
-  A sequence of events happening randomly at irregular intervals. Streams in SJ-Platform differ by a physical service (that provides or stores data) and by purpose. According to a physical service the types of streams existing in SJ-Platform are: Apache Kafka, T-streams, Elasticsearch, SQL-database, RESTful. According to stream purpose they are: input streams, internal streams and output streams.
+  A sequence of events happening randomly at irregular intervals. Streams in SJ-Platform differ by a physical service (that provides or stores data) and by purpose. According to a physical service the types of streams existing in SJ-Platform are: Apache Kafka, T-streams, Elasticsearch, SQL-database, RESTful. According to the purpose streams can be: input streams, internal streams and output streams.
   
   - **Input stream** - sequence of data elements from data source. May be of types: T-streams, Apache Kafka.
   - **Internal stream** - sequence of data elements transferred between system modules. May be of type: T-streams.
@@ -84,7 +84,7 @@ T-streams
   (transactional streams); a Scala library providing an infrastructure component which implements transactional messaging.
 
 Window 
-  A set of batches on an unbounded stream. Grouping batches allows processing a series of events at one time. It is important in case the processing of events in a stream depends on other events of this stream or on events in another stream.  
+  A set of batches of an unbounded stream. Grouping batches allows processing a series of events at one time. It is important in case the processing of events in a stream depends on other events of this stream or on events in another stream.  
   
 
 
