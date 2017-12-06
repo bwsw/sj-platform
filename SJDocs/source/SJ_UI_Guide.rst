@@ -414,7 +414,7 @@ Select from a type of a stream the drop down list:
  **T-streams Stream Type**
 
   - *Partitions count* *
-        A partition is a part of data stream. Partitions are a special conception which handle regular queues in multi-queues, e.g. a stream with one partition is a queue, but a stream with two partitions is like a two different queues.  Using streams with many partitions allows to parallelize the processing.
+        A partition is a part of a data stream allocated for convenience in stream processing. Partitions are a special conception which handle regular queues in multi-queues, e.g. a stream with one partition is a queue, but a stream with two partitions is like two different queues.  Using streams with many partitions allows to parallelize the processing.
 
         Enter a number of partitions. It must be a positive integer.
 
@@ -427,7 +427,7 @@ Select from a type of a stream the drop down list:
  **Apache Kafka Stream Type**
 
   - *Partitions count* *
-        A partition is a part of data stream. Partitions are a special conception which handle regular queues in multi-queues, e.g. a stream with one partition is a queue, but a stream with two partitions is like a two different queues. Using streams with many partitions allows to handle parallelism properly as engine instances divide existing partitions fairly.
+        A partition is a part of a data stream allocated for convenience in stream processing. Partitions are a special conception which handle regular queues in multi-queues, e.g. a stream with one partition is a queue, but a stream with two partitions is like two different queues. Using streams with many partitions allows to handle parallelism properly as engine instances divide existing partitions fairly.
 
         Enter a number of partitions. It must be a positive integer.
 
@@ -445,7 +445,7 @@ Select from a type of a stream the drop down list:
  **SQL database Stream Type**
 
   - *Partitions count* *
-        A partition is a part of data stream. Partitions are a special conception which handle regular queues in multi-queues, e.g. a stream with one partition is a queue, but a stream with two partitions is like a two different queues. Using streams with many partitions allows to handle parallelism properly as engine instances divide existing partitions fairly.
+        A partition is a part of a data stream allocated for convenience in stream processing. Partitions are a special conception which handle regular queues in multi-queues, e.g. a stream with one partition is a queue, but a stream with two partitions is like two different queues. Using streams with many partitions allows to handle parallelism properly as engine instances divide existing partitions fairly.
 
         Enter a number of partitions. It must be a positive integer.
 
@@ -461,7 +461,7 @@ Select from a type of a stream the drop down list:
  **RESTful Stream Type**
 
   - *Partitions count* *
-        A partition is a part of data stream. Partitions are a special conception which handle regular queues in multi-queues, e.g. a stream with one partition is a queue, but a stream with two partitions is like a two different queues. Using streams with many partitions allows to handle parallelism properly as engine instances divide existing partitions fairly.
+        A partition is a part of a data stream allocated for convenience in stream processing. Partitions are a special conception which handle regular queues in multi-queues, e.g. a stream with one partition is a queue, but a stream with two partitions is like two different queues. Using streams with many partitions allows to handle parallelism properly as engine instances divide existing partitions fairly.
 
         Enter a number of partitions. It must be a positive integer.
 
