@@ -33,7 +33,7 @@ The Stream Juggler Platform performs data processing that is fulfilled in module
 
 The events enter the processing module in streams from a list of supported interfaces - TCP, Apache Kafka and T-streams. A result data are placed into an external data storage.
 
-.. figure:: _static/Overview2.png
+.. figure:: _static/Overview3.png
     :align: center
     :scale: 80%
 
