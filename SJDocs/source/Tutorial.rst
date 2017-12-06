@@ -1061,8 +1061,8 @@ A complete pipeline can be rendered as in the diagram below:
 Green, yellow, purple and red blocks within the SJ-Platform scope rectangular area are managed and evaluated by SJ-Platform. 
 
 These are:
-- *'sflow-csv-input'* module - a regular input module that transforms CSV data into T-streams;
-- *'sflow-process'* module - a process module for micro-batch data processing;
+- *'sflow-csv-input'* module - an input module that transforms CSV data into T-streams;
+- *'sflow-process'* module - a processing module for micro-batch data processing;
 - *'sflow-src-ip-output'* and *'sflow-src-dst-output'* modules - two output modules that export processed data via T-streams to PostgreSQL;
 - *'sflow-fallback-output'* module - an output module to store incorrect data to a separate table in PostgreSQL.
 
