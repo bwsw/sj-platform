@@ -11,7 +11,7 @@ Configurations
   Settings used for the system work. 
 
 Checkpoint
-  A saved "snapshot" of processed data at a specific time. The system saves the information about all consumed/recorded data by a module at that particular time, and in case of failure it restores the module work to the stage it was before the last checkpoint. If no checkpoint has been performed yet, the processing will start from the beginning.
+  A saved "snapshot" of processed data at a specific time. The system saves the information about all consumed/recorded data by a module at that particular time, and in case of failure it restores the module work to the stage it was before the last checkpoint. If no checkpoint has been performed, the processing will start from the beginning.
   
 .. Checkpoint Group
   A special entity which allows a developer to do atomic checkpoint for a group of producers and consumers. 
