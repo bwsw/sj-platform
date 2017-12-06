@@ -116,11 +116,11 @@ The range of optional settings is presented below. They have default values in t
 
 .. note::  In general 'framework-backoff-seconds', 'framework-backoff-factor' and 'framework-max-launch-delay-seconds' configure exponential backoff behavior when launching potentially sick apps. This prevents sandboxes associated with consecutively failing tasks from filling up the hard disk on Mesos slaves. The backoff period is multiplied by the factor for each consecutive failure until it reaches maxLaunchDelaySeconds. This applies also to tasks that are killed due to failing too many health checks.
 
-Сonfiguration domain named 'configuration.apache-kafka' contains properties used to create an Apache Kafka consumer (see `the official documentation <https://kafka.apache.org/documentation/#consumerconfigs>`_). 
+Сonfiguration domain named 'Apache Kafka' contains properties used to create an Apache Kafka consumer (see `the official documentation <https://kafka.apache.org/documentation/#consumerconfigs>`_). 
 
 .. note:: You must not define properties such as 'bootstrap.servers', 'enable.auto.commit', 'key.deserializer' and 'value.deserializer' in order to avoid a system crash.
 
-Сonfiguration domain named 'configuration.t-streams' contains properties used for a T-streams consumer/producer. 
+Сonfiguration domain named 'T-streams' contains properties used for a T-streams consumer/producer. 
 
 .. note:: You must not define properties such as 'producer.bind-host', 'producer.bind-port', 'consumer.subscriber.bind-host' and 'consumer.subscriber.bind-port' to avoid a system crash. 
 
@@ -735,7 +735,7 @@ Please, review the lists with general and specific fields description below.
      Allows to manage stateful processing. Available values: 'ram' or 'none' ('none' is default). If 'none', no state is available. Selecting 'ram', you will save the state to the system memory.
      
 - State Full Checkpoint
-     The number of checkpoints after which the full checkpoint is performed (100 by default).
+     The number of checkpoints after which the full checkpoint of state is performed (100 by default).
      
 - Event-Wait-Idle Time
      Idle timeout, when no new messages appear (1000 ms is default).
@@ -761,7 +761,7 @@ Please, review the lists with general and specific fields description below.
      Allows to manage stateful processing. Available values: 'ram' or 'none' ('none' is default). If 'none', no state is available. Selecting 'ram', you will save the state to the system memory.
      
 - State Full Checkpoint
-    The number of checkpoints after which the full checkpoint is performed (100 is default).
+    The number of checkpoints after which the full checkpoint of state is performed (100 is default).
     
 - Start From 
      Value must be 'newest' (the system does not read the historical data, waits for new events), 'oldest' (the system reads all input stream events) or datetime (that requires specifying a timestamp and means the system reads events from the stream starting from the specified moment). If input streams of the instance are of Apache Kafka type, then 'Start from' must be 'oldest' or 'newest' ('newest' is default).
@@ -856,7 +856,7 @@ The form will show the settings of the selected instance. They can be edited and
 
 - error - an error is detected when stopping the instance.
 
-If an instance repeatedly gets 'failed' or the 'error' statuses after pressing the "Start" button, you should follow the instructions:
+If an instance repeatedly gets 'failed' or 'error' statuses after pressing the "Start" button, you should follow the instructions:
 
 1) Check that all of the following settings exist (see the table_ for more information on Configuration):
 
