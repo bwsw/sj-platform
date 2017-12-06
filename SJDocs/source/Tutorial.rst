@@ -58,7 +58,7 @@ If you would like to continue studying the platform, proceed with reading the do
 Examples Introduction
 --------------------------------------
 
-The example tasks that will be presented are different. But the steps we will perform to solve the tasks are common for both of them (see Picture 3). 
+The example tasks that will be presented are different. But the steps we will perform to solve the tasks are common for both of them (see Figure 1.3). 
 
 .. Before starting with the steps, it is important to note that to complete your job using SJ-Platform you should definitely know how the pipeline is going to look, what data format will be delivered into the system. The modules for data processing should be preliminarily created.
 
