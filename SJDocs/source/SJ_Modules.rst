@@ -522,16 +522,16 @@ At this point we determined the types of instances in the pipeline and the types
 
 Firstly, create two providers - Apache Kafka and Apache Zookeeper. Secondly, create an Apache Kafka service and Apache Zookeeper service (that will be one for all instance in the pipeline). Thirdly, create streams of Apache Kafka. Finally, create an instance of a batch module.
 
-The schema below may help you to understand the dependency of entities in the system. It presents the order of entities creation.
+The schema below presents the order of entities creation.
 
 .. figure:: _static/InstanceCorrelation2.png
   :align: center
 
   Figure 1.14
   
-  |req-arrow| - a required entity
+  |req-arrow| - connects the entity required to create the entity it points to.
   
-  |oneof-arrow|- one of the entity types is possible
+  |oneof-arrow|- one of the entity types is possible to create the entity it points to.
   
 The table below explains what types of streams may serve as inputs or outputs for particular instance types:
 
