@@ -711,7 +711,8 @@ Please, review the lists with general and specific fields description below.
        
 .. note:: Backups increase memory usage since they are also kept in memory.
 
- **Regular-streaming instance fields**
+
+**Regular-streaming instance fields**
 
   - Checkpoint Mode*
      Value must be 'time-interval' for checkpointing after a set period of time, or 'every-nth' for performing a checkpoint after a set number of events.
@@ -735,7 +736,7 @@ Please, review the lists with general and specific fields description below.
      Allows to manage stateful processing. Available values: 'ram' or 'none' ('none' is default). If 'none', no state is available. Selecting 'ram', you will save the state to the system memory.
      
 - State Full Checkpoint
-     The number of checkpoints after which the full checkpoint of state is performed (100 by default).
+     The number of checkpoints after which the full checkpoint of :ref:`state` is performed (100 by default).
      
 - Event-Wait-Idle Time
      Idle timeout, when no new messages appear (1000 ms is default).
