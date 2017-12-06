@@ -529,9 +529,9 @@ The schema below presents the order of entities creation.
 
   Figure 1.14
   
-  |req-arrow| connects the entity required to create the entity it points to.
+ |oneof-arrow| connects the entity required to create the entity it points to.
   
-  |oneof-arrow| one of the entity types is possible to create the entity it points to.
+ |req-arrow| one of the entity types is possible to create the entity it points to.
   
 The table below explains what types of streams may serve as inputs or outputs for particular instance types:
 
