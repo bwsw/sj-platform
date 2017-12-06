@@ -352,7 +352,7 @@ You can perform the following actions on each service in the list:
 
 .. figure:: _static/ServicesList_ProviderInfo1.png
 
-3. **Delete** a service clicking on the corresponding icon |delete-icon| in the Action column for the service you want to delete.
+3. **Delete** a service clicking the corresponding button |delete-icon| in the Action column for the service you want to delete.
 
 .. note:: A service used by one of the streams can not be deleted.
 
@@ -495,7 +495,7 @@ In the list of streams the following actions can be performed:
 
 .. figure:: _static/StreamsList_ServiceInfo1.png
 
-3. **Delete** a stream by clicking on the corresponding icon |delete-icon| in the Actions column for the stream you want to delete.
+3. **Delete** a stream by clicking the corresponding button |delete-icon| in the Actions column for the stream you want to delete.
 
 .. note:: A stream used by any instance can not be deleted.
 
@@ -557,9 +557,9 @@ In the list of modules the following actions can be performed:
 
 1. **View** a module name, type, version and size, the date of uploading.
 
-2. **Download** a module to your computer by clicking the download icon |download-icon| in the Actions column in the line for the module you want to download. You need only to specify a folder where to store the module to and click the "Save" button.
+2. **Download** a module to your computer by clicking the download button |download-icon| in the Actions column in the line for the module you want to download. You need only to specify a folder where to store the module to and click the "Save" button.
 
-3. **Delete** a module by clicking the corresponding icon |delete-icon| in the Actions column in the line for the module you want to delete.
+3. **Delete** a module by clicking the corresponding button |delete-icon| in the Actions column in the line for the module you want to delete.
 
 .. note:: A module used by any instance can not be deleted.
 
@@ -585,9 +585,9 @@ The following actions can be performed with the files in the list:
 
 1. **View** a jar name, version and size, the date of uploading.
 
-2. **Download** a jar file to your computer by clicking on the download icon |download-icon| in the Actions column for the JAR file you want to download. You need only to specify a folder where to store the JAR and click the "Save" button.
+2. **Download** a jar file to your computer by clicking the download button |download-icon| in the Actions column for the JAR file you want to download. You need only to specify a folder where to store the JAR and click the "Save" button.
 
-3. **Delete** a jar by clicking on the corresponding icon |delete-icon| in the Actions column for the JAR file you want to delete.
+3. **Delete** a jar by clicking the corresponding button |delete-icon| in the Actions column for the JAR file you want to delete.
 
 The list of jars can be filtered by its name using the search tool above the list.
 
@@ -615,13 +615,17 @@ Before creating an instance make sure all necessary *configuration* *settings* a
 
 .. note:: Read more about necessary configuration settings in the `Configuration`_ section.
 
-Under the *Instances* section of the main navigation menu there is a list of instances.  In the upper-right corner click "Create Instance" and choose the module from the drop-down list. An instance will be created for the selected module.
+Under the *Instances* section of the main navigation menu there is a list of instances.  
+
+.. figure:: _static/Instances.png
+
+In the upper-right corner click "Create Instance" and choose the module from the drop-down list. An instance will be created for the selected module.
 
 .. figure:: _static/CreateInstance_Type1.png
 
 The type of module determines the type of instance that will be created: input-streaming, regular-streaming, batch-streaming or output-streaming. 
 
-Each type of instance requires specific settings to be filled in alongside with general settings common for all instances. These specific fields are to be determined in the Instance parameters depending on each individual module type.
+Each type of instance requires specific settings to be filled in alongside with general settings common for all instances. These specific fields are to be determined in the instance parameters depending on each individual module type.
 
 Please, review the lists with general and specific fields description below.
 
@@ -661,7 +665,9 @@ Please, review the lists with general and specific fields description below.
     JSON-map with `attributes <http://mesos.apache.org/documentation/latest/attributes-resources/#attributes>`_ for framework. While Mesos Master determines how many resources are offered to each framework, the frameworks' schedulers select which of the offered resources to use. You can assign "+" or "-"  to an attribute of Mesos resources. Resources with "+" attributes are added to the list of resources used for task launching. Resources with "-" attributes are not included into this list. In case the list of attributes is empty, the range of offered resources is determined by Mesos. Find more about Mesos resources in `the official documentation <http://mesos.apache.org/documentation/latest/architecture/>`_.
     
 - Coordination Service*
-    Name of the Apache Zookeeper service required for instance launching syncronization to avoid conflicts at Mesos resources usage.
+    Name of the Apache Zookeeper service required for instance launching syncronization to avoid conflicts at Mesos resources usage. 
+
+.. note:: Select one and the same Apache Zookeeper service for all instances in your pipeline to avoid conflicts at Mesos resources usage. 
     
 - Environment Variables
     Variables used in the framework.
@@ -705,8 +711,6 @@ Please, review the lists with general and specific fields description below.
        
 .. note:: Backups increase memory usage since they are also kept in memory.
 
-.. figure:: _static/Create_InputInst.png
-
  **Regular-streaming instance fields**
 
   - Checkpoint Mode*
@@ -728,15 +732,13 @@ Please, review the lists with general and specific fields description below.
      Value must be 'newest' (the system does not read the historical data, waits for new events), 'oldest' (the system reads all input stream events) or datetime (that requires specifying a timestamp and means the system reads events from the stream starting from the specified moment). If input streams of the instance are of Apache Kafka type, then 'Start from' must be 'oldest' or 'newest' ('newest' is default).
 
 - State Management
-      Allows to manage stateful processing. Available values: 'ram' or 'none' ('none' is default). If 'none', no state is available. Selecting 'ram', you will save the state to the system memory.
+     Allows to manage stateful processing. Available values: 'ram' or 'none' ('none' is default). If 'none', no state is available. Selecting 'ram', you will save the state to the system memory.
      
 - State Full Checkpoint
-     Interval for full checkpoint (100 ms by default).
+     The number of checkpoints after which the full checkpoint is performed (100 by default).
      
 - Event-Wait-Idle Time
      Idle timeout, when no new messages appear (1000 ms is default).
-
-.. figure:: _static/Create_RegInst.png
 
  **Batch-streaming instance fields**
 
@@ -759,15 +761,13 @@ Please, review the lists with general and specific fields description below.
      Allows to manage stateful processing. Available values: 'ram' or 'none' ('none' is default). If 'none', no state is available. Selecting 'ram', you will save the state to the system memory.
      
 - State Full Checkpoint
-    An interval for full checkpoint (100 ms is default).
+    The number of checkpoints after which the full checkpoint is performed (100 is default).
     
 - Start From 
      Value must be 'newest' (the system does not read the historical data, waits for new events), 'oldest' (the system reads all input stream events) or datetime (that requires specifying a timestamp and means the system reads events from the stream starting from the specified moment). If input streams of the instance are of Apache Kafka type, then 'Start from' must be 'oldest' or 'newest' ('newest' is default).
     
 - Event-Wait-Time
      Idle timeout, when there are no messages (1000 ms by default).
-
-.. figure:: _static/Create_BatchInst.png
 
  **Output-streaming instance fields**
    
@@ -786,8 +786,7 @@ Please, review the lists with general and specific fields description below.
   - Start From
      Value must be 'newest' (the system does not read the historical data, waits for new events), 'oldest' (the system reads all input stream events) or datetime (that requires specifying a timestamp and means the system reads events from the stream starting from the specified moment).
 
-.. figure:: _static/Create_OutputInst.png
-
+.. note:: Required fields are marked with an asterisk (*).
 ..  "InputAvroSchema", "Avro schema for input objects. Requires if input object is instance of 'org.apache.avro.generic.GenericRecord':https://avro.apache.org/docs/1.8.1/api/java/org/apache/avro/generic/GenericRecord.html@.", "{'type':'record', 'name':'rec', 'fields':[{'name':'f1','type':string'}]}
 Click "Create" at the bottom and see the instance is in the list of instances now. 
 
@@ -799,14 +798,14 @@ Details of an instance are displayed to the right when clicking the instance in 
 
 .. figure:: _static/InstancesList.png
 
-The system additionally shows the following fields in the Instance details:
+The system additionally shows the following fields in the *Instance details* panel:
 
 - Stages
-   Stages display information about the current status of the framework that starts Instance. It allows you to follow starting or stopping procedures of the instance.
+   Stages display information about the current status of the framework that starts an instance. It allows you to follow starting or stopping procedures of the instance.
    
    The stages include:
 
-    - state - An instance status: 
+    - state - an instance status: 
     
     	- ready
     	- starting
@@ -817,8 +816,8 @@ The system additionally shows the following fields in the Instance details:
     	- failed
     	- error
 
-    - datetime - The last time the state has been changed. 
-    - duration  -  How long a stage is in the current state. This field makes sense if a state field is 'starting', 'stopping' or 'deleting'.
+    - datetime - the last time the state has been changed. 
+    - duration  -  how long a stage is in the current state. This field makes sense if a state field is 'starting', 'stopping' or 'deleting'.
   
 - Execution plan
     Execution plan consists of tasks. The number of tasks equals to a 'Parallelism' parameter. Each task has a unique name within the execution plan. Also the task has a set of Input stream names and their intervals of partitions. In general, it provides the information of the sources from which the data will be consumed.
@@ -857,7 +856,7 @@ The form will show the settings of the selected instance. They can be edited and
 
 - error - an error is detected when stopping the instance.
 
-If an instance repeatedly gets 'failed' or the 'error' statuses after being launched, you should follow the instructions:
+If an instance repeatedly gets 'failed' or the 'error' statuses after pressing the "Start" button, you should follow the instructions:
 
 1) Check that all of the following settings exist (see the table_ for more information on Configuration):
 
@@ -874,7 +873,7 @@ If all described above is correct, but the "failed" or the "error" status still 
 
 The *information* on the task execution are also available from the list of instances. 
 
-Click the "Information" icon |stats-icon| next to the Instance name you want to get the information for. 
+Click the "Information" button |stats-icon| next to the Instance name you want to get the information for. 
 
 .. figure:: _static/FrameworkStatsIcon1.png
 
