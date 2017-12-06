@@ -82,7 +82,7 @@ What we are going to do for the examples is:
  
 2. Download and set up the platform and demo project. We'll set up the platform and the demo repositories downloading it from GitHub. 
 
-3. Upload configurations and engines. The configurations should be uploaded to determine module performance. The full list of all configurations can be viewed at the :ref:`Configuration` page. 
+3. Upload configurations and engines. The configurations should be uploaded to determine the system work. The full list of all configurations can be viewed at the :ref:`Configuration` page. 
 
    Engines are necessary for modules as they handle data flow making it into streams.
 
