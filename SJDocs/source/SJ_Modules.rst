@@ -529,7 +529,7 @@ The schema below presents the order of entities creation.
 
   Figure 1.14
   
-  |oneof-arrow| connects the entity required to create the entity it points to.
+  |oneof-arrow| the entity type required for creation of the entity it points to.
   
   |req-arrow| one of the entity types is possible to create the entity it points to.
   
