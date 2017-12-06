@@ -17,7 +17,7 @@ Checkpoint
   A special entity which allows a developer to do atomic checkpoint for a group of producers and consumers. 
 
 Engine
-  A base of the system. It provides basic I/O functionality. It uses module settings to process data.
+  A base of the system. It provides basic I/O functionality for a module. It uses module settings to process data.
 
 Envelope
   A specialized fundamental data structure, containing data and metadata. The metadata is required for exactly-once processing.
