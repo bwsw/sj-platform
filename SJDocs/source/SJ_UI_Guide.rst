@@ -679,34 +679,34 @@ Please, review the lists with general and specific fields description below.
 
  **Input-streaming instance fields**
   
-  - Checkpoint Mode*
+- Checkpoint Mode*
        Value must be 'time-interval' for checkpointing after a set period of time, or 'every-nth' for performing a checkpoint after a set number of events.
        
-  - Checkpoint Interval* 
+- Checkpoint Interval* 
        Interval for performing the checkpoint. If Checkpoint Mode is  'time-interval' the value is set in ms.  If Checkpoint Mode is 'every-nth' the value is the number of events after which the checkpoint is done.
        
-  - Outputs*
+- Outputs*
        Names of output streams (must be of the 'T-streams' type only). You can add several output streams by clicking "Add Output" and selecting an output stream name from the drop-down list.
        
-  - Duplicate Check
+- Duplicate Check
        The flag determines if an envelope (defined by an envelope key) has to be checked for duplication or not. False by default.
 
-  - Lookup History*
+- Lookup History*
        How long a unique key of envelope can stay in a queue for checking envelopes for duplication (in seconds). If it does not equal to 0, entries that are older than this time and not updated for this time are evicted automatically accordingly to an eviction-policy. Valid values are integers between 0 and Integer.MAX VALUE. Default value is 0, which means infinite.
        
-  - Queue Max Size*
+- Queue Max Size*
         Maximum size of the queue that contains the unique keys of envelopes. When maximum size is reached, the queue is evicted on the basis of the policy defined at the default-eviction-policy.
 	
-  - Default Eviction Policy
+- Default Eviction Policy
         If set, no items will be evicted and the "Queue Max Size" property will be ignored. You still can combine it with "Lookup History". Can be 'LRU' (Least Recently Used) or 'LFU' (Least Frequently Used) or 'NONE' (NONE by default).
   
-  - Eviction Policy
+- Eviction Policy
         An eviction policy of input envelope duplicates. Can be 'fix-time' for storing an envelope key for the period specified in Lookup History, or 'expanded-time' meaning that if a duplicate envelope appears the time of the presence of the key will be updated ('fix-time' by default).
 	
-  - Backup Count 
+- Backup Count 
        The number of backup copies you want to have (0 by default, maximum 6). Sync backup operations have a blocking cost which may lead to latency issues. You can skip this field if you do not want your entries to be backed up, e.g. if performance is more important than backing up.
 
-  - Async-Backup-Count
+- Async-Backup-Count
        The flag determines if an envelope (defined by an envelope key) has to be checked for duplication or not (0 by default). The backup operations are performed at some point in time (non-blocking operation). 
        
 .. note:: Backups increase memory usage since they are also kept in memory.
@@ -714,13 +714,13 @@ Please, review the lists with general and specific fields description below.
 
 **Regular-streaming instance fields**
 
-  - Checkpoint Mode*
+- Checkpoint Mode*
      Value must be 'time-interval' for checkpointing after a set period of time, or 'every-nth' for performing a checkpoint after a set number of events.
  
-  - Checkpoint Interval* 
+- Checkpoint Interval* 
      Interval for performing the checkpoint. If Checkpoint Mode is  'time-interval' the value is set in ms.  If Checkpoint Mode is 'every-nth' the value is the number of events after which the checkpoint is done.
      
-  - Inputs*
+- Inputs*
      Names of input streams. Requires an input mode to be one of the following: 'full' (if you want each task to process all partitions of the stream) or 'split' (if you want to divide stream's partitions among the tasks; it is a default value). The stream should exist in the system (it should be of 'T-streams' or 'Apache Kafka' type).
      You can add several input streams by clicking "Add Input" and selecting an input stream name from the drop-down list.
      
@@ -743,7 +743,7 @@ Please, review the lists with general and specific fields description below.
 
  **Batch-streaming instance fields**
 
-  - Inputs*
+- Inputs*
      Names of input streams. Requires an input mode to be one of the following: 'full' (if you want each task to process all partitions of the stream) or 'split' (if you want to divide stream's partitions among the tasks; it is a default value). The stream should exist in the system (it should be of 'T-streams' or 'Apache Kafka' type).
      You can add several input streams by clicking "Add Input" and selecting an input stream name from the drop-down list.	
 
@@ -772,19 +772,19 @@ Please, review the lists with general and specific fields description below.
 
  **Output-streaming instance fields**
    
-  - Checkpoint Mode*
+- Checkpoint Mode*
       Value must be 'time-interval' for checkpointing after a set period of time, or 'every-nth' for performing a checkpoint after a set number of events. For output streams 'every-nth' is only available.
       
-  - Checkpoint Interval*
+- Checkpoint Interval*
       Interval for performing the checkpoint. If Checkpoint Mode is 'time-interval' the value is set in ms.  If Checkpoint Mode is 'every-nth' the value is the number of events after which the checkpoint is done.
       
-  - Input* 
+- Input* 
       Name of an input stream. Must be of the 't-stream' type only. Stream for this type of module has the 'split' mode only. Stream must exist in the system.
       
-  - Output* 
+- Output* 
      Name of an output stream (must be of 'SQL-database', 'Elasticsearch' or 'RESTful' type).
      
-  - Start From
+- Start From
      Value must be 'newest' (the system does not read the historical data, waits for new events), 'oldest' (the system reads all input stream events) or datetime (that requires specifying a timestamp and means the system reads events from the stream starting from the specified moment).
 
 .. note:: Required fields are marked with an asterisk (*).
