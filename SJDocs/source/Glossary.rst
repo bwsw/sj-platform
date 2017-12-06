@@ -61,6 +61,7 @@ Service
 Sliding interval 
   A step size at which a window slides forward. It can be less than a window size, and in this case some data will be processed more than once.
 
+.. _state:
 State
   A sort of a key-value storage for user data which is used to keep some global module variables related to processing. These variables are persisted and are recovered after a failure. 
 
