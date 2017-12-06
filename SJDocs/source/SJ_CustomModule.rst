@@ -344,7 +344,7 @@ So, the `InputEnvelope` objects are put into two corresponding streams.
 Regular module
 """"""""""""""""""""""
 
-The data from both of these streams are sent to a Regular module. We choose the Regular module instead of the Batch one because we need to process each input element separately. So we define an Executor class which extends `RegularStreamingExecutor`::
+The data from both of these streams are sent to a Regular module. We choose the Regular module instead of the Batch one because we need to process each input element separately. So we define an Executor class which implements `RegularStreamingExecutor`::
 
  class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecutor[Record](manager)
 
