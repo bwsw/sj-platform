@@ -16,7 +16,7 @@ A module includes:
    :scale: 120%
    :align: center
 
-   Picture 1.1
+   Figure 1.1
    
 Below you will find more information on each of these two components.
 
@@ -51,7 +51,7 @@ The base of the system is an engine: it provides basic I/O functionalities. It i
    :scale: 120%
    :align: center
    
-   Picture 1.2
+   Figure 1.2
    
 After its uploading, the engine receives raw data and sends them to the module executor. The executor starts data processing and returns the resulting data back to the engine where they are deserialized to be passed into the stream or a storage.
 
@@ -74,7 +74,7 @@ The modules can be strung in a pipeline as illustrated below:
    :scale: 80 %
    :align: center
 
-   Picture 1.3 
+   Figure 1.3 
   
 At this page each module is described in detail. You will find more information on the methods provided by module executors as well as entities' description.
 
@@ -90,7 +90,7 @@ In the SJ-Platform the TCP Input module is currently implemented.
   :scale: 80 %
   :align: center
 
-  Picture 1.4
+  Figure 1.4
   
 It performs the transformation of the streams incoming via TCP into T-streams. T-streams are persistent streams designed for exactly-once processing (so they include a transactional producer, a consumer and a subscriber). Find more information about T-streams `here <http://t-streams.com>`_.
 
@@ -100,7 +100,7 @@ In the diagram below you can see the illustration of dataflow for the input modu
    :scale: 80 %
    :align: center
 
-   Picture 1.5
+   Figure 1.5
 
 All input data elements are going as a flow of bytes to particular interface provided by Task Engine. That flow is going straight to Streaming Executor and is converted to an object called an Input Envelope. 
 
@@ -188,7 +188,7 @@ The most generic modules in the system are modules of a regular-streaming type. 
   :scale: 80 %
   :align: center
 
-  Picture 1.6
+  Figure 1.6
 
 The diagram below represents the dataflow in the regular module.
 
@@ -196,7 +196,7 @@ The diagram below represents the dataflow in the regular module.
   :scale: 80 %
   :align: center
 
-  Picture 1.7
+  Figure 1.7
   
 The TaskEngine of a regular module receives data from T-streams. It deserializes the flow of bytes to TStreamsEnvelope[T] (where [T] is a type of messages in the envelope) which is then passed to the StreamingExecutor.
 
@@ -334,7 +334,7 @@ The diagram below is a simple illustration of how a sliding window operation loo
    :scale: 80 %
    :align: center
 
-   Picture 1.8
+   Figure 1.8
   
 As shown in the figure, every time the window slides over an input stream, the batches of events that fall within the window are combined and operated upon to produce the transformed data of the windowed stream. It is important that any window operation needs to specify the parameters:
 
@@ -428,7 +428,7 @@ Modules of an output type are responsible for saving of output data to external 
   :scale: 80 %
   :align: center
 
-  Picture 1.9
+  Figure 1.9
   
 They transform the result of data processing received from T-streams and passe them to an external data storage. They allow to transform one data item from incoming streaming into one and more data output items.
 
@@ -438,7 +438,7 @@ The diagram below illustrates the dataflow in an output module.
   :scale: 80 %
   :align: center
 
-  Picture 1.10
+  Figure 1.10
   
 The TaskEngine deserializes the stream of bytes from T-Streams to TStreamsEnvelope[T] (where [T] is a type of messages in the envelope) and sends it to the StreamingExecutor. The StreamingExecutor returns Entities back to the TaskEngine. 
 
@@ -464,7 +464,7 @@ Please, find more information about engines at the :ref:`Engines` page.
 
 .. _Entities_Correlation:
 
-Prerequisites For Modules. Streaming Component.
+Prerequisites For Modules
 --------------------------------------------------
 
 A module requires the following elements to be created for its work:
@@ -477,46 +477,66 @@ A module requires the following elements to be created for its work:
 
 - Instance
 
-The type of module requires a specific type of instance to be created. An  instance is a set of settings determining the collaborative work of an engine and a module.  These settings are specified via UI or REST API and determine the mode of the module operation: data stream type the module is going to work with, a checkpoint concept, the settings of state and parallelism. Each module type requires an instance of a specific type: input, regular or batch, output. In the schema below you can see that each instance type requires a proper type of streams, and thus providers and services of a correct type as well.
+Each type of module described above requires an instance of a corresponding type. 
 
-The Stream Juggler Platform supports *Apache Kafka* and *T-stream* types of streams. And while the Apache Kafka streams are a well-known type of streaming introduced by Apache Software Foundation, the T-streams are intentionally designed for the Stream Juggler Platform as a complement for Apache Kafka. The T-streams have more features than Kafka and make exactly-once processing possible. Find more about T-streams at the `site <http://t-streams.com>`_ .
+Instance
+~~~~~~~~~~~~
+An instance is a set of settings determining the collaborative work of an engine and a module. These settings are specified via UI or REST API and determine the mode of the module operation: data stream type the module is going to work with, a checkpoint concept, the settings of state and parallelism, etc. Instances can be of the following types in the system: input, processing (regular/batch), output. To create an instance we need to create streams for it. And streams, in their turn, require specific services to be created. The services require a provider of a corresponding type.
 
+Stream
+~~~~~~~~
+The Stream Juggler Platform supports *Apache Kafka* and *T-stream* types of streams. And while the Apache Kafka streams are a well-known type of streaming introduced by Apache Software Foundation, the T-streams is intentionally designed for the Stream Juggler Platform as a complement for Apache Kafka. The T-streams has more features than Kafka and make exactly-once processing possible. Find more about T-streams at the `site <http://t-streams.com>`_ .
+
+Service and Provider
+~~~~~~~~~~~~~~~~~~~~~
 To create streams of exact type in the system you need to create a service and a provider for this service. The types of a service and a provider are determined by the type of a stream you need for the module.
 
-For example, you have decided to include a Batch module as a processing module in your pipeline. You will need to create a batch instance for it. An instance of a batch type requires *Apache Zookeeper service*.
+Example
+~~~~~~~~~~
+In this section we describe the process of determining of all the needed entities.
 
-.. figure:: _static/Inst-Serv.png
+For example, there is some system which needs to process data in a micro-batch mode from Apache Kafka. So we need to include a Batch module into our pipeline.
+
+For the Batch module we need to create a batch instance. Any type of instances in the system requires Apache Zookeper service and Apache Zookeeper provider for it (Figure 1.11). The Apache Zookeeper service should be unique for all the instances in our pipeline.
+
+.. figure:: _static/zk-inst-serv-pr.png
+   :align: center
+   
+   Figure 1.11
+   
+The batch instance will receive data from Apache Kafka streams. Apache Kafka streams require the Apache Kafka service to exist in our system. To create the Apache Kafka service you should create two specific providers of the following types: Apache Kafka and Apache Zookeeper (Figure 1.12).
+
+.. figure:: _static/kfk-inst-serv-pr.png
+   :align: center
+   
+   Figure 1.12
+   
+So these are the types of the instance and the streaming components that will be created for our example:
+
+.. figure:: _static/inst-serv-pr.png
+   :align: center
+   
+   Figure 1.13
+
+At this point we determined the types of instances in the pipeline and the types of streaming components. So we can start building the infrastructure.
+
+Firstly, create two providers - Apache Kafka and Apache Zookeeper. Secondly, create an Apache Kafka service and Apache Zookeeper service (that will be one for all instance in the pipeline). Thirdly, create streams of Apache Kafka. Finally, create an instance of a batch module.
+
+The schema below may help you to understand the dependency of entities in the system. It presents the order of entities creation.
+
+.. figure:: _static/InstanceCorrelation2.png
   :align: center
+
+  Figure 1.14
   
-  Picture 1.11
+  |req-arrow| - a required entity
   
-An instance of a batch type will receive data from Apache Kafka. Thus, it will require an *Apache Kafka service*. 
-
-.. figure:: _static/Inst-Stream-Serv.png
-  :align: center
+  |oneof-arrow|- one of the entity types is possible
   
-  Picture 1.12
-  
-Apache Kafka service will require two provider types for it: *Apache Kafka* and *Apache ZooKeeper*.
-
-.. figure:: _static/Inst-Stream-Serv-Prov.png
-  :align: center
-
-  Picture 1.12
-  
-Once you have determined the types of instances in the pipeline and the types of streaming components, you can start building the infrastructure. Firstly, create two providers of *Apache Kafka* and *Apache Zookeeper* types. Secondly, create services of *Apache Kafka* and *Apache Zookeeper* types. Thirdly, create streams of *Apache Kafka*. Finally, create an instance of a batch module.
-
-The schema below may help you to understand the dependency of entities in the system.
-
-.. figure:: _static/InstanceCorrelation1.png
-  :align: center
-
-  Picture 1.13
-
-The table below explains what types of streams may serve as input or output streams for particular instance types:
+The table below explains what types of streams may serve as inputs or outputs for particular instance types:
 
 ===============  ================================================  ===============================================
-Instance type    Input stream                                      Output stream
+Instance type    Inputs                                            Outputs
 ===============  ================================================  ===============================================
 *Input*            TCP (provided by Input Streaming Engine)         T-streams 
 
@@ -558,5 +578,7 @@ Instance type    Input stream                                      Output stream
 We hope this information will help you to select the most appropriate types of entities in the system to build a pipeline for smooth data stream processing.
 
 
+.. |req-arrow| image:: _static/req-arrow.png
 
+.. |oneof-arrow| image:: _static/oneof-arrow.png
 
