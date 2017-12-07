@@ -550,7 +550,7 @@ Processing module instance type (regular or batch) works with the following enti
 
 Output module instance type works with the following entities types:
 
-.. figure:: _static/InstCorrelation-Output.png
+.. figure:: _static/InstCorrelation-Output1.png
   :align: center
 
   Figure 1.16
