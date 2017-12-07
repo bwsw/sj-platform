@@ -319,7 +319,7 @@ If we look deeper into the structure, we will see the following data flow:
 
 .. figure:: _static/SJStructure.png
 
-All input data elements are going as a flow of bytes to a particular interface provided by `InputTaskEngine`. That flow is going straight to `RegexInputExecutor` (which provides the `InputStreamingExecutor` interface) and is converted to `InputEnvelope` objects which store all data inside as `Record` (provided by the Apache Avro library). 
+All input data elements are going as a flow of bytes to a particular interface provided by `InputTaskEngine`. That flow is going straight to `RegexInputExecutor` (which implements the `InputStreamingExecutor` interface) and is converted to `InputEnvelope` objects which store all data inside as `Record` (provided by the Apache Avro library). 
 
 `InputEnvelope` objects then go back to `InputTaskEngine` which serializes them to the stream of bytes and then sends to T-Streams. 
 
@@ -334,7 +334,7 @@ Then `OutputTaskEngine` deserializes the stream of bytes from T-Streams to TStre
 Input module 
 """"""""""""""""""
 
-The Input module is `RegexInputExecutor` (it contains the `InputStreamingExecutor`) and it is provided via the Sonatype repository. Its purpose (in general) is to process an input stream of strings using regexp rules provided by a user and create `InputEnvelope` objects as a result.
+The Input module is `RegexInputExecutor` (it implements the `InputStreamingExecutor`) and it is provided via the Sonatype repository. Its purpose (in general) is to process an input stream of strings using regexp rules provided by a user and create `InputEnvelope` objects as a result.
 
 The rules are described in `pingstation-input.json`. As we can see, there are rules for each type of input records and each has its own value in the `outputStream` fields: "echo-response" and "unreachable-response". 
 
