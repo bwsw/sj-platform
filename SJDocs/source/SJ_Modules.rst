@@ -479,7 +479,7 @@ Module's instances require the following elements to be created for their work:
 
 You should create these elements before creating an instance. First, you need to create streams for inputs and outputs. Streams, in their turn, require specific services to be created. Each service type requires a provider of a corresponding type.
 
-Each type of instances works with a specific type of streams, services and providers. Find below the detailed information on the types of providers, services and streams required for each instance type. Besides, we will provide you an example to explain the dependency of entity types for each instance.
+Each type of instances works with a specific type of streams, services and providers. Find below the detailed information on the types of providers, services and streams required for each instance type. Besides, we will provide you an example to explain the dependence of entity types on an instance type.
 
 Stream
 ~~~~~~~~
@@ -522,7 +522,7 @@ At this point we determined the types of instances in the pipeline and the types
 
 Firstly, create two providers - Apache Kafka and Apache Zookeeper. Secondly, create Apache Kafka service and Apache Zookeeper service (that will be unique for all instances in the pipeline). Thirdly, create streams of Apache Kafka. Finally, create an instance of a batch module.
 
-The schemas below may help you to understand the dependency of entities in the system for each instance type.
+The schemas below may help you to understand the dependence of entities in the system for each instance type.
 
 Input module instance type works with the following entities types:
 
