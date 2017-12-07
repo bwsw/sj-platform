@@ -464,28 +464,28 @@ Please, find more information about engines at the :ref:`Engines` page.
 
 .. _Entities_Correlation:
 
-Prerequisites For Modules
---------------------------------------------------
+Module Instances
+-----------------------
 
-A module requires the following elements to be created for its work:
+Each type of module described above requires an instance of a corresponding type. An instance is a set of settings determining the collaborative work of an engine and a module. These settings are specified via UI or REST API and determine the mode of the module operation: data stream type the module is going to work with, checkpoint concept, settings of state and parallelism, etc. In the system instances can be of the following types: input, processing (regular/batch), output. 
 
-- Provider
+Module's instances require the following elements to be created for their work:
+
+- Stream
 
 - Service
 
-- Stream 
+- Provider
 
-- Instance
+You should create these elements before creating an instance. First, you need to create streams for it. And streams, in their turn, require specific services to be created. Each service type requires a provider of a corresponding type.
 
-Each type of module described above requires an instance of a corresponding type. 
-
-Instance
-~~~~~~~~~~~~
-An instance is a set of settings determining the collaborative work of an engine and a module. These settings are specified via UI or REST API and determine the mode of the module operation: data stream type the module is going to work with, a checkpoint concept, the settings of state and parallelism, etc. In the system instances can be of the following types: input, processing (regular/batch), output. To create an instance we need to create streams for it. And streams, in their turn, require specific services to be created. The services require a provider of a corresponding type.
+Each type of instances works with a specific type of streams, services and providers. Find below the detailed information on the types of providers, services and streams required for each instance type.
 
 Stream
 ~~~~~~~~
-The Stream Juggler Platform supports *Apache Kafka* and *T-stream* types of streams. And while the Apache Kafka streams are a well-known type of streaming introduced by Apache Software Foundation, the T-streams is intentionally designed for the Stream Juggler Platform as a complement for Apache Kafka. The T-streams has more features than Kafka and make exactly-once processing possible. Find more about T-streams at the `site <http://t-streams.com>`_ .
+The Stream Juggler Platform supports *Apache Kafka* and *T-stream* types of streams. And while the Apache Kafka streams are a well-known type of streaming introduced by Apache Software Foundation, the T-streams is intentionally designed for the Stream Juggler Platform as a complement for Apache Kafka. The T-streams has more features than Kafka and makes exactly-once processing possible. Find more about T-streams at the `site <http://t-streams.com>`_ .
+
+The following stream types can be used for output streams that export result data from the system to an external storage: Elasticsearch, SQL-database, RESTful. They are determined by the type of the external data storage.
 
 Service and Provider
 ~~~~~~~~~~~~~~~~~~~~~
@@ -499,41 +499,67 @@ For example, there is some system which needs to process data in a micro-batch m
 
 For the Batch module we need to create a batch instance. Any type of instances in the system requires Apache Zookeper service and Apache Zookeeper provider for it (Figure 1.11). The Apache Zookeeper service should be unique for all the instances in our pipeline.
 
-.. figure:: _static/zk-inst-serv-pr.png
+.. figure:: _static/zk-inst-serv-pr1.png
    :align: center
    
    Figure 1.11
    
 The batch instance will receive data from Apache Kafka streams. Apache Kafka streams require the Apache Kafka service to exist in our system. To create the Apache Kafka service you should create two specific providers of the following types: Apache Kafka and Apache Zookeeper (Figure 1.12).
 
-.. figure:: _static/kfk-inst-serv-pr.png
+.. figure:: _static/kfk-inst-serv-pr1.png
    :align: center
    
    Figure 1.12
    
 So these are the types of the instance and the streaming components that will be created for our example:
 
-.. figure:: _static/inst-serv-pr.png
+.. figure:: _static/inst-stream-serv-prov.png
    :align: center
    
    Figure 1.13
 
 At this point we determined the types of instances in the pipeline and the types of streaming components. So we can start building the infrastructure.
 
-Firstly, create two providers - Apache Kafka and Apache Zookeeper. Secondly, create an Apache Kafka service and Apache Zookeeper service (that will be one for all instance in the pipeline). Thirdly, create streams of Apache Kafka. Finally, create an instance of a batch module.
+Firstly, create two providers - Apache Kafka and Apache Zookeeper. Secondly, create Apache Kafka service and Apache Zookeeper service (that will be unique for all instances in the pipeline). Thirdly, create streams of Apache Kafka. Finally, create an instance of a batch module.
 
-The schema below presents the order of entities creation.
+The schemas below may help you to understand the dependency of entities in the system for each instance type.
 
-.. figure:: _static/InstanceCorrelation2.png
+Input module instance type works with the following entities types:
+
+.. figure:: _static/InstCorrelation-Input.png
   :align: center
 
   Figure 1.14
   
-  |oneof-arrow| the entity type required for creation of the entity it points to.
+  |oneof-arrow| points to the entity type required for creation of this entity.
   
-  |req-arrow| one of the entity types is possible to create the entity it points to.
+  |req-arrow| points to one of the entity types needed to create the entity it points to.
   
-The table below explains what types of streams may serve as inputs or outputs for particular instance types:
+   
+Processing module instance type (regular or batch) works with the following entities types:
+
+.. figure:: _static/InstCorrelation-Process.png
+  :align: center
+
+  Figure 1.15
+  
+  |oneof-arrow| points to the entity type required for creation of this entity.
+  
+  |req-arrow| points to one of the entity types needed to create the entity it points to.
+
+
+Output module instance type works with the following entities types:
+
+.. figure:: _static/InstCorrelation-Output.png
+  :align: center
+
+  Figure 1.16
+  
+  |oneof-arrow| points to the entity type required for creation of this entity.
+  
+  |req-arrow| points to one of the entity types needed to create the entity it points to.
+  
+The table below explains what entity types can be used as inputs or outputs for a particular instance type:
 
 ===============  ================================================  ===============================================
 Instance type    Inputs                                            Outputs
