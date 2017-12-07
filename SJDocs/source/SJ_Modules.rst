@@ -477,9 +477,9 @@ Module's instances require the following elements to be created for their work:
 
 - Provider
 
-You should create these elements before creating an instance. First, you need to create streams for it. And streams, in their turn, require specific services to be created. Each service type requires a provider of a corresponding type.
+You should create these elements before creating an instance. First, you need to create streams for inputs and outputs. Streams, in their turn, require specific services to be created. Each service type requires a provider of a corresponding type.
 
-Each type of instances works with a specific type of streams, services and providers. Find below the detailed information on the types of providers, services and streams required for each instance type.
+Each type of instances works with a specific type of streams, services and providers. Find below the detailed information on the types of providers, services and streams required for each instance type. Besides, we will provide you an example to explain the dependency of entity types for each instance.
 
 Stream
 ~~~~~~~~
