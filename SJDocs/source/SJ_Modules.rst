@@ -481,7 +481,7 @@ Each type of module described above requires an instance of a corresponding type
 
 Instance
 ~~~~~~~~~~~~
-An instance is a set of settings determining the collaborative work of an engine and a module. These settings are specified via UI or REST API and determine the mode of the module operation: data stream type the module is going to work with, a checkpoint concept, the settings of state and parallelism, etc. Instances can be of the following types in the system: input, processing (regular/batch), output. To create an instance we need to create streams for it. And streams, in their turn, require specific services to be created. The services require a provider of a corresponding type.
+An instance is a set of settings determining the collaborative work of an engine and a module. These settings are specified via UI or REST API and determine the mode of the module operation: data stream type the module is going to work with, a checkpoint concept, the settings of state and parallelism, etc. In the system instances can be of the following types: input, processing (regular/batch), output. To create an instance we need to create streams for it. And streams, in their turn, require specific services to be created. The services require a provider of a corresponding type.
 
 Stream
 ~~~~~~~~
