@@ -497,7 +497,7 @@ In this section we describe the process of determining of all the needed entitie
 
 For example, there is some system which needs to process data in a micro-batch mode from Apache Kafka. So we need to include a Batch module into our pipeline.
 
-For the Batch module we need to create a batch instance. Any type of instances in the system requires Apache Zookeper service and Apache Zookeeper provider for it (Figure 1.11). The Apache Zookeeper service should be unique for all the instances in our pipeline.
+For the Batch module we need to create a batch instance. Any type of instances in the system requires Apache Zookeper service and Apache Zookeeper provider for it (Figure 1.11). The Apache Zookeeper service should be unique for all the instances in the system.
 
 .. figure:: _static/zk-inst-serv-pr1.png
    :align: center
@@ -520,7 +520,7 @@ So these are the types of the instance and the streaming components that will be
 
 At this point we determined the types of instances in the pipeline and the types of streaming components. So we can start building the infrastructure.
 
-Firstly, create two providers - Apache Kafka and Apache Zookeeper. Secondly, create Apache Kafka service and Apache Zookeeper service (that will be unique for all instances in the pipeline). Thirdly, create streams of Apache Kafka. Finally, create an instance of a batch module.
+Firstly, create two providers - Apache Kafka and Apache Zookeeper. Secondly, create Apache Kafka service and Apache Zookeeper service (that will be unique for all instances in the system). Thirdly, create streams of Apache Kafka. Finally, create an instance of a batch module.
 
 The schemas below may help you to understand the dependence of entities in the system for each instance type.
 
