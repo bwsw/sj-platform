@@ -649,23 +649,21 @@ First, configure the environment::
 
 <host>:<port> — SJ-Platform REST host and port.
 
-Now **download modules** from Sonatype Repository:
-
-- To download the *sj-regex-input* module from the sonatype repository::
+Now you should **download** the *sj-regex-input* module from Sonatype Repository::
 
    curl "https://oss.sonatype.org/content/repositories/snapshots/com/bwsw/sj-regex-input_2.12/1.0-SNAPSHOT/sj-regex-input_2.12-1.0-SNAPSHOT.jar" -o sj-regex-input.jar 
 
-- To download the *ps-process* module from the sonatype repository::
+.. To download the *ps-process* module from the sonatype repository::
 
    curl “https://oss.sonatype.org/content/repositories/snapshots/com/bwsw/ps-process_2.12/1.0-SNAPSHOT/ps-process_2.12-1.0-SNAPSHOT.jar” -o ps-process-1.0.jar
 
-- To download the *ps-output* module from the sonatype repository::
+.. To download the *ps-output* module from the sonatype repository::
 
    curl “https://oss.sonatype.org/content/repositories/snapshots/com/bwsw/ps-output_2.12/1.0-SNAPSHOT/ps-output_2.12-1.0-SNAPSHOT.jar” -o ps-output-1.0.jar
 
 **Upload modules**
 
-Upload modules to the system::
+Upload three modules to the system::
 
  curl --form jar=@sj-regex-input.jar http://$address/v1/modules
  curl --form jar=@ps-process/target/scala-2.11/ps-process-1.0.jar http://$address/v1/modules
