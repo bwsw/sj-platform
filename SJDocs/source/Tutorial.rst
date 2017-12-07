@@ -140,7 +140,7 @@ An instance is created with specific parameters. It will use particular streams 
 
 Launching instances we will start data processing in the platform.
 
-8. Obtain and store the result. The result of processing will be stored to an external storage. Besides, in the fping example we will visualise resulting data using Kibana.
+8. Obtain and store the result. The result of processing will be saved to an external storage. Besides, in the fping example we will visualise resulting data using Kibana.
 
 Now as you have general idea of the workscope to do, let's dive into the example tasks.
 
@@ -854,7 +854,7 @@ Launching Instances
 
 After the streaming layer (with its infrastructure) and instances are ready you can start a module. 
 
-The module starts working after its instance is launched. An input module begins to receive data, transforms the data for T-streams to transfer them to the processing module. A processing module begins to process them and put to T-streams to transfer them to the output module. An output module begins to store the result in a data storage. 
+The module starts working after its instance is launched. An input module begins to receive data, transforms the data for T-streams to transfer them to the processing module. A processing module begins to process them and put to T-streams to transfer them to the output module. An output module begins to save the result into a data storage. 
 
 In the example case, there are three modules and each of them has its own instances. Thus, these instances should be launched one by one. 
 
