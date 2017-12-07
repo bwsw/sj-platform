@@ -479,13 +479,13 @@ Module's instances require the following elements to be created for their work:
 
 You should create these elements before creating an instance. First, you need to create streams for inputs and outputs. Streams, in their turn, require specific services to be created. Each service type requires a provider of a corresponding type.
 
-Each type of instances works with a specific type of streams, services and providers. Find below the detailed information on the types of providers, services and streams required for each instance type. Besides, we will provide you an example to explain the dependence of entity types on an instance type.
+Each instance type works with a specific type of streams, services and providers. Find below the detailed information on the types of providers, services and streams required for each instance type. Besides, we will provide you an example to explain the dependence of entity types on an instance type.
 
 Stream
 ~~~~~~~~
 The Stream Juggler Platform supports *Apache Kafka* and *T-stream* types of streams. And while the Apache Kafka streams are a well-known type of streaming introduced by Apache Software Foundation, the T-streams is intentionally designed for the Stream Juggler Platform as a complement for Apache Kafka. The T-streams has more features than Kafka and makes exactly-once processing possible. Find more about T-streams at the `site <http://t-streams.com>`_ .
 
-The following stream types can be used for output streams that export result data from the system to an external storage: Elasticsearch, SQL-database, RESTful. They are determined by the type of the external data storage.
+The following stream types can be used for output streams that export resulting data from the system to an external storage: Elasticsearch, SQL-database, a system with RESTful interface. They are determined by the type of the external data storage.
 
 Service and Provider
 ~~~~~~~~~~~~~~~~~~~~~
@@ -497,7 +497,7 @@ In this section we describe the process of determining of all the needed entitie
 
 For example, there is some system which needs to process data in a micro-batch mode from Apache Kafka. So we need to include a Batch module into our pipeline.
 
-For the Batch module we need to create a batch instance. Any type of instances in the system requires Apache Zookeper service and Apache Zookeeper provider for it (Figure 1.11). The Apache Zookeeper service should be unique for all the instances in the system.
+For the Batch module we need to create a batch instance. In the system an instance of any type requires Apache Zookeper service and Apache Zookeeper provider for it (Figure 1.11). The Apache Zookeeper service should be unique for all the instances in the system.
 
 .. figure:: _static/zk-inst-serv-pr1.png
    :align: center
@@ -522,7 +522,7 @@ At this point we determined the types of instances in the pipeline and the types
 
 Firstly, create two providers - Apache Kafka and Apache Zookeeper. Secondly, create Apache Kafka service and Apache Zookeeper service (that will be unique for all instances in the system). Thirdly, create streams of Apache Kafka. Finally, create an instance of a batch module.
 
-The schemas below may help you to understand the dependence of entities in the system for each instance type.
+The schemes below may help you to understand the dependence of entities in the system for each instance type.
 
 Input module instance type works with the following entities types:
 
@@ -533,9 +533,6 @@ Input module instance type works with the following entities types:
   
   |oneof-arrow| points to the entity type required for creation of this entity.
   
-  |req-arrow| points to one of the entity types needed to create the entity it points to.
-  
-   
 Processing module instance type (regular or batch) works with the following entities types:
 
 .. figure:: _static/InstCorrelation-Process.png
@@ -545,7 +542,7 @@ Processing module instance type (regular or batch) works with the following enti
   
   |oneof-arrow| points to the entity type required for creation of this entity.
   
-  |req-arrow| points to one of the entity types needed to create the entity it points to.
+  |req-arrow| points to the entity which may be needed when creating the dependent entity.
 
 
 Output module instance type works with the following entities types:
@@ -557,7 +554,7 @@ Output module instance type works with the following entities types:
   
   |oneof-arrow| points to the entity type required for creation of this entity.
   
-  |req-arrow| points to one of the entity types needed to create the entity it points to.
+  |req-arrow| points to the set of instance types, one of which shall be created before creating the dependent entity.
   
 The table below explains what entity types can be used as inputs or outputs for a particular instance type:
 
