@@ -5,9 +5,9 @@ Custom Module Development Guide
 
 .. Contents::
 
-In this section, we describe how to write your own module for the Stream Juggler platform.
+In this section, we describe how to write your own module for the Stream Juggler Platform.
 
-The Stream Juggler Platform is a platform for your custom module implementation. It allows adjusting the system to your custom aims. Creation of a custom module will not become a challenge for an average developer who knows Scala language as no special tools or services are necessary.
+The Stream Juggler Platform is a system for your custom module implementation. It allows adjusting the system to your custom aims. Creation of a custom module will not become a challenge for an average developer who knows Scala language as no special tools or services are necessary.
 
 Prior to the module development, please, take a look at the :ref:`Architecture` and :ref:`Modules` sections.
 
@@ -49,13 +49,14 @@ The workflow of the SJ-Platform implies the structure:
 2. A **processing module** performs the main transformation and calculation of data. It accepts data via T-streams and Apache Kafka. The processed data are put into T-streams only. So an output module is required in the next step as we can not get the result data right from T-streams and put them into an external storage.
 3. An **output module** is necessary to transfer the data from T-streams into the result data of the type appropriate for the external storage.
 
-.. figure:: _static/ModulePipeline1.png
+.. figure:: _static/ModuleStructure4.png
+  :scale: 80 %
 
 Below you will find the instructions on custom module creation in Scala.
 
 Before Starting With Modules
 --------------------------------------------------
-The instructions below are given for assembling a .JAR file via sbt in Scala.
+The instructions below are given for assembling a JAR file via sbt in Scala.
 
 It is meant that all necessary services are deployed for the module and you know for sure:
 
@@ -318,7 +319,7 @@ If we look deeper into the structure, we will see the following data flow:
 
 .. figure:: _static/SJStructure.png
 
-All input data elements are going as a flow of bytes to a particular interface provided by `InputTaskEngine`. That flow is going straight to `RegexInputExecutor` (which provides the `InputStreamingExecutor` interface) and is converted to `InputEnvelope` objects which store all data inside as `Record` (provided by the Apache Avro library). 
+All input data elements are going as a flow of bytes to a particular interface provided by `InputTaskEngine`. That flow is going straight to `RegexInputExecutor` (which implements the `InputStreamingExecutor` interface) and is converted to `InputEnvelope` objects which store all data inside as `Record` (provided by the Apache Avro library). 
 
 `InputEnvelope` objects then go back to `InputTaskEngine` which serializes them to the stream of bytes and then sends to T-Streams. 
 
@@ -333,7 +334,7 @@ Then `OutputTaskEngine` deserializes the stream of bytes from T-Streams to TStre
 Input module 
 """"""""""""""""""
 
-The Input module is `RegexInputExecutor` (it contains the `InputStreamingExecutor`) and it is provided via the Sonatype repository. Its purpose (in general) is to process an input stream of strings using regexp rules provided by a user and create `InputEnvelope` objects as a result.
+The Input module is `RegexInputExecutor` (it implements the `InputStreamingExecutor`) and it is provided via the Sonatype repository. Its purpose (in general) is to process an input stream of strings using regexp rules provided by a user and create `InputEnvelope` objects as a result.
 
 The rules are described in `pingstation-input.json`. As we can see, there are rules for each type of input records and each has its own value in the `outputStream` fields: "echo-response" and "unreachable-response". 
 
@@ -343,7 +344,7 @@ So, the `InputEnvelope` objects are put into two corresponding streams.
 Regular module
 """"""""""""""""""""""
 
-The data from both of these streams are sent to a Regular module. We choose the Regular module instead of the Batch one because we need to process each input element separately. So we define an Executor class which extends `RegularStreamingExecutor`::
+The data from both of these streams are sent to a Regular module. We choose the Regular module instead of the Batch one because we need to process each input element separately. So we define an Executor class which implements `RegularStreamingExecutor`::
 
  class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecutor[Record](manager)
 
@@ -415,7 +416,7 @@ onMessage
 
 The ``onMessage`` method is called every time the Executor receives an envelope.
 
-As we remember, there are two possible types of envelopes: echo-response and unreachable-response, which are stored in two different streams. 
+As we remember, there are two possible types of envelopes in our example: echo-response and unreachable-response, which are stored in two different streams. 
 
 We obtain envelopes from both of them and the name of the stream is stored in the ``envelope.stream`` field::
 

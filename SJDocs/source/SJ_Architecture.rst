@@ -33,7 +33,7 @@ The Stream Juggler Platform performs data processing that is fulfilled in module
 
 The events enter the processing module in streams from a list of supported interfaces - TCP, Apache Kafka and T-streams. A result data are placed into an external data storage.
 
-.. figure:: _static/Overview2.png
+.. figure:: _static/Overview3.png
     :align: center
     :scale: 80%
 
@@ -79,11 +79,11 @@ The major one is the **processing module** that performs data processing. Two ty
 
 The processing module receives data for processing from Apache Kafka and T-streams. You also can use TCP as a source, but you will need an input module in this case. The **input module** handles external inputs, does data deduplication, transforms raw data into objects for T-streams. 
 
-To receive the result of processing an output module is required. The **output module** puts the processed data from event processing pipeline to external data destinations (Elasticsearch, SQL database, RESTful).
+To receive the result of processing an output module is required. The **output module** puts the processed data from event processing pipeline to external data destinations (Elasticsearch, SQL-database, RESTful).
 
 So the pipeline may look like at the following scheme:
 
-.. figure:: _static/ModuleStructure3.png
+.. figure:: _static/ModuleStructure4.png
    :align: center
    :scale: 80%
 
@@ -124,7 +124,7 @@ SJ-Platform performs **stream processing**. That means the system can handle eve
 
 Streams can be very intensive and all events cannot be handled by a single server of arbitrary performance. The system allows **scaling** the computations horizontally to handle increasing demands.
 
-The events are guaranteed to be processed **exactly-once**. The key idea of exactly-once processing lies in a group **checkpoint**. That means all producers and consumers of a stream are bunched into a group and do a checkpoint automatically fixing the current state. Moreover, a user can initialize a checkpoint after any stage of the processing cycle.
+The events are guaranteed to be processed **exactly-once**. The key idea of exactly-once processing lies in the **checkpoint**. That means all producers and consumers of a stream are bunched into a group and do a checkpoint automatically fixing the current state. Moreover, a user can initialize a checkpoint after any stage of the processing cycle.
 
 The idea of **parallelism** is implemented via multi-partitioning in streams. A **partition** is a part of a data stream allocated for convenience in stream processing.  Upon creation, every stream gets a certain amount of partitions. The parallelism is enabled by dividing existing partitions fairly among the tasks of module instance and thus scaling the data processing.
 
@@ -132,7 +132,8 @@ SJ-Platform fulfills the idea of **fault-tolerance** as its architecture prevent
 
 The general structure of SJ-Platform can be rendered as at the scheme below where all the mentioned above  components are presented in detail:
 
-.. figure:: _static/SJ_General2.png
+.. figure:: _static/SJ_General3.png
+   :scale: 80 %
    :align: center
 
    Picture 1.4
@@ -141,7 +142,7 @@ To understand the interconnections between platform components look at the diagr
 
 SJ-Platform uses a range of data sources and data storages. A client operates the platform via UI/REST API. And he/she uploads a custom module to the platform with a set of configurations. The platform runs the module via an "executable" engine on Mesos and Marathon. And the module uses MongoDB as a data store.
 
-.. figure:: _static/SJComponentDiagram.png
+.. figure:: _static/SJСomponentDiagram2.png
     :align: center
    
     Picture 1.5

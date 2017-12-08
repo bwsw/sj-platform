@@ -27,7 +27,7 @@ A simplified structure of SJ-Platform can be presented as at the image below:
 .. figure:: _static/tutorialGeneral.png
    :align: center
 
-   Picture 1.1
+   Figure 1.1
 
 Let’s have a look at the platform from the perspective of a processing pipeline.
 
@@ -43,7 +43,7 @@ General processing workflow which the system allows implementing is illustrated 
    :scale: 80%
    :align: center
    
-   Picture 1.2
+   Figure 1.2
    
 Green, yellow and purple blocks displayed in a rectangular area are managed and evaluated by SJ-Platform. They represent an input module, a processing module and an output module, respectively. The blocks outside the rectangular area represent external systems (a data source and a data storage).
 
@@ -58,14 +58,14 @@ If you would like to continue studying the platform, proceed with reading the do
 Examples Introduction
 --------------------------------------
 
-The example tasks that will be presented are different. But the steps we will perform to solve the tasks are common for both of them (see Picture 3). 
+The example tasks that will be presented are different. But the steps we will perform to solve the tasks are common for both of them (see Figure 1.3). 
 
 .. Before starting with the steps, it is important to note that to complete your job using SJ-Platform you should definitely know how the pipeline is going to look, what data format will be delivered into the system. The modules for data processing should be preliminarily created.
 
 .. figure:: _static/TutorialSteps.png
    :align: center
    
-   Picture 1.3
+   Figure 1.3
 
 What we are going to do for the examples is:
 
@@ -82,7 +82,7 @@ What we are going to do for the examples is:
  
 2. Download and set up the platform and demo project. We'll set up the platform and the demo repositories downloading it from GitHub. 
 
-3. Upload configurations and engines. The configurations should be uploaded to determine module performance. The full list of all configurations can be viewed at the :ref:`Configuration` page. 
+3. Upload configurations and engines. The configurations should be uploaded to determine the system work. The full list of all configurations can be viewed at the :ref:`Configuration` page. 
 
    Engines are necessary for modules as they handle data flow making it into streams.
 
@@ -94,7 +94,7 @@ What we are going to do for the examples is:
    :scale: 110%
    :align: center
    
-   Picture 1.4
+   Figure 1.4
    
 .. note:: Find more about engines at the :ref:`Engines` page.
 
@@ -104,7 +104,7 @@ What we are going to do for the examples is:
    :scale: 120%
    :align: center
    
-   Picture 1.5
+   Figure 1.5
    
 In the example tasks we will upload ready-to-use modules of three types - input modules, processing modules (regular, batch) and output modules. 
    
@@ -118,7 +118,7 @@ To solve your tasks, you may upload your custom modules in this step.
    :scale: 80%
    :align: center
    
-   Picture 1.6
+   Figure 1.6
    
 Streaming requires the infrastructure: providers and services. These are necessary API entites without which streaming will not be so flexible. Streaming flexibility lies in the one-to-many connection between providers and services, streams and modules. One provider works with many services (of various types). One type of streams can be used by different module instances. These streams take necessary settings from the common infrastructure (providers and services). There is no need to duplicate the settings for each individual stream.
 
@@ -134,13 +134,13 @@ For both example tasks we will need Apache Zookeeper, Elasticsearch and SQL-data
    :scale: 120%
    :align: center
    
-   Picture 1.7
+   Figure 1.7
    
 An instance is created with specific parameters. It will use particular streams specified for it as input and output streams.
 
 Launching instances we will start data processing in the platform.
 
-8. Obtain and store the result. The result of processing will be stored to an external storage. Besides, in the fping example we will visualise resulting data using Kibana.
+8. Obtain and store the result. The result of processing will be saved to an external storage. Besides, in the fping example we will visualise resulting data using Kibana.
 
 Now as you have general idea of the workscope to do, let's dive into the example tasks.
 
@@ -158,7 +158,7 @@ In the example task solution the processing workflow is formed in the following 
 .. figure:: _static/FPingDemo1.png
    :align: center
    
-   Picture 1.8
+   Figure 1.8
    
 This diagram demonstrates the processing workflow of the demo. As you can see, the data come to a TCP input module through a pipeline of fping and netcat. The TCP input module is a regular module that performs per-event processing. We provide two off-the-shelf modules - CSV and regex - for two most general input data formats. Find more information about them at the :ref:`input-module` section. For the fping example task we will use a regex input module. It processes an input stream which contains text data using a set of regular expressions, and then serializes them with Apache Avro.
 
@@ -243,7 +243,7 @@ So, let's start with deploying Mesos and other services.
 
 Start Mesos and the services. 
 
-.. note:: If you are planning to process data in a parallel mode (set the `parallelizm` parameter to a value greater than 1), you need to increase the `executor_registration_timeout` parameter for Mesos-slave.
+.. note:: If you are planning to process data in a parallel mode (set the ``parallelizm`` parameter to a value greater than 1), you need to increase the ``executor_registration_timeout`` parameter for Mesos-slave.
 
     
 2) Create JSON files and a configuration file. Please, name them as specified here.
@@ -581,7 +581,7 @@ Now the JARs should appear in the UI under Custom Jars of the "Custom files" nav
 .. figure:: _static/EnginesUploaded.png
    :align: center
    
-   Picture 1.9
+   Figure 1.9
 
 Setup Configurations for Engines
 """"""""""""""""""""""""""""""""""""""""
@@ -623,7 +623,7 @@ In the UI you can see the uploaded configurations under the “Configuration” 
 .. figure:: _static/ConfigurationsUploaded.png
    :align: center
    
-   Picture 1.10
+   Figure 1.10
 
 
 Step 4. Module Uploading 
@@ -649,23 +649,21 @@ First, configure the environment::
 
 <host>:<port> — SJ-Platform REST host and port.
 
-Now **download modules** from Sonatype Repository:
-
-- To download the *sj-regex-input* module from the sonatype repository::
+Now you should **download** the *sj-regex-input* module from Sonatype Repository::
 
    curl "https://oss.sonatype.org/content/repositories/snapshots/com/bwsw/sj-regex-input_2.12/1.0-SNAPSHOT/sj-regex-input_2.12-1.0-SNAPSHOT.jar" -o sj-regex-input.jar 
 
-- To download the *ps-process* module from the sonatype repository::
+.. To download the *ps-process* module from the sonatype repository::
 
    curl “https://oss.sonatype.org/content/repositories/snapshots/com/bwsw/ps-process_2.12/1.0-SNAPSHOT/ps-process_2.12-1.0-SNAPSHOT.jar” -o ps-process-1.0.jar
 
-- To download the *ps-output* module from the sonatype repository::
+.. To download the *ps-output* module from the sonatype repository::
 
    curl “https://oss.sonatype.org/content/repositories/snapshots/com/bwsw/ps-output_2.12/1.0-SNAPSHOT/ps-output_2.12-1.0-SNAPSHOT.jar” -o ps-output-1.0.jar
 
 **Upload modules**
 
-Upload modules to the system::
+Upload three modules to the system::
 
  curl --form jar=@sj-regex-input.jar http://$address/v1/modules
  curl --form jar=@ps-process/target/scala-2.11/ps-process-1.0.jar http://$address/v1/modules
@@ -676,7 +674,7 @@ Now in the UI, you can see the uploaded modules under the ‘Modules’ tab.
 .. figure:: _static/ModulesUploaded.png
    :align: center
    
-   Picture 1.11
+   Figure 1.11
 
 .. _Creating_Streams:
 
@@ -699,7 +697,7 @@ In the example task solution the following stream types are implemented:
    :scale: 80%
    :align: center
    
-   Picture 1.12
+   Figure 1.12
 
 Prior to creating a stream, we need to create infrastructure for the streaming layer. The infrastructure for streams includes **providers** and **services**. This is a required presetting.
 
@@ -741,7 +739,7 @@ The created providers are available in the UI under the “Providers” tab.
 .. figure:: _static/ProvidersCreated.png
    :align: center
    
-   Picture 1.13
+   Figure 1.13
 
 2) Next, we will set up services:
 
@@ -762,7 +760,7 @@ Please, make sure the created services have appeared in the UI under the “Serv
 .. figure:: _static/ServicesCreated.png
    :align: center
    
-   Picture 1.14
+   Figure 1.14
 
 Creating Streams
 """"""""""""""""""""""""""""""
@@ -782,34 +780,26 @@ These streams are of T-streams type.
 
 For **ps-process module**:
 
-Create output streams of the regular-streaming module (consequently, an input stream of the output-streaming module) named ‘echo-response-1m’, ‘echo-response-3m’ and ‘echo-response-1h’. They will be used for keeping the aggregated information about the average time of echo responses, the total amount of echo responses, the total amount of unreachable responses and the timestamp for each IP (per 1 minute, per 3 minutes and per 1 hour)::
+Create an output stream of the regular-streaming module (consequently, an input stream of the output-streaming module) named ‘echo-response-1m’. It will be used for keeping the aggregated information about the average time of echo responses, the total amount of echo responses, the total amount of unreachable responses and the timestamp for each IP (per 1 minute)::
 
  curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data   "@api-json/streams/echo-response-1m.json"
 
- curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/echo-response-3m.json"
-
- curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/echo-response-1h.json"
-
-These streams are of T-streams type.
+This stream is of the T-streams type.
 
 For **ps-output module**:
 
-Create output streams of the output-streaming module named ‘es-echo-response-1m’, ‘es-echo-response-3m’, ‘es-echo-response-1h’. They will be used for keeping the aggregated information (per 1 minute, per 3 minutes and per 1 hour) from the previous corresponding stream including total amount of responses::
+Create an output stream of the output-streaming module named ‘es-echo-response-1m’. It will be used for keeping the aggregated information (per 1 minute) from the previous stream including total amount of responses::
 
  curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/es-echo-response-1m.json"
 
- curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/es-echo-response-3m.json"
-
- curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/es-echo-response-1h.json"
- 
-These streams are of Elasticsearch type (as the external storage in the pipeline is Elasticsearch).
+This stream is of the Elasticsearch type (as the external storage in the pipeline is Elasticsearch).
 
 All the created streams should be available now in the UI under the “Streams” tab.
 
-.. figure:: _static/StreamsCreated.png
+.. figure:: _static/StreamsCreated1.png
    :align: center
    
-   Picture 1.15
+   Figure 1.15
 
 Step 6. Create Output Destination
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -842,39 +832,27 @@ To create an instance of the *ps-process* module send the following request::
 
  curl --request POST "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance" -H 'Content-Type: application/json' --data "@api-json/instances/pingstation-process.json"
 
-Create two more instances for the *ps-process* module with different checkpoint intervals to process data every 3 minutes and every hour. Remember to create them with different names::
-
- curl --request POST "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance" -H 'Content-Type: application/json' --data "@api-json/instances/pingstation-echo-process-3m.json"
-
- curl --request POST "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance" -H 'Content-Type: application/json' --data "@api-json/instances/pingstation-echo-process-1h.json"
-
 To create an instance of the *ps-output* module send the following request::
 
  curl --request POST "http://$address/v1/modules/output-streaming/pingstation-output/1.0/instance" -H 'Content-Type: application/json' --data "@api-json/instances/pingstation-output.json"
  
-Create two more instances to receive data from the instances processing data every 3 minutes and every hour. Remember to create the JSON files with different names. Change the ‘input’ values to ‘echo-response-3m’ and ‘echo-response-1h’ respectively to receive data from these streams. 
-
-Change the ‘output’ values to ‘es-echo-response-3m’ and ‘es-echo-response-1h’ correspondingly to put the result data to these streams:: 
-
- curl --request POST "http://$address/v1/modules/output-streaming/pingstation-output/1.0/instance" -H 'Content-Type: application/json' --data "@api-json/instances/pingstation-output-3m.json"
-
- curl --request POST "http://$address/v1/modules/output-streaming/pingstation-output/1.0/instance" -H 'Content-Type: application/json' --data "@api-json/instances/pingstation-output-1h.json"
-
 The created instances should be available now in UI under the “Instances” tab. There they will appear with the “ready” status.
 
-.. figure:: _static/InstancesCreated.png
+.. figure:: _static/InstancesCreated1.png
    :align: center
    
-   Picture 1.16
+   Figure 1.16
 
 Ready! The modules can be launched.
+
+.. _fping_Launch_Instances:
 
 Launching Instances
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 After the streaming layer (with its infrastructure) and instances are ready you can start a module. 
 
-The module starts working after its instance is launched. An input module begins to receive data, transforms the data for T-streams to transfer them to the processing module. A processing module begins to process them and put to T-streams to transfer them to the output module. An output module begins to store the result in a data storage. 
+The module starts working after its instance is launched. An input module begins to receive data, transforms the data for T-streams to transfer them to the processing module. A processing module begins to process them and put to T-streams to transfer them to the output module. An output module begins to save the result into a data storage. 
 
 In the example case, there are three modules and each of them has its own instances. Thus, these instances should be launched one by one. 
 
@@ -886,24 +864,16 @@ To launch the **processing module instances** send::
 
  curl --request GET "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance/pingstation-process/start"
 
- curl --request GET "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance/pingstation-process-3m/start"
-
- curl --request GET "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance/pingstation-process-1h/start" 
-
 To launch the **output module instances** send::
 
  curl --request GET "http://$address/v1/modules/output-streaming/pingstation-output/1.0/instance/pingstation-output/start"
 
- curl --request GET "http://$address/v1/modules/output-streaming/pingstation-output/1.0/instance/pingstation-output-3m/start"
-
- curl --request GET "http://$address/v1/modules/output-streaming/pingstation-output/1.0/instance/pingstation-output-1h/start" 
-
 If you take a look at the UI, you will see the launched instances with the “started” status.
 
-.. figure:: _static/InstancesStarted.png
+.. figure:: _static/InstancesStarted1.png
    :align: center
    
-   Picture 1.17
+   Figure 1.17
 
 To get a list of ports that are listened by the input module instance send the request::
 
@@ -954,9 +924,47 @@ It illustrates the average time of echo-responses by IPs per a selected period o
 .. figure:: _static/Kibana.png
    :align: center
    
-   Picture 1.18
+   Figure 1.18
 
 Many other parameter combinations can be implemented to view the results.
+
+Customization
+~~~~~~~~~~~~~~~~
+The platform allows to customize the pipeline. For example, you can change the data aggregation interval adding more instances. You can create one instance with the 3-minute aggregation interval and another instance with 1-hour aggregation interval.
+
+1. Each instance needs an input stream and an output stream. You can create streams on the base of the existing providers and services. Remember to create the JSON files with different names, e.g. 'echo-response-3m' as *ps-process* output stream aggregating data per 3 minutes, 'echo-response-1h' as *ps-process* output stream aggregating data per 1 hour::
+ 
+    curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/echo-response-3m.json"
+
+    curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/echo-response-1h.json"
+    
+   Create output streams for the *ps-output* module with new names, e.g. 'es-echo-response-3m' exporting result data  aggregated per 3 minutes, 'es-echo-response-1h' exporting result data aggregated per 1 hour:: 
+  
+     curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/es-echo-response-3m.json"
+
+     curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/es-echo-response-1h.json"
+
+2. Create two more instances for the *ps-process* module with different checkpoint intervals to process data every 3 minutes and every hour. Remember to create them with different names. In our example we create 'pingstation-echo-process-3m' and 'pingstation-echo-process-1h' instances with ‘output’ values ‘echo-response-3m’ and ‘echo-response-1h’ correspondingly::
+
+    curl --request POST "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance" -H 'Content-Type: application/json' --data "@api-json/instances/pingstation-echo-process-3m.json"
+
+    curl --request POST "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance" -H 'Content-Type: application/json' --data "@api-json/instances/pingstation-echo-process-1h.json"
+ 
+3. Create two more instances for the *ps-output* module with different checkpoint intervals to receive data aggregated for every 3 minutes and for every hour.
+
+   Create the JSON files with different names. Change the ‘input’ values to ‘echo-response-3m’ and ‘echo-response-1h’ respectively to receive data from these streams. Change the ‘output’ values to ‘es-echo-response-3m’ and ‘es-echo-response-1h’ correspondingly to put the result data to these streams:: 
+
+    curl --request POST "http://$address/v1/modules/output-streaming/pingstation-output/1.0/instance" -H 'Content-Type: application/json' --data "@api-json/instances/pingstation-output-3m.json"
+
+    curl --request POST "http://$address/v1/modules/output-streaming/pingstation-output/1.0/instance" -H 'Content-Type: application/json' --data "@api-json/instances/pingstation-output-1h.json"
+ 
+4. Launch the instances as described in the :ref:`fping_Launch_Instances` section. Remember to change the instance names for the new ones::
+ 
+     curl --request GET "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance/pingstation-echo-process-3m/start"
+     curl --request GET "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance/pingstation-echo-process-1h/start"
+     
+     curl --request GET "http://$address/v1/modules/output-streaming/pingstation-output/1.0/instance/pingstation-output-3m/start"
+     curl --request GET "http://$address/v1/modules/output-streaming/pingstation-output/1.0/instance/pingstation-output-1h/start"
 
 Instance Shutdown 
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -969,32 +977,32 @@ If there is no need for it anymore, a stopped instance can be deleted. On the ba
 
 To stop instances in the example task the following requests should be sent.
 
-To stop the **sj-regex-input module instance** send::
+To stop the *sj-regex-input* module instance send::
 
  curl --request GET "http://$address/v1/modules/input-streaming/pingstation-input/1.0/instance/pingstation-input/stop"
 
-To stop the **ps-process module instances** send::
+To stop the *ps-process* module instance send::
 
  curl --request GET "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance/pingstation-process/stop "
 
- curl --request GET "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance/pingstation-process-3m/stop "
+.. curl --request GET "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance/pingstation-process-3m/stop "
 
- curl --request GET "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance/pingstation-process-1h/stop "
+.. curl --request GET "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance/pingstation-process-1h/stop "
 
-To stop the **ps-output module instances** send::
+To stop the *ps-output* module instances send::
 
  curl --request GET "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance/pingstation-output/stop" 
 
- curl --request GET "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance/pingstation-output-3m/stop"  
+.. curl --request GET "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance/pingstation-output-3m/stop"  
 
- curl --request GET "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance/pingstation-output-1h/stop" 
+.. curl --request GET "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance/pingstation-output-1h/stop" 
 
 In the UI, you will see the stopped instances with the “stopped” status.
 
-.. figure:: _static/InstancesStopped.png
+.. figure:: _static/InstancesStopped1.png
    :align: center
    
-   Picture 1.19
+   Figure 1.19
 
 Deleting Instance
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1012,7 +1020,7 @@ To delete the *ps-process* module instance send::
 
  curl --request DELETE "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance/pingstation-process/"
 
- сurl --request DELETE "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance/pingstation-process-3m/" 
+.. сurl --request DELETE "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance/pingstation-process-3m/" 
 
  curl --request DELETE "http://$address/v1/modules/regular-streaming/pingstation-process/1.0/instance/pingstation-process-1h/"
 
@@ -1020,7 +1028,7 @@ To delete the *ps-output* module instance send::
 
  curl --request DELETE "http://$address/v1/modules/output-streaming/pingstation-output/1.0/instance/pingstation-output/"
 
- curl --request DELETE "http://$address/v1/modules/output-streaming/pingstation-output/1.0/instance/pingstation-output-3m/"
+.. curl --request DELETE "http://$address/v1/modules/output-streaming/pingstation-output/1.0/instance/pingstation-output-3m/"
 
  curl --request DELETE "http://$address/v1/modules/output-streaming/pingstation-output/1.0/instance/pingstation-output-1h/"
 
@@ -1046,13 +1054,14 @@ A complete pipeline can be rendered as in the diagram below:
 .. figure:: _static/SflowDemo.png
    :align: center
    
-   Picture 2.1
+   Figure 2.1
 
 Green, yellow, purple and red blocks within the SJ-Platform scope rectangular area are managed and evaluated by SJ-Platform. 
 
 These are:
-- *'sflow-csv-input'* module - a regular input module that transforms CSV data into T-streams;
-- *'sflow-process'* module - a process module for micro-batch data processing;
+
+- *'sflow-csv-input'* module - an input module that transforms CSV data into T-streams;
+- *'sflow-process'* module - a processing module for micro-batch data processing;
 - *'sflow-src-ip-output'* and *'sflow-src-dst-output'* modules - two output modules that export processed data via T-streams to PostgreSQL;
 - *'sflow-fallback-output'* module - an output module to store incorrect data to a separate table in PostgreSQL.
 
@@ -1186,7 +1195,7 @@ Check out in the UI the engines are uploaded:
 .. figure:: _static/sFlow_EnginesUploaded.png
    :align: center
    
-   Picture 2.2
+   Figure 2.2
 
 Setup settings for the engines. Please, replace <slave_advertise_ip> with Mesos-slave IP and <marathon_address> with the address of Marathon::
 
@@ -1210,7 +1219,7 @@ You can see in the UI the configurations are uploaded:
 .. figure:: _static/sFlow_ConfigsUploaded.png
    :align: center
    
-   Picture 2.3
+   Figure 2.3
 
 Step 4. Module Uploading
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1246,7 +1255,7 @@ Now you can see the uploaded modules in the UI:
 .. figure:: _static/sFlow_Modules.png
    :align: center
 
-   Picture 2.4
+   Figure 2.4
 
 Now upload the GeoIP database which is required for the processing module::
 
@@ -1269,7 +1278,7 @@ Now you can see the settings are added to the configuration list:
 .. figure:: _static/sFlow_SQLsettings.png
    :align: center
    
-   Picture 2.5
+   Figure 2.5
 
 Step 5. Creating Streaming Layer
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1327,7 +1336,7 @@ Check out they have appeared in the UI:
 .. figure:: _static/sflow_Providers.png
    :align: center
    
-   Picture 2.6
+   Figure 2.6
 
 Once providers are created, we can create services.
 
@@ -1347,7 +1356,7 @@ Check out the services have appeared in the UI:
 .. figure:: _static/sflow_Services.png
    :align: center
    
-   Picture 2.7
+   Figure 2.7
 
 Streams creation
 ''''''''''''''''''''''''''
@@ -1386,7 +1395,7 @@ Check out that they have appeared in the UI:
 .. figure:: _static/sflow_Streams.png
    :align: center
    
-   Picture 2.8
+   Figure 2.8
 
 Step 6. Output SQL Tables Creation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1444,7 +1453,7 @@ View them in the UI:
 .. figure:: _static/sflow_Instances.png
    :align: center
    
-   Picture 2.9
+   Figure 2.9
 
 Launching Instances
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -1486,7 +1495,7 @@ Or, in the UI, click at the input module instance in the "Instances" section and
 .. figure:: _static/sflow_InstancesStarted.png
    :align: center
    
-   Picture 2.10
+   Figure 2.10
 
 And now you can start the processing pipeline (replace <host> and <port> by values for the input module task host and port)::
 

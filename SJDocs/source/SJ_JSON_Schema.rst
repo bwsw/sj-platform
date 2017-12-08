@@ -3,7 +3,42 @@
 JSON schema for module specification 
 ===========================================
 
-A Json schema for a specification file of a module looks as presented below::
+A JSON schema for module specification should contain the following *specification fields*. These fields are described in the table below :
+
+.. tip:: IOstream - is an input/output stream.
+
+.. csv-table:: **Specification fields**
+   :header: "Field", "Format", "Description"
+   :widths: 25, 20, 40
+
+   "name*", "String", "The unique name of the module"
+   "description", "String", "The description for a module"
+   "version*", "String", "The module version"
+   "author", "String", "The module author"
+   "license", "String", "The software license type for a module"
+   "inputs*", "IOstream","The specification for the inputs of a module"
+   "outputs*", "IOstream", "The specification for the outputs of a module"
+   "module-type*", "String", "The type of a module. One of the following: [input-streaming, output-streaming, batch-streaming, regular-streaming]"
+   "engine-name*", "String", "The name of the computing core of a module"
+   "engine-version*", "String", "The version of the computing core of a module"
+   "validator-class*", "String", "The absolute path to class that is responsible for a validation of launch options"
+   "executor-class*", "String", "The absolute path to class that is responsible for a running of module"
+   "batch-collector-class**", "String", "The absolute path to class that is responsible for a batch collecting of batch-streaming module"
+
+.. note:: `*` - a required field, ** - a required field for a batch-streaming module.
+
+IOstream for inputs and outputs has the following structure:
+
+.. csv-table:: **IOstream fields**
+  :header: "Field", "Format",  "Description"
+  :widths: 20, 20, 60
+
+  "cardinality*", "Array[Int]", "The boundary of interval in which a number of inputs can change. Must contain 2 items."
+  "types*", "Array[String]", "The enumeration of types of inputs. Can contain only [stream.t-streams, stream.apache-kafka, stream.elasticsearch, stream.sql-database, stream.restful, input]."
+
+.. note:: `*` - a required field.
+
+.. A Json schema for a specification file of a module looks as presented below::
 
  {
   "$schema": "http://json-schema.org/draft-04/schema#",
@@ -121,7 +156,7 @@ A Json schema for a specification file of a module looks as presented below::
 Json Example For Each Module Type 
 =====================================
 
-Below you will find an example for the Json schema for each module type.
+Below you will find an example for the JSON schema for each module type.
 
 .. _Json_example_input:
 

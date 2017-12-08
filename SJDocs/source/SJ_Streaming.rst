@@ -12,6 +12,8 @@ The streaming component is essential in SJ-Platform. The data are fed to the sys
 
 The system receives data via **TCP** or **Apache Kafka**. Within SJ-Platform modules exchange data via **T-streams**. The results are exported to an external storage via output streams which type is determined by the type of the storage. For now, **Elasticsearch**, **SQL-database** and **RESTful** output stream types are supported. 
 
+.. figure:: _static/SJ_Streams.png
+
 The table below shows what types of streams are required as input/output streams for a particular module type.
 
 ===============  ================================================  ===============================================
@@ -44,7 +46,7 @@ Module type      Input stream                                      Output stream
 
 Input Streams
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-The data can be received from different sources. Currently, the platform supports obtaining data from Apache Kafka and via TCP connections.
+The data can be received by the system from different sources. Currently, the platform supports obtaining data from Apache Kafka and via TCP connections.
 
 SJ-Platform supports `Apache Kafka <https://kafka.apache.org/documentation/>`_ as a standard providing a common interface for the integration of many applications.
 

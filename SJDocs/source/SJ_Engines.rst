@@ -5,7 +5,7 @@ Engines: types, workflow
 
 .. Contents::
 
-An **engine** is the base of the system. It provides basic I/O functionalities. It is started via a Mesos framework which provides distributed task dispatching and then the statistics on task execution. 
+An **engine** is the base of the system. It provides basic I/O functionality. It is started via a Mesos framework which provides distributed task dispatching and then the statistics on task execution. 
 
 The engine performs data processing using an uploaded module. After its uploading, the engine receives raw data and sends them to the module executor. At this moment a module starts working. Module's executor starts data processing and returns the resulting data back to the engine where they are deserialized to be passed into the stream or a storage.
 
