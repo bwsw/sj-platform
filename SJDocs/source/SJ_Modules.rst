@@ -5,7 +5,7 @@ Modules: Types, Structure, Pipeline
 
 .. contents:: Contents
    
-A **module** is a processor that handles events of data streams. It works within an engine that receives raw data and sends them to the module executor. A module uses instances as a range of settings determining the collaborative work of an engine and a module. 
+A **module** is a processor that handles events of data streams. It is a key program component in the system that contains the logic of data processing and settings validation. It works within an engine that receives raw data and sends them to the module executor. A module uses instances as a range of settings determining the collaborative work of an engine and a module. 
 
 A module includes:
 
@@ -477,7 +477,7 @@ Module's instances require the following elements to be created for their work:
 
 - Provider
 
-You should create these elements before creating an instance. First, you need to create streams for inputs and outputs. Streams, in their turn, require specific services to be created. Each service type requires a provider of a corresponding type.
+You should create these elements before creating an instance. You need streams for instance inputs and outputs. Streams, in their turn, require specific services to be created. Each service (based on its type) requires a provider of a corresponding type.
 
 Each instance type works with a specific type of streams, services and providers. Find below the detailed information on the types of providers, services and streams required for each instance type. Besides, we will provide you an example to explain the dependence of entity types on an instance type.
 
@@ -495,7 +495,7 @@ Example
 ~~~~~~~~~~
 In this section we describe the process of determining of all the needed entities.
 
-For example, there is some system which needs to process data in a micro-batch mode from Apache Kafka. So we need to include a Batch module into our pipeline.
+For example, there is some issue for which you need to process data from Apache Kafka in a micro-batch mode. So we need to include a Batch module into our pipeline.
 
 For the Batch module we need to create a batch instance. In the system an instance of any type requires Apache Zookeper service and Apache Zookeeper provider for it (Figure 1.11). The Apache Zookeeper service should be unique for all the instances in the system.
 
@@ -504,14 +504,14 @@ For the Batch module we need to create a batch instance. In the system an instan
    
    Figure 1.11
    
-The batch instance will receive data from Apache Kafka streams. Apache Kafka streams require the Apache Kafka service to exist in our system. To create the Apache Kafka service you should create two specific providers of the following types: Apache Kafka and Apache Zookeeper (Figure 1.12).
+The batch instance will receive data from Apache Kafka streams. Apache Kafka streams require the Apache Kafka service to exist in our system. To create the Apache Kafka service you need two specific providers of the following types: Apache Kafka and Apache Zookeeper (the same as in the previous step) (Figure 1.12).
 
 .. figure:: _static/kfk-inst-serv-pr1.png
    :align: center
    
    Figure 1.12
    
-So these are the types of the instance and the streaming components that will be created for our example:
+So these are the types of the instance and the streaming components that we need for our example:
 
 .. figure:: _static/inst-stream-serv-prov.png
    :align: center
@@ -522,7 +522,7 @@ At this point we determined the types of instances in the pipeline and the types
 
 Firstly, create two providers - Apache Kafka and Apache Zookeeper. Secondly, create Apache Kafka service and Apache Zookeeper service (that will be unique for all instances in the system). Thirdly, create streams of Apache Kafka. Finally, create an instance of a batch module.
 
-The schemes below may help you to understand the dependence of entities in the system for each instance type.
+The schemes below may help you to understand the dependency of entities in the system for each module instance type.
 
 Input module instance type works with the following entities types:
 
@@ -542,19 +542,19 @@ Processing module instance type (regular or batch) works with the following enti
   
   |oneof-arrow| points to the entity type required for creation of this entity.
   
-  |req-arrow| points to the entity which may be needed when creating the dependent entity.
+  |req-arrow| points to the set of entities which may be needed when creating the dependent entity.
 
 
 Output module instance type works with the following entities types:
 
-.. figure:: _static/InstCorrelation-Output1.png
+.. figure:: _static/InstCorrelation-Output2.png
   :align: center
 
   Figure 1.16
   
   |oneof-arrow| points to the entity type required for creation of this entity.
   
-  |req-arrow| points to the set of instance types, one of which shall be created before creating the dependent entity.
+  |req-arrow| points to the set of instance types, one of which shall be created before creating the dependent one entity.
   
 The table below explains what entity types can be used as inputs or outputs for a particular instance type:
 
