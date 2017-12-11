@@ -523,7 +523,7 @@ Start Mesos and the services.
 
 .. figure:: _static/ServicesOnMarathon.png
    :align: center
-   Picture 1.8
+   Figure 1.8
 
 
 Step 2. SJ-Platform Setting Up 
