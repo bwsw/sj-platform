@@ -230,10 +230,7 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
-# latex_documents = [
-    (master_doc, 'Stream Juggler.tex', 'Stream Juggler Documentation',
-     'MaslovaEV', 'manual'),
-]
+# latex_documents = []
 
 # The name of an image file (relative to this directory) to place at the top of
 # the title page.
