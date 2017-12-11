@@ -523,7 +523,7 @@ Start Mesos and the services.
 
 .. figure:: _static/ServicesOnMarathon.png
    :align: center
-   Picture 1.8
+   Figure 1.8
 
 
 Step 2. SJ-Platform Setting Up 
@@ -896,7 +896,7 @@ You need to have 'fping' installed. If not, please, install it::
 
  sudo apt-get install fping
 
-And now you can **start the processing pipeline**. Please, replace value of `nc` operands with the host and port of the instance task::
+And now you can **start the processing pipeline**. Please, replace values of `nc` operands with the host and the port of the instance task::
 
  fping -l -g 91.221.60.0/23 2>&1 | awk '{printf "%s ", $0; system("echo $(date +%s%N | head -c -7)")}' | nc 176.120.25.19 31000
 
@@ -1032,7 +1032,7 @@ To delete the *ps-output* module instance send::
 
  curl --request DELETE "http://$address/v1/modules/output-streaming/pingstation-output/1.0/instance/pingstation-output-1h/"
 
-Via the UI you can make sure the instances are deleted.
+In the UI you can make sure the deleted instances are not present.
 
 .. _sflow-example-task:
 
@@ -1047,7 +1047,9 @@ A sFlow reporter is an external data source in our example task. It sends data t
 
 The CSV data are transformed by the input module and sent for processing to the batch processing module. The data that can not be parsed by the input module are treated as incorrect and sent straight to the output module without processing.
 
-Processed data are saved in the PostgreSQL database. Output module with the streams of SQL-database type exports it from the platform.
+The processed data are exported via the output module with the streams of SQL-database type and saved in the PostgreSQL database.
+
+.. Processed data are saved in the PostgreSQL database. Output module with the streams of SQL-database type exports it from the platform.
 
 A complete pipeline can be rendered as in the diagram below:
 
@@ -1497,7 +1499,7 @@ Or, in the UI, click at the input module instance in the "Instances" section and
    
    Figure 2.10
 
-And now you can start the processing pipeline (replace <host> and <port> by values for the input module task host and port)::
+And now you can **start the processing pipeline** (please, replace <host> and <port> by the values returned for the instance task of the input module)::
 
  python send_sflow.py -p <port> -h <host> sflow_example.csv
  

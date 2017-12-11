@@ -313,7 +313,7 @@
                     <select [(ngModel)]="newInstance.inputs[i]"
                             (change)="checkTimestampAcceptable()"
                             name="instanceInputs{{i}}" required class="form-control">
-                      <option *ngFor="let stream of streamsList | streamFilter: 'stream.t-streams, stream.apache-kafka' | orderBy: 'name' "  value="{{stream.name}}">
+                      <option *ngFor="let stream of streamsList | streamFilter: 'stream.t-streams,stream.apache-kafka' | orderBy: 'name' "  value="{{stream.name}}">
                         {{stream.name}} ({{stream.service}}, {{providerList[stream.service]}})
                       </option>
                     </select>
@@ -446,10 +446,10 @@
               </div>
             </fieldset>
 
-            <!-- State full checkpoint -->
+            <!-- Stateful checkpoint -->
             <fieldset *ngIf="newInstance.module.moduleType === 'regular-streaming' ||
                               newInstance.module.moduleType === 'batch-streaming'" class="form-group row">
-              <label class="col-form-label col-sm-2">State full checkpoint</label>
+              <label class="col-form-label col-sm-2">Stateful checkpoint</label>
               <div class="col col-sm-10">
                 <input [(ngModel)]="newInstance.stateFullCheckpoint" name="instanceStateFullCheckpoint"
                        type="number" class="form-control" placeholder="Enter state full checkpoint">

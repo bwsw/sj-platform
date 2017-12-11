@@ -22,7 +22,7 @@ The platform features presented above have conditioned the architecture develope
 .. figure:: _static/genCon.png
     :align: center
     
-    Picture 1.1
+    Figure 1.1
 
 1) **Processing** component for launching data computation,
 2) **Streaming** component for data transportation,
@@ -37,7 +37,7 @@ The events enter the processing module in streams from a list of supported inter
     :align: center
     :scale: 80%
 
-    Picture 1.2
+    Figure 1.2
     
 SJ-Platform provides a user with the comprehensive **API** and **UI** that allow him/her to develop, customize and manage the event processing pipeline.
 
@@ -87,7 +87,7 @@ So the pipeline may look like at the following scheme:
    :align: center
    :scale: 80%
 
-   Picture 1.3
+   Figure 1.3
     
 In the Processing platform component, the ingested data are transformed into streams, processed and sent to an external storage.  Data transformation and computation are the two major tasks of this component.
 
@@ -136,7 +136,7 @@ The general structure of SJ-Platform can be rendered as at the scheme below wher
    :scale: 80 %
    :align: center
 
-   Picture 1.4
+   Figure 1.4
     
 To understand the interconnections between platform components look at the diagram below. 
 
@@ -145,7 +145,7 @@ SJ-Platform uses a range of data sources and data storages. A client operates th
 .. figure:: _static/SJСomponentDiagram2.png
     :align: center
    
-    Picture 1.5
+    Figure 1.5
     
 Every component deployed to the Stream Juggler Platform contributes to the main idea of hitting three V-s of data processing:
 

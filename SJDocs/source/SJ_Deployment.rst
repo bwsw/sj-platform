@@ -714,7 +714,7 @@ The following services are required before the platfrom deployment on minimesos:
  
    After launching you can see the Weavescope app (https://github.com/weaveworks/scope) on port 4040.
 
-   This application is an instrument to visualize, monitor your docker containers. It generates the map that can look like at the picture below: 
+   This application is an instrument to visualize, monitor your docker containers. It generates the map that can look like at the figure below: 
    
    .. figure:: _static/weavescope1.png
    
@@ -1079,11 +1079,15 @@ And install it::
 After deploying each service you may see corresponding applications in Marathon UI (port 8080):
  
 .. figure:: _static/marathon2.png
- 
+   
+   Figure 1.1
+   
 and corresponding tasks in the Mesos UI (port 5050):
  
 .. figure:: _static/mesos2.png
- 
+   
+   Figure 1.2
+   
 The graph structure provided by weavescope will surely change (port 4040):
  
 .. figure:: _static/weavescope2.png
@@ -1227,7 +1231,9 @@ The example below is compiled in Kibana v.5.5.1.
 It illustrates average time of echo-responses by IPs per a selected period of time (e.g. 1 min). As you can see, different nodes have the different average time of response. Some nodes respond faster than others. 
 
 .. figure:: _static/Kibana.png
-
+   
+   Figure 1.3
+   
 Lots of other parameter combinations can be implemented to view the results.
 
 Instance Shutdown 
