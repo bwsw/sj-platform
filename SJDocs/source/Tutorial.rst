@@ -168,7 +168,7 @@ Then the input module parses ICMP echo responses (IP and response time are selec
 
 After that, the instance of a processing module aggregates response time and a total amount of echo/unreachable responses by IP per 1 minute and sends aggregated data to 'echo-response-1m' stream. In the fping demonstration example the data aggregation is performed with the processing module of a regular-streaming type. 
 
-In the :ref:`fping-Customization` section we will tell how to add two more instances to the processing module for calculating responses per 3 minutes and per 1 hour. It will allow adjusting the system to a specific aim and makeing calculaations for different periods of time.
+In the :ref:`fping-Customization` section we will tell you how to add two more instances to the processing module for calculating responses per 3 minutes and per 1 hour. It is an optional step which allows adjusting the system to a specific aim and making calculations for different periods of time.
 
 Finally, the output module exports aggregated data from echo-response streams to Elasticsearch. The result is visualized using Kibana. 
 
