@@ -896,7 +896,7 @@ You need to have 'fping' installed. If not, please, install it::
 
  sudo apt-get install fping
 
-And now you can **start the processing pipeline**. Please, replace value of `nc` operands with the host and port of the instance task::
+And now you can **start the processing pipeline**. Please, replace values of `nc` operands with the host and the port of the instance task::
 
  fping -l -g 91.221.60.0/23 2>&1 | awk '{printf "%s ", $0; system("echo $(date +%s%N | head -c -7)")}' | nc 176.120.25.19 31000
 
@@ -1499,7 +1499,7 @@ Or, in the UI, click at the input module instance in the "Instances" section and
    
    Figure 2.10
 
-And now you can start the processing pipeline (replace <host> and <port> by the values returned for the instance task of the input module)::
+And now you can **start the processing pipeline** (please, replace <host> and <port> by the values returned for the instance task of the input module)::
 
  python send_sflow.py -p <port> -h <host> sflow_example.csv
  
