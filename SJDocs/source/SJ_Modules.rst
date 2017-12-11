@@ -477,23 +477,23 @@ Module's instances require the following elements to be created for their work:
 
 - Provider
 
-You should create these elements before creating an instance. You need streams for instance inputs and outputs. Streams, in their turn, require specific services to be created. Each service (based on its type) requires a provider of a corresponding type.
+You should create these elements before creating an instance. You need streams for instance inputs and outputs. Streams, in their turn, require specific services to be created. Each service (based on its type) requires a provider of a corresponding type. All these elements form the infrastructure for an instance.
 
 Each instance type works with a specific type of streams, services and providers. Find below the detailed information on the types of providers, services and streams required for each instance type. Besides, we will provide you an example to explain the dependence of entity types on an instance type.
 
-Stream
-~~~~~~~~
+**Stream**
+
 The Stream Juggler Platform supports *Apache Kafka* and *T-stream* types of streams. And while the Apache Kafka streams are a well-known type of streaming introduced by Apache Software Foundation, the T-streams is intentionally designed for the Stream Juggler Platform as a complement for Apache Kafka. The T-streams has more features than Kafka and makes exactly-once processing possible. Find more about T-streams at the `site <http://t-streams.com>`_ .
 
 The following stream types can be used for output streams that export resulting data from the system to an external storage: Elasticsearch, SQL-database, a system with RESTful interface. They are determined by the type of the external data storage.
 
-Service and Provider
-~~~~~~~~~~~~~~~~~~~~~
+**Service and Provider**
+
 To create streams of exact type in the system you need to create a service and a provider for this service. The types of a service and a provider are determined by the type of a stream you need for the module.
 
-Example
-~~~~~~~~~~
-In this section we describe the process of determining of all the needed entities.
+Example of Instance Infrastructure
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In this section we will describe the process of determining of all the needed entities for the instance infrastructure.
 
 For example, there is some issue for which you need to process data from Apache Kafka in a micro-batch mode. So we need to include a Batch module into our pipeline.
 
@@ -504,23 +504,26 @@ For the Batch module we need to create a batch instance. In the system an instan
    
    Figure 1.11
    
-The batch instance will receive data from Apache Kafka streams. Apache Kafka streams require the Apache Kafka service to exist in our system. To create the Apache Kafka service you need two specific providers of the following types: Apache Kafka and Apache Zookeeper (the same as in the previous step) (Figure 1.12).
+The batch instance will receive data from Apache Kafka streams. Apache Kafka streams require the Apache Kafka service to exist in our system. The Apache Kafka service requires two specific providers of the following types: Apache Kafka and Apache Zookeeper (the same as in the previous step) (Figure 1.12).
 
 .. figure:: _static/kfk-inst-serv-pr1.png
    :align: center
    
    Figure 1.12
    
-So these are the types of the instance and the streaming components that we need for our example:
+So these are the instance and the streaming components types that we need for our example:
 
 .. figure:: _static/inst-stream-serv-prov.png
    :align: center
    
    Figure 1.13
 
-At this point we determined the types of instances in the pipeline and the types of streaming components. So we can start building the infrastructure.
+At this point we have determined the type of instance in the pipeline and the types of streaming components. So we can start building the infrastructure.
 
-Firstly, create two providers - Apache Kafka and Apache Zookeeper. Secondly, create Apache Kafka service and Apache Zookeeper service (that will be unique for all instances in the system). Thirdly, create streams of Apache Kafka. Finally, create an instance of a batch module.
+Firstly, create two providers - Apache Kafka and Apache Zookeeper. Secondly, create Apache Kafka service and Apache Zookeeper service (that will be unique for all instances in the system). Thirdly, create the stream of Apache Kafka. Finally, create the instance of a batch module.
+
+General Instance Infrastructure
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The schemes below may help you to understand the dependency of entities in the system for each module instance type.
 
@@ -554,14 +557,14 @@ Output module instance type works with the following entities types:
   
   |oneof-arrow| points to the entity type required for creation of this entity.
   
-  |req-arrow| points to the set of entities, one of which shall be created before creating the dependent entity.
+  |oneofset-arrow| points to the set of entities, one of which shall be created before creating the dependent entity.
   
-The table below explains what entity types can be used as inputs or outputs for a particular instance type:
+The table below explains what inputs or outputs can be used for a particular instance type:
 
 ===============  ================================================  ===============================================
 Instance type    Inputs                                            Outputs
 ===============  ================================================  ===============================================
-*Input*            TCP (provided by Input Streaming Engine)         T-streams 
+*Input*           TCP (provided by Input Streaming Engine)          T-streams 
 
                                                                       **Providers**: Apache Zookeeper
                                        
