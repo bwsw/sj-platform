@@ -542,7 +542,7 @@ Processing module instance type (regular or batch) works with the following enti
   
   |oneof-arrow| points to the entity type required for creation of this entity.
   
-  |req-arrow| points to the set of entities which may be needed when creating the dependent entity.
+  |req-arrow| points to the entity which may be needed when creating a dependent entity.
 
 
 Output module instance type works with the following entities types:
@@ -554,7 +554,7 @@ Output module instance type works with the following entities types:
   
   |oneof-arrow| points to the entity type required for creation of this entity.
   
-  |req-arrow| points to the set of instance types, one of which shall be created before creating the dependent one entity.
+  |req-arrow| points to the set of entities, one of which shall be created before creating the dependent entity.
   
 The table below explains what entity types can be used as inputs or outputs for a particular instance type:
 
