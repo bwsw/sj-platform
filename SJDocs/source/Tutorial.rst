@@ -1048,6 +1048,7 @@ A sFlow reporter is an external data source in our example task. It sends data t
 The CSV data are transformed by the input module and sent for processing to the batch processing module. The data that can not be parsed by the input module are treated as incorrect and sent straight to the output module without processing.
 
 The processed data are exported via the output module with the streams of SQL-database type and saved in the PostgreSQL database.
+
 .. Processed data are saved in the PostgreSQL database. Output module with the streams of SQL-database type exports it from the platform.
 
 A complete pipeline can be rendered as in the diagram below:
