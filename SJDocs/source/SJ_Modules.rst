@@ -608,3 +608,4 @@ We hope this information will help you to select the most appropriate types of e
 
 .. |oneof-arrow| image:: _static/oneof-arrow.png
 
+.. |oneofset-arrow| image:: _static/oneofset-arrow.png
