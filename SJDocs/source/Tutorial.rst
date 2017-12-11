@@ -160,13 +160,15 @@ In the example task solution the processing workflow is formed in the following 
    
    Figure 1.8
    
-This diagram demonstrates the processing workflow of the demo. As you can see, the data come to a TCP input module through a pipeline of fping and netcat. The TCP input module is a regular module that performs per-event processing. We provide two off-the-shelf modules - CSV and regex - for two most general input data formats. Find more information about them at the :ref:`input-module` section. For the fping example task we will use a regex input module. It processes an input stream which contains text data using a set of regular expressions, and then serializes them with Apache Avro.
+This diagram demonstrates the processing workflow of the demo. As you can see, the data come to a TCP input module through a pipeline of fping and netcat. The TCP input module is an input module that performs per-event processing. For the fping example task we will use one of two TCP input modules provided by SJ-Platform - a regex input module. It processes an input stream which contains text data using a set of regular expressions, and then serializes them with Apache Avro.
+
+.. note:: We provide two off-the-shelf input modules - CSV and regex - for two most general input data formats. Find more information about them at the :ref:`input-module` section.
 
 Then the input module parses ICMP echo responses (IP and response time are selected) and ICMP unreachable responses (IPs only are selected) and puts the parsed data into 'echo-response' stream and 'unreachable-response' stream, respectively.
 
 After that, the instance of a processing module aggregates response time and a total amount of echo/unreachable responses by IP per 1 minute and sends aggregated data to 'echo-response-1m' stream. In the fping demonstration example the data aggregation is performed with the processing module of a regular-streaming type. 
 
-We add two more instances to the processing module to calculate responses per 3 minutes and per 1 hour. Correspondingly, 'echo-response-3m' and 'echo-response-1h' streams are created for these instances to put there the aggregated data on echo-responses.
+In the :ref:`fping-Customization` section we will tell how to add two more instances to the processing module for calculating responses per 3 minutes and per 1 hour. It will allow adjusting the system to a specific aim and makeing calculaations for different periods of time.
 
 Finally, the output module exports aggregated data from echo-response streams to Elasticsearch. The result is visualized using Kibana. 
 
@@ -928,17 +930,19 @@ It illustrates the average time of echo-responses by IPs per a selected period o
 
 Many other parameter combinations can be implemented to view the results.
 
+.. _fping-Customization:
+
 Customization
 ~~~~~~~~~~~~~~~~
-The platform allows to customize the pipeline. For example, you can change the data aggregation interval adding more instances. You can create one instance with the 3-minute aggregation interval and another instance with 1-hour aggregation interval.
+The platform allows to customize the pipeline. For example, you can change the data aggregation interval adding more instances. You can create one instance with the 3-minute aggregation interval and another instance with 1-hour aggregation interval. We will start from creating input and output streams for these instances.
 
-1. Each instance needs an input stream and an output stream. You can create streams on the base of the existing providers and services. Remember to create the JSON files with different names, e.g. 'echo-response-3m' as *ps-process* output stream aggregating data per 3 minutes, 'echo-response-1h' as *ps-process* output stream aggregating data per 1 hour::
+1. You can create streams on the base of the existing providers and services. Remember to create the JSON files with different names. Create output streams for the *ps-process* module with the names e.g. 'echo-response-3m' as an output stream aggregating data per 3 minutes, 'echo-response-1h' as an output stream aggregating data per 1 hour::
  
     curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/echo-response-3m.json"
 
     curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/echo-response-1h.json"
     
-   Create output streams for the *ps-output* module with new names, e.g. 'es-echo-response-3m' exporting result data  aggregated per 3 minutes, 'es-echo-response-1h' exporting result data aggregated per 1 hour:: 
+   Create output streams for the *ps-output* module with new names, e.g. 'es-echo-response-3m' exporting resulting data aggregated per 3 minutes, 'es-echo-response-1h' exporting resulting data aggregated per 1 hour:: 
   
      curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/es-echo-response-3m.json"
 
