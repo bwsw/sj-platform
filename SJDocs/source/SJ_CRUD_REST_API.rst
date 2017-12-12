@@ -54,9 +54,9 @@ All text data must be encoded in UTF-8.
 
 The data format in the body of the response is JSON.
 
+.. _REST_Providers:
 
-
-CRUD Rest-API for Providers
+CRUD REST-API for Providers
 -----------------------------------
 
 The range of REST API methods described below allows to create or delete a provider, get the information on the provider, get the list of providers in the system, test connection to a provider.
@@ -389,7 +389,9 @@ Error response example::
  
 .. tip:: A full range of error responses can be found at :ref:`Provider_Errors`
 
-CRUD Rest-API for Services
+.. _REST_Services:
+
+CRUD REST-API for Services
 --------------------------------------
 
 The range of REST API methods described below allows to create or delete a service, get the information on the service, get the list of services and service types in the system, get streams and instances related to a service.
@@ -778,7 +780,9 @@ Error response example::
 
 .. tip:: A full range of error responses can be found at :ref:`Services_Errors`
 
-CRUD Rest-API for Streams
+.. _REST_Streams:
+
+CRUD REST-API for Streams
 --------------------------------------
 
 The range of REST API methods described below allows to create or delete a stream, get the information on the stream, get the list of streams and stream types in the system, get instances related to a stream.
@@ -1083,7 +1087,7 @@ Error response example::
 
 .. tip:: A full range of error responses can be found at :ref:`Streams_Errors`
 
-CRUD Rest-API for Configurations
+CRUD REST-API for Configurations
 -----------------------------------
 
 The range of REST API methods described below allows to create or delete configuration, get the information on the configuration, get the list of configurations existing in the system, get list of domains.
@@ -1376,7 +1380,7 @@ Success response example::
 
 .. tip:: A full range of error responses can be found at :ref:`Config_Settings_Errors`
 
-CRUD Rest-API for Custom Files
+CRUD REST-API for Custom Files
 ----------------------------------------
 
 The range of REST API methods described below allows to upload a custom jar or file, download it to your computer, get list of custom jars or files in the system and delete a custom jar or file.
@@ -1777,10 +1781,10 @@ Success response example::
  }
 
 .. _Modules_REST_API:
-CRUD Rest-API for Modules 
+CRUD REST-API for Modules 
 ------------------------------
 
-This is the CRUD Rest-API for modules uploaded as jar files, instantiated and running modules as well as for custom jar files.
+This is the CRUD REST-API for modules uploaded as jar files, instantiated and running modules as well as for custom jar files.
 
 .. csv-table::  Module types
  :header: "Types"
@@ -2146,7 +2150,7 @@ Error response example::
 
 .. _REST_API_Instance:
 
-CRUD Rest-API for Instances
+CRUD REST-API for Instances
 -----------------------------------
 
 The range of REST API methods described below allows to create an instance of a module, get the list of existing instances, get the settings of a specific instance, start and stop an instance and get the instance tasks information as well as delete an instance of a specific module. 
@@ -2947,7 +2951,7 @@ Error response example::
     "status-code": 404
  }
 
-Stream Juggler Mesos Framework Rest
+Mesos Framework REST API
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Request method: GET
