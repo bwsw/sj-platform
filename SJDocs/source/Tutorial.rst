@@ -619,6 +619,7 @@ In the UI you can see the uploaded configurations under the “Configuration” 
    
    Figure 1.10
 
+.. _Module_Uploading:
 
 Step 4. Module Uploading 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -633,7 +634,7 @@ For the stated example task we upload the following modules:
 
 - an output module - *ps-output* module - that exports resulting data to Elasticsearch.
 
-Please, follow these steps to build and upload the modules.
+Please, follow these steps to upload the modules.
 
 First, configure the environment::
  
