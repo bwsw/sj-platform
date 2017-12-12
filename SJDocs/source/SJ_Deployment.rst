@@ -359,7 +359,7 @@ To set up required configurations for the engines, run the following commands. P
     
 4. You can add the following optional configuraions if necessary. They have default values in the system but can be overriden.
 
- **Optional** configurations:
+**Optional** configurations:
 
 .. csv-table:: 
   :header: "Config Domain","Name", "Description", "Default value"
