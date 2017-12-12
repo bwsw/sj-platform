@@ -1,4 +1,4 @@
-Platform Deployment on Cluster 
+SJ-Platform Deployment on Cluster 
 =====================================
 
 .. Contents::
