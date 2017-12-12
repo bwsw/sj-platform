@@ -215,7 +215,7 @@ Specify the same token and prefix in the T-streams service JSON::
   "type": "service.t-streams",
   "provider": "zookeeper-ps-provider",
   "prefix": <prefix-name>,
-  "token" : <tolen>
+  "token" : <token>
  }
 
 **tts.json** 
