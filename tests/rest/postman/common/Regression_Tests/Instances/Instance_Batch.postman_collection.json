@@ -331,7 +331,7 @@
 			"description": "",
 			"collectionId": "e36ec926-22af-f0e8-007c-008794d5c422",
 			"responses": [],
-			"rawModeData": "{\n       \"name\":\"batch\",\n       \"coordinationService\": \"zookeper-coord-serv\", \n       \"inputs\": [\"input-kafka\"], \n       \"options\":{\"d\":1},\n       \"outputs\": [\"output-tstream\"],\n       \"stateFullCheckpoint\":0\n     }"
+			"rawModeData": "{\n       \"name\":\"batch\",\n       \"coordinationService\": \"zookeper-coord-serv\", \n       \"inputs\": [\"input-kafka\"], \n       \"options\":{\"d\":1},\n       \"outputs\": [\"output-tstream\"],\n       \"stateManagement\":\"ram\",\n       \"stateFullCheckpoint\":0\n     }"
 		},
 		{
 			"id": "bd4ae948-11f4-bbb3-28d8-496ebfe4e5aa",
@@ -354,7 +354,7 @@
 			"description": "",
 			"collectionId": "e36ec926-22af-f0e8-007c-008794d5c422",
 			"responses": [],
-			"rawModeData": "{\n       \"name\":\"batch\",\n       \"coordinationService\": \"zookeper-coord-serv\", \n       \"inputs\": [\"input-kafka\"], \n       \"options\":{\"d\":1},\n       \"outputs\": [\"output-tstream\"],\n       \"stateFullCheckpoint\":-5\n     }"
+			"rawModeData": "{\n       \"name\":\"batch\",\n       \"coordinationService\": \"zookeper-coord-serv\", \n       \"inputs\": [\"input-kafka\"], \n       \"options\":{\"d\":1},\n       \"outputs\": [\"output-tstream\"],\n       \"stateManagement\":\"ram\",\n       \"stateFullCheckpoint\":-5\n     }"
 		},
 		{
 			"id": "487c4162-78b1-ad0a-5e28-d71caeb701bf",
