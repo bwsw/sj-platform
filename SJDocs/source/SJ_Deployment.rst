@@ -152,7 +152,7 @@ For sj-rest.json it is better to upload the docker image separately::
 
 Replace <zk_ip> according to the Zookeeper address.
 
-Replace <token> and <prefix-name> with valid prefix and token. These names should be specified then in the T-streams service JSON (see below)::
+Replace <token> and <prefix-name> with valid token and prefix. These names should be specified then in the T-streams service JSON (see below)::
 
  key=<token>
  active.tokens.number=100
