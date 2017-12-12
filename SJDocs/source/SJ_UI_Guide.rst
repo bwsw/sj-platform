@@ -130,6 +130,7 @@ For each uploaded custom jar a new configuration is added in the following forma
 
  key = {custom-jar-name}-{version}, value = {file-name}
 
+.. _UI_Providers:
 
 Providers 
 ---------
@@ -216,6 +217,8 @@ You can perform the following actions on each provider in the list:
 3. **Test Connection** to a provider.
 
 The list of providers can be filtered by its type and/or a name using the search tool above the list.
+
+.. _UI_Services:
 
 Services
 --------
@@ -358,6 +361,7 @@ You can perform the following actions on each service in the list:
 
 The list of services can be filtered by its type and/or a name using the search tool above the list.
 
+.. _UI_Streams:
 
 Streams
 ----------
@@ -501,8 +505,10 @@ In the list of streams the following actions can be performed:
 
 The list of streams can be filtered by its type and/or a name using the search tool above the list.
 
+.. _UI_Modules:
+
 Modules
--------
+---------
 
 In the next section — *Modules* — you can upload and manage your own module(s). 
 
@@ -592,6 +598,7 @@ The following actions can be performed with the files in the list:
 The list of jars can be filtered by its name using the search tool above the list.
 
 .. _Custom_Files:
+
 Custom Files
 ~~~~~~~~~~~~
 
@@ -607,9 +614,12 @@ The following actions can be performed with the files in the list:
 
 The list of files can be filtered by its name using the search tool above the list.
 
+.. _UI_Instances:
+
 Instances
----------
-Module uses a specific **instance** as a full set of settings that determine the collaborative work of an engine and a module.
+-----------
+
+Module's engine uses a specific **instance** as a full set of settings that determine the collaborative work of an engine and a module.
 
 Before creating an instance make sure all necessary *configuration* *settings* are added to the system.
 
