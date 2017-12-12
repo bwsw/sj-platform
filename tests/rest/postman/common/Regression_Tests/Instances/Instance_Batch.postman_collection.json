@@ -369,7 +369,7 @@
 			"data": [],
 			"dataMode": "raw",
 			"version": 2,
-			"tests": "tests[\"Body matches string\"] = responseBody.has(\"'startFrom' must be one of: [oldest, newest] or timestamp\");\n\ntests[\"Status code is 400\"] = responseCode.code === 400;\n\n",
+			"tests": "tests[\"Body matches string\"] = responseBody.has(\"'startFrom' attribute is not one of: [oldest, newest] or timestamp\");\n\ntests[\"Status code is 400\"] = responseCode.code === 400;\n\n",
 			"currentHelper": "normal",
 			"helperAttributes": {},
 			"time": 1512720376569,
@@ -461,7 +461,7 @@
 			"data": [],
 			"dataMode": "raw",
 			"version": 2,
-			"tests": "tests[\"Body matches string\"] = responseBody.has(\"'Window' attribute must be greater than zero.\");\n\ntests[\"Status code is 400\"] = responseCode.code === 400;\n\n",
+			"tests": "tests[\"Body matches string\"] = responseBody.has(\"'Window' attribute must be greater than zero\");\n\ntests[\"Status code is 400\"] = responseCode.code === 400;\n\n",
 			"currentHelper": "normal",
 			"helperAttributes": {},
 			"time": 1512964189097,
@@ -507,7 +507,7 @@
 			"data": [],
 			"dataMode": "raw",
 			"version": 2,
-			"tests": "tests[\"Body matches string\"] = responseBody.has(\"'Window' attribute must be greater than zero.\");\n\ntests[\"Status code is 400\"] = responseCode.code === 400;\n\n",
+			"tests": "tests[\"Body matches string\"] = responseBody.has(\"'Window' attribute must be greater than zero\");\n\ntests[\"Status code is 400\"] = responseCode.code === 400;\n\n",
 			"currentHelper": "normal",
 			"helperAttributes": {},
 			"time": 1512964464117,
@@ -538,7 +538,7 @@
 			"description": "",
 			"collectionId": "e36ec926-22af-f0e8-007c-008794d5c422",
 			"responses": [],
-			"rawModeData": "{\n       \"name\":\"batch\",\n       \"coordinationService\": \"zookeper-coord-serv\", \n       \"inputs\": [\"input-kafka\"], \n       \"options\":{\"d\":1},\n       \"outputs\": [\"output-tstream\"],\n       \"window\":2\n       \"slidingInterval\":5\n     }"
+			"rawModeData": "{\n       \"name\":\"batch\",\n       \"coordinationService\": \"zookeper-coord-serv\", \n       \"inputs\": [\"input-kafka\"], \n       \"options\":{\"d\":1},\n       \"outputs\": [\"output-tstream\"],\n       \"window\":2,\n       \"slidingInterval\":5\n     }"
 		},
 		{
 			"id": "4d9176a9-54c1-576b-89e6-1cad744034b7",
