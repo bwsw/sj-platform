@@ -155,12 +155,14 @@ The issue we are going to solve using our platform is to collect aggregated info
 
 In the example task solution the processing workflow is formed in the following way:
 
-.. figure:: _static/FPingDemo1.png
+.. figure:: _static/FPingDemo2.png
    :align: center
    
    Figure 1.8
    
-This diagram demonstrates the processing workflow of the demo. As you can see, the data come to a TCP input module through a pipeline of fping and netcat. The TCP input module is an input module that performs per-event processing. For the fping example task we will use one of two TCP input modules provided by SJ-Platform - a regex input module. It processes an input stream which contains text data using a set of regular expressions, and then serializes them with Apache Avro.
+This diagram demonstrates the processing workflow for the example. Green, yellow and purple blocks are executed with SJ-Platform. They are an input module, a processing module and an output module. 
+
+The data come to a TCP input module through a pipeline of fping and netcat. The TCP input module is an input module that performs per-event processing. For the fping example task we will use one of two TCP input modules provided by SJ-Platform - a regex input module. It processes an input stream which contains text data using a set of regular expressions, and then serializes them with Apache Avro.
 
 .. note:: We provide two off-the-shelf input modules - CSV and regex - for two most general input data formats. Find more information about them at the :ref:`input-module` section.
 
@@ -168,11 +170,11 @@ Then the input module parses ICMP echo responses (IP and response time are selec
 
 After that, the instance of a processing module aggregates response time and a total amount of echo/unreachable responses by IP per 1 minute and sends aggregated data to 'echo-response-1m' stream. In the fping demonstration example the data aggregation is performed with the processing module of a regular-streaming type. 
 
-In the :ref:`fping-Customization` section we will tell you how to add two more instances to the processing module for calculating responses per 3 minutes and per 1 hour. It is an optional step which allows adjusting the system to a specific aim and making calculations for different periods of time.
+In the :ref:`fping-Customization` section we will tell you how to add more instances to the processing module for calculating responses per a different period of time - per 3 minutes and per 1 hour. It is an optional step which allows adjusting the system to a specific aim and making calculations for different periods of time.
 
 Finally, the output module exports aggregated data from echo-response streams to Elasticsearch. The result is visualized using Kibana. 
 
-The data are fed to the system, passed from one module to another and exported from the system via streams. Read more about streams under the :ref:`Creating_Streams` section.
+The data are fed to the system, passed from one module to another and exported from the system via streams. 
 
 Platform entities can be created via Web UI filling up all needed fields in corresponding forms. In the demonstration task, we suggest adding the entities to the system via REST API as it is the easiest and quickest way. You can use Web UI to see the created entities. 
 
@@ -187,9 +189,9 @@ Step 1. Deployment
 
 Though SJ-Platform is quite a complex system and it includes a range of services to be deployed, no special skills are required for its setting up. 
 
-There are three options to deploy the platform. Please, read the description for each option and choose the most convenient for you.
+There are two options to deploy the platform. Please, read the description for each option and choose the most convenient for you.
 
-**Option 1.** The easiest way is to deploy SJ-Platform on `a virtual machine <http://streamjuggler.readthedocs.io/en/develop/SJ_Demo_Deployment.html>`_. This is the most rapid way to get acquainted with the platform and assess its performance. 
+**Option 1.** The easiest way to start SJ-Platform is prebuilding `a virtual box image <http://streamjuggler.readthedocs.io/en/develop/SJ_Demo_Deployment.html>`_. This is the most rapid way to get acquainted with the platform and assess its performance. 
 
 We suggest deploying the platform locally via Vagrant with VirtualBox as a provider. It takes up to 30 minutes. 
 
@@ -217,15 +219,6 @@ The platform is deployed with no entities. Thus, the pipeline should be built fr
 
 This tutorial provides step-by-step instructions to deploy the demo project to Mesos using Marathon. At first step, Mesos with all the services will be deployed. Then entities will be created for the platform. Finally, modules will be launched and results will be visualised using Kibana.
 
-**Option 3.** Also, you can run SJ-Platform locally deploying it on `minimesos <http://streamjuggler.readthedocs.io/en/develop/SJ_Deployment.html#minimesos-deployment>`_ as a testing environment.
-
-Minimum system requirements in this case are as follows: 
-
-- git, 
-- sbt (see `official documentation <http://www.scala-sbt.org/download.html>`_), 
-- Docker (see `official documentation <https://docs.docker.com/engine/installation/linux/docker-ce/ubuntu/>`_),
-- cURL.
-
 For the example task we provide instructions to deploy the platform **to Mesos** using Marathon.
 
 The deployment is performed via REST API.
@@ -246,7 +239,6 @@ So, let's start with deploying Mesos and other services.
 Start Mesos and the services. 
 
 .. note:: If you are planning to process data in a parallel mode (set the ``parallelizm`` parameter to a value greater than 1), you need to increase the ``executor_registration_timeout`` parameter for Mesos-slave.
-
     
 2) Create JSON files and a configuration file. Please, name them as specified here.
 
@@ -934,7 +926,15 @@ Many other parameter combinations can be implemented to view the results.
 
 Customization
 ~~~~~~~~~~~~~~~~
-The platform allows to customize the pipeline. For example, you can change the data aggregation interval adding more instances. You can create one instance with the 3-minute aggregation interval and another instance with 1-hour aggregation interval. We will start from creating input and output streams for these instances.
+The platform allows to customize the processing flow. For example, you can change the data aggregation interval adding more instances. You can create one instance with the 3-minute aggregation interval and another instance with 1-hour aggregation interval. 
+
+.. figure:: _static/FPingDemoCustom.png
+   :align: center
+   :scale: 80%
+   
+   Figure 1.19
+
+We will start from creating input and output streams for the instances. 
 
 1. You can create streams on the base of the existing providers and services. Remember to create the JSON files with different names. Create output streams for the *ps-process* module with the names e.g. 'echo-response-3m' as an output stream aggregating data per 3 minutes, 'echo-response-1h' as an output stream aggregating data per 1 hour::
  
@@ -944,9 +944,9 @@ The platform allows to customize the pipeline. For example, you can change the d
     
    Create output streams for the *ps-output* module with new names, e.g. 'es-echo-response-3m' exporting resulting data aggregated per 3 minutes, 'es-echo-response-1h' exporting resulting data aggregated per 1 hour:: 
   
-     curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/es-echo-response-3m.json"
+    curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/es-echo-response-3m.json"
 
-     curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/es-echo-response-1h.json"
+    curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/es-echo-response-1h.json"
 
 2. Create two more instances for the *ps-process* module with different checkpoint intervals to process data every 3 minutes and every hour. Remember to create them with different names. In our example we create 'pingstation-echo-process-3m' and 'pingstation-echo-process-1h' instances with ‘output’ values ‘echo-response-3m’ and ‘echo-response-1h’ correspondingly::
 
@@ -1006,7 +1006,7 @@ In the UI, you will see the stopped instances with the “stopped” status.
 .. figure:: _static/InstancesStopped1.png
    :align: center
    
-   Figure 1.19
+   Figure 1.20
 
 Deleting Instance
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1057,12 +1057,13 @@ The processed data are exported via the output module with the streams of SQL-da
 
 A complete pipeline can be rendered as in the diagram below:
 
-.. figure:: _static/SflowDemo.png
+.. figure:: _static/SflowDemo2.png
    :align: center
+   :scale: 80%
    
    Figure 2.1
 
-Green, yellow, purple and red blocks within the SJ-Platform scope rectangular area are managed and evaluated by SJ-Platform. 
+Green, yellow, purple and red blocks within the SJ-Platform rectangular area are managed and evaluated by SJ-Platform. 
 
 These are:
 
