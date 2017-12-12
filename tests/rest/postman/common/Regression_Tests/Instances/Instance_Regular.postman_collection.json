@@ -131,7 +131,7 @@
 			"description": "",
 			"collectionId": "ea7676e0-aa78-037e-7b8b-a177ae7660a1",
 			"responses": [],
-			"rawModeData": "{\n       \"name\":\"regular1\",\n       \"coordinationService\": \"zookeper-coord-serv\", \n       \"inputs\": [\"input-stream-tstream/qqq\"], \n       \"options\":{\"d\":1},\n       \"outputs\": [\"output-stream-tstream\"]\n     }"
+			"rawModeData": "{\n       \"name\":\"regular1\",\n       \"coordinationService\": \"zookeper-coord-serv\", \n       \"inputs\": [\"input-stream-tstream/qqq\"], \n       \"options\":{\"d\":1},\n       \"outputs\": [\"output-stream-tstream\"],\n       \"checkpointMode\": \"every-nth\",\n       \"checkpointInterval\": 1\n     }"
 		},
 		{
 			"id": "4de54d55-bf56-e05c-c71c-8b92d2a3b91b",
