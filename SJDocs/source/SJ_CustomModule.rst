@@ -56,7 +56,7 @@ Below you will find the instructions on custom module creation in Scala.
 
 Before Starting With Modules
 --------------------------------------------------
-The instructions below are given for assembling a JAR file via sbt in Scala.
+The instructions below are given for assembling a JAR file via sbt in Scala. Install sbt following the instructions in `the official documentation <http://www.scala-sbt.org/download.html>`_ .
 
 It is meant that all necessary services are deployed for the module and you know for sure:
 
