@@ -49,8 +49,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = 'Stream Juggler'
-copyright = '2017, Stream Juggler'
+project = 'Stream Juggler Platform'
+copyright = '2017, Stream Juggler Platform'
 author = 'BWSW'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -258,7 +258,7 @@ latex_elements = {
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'Stream Juggler', 'Stream Juggler Documentation',
+    (master_doc, 'Stream Juggler Platform', 'SJ-Platform Documentation',
      [author], 1)
 ]
 
@@ -272,10 +272,9 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'Stream Juggler', 'Stream Juggler Documentation',
-     author, 'Stream Juggler', 'Platform for real-time and batched stream processing',
-     'Miscellaneous'),
-]
+    (master_doc, 'Stream Juggler Platform', 'SJ-Platform Documentation',
+     author, 'Stream Juggler Platform', 'Platform for stream and micro-batch processing',
+     'Miscellaneous'),]
 
 # Documents to append as an appendix to all manuals.
 #texinfo_appendices = []
