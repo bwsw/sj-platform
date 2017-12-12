@@ -467,27 +467,27 @@ Please, find more information about engines at the :ref:`Engines` page.
 Module Instances
 -----------------------
 
-Each type of module described above requires an instance of a corresponding type. An instance is a set of settings determining the collaborative work of an engine and a module. These settings are specified via UI or REST API and determine the mode of the module operation: data stream type the module is going to work with, checkpoint concept, settings of state and parallelism, etc. In the system instances can be of the following types: input, processing (regular/batch), output. 
+Each type of modules described above requires an instance of a corresponding type. An instance is a set of settings determining the collaborative work of an engine and a module. These settings are specified via the UI or REST API and determine the mode of the module operation: data stream type the module is going to work with, checkpoint concept, settings of state and parallelism, etc. In the system instances can be of the following types: input, processing (regular/batch), output. 
 
 Module's instances require the following elements to be created for their work:
 
-- Stream
+- a stream
 
-- Service
+- a service
 
-- Provider
+- a provider
 
 You should create these elements before creating an instance. You need streams for instance inputs and outputs. Streams, in their turn, require specific services to be created. Each service (based on its type) requires a provider of a corresponding type. All these elements form the infrastructure for an instance.
 
 Each instance type works with a specific type of streams, services and providers. Find below the detailed information on the types of providers, services and streams required for each instance type. Besides, we will provide you an example to explain the dependence of entity types on an instance type.
 
-**Stream**
+**Streams**
 
 The Stream Juggler Platform supports *Apache Kafka* and *T-stream* types of streams. And while the Apache Kafka streams are a well-known type of streaming introduced by Apache Software Foundation, the T-streams is intentionally designed for the Stream Juggler Platform as a complement for Apache Kafka. The T-streams has more features than Kafka and makes exactly-once processing possible. Find more about T-streams at the `site <http://t-streams.com>`_ .
 
 The following stream types can be used for output streams that export resulting data from the system to an external storage: Elasticsearch, SQL-database, a system with RESTful interface. They are determined by the type of the external data storage.
 
-**Service and Provider**
+**Services and Providers**
 
 To create streams of exact type in the system you need to create a service and a provider for this service. The types of a service and a provider are determined by the type of a stream you need for the module.
 
