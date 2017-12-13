@@ -233,7 +233,7 @@ In the Regular module the executor provides the following methods that does not 
 .. 4) "onAfterCheckpoint": 
     It is invoked after every checkpoint.
 4) ``onTimer``: 
-    It is invoked every time when a set timer expires. Inside the method there is an access to a parameter that defines a delay between a real response time and an invocation of this handler.
+    It is invoked every time when a set timer expires. Inside the method there is access to a parameter that defines a delay between a real response time and an invocation of this handler.
 5) ``onIdle``: 
     It is invoked every time when idle timeout expires but a new message hadn't appeared. It is a moment when there is nothing to process.
 6) ``onBeforeStateSave``: 
@@ -245,7 +245,7 @@ The module may have a state. A state is a sort of a key-value storage and can be
 
 In case of a fail (when something is going wrong in one of the methods described above) a whole module will be restarted. And the work will start with the `onInit` method call.
 
-Inside of the module there is a manager allowing to get an access to: 
+Inside the module there is a manager allowing to get access to: 
 
 - an output that is defined within the instance (by calling ``getPartitionedOutput()`` or ``getRoundRobinOutput()``),
 - timer (by calling ``setTimer()``)
@@ -369,8 +369,8 @@ The executor of the batch module provides the following methods that does not pe
      val allWindows = windowRepository.getAll()
      allWindows.flatMap(x => x._2.batches).flatMap(x => 
      x.envelopes).foreach {
-     case kafkaEnvelope: KafkaEnvelope[Integer @unchecked] => //here there is an access to certain fields such as offset and data of integer type
-     case tstreamEnvelope: TStreamEnvelope[Integer @unchecked] => //here there is an access to certain fields such as txnUUID, consumerName and data (array of integers)
+     case kafkaEnvelope: KafkaEnvelope[Integer @unchecked] => //here there is access to certain fields such as offset and data of integer type
+     case tstreamEnvelope: TStreamEnvelope[Integer @unchecked] => //here there is access to certain fields such as txnUUID, consumerName and data (array of integers)
      }
 
     The data type of the envelope can be "KafkaEnvelope" data type or "TStreamEnvelope" data type. If you specify the inputs of the only one of this data types in an instance, you shouldn't match the envelope like in the example above and cast right the envelope to a particular data type::
@@ -383,7 +383,7 @@ The executor of the batch module provides the following methods that does not pe
 .. 4) "onAfterCheckpoint": 
     It is invoked after every checkpoint
 4) ``onTimer``: 
-    It is invoked every time when a set timer expires. Inside the method there is an access to a parameter that defines a delay between a real response time and an invocation of this handler
+    It is invoked every time when a set timer expires. Inside the method there is access to a parameter that defines a delay between a real response time and an invocation of this handler
 5) ``onIdle``: 
     It is invoked every time when idle timeout expires but a new message hasn't appeared. It is a moment when there is nothing to process
 6) ``onBeforeStateSave``: 
@@ -447,7 +447,7 @@ They are then put to an external datastorage.
 The output executor provides the following methods that does not perform any work by default so you should define their implementation by yourself.
 
 1. ``onMessage``: 
-    It is invoked for every received message from one of the inputs that are defined within the instance. Inside the method you have an access to the message that has the TStreamEnvelope type. 
+    It is invoked for every received message from one of the inputs that are defined within the instance. Inside the method you have access to the message that has the TStreamEnvelope type. 
 
 2. ``getOutputEntity``:
     It is invoked once when module running. This method returns the current working entity, i.e. fields and types. This method must be overridden. 
