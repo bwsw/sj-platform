@@ -440,6 +440,8 @@ Apache Kafka
   "zkProvider*", "String", "zk provider name.", "zkProvider can be of 'provider.apache-zookeeper' type only."
   "creationDate", "String", "The time when a service has been created.", ""
 
+.. _T-streams-service:
+
 T-streams 
 """"""""""""""""""""""""""""""
 
