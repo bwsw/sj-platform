@@ -1,15 +1,13 @@
-Demo Deployment on Virtual Machine
-------------------------------------
+Run Pre-built |VirtualBox (TM)| Image
+-------------------------------------------
 
-SJ-Platform can be deployed on a virtual machine. We suggest deploying the platform locally via Vagrant with VirtualBox as a provider.
- 
-This is the most rapid way to get acquainted with the platform and assess its performance.
+For the first aquaintance with SJ-Platform we suggest deploying the platform via Vagrant with |VirtualBox (TM)| as a provider. In this case you use a pre-built |VirtualBox (TM)| image of the platform. So this is the most rapid way to run the platform and assess its performance. It takes up to 30 minutes. The platform is started with all entities necessary to demonstrate the solution for the example task described at the :ref:`fping-example-task` section: providers, services, streams, configurations. 
 
 Requirements:
 
 - At least 8 GB of free RAM.
 
-- VT-x must be enabled in BIOS.
+- VT-x enabled in BIOS.
 
 To determine if CPU VT extensions are enabled in BIOS, do the following:
 
@@ -54,7 +52,7 @@ Please, make sure to install the service of the versions specified below:
 - VirtualBox 5.0.40
 - Ubuntu 16.04
 
-2. Then, clone the project from the GitHub repository::
+2. Then, clone the project repository from GitHub::
 
     $ git clone https://github.com/bwsw/sj-demo-vagrant.git
     $ cd sj-demo-vagrant
@@ -81,7 +79,7 @@ After launching Vagrant you will get the access to Mesos, Marathon, the SJ-Platf
 - modules;
 - streams with infrastructurte (providers, services);
 - instances;
-- data store as a result destination.
+- data storage as a resulting data destination.
 
 Vagrant creates Ubuntu/Xenial64 virtual machines with specific parameters:
 
@@ -113,7 +111,7 @@ VM hostname = master
 
 - ip = 192.168.50.51
 
-- forwarding ports: 2181, 5050, 8080
+- forwarded ports: 2181, 5050, 8080
 
 *Services*:
 
@@ -153,7 +151,7 @@ VM hostname = slave1
 
 - ip = 192.168.50.52
 
-- forwarding ports: 5051, 8888, 9092, 7203, 31071, 5601, 9200, 9300
+- forwarded ports: 5051, 8888, 9092, 7203, 31071, 5601, 9200, 9300
 
 *Services*:
 
@@ -198,7 +196,7 @@ VM hostname = slave2
 
 - ip = 192.168.50.53
 
-- forwarding ports: 31500 - 31600
+- forwarded ports: 31500 - 31600
 
 *Services*:
 
@@ -215,7 +213,7 @@ Description:
   
   - zk = zk://192.168.50.51:2181/mesos, 
   
-  - ports = forwarding ports.
+  - ports = forwarded ports.
   
   Next, Docker engine is installed.
 
@@ -231,7 +229,7 @@ VM name = storage
 
 - ip = 192.168.50.55
 
-- forwarding ports: 27017
+- forwarded ports: 27017
 
 *Srevices*:
 
@@ -286,15 +284,11 @@ Use local host - 0.0.0.0
 
 The platform is deployed with the entities: providers, services, streams, configurations.
 
-Modules and instances are created as for the f-ping-demo project described in :ref:`Tutorial` .
+Modules and instances are created as for the :ref:`fping-example-task` described in :ref:`Tutorial` .
 
-To proceed working with the platform via the UI, please, see the `UI Guide <http://streamjuggler.readthedocs.io/en/develop/SJ_UI_Guide.html>`_ .
+To proceed working with the platform via the UI, please, see the `UI Guide <http://streamjuggler.readthedocs.io/en/develop/SJ_UI_Guide.html>`_. There you can launch the instances, view the statistics of task execution. 
 
-Now you can launch the instances, view the statistics of task execution in the UI. 
-
-Or you are enabled to create your own pipeline with modules and instances that are suitable to achieve your goals.
-
-How to create your own module is described in detail `here <http://streamjuggler.readthedocs.io/en/develop/SJ_CustomModule.html>`_ .
+Or you can create your own pipeline with modules suitable to achieve your goals. How to create your own module is described `here <http://streamjuggler.readthedocs.io/en/develop/SJ_CustomModule.html>`_ in detail.
 
 Destroying Virtual Machine
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -304,3 +298,5 @@ To destroy the virtual machine(s) use::
  $ vagrant destroy
  
 VMs will be terminated. 
+
+.. |VirtualBox (TM)| unicode:: VirtualBox U+00AE
