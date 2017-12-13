@@ -371,7 +371,7 @@ Specify them in the module specification JSON for ``engine-name`` and ``engine-v
     curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"batch-streaming-validator-class\",\"value\": \"com.bwsw.sj.crud.rest.instance.validator.BatchInstanceValidator\",\"domain\": \"configuration.system\"}" 
     curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"output-streaming-validator-class\",\"value\": \"com.bwsw.sj.crud.rest.instance.validator.OutputInstanceValidator\",\"domain\": \"configuration.system\"}" 
     
-4. You can add the following optional configuraions if necessary. They have default values in the system but can be overriden. Find the full list of optional configurations at the :ref:`optional-configurations` table.
+4. You can add the following optional configuraions if necessary. They have default values in the system but can be overriden. Find the full list of optional configurations at the :ref:`table-optional` table.
 
 
 Creating Platform Entities
