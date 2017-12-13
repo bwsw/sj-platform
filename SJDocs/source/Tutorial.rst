@@ -1058,7 +1058,7 @@ The processed data are exported via the output module with the streams of SQL-da
 
 A complete pipeline can be rendered as in the diagram below:
 
-.. figure:: _static/SflowDemo2.png
+.. figure:: _static/SflowDemo3.png
    :align: center
    :scale: 80%
    
