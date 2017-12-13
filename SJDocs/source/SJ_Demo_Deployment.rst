@@ -284,7 +284,7 @@ Use local host - 0.0.0.0
 
 The platform is deployed with the entities: providers, services, streams, configurations.
 
-Modules and instances are created as for the :ref:`fping-example-task` described in :ref:`Tutorial` .
+Modules and instances are created as for the :ref:`fping-example-task` described in :ref:`Tutorial`.
 
 If you want to proceed to work with the platform via the UI, please, see the `UI Guide <http://streamjuggler.readthedocs.io/en/develop/SJ_UI_Guide.html>`_. It will provide you with the necessary information on how you can launch the instances, view the statistics of task execution. 
 
