@@ -281,7 +281,7 @@ Via the Marathon interface make sure the services are deployed.
 
 Now look and make sure you have access to the Web UI. You will see the platform but it is not completed with any entities yet. 
 
-In the next section we will show you how to upload modules as well as engines for them, configurations for engines
+In the next section we will show you how to upload modules as well as engines for them, configurations for engines and module validators.
 
 Engine Uploading
 """"""""""""""""""""""""""
@@ -295,7 +295,7 @@ Before uploading modules, upload the engine jars for them.
     wget http://c1-ftp1.netpoint-dc.com/sj/1.0-SNAPSHOT/sj-output-streaming-engine.jar
     wget http://c1-ftp1.netpoint-dc.com/sj/1.0-SNAPSHOT/sj-mesos-framework.jar
     
-Now upload the engine jars into the platform. Please, replace <slave_advertise_ip> with the Mesos-slave IP and <rest-port> with the SJ-rest service port::
+   Now upload the engine jars into the platform. Please, replace <slave_advertise_ip> with the Mesos-slave IP and <rest-port> with the SJ-rest service port::
 
     cd sj-platform
     address=<slave_advertise_ip>:<rest-port>
@@ -306,7 +306,7 @@ Now upload the engine jars into the platform. Please, replace <slave_advertise_i
     curl --form jar=@sj-batch-streaming-engine.jar http://$address/v1/custom/jars
     curl --form jar=@sj-output-streaming-engine.jar http://$address/v1/custom/jars
 
-When creating a module you should use correct name and version of the engine:
+   When creating a module you should use correct name and version of the engine:
 
 ==========================  =======================================  ==============================================
 Module type                 Engine name                              Engine version
@@ -321,13 +321,13 @@ Module type                 Engine name                              Engine vers
 
 ==========================  =======================================  ==============================================
 
-Specify them in the module specification JSON for ``engine-name`` and ``engine-version`` fields, for example::
+   Specify them in the module specification JSON for ``engine-name`` and ``engine-version`` fields, for example::
   
-  {...
-  "module-type": "regular-streaming",
-  "engine-name": "com.bwsw.regular.streaming.engine",
-  "engine-version": "1.0",
-  ...}
+    {...
+    "module-type": "regular-streaming",
+    "engine-name": "com.bwsw.regular.streaming.engine",
+    "engine-version": "1.0",
+    ...}
  
 2. Setup configurations for engines.
 
