@@ -5,16 +5,16 @@ SJ-Platform Deployment on Cluster
 
 The section provides a detailed step-by-step instruction on Stream Juggler Platform deployment on cluster. 
 
-Currently, the deployment on **Mesos** is supported for SJ-Platform.
+Currently, the deployment on **Mesos** is supported for SJ-Platform that allows running the system at scale and to support different types of workloads.
 
-A complete list of requirements and the deployment procedure description can be found below. This is a demo case for which all the services are deployed and started. Then entities are added to the platform - providers, services, streams, modules and instances. These entities are also of the particular types necessary to solve the demo task.
+A complete list of requirements and the deployment procedure description can be found below. We will deploy and start all the services. Then you will need to add entities - providers, services, streams, modules and instances - to build a pipeline that correspond to your task. The steps on creating platform entities are provided in the :ref:`UI-Guide`.
 
 Overall Deployment Infrastructure
 --------------------------------------------
 
 The Stream Juggler platform works on the base of the following services:
 
-- Resource management is fulfilled via `Apache Mesos <http://mesos.apache.org/>`_ that allows to run the system at scale and to support different types of workloads.
+- Resource management is fulfilled via `Apache Mesos <http://mesos.apache.org/>`_.
 
 - To start applicable services in the Mesos we use `Docker <http://mesos.apache.org/documentation/latest/docker-containerizer/>`_.
 
@@ -30,9 +30,9 @@ The Stream Juggler platform works on the base of the following services:
 
 SJ-Platform's backend is written in Scala. The UI is based on Angular 4.0. REST API is written in Akka HTTP.
 
-Below, you will find necessary instructions to run the services on a cluster (Mesos). The section covers the steps on deployment of necessary services and configurations. The system is set up with no entities. You can create them depending on your aims ans tasks. The steps on creating platform entities are provided in the :ref:`fping-example-task` section.
+The section covers the steps on deployment of necessary services and configurations. The system is set up with no entities. You can create them depending on your aims and tasks. The steps on creating platform entities are provided in the :ref:`UI-Guide`.
 
-The deployment is performed via REST API.
+Now we will perform the deployment via REST API.
 
 .. _Mesos_deployment:
 
@@ -43,9 +43,9 @@ Firstly, deploy Mesos and other required services.
 
 1. Deploy Mesos, Marathon, Zookeeper. You can follow the instructions in the official `instalation guide <http://www.bogotobogo.com/DevOps/DevOps_Mesos_Install.php>`_ .
 
-Please, note, the deployment is described for one default Mesos-slave with available ports [31000-32000]. 
+.. Please, note, the deployment is described for one default Mesos-slave with available ports [31000-32000]. 
 
-If you are planning to launch an instance with greater value of the "parallelizm" parameter, i.e. to run tasks on more than 1 nodes, you need to increase the "executor_registration_timeout" parameter for Mesos-slave.
+If you are planning to launch an instance with greater value of the ``parallelizm`` parameter, i.e. to run tasks on more than 1 nodes, you need to increase the ``executor_registration_timeout`` parameter for Mesos-slave.
 
 The requirements to Mesos-slave: 
 
@@ -65,15 +65,17 @@ Mesos-slave must support Docker containerizer.
 
    Find detailed instructions on Java deployment in the `installation guide <https://tecadmin.net/install-oracle-java-8-ubuntu-via-ppa/>`_.
 
-4. Start Mesos-master, Mesos-slave and the services. 
+4. Start Mesos-master, Mesos-slave, Marathon, Zookeeper. 
 
 After performing all the steps, make sure you have access to Mesos interface, Marathon interface. Apache Zookeeper now should be active.
 
-5. Create a configuration file (config.properties) and JSON files for the physical services - MongoDB, RESTful, T-streams server. Please, name them as it is specified here.
+5. Create a configuration file (config.properties) and JSON files for the physical services - MongoDB, SJ-rest, tts. Please, name them as it is specified here.
 
-Replace <mongo_port> with a port for MongoDB. It is one of the available Mesos-slave ports.
+**mongo.json**
 
-**mongo.json**::
+Replace <mongo_port> with the port of MongoDB. It should be one of the available Mesos-slave ports.
+
+::
 
  {  
    "id":"mongo",
@@ -85,7 +87,7 @@ Replace <mongo_port> with a port for MongoDB. It is one of the available Mesos-s
          "portMappings":[  
             {  
                "containerPort":27017,
-               "hostPort":<mongo_port>,
+               "hostPort":"<mongo_port>",
                "protocol":"tcp" 
             }
          ],
@@ -104,13 +106,14 @@ Replace <mongo_port> with a port for MongoDB. It is one of the available Mesos-s
 
 **sj-rest.json**
 
-Replace <slave_advertise_ip> with a valid Mesos-salve IP.
+PLease, replace:
 
-Replace <zk_ip> and <zk_port> according to the zookeeper address.
+- <slave_advertise_ip> with a valid Mesos-slave IP;
+- <zk_ip> and <zk_port> with the Zookeeper address;
+- <rest_port> with the port for the SJ-rest service. It should be one of the available Mesos-slave ports.
+- <mongo_port> with the port of MongoDB. Use the one you specified in **mongo.json**.
 
-Replace <rest_port> with the port for the SJ-rest service. It should be one of the available Mesos-slave ports.
-
-Replace <mongo_port> - port of MongoDB, one of the available Mesos-slave ports::
+::
 
  {  
    "id":"sj-rest",
@@ -122,7 +125,7 @@ Replace <mongo_port> - port of MongoDB, one of the available Mesos-slave ports::
          "portMappings":[  
             {  
                "containerPort":8080,
-               "hostPort":<rest_port>,
+               "hostPort":"<rest_port>",
                "protocol":"tcp" 
             }
          ],
@@ -149,10 +152,14 @@ For sj-rest.json it is better to upload the docker image separately::
  sudo docker pull bwsw/sj-rest:dev
 
 **config.properties** 
+This is a file with configuratios for tts service (used for T-streams). 
 
-Replace <zk_ip> according to the Zookeeper address.
+Please, replace:
 
-Replace <token> and <prefix-name> with valid token and prefix. These names should be specified then in the T-streams service JSON (see below)::
+- <zk_ip> according to the Zookeeper address;
+- <token> and <prefix-name> with valid token and prefix. These names should be specified then in the T-streams service JSON (see below).
+
+::
 
  key=<token>
  active.tokens.number=100
@@ -211,18 +218,22 @@ Specify the same token and prefix in the T-streams service JSON::
 
  {
   "name": "tstream-ps-service",
-  "description": "Tstream service for demo",
+  "description": "Example of T-streams service",
   "type": "service.t-streams",
   "provider": "zookeeper-ps-provider",
-  "prefix": <prefix-name>,
-  "token" : <token>
+  "prefix": "<prefix-name>",
+  "token" : "<token>"
  }
 
 **tts.json** 
 
-This is a JSON file for T-streams. Please, replace <path_to_conf_directory> with an appropriate path to the configuration file directory on your computer. Also replace <slave_advertise_ip> with the Mesos-slave IP. 
+This is a JSON file for T-streams. Please, replace:
 
-Replace <tts_port> with the port for the tts service. It should be one of the available Mesos-slave ports::
+- <path_to_conf_directory> with an appropriate path to the configuration file directory on your computer;
+- <slave_advertise_ip> with the Mesos-slave IP;
+- <tts_port> with the port for the tts service. It should be one of the available Mesos-slave ports.
+
+::
 
  {
     "id": "tts",
@@ -241,7 +252,7 @@ Replace <tts_port> with the port for the tts service. It should be one of the av
             "portMappings": [
                 {
                     "containerPort": 8080,
-                    "hostPort": <tts_port>,
+                    "hostPort": "<tts_port>",
                     "protocol": "tcp" 
                 }
             ],
@@ -290,16 +301,16 @@ Before uploading modules, upload the engine jars for them.
 
 1. You should download the engine jars for each module types (input-streaming, regular-streaming, batch-streaming, output-streaming) and a Mesos framework::
 
-    wget http://c1-ftp1.netpoint-dc.com/sj/1.0-SNAPSHOT/sj-mesos-framework.jar
     wget http://c1-ftp1.netpoint-dc.com/sj/1.0-SNAPSHOT/sj-input-streaming-engine.jar
     wget http://c1-ftp1.netpoint-dc.com/sj/1.0-SNAPSHOT/sj-regular-streaming-engine.jar
     wget http://c1-ftp1.netpoint-dc.com/sj/1.0-SNAPSHOT/sj-batch-streaming-engine.jar
     wget http://c1-ftp1.netpoint-dc.com/sj/1.0-SNAPSHOT/sj-output-streaming-engine.jar
+    wget http://c1-ftp1.netpoint-dc.com/sj/1.0-SNAPSHOT/sj-mesos-framework.jar
     
-Now upload the engine jars into the platform. Please, replace <slave_advertise_ip> with the Mesos-slave IP::
+Now upload the engine jars into the platform. Please, replace <slave_advertise_ip> with the Mesos-slave IP and <rest-port> with the SJ-rest service port::
 
     cd sj-platform
-    address=<slave_advertise_ip>:31080
+    address=<slave_advertise_ip>:<rest-port>
     
     curl --form jar=@sj-mesos-framework.jar http://$address/v1/custom/jars
     curl --form jar=@sj-input-streaming-engine.jar http://$address/v1/custom/jars
@@ -324,31 +335,34 @@ Module type                 Engine name                              Engine vers
 
 Specify them in the module specification JSON for ``engine-name`` and ``engine-version`` fields, for example::
   
-  },
+  {...
   "module-type": "regular-streaming",
   "engine-name": "com.bwsw.regular.streaming.engine",
   "engine-version": "1.0",
-  "options": {},
-  "validator-class": "com.bwsw.sj.examples.pingstation.module.regular.Validator",
-  "executor-class": "com.bwsw.sj.examples.pingstation.module.regular.Executor"
- }
+  ...}
  
 2. Setup configurations for engines.
 
-The range of configurations includes required and optional ones. 
+   The range of configurations includes required and optional ones. 
 
-The list of all configurations can be viewed at the :ref:`Configuration` page.
+   The list of all configurations can be viewed at the :ref:`Configuration` page.
 
-To set up required configurations for the engines, run the following commands. Please, replace <slave_advertise_ip> with the Mesos-slave IP and <marathon_address> with the address of Marathon::
+   To set up required configurations for the engines, run the following commands. Please, replace:
 
-   curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"session-timeout\",\"value\": \"7000\",\"domain\": \"configuration.apache-zookeeper\"}" 
-   curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"current-framework\",\"value\": \"com.bwsw.fw-1.0\",\"domain\": \"configuration.system\"}" 
-   curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"crud-rest-host\",\"value\": \"<slave_advertise_ip>\",\"domain\": \"configuration.system\"}" 
-   curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"crud-rest-port\",\"value\": \"31080\",\"domain\": \"configuration.system\"}" 
-   curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"marathon-connect\",\"value\": \"http://<marathon_address>\",\"domain\": \"configuration.system\"}" 
-   curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"marathon-connect-timeout\",\"value\": \"60000\",\"domain\": \"configuration.system\"}" 
-   curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"kafka-subscriber-timeout\",\"value\": \"100\",\"domain\": \"configuration.system\"}" 
-   curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"low-watermark\",\"value\": \"100\",\"domain\": \"configuration.system\"}" 
+    - <slave_advertise_ip> with the Mesos-slave IP; 
+    - <marathon_address> with the address of Marathon;
+    - <rest-port> with the SJ-rest service port.
+    
+   ::
+
+    curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"session-timeout\",\"value\": \"7000\",\"domain\": \"configuration.apache-zookeeper\"}" 
+    curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"current-framework\",\"value\": \"com.bwsw.fw-1.0\",\"domain\": \"configuration.system\"}" 
+    curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"crud-rest-host\",\"value\": \"<slave_advertise_ip>\",\"domain\": \"configuration.system\"}" 
+    curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"crud-rest-port\",\"value\": \"<rest-port>\",\"domain\": \"configuration.system\"}" 
+    curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"marathon-connect\",\"value\": \"http://<marathon_address>\",\"domain\": \"configuration.system\"}" 
+    curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"marathon-connect-timeout\",\"value\": \"60000\",\"domain\": \"configuration.system\"}" 
+    curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"kafka-subscriber-timeout\",\"value\": \"100\",\"domain\": \"configuration.system\"}" 
+    curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"low-watermark\",\"value\": \"100\",\"domain\": \"configuration.system\"}" 
 
 3. Send the next POST requests to upload configurations for module validators::
 
@@ -357,34 +371,7 @@ To set up required configurations for the engines, run the following commands. P
     curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"batch-streaming-validator-class\",\"value\": \"com.bwsw.sj.crud.rest.instance.validator.BatchInstanceValidator\",\"domain\": \"configuration.system\"}" 
     curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"output-streaming-validator-class\",\"value\": \"com.bwsw.sj.crud.rest.instance.validator.OutputInstanceValidator\",\"domain\": \"configuration.system\"}" 
     
-4. You can add the following optional configuraions if necessary. They have default values in the system but can be overriden.
-
-**Optional** configurations:
-
-.. csv-table:: 
-  :header: "Config Domain","Name", "Description", "Default value"
-  :widths: 15, 20, 50, 15
-  
-  "system", "framework-principal", "Framework principal for mesos authentication", "---"
-  "system", "framework-secret",  "Framework secret for mesos authentication", "---"
-  "system", "framework-backoff-seconds", "Seconds for first delay after crash", "7"
-  "system", "framework-backoff-factor", "Factor for backoffSeconds parameter of following delays", "7.0"
-  "system", "framework-max-launch-delay-seconds", "Max seconds for delay", "600"
-  "system", "output-processor-parallelism", "A number of threads used to write data to an external datastorage (Elasticsearch or RESTful)", "8"
-
-.. note::  In general 'framework-backoff-seconds', 'framework-backoff-factor' and 'framework-max-launch-delay-seconds' configure exponential backoff behavior when launching potentially sick apps. This prevents sandboxes associated with consecutively failing tasks from filling up the hard disk on Mesos slaves. The backoff period is multiplied by the factor for each consecutive failure until it reaches ``maxLaunchDelaySeconds``. This applies also to tasks that are killed due to failing too many health checks.
-
-.. Сonfiguration domain named 'Apache Kafka' contains properties used to create an Apache Kafka consumer (see `the official documentation <https://kafka.apache.org/documentation/#consumerconfigs>`_). .. note:: You must not define properties such as 'bootstrap.servers', 'enable.auto.commit', 'key.deserializer' and 'value.deserializer' in order to avoid a system crash.
-
-Сonfiguration domain named 'T-streams' contains properties used for a T-streams consumer/producer. 
-
-.. note:: You must not define properties such as 'producer.bind-host', 'producer.bind-port', 'consumer.subscriber.bind-host' and 'consumer.subscriber.bind-port' to avoid a system crash. 
-
-To see the properties list check the following links: for a `producer <http://t-streams.com/docs/a2-api/tstreams-factory-api/#TSF_DictionaryProducer_keyset>`_ and for a `consumer <http://t-streams.com/docs/a2-api/tstreams-factory-api/#TSF_DictionaryConsumer_keyset>`_ (you should use the textual constants to create a configuration).
-
-For each uploaded custom jar a new configuration is added in the following format:: 
-
- key = {custom-jar-name}-{version}, value = {file-name}
+4. You can add the following optional configuraions if necessary. They have default values in the system but can be overriden. Find the full list of optional configurations at the :ref:`optional-configurations` table.
 
 
 Creating Platform Entities
@@ -414,7 +401,7 @@ Or module uploading can be performed via the UI (see :ref:`UI_Modules`).
 
 Providers
 """"""""""
-Providers are a part of the streaming infrastructure. They can be created using REST API (replace <provider_name> with the name of provider)::
+Providers are a part of the streaming infrastructure. They can be created using REST API (replace <provider_name> with the name of the provider JSON file)::
 
  curl --request POST "http://$address/v1/providers" -H 'Content-Type: application/json' --data "@api-json/providers/<provider_name>.json"
 
@@ -424,7 +411,7 @@ Or providers can be created via the UI (see :ref:`UI_Providers`).
 
 Services
 """"""""""
-Services are a part of the streaming infrastructure. They can be created using REST API (replace <service_name> with the name of service)::
+Services are a part of the streaming infrastructure. They can be created using REST API (replace <service_name> with the name of the service JSON file)::
 
  curl --request POST "http://$address/v1/services" -H 'Content-Type: application/json' --data "@api-json/services/<service_name>.json"
 
@@ -434,7 +421,7 @@ Or services can be created via the UI (see :ref:`UI_Services`).
 
 Streams
 """"""""""
-Streams provide data exchange between modules. They can be created using REST API (replace <stream_name> with the name of stream)::
+Streams provide data exchange between modules. They can be created using REST API (replace <stream_name> with the name of the stream JSON file)::
 
  curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/<stream_name>.json"
 
@@ -447,7 +434,7 @@ Instances
 
 Instances are used with engines to determine their collaborative work with modules. Each module needs an individual instance for it. Its type corresponds to the module type (input-streaming, regular-streaming or batch-streaming, output-streaming). 
 
-Instances can be created using REST API (replace <instance_name> with the name of instance)::
+Instances can be created using REST API (replace <instance_name> with the name of the instance JSON file)::
  
  curl --request POST "http://$address/v1/modules/input-streaming/pingstation-input/1.0/instance" -H 'Content-Type: application/json' --data "@api-json/instances/<instance_name>.json"
 
@@ -455,4 +442,4 @@ For more details see :ref:`REST_API_Instance`.
 
 Or instances can be created via the UI (see :ref:`UI_Instances`).
 
-Launch instances one by one to start the flow.
+To start processing you should launch instances one by one.
