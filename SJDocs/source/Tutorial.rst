@@ -523,18 +523,13 @@ Start Mesos and the services.
 Step 2. SJ-Platform Setting Up 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-1) Copy the SJ-Platform repository from GitHub::
-
-    git clone https://github.com/bwsw/sj-platform.git
-
-2) Add the credential settings if Mesos requires that frameworks must be authenticated:: 
+1) Add the credential settings if Mesos requires that frameworks must be authenticated:: 
  
     curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"framework-principal\",\"value\": <principal>,\"domain\": \"configuration.system\"}" 
     curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"framework-secret\",\"value\": <secret>,\"domain\": \"configuration.system\"}" 
  
-3) Copy the demonstrational task repository from GitHub::
+2) Copy the demonstrational task repository from GitHub::
 
-    cd ..
     git clone https://github.com/bwsw/sj-fping-demo.git
     cd sj-fping-demo
 
@@ -561,9 +556,9 @@ Please, download the engines' JARs for each module type (input-streaming, regula
  wget http://c1-ftp1.netpoint-dc.com/sj/1.0-SNAPSHOT/sj-regular-streaming-engine.jar
  wget http://c1-ftp1.netpoint-dc.com/sj/1.0-SNAPSHOT/sj-output-streaming-engine.jar
 
-Now upload the engines' JARs. Please, change <slave_advertise_ip> to the slave advertise IP::
+Now upload the engines' JARs. Please, replace <slave_advertise_ip> with the Mesos-slave IP::
 
- address=address=<slave_advertise_ip>:31080
+ address=<slave_advertise_ip>:31080
 
  curl --form jar=@sj-mesos-framework.jar http://$address/v1/custom/jars
  curl --form jar=@sj-input-streaming-engine.jar http://$address/v1/custom/jars
@@ -636,15 +631,7 @@ For the stated example task we upload the following modules:
 
 Please, follow these steps to upload the modules.
 
-First, configure the environment::
- 
- cd sj-fping-demo
- 
- address=<host>:<port>
-
-<host>:<port> — SJ-Platform REST host and port.
-
-Now you should **download** the *sj-regex-input* module from Sonatype Repository::
+**Download** the *sj-regex-input* module from Sonatype Repository::
 
    curl "https://oss.sonatype.org/content/repositories/snapshots/com/bwsw/sj-regex-input_2.12/1.0-SNAPSHOT/sj-regex-input_2.12-1.0-SNAPSHOT.jar" -o sj-regex-input.jar 
 
