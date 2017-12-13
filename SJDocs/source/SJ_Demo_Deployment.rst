@@ -274,7 +274,7 @@ Here is the full list of addresses to get access to the services:
 
 - 0.0.0.0:5601 - Kibana
 
-- 0.0.0.0:9092,0.0.0.0:7203 - Kafka
+- 0.0.0.0:9092, 0.0.0.0:7203 - Kafka
 
 
 The platform is deployed with the entities: configurations, engines, providers, services, streams. Modules and instances are created as for the :ref:`fping-example-task` described in :ref:`Tutorial`.
