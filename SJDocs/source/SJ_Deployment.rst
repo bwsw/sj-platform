@@ -7,7 +7,7 @@ The section provides a detailed step-by-step instruction on Stream Juggler Platf
 
 Currently, the deployment on **Mesos** is supported for SJ-Platform that allows running the system at scale and to support different types of workloads.
 
-A complete list of requirements and the deployment procedure description can be found below. We will deploy and start all the services. Then you will need to add entities - providers, services, streams, modules and instances - to build a pipeline that correspond to your task. The steps on creating platform entities are provided in the :ref:`UI-Guide`.
+A complete list of requirements and the deployment procedure description can be found below. We will deploy and start all the services. Then you will need to add entities - providers, services, streams, modules and instances - to build a pipeline that corresponds to your aims. The steps on creating platform entities are provided in the :ref:`UI-Guide`.
 
 Overall Deployment Infrastructure
 --------------------------------------------
@@ -39,37 +39,24 @@ Now we will perform the deployment via REST API.
 Deployment of Required Services on Mesos
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Firstly, deploy Mesos and other required services. 
+In the first step, deploy Mesos and other required services. 
 
 1. Deploy Mesos, Marathon, Zookeeper. You can follow the instructions in the official `instalation guide <http://www.bogotobogo.com/DevOps/DevOps_Mesos_Install.php>`_ .
 
-.. Please, note, the deployment is described for one default Mesos-slave with available ports [31000-32000]. 
+   If you are planning to launch an instance with greater value of the ``parallelizm`` parameter, i.e. to run tasks on more than 1 nodes, you need to increase the ``executor_registration_timeout`` parameter for Mesos-slave.
 
-If you are planning to launch an instance with greater value of the ``parallelizm`` parameter, i.e. to run tasks on more than 1 nodes, you need to increase the ``executor_registration_timeout`` parameter for Mesos-slave.
+   The requirements to Mesos-slave: 
 
-The requirements to Mesos-slave: 
+    - 2 CPUs; 
+    - 4096 memory;
+    - Docker installed (see the official `installation guide <https://docs.docker.com/engine/installation/linux/docker-ce/ubuntu/#install-docker-ce>`_);
+    - Java installed (see  the official `installation guide <https://tecadmin.net/install-oracle-java-8-ubuntu-via-ppa/>`_).
 
-- 2 CPUs, 
-- 4096 memory.
+Mesos-slave should support Docker containerizer.
 
-Mesos-slave must support Docker containerizer.
+Now make sure you have access to Mesos interface, Marathon interface. Apache Zookeeper should be active.
 
-2. For Docker deployment follow the instructions at the official `installation guide <https://docs.docker.com/engine/installation/linux/docker-ce/ubuntu/#install-docker-ce>`_
-
-3. Install Java::
-                                         
-    sudo add-apt-repository ppa:webupd8team/java
-    sudo apt-get update
-    sudo apt-get install oracle-java8-installer
-    sudo apt-get install oracle-java8-set-default
-
-   Find detailed instructions on Java deployment in the `installation guide <https://tecadmin.net/install-oracle-java-8-ubuntu-via-ppa/>`_.
-
-4. Start Mesos-master, Mesos-slave, Marathon, Zookeeper. 
-
-After performing all the steps, make sure you have access to Mesos interface, Marathon interface. Apache Zookeeper now should be active.
-
-5. Create a configuration file (config.properties) and JSON files for the physical services - MongoDB, SJ-rest, tts. Please, name them as it is specified here.
+2. Create a configuration file (config.properties) and JSON files for the physical services - MongoDB, SJ-rest, tts. Please, name them as it is specified here.
 
 **mongo.json**
 
@@ -106,7 +93,7 @@ Replace <mongo_port> with the port of MongoDB. It should be one of the available
 
 **sj-rest.json**
 
-PLease, replace:
+Please, replace:
 
 - <slave_advertise_ip> with a valid Mesos-slave IP;
 - <zk_ip> and <zk_port> with the Zookeeper address;
@@ -152,12 +139,13 @@ For sj-rest.json it is better to upload the docker image separately::
  sudo docker pull bwsw/sj-rest:dev
 
 **config.properties** 
-This is a file with configuratios for tts service (used for T-streams). 
+
+This is a file with configuratios for the tts service (used for T-streams). 
 
 Please, replace:
 
 - <zk_ip> according to the Zookeeper address;
-- <token> and <prefix-name> with valid token and prefix. These names should be specified then in the T-streams service JSON (see below).
+- <token> and <prefix-name> with valid token and prefix (description is provided in the :ref:`T-streams-service`). These token and prefix should be specified then in the T-streams service JSON (see below).
 
 ::
 
@@ -269,7 +257,7 @@ This is a JSON file for T-streams. Please, replace:
     "mem": 512,
     "env": {
       "HOST":"<slave_advertise_ip>",
-      "PORT0":<tts_port> 
+      "PORT0":"<tts_port>"
     }
  }
 
@@ -386,7 +374,7 @@ The following entities should be uploaded or created in the system:
 2) Providers; 
 3) Services;
 4) Streams;
-5) Instances fo reach module types.
+5) Instances for each module types.
 
 Modules
 """"""""""
