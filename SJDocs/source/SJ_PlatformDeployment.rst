@@ -7,8 +7,8 @@ This section provides the information on Stream Juggler Platform deployment.
 
 Below, two ways of deployment are described. Please, read the requirements for each of them and decide what option is more suitable for your aims.
 
-Deployment on Cluster
----------------------------
+SJ-Platform Deployment on Cluster
+---------------------------------
 
 The first option is to deploy SJ-Platform on a cluster. 
 
@@ -25,12 +25,12 @@ Minimum system requirements are as follows:
 
 The platform is deployed with no entities. Thus, the pipeline can be structured from scratch. The entities can be added to the platform via `REST API <http://streamjuggler.readthedocs.io/en/develop/SJ_CRUD_REST_API.html>`_ or `the UI <http://streamjuggler.readthedocs.io/en/develop/SJ_UI_Guide.html>`_ .
 
-Deployment on Pre-built |VirtualBox (TM)| Image
-------------------------------------------------
+Run SJ-Platform from Pre-built |VirtualBox (TM)| Image
+-------------------------------------------------------
 
-SJ-Platform can be deployed on a pre-built |VirtualBox (TM)| image.
+SJ-Platform can be started from a pre-built |VirtualBox (TM)| image.
 
-Please, find detailed instructions in `the guide on deployment on the pre-built VirtualBox image <http://streamjuggler.readthedocs.io/en/develop/SJ_Demo_Deployment.html>`_ .
+Please, find detailed instructions in `the guide on the pre-built VirtualBox image <http://streamjuggler.readthedocs.io/en/develop/SJ_Demo_Deployment.html>`_ .
 
 We suggest deploying the platform locally via Vagrant with |VirtualBox (TM)| as a provider. This is the most rapid way to get acquainted with the platform and assess its performance. It takes up to 30 minutes. The platform is deployed with all entities necessary to demonstrate the solution for the example task described at the :ref:`fping-example-task` section: providers, services, streams, configurations. 
 
