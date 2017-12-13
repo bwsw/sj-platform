@@ -140,7 +140,7 @@ For sj-rest.json it is better to upload the docker image separately::
 
 **config.properties** 
 
-This is a file with configuratios for the tts service (used for T-streams). 
+This is a file with configurations for the tts service (used for T-streams). 
 
 Please, replace:
 
