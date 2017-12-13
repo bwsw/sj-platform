@@ -559,7 +559,7 @@ Output module instance type works with the following entities types:
   
   |oneofset-arrow| points to the set of entities, one of which shall be created before creating the dependent entity.
   
-The table below explains what inputs or outputs can be used for a particular instance type:
+The table below explains what inputs and outputs can be used for a particular instance type:
 
 ===============  ================================================  ===============================================
 Instance type    Inputs                                            Outputs
@@ -602,6 +602,8 @@ Instance type    Inputs                                            Outputs
 ===============  ================================================  ===============================================
 
 We hope this information will help you to select the most appropriate types of entities in the system to build a pipeline for smooth data stream processing.
+
+You can find the details on creating instances and their infrastructure in the :ref:`UI_Guide`.
 
 
 .. |req-arrow| image:: _static/req-arrow.png
