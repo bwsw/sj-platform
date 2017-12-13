@@ -32,7 +32,7 @@ Another option to start SJ-Platform is to run a pre-built |VirtualBox (TM)| imag
 
 Please, find detailed instructions in `the guide <http://streamjuggler.readthedocs.io/en/develop/SJ_Demo_Deployment.html>`_ on running the pre-built |VirtualBox (TM)| image of SJ-Platform.
 
-We suggest deploying the platform via Vagrant with VirtualBox® as a provider. This is the most rapid way to run the platform and assess its performance. It takes up to 30 minutes. The platform is deployed with all entities necessary to demonstrate the solution for the example task described in the :ref:`fping-example-task` section: providers, services, streams, configurations, modules and instances. 
+We suggest deploying the platform using Vagrant with VirtualBox® as a provider. This is the most rapid way to run the platform and assess its performance. It takes up to 30 minutes. The platform is deployed with all entities necessary to demonstrate the solution for the example task described in the :ref:`fping-example-task` section: providers, services, streams, configurations, modules and instances. 
 
 Minimum system requirements are as follows:
 
