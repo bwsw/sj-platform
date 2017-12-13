@@ -1,7 +1,7 @@
 Run Pre-built |VirtualBox (TM)| Image
 -------------------------------------------
 
-For the first aquaintance with SJ-Platform we suggest deploying the platform via Vagrant with |VirtualBox (TM)| as a provider. In this case you use a pre-built |VirtualBox (TM)| image of the platform. So this is the most rapid way to run the platform and assess its performance. It takes up to 30 minutes. The platform is started with all entities necessary to demonstrate the solution for the example task described at the :ref:`fping-example-task` section: providers, services, streams, configurations. 
+For the first acquaintance with SJ-Platform, we suggest deploying the platform via Vagrant with |VirtualBox (TM)| as a provider. In this case, you use a pre-built |VirtualBox (TM)| image of the platform. So this is the most rapid way to run the platform and assess its performance. It takes up to 30 minutes. The platform is started with all entities necessary to demonstrate the solution for the example task described in the :ref:`fping-example-task` section: providers, services, streams, configurations. 
 
 Requirements:
 
@@ -25,7 +25,7 @@ If the CPU is enabled, you will see::
  INFO: /dev/kvm exists
  KVM acceleration can be used
 
-Otherwise, the respond will look as presented below::
+Otherwise, the response will look as presented below::
 
  INFO: /dev/kvm does not exist
  HINT: sudo modprobe kvm_intel 
@@ -68,7 +68,7 @@ It will take up to 30 minutes, 8GB memory and 7 CPUs.
 
 .. important:: Please, make sure the ports are opened!
 
-At the end of deploying you can see urls of all services.
+At the end of deploying you can see URLs of all services.
 
 Description
 """""""""""""""""""
@@ -77,7 +77,7 @@ After launching Vagrant you will get the access to Mesos, Marathon, the SJ-Platf
 
 - configurations for modules;
 - modules;
-- streams with infrastructurte (providers, services);
+- streams with infrastructure (providers, services);
 - instances;
 - data storage as a resulting data destination.
 
@@ -95,7 +95,7 @@ Vagrant creates Ubuntu/Xenial64 virtual machines with specific parameters:
 
 All VMs are launched in the private network: 192.168.50.0
 
-Also you can access VM with *vagrant ssh* <name>.
+Also, you can access VM with *vagrant ssh* <name>.
 
 **Master VM**
 
@@ -231,7 +231,7 @@ VM name = storage
 
 - forwarded ports: 27017
 
-*Srevices*:
+*Services*:
 
 - MongoDB
 
@@ -286,7 +286,7 @@ The platform is deployed with the entities: providers, services, streams, config
 
 Modules and instances are created as for the :ref:`fping-example-task` described in :ref:`Tutorial` .
 
-To proceed working with the platform via the UI, please, see the `UI Guide <http://streamjuggler.readthedocs.io/en/develop/SJ_UI_Guide.html>`_. There you can launch the instances, view the statistics of task execution. 
+If you want to proceed to work with the platform via the UI, please, see the `UI Guide <http://streamjuggler.readthedocs.io/en/develop/SJ_UI_Guide.html>`_. It will provide you with the necessary information on how you can launch the instances, view the statistics of task execution. 
 
 Or you can create your own pipeline with modules suitable to achieve your goals. How to create your own module is described `here <http://streamjuggler.readthedocs.io/en/develop/SJ_CustomModule.html>`_ in detail.
 
