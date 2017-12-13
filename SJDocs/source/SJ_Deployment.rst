@@ -52,9 +52,9 @@ In the first step, deploy Mesos and other required services.
     - Docker installed (see the official `installation guide <https://docs.docker.com/engine/installation/linux/docker-ce/ubuntu/#install-docker-ce>`_);
     - Java installed (see  the official `installation guide <https://tecadmin.net/install-oracle-java-8-ubuntu-via-ppa/>`_).
 
-Mesos-slave should support Docker containerizer.
+   Mesos-slave should support Docker containerizer.
 
-Now make sure you have access to Mesos interface, Marathon interface. Apache Zookeeper should be active.
+   Now make sure you have access to Mesos interface, Marathon interface. Apache Zookeeper should be active.
 
 2. Create a configuration file (config.properties) and JSON files for the physical services - MongoDB, SJ-rest, tts. Please, name them as it is specified here.
 
