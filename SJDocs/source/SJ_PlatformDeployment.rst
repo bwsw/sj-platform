@@ -30,7 +30,7 @@ Run SJ-Platform from Pre-built |VirtualBox (TM)| Image
 
 SJ-Platform can be started from a pre-built |VirtualBox (TM)| image.
 
-Please, find detailed instructions in `the guide on the pre-built VirtualBox image <http://streamjuggler.readthedocs.io/en/develop/SJ_Demo_Deployment.html>`_ .
+Please, find detailed instructions in `the guide <http://streamjuggler.readthedocs.io/en/develop/SJ_Demo_Deployment.html>`_ on starting the platform from the pre-built |VirtualBox (TM)| image.
 
 We suggest deploying the platform locally via Vagrant with |VirtualBox (TM)| as a provider. This is the most rapid way to get acquainted with the platform and assess its performance. It takes up to 30 minutes. The platform is deployed with all entities necessary to demonstrate the solution for the example task described at the :ref:`fping-example-task` section: providers, services, streams, configurations. 
 
