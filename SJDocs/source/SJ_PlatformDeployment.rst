@@ -16,36 +16,38 @@ The `deployment guide <http://streamjuggler.readthedocs.io/en/develop/SJ_Deploym
 
 Currently, the deployment on `Apache Mesos <http://mesos.apache.org/>`_ as a universal distributed computational engine is supported.
 
-Another option is to deploy SJ-Platform in a local mode using `minimesos <https://www.minimesos.org/>`_ as a testing environment.
+.. Another option is to deploy SJ-Platform in a local mode using `minimesos <https://www.minimesos.org/>`_ as a testing environment.
 
-The following technical requirements should be met:
+Minimum system requirements are as follows:
 
 - working Linux host with 4-8 GB of RAM and 4 CPU cores; 
 - Docker v17.03 installed.  
 
 The platform is deployed with no entities. Thus, the pipeline can be structured from scratch. The entities can be added to the platform via `REST API <http://streamjuggler.readthedocs.io/en/develop/SJ_CRUD_REST_API.html>`_ or `the UI <http://streamjuggler.readthedocs.io/en/develop/SJ_UI_Guide.html>`_ .
 
-Deployment on Virtual Machine
-----------------------------------
+Deployment on Pre-built |VirtualBox (TM)| Image
+------------------------------------------------
 
-SJ-Platform can be deployed on a virtual machine.
+SJ-Platform can be deployed on a pre-built |VirtualBox (TM)| image.
 
-Please, find detailed instructions in `the guide on deployment on the virtual machine <http://streamjuggler.readthedocs.io/en/develop/SJ_Demo_Deployment.html>`_ .
+Please, find detailed instructions in `the guide on deployment on the pre-built VirtualBox image <http://streamjuggler.readthedocs.io/en/develop/SJ_Demo_Deployment.html>`_ .
 
-We suggest deploying the platform locally via Vagrant with VirtualBox as a provider. This is the most rapid way to get acquainted with the platform and assess its performance. It takes up to 30 minutes. The platform is deployed with all entities necessary to demonstrate the solution for the example task: providers, services, streams, configurations. 
+We suggest deploying the platform locally via Vagrant with |VirtualBox (TM)| as a provider. This is the most rapid way to get acquainted with the platform and assess its performance. It takes up to 30 minutes. The platform is deployed with all entities necessary to demonstrate the solution for the example task described at the :ref:`fping-example-task` section: providers, services, streams, configurations. 
 
-All that's needed is:
+Minimum system requirements are as follows:
 
 - At least 8 GB of free RAM;
 
-- VT-x must be enabled in BIOS;
+- VT-x enabled in BIOS;
 
-- Vagrant 1.9.1 installed;
+- `Vagrant 1.9.1 <https://www.vagrantup.com/downloads.html>`_ installed;
 
-- VirtualBox 5.0.40 installed.
+- `VirtualBox 5.0.40 <https://www.virtualbox.org/>`_ installed.
 
 These requirements are provided for deployment on Ubuntu 16.04 OS.
 
 
 
 In case, any problems occur during the deployment, please, open an issue in the project `GitHub repository <https://github.com/bwsw/sj-platform/tree/develop>`_ and let the project team solve it.
+
+.. |VirtualBox (TM)| unicode:: VirtualBox U+00AE
