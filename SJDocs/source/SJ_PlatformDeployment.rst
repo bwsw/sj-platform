@@ -25,14 +25,14 @@ Minimum system requirements are as follows:
 
 The platform is deployed with no entities. Thus, the pipeline can be structured from scratch. The entities can be added to the platform via `REST API <http://streamjuggler.readthedocs.io/en/develop/SJ_CRUD_REST_API.html>`_ or `the UI <http://streamjuggler.readthedocs.io/en/develop/SJ_UI_Guide.html>`_ .
 
-Run SJ-Platform from Pre-built |VirtualBox (TM)| Image
+Running Pre-built |VirtualBox (TM)| Image
 -------------------------------------------------------
 
-SJ-Platform can be started from a pre-built |VirtualBox (TM)| image.
+Another option to start SJ-Platform is to run a pre-built |VirtualBox (TM)| image.
 
-Please, find detailed instructions in `the guide <http://streamjuggler.readthedocs.io/en/develop/SJ_Demo_Deployment.html>`_ on starting the platform from the pre-built |VirtualBox (TM)| image.
+Please, find detailed instructions in `the guide <http://streamjuggler.readthedocs.io/en/develop/SJ_Demo_Deployment.html>`_ on running the pre-built |VirtualBox (TM)| image of SJ-Platform.
 
-We suggest deploying the platform locally via Vagrant with |VirtualBox (TM)| as a provider. This is the most rapid way to get acquainted with the platform and assess its performance. It takes up to 30 minutes. The platform is deployed with all entities necessary to demonstrate the solution for the example task described at the :ref:`fping-example-task` section: providers, services, streams, configurations. 
+We suggest deploying the platform via Vagrant with VirtualBox® as a provider. This is the most rapid way to run the platform and assess its performance. It takes up to 30 minutes. The platform is deployed with all entities necessary to demonstrate the solution for the example task described in the :ref:`fping-example-task` section: providers, services, streams, configurations, modules and instances. 
 
 Minimum system requirements are as follows:
 
