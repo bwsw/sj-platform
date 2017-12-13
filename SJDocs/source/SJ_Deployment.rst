@@ -321,13 +321,13 @@ Module type                 Engine name                              Engine vers
 
 ==========================  =======================================  ==============================================
 
-   Specify them in the module specification JSON for ``engine-name`` and ``engine-version`` fields, for example::
+    Specify them in the module specification JSON for ``engine-name`` and ``engine-version`` fields, for example::
   
-    {...
-    "module-type": "regular-streaming",
-    "engine-name": "com.bwsw.regular.streaming.engine",
-    "engine-version": "1.0",
-    ...}
+     {...
+     "module-type": "regular-streaming",
+     "engine-name": "com.bwsw.regular.streaming.engine",
+     "engine-version": "1.0",
+     ...}
  
 2. Setup configurations for engines.
 
