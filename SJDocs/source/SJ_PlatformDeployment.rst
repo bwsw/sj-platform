@@ -3,9 +3,12 @@
 Platform Deployment
 ================================
 
-This section provides the information on Stream Juggler Platform deployment. 
+In this section you will find the information on how to start working with the Stream Juggler Platform. We offer two options here: 
 
-Below, two ways of deployment are described. Please, read the requirements for each of them and decide what option is more suitable for your aims.
+1) to deploy the platform on a cluster, or
+2) to run the pre-built |VirtualBox (TM)| image with the :ref:`fping-example-task` solution implemented on the SJ-Platform base.
+
+Please, read the requirements for each option and decide which is more suitable for your aims.
 
 SJ-Platform Deployment on Cluster
 ---------------------------------
@@ -20,7 +23,7 @@ Currently, the deployment on `Apache Mesos <http://mesos.apache.org/>`_ as a uni
 
 Minimum system requirements are as follows:
 
-- working Linux host with 4-8 GB of RAM and 4 CPU cores; 
+- Linux host with 4-8 GB of RAM and 4 CPU cores; 
 - Docker v17.03 installed.  
 
 The platform is deployed with no entities. Thus, the pipeline can be structured from scratch. The entities can be added to the platform via `REST API <http://streamjuggler.readthedocs.io/en/develop/SJ_CRUD_REST_API.html>`_ or `the UI <http://streamjuggler.readthedocs.io/en/develop/SJ_UI_Guide.html>`_ .
@@ -28,7 +31,7 @@ The platform is deployed with no entities. Thus, the pipeline can be structured 
 Running Pre-built |VirtualBox (TM)| Image
 -------------------------------------------------------
 
-Another option to start SJ-Platform is to run a pre-built |VirtualBox (TM)| image.
+Another option to start working with SJ-Platform is to run a pre-built |VirtualBox (TM)| image.
 
 Please, find detailed instructions in `the guide <http://streamjuggler.readthedocs.io/en/develop/SJ_Demo_Deployment.html>`_ on running the pre-built |VirtualBox (TM)| image of SJ-Platform.
 
