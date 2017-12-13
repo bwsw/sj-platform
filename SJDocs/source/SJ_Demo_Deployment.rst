@@ -1,7 +1,7 @@
-Run Pre-built |VirtualBox (TM)| Image
+Running Pre-built |VirtualBox (TM)| Image
 -------------------------------------------
 
-For the first acquaintance with SJ-Platform, we suggest deploying the platform using Vagrant with |VirtualBox (TM)| as a provider. In this case, you use a pre-built |VirtualBox (TM)| image of the platform. So this is the most rapid way to run the platform and assess its performance. It takes up to 30 minutes. The platform is started with all entities necessary to demonstrate the solution for the example task described in the :ref:`fping-example-task` section: providers, services, streams, configurations. 
+For the first acquaintance with SJ-Platform, we suggest deploying the platform using Vagrant with |VirtualBox (TM)| as a provider. In this case, you use a pre-built |VirtualBox (TM)| image of the platform. So this is the most rapid way to run the platform and assess its performance. It takes up to 30 minutes. The platform is started with all entities necessary to demonstrate the solution for the example task described in the :ref:`fping-example-task` section: configurations, engines, providers, services, streams, modules and instances. 
 
 Requirements:
 
@@ -95,13 +95,15 @@ Vagrant creates Ubuntu/Xenial64 virtual machines with specific parameters:
 
 All VMs are launched in the private network: 192.168.50.0
 
-Also, you can access VM with *vagrant ssh* <name>.
+Also, you can use the following command to establish an SSH session into a running virtual machine to get shell access::
+
+ vagrant ssh <name>
+
+Find below the detailed descrition for each virtual machine.
 
 **Master VM**
 
-VM name = master
-
-VM hostname = master
+Virtual machine name is "master". Its hostname is "master".
 
 *Resources*:
 
@@ -139,9 +141,7 @@ Description:
 
 **Slave1 VM**
 
-VM name = slave1
-
-VM hostname = slave1
+Virtual machine name is "slave1". Its hostname is "slave1".
 
 *Resources*:
 
@@ -184,9 +184,7 @@ Description:
 
 **Slave2 VM**
 
-VM name = slave2
-
-VM hostname = slave2
+Virtual machine name is "slave2". Its hostname is "slave2".
 
 *Resources*:
 
@@ -219,7 +217,7 @@ Description:
 
 **Storage VM**
 
-VM name = storage
+Virtual machine name is "storage".
 
 *Resource*:
 
@@ -236,12 +234,11 @@ VM name = storage
 - MongoDB
 
 Description:
-
-After VM is launched, Vagrant firstly installs Docker engine and then launches MongoDB in Docker.
+  After VM is launched, Vagrant firstly installs Docker engine and then launches MongoDB in Docker.
 
 **Executor VM**
 
-VM name = executor
+Virtual machine name is "executor".
 
 *Resource*:
 
@@ -259,32 +256,28 @@ Description:
   After services are launched, Vagrant creates all entities via SJ-rest.
 
 
-A full list of ports to get access to the services:
+Here is the full list of addresses to get access to the services:
 
-- 8080 - Marathon
+- 0.0.0.0:8080 - Marathon
 
-- 5050 - Mesos Master
+- 0.0.0.0:5050 - Mesos Master
 
-- 5051 - Mesos Agent
+- 0.0.0.0:5051 - Mesos Agent
 
-- 8888 - SJ REST
+- 0.0.0.0:8888 - SJ REST
 
-- 27017 - MongoDB
+- 0.0.0.0:27017 - MongoDB
 
-- 2181 - Apache Zookeeper
+- 0.0.0.0:2181 - Apache Zookeeper
 
-- 9200 - Elasticsearch
+- 0.0.0.0:9200 - Elasticsearch
 
-- 5601 - Kibana
+- 0.0.0.0:5601 - Kibana
 
-- 9092,7203 - Kafka
-
-Use local host - 0.0.0.0
+- 0.0.0.0:9092,0.0.0.0:7203 - Kafka
 
 
-The platform is deployed with the entities: providers, services, streams, configurations.
-
-Modules and instances are created as for the :ref:`fping-example-task` described in :ref:`Tutorial`.
+The platform is deployed with the entities: configurations, engines, providers, services, streams. Modules and instances are created as for the :ref:`fping-example-task` described in :ref:`Tutorial`.
 
 If you want to proceed to work with the platform via the UI, please, see the `UI Guide <http://streamjuggler.readthedocs.io/en/develop/SJ_UI_Guide.html>`_. It will provide you with the necessary information on how you can launch the instances, view the statistics of task execution. 
 
@@ -297,6 +290,6 @@ To destroy the virtual machine(s) use::
 
  $ vagrant destroy
  
-VMs will be terminated. 
+Virtual machine(s) will be terminated. 
 
 .. |VirtualBox (TM)| unicode:: VirtualBox U+00AE
