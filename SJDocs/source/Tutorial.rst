@@ -155,7 +155,7 @@ The issue we are going to solve using our platform is to collect aggregated info
 
 In the example task solution the processing workflow is formed in the following way:
 
-.. figure:: _static/FPingDemo2.png
+.. figure:: _static/FPingDemo3.png
    :align: center
    
    Figure 1.8
