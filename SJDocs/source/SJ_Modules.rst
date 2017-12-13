@@ -525,7 +525,7 @@ Firstly, create two providers - Apache Kafka and Apache Zookeeper. Secondly, cre
 General Instance Infrastructure
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The schemes below may help you to understand the dependency of entities in the system for each module instance type.
+The schemas below may help you to understand the dependency of entities in the system for each module instance type.
 
 Input module instance type works with the following entities types:
 
