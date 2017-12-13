@@ -70,6 +70,8 @@ It will take up to 30 minutes, 8GB memory and 7 CPUs.
 
 At the end of deploying you can see URLs of all services.
 
+.. _VM_Description:
+
 Description
 """""""""""""""""""
 
