@@ -16,7 +16,7 @@ A module includes:
    :scale: 120%
    :align: center
 
-   Figure 1.1
+   Figure 1.1: Module structure
    
 Below you will find more information on each of these two components.
 
@@ -51,7 +51,7 @@ The base of the system is an engine: it provides basic I/O functionality. It is 
    :scale: 120%
    :align: center
    
-   Figure 1.2
+   Figure 1.2: Engine in SJ-Platform
    
 After its uploading, the engine receives raw data and sends them to the module executor. The executor starts data processing and returns the resulting data back to the engine where they are deserialized to be passed into the stream or a storage.
 
@@ -70,11 +70,11 @@ The system supports 4 types of modules:
 
 The modules can be strung in a pipeline as illustrated below:
 
-.. figure:: _static/ModuleStructure4.png
+.. figure:: _static/ModuleStructure5.png
    :scale: 80 %
    :align: center
 
-   Figure 1.3 
+   Figure 1.3: Pipeline structure 
   
 At this page each module is described in detail. You will find more information on the methods provided by module executors as well as entities' description.
 
@@ -90,7 +90,7 @@ In the SJ-Platform the TCP Input module is currently implemented.
   :scale: 80 %
   :align: center
 
-  Figure 1.4
+  Figure 1.4: Input module strucutre
   
 It performs the transformation of the streams incoming via TCP into T-streams. T-streams are persistent streams designed for exactly-once processing (so they include a transactional producer, a consumer and a subscriber). Find more information about T-streams `here <http://t-streams.com>`_.
 
@@ -100,7 +100,7 @@ In the diagram below you can see the illustration of dataflow for the input modu
    :scale: 80 %
    :align: center
 
-   Figure 1.5
+   Figure 1.5: Processing in the input module
 
 All input data elements are going as a flow of bytes to particular interface provided by Task Engine. That flow is going straight to Streaming Executor and is converted to an object called an Input Envelope. 
 
@@ -188,7 +188,7 @@ The most generic modules in the system are modules of a regular-streaming type. 
   :scale: 80 %
   :align: center
 
-  Figure 1.6
+  Figure 1.6: Regular module structure
 
 The diagram below represents the dataflow in the regular module.
 
@@ -196,7 +196,7 @@ The diagram below represents the dataflow in the regular module.
   :scale: 80 %
   :align: center
 
-  Figure 1.7
+  Figure 1.7: Processing in the regular module
   
 The TaskEngine of a regular module receives data from T-streams. It deserializes the flow of bytes to TStreamsEnvelope[T] (where [T] is a type of messages in the envelope) which is then passed to the StreamingExecutor.
 
@@ -334,7 +334,7 @@ The diagram below is a simple illustration of how a sliding window operation loo
    :scale: 80 %
    :align: center
 
-   Figure 1.8
+   Figure 1.8: Sliding windowing
   
 As shown in the figure, every time the window slides over an input stream, the batches of events that fall within the window are combined and operated upon to produce the transformed data of the windowed stream. It is important that any window operation needs to specify the parameters:
 
@@ -428,7 +428,7 @@ Modules of an output type are responsible for saving of output data to external 
   :scale: 80 %
   :align: center
 
-  Figure 1.9
+  Figure 1.9: Output module structure
   
 They transform the result of data processing received from T-streams and passe them to an external data storage. They allow to transform one data item from incoming streaming into one and more data output items.
 
@@ -438,7 +438,7 @@ The diagram below illustrates the dataflow in an output module.
   :scale: 80 %
   :align: center
 
-  Figure 1.10
+  Figure 1.10: Processing in the output module
   
 The TaskEngine deserializes the stream of bytes from T-Streams to TStreamsEnvelope[T] (where [T] is a type of messages in the envelope) and sends it to the StreamingExecutor. The StreamingExecutor returns Entities back to the TaskEngine. 
 
@@ -502,21 +502,21 @@ For the Batch module we need to create a batch instance. In the system an instan
 .. figure:: _static/zk-inst-serv-pr1.png
    :align: center
    
-   Figure 1.11
+   Figure 1.11: Instance dependence on Apache Zookeeper diagram
    
 The batch instance will receive data from Apache Kafka streams. Apache Kafka streams require the Apache Kafka service to exist in our system. The Apache Kafka service requires two specific providers of the following types: Apache Kafka and Apache Zookeeper (the same as in the previous step) (Figure 1.12).
 
 .. figure:: _static/kfk-inst-serv-pr1.png
    :align: center
    
-   Figure 1.12
+   Figure 1.12: Apache Kafka streaming infrastructure for the instance
    
 So these are the instance and the streaming components types that we need for our example:
 
 .. figure:: _static/inst-stream-serv-prov.png
    :align: center
    
-   Figure 1.13
+   Figure 1.13: Instance infrastructure example
 
 At this point we have determined the type of instance in the pipeline and the types of streaming components. So we can start building the infrastructure.
 
@@ -532,7 +532,7 @@ Input module instance type works with the following entities types:
 .. figure:: _static/InstCorrelation-Input.png
   :align: center
 
-  Figure 1.14
+  Figure 1.14: Instance infrastructure for the input instance type
   
   |oneof-arrow| points to the entity type required for creation of this entity.
   
@@ -541,7 +541,7 @@ Processing module instance type (regular or batch) works with the following enti
 .. figure:: _static/InstCorrelation-Process.png
   :align: center
 
-  Figure 1.15
+  Figure 1.15: Instance infrastructure for the processing instance type
   
   |oneof-arrow| points to the entity type required for creation of this entity.
   
@@ -553,7 +553,7 @@ Output module instance type works with the following entities types:
 .. figure:: _static/InstCorrelation-Output2.png
   :align: center
 
-  Figure 1.16
+  Figure 1.16: Instance infrastructure for the output instance type
   
   |oneof-arrow| points to the entity type required for creation of this entity.
   
