@@ -2776,6 +2776,8 @@ Error response example::
     "status-code": 404
  }
 
+.. _REST-API-Start-Instance:
+
 Start an instance
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
