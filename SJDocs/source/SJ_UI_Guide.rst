@@ -51,7 +51,9 @@ Configurations are the settings necessary for the system work.
 The configurations can be added under the *Configuration* tab of the main navigation bar. 
 
 .. figure:: _static/Configurations1.png
-
+    
+    Figure 1.1: List of providers
+    
 Please, click "Add Settings" in the upper-right corner above the list and fill in the form (the information on the required settings can be found in the table_ below):
 
 1. *Name* *
@@ -139,17 +141,22 @@ A **provider** is a part of streaming infrastructure. This is an entity which co
 Under the "Providers" section of the main navigation bar, you can see the list of providers, manage them, view the details.
 
 .. figure:: _static/Providers1.png
+   
+    Figure 1.2: List of providers
 
 Press "Create provider" and fill in the form where general fields and specific fields should be completed:
 
 .. figure:: _static/CreateProvider1.png
-
+   
+   Figure 1.3: "Create provider" button
+   
 **General fields:**
 
 - *Type*  *
 
 .. figure:: _static/CreateProvider_Type1.png
-
+    
+    Figure 1.4: Provider type field
 
 Select a type of the provider you are going to create from the drop-down list. The following options are available:
 
@@ -201,7 +208,9 @@ The type of the provider is determined by the type of the stream and the instanc
 Click "Create" below and see the provider appeared in the provider list. Provider details are displayed to the right when clicking a provider in the list. 
 
 .. figure:: _static/Providers_list1.png
-
+    
+    Figure 1.5: Provider details
+    
 Click "Cancel" to drop provider creation.
 
 You can perform the following actions on each provider in the list:
@@ -227,9 +236,13 @@ Under the *Services* section of the main navigation bar, you will find the list 
 
 .. figure:: _static/Services1.png
 
+    Figure 1.6: List of services
+
 Please, press "Create Service" and fill out the form with general and specific fields:
 
 .. figure:: _static/CreateService1.png
+
+    Figure 1.7: "Create Service" button
 
 **General fields:**
 
@@ -245,6 +258,8 @@ Please, press "Create Service" and fill out the form with general and specific f
 
 .. figure:: _static/CreateService_Type1.png
 
+    Figure 1.8: Service type field
+    
 - *Name* *
        Enter a name of the services. It must consist of digits, lowercase letters or hyphens and start with a letter.
 
@@ -343,6 +358,8 @@ Click "Create" below and you will see that the service appeared in the services 
 
 .. figure:: _static/ServicesList1.png
 
+    Figure 1.9: Service details
+    
 Click "Cancel" to drop all the specified settings. The service will not be created then.
 
 You can perform the following actions on each service in the list:
@@ -352,7 +369,9 @@ You can perform the following actions on each service in the list:
 2. **View** a provider for the service and get the provider`s information in a pop-up window by clicking on the active provider`s name in the "Provider" column.
 
 .. figure:: _static/ServicesList_ProviderInfo1.png
-
+    
+    Figure 1.10: Provider information
+    
 3. **Delete** a service clicking the corresponding button |delete-icon| in the Action column for the service you want to delete.
 
 .. note:: A service used by one of the streams cannot be deleted.
@@ -375,11 +394,15 @@ There are three kinds of streams in the SJ-Platform:
 Under the *Streams* section of the main navigation bar, you will find the list of streams.
 
 .. figure:: _static/Streams.png
-
+    
+    Figure 1.11: List of streams
+    
 Please, press "Create Stream" and fill in the form where general and specific fields should be completed:
 
 .. figure:: _static/CreateStreams1.png
 
+    Figure 1.12: "Create Stream" button
+    
 **General fields:**
 
 - *Type* *
@@ -397,6 +420,8 @@ Select from a type of a stream the drop-down list:
  - RESTful - It is an output stream of the REST type.
 
 .. figure:: _static/CreateStream_Type1.png
+    
+    Figure 1.13: Stream type field
 
 - *Name* *
         Enter a stream name here. It must consist of lowercase letters, digits or hyphens only.
@@ -483,10 +508,12 @@ Select from a type of a stream the drop-down list:
 
 .. note:: Required fields are marked with an asterisk (*)
 
-Click "Create" at the bottom and see the stream is in the list of streams now. Details of the node are displayed to the right when clicking the stream in the list. 
+Click "Create" at the bottom and see the stream is in the list of streams now. Details of a stream are displayed to the right when clicking the stream in the list. 
 
 .. figure:: _static/StreamsList1.png
-
+    
+    Figure 1.14: Stream details
+    
 Click "Cancel" to drop all the specified settings. The stream will not be created then.
 
 In the list of streams the following actions can be performed:
@@ -496,7 +523,9 @@ In the list of streams the following actions can be performed:
 2. **View** a service for the stream and get the service`s information in a pop-up window by clicking on the active service`s name in the "Service" column.
 
 .. figure:: _static/StreamsList_ServiceInfo1.png
-
+   
+    Figure 1.15: Service information
+    
 3. **Delete** a stream by clicking the corresponding button |delete-icon| in the Actions column for the stream you want to delete.
 
 .. note:: A stream used by any instance cannot be deleted.
@@ -512,6 +541,8 @@ In the next section — *Modules* — you can upload and manage your own module(
 
 .. figure:: _static/ModulesList.png
 
+    Figure 1.16: List of modules
+    
 How to create a module is described in detail in the :ref:`Custom_Module` section.
 
 The platform supports 4 types of modules:
@@ -551,12 +582,16 @@ If the module is uploaded correctly a success message appears and the uploaded m
 
 .. figure:: _static/Module_Uploaded1.png
 
+    Figure 1.17: Module is uploaded successfully
+    
 Otherwise, an error message will inform you that the module is not uploaded.
 
 Module details are displayed to the right when clicking a module in the list. 
 
 .. figure:: _static/ModuleDetails.png
 
+    Figure 1.18: Module details
+    
 In the list of modules the following actions can be performed:
 
 1. **View** a module name, type, version and size, the date of uploading.
@@ -578,6 +613,8 @@ A *Custom Files* section is a section where a user can upload custom JAR files a
 
 .. figure:: _static/CustomFilesList.png
 
+    Figure 1.19: Custom files list
+    
 Here you can find two tabs: **Custom Jars** and **Custom files**. Below you will find more information for each of these tabs.
 
 Custom Jars
@@ -627,10 +664,14 @@ Under the *Instances* section of the main navigation bar, there is a list of ins
 
 .. figure:: _static/Instances.png
 
+    Figure 1.20: Instance list
+    
 In the upper-right corner click "Create Instance" and choose the module from the drop-down list. An instance will be created for the selected module.
 
 .. figure:: _static/CreateInstance_Type1.png
-
+   
+   Figure 1.21: "Create Instance" button
+   
 The type of module determines the type of instance that will be created: input-streaming, regular-streaming, batch-streaming or output-streaming. 
 
 Each type of instance requires specific settings to be filled in alongside with general settings common for all instances. These specific fields are to be determined in the instance parameters depending on each individual module type.
@@ -733,7 +774,9 @@ Please, review the lists with general and specific fields described below.
      You can add several input streams by clicking "Add Input" and selecting an input stream name from the drop-down list.
      
 .. figure:: _static/Create_RegInst_AddInputs.png
- 
+
+     Figure 1.22: Adding inputs when creating instances
+     
 - Outputs*
      Names of output streams (should be of the 'T-stream' type only). You can add several output streams by clicking "Add Output" and selecting an output stream name from the drop-down list.
      
@@ -756,7 +799,9 @@ Please, review the lists with general and specific fields described below.
      You can add several input streams by clicking "Add Input" and selecting an input stream name from the drop-down list.	
 
 .. figure:: _static/Create_BatchInst_AddInputs.png
-
+     
+     Figure 1.23: Adding inputs when creating instances
+     
 - Outputs* 
      Names of output streams (must be of the 'T-streams' type only).  You can add several input streams by clicking "Add Input" and selecting an input stream name from the drop-down list.
 
@@ -807,6 +852,8 @@ Details of an instance are displayed to the right when clicking the instance in 
 
 .. figure:: _static/InstancesList.png
 
+     Figure 1.24: Instance details
+     
 The system additionally shows the following fields in the *Instance details* panel:
 
 - Stages
@@ -841,7 +888,9 @@ In the list of instances the following actions can be performed:
 3. **Clone** an instance. This function enables instance creation by copying the settings of an existing instance. Just click "Clone instance" |clone-icon| in the Actions column for the instance you want to clone.
 
 .. figure:: _static/CreateInstance_Clone2.png
-
+    
+    Figure 1.25: "Clone" instance
+    
 The form will show the settings of the selected instance. They can be edited and saved by clicking the "Create" button. A new instance will appear in the list of instances.
 
 4. **Delete** an instance by clicking the corresponding button |delete-icon| in the Actions column for the instance you want to delete.
@@ -887,9 +936,13 @@ Click the "Information" button |stats-icon| next to the Instance name you want t
 
 .. figure:: _static/FrameworkStatsIcon1.png
 
+     Figure 1.26: Instance task information
+
 A window will pop-up to show the information. 
 
 .. figure:: _static/FrameworkStats.png
+
+     Figure 1.27: Task information window
 
 It displays the list of tasks with the following information for each task in the list:
 
