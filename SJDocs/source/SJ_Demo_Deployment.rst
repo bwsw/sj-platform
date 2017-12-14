@@ -1,5 +1,5 @@
-Running Pre-built |VirtualBox (TM)| Image
--------------------------------------------
+Details of Running Pre-built |VirtualBox (TM)| Image
+-----------------------------------------------------
 
 For the first acquaintance with SJ-Platform, we suggest deploying the platform using Vagrant with |VirtualBox (TM)| as a provider. In this case, you use a pre-built |VirtualBox (TM)| image of the platform. So this is the most rapid way to run the platform and assess its performance. It takes up to 30 minutes. The platform is started with all entities necessary to demonstrate the solution for the example task described in the :ref:`fping-example-task` section: configurations, engines, providers, services, streams, modules and instances. 
 
@@ -9,66 +9,7 @@ Requirements:
 
 - VT-x enabled in BIOS.
 
-To determine if CPU VT extensions are enabled in BIOS, do the following:
-
-1) Install CPU-checker::
-
-    $ sudo apt-get update
-    $ sudo apt-get install cpu-checker
-
-2) Then check::
-
-    $ kvm-ok
-
-If the CPU is enabled, you will see::
-
- INFO: /dev/kvm exists
- KVM acceleration can be used
-
-Otherwise, the response will look as presented below::
-
- INFO: /dev/kvm does not exist
- HINT: sudo modprobe kvm_intel 
- INFO: Your CPU supports KVM extensions
- INFO: KVM (vmx) is disabled by your BIOS
- HINT: Enter your BIOS setup and enable Virtualization Technology (VT),
-      and then hard poweroff/poweron your system
- KVM acceleration can NOT be used
-
-
-Deployment
-~~~~~~~~~~~~~~~~~~~~~~~
-
-1. At the first step Vagrant and VirtualBox should be installed. 
-
-You can do it following the instructions in the official documentation: 
-
-- `for Vagrant <https://www.vagrantup.com/docs/installation/>`_
-- `for VirtualBox <https://www.virtualbox.org/wiki/Downloads>`_
-
-Please, make sure to install the service of the versions specified below:
-
-- Vagrant 1.9.1
-- VirtualBox 5.0.40
-- Ubuntu 16.04
-
-2. Then, clone the project repository from GitHub::
-
-    $ git clone https://github.com/bwsw/sj-demo-vagrant.git
-    $ cd sj-demo-vagrant
-
-Launching Virtual Machine
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-To launch Vagrant use the following command::
-
- $ vagrant up
-
-It will take up to 30 minutes, 8GB memory and 7 CPUs.
-
-.. important:: Please, make sure the ports are opened!
-
-At the end of deploying you can see URLs of all services.
+Below a detailed description is provided on what is happening when running the pre-built |VirtualBox (TM)| image.
 
 .. _VM_Description:
 
@@ -279,19 +220,7 @@ Here is the full list of addresses to get access to the services:
 - 0.0.0.0:9092, 0.0.0.0:7203 - Kafka
 
 
-The platform is deployed with the entities: configurations, engines, providers, services, streams. Modules and instances are created as for the :ref:`fping-example-task` described in :ref:`Tutorial`.
+The platform is deployed with the entities: configurations, engines, providers, services, streams. Modules and instances are created as for the :ref:`fping-example-task` described in Tutorial. To launch the data processing follow the instruction provided in the :ref:`fping-Launch-Instances` step of the example task.
 
-If you want to proceed to work with the platform via the UI, please, see the `UI Guide <http://streamjuggler.readthedocs.io/en/develop/SJ_UI_Guide.html>`_. It will provide you with the necessary information on how you can launch the instances, view the statistics of task execution. 
-
-Or you can create your own pipeline with modules suitable to achieve your goals. How to create your own module is described `here <http://streamjuggler.readthedocs.io/en/develop/SJ_CustomModule.html>`_ in detail.
-
-Destroying Virtual Machine
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-To destroy the virtual machine(s) use::
-
- $ vagrant destroy
- 
-Virtual machine(s) will be terminated. 
-
+.. Or you can create your own pipeline with modules suitable to achieve your goals. How to create your own module is described `here <http://streamjuggler.readthedocs.io/en/develop/SJ_CustomModule.html>`_ in detail.
 .. |VirtualBox (TM)| unicode:: VirtualBox U+00AE
