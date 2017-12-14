@@ -27,7 +27,7 @@ A simplified structure of SJ-Platform can be presented as at the image below:
 .. figure:: _static/tutorialGeneral.png
    :align: center
 
-   Figure 1.1
+   Figure 1.1: General platform structure
 
 Let’s have a look at the platform from the perspective of a processing pipeline.
 
@@ -43,7 +43,7 @@ General processing workflow which the system allows implementing is illustrated 
    :scale: 80%
    :align: center
    
-   Figure 1.2
+   Figure 1.2: General processing workflow
    
 Green, yellow and purple blocks displayed in a rectangular area are managed and evaluated by SJ-Platform. They represent an input module, a processing module and an output module, respectively. The blocks outside the rectangular area represent external systems (a data source and a data storage).
 
@@ -65,7 +65,7 @@ The example tasks that will be presented are different. But the steps we will pe
 .. figure:: _static/TutorialSteps.png
    :align: center
    
-   Figure 1.3
+   Figure 1.3: Example task solution steps
 
 What we are going to do for the examples is:
 
@@ -94,7 +94,7 @@ What we are going to do for the examples is:
    :scale: 110%
    :align: center
    
-   Figure 1.4
+   Figure 1.4: Engine
    
 .. note:: Find more about engines at the :ref:`Engines` page.
 
@@ -104,7 +104,7 @@ What we are going to do for the examples is:
    :scale: 120%
    :align: center
    
-   Figure 1.5
+   Figure 1.5: Module structure
    
 In the example tasks we will upload ready-to-use modules of three types - input modules, processing modules (regular, batch) and output modules. 
    
@@ -118,7 +118,7 @@ To solve your tasks, you may upload your custom modules in this step.
    :scale: 80%
    :align: center
    
-   Figure 1.6
+   Figure 1.6: Srteams in the system
    
 Streaming requires the infrastructure: providers and services. These are necessary API entites without which streaming will not be so flexible. Streaming flexibility lies in the one-to-many connection between providers and services, streams and modules. One provider works with many services (of various types). One type of streams can be used by different module instances. These streams take necessary settings from the common infrastructure (providers and services). There is no need to duplicate the settings for each individual stream.
 
@@ -134,7 +134,7 @@ For both example tasks we will need Apache Zookeeper, Elasticsearch and SQL-data
    :scale: 120%
    :align: center
    
-   Figure 1.7
+   Figure 1.7: Instance in the platform
    
 An instance is created with specific parameters. It will use particular streams specified for it as input and output streams.
 
@@ -158,7 +158,7 @@ In the example task solution the processing workflow is formed in the following 
 .. figure:: _static/FPingDemo3.png
    :align: center
    
-   Figure 1.8
+   Figure 1.8: Fping example task pipeline
    
 This diagram demonstrates the processing workflow for the example. Green, yellow and purple blocks are executed with SJ-Platform. They are an input module, a processing module and an output module. 
 
@@ -560,7 +560,7 @@ Now the JARs should appear in the UI under Custom Jars of the "Custom files" nav
 .. figure:: _static/EnginesUploaded.png
    :align: center
    
-   Figure 1.9
+   Figure 1.9: Uploaded engines list
 
 Setup Configurations for Engines
 """"""""""""""""""""""""""""""""""""""""
@@ -602,7 +602,7 @@ In the UI you can see the uploaded configurations under the “Configuration” 
 .. figure:: _static/ConfigurationsUploaded.png
    :align: center
    
-   Figure 1.10
+   Figure 1.10: Uploaded configurations list
 
 .. _Module_Uploading:
 
@@ -652,7 +652,7 @@ Now in the UI, you can see the uploaded modules under the ‘Modules’ tab.
 .. figure:: _static/ModulesUploaded.png
    :align: center
    
-   Figure 1.11
+   Figure 1.11: Uploaded modules list
 
 .. _Creating_Streams:
 
@@ -675,7 +675,7 @@ In the example task solution the following stream types are implemented:
    :scale: 80%
    :align: center
    
-   Figure 1.12
+   Figure 1.12: Streams in Fping example pipeline
 
 Prior to creating a stream, we need to create infrastructure for the streaming layer. The infrastructure for streams includes **providers** and **services**. This is a required presetting.
 
@@ -717,7 +717,7 @@ The created providers are available in the UI under the “Providers” tab.
 .. figure:: _static/ProvidersCreated.png
    :align: center
    
-   Figure 1.13
+   Figure 1.13: Providers list
 
 2) Next, we will set up services:
 
@@ -738,7 +738,7 @@ Please, make sure the created services have appeared in the UI under the “Serv
 .. figure:: _static/ServicesCreated.png
    :align: center
    
-   Figure 1.14
+   Figure 1.14: Services list
 
 Creating Streams
 """"""""""""""""""""""""""""""
@@ -777,7 +777,7 @@ All the created streams should be available now in the UI under the “Streams�
 .. figure:: _static/StreamsCreated1.png
    :align: center
    
-   Figure 1.15
+   Figure 1.15: Streams list
 
 Step 5. Create Output Destination
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -819,7 +819,7 @@ The created instances should be available now in UI under the “Instances” ta
 .. figure:: _static/InstancesCreated1.png
    :align: center
    
-   Figure 1.16
+   Figure 1.16: Instances list
 
 Ready! The modules can be launched.
 
@@ -851,7 +851,7 @@ If you take a look at the UI, you will see the launched instances with the “st
 .. figure:: _static/InstancesStarted1.png
    :align: center
    
-   Figure 1.17
+   Figure 1.17: Instances started
 
 To get a list of ports that are listened by the input module instance send the request::
 
@@ -902,7 +902,7 @@ It illustrates the average time of echo-responses by IPs per a selected period o
 .. figure:: _static/Kibana.png
    :align: center
    
-   Figure 1.18
+   Figure 1.18: View results in Kibana
 
 Many other parameter combinations can be implemented to view the results.
 
@@ -916,7 +916,7 @@ The platform allows to customize the processing flow. For example, you can chang
    :align: center
    :scale: 80%
    
-   Figure 1.19
+   Figure 1.19: Fping example solution customization
 
 We will start from creating input and output streams for the instances. 
 
@@ -990,7 +990,7 @@ In the UI, you will see the stopped instances with the “stopped” status.
 .. figure:: _static/InstancesStopped1.png
    :align: center
    
-   Figure 1.20
+   Figure 1.20: Instances stopped
 
 Deleting Instance
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1045,7 +1045,7 @@ A complete pipeline can be rendered as in the diagram below:
    :align: center
    :scale: 80%
    
-   Figure 2.1
+   Figure 2.1: sFlow example task pipeline
 
 Green, yellow, purple and red blocks within the SJ-Platform rectangular area are managed and evaluated by SJ-Platform. 
 
@@ -1179,7 +1179,7 @@ Check out in the UI the engines are uploaded:
 .. figure:: _static/sFlow_EnginesUploaded.png
    :align: center
    
-   Figure 2.2
+   Figure 2.2: Engines list
 
 Setup settings for the engines. Please, replace <slave_advertise_ip> with Mesos-slave IP and <marathon_address> with the address of Marathon::
 
@@ -1203,7 +1203,7 @@ You can see in the UI the configurations are uploaded:
 .. figure:: _static/sFlow_ConfigsUploaded.png
    :align: center
    
-   Figure 2.3
+   Figure 2.3: Configuration list
 
 Step 3. Module Uploading
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1238,7 +1238,7 @@ Now you can see the uploaded modules in the UI:
 .. figure:: _static/sFlow_Modules.png
    :align: center
 
-   Figure 2.4
+   Figure 2.4: Modules list
 
 Now upload the GeoIP database which is required for the processing module::
 
@@ -1261,7 +1261,7 @@ Now you can see the settings are added to the configuration list:
 .. figure:: _static/sFlow_SQLsettings.png
    :align: center
    
-   Figure 2.5
+   Figure 2.5: SQL settings are added to the list
 
 Step 4. Creating Streaming Layer
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1319,7 +1319,7 @@ Check out they have appeared in the UI:
 .. figure:: _static/sflow_Providers.png
    :align: center
    
-   Figure 2.6
+   Figure 2.6: Providers list
 
 Once providers are created, we can create services.
 
@@ -1339,7 +1339,7 @@ Check out the services have appeared in the UI:
 .. figure:: _static/sflow_Services.png
    :align: center
    
-   Figure 2.7
+   Figure 2.7: Services list
 
 Streams creation
 ''''''''''''''''''''''''''
@@ -1378,7 +1378,7 @@ Check out that they have appeared in the UI:
 .. figure:: _static/sflow_Streams.png
    :align: center
    
-   Figure 2.8
+   Figure 2.8: Streams list
 
 Step 5. Output SQL Tables Creation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1436,7 +1436,7 @@ View them in the UI:
 .. figure:: _static/sflow_Instances.png
    :align: center
    
-   Figure 2.9
+   Figure 2.9: Instances list
 
 Launching Instances
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -1478,7 +1478,7 @@ Or, in the UI, click at the input module instance in the "Instances" section and
 .. figure:: _static/sflow_InstancesStarted.png
    :align: center
    
-   Figure 2.10
+   Figure 2.10: Instances started
 
 And now you can **start the processing pipeline** (please, replace <host> and <port> by the values returned for the instance task of the input module)::
 
