@@ -46,9 +46,9 @@ Two demo projects will train the reader to develop the modules for the platform 
 - data processing, filtering, aggregation,
 - result data storing and visualizing.
 
-The demonstrated examples of tasks are not trivial but they are illustrative enough in terms of the platform usage. The first demo intends collecting the aggregated information on the accessibility of nodes. In this case, the data source is a fping sensor. The Elasticsearch is chosen as a data storage.
+The demonstrated example tasks are not trivial but they are illustrative enough in terms of the platform usage. The first example is intended to collect the aggregated information on the accessibility of nodes. In this case, the data source is a fping sensor. The Elasticsearch is chosen as a data storage.
 
-The second demo performs data collecting from a sFlow reporter on network monitoring and traffic computation. The result is stored in PostgreSQL.
+The second example performs data collecting from a sFlow reporter on network monitoring and traffic computation. The result is stored in PostgreSQL.
 
 The problem is not a case of a "heavy" task but it includes some problems which are very specific to stream processing tasks and introduces all SJ-Platform functionality step-by-step without deep knowledge requirements of specific problem domains.
 
