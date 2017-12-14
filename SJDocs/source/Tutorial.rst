@@ -512,30 +512,20 @@ Start Mesos and the services.
 
       curl -X POST http://172.17.0.1:8080/v2/apps -H "Content-type: application/json" -d @kibana.json
 
-
    Via the Marathon interface, make sure the services have a *running* status.
 
 .. figure:: _static/ServicesOnMarathon.png
    :align: center
    Figure 1.8
 
-
-Step 2. SJ-Platform Setting Up 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-1) Add the credential settings if Mesos requires that frameworks must be authenticated:: 
+4) Add the credential settings if Mesos requires the framework must be authenticated:: 
  
     curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"framework-principal\",\"value\": <principal>,\"domain\": \"configuration.system\"}" 
     curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"framework-secret\",\"value\": <secret>,\"domain\": \"configuration.system\"}" 
- 
-2) Copy the demonstrational task repository from GitHub::
-
-    git clone https://github.com/bwsw/sj-fping-demo.git
-    cd sj-fping-demo
 
 Now make sure you have access to the Web UI. You will see the platform is deployed but there are no entities yet created. We will create them in next steps.
 
-Step 3. Configurations and Engine Jars Uploading 
+Step 2. Configurations and Engine Jars Uploading 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To implement the processing workflow for the example task resolution the following JAR files should be uploaded:
@@ -616,7 +606,7 @@ In the UI you can see the uploaded configurations under the “Configuration” 
 
 .. _Module_Uploading:
 
-Step 4. Module Uploading 
+Step 3. Module Uploading 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Now as the system is deployed and necessary engines are added, modules can be uploaded to the system.
@@ -631,7 +621,13 @@ For the stated example task we upload the following modules:
 
 Please, follow these steps to upload the modules.
 
-**Download** the *sj-regex-input* module from Sonatype Repository::
+First, copy the example task repository from GitHub::
+
+    git clone https://github.com/bwsw/sj-fping-demo.git
+    cd sj-fping-demo
+    sbt assembly
+
+Then **download** the *sj-regex-input* module from Sonatype Repository::
 
    curl "https://oss.sonatype.org/content/repositories/snapshots/com/bwsw/sj-regex-input_2.12/1.0-SNAPSHOT/sj-regex-input_2.12-1.0-SNAPSHOT.jar" -o sj-regex-input.jar 
 
@@ -660,7 +656,7 @@ Now in the UI, you can see the uploaded modules under the ‘Modules’ tab.
 
 .. _Creating_Streams:
 
-Step 5. Creating Streaming Layer 
+Step 4. Creating Streaming Layer 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The raw data are fed to the platform from different sources. And within the platform, the data are transported to and from modules via streams. Thus, in the next step, the streams for data ingesting and exporting will be created.
@@ -783,7 +779,7 @@ All the created streams should be available now in the UI under the “Streams�
    
    Figure 1.15
 
-Step 6. Create Output Destination
+Step 5. Create Output Destination
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 At this step all necessary indexes, tables and mapping should be created for storing the processed result.
@@ -797,7 +793,7 @@ Create the index and the mapping for Elasticsearch sending the PUT request::
  curl --request PUT "http://176.120.25.19:9200/pingstation" -H 'Content-Type: application/json' --data "@api-json/elasticsearch-index.json"
 
 
-Step 7. Creating Instances 
+Step 6. Creating Instances 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Once the system is deployed, configurations and modules are uploaded, the streaming layer with necessary infrastructure is created, we can create instances in the next step.
@@ -1155,16 +1151,9 @@ Via the Marathon interface, make sure the services are deployed and run properly
 
 Make sure you have access to the Web UI. You will see the platform but there are no entities yet. We will add them further.
 
-Step 2. SJ-Platform Setting Up 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Next, we will upload configurations for the platform and engine JARs for modules in the next step.
 
-1) Copy the SJ-Platform repository from GitHub::
-
-    git clone https://github.com/bwsw/sj-platform.git
-
-We will upload configurations for the platfom and engine JARs for modules in the next step.
-
-Step 3. Configurations and Engine Jars Uploading
+Step 2. Configurations and Engine Jars Uploading
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 We upload an engine JAR file for each type of module and for Mesos framework.
@@ -1216,24 +1205,23 @@ You can see in the UI the configurations are uploaded:
    
    Figure 2.3
 
-Step 4. Module Uploading
+Step 3. Module Uploading
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Now let's upload modules for data processing. 
 
-First, copy the demo project repository from GitHub::
+First, copy the example project repository from GitHub::
  
- cd ..
  git clone https://github.com/bwsw/sj-sflow-demo.git
  cd sj-sflow-demo
  sbt assembly
 
-Then, upload the ready-to-use CSV-input module from the sonatype repository::
+Then, upload the ready-to-use CSV-input module from the Sonatype repository::
 
  curl "https://oss.sonatype.org/content/repositories/snapshots/com/bwsw/sj-csv-input_2.12/1.0-SNAPSHOT/sj-csv-input_2.12-1.0-SNAPSHOT.jar" -o sj-csv-input.jar
  curl --form jar=@sj-csv-input.jar http://$address/v1/modules
 
-Then, build and upload the batch processing and the output modules of the sFlow demo project. 
+Next, build and upload the batch processing and the output modules of the sFlow demo project. 
 
 From the directory of the demo project set up the batch processing module::
  
@@ -1275,7 +1263,7 @@ Now you can see the settings are added to the configuration list:
    
    Figure 2.5
 
-Step 5. Creating Streaming Layer
+Step 4. Creating Streaming Layer
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Let’s create streams to transfer data from and to the modules.
@@ -1392,7 +1380,7 @@ Check out that they have appeared in the UI:
    
    Figure 2.8
 
-Step 6. Output SQL Tables Creation
+Step 5. Output SQL Tables Creation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 At this step you are expected to have PostgreSQL running with `sflow` database in it. 
 
@@ -1419,7 +1407,7 @@ SQL tables for the output data should be created in the *sflow* database. To cre
     txn BIGINT
  );
 
-Step 7. Creating Instances
+Step 6. Creating Instances
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 An instance should be created for each module. It is a set of settings determining the collaborative work of a module and an engine. 
