@@ -83,7 +83,7 @@ To receive the result of processing an output module is required. The **output m
 
 So the pipeline may look like at the following scheme:
 
-.. figure:: _static/ModuleStructure4.png
+.. figure:: _static/ModuleStructure5.png
    :align: center
    :scale: 80%
 
