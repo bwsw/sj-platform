@@ -1216,7 +1216,7 @@ First, copy the example project repository from GitHub::
  cd sj-sflow-demo
  sbt assembly
 
-Then, upload the ready-to-use CSV-input module from the Sonatype repository::
+Then, upload the ready-to-use CSV-input module from Sonatype repository::
 
  curl "https://oss.sonatype.org/content/repositories/snapshots/com/bwsw/sj-csv-input_2.12/1.0-SNAPSHOT/sj-csv-input_2.12-1.0-SNAPSHOT.jar" -o sj-csv-input.jar
  curl --form jar=@sj-csv-input.jar http://$address/v1/modules
