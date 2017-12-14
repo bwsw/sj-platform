@@ -220,7 +220,7 @@ Here is the full list of addresses to get access to the services:
 - 0.0.0.0:9092, 0.0.0.0:7203 - Kafka
 
 
-The platform is deployed with the entities: configurations, engines, providers, services, streams. Modules and instances are created as for the :ref:`fping-example-task` described in Tutorial. To launch the data processing follow the instruction provided in the :ref:`fping-Launch-Instances` step of the example task.
+The platform is deployed with the entities: configurations, engines, providers, services, streams. Modules and instances are created as for the :ref:`fping-example-task` described in Tutorial. To launch the data processing follow the instructions provided in the :ref:`fping-Launch-Instances` step of the example task.
 
 .. Or you can create your own pipeline with modules suitable to achieve your goals. How to create your own module is described `here <http://streamjuggler.readthedocs.io/en/develop/SJ_CustomModule.html>`_ in detail.
 .. |VirtualBox (TM)| unicode:: VirtualBox U+00AE
