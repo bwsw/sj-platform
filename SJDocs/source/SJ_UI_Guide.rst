@@ -833,6 +833,7 @@ The system additionally shows the following fields in the *Instance details* pan
 
 - Tasks
     For a started instance the task name and address (host and port) are specified in the *Instance details* panel.
+
 In the list of instances the following actions can be performed:
 
 1. **Start** an instance by clicking the "Start" button in the Actions column. The instance status will first change to "Starting" and in a few seconds to "Started". That means the instance is launched and is working now.
