@@ -23,7 +23,7 @@ Envelope
   A specialized fundamental data structure, containing data and metadata. The metadata is required for exactly-once processing.
 
 Event 
-  Minimal data unit of a stream.
+  A Minimal data unit of a stream.
 
 Exactly-once processing 
   The processing of stream events only once.
@@ -32,10 +32,10 @@ Executor
   A part of a module that performs data processing.
 
 External data source 
-   An external system which provides data for processing.
+  An external system which provides data for processing.
 
 External data storage 
-   An external system which stores resulting data after processing.
+  An external system which stores resulting data after processing.
 
 Instance 
   A set of settings determining the collaborative work of an engine and a module.
@@ -69,11 +69,11 @@ State storage service
   A service responsible for storing data state into a specified location (determined by instance settings). It is performed together with the checkpoint.
 
 Stream  
-  A sequence of events happening randomly at irregular intervals. Streams in SJ-Platform differ by a physical service (that provides or stores data) and by purpose. According to a physical service the types of streams existing in SJ-Platform are: Apache Kafka, T-streams, Elasticsearch, SQL-database, RESTful. According to the purpose streams can be: input streams, internal streams and output streams.
+  A sequence of events happening randomly at irregular intervals. Streams in SJ-Platform differ by a physical service (that provides or stores data) and by purpose. According to a physical service, the types of streams existing in SJ-Platform are Apache Kafka, T-streams, Elasticsearch, SQL-database, RESTful. According to the purpose, streams can be: input streams, internal streams and output streams.
   
-  - **Input stream** - sequence of data elements from data source. May be of types: T-streams, Apache Kafka.
-  - **Internal stream** - sequence of data elements transferred between system modules. May be of type: T-streams.
-  - **Output stream** - sequence of data elements which is saved in data storage. May be of types: T-streams, Elasticsearch, SQL database, RESTful.
+  - **Input stream** - a sequence of data elements from data source. It may be of types: T-streams, Apache Kafka.
+  - **Internal stream** - a sequence of data elements transferred between system modules. It may be of type: T-streams.
+  - **Output stream** - a sequence of data elements which is saved in data storage. It may be of types: T-streams, Elasticsearch, SQL database, RESTful.
   
 Task
   It is a Mesos term and, in general, it means a piece of work to be done. Within the system, a task is a logical part of an instance. Each task does the same work that is provided by a module. They are executed separately from each other.
