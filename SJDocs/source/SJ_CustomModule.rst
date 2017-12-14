@@ -49,7 +49,7 @@ The workflow of the SJ-Platform implies the structure:
 2. A **processing module** performs the main transformation and calculation of data. It accepts data via T-streams and Apache Kafka. The processed data are put into T-streams only. So an output module is required in the next step as we can not get the result data right from T-streams and put them into an external storage.
 3. An **output module** is necessary to transfer the data from T-streams into the result data of the type appropriate for the external storage.
 
-.. figure:: _static/ModuleStructure4.png
+.. figure:: _static/ModuleStructure5.png
   :scale: 80 %
 
 Below you will find the instructions on custom module creation in Scala.
@@ -71,7 +71,7 @@ A :ref:`hello-world-module` is presented as a tutorial on a module development.
 
 Input Streaming Custom Module
 ---------------------------------
-1) Create a new sbt project depending on sj-engine-core library, i.e. use the latest version from the  ` Apache Maven repository <https://mvnrepository.com/artifact/com.bwsw>`_ in your `build.sbt` file.  Also mark this dependency as provided. This prevents it from being included in the assembly JAR. For example:: 
+1) Create a new sbt project depending on sj-engine-core library, i.e. use the latest version from the  `Apache Maven repository <https://mvnrepository.com/artifact/com.bwsw>`_ in your `build.sbt` file.  Also mark this dependency as provided. This prevents it from being included in the assembly JAR. For example:: 
  
     libraryDependencies += "com.bwsw" %% "sj-engine-core" % "1.0" % "provided"
  
@@ -87,7 +87,7 @@ Input Streaming Custom Module
 
 Regular Streaming Custom Module
 ---------------------------------
-1) Create a new sbt project with a dependency on the sj-engine-core library, i.e. use the latest version from the ` Apache Maven repository <https://mvnrepository.com/artifact/com.bwsw>`_ in your `build.sbt` file. Also mark this dependency as provided. This prevents it from being included in the assembly JAR. For example:: 
+1) Create a new sbt project with a dependency on the sj-engine-core library, i.e. use the latest version from the `Apache Maven repository <https://mvnrepository.com/artifact/com.bwsw>`_ in your `build.sbt` file. Also mark this dependency as provided. This prevents it from being included in the assembly JAR. For example:: 
  
     libraryDependencies += "com.bwsw" %% "sj-engine-core" % "1.0" % "provided"
     
@@ -103,7 +103,7 @@ Regular Streaming Custom Module
 
 Batch Streaming Custom Module
 ------------------------------------
-1) Create a new sbt project with a dependency on the sj-engine-core library, i.e. use the latest version from the  ` Apache Maven repository <https://mvnrepository.com/artifact/com.bwsw>`_ in your `build.sbt` file. Also mark this dependency as provided. This prevents it from being included in the assembly JAR. For example:: 
+1) Create a new sbt project with a dependency on the sj-engine-core library, i.e. use the latest version from the  `Apache Maven repository <https://mvnrepository.com/artifact/com.bwsw>`_ in your `build.sbt` file. Also mark this dependency as provided. This prevents it from being included in the assembly JAR. For example:: 
  
     libraryDependencies += "com.bwsw" %% "sj-engine-core" % "1.0" % "provided"
 
@@ -120,7 +120,7 @@ Batch Streaming Custom Module
 
 Output Streaming Custom Module
 -----------------------------------------------
-1) Create a new sbt project with a dependency on the sj-engine-core library, i.e. use the latest version from the  ` Apache Maven repository <https://mvnrepository.com/artifact/com.bwsw>`_ in your `build.sbt` file. Also mark this dependency as provided. This prevents it from being included in the assembly JAR. For example:: 
+1) Create a new sbt project with a dependency on the sj-engine-core library, i.e. use the latest version from the  `Apache Maven repository <https://mvnrepository.com/artifact/com.bwsw>`_ in your `build.sbt` file. Also mark this dependency as provided. This prevents it from being included in the assembly JAR. For example:: 
  
     libraryDependencies += "com.bwsw" %% "sj-engine-core" % "1.0" % "provided"
 
