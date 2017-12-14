@@ -50,7 +50,11 @@ The workflow of the SJ-Platform implies the structure:
 3. An **output module** is necessary to transfer the data from T-streams into the result data of the type appropriate for the external storage.
 
 .. figure:: _static/ModuleStructure5.png
-  :scale: 80 %
+   :scale: 80 %
+   :align: center
+  
+   Figure 1.1: Pipeline structure
+  
 
 Below you will find the instructions on custom module creation in Scala.
 
@@ -309,15 +313,21 @@ Processing description
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Architecture of our solution is going to look like at the schema below:
 
-.. figure:: _static/Structure.png
-
+.. figure:: _static/CustomModule_Structure.png
+   :align: center
+  
+   Figure 1.2: Example pipeline structure
+  
 Netcat appears here because we will send our data to SJ-module via TCP connection.
 
 That is a general description.
 
 If we look deeper into the structure, we will see the following data flow:
 
-.. figure:: _static/SJStructure.png
+.. figure:: _static/CustomModule_Processing.png
+   :align: center
+  
+   Figure 1.3: Processing in the example pipeline 
 
 All input data elements are going as a flow of bytes to a particular interface provided by `InputTaskEngine`. That flow is going straight to `RegexInputExecutor` (which implements the `InputStreamingExecutor` interface) and is converted to `InputEnvelope` objects which store all data inside as `Record` (provided by the Apache Avro library). 
 
