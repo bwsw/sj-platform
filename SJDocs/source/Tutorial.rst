@@ -627,7 +627,7 @@ First, copy the example task repository from GitHub::
     cd sj-fping-demo
     sbt assembly
 
-Then **download** the *sj-regex-input* module from Sonatype Repository::
+Then **download** the *sj-regex-input* module from Sonatype repository::
 
    curl "https://oss.sonatype.org/content/repositories/snapshots/com/bwsw/sj-regex-input_2.12/1.0-SNAPSHOT/sj-regex-input_2.12-1.0-SNAPSHOT.jar" -o sj-regex-input.jar 
 
