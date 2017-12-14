@@ -522,9 +522,9 @@ To launch Vagrant use the following command::
 
 It will take up to 30 minutes, 8GB memory and 7 CPUs.
 
-.. note:: Please, make sure the ports are available!  In Linux you can use netstat for monitoring network connections and statistics. Run the following command to list all open ports or currently running ports including TCP and UDP::
+.. note:: Please, make sure the ports are available!  In Linux you can use netstat for monitoring network connections and statistics. Run the following command to list all open ports or currently running ports including TCP and UDP:
           
-           netstat -lntu
+ ``netstat -lntu``
 
 At the end of deploying you can see URLs of all services.
 
