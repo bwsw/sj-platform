@@ -5,7 +5,7 @@ Platform Deployment
 
 In this section you will find the information on how to start working with the Stream Juggler Platform. We offer two options here: 
 
-1) to deploy the platform on a cluster, or
+1) to deploy the platform on Mesos cluster, or
 2) to run the pre-built |VirtualBox (TM)| image with the :ref:`fping-example-task` solution implemented on the SJ-Platform base.
 
 Please, read the requirements for each option and decide which is more suitable for your aims.
@@ -15,7 +15,7 @@ SJ-Platform Deployment on Mesos Cluster
 
 The first option is to deploy SJ-Platform on a cluster. Currently, the deployment on `Apache Mesos <http://mesos.apache.org/>`_ as a universal distributed computational engine is supported.
 
-The detailed step-by-step instruction on Stream Juggler Platform deployment on Mesos cluster is provided. A You will find here a complete list of requirements and the deployment procedure description. We will deploy and start all the services. The platform will contain no entities. It means you can structure the pipeline corresponding to your aims from scratch. The entities can be added to the platform via `REST API <http://streamjuggler.readthedocs.io/en/develop/SJ_CRUD_REST_API.html>`_ or `the UI <http://streamjuggler.readthedocs.io/en/develop/SJ_UI_Guide.html>`_ . 
+The detailed step-by-step instructions on Stream Juggler Platform deployment on Mesos cluster is provided. You will find here a complete list of requirements and the deployment procedure description. We will deploy and start all the necessary services. The platform will contain no entities. It means you can structure the pipeline corresponding to your aims from scratch. The entities can be added to the platform via `REST API <http://streamjuggler.readthedocs.io/en/develop/SJ_CRUD_REST_API.html>`_ or `the UI <http://streamjuggler.readthedocs.io/en/develop/SJ_UI_Guide.html>`_ . 
 
 .. Another option is to deploy SJ-Platform in a local mode using `minimesos <https://www.minimesos.org/>`_ as a testing environment.
 
@@ -380,7 +380,7 @@ Creating Platform Entities
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Under this section you will find the information on platform entities creation.
 
-We will not provide you with specific instructions as this part is custom and the set of platform entities you need for your tasks may differ. Step-by-step instructions on creating platform entities are provided in the :ref:`fping-example-task` and :ref:`sflow-example-task` sections of :ref:`Tutorial`.
+We will not provide you with specific instructions as this part is custom and the set of platform entities you need for your tasks may differ. Step-by-step instructions on creating entities for example issue solutions are provided in the :ref:`fping-example-task` and :ref:`sflow-example-task` sections of Tutorial.
 
 The following entities should be uploaded or created in the system:
 
@@ -444,7 +444,7 @@ For more details see :ref:`REST_API_Instance`.
 
 Or instances can be created via the UI (see :ref:`UI_Instances`).
 
-To start processing you should launch instances one by one. Use REST API (see :ref:`REST_API`) or the Web UI (see :ref:`UI_Guide`) to start processing and monitor the task execution.
+To start processing you should launch instances one by one.  Use REST API (see :ref:`REST-API-Start-Instance`) or the Web UI (see :ref:`UI_Instances`) to start processing and monitor the task execution.
 
 
 Running Pre-built |VirtualBox (TM)| Image
@@ -528,11 +528,7 @@ At the end of deploying you can see URLs of all services.
 
 The detailed :ref:`VM_Description` is provided for you to understand the process of virtual machines' creation.
 
-The platform is deployed with the entities: configurations, engines, providers, services, streams. Modules and instances are created as for the :ref:`fping-example-task` described in :ref:`Tutorial`.
-
-If you want to proceed to work with the platform via the UI, please, see the `UI Guide <http://streamjuggler.readthedocs.io/en/develop/SJ_UI_Guide.html>`_. It will provide you with the necessary information on how you can launch the instances, view the statistics of task execution. 
-
-Or you can create your own pipeline with modules suitable to achieve your goals. How to create your own module is described `here <http://streamjuggler.readthedocs.io/en/develop/SJ_CustomModule.html>`_.
+The platform is deployed with the entities: configurations, engines, providers, services, streams. Modules and instances are created as for the :ref:`fping-example-task` described in Tutorial. To launch the data processing follow the instructions provided in the :ref:`fping-Launch-Instances` step of the example task.
 
 Destroying Virtual Machine
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
