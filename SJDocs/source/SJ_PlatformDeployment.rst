@@ -301,7 +301,7 @@ Engine Uploading
 """"""""""""""""""""""""""
 Before uploading modules, upload the engine jars for them. 
 
-1. You should download the engine jars for each module types (input-streaming, regular-streaming, batch-streaming, output-streaming) and a Mesos framework::
+1. You should download the engine jars for each module type (input-streaming, regular-streaming, batch-streaming, output-streaming) and a Mesos framework::
 
     wget http://c1-ftp1.netpoint-dc.com/sj/1.0-SNAPSHOT/sj-input-streaming-engine.jar
     wget http://c1-ftp1.netpoint-dc.com/sj/1.0-SNAPSHOT/sj-regular-streaming-engine.jar
@@ -373,14 +373,14 @@ Module type                 Engine name                              Engine vers
     curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"batch-streaming-validator-class\",\"value\": \"com.bwsw.sj.crud.rest.instance.validator.BatchInstanceValidator\",\"domain\": \"configuration.system\"}" 
     curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"output-streaming-validator-class\",\"value\": \"com.bwsw.sj.crud.rest.instance.validator.OutputInstanceValidator\",\"domain\": \"configuration.system\"}" 
     
-4. You can add the following optional configuraions if necessary. They have default values in the system but can be overriden. Find the full list of optional configurations at the :ref:`table-optional` table.
+4. You can add optional configuraions if necessary. They have default values in the system but can be overriden. Find the full list of optional configurations at the :ref:`table-optional` table.
 
 
 Creating Platform Entities
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Under this section you will find the information on platform entities creation.
 
-We will not provide you with specific instructions as this part is custom and the set of platform entities you need for your tasks may differ. Step-by-step instructions on creating platform entities are provided in the :ref:`fping-example-task` and :ref:`sflow-example-task` sections.
+We will not provide you with specific instructions as this part is custom and the set of platform entities you need for your tasks may differ. Step-by-step instructions on creating platform entities are provided in the :ref:`fping-example-task` and :ref:`sflow-example-task` sections of :ref:`Tutorial`.
 
 The following entities should be uploaded or created in the system:
 
@@ -495,7 +495,7 @@ Otherwise, the response will look as presented below::
 Prerequisites
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-1. At the first step Vagrant and VirtualBox should be installed. 
+1. At the first step install Vagrant and VirtualBox. 
 
 You can do it following the instructions in the official documentation: 
 
@@ -532,7 +532,7 @@ The platform is deployed with the entities: configurations, engines, providers, 
 
 If you want to proceed to work with the platform via the UI, please, see the `UI Guide <http://streamjuggler.readthedocs.io/en/develop/SJ_UI_Guide.html>`_. It will provide you with the necessary information on how you can launch the instances, view the statistics of task execution. 
 
-Or you can create your own pipeline with modules suitable to achieve your goals. How to create your own module is described `here <http://streamjuggler.readthedocs.io/en/develop/SJ_CustomModule.html>`_ in detail.
+Or you can create your own pipeline with modules suitable to achieve your goals. How to create your own module is described `here <http://streamjuggler.readthedocs.io/en/develop/SJ_CustomModule.html>`_.
 
 Destroying Virtual Machine
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
