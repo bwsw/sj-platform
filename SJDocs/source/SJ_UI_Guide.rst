@@ -889,7 +889,7 @@ In the list of instances the following actions can be performed:
 
 .. figure:: _static/CreateInstance_Clone2.png
     
-    Figure 1.25: "Clone" instance
+    Figure 1.25: "Clone instance" action
     
 The form will show the settings of the selected instance. They can be edited and saved by clicking the "Create" button. A new instance will appear in the list of instances.
 
