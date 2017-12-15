@@ -851,7 +851,7 @@ If you take a look at the UI, you will see the launched instances with the “st
 .. figure:: _static/InstancesStarted1.png
    :align: center
    
-   Figure 1.17: Instances started
+   Figure 1.17: Started instances 
 
 To get a list of ports that are listened by the input module instance send the request::
 
@@ -990,7 +990,7 @@ In the UI, you will see the stopped instances with the “stopped” status.
 .. figure:: _static/InstancesStopped1.png
    :align: center
    
-   Figure 1.20: Instances stopped
+   Figure 1.20: Stopped instances 
 
 Deleting Instance
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1203,7 +1203,7 @@ You can see in the UI the configurations are uploaded:
 .. figure:: _static/sFlow_ConfigsUploaded.png
    :align: center
    
-   Figure 2.3: Configuration list
+   Figure 2.3: Configurations list
 
 Step 3. Module Uploading
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1261,7 +1261,7 @@ Now you can see the settings are added to the configuration list:
 .. figure:: _static/sFlow_SQLsettings.png
    :align: center
    
-   Figure 2.5: SQL settings are added to the list
+   Figure 2.5: JDBC driver settings are added to the list
 
 Step 4. Creating Streaming Layer
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1478,7 +1478,7 @@ Or, in the UI, click at the input module instance in the "Instances" section and
 .. figure:: _static/sflow_InstancesStarted.png
    :align: center
    
-   Figure 2.10: Instances started
+   Figure 2.10: Started instances 
 
 And now you can **start the processing pipeline** (please, replace <host> and <port> by the values returned for the instance task of the input module)::
 
