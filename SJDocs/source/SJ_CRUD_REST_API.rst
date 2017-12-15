@@ -56,7 +56,7 @@ The data format in the body of the response is JSON.
 
 .. _REST_Providers:
 
-CRUD REST-API for Providers
+CRUD REST API for Providers
 -----------------------------------
 
 The range of REST API methods described below allows to create or delete a provider, get the information on the provider, get the list of providers in the system, test connection to a provider.
@@ -391,7 +391,7 @@ Error response example::
 
 .. _REST_Services:
 
-CRUD REST-API for Services
+CRUD REST API for Services
 --------------------------------------
 
 The range of REST API methods described below allows to create or delete a service, get the information on the service, get the list of services and service types in the system, get streams and instances related to a service.
@@ -784,7 +784,7 @@ Error response example::
 
 .. _REST_Streams:
 
-CRUD REST-API for Streams
+CRUD REST API for Streams
 --------------------------------------
 
 The range of REST API methods described below allows to create or delete a stream, get the information on the stream, get the list of streams and stream types in the system, get instances related to a stream.
@@ -1089,7 +1089,7 @@ Error response example::
 
 .. tip:: A full range of error responses can be found at :ref:`Streams_Errors`
 
-CRUD REST-API for Configurations
+CRUD REST API for Configurations
 -----------------------------------
 
 The range of REST API methods described below allows to create or delete configuration, get the information on the configuration, get the list of configurations existing in the system, get list of domains.
@@ -1382,7 +1382,7 @@ Success response example::
 
 .. tip:: A full range of error responses can be found at :ref:`Config_Settings_Errors`
 
-CRUD REST-API for Custom Files
+CRUD REST API for Custom Files
 ----------------------------------------
 
 The range of REST API methods described below allows to upload a custom jar or file, download it to your computer, get list of custom jars or files in the system and delete a custom jar or file.
@@ -1784,10 +1784,10 @@ Success response example::
 
 .. _Modules_REST_API:
 
-CRUD REST-API for Modules 
+CRUD REST API for Modules 
 ------------------------------
 
-This is the CRUD REST-API for modules uploaded as jar files, instantiated and running modules as well as for custom jar files.
+This is the CRUD REST API for modules uploaded as jar files, instantiated and running modules as well as for custom jar files.
 
 .. csv-table::  Module types
  :header: "Types"
@@ -2153,7 +2153,7 @@ Error response example::
 
 .. _REST_API_Instance:
 
-CRUD REST-API for Instances
+CRUD REST API for Instances
 -----------------------------------
 
 The range of REST API methods described below allows to create an instance of a module, get the list of existing instances, get the settings of a specific instance, start and stop an instance and get the instance tasks information as well as delete an instance of a specific module. 
