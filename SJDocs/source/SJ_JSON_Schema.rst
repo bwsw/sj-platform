@@ -1,5 +1,7 @@
 .. _Json_schema:
 
+.. contents::
+
 JSON schema for module specification 
 ===========================================
 
