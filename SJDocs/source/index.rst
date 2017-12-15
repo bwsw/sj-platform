@@ -30,7 +30,7 @@ The :ref:`Custom_Module` section explains how to write a module using a simple h
 API and UI documentation
 -------------------------------
 
-SJ-Platform provides REST API and Web UI for users to easily manage the platform. The :ref:`UI_Guide` and the :ref:`REST_API_Guide` may be of utmost importance for platform administrators. 
+SJ-Platform provides REST API and Web UI for users to easily manage the platform. The :ref:`UI_Guide` and the :ref:`REST_API` may be of utmost importance for platform administrators. 
 
 
 **SJ-Platform 1.1.1** documentation general structure:
