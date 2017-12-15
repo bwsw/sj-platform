@@ -51,7 +51,7 @@ The base of the system is an engine: it provides basic I/O functionality. It is 
    :scale: 120%
    :align: center
    
-   Figure 1.2: Engine in SJ-Platform
+   Figure 1.2: An engine in SJ-Platform
    
 After its uploading, the engine receives raw data and sends them to the module executor. The executor starts data processing and returns the resulting data back to the engine where they are deserialized to be passed into the stream or a storage.
 
@@ -90,7 +90,7 @@ In the SJ-Platform the TCP Input module is currently implemented.
   :scale: 80 %
   :align: center
 
-  Figure 1.4: Input module strucutre
+  Figure 1.4: Input module inputs and outputs
   
 It performs the transformation of the streams incoming via TCP into T-streams. T-streams are persistent streams designed for exactly-once processing (so they include a transactional producer, a consumer and a subscriber). Find more information about T-streams `here <http://t-streams.com>`_.
 
@@ -188,7 +188,7 @@ The most generic modules in the system are modules of a regular-streaming type. 
   :scale: 80 %
   :align: center
 
-  Figure 1.6: Regular module structure
+  Figure 1.6: Regular module inputs and outputs
 
 The diagram below represents the dataflow in the regular module.
 
@@ -428,7 +428,7 @@ Modules of an output type are responsible for saving of output data to external 
   :scale: 80 %
   :align: center
 
-  Figure 1.9: Output module structure
+  Figure 1.9: Output module inputs and outputs
   
 They transform the result of data processing received from T-streams and passe them to an external data storage. They allow to transform one data item from incoming streaming into one and more data output items.
 
@@ -502,21 +502,21 @@ For the Batch module we need to create a batch instance. In the system an instan
 .. figure:: _static/zk-inst-serv-pr1.png
    :align: center
    
-   Figure 1.11: Instance dependence on Apache Zookeeper diagram
+   Figure 1.11: Instance dependence on Apache Zookeeper 
    
 The batch instance will receive data from Apache Kafka streams. Apache Kafka streams require the Apache Kafka service to exist in our system. The Apache Kafka service requires two specific providers of the following types: Apache Kafka and Apache Zookeeper (the same as in the previous step) (Figure 1.12).
 
 .. figure:: _static/kfk-inst-serv-pr1.png
    :align: center
    
-   Figure 1.12: Apache Kafka streaming infrastructure for the instance
+   Figure 1.12: Apache Kafka streaming infrastructure for the batch instance
    
 So these are the instance and the streaming components types that we need for our example:
 
 .. figure:: _static/inst-stream-serv-prov.png
    :align: center
    
-   Figure 1.13: Instance infrastructure example
+   Figure 1.13: Batch instance infrastructure example
 
 At this point we have determined the type of instance in the pipeline and the types of streaming components. So we can start building the infrastructure.
 
