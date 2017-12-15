@@ -13,6 +13,8 @@ The streaming component is essential in SJ-Platform. The data are fed to the sys
 The system receives data via **TCP** or **Apache Kafka**. Within SJ-Platform modules exchange data via **T-streams**. The results are exported to an external storage via output streams which type is determined by the type of the storage. For now, **Elasticsearch**, **SQL-database** and **RESTful** output stream types are supported. 
 
 .. figure:: _static/SJ_Streams.png
+    
+    Figure 1.1: I/O Streams in SJ-Platform
 
 The table below shows what types of streams are required as input/output streams for a particular module type.
 
@@ -62,7 +64,9 @@ The easiest way to try T-streams and dive into basic operations with T-streams i
 The image below illustrates the data design format in T-streams. The stream consists of partitions. Each partition holds a number of transactions with data elements inside. 
 
 .. figure:: _static/t-streams-organization.png
-
+    
+    Figure 1.2: T-streams structure
+    
 Data elements are time-sorted within a transaction. 
 
 Transactions are used to write or read data from T-streams. The transaction is also a basic recovery element. This means, that in case of a crash, the processing can recover from a transaction.

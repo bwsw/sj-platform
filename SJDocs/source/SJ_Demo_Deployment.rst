@@ -1,87 +1,28 @@
-Demo Deployment on Virtual Machine
-------------------------------------
+Details of Running Pre-built |VirtualBox (TM)| Image
+-----------------------------------------------------
 
-SJ-Platform can be deployed on a virtual machine. We suggest deploying the platform locally via Vagrant with VirtualBox as a provider.
- 
-This is the most rapid way to get acquainted with the platform and assess its performance.
+For the first acquaintance with SJ-Platform, we suggest deploying the platform using Vagrant with |VirtualBox (TM)| as a provider. In this case, you use a pre-built |VirtualBox (TM)| image of the platform. So this is the most rapid way to run the platform and assess its performance. It takes up to 30 minutes. The platform is started with all entities necessary to demonstrate the solution for the example task described in the :ref:`fping-example-task` section: configurations, engines, providers, services, streams, modules and instances. 
 
 Requirements:
 
 - At least 8 GB of free RAM.
 
-- VT-x must be enabled in BIOS.
+- VT-x enabled in BIOS.
 
-To determine if CPU VT extensions are enabled in BIOS, do the following:
+Below a detailed description is provided on what is happening when running the pre-built |VirtualBox (TM)| image.
 
-1) Install CPU-checker::
-
-    $ sudo apt-get update
-    $ sudo apt-get install cpu-checker
-
-2) Then check::
-
-    $ kvm-ok
-
-If the CPU is enabled, you will see::
-
- INFO: /dev/kvm exists
- KVM acceleration can be used
-
-Otherwise, the respond will look as presented below::
-
- INFO: /dev/kvm does not exist
- HINT: sudo modprobe kvm_intel 
- INFO: Your CPU supports KVM extensions
- INFO: KVM (vmx) is disabled by your BIOS
- HINT: Enter your BIOS setup and enable Virtualization Technology (VT),
-      and then hard poweroff/poweron your system
- KVM acceleration can NOT be used
-
-
-Deployment
-~~~~~~~~~~~~~~~~~~~~~~~
-
-1. At the first step Vagrant and VirtualBox should be installed. 
-
-You can do it following the instructions in the official documentation: 
-
-- `for Vagrant <https://www.vagrantup.com/docs/installation/>`_
-- `for VirtualBox <https://www.virtualbox.org/wiki/Downloads>`_
-
-Please, make sure to install the service of the versions specified below:
-
-- Vagrant 1.9.1
-- VirtualBox 5.0.40
-- Ubuntu 16.04
-
-2. Then, clone the project from the GitHub repository::
-
-    $ git clone https://github.com/bwsw/sj-demo-vagrant.git
-    $ cd sj-demo-vagrant
-
-Launching Virtual Machine
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-To launch Vagrant use the following command::
-
- $ vagrant up
-
-It will take up to 30 minutes, 8GB memory and 7 CPUs.
-
-.. important:: Please, make sure the ports are opened!
-
-At the end of deploying you can see urls of all services.
+.. _VM_Description:
 
 Description
 """""""""""""""""""
 
-After launching Vagrant you will get the access to Mesos, Marathon, the SJ-Platform REST API and UI. In the UI you will see all the platform entities created for the `fping demo <http://streamjuggler.readthedocs.io/en/develop/Tutorial.html#fping-example-task>`_ project:
+After launching Vagrant you will get access to Mesos, Marathon, the SJ-Platform REST API and UI. In the UI you will see all the platform entities created for the `fping demo <http://streamjuggler.readthedocs.io/en/develop/Tutorial.html#fping-example-task>`_ project:
 
 - configurations for modules;
 - modules;
-- streams with infrastructurte (providers, services);
+- streams with infrastructure (providers, services);
 - instances;
-- data store as a result destination.
+- data storage as a resulting data destination.
 
 Vagrant creates Ubuntu/Xenial64 virtual machines with specific parameters:
 
@@ -97,13 +38,15 @@ Vagrant creates Ubuntu/Xenial64 virtual machines with specific parameters:
 
 All VMs are launched in the private network: 192.168.50.0
 
-Also you can access VM with *vagrant ssh* <name>.
+Also, you can use the following command to establish an SSH session into a running virtual machine to get shell access::
+
+ vagrant ssh <name>
+
+Find below the detailed descrition for each virtual machine.
 
 **Master VM**
 
-VM name = master
-
-VM hostname = master
+Virtual machine name is "master". Its hostname is "master".
 
 *Resources*:
 
@@ -113,7 +56,7 @@ VM hostname = master
 
 - ip = 192.168.50.51
 
-- forwarding ports: 2181, 5050, 8080
+- forwarded ports: 2181, 5050, 8080
 
 *Services*:
 
@@ -141,9 +84,7 @@ Description:
 
 **Slave1 VM**
 
-VM name = slave1
-
-VM hostname = slave1
+Virtual machine name is "slave1". Its hostname is "slave1".
 
 *Resources*:
 
@@ -153,7 +94,7 @@ VM hostname = slave1
 
 - ip = 192.168.50.52
 
-- forwarding ports: 5051, 8888, 9092, 7203, 31071, 5601, 9200, 9300
+- forwarded ports: 5051, 8888, 9092, 7203, 31071, 5601, 9200, 9300
 
 *Services*:
 
@@ -186,9 +127,7 @@ Description:
 
 **Slave2 VM**
 
-VM name = slave2
-
-VM hostname = slave2
+Virtual machine name is "slave2". Its hostname is "slave2".
 
 *Resources*:
 
@@ -198,7 +137,7 @@ VM hostname = slave2
 
 - ip = 192.168.50.53
 
-- forwarding ports: 31500 - 31600
+- forwarded ports: 31500 - 31600
 
 *Services*:
 
@@ -215,13 +154,13 @@ Description:
   
   - zk = zk://192.168.50.51:2181/mesos, 
   
-  - ports = forwarding ports.
+  - ports = forwarded ports.
   
   Next, Docker engine is installed.
 
 **Storage VM**
 
-VM name = storage
+Virtual machine name is "storage".
 
 *Resource*:
 
@@ -231,19 +170,18 @@ VM name = storage
 
 - ip = 192.168.50.55
 
-- forwarding ports: 27017
+- forwarded ports: 27017
 
-*Srevices*:
+*Services*:
 
 - MongoDB
 
 Description:
-
-After VM is launched, Vagrant firstly installs Docker engine and then launches MongoDB in Docker.
+  After VM is launched, Vagrant firstly installs Docker engine and then launches MongoDB in Docker.
 
 **Executor VM**
 
-VM name = executor
+Virtual machine name is "executor".
 
 *Resource*:
 
@@ -261,46 +199,28 @@ Description:
   After services are launched, Vagrant creates all entities via SJ-rest.
 
 
-A full list of ports to get access to the services:
+Here is the full list of addresses to get access to the services:
 
-- 8080 - Marathon
+- 0.0.0.0:8080 - Marathon
 
-- 5050 - Mesos Master
+- 0.0.0.0:5050 - Mesos Master
 
-- 5051 - Mesos Agent
+- 0.0.0.0:5051 - Mesos Agent
 
-- 8888 - SJ REST
+- 0.0.0.0:8888 - SJ REST
 
-- 27017 - MongoDB
+- 0.0.0.0:27017 - MongoDB
 
-- 2181 - Apache Zookeeper
+- 0.0.0.0:2181 - Apache Zookeeper
 
-- 9200 - Elasticsearch
+- 0.0.0.0:9200 - Elasticsearch
 
-- 5601 - Kibana
+- 0.0.0.0:5601 - Kibana
 
-- 9092,7203 - Kafka
-
-Use local host - 0.0.0.0
+- 0.0.0.0:9092, 0.0.0.0:7203 - Kafka
 
 
-The platform is deployed with the entities: providers, services, streams, configurations.
+The platform is deployed with the entities: configurations, engines, providers, services, streams. Modules and instances are created as for the :ref:`fping-example-task` described in Tutorial. To launch the data processing follow the instructions provided in the :ref:`fping-Launch-Instances` step of the example task.
 
-Modules and instances are created as for the f-ping-demo project described in :ref:`Tutorial` .
-
-To proceed working with the platform via the UI, please, see the `UI Guide <http://streamjuggler.readthedocs.io/en/develop/SJ_UI_Guide.html>`_ .
-
-Now you can launch the instances, view the statistics of task execution in the UI. 
-
-Or you are enabled to create your own pipeline with modules and instances that are suitable to achieve your goals.
-
-How to create your own module is described in detail `here <http://streamjuggler.readthedocs.io/en/develop/SJ_CustomModule.html>`_ .
-
-Destroying Virtual Machine
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-To destroy the virtual machine(s) use::
-
- $ vagrant destroy
- 
-VMs will be terminated. 
+.. Or you can create your own pipeline with modules suitable to achieve your goals. How to create your own module is described `here <http://streamjuggler.readthedocs.io/en/develop/SJ_CustomModule.html>`_ in detail.
+.. |VirtualBox (TM)| unicode:: VirtualBox U+00AE

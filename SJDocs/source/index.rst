@@ -3,10 +3,11 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
+
+.. figure:: _static/Sj.svg
+
 Welcome to Stream Juggler Platform 1.1.1!
 ===========================================
-
-.. figure:: _static/logo.png
 
 The Stream Juggler Platform (SJ-Platform) is an open source, scalable solution for stream and micro-batched processing. The system fits for building both simple and complex event processing systems (CEP) and allows a developer to construct pipelines for analyzing data streams.
 

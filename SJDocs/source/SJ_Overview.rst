@@ -4,9 +4,9 @@ Stream Juggler Platform Overview
 Introduction to Stream Juggler Platform
 ----------------------------
 
-Stream Juggler Platform (**SJ-Platform**) is an open source, scalable solution for stream and micro-batch processing of unbounded data streams. The system fits for building an event processing systems and allows a developer to construct connected pipelines for handling data streams. **Stream** is unbound sequence of events processed sequentially from the oldest ones to newest ones. SJ-Platform is built to be smooth and easy to understand and learn for an average developer who knows Scala language. The system doesn't require any specific knowledge of mathematical concepts like some competing systems require. Thus, it makes it easy for a common type engineer to solve stream processing tasks.
+Stream Juggler Platform (**SJ-Platform**) is an open source, scalable solution for stream and micro-batch processing of unbounded data streams. The system fits for building an event processing systems and allows a developer to construct connected pipelines for handling data streams. A **stream** is an unbound sequence of events processed sequentially from the oldest ones to the newest ones. SJ-Platform is built to be smooth and easy to understand and learn for an average developer who knows Scala language. The system doesn't require any specific knowledge of mathematical concepts like some competing systems require. Thus, it makes it easy for a common type engineer to solve stream processing tasks.
 
-Basically, SJ-Platform is inspired by `Apache Samza <http://samza.apache.org/>`_, but has a lot of features which Samza doesn't provide, like exactly-once processing capability, integrated RESTful API and Web UI and lots of others.
+Basically, SJ-Platform is inspired by `Apache Samza <http://samza.apache.org/>`_, but it has a lot of features which Samza doesn't provide, like exactly-once processing capability, integrated RESTful API and Web UI and lots of others.
 
 Stream Processing Systems are widely used in the modern world. There are a lot of cases where developers should use stream processing systems. All those cases usually involve large data streams which can not be handled by a single computer effectively, specific requirements are applied to computations like idempotent processing, exactly-once processing and predictable behavior in case of crashes. Every stream processing platform is a framework which enforces certain code restrictions guaranteeing that the processing is stable and results are reproducible if a developer follows the restrictions.
 
@@ -46,9 +46,9 @@ Two demo projects will train the reader to develop the modules for the platform 
 - data processing, filtering, aggregation,
 - result data storing and visualizing.
 
-The demonstrated examples of tasks are not trivial but they are illustrative enough in terms of the platform usage. The first demo intends collecting the aggregated information on the accessibility of nodes. In this case, the data source is a fping sensor. The Elasticsearch is chosen as a data storage.
+The demonstrated example tasks are not trivial but they are illustrative enough in terms of the platform usage. The first example is intended to collect the aggregated information on the accessibility of nodes. In this case, the data source is a fping sensor. The Elasticsearch is chosen as a data storage.
 
-The second demo performs data collecting from a sFlow reporter on network monitoring and traffic computation. The result is stored in PostgreSQL.
+The second example performs data collecting from a sFlow reporter on network monitoring and traffic computation. The result is stored in PostgreSQL.
 
 The problem is not a case of a "heavy" task but it includes some problems which are very specific to stream processing tasks and introduces all SJ-Platform functionality step-by-step without deep knowledge requirements of specific problem domains.
 

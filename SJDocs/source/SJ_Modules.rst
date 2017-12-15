@@ -5,7 +5,7 @@ Modules: Types, Structure, Pipeline
 
 .. contents:: Contents
    
-A **module** is a processor that handles events of data streams. It works within an engine that receives raw data and sends them to the module executor. A module uses instances as a range of settings determining the collaborative work of an engine and a module. 
+A **module** is a processor that handles events of data streams. It is a key program component in the system that contains the logic of data processing and settings validation. It works within an engine that receives raw data and sends them to the module executor. A module uses instances as a range of settings determining the collaborative work of an engine and a module. 
 
 A module includes:
 
@@ -16,7 +16,7 @@ A module includes:
    :scale: 120%
    :align: center
 
-   Figure 1.1
+   Figure 1.1: Module structure
    
 Below you will find more information on each of these two components.
 
@@ -51,7 +51,7 @@ The base of the system is an engine: it provides basic I/O functionality. It is 
    :scale: 120%
    :align: center
    
-   Figure 1.2
+   Figure 1.2: Engine in SJ-Platform
    
 After its uploading, the engine receives raw data and sends them to the module executor. The executor starts data processing and returns the resulting data back to the engine where they are deserialized to be passed into the stream or a storage.
 
@@ -70,11 +70,11 @@ The system supports 4 types of modules:
 
 The modules can be strung in a pipeline as illustrated below:
 
-.. figure:: _static/ModuleStructure4.png
+.. figure:: _static/ModuleStructure5.png
    :scale: 80 %
    :align: center
 
-   Figure 1.3 
+   Figure 1.3: Pipeline structure 
   
 At this page each module is described in detail. You will find more information on the methods provided by module executors as well as entities' description.
 
@@ -90,7 +90,7 @@ In the SJ-Platform the TCP Input module is currently implemented.
   :scale: 80 %
   :align: center
 
-  Figure 1.4
+  Figure 1.4: Input module strucutre
   
 It performs the transformation of the streams incoming via TCP into T-streams. T-streams are persistent streams designed for exactly-once processing (so they include a transactional producer, a consumer and a subscriber). Find more information about T-streams `here <http://t-streams.com>`_.
 
@@ -100,7 +100,7 @@ In the diagram below you can see the illustration of dataflow for the input modu
    :scale: 80 %
    :align: center
 
-   Figure 1.5
+   Figure 1.5: Processing in the input module
 
 All input data elements are going as a flow of bytes to particular interface provided by Task Engine. That flow is going straight to Streaming Executor and is converted to an object called an Input Envelope. 
 
@@ -188,7 +188,7 @@ The most generic modules in the system are modules of a regular-streaming type. 
   :scale: 80 %
   :align: center
 
-  Figure 1.6
+  Figure 1.6: Regular module structure
 
 The diagram below represents the dataflow in the regular module.
 
@@ -196,7 +196,7 @@ The diagram below represents the dataflow in the regular module.
   :scale: 80 %
   :align: center
 
-  Figure 1.7
+  Figure 1.7: Processing in the regular module
   
 The TaskEngine of a regular module receives data from T-streams. It deserializes the flow of bytes to TStreamsEnvelope[T] (where [T] is a type of messages in the envelope) which is then passed to the StreamingExecutor.
 
@@ -233,7 +233,7 @@ In the Regular module the executor provides the following methods that does not 
 .. 4) "onAfterCheckpoint": 
     It is invoked after every checkpoint.
 4) ``onTimer``: 
-    It is invoked every time when a set timer expires. Inside the method there is an access to a parameter that defines a delay between a real response time and an invocation of this handler.
+    It is invoked every time when a set timer expires. Inside the method there is access to a parameter that defines a delay between a real response time and an invocation of this handler.
 5) ``onIdle``: 
     It is invoked every time when idle timeout expires but a new message hadn't appeared. It is a moment when there is nothing to process.
 6) ``onBeforeStateSave``: 
@@ -245,7 +245,7 @@ The module may have a state. A state is a sort of a key-value storage and can be
 
 In case of a fail (when something is going wrong in one of the methods described above) a whole module will be restarted. And the work will start with the `onInit` method call.
 
-Inside of the module there is a manager allowing to get an access to: 
+Inside the module there is a manager allowing to get access to: 
 
 - an output that is defined within the instance (by calling ``getPartitionedOutput()`` or ``getRoundRobinOutput()``),
 - timer (by calling ``setTimer()``)
@@ -334,7 +334,7 @@ The diagram below is a simple illustration of how a sliding window operation loo
    :scale: 80 %
    :align: center
 
-   Figure 1.8
+   Figure 1.8: Sliding windowing
   
 As shown in the figure, every time the window slides over an input stream, the batches of events that fall within the window are combined and operated upon to produce the transformed data of the windowed stream. It is important that any window operation needs to specify the parameters:
 
@@ -369,8 +369,8 @@ The executor of the batch module provides the following methods that does not pe
      val allWindows = windowRepository.getAll()
      allWindows.flatMap(x => x._2.batches).flatMap(x => 
      x.envelopes).foreach {
-     case kafkaEnvelope: KafkaEnvelope[Integer @unchecked] => //here there is an access to certain fields such as offset and data of integer type
-     case tstreamEnvelope: TStreamEnvelope[Integer @unchecked] => //here there is an access to certain fields such as txnUUID, consumerName and data (array of integers)
+     case kafkaEnvelope: KafkaEnvelope[Integer @unchecked] => //here there is access to certain fields such as offset and data of integer type
+     case tstreamEnvelope: TStreamEnvelope[Integer @unchecked] => //here there is access to certain fields such as txnUUID, consumerName and data (array of integers)
      }
 
     The data type of the envelope can be "KafkaEnvelope" data type or "TStreamEnvelope" data type. If you specify the inputs of the only one of this data types in an instance, you shouldn't match the envelope like in the example above and cast right the envelope to a particular data type::
@@ -383,7 +383,7 @@ The executor of the batch module provides the following methods that does not pe
 .. 4) "onAfterCheckpoint": 
     It is invoked after every checkpoint
 4) ``onTimer``: 
-    It is invoked every time when a set timer expires. Inside the method there is an access to a parameter that defines a delay between a real response time and an invocation of this handler
+    It is invoked every time when a set timer expires. Inside the method there is access to a parameter that defines a delay between a real response time and an invocation of this handler
 5) ``onIdle``: 
     It is invoked every time when idle timeout expires but a new message hasn't appeared. It is a moment when there is nothing to process
 6) ``onBeforeStateSave``: 
@@ -428,7 +428,7 @@ Modules of an output type are responsible for saving of output data to external 
   :scale: 80 %
   :align: center
 
-  Figure 1.9
+  Figure 1.9: Output module structure
   
 They transform the result of data processing received from T-streams and passe them to an external data storage. They allow to transform one data item from incoming streaming into one and more data output items.
 
@@ -438,7 +438,7 @@ The diagram below illustrates the dataflow in an output module.
   :scale: 80 %
   :align: center
 
-  Figure 1.10
+  Figure 1.10: Processing in the output module
   
 The TaskEngine deserializes the stream of bytes from T-Streams to TStreamsEnvelope[T] (where [T] is a type of messages in the envelope) and sends it to the StreamingExecutor. The StreamingExecutor returns Entities back to the TaskEngine. 
 
@@ -447,7 +447,7 @@ They are then put to an external datastorage.
 The output executor provides the following methods that does not perform any work by default so you should define their implementation by yourself.
 
 1. ``onMessage``: 
-    It is invoked for every received message from one of the inputs that are defined within the instance. Inside the method you have an access to the message that has the TStreamEnvelope type. 
+    It is invoked for every received message from one of the inputs that are defined within the instance. Inside the method you have access to the message that has the TStreamEnvelope type. 
 
 2. ``getOutputEntity``:
     It is invoked once when module running. This method returns the current working entity, i.e. fields and types. This method must be overridden. 
@@ -467,69 +467,72 @@ Please, find more information about engines at the :ref:`Engines` page.
 Module Instances
 -----------------------
 
-Each type of module described above requires an instance of a corresponding type. An instance is a set of settings determining the collaborative work of an engine and a module. These settings are specified via UI or REST API and determine the mode of the module operation: data stream type the module is going to work with, checkpoint concept, settings of state and parallelism, etc. In the system instances can be of the following types: input, processing (regular/batch), output. 
+Each type of modules described above requires an instance of a corresponding type. An instance is a set of settings determining the collaborative work of an engine and a module. These settings are specified via the UI or REST API and determine the mode of the module operation: data stream type the module is going to work with, checkpoint concept, settings of state and parallelism, etc. In the system instances can be of the following types: input, processing (regular/batch), output. 
 
 Module's instances require the following elements to be created for their work:
 
-- Stream
+- a stream
 
-- Service
+- a service
 
-- Provider
+- a provider
 
-You should create these elements before creating an instance. First, you need to create streams for inputs and outputs. Streams, in their turn, require specific services to be created. Each service type requires a provider of a corresponding type.
+You should create these elements before creating an instance. You need streams for instance inputs and outputs. Streams, in their turn, require specific services to be created. Each service (based on its type) requires a provider of a corresponding type. All these elements form the infrastructure for an instance.
 
 Each instance type works with a specific type of streams, services and providers. Find below the detailed information on the types of providers, services and streams required for each instance type. Besides, we will provide you an example to explain the dependence of entity types on an instance type.
 
-Stream
-~~~~~~~~
+**Streams**
+
 The Stream Juggler Platform supports *Apache Kafka* and *T-stream* types of streams. And while the Apache Kafka streams are a well-known type of streaming introduced by Apache Software Foundation, the T-streams is intentionally designed for the Stream Juggler Platform as a complement for Apache Kafka. The T-streams has more features than Kafka and makes exactly-once processing possible. Find more about T-streams at the `site <http://t-streams.com>`_ .
 
 The following stream types can be used for output streams that export resulting data from the system to an external storage: Elasticsearch, SQL-database, a system with RESTful interface. They are determined by the type of the external data storage.
 
-Service and Provider
-~~~~~~~~~~~~~~~~~~~~~
+**Services and Providers**
+
 To create streams of exact type in the system you need to create a service and a provider for this service. The types of a service and a provider are determined by the type of a stream you need for the module.
 
-Example
-~~~~~~~~~~
-In this section we describe the process of determining of all the needed entities.
+Example of Instance Infrastructure
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In this section we will describe the process of determining of all the needed entities for the instance infrastructure.
 
-For example, there is some system which needs to process data in a micro-batch mode from Apache Kafka. So we need to include a Batch module into our pipeline.
+For example, there is some issue for which you need to process data from Apache Kafka in a micro-batch mode. So we need to include a Batch module into our pipeline.
 
 For the Batch module we need to create a batch instance. In the system an instance of any type requires Apache Zookeper service and Apache Zookeeper provider for it (Figure 1.11). The Apache Zookeeper service should be unique for all the instances in the system.
 
 .. figure:: _static/zk-inst-serv-pr1.png
    :align: center
    
-   Figure 1.11
+   Figure 1.11: Instance dependence on Apache Zookeeper diagram
    
-The batch instance will receive data from Apache Kafka streams. Apache Kafka streams require the Apache Kafka service to exist in our system. To create the Apache Kafka service you should create two specific providers of the following types: Apache Kafka and Apache Zookeeper (Figure 1.12).
+The batch instance will receive data from Apache Kafka streams. Apache Kafka streams require the Apache Kafka service to exist in our system. The Apache Kafka service requires two specific providers of the following types: Apache Kafka and Apache Zookeeper (the same as in the previous step) (Figure 1.12).
 
 .. figure:: _static/kfk-inst-serv-pr1.png
    :align: center
    
-   Figure 1.12
+   Figure 1.12: Apache Kafka streaming infrastructure for the instance
    
-So these are the types of the instance and the streaming components that will be created for our example:
+So these are the instance and the streaming components types that we need for our example:
 
 .. figure:: _static/inst-stream-serv-prov.png
    :align: center
    
-   Figure 1.13
+   Figure 1.13: Instance infrastructure example
 
-At this point we determined the types of instances in the pipeline and the types of streaming components. So we can start building the infrastructure.
+At this point we have determined the type of instance in the pipeline and the types of streaming components. So we can start building the infrastructure.
 
-Firstly, create two providers - Apache Kafka and Apache Zookeeper. Secondly, create Apache Kafka service and Apache Zookeeper service (that will be unique for all instances in the system). Thirdly, create streams of Apache Kafka. Finally, create an instance of a batch module.
+Firstly, create two providers - Apache Kafka and Apache Zookeeper. Secondly, create Apache Kafka service and Apache Zookeeper service (that will be unique for all instances in the system). Thirdly, create the stream of Apache Kafka. Finally, create the instance of a batch module.
 
-The schemes below may help you to understand the dependence of entities in the system for each instance type.
+General Instance Infrastructure
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The schemas below may help you to understand the dependency of entities in the system for each module instance type.
 
 Input module instance type works with the following entities types:
 
 .. figure:: _static/InstCorrelation-Input.png
   :align: center
 
-  Figure 1.14
+  Figure 1.14: Instance infrastructure for the input instance type
   
   |oneof-arrow| points to the entity type required for creation of this entity.
   
@@ -538,30 +541,30 @@ Processing module instance type (regular or batch) works with the following enti
 .. figure:: _static/InstCorrelation-Process.png
   :align: center
 
-  Figure 1.15
+  Figure 1.15: Instance infrastructure for the processing instance type
   
   |oneof-arrow| points to the entity type required for creation of this entity.
   
-  |req-arrow| points to the entity which may be needed when creating the dependent entity.
+  |req-arrow| points to the entity which may be needed when creating a dependent entity.
 
 
 Output module instance type works with the following entities types:
 
-.. figure:: _static/InstCorrelation-Output1.png
+.. figure:: _static/InstCorrelation-Output2.png
   :align: center
 
-  Figure 1.16
+  Figure 1.16: Instance infrastructure for the output instance type
   
   |oneof-arrow| points to the entity type required for creation of this entity.
   
-  |req-arrow| points to the set of instance types, one of which shall be created before creating the dependent entity.
+  |oneofset-arrow| points to the set of entities, one of which shall be created before creating the dependent entity.
   
-The table below explains what entity types can be used as inputs or outputs for a particular instance type:
+The table below explains what inputs and outputs can be used for a particular instance type:
 
 ===============  ================================================  ===============================================
 Instance type    Inputs                                            Outputs
 ===============  ================================================  ===============================================
-*Input*            TCP (provided by Input Streaming Engine)         T-streams 
+*Input*           TCP (provided by Input Streaming Engine)          T-streams 
 
                                                                       **Providers**: Apache Zookeeper
                                        
@@ -600,8 +603,11 @@ Instance type    Inputs                                            Outputs
 
 We hope this information will help you to select the most appropriate types of entities in the system to build a pipeline for smooth data stream processing.
 
+You can find the details on creating instances and their infrastructure in the :ref:`UI_Guide`.
+
 
 .. |req-arrow| image:: _static/req-arrow.png
 
 .. |oneof-arrow| image:: _static/oneof-arrow.png
 
+.. |oneofset-arrow| image:: _static/oneofset-arrow.png

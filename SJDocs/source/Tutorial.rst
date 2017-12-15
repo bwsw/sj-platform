@@ -27,7 +27,7 @@ A simplified structure of SJ-Platform can be presented as at the image below:
 .. figure:: _static/tutorialGeneral.png
    :align: center
 
-   Figure 1.1
+   Figure 1.1: General platform structure
 
 Let’s have a look at the platform from the perspective of a processing pipeline.
 
@@ -43,7 +43,7 @@ General processing workflow which the system allows implementing is illustrated 
    :scale: 80%
    :align: center
    
-   Figure 1.2
+   Figure 1.2: General processing workflow
    
 Green, yellow and purple blocks displayed in a rectangular area are managed and evaluated by SJ-Platform. They represent an input module, a processing module and an output module, respectively. The blocks outside the rectangular area represent external systems (a data source and a data storage).
 
@@ -65,7 +65,7 @@ The example tasks that will be presented are different. But the steps we will pe
 .. figure:: _static/TutorialSteps.png
    :align: center
    
-   Figure 1.3
+   Figure 1.3: Example task solution steps
 
 What we are going to do for the examples is:
 
@@ -94,7 +94,7 @@ What we are going to do for the examples is:
    :scale: 110%
    :align: center
    
-   Figure 1.4
+   Figure 1.4: Engine
    
 .. note:: Find more about engines at the :ref:`Engines` page.
 
@@ -104,7 +104,7 @@ What we are going to do for the examples is:
    :scale: 120%
    :align: center
    
-   Figure 1.5
+   Figure 1.5: Module structure
    
 In the example tasks we will upload ready-to-use modules of three types - input modules, processing modules (regular, batch) and output modules. 
    
@@ -118,7 +118,7 @@ To solve your tasks, you may upload your custom modules in this step.
    :scale: 80%
    :align: center
    
-   Figure 1.6
+   Figure 1.6: Srteams in the system
    
 Streaming requires the infrastructure: providers and services. These are necessary API entites without which streaming will not be so flexible. Streaming flexibility lies in the one-to-many connection between providers and services, streams and modules. One provider works with many services (of various types). One type of streams can be used by different module instances. These streams take necessary settings from the common infrastructure (providers and services). There is no need to duplicate the settings for each individual stream.
 
@@ -134,7 +134,7 @@ For both example tasks we will need Apache Zookeeper, Elasticsearch and SQL-data
    :scale: 120%
    :align: center
    
-   Figure 1.7
+   Figure 1.7: Instance in the platform
    
 An instance is created with specific parameters. It will use particular streams specified for it as input and output streams.
 
@@ -155,22 +155,26 @@ The issue we are going to solve using our platform is to collect aggregated info
 
 In the example task solution the processing workflow is formed in the following way:
 
-.. figure:: _static/FPingDemo1.png
+.. figure:: _static/FPingDemo3.png
    :align: center
    
-   Figure 1.8
+   Figure 1.8: Fping example task pipeline
    
-This diagram demonstrates the processing workflow of the demo. As you can see, the data come to a TCP input module through a pipeline of fping and netcat. The TCP input module is a regular module that performs per-event processing. We provide two off-the-shelf modules - CSV and regex - for two most general input data formats. Find more information about them at the :ref:`input-module` section. For the fping example task we will use a regex input module. It processes an input stream which contains text data using a set of regular expressions, and then serializes them with Apache Avro.
+This diagram demonstrates the processing workflow for the example. Green, yellow and purple blocks are executed with SJ-Platform. They are an input module, a processing module and an output module. 
+
+The data come to a TCP input module through a pipeline of fping and netcat. The TCP input module is an input module that performs per-event processing. For the fping example task we will use one of two TCP input modules provided by SJ-Platform - a regex input module. It processes an input stream which contains text data using a set of regular expressions, and then serializes them with Apache Avro.
+
+.. note:: We provide two off-the-shelf input modules - CSV and regex - for two most general input data formats. Find more information about them at the :ref:`input-module` section.
 
 Then the input module parses ICMP echo responses (IP and response time are selected) and ICMP unreachable responses (IPs only are selected) and puts the parsed data into 'echo-response' stream and 'unreachable-response' stream, respectively.
 
 After that, the instance of a processing module aggregates response time and a total amount of echo/unreachable responses by IP per 1 minute and sends aggregated data to 'echo-response-1m' stream. In the fping demonstration example the data aggregation is performed with the processing module of a regular-streaming type. 
 
-We add two more instances to the processing module to calculate responses per 3 minutes and per 1 hour. Correspondingly, 'echo-response-3m' and 'echo-response-1h' streams are created for these instances to put there the aggregated data on echo-responses.
+In the :ref:`fping-Customization` section we will tell you how to add more instances to the processing module for calculating responses per a different period of time - per 3 minutes and per 1 hour. It is an optional step which allows adjusting the system to a specific aim and making calculations for different periods of time.
 
 Finally, the output module exports aggregated data from echo-response streams to Elasticsearch. The result is visualized using Kibana. 
 
-The data are fed to the system, passed from one module to another and exported from the system via streams. Read more about streams under the :ref:`Creating_Streams` section.
+The data are fed to the system, passed from one module to another and exported from the system via streams. 
 
 Platform entities can be created via Web UI filling up all needed fields in corresponding forms. In the demonstration task, we suggest adding the entities to the system via REST API as it is the easiest and quickest way. You can use Web UI to see the created entities. 
 
@@ -185,9 +189,9 @@ Step 1. Deployment
 
 Though SJ-Platform is quite a complex system and it includes a range of services to be deployed, no special skills are required for its setting up. 
 
-There are three options to deploy the platform. Please, read the description for each option and choose the most convenient for you.
+There are two options to deploy the platform. Please, read the description for each option and choose the most convenient for you.
 
-**Option 1.** The easiest way is to deploy SJ-Platform on `a virtual machine <http://streamjuggler.readthedocs.io/en/develop/SJ_Demo_Deployment.html>`_. This is the most rapid way to get acquainted with the platform and assess its performance. 
+**Option 1.** The easiest way to start SJ-Platform is prebuilding `a virtual box image <http://streamjuggler.readthedocs.io/en/develop/SJ_Demo_Deployment.html>`_. This is the most rapid way to get acquainted with the platform and assess its performance. 
 
 We suggest deploying the platform locally via Vagrant with VirtualBox as a provider. It takes up to 30 minutes. 
 
@@ -215,15 +219,6 @@ The platform is deployed with no entities. Thus, the pipeline should be built fr
 
 This tutorial provides step-by-step instructions to deploy the demo project to Mesos using Marathon. At first step, Mesos with all the services will be deployed. Then entities will be created for the platform. Finally, modules will be launched and results will be visualised using Kibana.
 
-**Option 3.** Also, you can run SJ-Platform locally deploying it on `minimesos <http://streamjuggler.readthedocs.io/en/develop/SJ_Deployment.html#minimesos-deployment>`_ as a testing environment.
-
-Minimum system requirements in this case are as follows: 
-
-- git, 
-- sbt (see `official documentation <http://www.scala-sbt.org/download.html>`_), 
-- Docker (see `official documentation <https://docs.docker.com/engine/installation/linux/docker-ce/ubuntu/>`_),
-- cURL.
-
 For the example task we provide instructions to deploy the platform **to Mesos** using Marathon.
 
 The deployment is performed via REST API.
@@ -244,7 +239,6 @@ So, let's start with deploying Mesos and other services.
 Start Mesos and the services. 
 
 .. note:: If you are planning to process data in a parallel mode (set the ``parallelizm`` parameter to a value greater than 1), you need to increase the ``executor_registration_timeout`` parameter for Mesos-slave.
-
     
 2) Create JSON files and a configuration file. Please, name them as specified here.
 
@@ -518,35 +512,20 @@ Start Mesos and the services.
 
       curl -X POST http://172.17.0.1:8080/v2/apps -H "Content-type: application/json" -d @kibana.json
 
-
    Via the Marathon interface, make sure the services have a *running* status.
 
 .. figure:: _static/ServicesOnMarathon.png
    :align: center
-   Picture 1.8
+   Figure 1.8
 
-
-Step 2. SJ-Platform Setting Up 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-1) Copy the SJ-Platform repository from GitHub::
-
-    git clone https://github.com/bwsw/sj-platform.git
-
-2) Add the credential settings if Mesos requires that frameworks must be authenticated:: 
+4) Add the credential settings if Mesos requires the framework must be authenticated:: 
  
     curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"framework-principal\",\"value\": <principal>,\"domain\": \"configuration.system\"}" 
     curl --request POST "http://$address/v1/config/settings" -H 'Content-Type: application/json' --data "{\"name\": \"framework-secret\",\"value\": <secret>,\"domain\": \"configuration.system\"}" 
- 
-3) Copy the demonstrational task repository from GitHub::
-
-    cd ..
-    git clone https://github.com/bwsw/sj-fping-demo.git
-    cd sj-fping-demo
 
 Now make sure you have access to the Web UI. You will see the platform is deployed but there are no entities yet created. We will create them in next steps.
 
-Step 3. Configurations and Engine Jars Uploading 
+Step 2. Configurations and Engine Jars Uploading 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To implement the processing workflow for the example task resolution the following JAR files should be uploaded:
@@ -567,9 +546,9 @@ Please, download the engines' JARs for each module type (input-streaming, regula
  wget http://c1-ftp1.netpoint-dc.com/sj/1.0-SNAPSHOT/sj-regular-streaming-engine.jar
  wget http://c1-ftp1.netpoint-dc.com/sj/1.0-SNAPSHOT/sj-output-streaming-engine.jar
 
-Now upload the engines' JARs. Please, change <slave_advertise_ip> to the slave advertise IP::
+Now upload the engines' JARs. Please, replace <slave_advertise_ip> with the Mesos-slave IP::
 
- address=address=<slave_advertise_ip>:31080
+ address=<slave_advertise_ip>:31080
 
  curl --form jar=@sj-mesos-framework.jar http://$address/v1/custom/jars
  curl --form jar=@sj-input-streaming-engine.jar http://$address/v1/custom/jars
@@ -581,7 +560,7 @@ Now the JARs should appear in the UI under Custom Jars of the "Custom files" nav
 .. figure:: _static/EnginesUploaded.png
    :align: center
    
-   Figure 1.9
+   Figure 1.9: Uploaded engines list
 
 Setup Configurations for Engines
 """"""""""""""""""""""""""""""""""""""""
@@ -623,10 +602,11 @@ In the UI you can see the uploaded configurations under the “Configuration” 
 .. figure:: _static/ConfigurationsUploaded.png
    :align: center
    
-   Figure 1.10
+   Figure 1.10: Uploaded configurations list
 
+.. _Module_Uploading:
 
-Step 4. Module Uploading 
+Step 3. Module Uploading 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Now as the system is deployed and necessary engines are added, modules can be uploaded to the system.
@@ -639,17 +619,15 @@ For the stated example task we upload the following modules:
 
 - an output module - *ps-output* module - that exports resulting data to Elasticsearch.
 
-Please, follow these steps to build and upload the modules.
+Please, follow these steps to upload the modules.
 
-First, configure the environment::
- 
- cd sj-fping-demo
- 
- address=<host>:<port>
+First, copy the example task repository from GitHub::
 
-<host>:<port> — SJ-Platform REST host and port.
+    git clone https://github.com/bwsw/sj-fping-demo.git
+    cd sj-fping-demo
+    sbt assembly
 
-Now you should **download** the *sj-regex-input* module from Sonatype Repository::
+Then **download** the *sj-regex-input* module from Sonatype repository::
 
    curl "https://oss.sonatype.org/content/repositories/snapshots/com/bwsw/sj-regex-input_2.12/1.0-SNAPSHOT/sj-regex-input_2.12-1.0-SNAPSHOT.jar" -o sj-regex-input.jar 
 
@@ -674,11 +652,11 @@ Now in the UI, you can see the uploaded modules under the ‘Modules’ tab.
 .. figure:: _static/ModulesUploaded.png
    :align: center
    
-   Figure 1.11
+   Figure 1.11: Uploaded modules list
 
 .. _Creating_Streams:
 
-Step 5. Creating Streaming Layer 
+Step 4. Creating Streaming Layer 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The raw data are fed to the platform from different sources. And within the platform, the data are transported to and from modules via streams. Thus, in the next step, the streams for data ingesting and exporting will be created.
@@ -697,7 +675,7 @@ In the example task solution the following stream types are implemented:
    :scale: 80%
    :align: center
    
-   Figure 1.12
+   Figure 1.12: Streams in Fping example pipeline
 
 Prior to creating a stream, we need to create infrastructure for the streaming layer. The infrastructure for streams includes **providers** and **services**. This is a required presetting.
 
@@ -739,7 +717,7 @@ The created providers are available in the UI under the “Providers” tab.
 .. figure:: _static/ProvidersCreated.png
    :align: center
    
-   Figure 1.13
+   Figure 1.13: Providers list
 
 2) Next, we will set up services:
 
@@ -760,7 +738,7 @@ Please, make sure the created services have appeared in the UI under the “Serv
 .. figure:: _static/ServicesCreated.png
    :align: center
    
-   Figure 1.14
+   Figure 1.14: Services list
 
 Creating Streams
 """"""""""""""""""""""""""""""
@@ -799,9 +777,9 @@ All the created streams should be available now in the UI under the “Streams�
 .. figure:: _static/StreamsCreated1.png
    :align: center
    
-   Figure 1.15
+   Figure 1.15: Streams list
 
-Step 6. Create Output Destination
+Step 5. Create Output Destination
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 At this step all necessary indexes, tables and mapping should be created for storing the processed result.
@@ -815,7 +793,7 @@ Create the index and the mapping for Elasticsearch sending the PUT request::
  curl --request PUT "http://176.120.25.19:9200/pingstation" -H 'Content-Type: application/json' --data "@api-json/elasticsearch-index.json"
 
 
-Step 7. Creating Instances 
+Step 6. Creating Instances 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Once the system is deployed, configurations and modules are uploaded, the streaming layer with necessary infrastructure is created, we can create instances in the next step.
@@ -841,7 +819,7 @@ The created instances should be available now in UI under the “Instances” ta
 .. figure:: _static/InstancesCreated1.png
    :align: center
    
-   Figure 1.16
+   Figure 1.16: Instances list
 
 Ready! The modules can be launched.
 
@@ -873,7 +851,7 @@ If you take a look at the UI, you will see the launched instances with the “st
 .. figure:: _static/InstancesStarted1.png
    :align: center
    
-   Figure 1.17
+   Figure 1.17: Instances started
 
 To get a list of ports that are listened by the input module instance send the request::
 
@@ -896,7 +874,7 @@ You need to have 'fping' installed. If not, please, install it::
 
  sudo apt-get install fping
 
-And now you can **start the processing pipeline**. Please, replace value of `nc` operands with the host and port of the instance task::
+And now you can **start the processing pipeline**. Please, replace values of `nc` operands with the host and the port of the instance task::
 
  fping -l -g 91.221.60.0/23 2>&1 | awk '{printf "%s ", $0; system("echo $(date +%s%N | head -c -7)")}' | nc 176.120.25.19 31000
 
@@ -924,25 +902,35 @@ It illustrates the average time of echo-responses by IPs per a selected period o
 .. figure:: _static/Kibana.png
    :align: center
    
-   Figure 1.18
+   Figure 1.18: View results in Kibana
 
 Many other parameter combinations can be implemented to view the results.
 
+.. _fping-Customization:
+
 Customization
 ~~~~~~~~~~~~~~~~
-The platform allows to customize the pipeline. For example, you can change the data aggregation interval adding more instances. You can create one instance with the 3-minute aggregation interval and another instance with 1-hour aggregation interval.
+The platform allows to customize the processing flow. For example, you can change the data aggregation interval adding more instances. You can create one instance with the 3-minute aggregation interval and another instance with 1-hour aggregation interval. 
 
-1. Each instance needs an input stream and an output stream. You can create streams on the base of the existing providers and services. Remember to create the JSON files with different names, e.g. 'echo-response-3m' as *ps-process* output stream aggregating data per 3 minutes, 'echo-response-1h' as *ps-process* output stream aggregating data per 1 hour::
+.. figure:: _static/FPingDemoCustom.png
+   :align: center
+   :scale: 80%
+   
+   Figure 1.19: Fping example solution customization
+
+We will start from creating input and output streams for the instances. 
+
+1. You can create streams on the base of the existing providers and services. Remember to create the JSON files with different names. Create output streams for the *ps-process* module with the names e.g. 'echo-response-3m' as an output stream aggregating data per 3 minutes, 'echo-response-1h' as an output stream aggregating data per 1 hour::
  
     curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/echo-response-3m.json"
 
     curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/echo-response-1h.json"
     
-   Create output streams for the *ps-output* module with new names, e.g. 'es-echo-response-3m' exporting result data  aggregated per 3 minutes, 'es-echo-response-1h' exporting result data aggregated per 1 hour:: 
+   Create output streams for the *ps-output* module with new names, e.g. 'es-echo-response-3m' exporting resulting data aggregated per 3 minutes, 'es-echo-response-1h' exporting resulting data aggregated per 1 hour:: 
   
-     curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/es-echo-response-3m.json"
+    curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/es-echo-response-3m.json"
 
-     curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/es-echo-response-1h.json"
+    curl --request POST "http://$address/v1/streams" -H 'Content-Type: application/json' --data "@api-json/streams/es-echo-response-1h.json"
 
 2. Create two more instances for the *ps-process* module with different checkpoint intervals to process data every 3 minutes and every hour. Remember to create them with different names. In our example we create 'pingstation-echo-process-3m' and 'pingstation-echo-process-1h' instances with ‘output’ values ‘echo-response-3m’ and ‘echo-response-1h’ correspondingly::
 
@@ -1002,7 +990,7 @@ In the UI, you will see the stopped instances with the “stopped” status.
 .. figure:: _static/InstancesStopped1.png
    :align: center
    
-   Figure 1.19
+   Figure 1.20: Instances stopped
 
 Deleting Instance
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1032,7 +1020,7 @@ To delete the *ps-output* module instance send::
 
  curl --request DELETE "http://$address/v1/modules/output-streaming/pingstation-output/1.0/instance/pingstation-output-1h/"
 
-Via the UI you can make sure the instances are deleted.
+In the UI you can make sure the deleted instances are not present.
 
 .. _sflow-example-task:
 
@@ -1047,16 +1035,19 @@ A sFlow reporter is an external data source in our example task. It sends data t
 
 The CSV data are transformed by the input module and sent for processing to the batch processing module. The data that can not be parsed by the input module are treated as incorrect and sent straight to the output module without processing.
 
-Processed data are saved in the PostgreSQL database. Output module with the streams of SQL-database type exports it from the platform.
+The processed data are exported via the output module with the streams of SQL-database type and saved in the PostgreSQL database.
+
+.. Processed data are saved in the PostgreSQL database. Output module with the streams of SQL-database type exports it from the platform.
 
 A complete pipeline can be rendered as in the diagram below:
 
-.. figure:: _static/SflowDemo.png
+.. figure:: _static/SflowDemo3.png
    :align: center
+   :scale: 80%
    
-   Figure 2.1
+   Figure 2.1: sFlow example task pipeline
 
-Green, yellow, purple and red blocks within the SJ-Platform scope rectangular area are managed and evaluated by SJ-Platform. 
+Green, yellow, purple and red blocks within the SJ-Platform rectangular area are managed and evaluated by SJ-Platform. 
 
 These are:
 
@@ -1160,16 +1151,9 @@ Via the Marathon interface, make sure the services are deployed and run properly
 
 Make sure you have access to the Web UI. You will see the platform but there are no entities yet. We will add them further.
 
-Step 2. SJ-Platform Setting Up 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Next, we will upload configurations for the platform and engine JARs for modules in the next step.
 
-1) Copy the SJ-Platform repository from GitHub::
-
-    git clone https://github.com/bwsw/sj-platform.git
-
-We will upload configurations for the platfom and engine JARs for modules in the next step.
-
-Step 3. Configurations and Engine Jars Uploading
+Step 2. Configurations and Engine Jars Uploading
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 We upload an engine JAR file for each type of module and for Mesos framework.
@@ -1195,7 +1179,7 @@ Check out in the UI the engines are uploaded:
 .. figure:: _static/sFlow_EnginesUploaded.png
    :align: center
    
-   Figure 2.2
+   Figure 2.2: Engines list
 
 Setup settings for the engines. Please, replace <slave_advertise_ip> with Mesos-slave IP and <marathon_address> with the address of Marathon::
 
@@ -1219,26 +1203,25 @@ You can see in the UI the configurations are uploaded:
 .. figure:: _static/sFlow_ConfigsUploaded.png
    :align: center
    
-   Figure 2.3
+   Figure 2.3: Configuration list
 
-Step 4. Module Uploading
+Step 3. Module Uploading
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Now let's upload modules for data processing. 
 
-First, copy the demo project repository from GitHub::
+First, copy the example project repository from GitHub::
  
- cd ..
  git clone https://github.com/bwsw/sj-sflow-demo.git
  cd sj-sflow-demo
  sbt assembly
 
-Then, upload the ready-to-use CSV-input module from the sonatype repository::
+Then, upload the ready-to-use CSV-input module from Sonatype repository::
 
  curl "https://oss.sonatype.org/content/repositories/snapshots/com/bwsw/sj-csv-input_2.12/1.0-SNAPSHOT/sj-csv-input_2.12-1.0-SNAPSHOT.jar" -o sj-csv-input.jar
  curl --form jar=@sj-csv-input.jar http://$address/v1/modules
 
-Then, build and upload the batch processing and the output modules of the sFlow demo project. 
+Next, build and upload the batch processing and the output modules of the sFlow demo project. 
 
 From the directory of the demo project set up the batch processing module::
  
@@ -1255,7 +1238,7 @@ Now you can see the uploaded modules in the UI:
 .. figure:: _static/sFlow_Modules.png
    :align: center
 
-   Figure 2.4
+   Figure 2.4: Modules list
 
 Now upload the GeoIP database which is required for the processing module::
 
@@ -1278,9 +1261,9 @@ Now you can see the settings are added to the configuration list:
 .. figure:: _static/sFlow_SQLsettings.png
    :align: center
    
-   Figure 2.5
+   Figure 2.5: SQL settings are added to the list
 
-Step 5. Creating Streaming Layer
+Step 4. Creating Streaming Layer
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Let’s create streams to transfer data from and to the modules.
@@ -1336,7 +1319,7 @@ Check out they have appeared in the UI:
 .. figure:: _static/sflow_Providers.png
    :align: center
    
-   Figure 2.6
+   Figure 2.6: Providers list
 
 Once providers are created, we can create services.
 
@@ -1356,7 +1339,7 @@ Check out the services have appeared in the UI:
 .. figure:: _static/sflow_Services.png
    :align: center
    
-   Figure 2.7
+   Figure 2.7: Services list
 
 Streams creation
 ''''''''''''''''''''''''''
@@ -1395,9 +1378,9 @@ Check out that they have appeared in the UI:
 .. figure:: _static/sflow_Streams.png
    :align: center
    
-   Figure 2.8
+   Figure 2.8: Streams list
 
-Step 6. Output SQL Tables Creation
+Step 5. Output SQL Tables Creation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 At this step you are expected to have PostgreSQL running with `sflow` database in it. 
 
@@ -1424,7 +1407,7 @@ SQL tables for the output data should be created in the *sflow* database. To cre
     txn BIGINT
  );
 
-Step 7. Creating Instances
+Step 6. Creating Instances
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 An instance should be created for each module. It is a set of settings determining the collaborative work of a module and an engine. 
@@ -1453,7 +1436,7 @@ View them in the UI:
 .. figure:: _static/sflow_Instances.png
    :align: center
    
-   Figure 2.9
+   Figure 2.9: Instances list
 
 Launching Instances
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -1495,9 +1478,9 @@ Or, in the UI, click at the input module instance in the "Instances" section and
 .. figure:: _static/sflow_InstancesStarted.png
    :align: center
    
-   Figure 2.10
+   Figure 2.10: Instances started
 
-And now you can start the processing pipeline (replace <host> and <port> by values for the input module task host and port)::
+And now you can **start the processing pipeline** (please, replace <host> and <port> by the values returned for the instance task of the input module)::
 
  python send_sflow.py -p <port> -h <host> sflow_example.csv
  
