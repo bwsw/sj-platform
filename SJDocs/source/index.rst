@@ -22,31 +22,16 @@ Tutorial
 
 A detailed :ref:`Tutorial` provides real-life example tasks resolved with SJ-Platform as well as detailed platform deployment instructions. 
 
-.. toctree::
-    :hidden:
-
-    Tutorial
-
 Creating Modules
 ---------------------
 
 The :ref:`Custom_Module` section explains how to write a module using a simple hello-world example. 
 
-.. toctree::
-    :hidden:
-
-    SJ_CustomModule
-
 API and UI documentation
 -------------------------------
 
-SJ-Platform provides REST API and Web UI for users to easily manage the platform. The guides for the Web UI and the CRUD REST API may be of utmost importance for platform administrators. 
+SJ-Platform provides REST API and Web UI for users to easily manage the platform. The :ref:`UI_Guide` and the :ref:`REST_API_Guide` may be of utmost importance for platform administrators. 
 
-.. toctree::
-    :hidden:
-
-    SJ_UI_Guide
-    SJ_CRUD_REST_API
 
 **SJ-Platform 1.1.1** documentation general structure:
 
