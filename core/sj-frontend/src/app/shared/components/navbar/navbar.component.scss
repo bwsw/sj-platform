@@ -6,8 +6,11 @@
   bottom: 0;
   width: 200px;
   z-index: 1;
+  div.sidebar {
+    display: flex !important;
+    flex-direction: column;
+  }
   ul {
-    padding-top: 50px;
     list-style: none;
   }
 }

@@ -2922,38 +2922,36 @@ header.navbar {
   line-height: 55px;
   background-color: #fff;
   border-bottom: 1px solid #cfd8dc; }
-  header.navbar .container-fluid {
-    padding: 0; }
-  header.navbar .nav-item {
-    position: relative;
-    min-width: 50px;
-    margin: 0 !important;
-    text-align: center; }
-    header.navbar .nav-item .nav-link i {
-      vertical-align: middle; }
-    header.navbar .nav-item .nav-link .tag {
-      position: absolute;
-      top: 9px;
-      right: 7px; }
-  header.navbar .img-avatar {
-    height: 35px;
-    margin: 0 10px; }
-  header.navbar .dropdown-menu {
-    padding-bottom: 0;
-    line-height: 1.5; }
-  header.navbar .dropdown-item {
-    min-width: 180px; }
-  header.navbar a.navbar-brand {
-    display: inline-block;
-    width: 155px;
-    height: 54px;
-    padding: 0.5rem 1rem;
-    background-color: #fff;
-    background-image: url("./assets/images/logo.png");
-    background-repeat: no-repeat;
-    background-position: center center;
-    background-size: 90px auto;
-    border-bottom: 1px solid #cfd8dc; }
+header.navbar .container-fluid {
+  padding: 0; }
+header.navbar .nav-item {
+  position: relative;
+  min-width: 50px;
+  margin: 0 !important;
+  text-align: center; }
+  header.navbar .nav-item .nav-link i {
+    vertical-align: middle; }
+  header.navbar .nav-item .nav-link .tag {
+    position: absolute;
+    top: 9px;
+    right: 7px; }
+header.navbar .img-avatar {
+  height: 35px;
+  margin: 0 10px; }
+header.navbar .dropdown-menu {
+  padding-bottom: 0;
+  line-height: 1.5; }
+header.navbar .dropdown-item {
+  min-width: 180px; }
+a.navbar-brand {
+  display: inline-block;
+  width: 155px;
+  height: 100px;
+  background-image: url("./assets/images/sj-logo.svg");
+  background-repeat: no-repeat;
+  background-position: center center;
+  margin-left: 10px;
+  background-size: 40%; }
 
 header.navbar .navbar-brand {
   margin-right: 0; }
