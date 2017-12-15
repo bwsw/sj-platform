@@ -86,11 +86,11 @@ Modules of the input-streaming type handle external input streams, does data ded
 
 In the SJ-Platform the TCP Input module is currently implemented.
 
-.. figure:: _static/InputModuleStructure1.png
+.. figure:: _static/InputModuleInP.png
   :scale: 80 %
   :align: center
 
-  Figure 1.4: Input module inputs and outputs
+  Figure 1.4: Input module direct interaction with pipeline components
   
 It performs the transformation of the streams incoming via TCP into T-streams. T-streams are persistent streams designed for exactly-once processing (so they include a transactional producer, a consumer and a subscriber). Find more information about T-streams `here <http://t-streams.com>`_.
 
@@ -184,11 +184,11 @@ Modules of Regular Type
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 The most generic modules in the system are modules of a regular-streaming type. A simplified definition of a regular module is a handler that performs data transformation and put the processed data into T-streams.
 
-.. figure:: _static/RegularModule3.png
+.. figure:: _static/RegularModuleInP.png
   :scale: 80 %
   :align: center
 
-  Figure 1.6: Regular module inputs and outputs
+  Figure 1.6: Regular module direct interaction with pipeline components
 
 The diagram below represents the dataflow in the regular module.
 
@@ -424,11 +424,11 @@ Modules of Output Type
 
 Modules of an output type are responsible for saving of output data to external data destinations (Elasticsearch, SQL database, RESTful).
 
-.. figure:: _static/OutputModule1.png
+.. figure:: _static/OutputModuleInP.png
   :scale: 80 %
   :align: center
 
-  Figure 1.9: Output module inputs and outputs
+  Figure 1.9: Output module direct interaction with pipline components
   
 They transform the result of data processing received from T-streams and passe them to an external data storage. They allow to transform one data item from incoming streaming into one and more data output items.
 
