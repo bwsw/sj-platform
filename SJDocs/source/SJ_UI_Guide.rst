@@ -52,7 +52,7 @@ The configurations can be added under the *Configuration* tab of the main naviga
 
 .. figure:: _static/Configurations1.png
     
-    Figure 1.1: List of providers
+    Figure 1.1: Configurations list 
     
 Please, click "Add Settings" in the upper-right corner above the list and fill in the form (the information on the required settings can be found in the table_ below):
 
@@ -142,7 +142,7 @@ Under the "Providers" section of the main navigation bar, you can see the list o
 
 .. figure:: _static/Providers1.png
    
-    Figure 1.2: List of providers
+    Figure 1.2: Providers list
 
 Press "Create provider" and fill in the form where general fields and specific fields should be completed:
 
@@ -236,7 +236,7 @@ Under the *Services* section of the main navigation bar, you will find the list 
 
 .. figure:: _static/Services1.png
 
-    Figure 1.6: List of services
+    Figure 1.6: Services list 
 
 Please, press "Create Service" and fill out the form with general and specific fields:
 
@@ -395,7 +395,7 @@ Under the *Streams* section of the main navigation bar, you will find the list o
 
 .. figure:: _static/Streams.png
     
-    Figure 1.11: List of streams
+    Figure 1.11: Streams list 
     
 Please, press "Create Stream" and fill in the form where general and specific fields should be completed:
 
@@ -541,7 +541,7 @@ In the next section — *Modules* — you can upload and manage your own module(
 
 .. figure:: _static/ModulesList.png
 
-    Figure 1.16: List of modules
+    Figure 1.16: Modules list 
     
 How to create a module is described in detail in the :ref:`Custom_Module` section.
 
@@ -775,7 +775,7 @@ Please, review the lists with general and specific fields described below.
      
 .. figure:: _static/Create_RegInst_AddInputs.png
 
-     Figure 1.22: Adding inputs when creating instances
+     Figure 1.22: Adding inputs when creating an instance
      
 - Outputs*
      Names of output streams (should be of the 'T-stream' type only). You can add several output streams by clicking "Add Output" and selecting an output stream name from the drop-down list.
@@ -800,7 +800,7 @@ Please, review the lists with general and specific fields described below.
 
 .. figure:: _static/Create_BatchInst_AddInputs.png
      
-     Figure 1.23: Adding inputs when creating instances
+     Figure 1.23: Adding inputs when creating an instance
      
 - Outputs* 
      Names of output streams (must be of the 'T-streams' type only).  You can add several input streams by clicking "Add Input" and selecting an input stream name from the drop-down list.
@@ -832,7 +832,7 @@ Please, review the lists with general and specific fields described below.
       Interval for performing the checkpoint. If Checkpoint Mode is 'time-interval' the value is set in ms.  If Checkpoint Mode is 'every-nth' the value is the number of events after which the checkpoint is done.
       
 - Input* 
-      Name of an input stream. Must be of the 't-stream' type only. Stream for this type of module has the 'split' mode only. The stream must exist in the system.
+      Name of an input stream. Must be of the 'T-streams' type only. Stream for this type of module has the 'split' mode only. The stream must exist in the system.
       
 - Output* 
      Name of an output stream (must be of 'SQL-database', 'Elasticsearch' or 'RESTful' type).
