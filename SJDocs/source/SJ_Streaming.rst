@@ -65,7 +65,7 @@ The image below illustrates the data design format in T-streams. The stream cons
 
 .. figure:: _static/t-streams-organization.png
     
-    Figure 1.2: T-streams structure
+    Figure 1.2: T-streams stream structure
     
 Data elements are time-sorted within a transaction. 
 
