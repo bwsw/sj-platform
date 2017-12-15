@@ -94,7 +94,7 @@ What we are going to do for the examples is:
    :scale: 110%
    :align: center
    
-   Figure 1.4: Engine
+   Figure 1.4: An engine in SJ-Platform
    
 .. note:: Find more about engines at the :ref:`Engines` page.
 
