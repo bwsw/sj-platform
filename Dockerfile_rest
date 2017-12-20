@@ -2,7 +2,7 @@ FROM ubuntu:xenial
 
 MAINTAINER BITWORKS
 
-ENV version 1.0-SNAPSHOT
+ARG version
 ENV DEBIAN_FRONTEND noninteractive
 
 # Install Oracle JDK 8
