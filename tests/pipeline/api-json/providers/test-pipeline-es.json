@@ -1,0 +1,8 @@
+{
+  "name": "test-pipeline-es",
+  "description": "Elasticsearch provider for pipeline test",
+  "type": "provider.elasticsearch",
+  "hosts": [
+    "<address>"
+  ]
+}

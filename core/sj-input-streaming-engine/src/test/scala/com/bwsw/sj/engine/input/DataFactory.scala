@@ -1,221 +1,183 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.bwsw.sj.engine.input
 
-import java.io.{BufferedReader, File, InputStreamReader, PrintStream}
-import java.net.Socket
-import java.util
+import java.io.{BufferedReader, File, InputStreamReader}
+import java.util.Date
 import java.util.jar.JarFile
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.common.file.utils.FileStorage
-import com.bwsw.sj.common.DAL.model.module.{InputInstance, InputTask, Instance}
-import com.bwsw.sj.common.DAL.model.{Service, _}
-import com.bwsw.sj.common.DAL.service.GenericMongoService
-import com.bwsw.sj.common.utils.{GeneratorLiterals, ProviderLiterals, _}
+import com.bwsw.sj.common.config.BenchmarkConfigNames
+import com.bwsw.sj.common.dal.model.instance.{InputTask, InstanceDomain}
+import com.bwsw.sj.common.dal.model.provider.ProviderDomain
+import com.bwsw.sj.common.dal.model.service.{ServiceDomain, TStreamServiceDomain, ZKServiceDomain}
+import com.bwsw.sj.common.dal.model.stream.{StreamDomain, TStreamStreamDomain}
+import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
+import com.bwsw.sj.common.si.model.instance.InputInstance
+import com.bwsw.sj.common.utils.{ProviderLiterals, _}
+import com.bwsw.sj.engine.core.testutils.TestStorageServer
+import com.bwsw.sj.engine.input.config.InputEngineConfigNames
 import com.bwsw.tstreams.agents.consumer.Consumer
 import com.bwsw.tstreams.agents.consumer.Offset.Oldest
-import com.bwsw.tstreams.converter.IConverter
-import com.bwsw.tstreams.env.{TSF_Dictionary, TStreamsFactory}
-import com.bwsw.tstreams.generator.LocalTransactionGenerator
-import com.bwsw.tstreams.services.BasicStreamService
+import com.bwsw.tstreams.env.{ConfigurationOptions, TStreamsFactory}
+import com.typesafe.config.ConfigFactory
+import scaldi.Injectable.inject
+
+import scala.collection.mutable
+import scala.util.{Failure, Success, Try}
 
 object DataFactory {
 
-  private val zookeeperHosts = System.getenv("ZOOKEEPER_HOSTS").split(",")
-  private val cassandraHost = System.getenv("CASSANDRA_HOST")
-  private val cassandraPort = System.getenv("CASSANDRA_PORT").toInt
-  private val cassandraTestKeyspace = "test_keyspace_for_input_engine"
-  private val testNamespace = "test"
+  import com.bwsw.sj.common.SjModule._
+
+  val connectionRepository: ConnectionRepository = inject[ConnectionRepository]
+  private val config = ConfigFactory.load()
+  private val zookeeperHosts = config.getString(BenchmarkConfigNames.zkHosts)
+  private val benchmarkPort = config.getInt(BenchmarkConfigNames.benchmarkPort)
+  private val testNamespace = "test_namespace_for_input_engine"
   private val instanceName = "test-instance-for-input-engine"
+  private val zookeeperProviderName = "zookeeper-test-provider"
+  private val tstreamServiceName = "tstream-test-service"
+  private val zookeeperServiceName = "zookeeper-test-service"
+  private val tstreamOutputNamePrefix = "tstream-output"
   private var instanceOutputs: Array[String] = Array()
-  private val tasks = new util.HashMap[String, InputTask]()
-  private val host = "localhost"
-  private val port = 8888
-  tasks.put(s"$instanceName-task0", new InputTask(host, port))
+  private val tasks = mutable.Map[String, InputTask]()
+  val instancePort = config.getInt(InputEngineConfigNames.entryPort)
+  tasks.put(s"$instanceName-task0", new InputTask(SjInputModuleBenchmarkConstants.instanceHost, instancePort))
   private val partitions = 1
   private val serializer = new JsonSerializer()
-  private val cassandraFactory = new CassandraFactory()
-  private val cassandraProvider = new Provider("cassandra-test-provider", "cassandra provider", Array(s"$cassandraHost:$cassandraPort"), "", "", ProviderLiterals.cassandraType)
-  private val zookeeperProvider = new Provider("zookeeper-test-provider", "zookeeper provider", zookeeperHosts, "", "", ProviderLiterals.zookeeperType)
-  private val tstrqService = new TStreamService("tstream-test-service", ServiceLiterals.tstreamsType, "tstream test service",
-    cassandraProvider, cassandraTestKeyspace, cassandraProvider, cassandraTestKeyspace, zookeeperProvider, "unit")
+  private val zookeeperProvider = new ProviderDomain(
+    zookeeperProviderName, zookeeperProviderName, zookeeperHosts.split(","), ProviderLiterals.zookeeperType, new Date())
+  private val tstrqService = new TStreamServiceDomain(tstreamServiceName, tstreamServiceName, zookeeperProvider,
+    TestStorageServer.defaultPrefix, TestStorageServer.defaultToken, creationDate = new Date())
   private val tstreamFactory = new TStreamsFactory()
   setTStreamFactoryProperties()
+  val storageClient = tstreamFactory.getStorageClient()
 
   val outputCount = 2
 
   private def setTStreamFactoryProperties() = {
-    setMetadataClusterProperties(tstrqService)
-    setDataClusterProperties(tstrqService)
+    setAuthOptions(tstrqService)
     setCoordinationOptions(tstrqService)
   }
 
-  private def setMetadataClusterProperties(tStreamService: TStreamService) = {
-    tstreamFactory.setProperty(TSF_Dictionary.Metadata.Cluster.NAMESPACE, tStreamService.metadataNamespace)
-      .setProperty(TSF_Dictionary.Metadata.Cluster.ENDPOINTS, tStreamService.metadataProvider.hosts.mkString(","))
+  private def setAuthOptions(tStreamService: TStreamServiceDomain) = {
+    tstreamFactory.setProperty(ConfigurationOptions.Common.authenticationKey, tStreamService.token)
   }
 
-  private def setDataClusterProperties(tStreamService: TStreamService) = {
-    tStreamService.dataProvider.providerType match {
-      case ProviderLiterals.aerospikeType =>
-        tstreamFactory.setProperty(TSF_Dictionary.Data.Cluster.DRIVER, TSF_Dictionary.Data.Cluster.Consts.DATA_DRIVER_AEROSPIKE)
-      case _ =>
-        tstreamFactory.setProperty(TSF_Dictionary.Data.Cluster.DRIVER, TSF_Dictionary.Data.Cluster.Consts.DATA_DRIVER_CASSANDRA)
-    }
-
-    tstreamFactory.setProperty(TSF_Dictionary.Data.Cluster.NAMESPACE, tStreamService.dataNamespace)
-      .setProperty(TSF_Dictionary.Data.Cluster.ENDPOINTS, tStreamService.dataProvider.hosts.mkString(","))
+  private def setCoordinationOptions(tStreamService: TStreamServiceDomain) = {
+    tstreamFactory.setProperty(ConfigurationOptions.Coordination.endpoints, tStreamService.provider.getConcatenatedHosts())
+    tstreamFactory.setProperty(ConfigurationOptions.Coordination.path, tStreamService.prefix)
   }
 
-  private def setCoordinationOptions(tStreamService: TStreamService) = {
-    tstreamFactory.setProperty(TSF_Dictionary.Coordination.ROOT, s"/${tStreamService.lockNamespace}")
-      .setProperty(TSF_Dictionary.Coordination.ENDPOINTS, tStreamService.lockProvider.hosts.mkString(","))
-  }
-
-  def writeData(totalInputElements: Int, totalDuplicateElements: Int) = {
-    try {
-      val socket = new Socket(host, port)
-      var amountOfDuplicates = -1
-      var amountOfElements = 0
-      var currentElement = 1
-      val out = new PrintStream(socket.getOutputStream)
-
-      while (amountOfElements < totalInputElements) {
-        if (amountOfDuplicates != totalDuplicateElements) {
-          out.println(currentElement)
-          out.flush()
-          amountOfElements += 1
-          amountOfDuplicates += 1
-        }
-        else {
-          currentElement += 1
-          out.println(currentElement)
-          out.flush()
-          amountOfElements += 1
-        }
-      }
-
-      socket.close()
-    }
-    catch {
-      case e: Exception =>
-        System.out.println("init error: " + e)
-    }
-  }
-
-  private val converter = new IConverter[Array[Byte], Array[Byte]] {
-    override def convert(obj: Array[Byte]): Array[Byte] = obj
-  }
-
-  def open() = cassandraFactory.open(Set((cassandraHost, cassandraPort)))
-
-  def cassandraSetup() = {
-    cassandraFactory.createKeyspace(cassandraTestKeyspace)
-    cassandraFactory.createMetadataTables(cassandraTestKeyspace)
-    cassandraFactory.createDataTable(cassandraTestKeyspace)
-  }
-
-  def cassandraDestroy() = {
-    cassandraFactory.dropKeyspace(cassandraTestKeyspace)
-  }
-
-  def close() = cassandraFactory.close()
-
-  def createProviders(providerService: GenericMongoService[Provider]) = {
-    providerService.save(cassandraProvider)
+  def createProviders(providerService: GenericMongoRepository[ProviderDomain]) = {
     providerService.save(zookeeperProvider)
   }
 
-  def deleteProviders(providerService: GenericMongoService[Provider]) = {
-    providerService.delete("cassandra-test-provider")
-    providerService.delete("zookeeper-test-provider")
+  def deleteProviders(providerService: GenericMongoRepository[ProviderDomain]) = {
+    providerService.delete(zookeeperProviderName)
   }
 
-  def createServices(serviceManager: GenericMongoService[Service], providerService: GenericMongoService[Provider]) = {
-    val cassService = new CassandraService("cassandra-test-service", ServiceLiterals.cassandraType, "cassandra test service", cassandraProvider, cassandraTestKeyspace)
-    serviceManager.save(cassService)
-
-    val zkService = new ZKService("zookeeper-test-service", ServiceLiterals.zookeeperType, "zookeeper test service", zookeeperProvider, testNamespace)
+  def createServices(serviceManager: GenericMongoRepository[ServiceDomain], providerService: GenericMongoRepository[ProviderDomain]) = {
+    val zkService = new ZKServiceDomain(zookeeperServiceName, zookeeperServiceName, zookeeperProvider,
+      testNamespace, creationDate = new Date())
     serviceManager.save(zkService)
 
     serviceManager.save(tstrqService)
   }
 
-  def deleteServices(serviceManager: GenericMongoService[Service]) = {
-    serviceManager.delete("cassandra-test-service")
-    serviceManager.delete("zookeeper-test-service")
-    serviceManager.delete("tstream-test-service")
+  def deleteServices(serviceManager: GenericMongoRepository[ServiceDomain]) = {
+    serviceManager.delete(zookeeperServiceName)
+    serviceManager.delete(tstreamServiceName)
   }
 
-  def createStreams(sjStreamService: GenericMongoService[SjStream], serviceManager: GenericMongoService[Service], outputCount: Int) = {
+  def createStreams(sjStreamService: GenericMongoRepository[StreamDomain], serviceManager: GenericMongoRepository[ServiceDomain], outputCount: Int) = {
     (1 to outputCount).foreach(x => {
       createOutputTStream(sjStreamService, serviceManager, partitions, x.toString)
-      instanceOutputs = instanceOutputs :+ s"test-output-tstream$x"
+      instanceOutputs = instanceOutputs :+ (tstreamOutputNamePrefix + x)
     })
   }
 
-  def deleteStreams(streamService: GenericMongoService[SjStream], outputCount: Int) = {
+  def deleteStreams(streamService: GenericMongoRepository[StreamDomain], outputCount: Int) = {
     (1 to outputCount).foreach(x => deleteOutputTStream(streamService, x.toString))
-
   }
 
-  private def createOutputTStream(sjStreamService: GenericMongoService[SjStream], serviceManager: GenericMongoService[Service], partitions: Int, suffix: String) = {
-    val localGenerator = new Generator(GeneratorLiterals.localType)
+  private def createOutputTStream(sjStreamService: GenericMongoRepository[StreamDomain], serviceManager: GenericMongoRepository[ServiceDomain], partitions: Int, suffix: String) = {
+    val s2 = new TStreamStreamDomain(
+      tstreamOutputNamePrefix + suffix,
+      tstrqService,
+      partitions,
+      tstreamOutputNamePrefix + suffix,
+      false,
+      Array("output", "some tags"),
+      creationDate = new Date()
+    )
 
-    val s2 = new TStreamSjStream("test-output-tstream" + suffix, "test-output-tstream", partitions, tstrqService, StreamLiterals.tStreamType, Array("output", "some tags"), localGenerator)
     sjStreamService.save(s2)
 
-    val metadataStorage = cassandraFactory.getMetadataStorage(cassandraTestKeyspace)
-    val dataStorage = cassandraFactory.getDataStorage(cassandraTestKeyspace)
-
-    BasicStreamService.createStream(
-      "test-output-tstream" + suffix,
+    storageClient.createStream(
+      tstreamOutputNamePrefix + suffix,
       partitions,
       1000 * 60,
-      "description of test output tstream",
-      metadataStorage,
-      dataStorage
-    )
+      "description of test output tstream")
   }
 
-  private def deleteOutputTStream(streamService: GenericMongoService[SjStream], suffix: String) = {
-    streamService.delete("test-output-tstream" + suffix)
-    val metadataStorage = cassandraFactory.getMetadataStorage(cassandraTestKeyspace)
-    BasicStreamService.deleteStream("test-output-tstream" + suffix, metadataStorage)
+  private def deleteOutputTStream(streamService: GenericMongoRepository[StreamDomain], suffix: String) = {
+    streamService.delete(tstreamOutputNamePrefix + suffix)
+
+    storageClient.deleteStream(tstreamOutputNamePrefix + suffix)
   }
 
-  def createInstance(serviceManager: GenericMongoService[Service],
-                     instanceService: GenericMongoService[Instance],
+  def createInstance(serviceManager: GenericMongoRepository[ServiceDomain],
+                     instanceService: GenericMongoRepository[InstanceDomain],
                      checkpointInterval: Int
-                      ) = {
+                    ) = {
 
-    val instance = new InputInstance()
-    instance.name = instanceName
-    instance.moduleType = EngineLiterals.inputStreamingType
-    instance.moduleName = "input-streaming-stub"
-    instance.moduleVersion = "1.0"
-    instance.status = EngineLiterals.ready
-    instance.description = "some description of test instance"
-    instance.outputs = instanceOutputs
-    instance.checkpointMode = EngineLiterals.everyNthCheckpointMode
-    instance.checkpointInterval = checkpointInterval
-    instance.parallelism = 1
-    instance.options = """{"hey": "hey"}"""
-    instance.perTaskCores = 0.1
-    instance.perTaskRam = 64
-    instance.performanceReportingInterval = 10000
-    instance.engine = "com.bwsw.input.streaming.engine-1.0"
-    instance.coordinationService = serviceManager.get("zookeeper-test-service").get.asInstanceOf[ZKService]
-    instance.duplicateCheck = false
-    instance.lookupHistory = 100
-    instance.queueMaxSize = 100
-    instance.defaultEvictionPolicy = EngineLiterals.lruDefaultEvictionPolicy
-    instance.evictionPolicy = "expanded-time"
-    instance.tasks = tasks
+    val instance = new InputInstance(
+      name = instanceName,
+      moduleType = EngineLiterals.inputStreamingType,
+      moduleName = "input-streaming-stub",
+      moduleVersion = "1.0",
+      engine = "com.bwsw.input.streaming.engine-1.0",
+      coordinationService = zookeeperServiceName,
+      checkpointMode = EngineLiterals.everyNthMode,
+      _status = EngineLiterals.started,
+      description = "some description of test instance",
+      outputs = instanceOutputs,
+      checkpointInterval = checkpointInterval,
+      duplicateCheck = true,
+      lookupHistory = 100,
+      queueMaxSize = 500,
+      defaultEvictionPolicy = EngineLiterals.lruDefaultEvictionPolicy,
+      evictionPolicy = "expanded-time",
+      tasks = tasks,
+      options =
+        s"""{"totalInputElements":${SjInputModuleBenchmarkConstants.totalInputElements},
+           |"benchmarkPort":$benchmarkPort,
+           |"verbose":false}""".stripMargin,
+      creationDate = new Date().toString)
 
-    instanceService.save(instance)
+    instanceService.save(instance.to)
   }
 
-  def deleteInstance(instanceService: GenericMongoService[Instance]) = {
+  def deleteInstance(instanceService: GenericMongoRepository[InstanceDomain]) = {
     instanceService.delete(instanceName)
   }
 
@@ -227,14 +189,17 @@ object DataFactory {
       val entry = enu.nextElement
       if (entry.getName.equals("specification.json")) {
         val reader = new BufferedReader(new InputStreamReader(jar.getInputStream(entry), "UTF-8"))
-        try {
+        val result = Try {
           var line = reader.readLine
-          while (line != null) {
+          while (Option(line).isDefined) {
             builder.append(line + "\n")
             line = reader.readLine
           }
-        } finally {
-          reader.close()
+        }
+        reader.close()
+        result match {
+          case Success(_) =>
+          case Failure(e) => throw e
         }
       }
     }
@@ -248,27 +213,24 @@ object DataFactory {
     storage.delete(filename)
   }
 
-  def createOutputConsumer(streamService: GenericMongoService[SjStream], suffix: String) = {
-    createConsumer("test-output-tstream" + suffix, streamService)
+  def createOutputConsumer(streamService: GenericMongoRepository[StreamDomain], suffix: String) = {
+    createConsumer(tstreamOutputNamePrefix + suffix, streamService)
   }
 
-  private def createConsumer(streamName: String, streamService: GenericMongoService[SjStream]): Consumer[Array[Byte]] = {
-    val stream = streamService.get(streamName).get.asInstanceOf[TStreamSjStream]
-    val transactionGenerator = new LocalTransactionGenerator
+  private def createConsumer(streamName: String, streamService: GenericMongoRepository[StreamDomain]): Consumer = {
+    val stream = streamService.get(streamName).get.asInstanceOf[TStreamStreamDomain]
 
     setStreamOptions(stream)
 
-    tstreamFactory.getConsumer[Array[Byte]](
+    tstreamFactory.getConsumer(
       streamName,
-      transactionGenerator,
-      converter,
       (0 until stream.partitions).toSet,
       Oldest)
   }
 
-  protected def setStreamOptions(stream: TStreamSjStream) = {
-    tstreamFactory.setProperty(TSF_Dictionary.Stream.NAME, stream.name)
-    tstreamFactory.setProperty(TSF_Dictionary.Stream.PARTITIONS, stream.partitions)
-    tstreamFactory.setProperty(TSF_Dictionary.Stream.DESCRIPTION, stream.description)
+  protected def setStreamOptions(stream: TStreamStreamDomain) = {
+    tstreamFactory.setProperty(ConfigurationOptions.Stream.name, stream.name)
+    tstreamFactory.setProperty(ConfigurationOptions.Stream.partitionsCount, stream.partitions)
+    tstreamFactory.setProperty(ConfigurationOptions.Stream.description, stream.description)
   }
 }

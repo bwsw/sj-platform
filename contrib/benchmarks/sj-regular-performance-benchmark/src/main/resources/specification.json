@@ -1,0 +1,32 @@
+{
+  "name": "com.bwsw.sj.benchmarks.module.regular",
+  "description": "Regular module for performance benchmark by BW",
+  "version": "1.0",
+  "author": "Pavel Tomskikh",
+  "license": "Apache 2.0",
+  "inputs": {
+    "cardinality": [
+      1,
+      1
+    ],
+    "types": [
+      "stream.apache-kafka",
+      "stream.t-streams"
+    ]
+  },
+  "outputs": {
+    "cardinality": [
+      0,
+      1
+    ],
+    "types": [
+      "stream.apache-kafka",
+      "stream.t-streams"
+    ]
+  },
+  "module-type": "regular-streaming",
+  "engine-name": "com.bwsw.regular.streaming.engine",
+  "engine-version": "1.0",
+  "validator-class": "com.bwsw.sj.benchmarks.module.regular.Validator",
+  "executor-class": "com.bwsw.sj.benchmarks.module.regular.Executor"
+}

@@ -1,46 +1,90 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.bwsw.sj.mesos.framework.task
 
-import java.util.Calendar
-import java.util.Date
+import java.util.{Calendar, Date}
 
-import com.bwsw.sj.common.DAL.model.module.{Task => InstanceTask}
+import com.bwsw.sj.common.rest.{Directory, FrameworkTask}
+import com.bwsw.sj.mesos.framework.config.FrameworkConfigNames
+import com.bwsw.sj.mesos.framework.schedule.FrameworkUtil
+import com.typesafe.config.ConfigFactory
+import org.apache.mesos.Protos.Resource
+
+import scala.util.Try
+import scala.collection.mutable
 
 /**
-  *
-  *
-  * @author Kseniya Tomskikh
+  * Task data model
+  * @param taskId
   */
 class Task(taskId: String) {
+  private val config = FrameworkUtil.config.get
+
   val id: String = taskId
   var state: String = "TASK_STAGING"
   var stateChanged: Long = Calendar.getInstance().getTime.getTime
   var reason: String = ""
   var node: String = ""
   var lastNode: String = ""
-  val description: InstanceTask = null
+  //  var description: InstanceTask = _
+  var maxDirectories = Try(config.getInt(FrameworkConfigNames.maxSandboxView)).getOrElse(7)
+  var directories: mutable.ListBuffer[Directory] = mutable.ListBuffer()
+  var host: Option[String] = None
+  var ports: Resource = _
 
-
+  /**
+    * Update task with concrete parameter
+    * @param state Current task state
+    * @param stateChanged Time when state changed
+    * @param reason Reason why state changed
+    * @param node Current slave
+    * @param lastNode Previous slave
+    * @param directory Links to sandbox
+    * @param host Slave host
+    * @param ports Occupied ports
+    */
   def update(state: String = state,
              stateChanged: Long = stateChanged,
              reason: String = reason,
              node: String = node,
-             lastNode: String = lastNode) = {
+             lastNode: String = lastNode,
+             directory: String = "",
+             host: String = this.host.orNull,
+             ports: Resource = ports): Unit = {
     this.state = state
     this.stateChanged = stateChanged
     this.reason = reason
     this.node = node
     this.lastNode = lastNode
+    this.host = Option(host)
+    this.ports = ports
+    if (!directories.exists(_.path == directory) && directory.nonEmpty)
+      directories.append(
+        Directory(new Date(stateChanged).toString, directory))
+    if (directories.toList.length > maxDirectories) directories = directories.dropRight(1)
   }
 
-  def toJson: Map[String, Any] = {
-    //val timestamp = new Timestamp(stateChanged)
-    Map(("id", id),
-      ("state", state),
-      ("state-change", new Date(stateChanged).toString),
-      ("reason", reason),
-      ("node", node),
-      ("last-node", lastNode)
-    )
+  /**
+    * Transform to FrameworkTask
+    * @return
+    */
+  def toFrameworkTask: FrameworkTask = {
+    FrameworkTask(id, state, new Date(stateChanged).toString, reason, node, lastNode, directories)
   }
-
 }

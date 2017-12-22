@@ -1,0 +1,7 @@
+{
+  "name": "test-pipeline-sql",
+  "description": "SQL service for pipeline test",
+  "provider": "test-pipeline-sql",
+  "database": "<database>",
+  "type": "service.sql-database"
+}

@@ -1,0 +1,26 @@
+{
+  "name": "test-pipeline-batch",
+  "description": "Batch module for pipeline test",
+  "window": 5,
+  "slidingInterval": 5,
+  "inputs": [
+    "test-pipeline-input-kafka/split",
+    "test-pipeline-input-t-streams/split"
+  ],
+  "outputs": [
+    "test-pipeline-batch"
+  ],
+  "stateManagement": "ram",
+  "stateFullCheckpoint": 5,
+  "parallelism": 1,
+  "startFrom": "oldest",
+  "perTaskCores": 0.1,
+  "perTaskRam": 256,
+  "jvmOptions": {
+    "-Xmx": "128m",
+    "-XX:MaxMetaspaceSize=": "196m",
+    "-XX:MaxDirectMemorySize=": "64m"
+  },
+  "eventWaitTime": 1000,
+  "coordinationService": "test-pipeline-zookeeper"
+}

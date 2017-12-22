@@ -1,0 +1,6 @@
+{
+  "name": "test-pipeline-regular-kafka-restful",
+  "description": "RESTful stream from batch for test pipeline",
+  "service": "test-pipeline-restful",
+  "type": "stream.restful"
+}

@@ -1,62 +1,82 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.bwsw.sj.engine.input
 
+import java.io.Closeable
 import java.util.concurrent._
 
+import com.bwsw.sj.common.dal.repository.ConnectionRepository
+import com.bwsw.sj.common.engine.TaskEngine
+import com.bwsw.sj.common.engine.core.managment.TaskManager
+import com.bwsw.sj.common.engine.core.reporting.{PerformanceMetrics, PerformanceMetricsReporter}
 import com.bwsw.sj.engine.core.engine.TaskRunner
-import com.bwsw.sj.engine.input.connection.tcp.server.InputStreamingServer
-import com.bwsw.sj.engine.input.task.InputTaskManager
-import com.bwsw.sj.engine.input.task.engine.InputTaskEngineFactory
-import com.bwsw.sj.engine.input.task.reporting.InputStreamingPerformanceMetrics
-import io.netty.buffer.ByteBuf
+import com.bwsw.sj.engine.input.connection.tcp.server.{ChannelHandlerContextState, InputStreamingServer}
+import com.bwsw.sj.engine.input.task.reporting.{InputStreamingPerformanceMetrics, InputStreamingPerformanceMetricsReporter}
+import com.bwsw.sj.engine.input.task.{InputTaskEngine, InputTaskManager}
 import io.netty.channel.ChannelHandlerContext
-import org.slf4j.LoggerFactory
+import scaldi.Injectable.inject
 
-import scala.collection.convert.decorateAsScala._
+import scala.collection.JavaConverters._
 
 /**
- * Object is responsible for running a task of job that launches input module
- *
- *
- * @author Kseniya Mikhaleva
- */
+  * Class is responsible for launching input engine execution logic.
+  * First, there are created all services needed to start engine. All of those services implement Callable interface
+  * Next, each service are launched as a separate task using [[java.util.concurrent.ExecutorCompletionService]]
+  * Finally, handle a case if some task will fail and stop the execution. Otherwise the execution will go on indefinitely
+  *
+  * @author Kseniya Mikhaleva
+  */
+object InputTaskRunner extends {
+  override val threadName = "InputTaskRunner-%d"
+} with TaskRunner {
 
-object InputTaskRunner extends {override val threadName = "InputTaskRunner-%d"} with TaskRunner {
+  private val queueSize = 5000
+  private val stateByContext = new ConcurrentHashMap[ChannelHandlerContext, ChannelHandlerContextState]().asScala
+  private val channelContextQueue = new ArrayBlockingQueue[ChannelHandlerContext](queueSize)
 
-  private val logger = LoggerFactory.getLogger(this.getClass)
-  private val queueSize = 1000
+  override protected def createTaskManager(): TaskManager = new InputTaskManager()
 
-  def main(args: Array[String]) {
-    try {
-      val bufferForEachContext = (new ConcurrentHashMap[ChannelHandlerContext, ByteBuf]()).asScala
-      val channelContextQueue = new ArrayBlockingQueue[ChannelHandlerContext](queueSize)
+  override protected def createPerformanceMetricsReporter(manager: TaskManager): PerformanceMetricsReporter =
+    new InputStreamingPerformanceMetricsReporter(manager.asInstanceOf[InputTaskManager])
 
-      val manager: InputTaskManager = new InputTaskManager()
-      logger.info(s"Task: ${manager.taskName}. Start preparing of task runner for an input module\n")
+  override protected def createTaskEngine(manager: TaskManager,
+                                          performanceMetrics: PerformanceMetrics): TaskEngine = {
+    InputTaskEngine(
+      manager.asInstanceOf[InputTaskManager],
+      performanceMetrics,
+      channelContextQueue,
+      stateByContext,
+      inject[ConnectionRepository])
+  }
 
-      val performanceMetrics = new InputStreamingPerformanceMetrics(manager)
+  override protected def createTaskInputService(manager: TaskManager, taskEngine: TaskEngine): Closeable = {
+    new InputStreamingServer(
+      manager.agentsHost,
+      manager.asInstanceOf[InputTaskManager].entryPort,
+      channelContextQueue,
+      stateByContext)
+  }
 
-      val inputTaskEngineFactory = new InputTaskEngineFactory(manager, performanceMetrics, channelContextQueue, bufferForEachContext)
-
-      val inputTaskEngine = inputTaskEngineFactory.createInputTaskEngine()
-
-      val inputStreamingServer = new InputStreamingServer(
-        manager.agentsHost,
-        manager.entryPort,
-        inputTaskEngine.executor,
-        channelContextQueue,
-        bufferForEachContext
-      )
-
-      logger.info(s"Task: ${manager.taskName}. Preparing finished. Launch task\n")
-
-      executorService.submit(inputTaskEngine)
-      executorService.submit(performanceMetrics)
-      executorService.submit(inputStreamingServer)
-
-      executorService.take().get()
-    } catch {
-      case assertionError: Error => handleException(assertionError)
-      case exception: Exception => handleException(exception)
-    }
+  override protected def createPerformanceMetrics(taskName: String,
+                                                  performanceMetricsReporter: PerformanceMetricsReporter): PerformanceMetrics = {
+    new InputStreamingPerformanceMetrics(
+      performanceMetricsReporter.asInstanceOf[InputStreamingPerformanceMetricsReporter],
+      s"performance-metrics-$taskName")
   }
 }

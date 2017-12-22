@@ -1,0 +1,8 @@
+<div class="right-inner-addon">
+  <select #select class="form-control"
+          (input)="valueChange(select.value)"
+          name="providerType">
+    <option value="">All</option>
+    <option *ngFor="let type of filterList | orderBy: 'name'" value="{{type.id}}">{{type.name}}</option>
+  </select>
+</div>

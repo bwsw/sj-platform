@@ -1,0 +1,33 @@
+{
+  "name": "batch-sum",
+  "description": "Module by BW of numbers summation",
+  "version": "1.0",
+  "author": "Ksenia Mikhaleva",
+  "license": "Apache 2.0",
+  "inputs": {
+    "cardinality": [
+      1,
+      10
+    ],
+    "types": [
+      "stream.apache-kafka"
+    ]
+  },
+  "outputs": {
+    "cardinality": [
+      1,
+      10
+    ],
+    "types": [
+      "stream.t-streams"
+    ]
+  },
+  "module-type": "batch-streaming",
+  "engine-name": "com.bwsw.batch.streaming.engine",
+  "engine-version": "1.0",
+  "options": {
+  },
+  "validator-class": "com.bwsw.sj.examples.sum.Validator",
+  "executor-class": "com.bwsw.sj.examples.sum.Executor",
+  "batch-collector-class": "com.bwsw.sj.examples.sum.NumericalBatchCollector"
+}

@@ -1,50 +1,50 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.bwsw.sj.engine.output.task
 
-import com.bwsw.sj.common.DAL.model.module.OutputInstance
-import com.bwsw.sj.common.engine.StreamingExecutor
-import com.bwsw.sj.engine.core.entities.OutputData
-import com.bwsw.sj.engine.core.environment.EnvironmentManager
-import com.bwsw.sj.engine.core.managment.TaskManager
+import com.bwsw.sj.common.dal.model.stream.StreamDomain
+import com.bwsw.sj.common.si.model.instance.OutputInstance
+import com.bwsw.sj.common.engine.core.environment.{EnvironmentManager, OutputEnvironmentManager}
+import com.bwsw.sj.common.engine.core.managment.TaskManager
+import com.bwsw.sj.common.engine.core.output.OutputStreamingExecutor
+import scaldi.Injector
+
+import scala.collection.mutable
 
 /**
- * Task manager for working with streams of output-streaming module
- *
- * @author Kseniya Tomskikh
- */
-class OutputTaskManager() extends TaskManager {
+  * Class allows to manage an environment of output streaming task
+  *
+  * @author Kseniya Tomskikh
+  */
+class OutputTaskManager(implicit injector: Injector) extends TaskManager {
+  val outputInstance: OutputInstance = instance.asInstanceOf[OutputInstance]
+  val inputs: mutable.Map[StreamDomain, Array[Int]] = getInputs(outputInstance.executionPlan)
 
-  private val outputInstance = instance.asInstanceOf[OutputInstance]
-  val inputs = getInputs(outputInstance.executionPlan)
-  lazy val outputProducers = {
-    logger.error(s"Instance of Output module hasn't got t-stream outputs " +
-      s"and it's impossible to retrieve their producers")
-    throw new Exception(s"Instance of Output module hasn't got t-stream outputs " +
-      s"and it's impossible to retrieve their producers")
-  }
-  
-  assert(agentsPorts.length == 2, "Not enough ports for t-stream consumers/producers ")
+  require(numberOfAgentsPorts >= 1, "Not enough ports for t-stream consumers. One or more ports are required")
 
-  def getExecutor(environmentManager: EnvironmentManager): StreamingExecutor = {
-    logger.debug(s"Task: $taskName. Start loading of executor class from module jar\n")
-    logger.debug(s"Task: $taskName. Create instance of executor class\n")
-    val executor = moduleClassLoader
-      .loadClass(executorClassName)
-      .newInstance()
-      .asInstanceOf[StreamingExecutor]
-    logger.debug(s"Task: $taskName. Create instance of executor class\n")
+  def getExecutor(environmentManager: EnvironmentManager): OutputStreamingExecutor[AnyRef] = {
+    logger.debug(s"Task: $taskName. Start loading of executor class from module jar.")
+    val executor = executorClass.getConstructor(classOf[OutputEnvironmentManager])
+      .newInstance(environmentManager)
+      .asInstanceOf[OutputStreamingExecutor[AnyRef]]
+    logger.debug(s"Task: $taskName. Create an instance of executor class.")
 
     executor
-  }
-
-  def getOutputModuleEntity(): OutputData = {
-    logger.info(s"Task: $taskName. Getting entity object from jar of file: " +
-      instance.moduleType + "-" + instance.moduleName + "-" + instance.moduleVersion)
-    val entityClassName = fileMetadata.specification.entityClass
-    val outputEntity = moduleClassLoader
-      .loadClass(entityClassName)
-      .newInstance()
-      .asInstanceOf[OutputData]
-
-    outputEntity
   }
 }

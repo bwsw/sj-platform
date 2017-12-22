@@ -1,0 +1,7 @@
+{
+  "name": "test-pipeline-kafka",
+  "description": "Kafka service for pipeline test",
+  "zkProvider": "test-pipeline-zookeeper",
+  "provider": "test-pipeline-kafka",
+  "type": "service.apache-kafka"
+}

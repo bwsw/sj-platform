@@ -1,0 +1,18 @@
+:host {
+  position: relative
+}
+
+.right-inner-addon {
+  margin: 0 5px 10px;
+
+  input {
+    padding-right: 30px;
+  }
+
+  i {
+    position: absolute;
+    right: 0;
+    padding: 10px 12px;
+    pointer-events: none;
+  }
+}

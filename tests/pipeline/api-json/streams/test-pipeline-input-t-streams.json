@@ -1,0 +1,7 @@
+{
+  "name": "test-pipeline-input-t-streams",
+  "description": "Input stream for pipeline test",
+  "service": "test-pipeline-t-streams",
+  "partitions": 1,
+  "type": "stream.t-streams"
+}

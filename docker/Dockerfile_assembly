@@ -25,4 +25,4 @@ WORKDIR /opt/bin/juggler
 RUN mkdir -p /root/.sbt/0.13 && \
     echo 'scalacOptions ++= Seq("-Xmax-classfile-name","100")' > /root/.sbt/0.13/local.sbt
 
-RUN sbt -J-Xms1g -J-Xmx6g assembly
+RUN sbt -J-Xms5g -J-Xmx7g assembly

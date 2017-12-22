@@ -1,71 +1,28 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.bwsw.sj.engine.input
 
-import java.io.File
-import java.util.logging.LogManager
-
-import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.engine.input.DataFactory._
-
-object SjInputModuleSetup extends App {
-  LogManager.getLogManager.reset()
-  val streamService = ConnectionRepository.getStreamService
-  val serviceManager = ConnectionRepository.getServiceManager
-  val providerService = ConnectionRepository.getProviderService
-  val instanceService = ConnectionRepository.getInstanceService
-  val fileStorage = ConnectionRepository.getFileStorage
-  val checkpointInterval = 10
-
-  val inputModule = new File("./contrib/stubs/sj-stub-input-streaming/target/scala-2.11/sj-stub-input-streaming-1.0.jar")
-
-  open()
-  cassandraSetup()
-  loadModule(inputModule, fileStorage)
-  createProviders(providerService)
-  createServices(serviceManager, providerService)
-  createStreams(streamService, serviceManager, outputCount)
-  createInstance(serviceManager, instanceService, checkpointInterval)
-  close()
-  ConnectionRepository.close()
-
-  println("DONE")
-}
-
+/**
+  * @author Pavel Tomskikh
+  */
 object SjInputModuleRunner extends App {
-  LogManager.getLogManager.reset()
   InputTaskRunner.main(Array())
 }
 
-object SjInputDataWriterRunner extends App {
-  LogManager.getLogManager.reset()
-  writeData(15, 5)
-
-  ConnectionRepository.close()
-}
-
-object DuplicateCheckerRunner extends App {
-  LogManager.getLogManager.reset()
-  DuplicateChecker.main(Array("15", "5"))
-}
-
-object SjInputModuleDestroy extends App {
-  LogManager.getLogManager.reset()
-  val streamService = ConnectionRepository.getStreamService
-  val serviceManager = ConnectionRepository.getServiceManager
-  val providerService = ConnectionRepository.getProviderService
-  val instanceService = ConnectionRepository.getInstanceService
-  val fileStorage = ConnectionRepository.getFileStorage
-
-  val inputModule = new File("./contrib/stubs/sj-stub-input-streaming/target/scala-2.11/sj-stub-input-streaming-1.0.jar")
-
-  open()
-  deleteStreams(streamService, outputCount)
-  deleteServices(serviceManager)
-  deleteProviders(providerService)
-  deleteInstance(instanceService)
-  deleteModule(fileStorage, inputModule.getName)
-  cassandraDestroy()
-  close()
-  ConnectionRepository.close()
-
-  println("DONE")
-}
+class SjInputModuleRunner

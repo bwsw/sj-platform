@@ -1,0 +1,7 @@
+{
+  "name": "test-pipeline-regular-kafka",
+  "description": "Regular stream for pipeline test",
+  "service": "test-pipeline-t-streams",
+  "partitions": 1,
+  "type": "stream.t-streams"
+}

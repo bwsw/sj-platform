@@ -1,46 +1,67 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.bwsw.sj.common.rest.utils
 
-import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.utils.ServiceLiterals._
+import com.typesafe.scalalogging.Logger
+import org.apache.curator.utils.PathUtils
 
-import scala.collection.mutable.ArrayBuffer
+import scala.util.{Failure, Success, Try}
 
-trait ValidationUtils {
-  private val providerDAO = ConnectionRepository.getProviderService
+/**
+  * Provides helping methods for validation some fields of entities that belong to SI layer
+  */
+object ValidationUtils {
+  private val logger = Logger(this.getClass)
 
-  def validateName(name: String) = {
+  def validateName(name: String): Boolean = {
+    logger.debug(s"Validate a name: '$name'.")
     name.matches( """^([a-z][a-z0-9-]*)$""")
   }
 
-  def validateConfigSettingName(name: String) = {
-    name.matches( """^([a-z][a-z-\.]*)$""")
+  def validateConfigSettingName(name: String): Boolean = {
+    logger.debug(s"Validate a configuration name: '$name'.")
+    name.matches( """^([a-z][a-z0-9-\.]*)$""")
   }
 
-  def validateProvider(provider: String, serviceType: String) = {
-    val errors = new ArrayBuffer[String]()
+  def isAlphaNumericWithUnderscore(name: String): Boolean = {
+    logger.debug(s"Validate a namespace/database: '$name'.")
+    name.matches( """^([a-z][a-z0-9_]*)$""")
+  }
 
-    Option(provider) match {
-      case None =>
-        errors += "'Provider' is required"
-      case Some(x) =>
-        if (x.isEmpty) {
-          errors += "'Provider' is required"
-        }
-        else {
-          val providerObj = providerDAO.get(x)
-          if (providerObj.isEmpty) {
-            errors += s"Provider '$x' does not exist"
-          } else if (providerObj.get.providerType != typeToProviderType(serviceType)) {
-            errors += s"Provider for '$serviceType' service must be of type '${typeToProviderType(serviceType)}' " +
-              s"('${providerObj.get.providerType}' is given instead)"
-          }
-        }
+  def normalizeName(name: String): String = {
+    logger.debug(s"Normalize a name: '$name'.")
+    name.replace('\\', '/')
+  }
+
+  /**
+    * Validates prefix in [[com.bwsw.sj.common.si.model.service.TStreamService TStreamService]]
+    *
+    * @return None if prefix is valid, Some(error) otherwise
+    */
+  def validatePrefix(prefix: String): Option[String] = {
+    Try(PathUtils.validatePath(prefix)) match {
+      case Success(_) => None
+      case Failure(exception: Throwable) => Some(exception.getMessage)
     }
-
-    errors
   }
 
-  def validateNamespace(namespace: String) = {
-    namespace.matches( """^([a-z][a-z0-9_]*)$""")
+  def validateToken(token: String): Boolean = {
+    token.length <= 32
   }
 }

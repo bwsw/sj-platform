@@ -1,0 +1,26 @@
+{
+  "name": "test-pipeline-regular-t-streams",
+  "description": "Regular module for pipeline test",
+  "inputs": [
+    "test-pipeline-input-t-streams/split"
+  ],
+  "outputs": [
+    "test-pipeline-regular-t-streams"
+  ],
+  "checkpointMode": "every-nth",
+  "checkpointInterval": 5,
+  "stateManagement": "ram",
+  "stateFullCheckpoint": 5,
+  "parallelism": 1,
+  "startFrom": "oldest",
+  "perTaskCores": 0.1,
+  "perTaskRam": 256,
+  "jvmOptions": {
+    "-Xmx": "128m",
+    "-XX:MaxMetaspaceSize=": "196m",
+    "-XX:MaxDirectMemorySize=": "64m"
+  },
+  "eventWaitTime": 1000,
+  "coordinationService": "test-pipeline-zookeeper",
+  "performanceReportingInterval": 60000
+}
