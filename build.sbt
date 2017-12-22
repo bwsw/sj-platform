@@ -15,7 +15,7 @@ addArtifact(artifact in(Compile, assembly), assembly)
 val commonSettings = Seq(
   organization := "com.bwsw",
   version := sjVersion,
-  scalaVersion := Dependencies.Versions.scala,
+  scalaVersion in ThisBuild := Dependencies.Versions.scala,
   scalacOptions ++= Seq(
     "-unchecked",
     "-deprecation",
@@ -48,6 +48,11 @@ val commonSettings = Seq(
   fork in run := true,
   fork in Test := true,
 
+  parallelExecution in Test := false,
+  concurrentRestrictions in Global += Tags.limit(Tags.Test, 1)
+)
+
+val publishSettings = Seq(
   pomIncludeRepository := { _ => false },
 
   licenses := Seq("Apache 2" -> url("http://www.apache.org/licenses/LICENSE-2.0")),
@@ -80,15 +85,18 @@ val commonSettings = Seq(
     else Some("releases" at nexus + "service/local/staging/deploy/maven2")
   }.value,
 
-  publishArtifact in Test := false,
+  publishArtifact in Test := false
+)
 
-  parallelExecution in Test := false,
-  concurrentRestrictions in Global += Tags.limit(Tags.Test, 1)
+val disabledPublishSettings = Seq(
+  publish := {},
+  publishTo := Some(Resolver.file("Unused transient repository", file("target/unusedrepo"))),
+  publishArtifact := false
 )
 
 lazy val sj = (project in file("."))
   .enablePlugins(ScalaUnidocPlugin)
-  .settings(publish := {})
+  .settings(disabledPublishSettings: _*)
   .settings(updateOptions :=
     updateOptions.value.withCachedResolution(true))
   .aggregate(common,
@@ -104,6 +112,7 @@ lazy val sj = (project in file("."))
 lazy val common = Project(id = "sj-common",
   base = file("./core/sj-common"))
   .settings(commonSettings: _*)
+  .settings(publishSettings: _*)
   .settings(
     libraryDependencies ++= Dependencies.sjCommonDependencies.value,
     libraryDependencies ++= Dependencies.sjTestDependencies.value
@@ -112,6 +121,7 @@ lazy val common = Project(id = "sj-common",
 lazy val engineCore = Project(id = "sj-engine-core",
   base = file("./core/sj-engine-core"))
   .settings(commonSettings: _*)
+  .settings(publishSettings: _*)
   .settings(
     resolvers += "Clojars Repository" at "http://clojars.org/repo/",
     libraryDependencies ++= Dependencies.sjEngineCoreDependencies.value,
@@ -122,6 +132,7 @@ lazy val engineCore = Project(id = "sj-engine-core",
 lazy val crudRest = Project(id = "sj-crud-rest",
   base = file("./core/sj-crud-rest"))
   .settings(commonSettings: _*)
+  .settings(publishSettings: _*)
   .settings(
     libraryDependencies ++= Dependencies.sjRestDependencies.value,
     libraryDependencies ++= Dependencies.sjTestDependencies.value
@@ -131,6 +142,7 @@ lazy val crudRest = Project(id = "sj-crud-rest",
 lazy val inputStreamingEngine = Project(id = "sj-input-streaming-engine",
   base = file("./core/sj-input-streaming-engine"))
   .settings(commonSettings: _*)
+  .settings(publishSettings: _*)
   .settings(
     libraryDependencies ++= Dependencies.sjInputEngineDependencies.value,
     libraryDependencies ++= Dependencies.sjTestDependencies.value,
@@ -141,6 +153,7 @@ lazy val inputStreamingEngine = Project(id = "sj-input-streaming-engine",
 lazy val regularStreamingEngine = Project(id = "sj-regular-streaming-engine",
   base = file("./core/sj-regular-streaming-engine"))
   .settings(commonSettings: _*)
+  .settings(publishSettings: _*)
   .settings(
     libraryDependencies ++= Dependencies.sjTestDependencies.value,
     test in Test := (test in Test).dependsOn((Keys.`package` in Compile) in stubRegular).value
@@ -151,6 +164,7 @@ lazy val regularStreamingEngine = Project(id = "sj-regular-streaming-engine",
 lazy val batchStreamingEngine = Project(id = "sj-batch-streaming-engine",
   base = file("./core/sj-batch-streaming-engine"))
   .settings(commonSettings: _*)
+  .settings(publishSettings: _*)
   .settings(
     libraryDependencies ++= Dependencies.sjTestDependencies.value,
     test in Test := (test in Test).dependsOn((Keys.`package` in Compile) in stubBatch).value
@@ -161,6 +175,7 @@ lazy val batchStreamingEngine = Project(id = "sj-batch-streaming-engine",
 lazy val outputStreamingEngine = Project(id = "sj-output-streaming-engine",
   base = file("./core/sj-output-streaming-engine"))
   .settings(commonSettings: _*)
+  .settings(publishSettings: _*)
   .settings(
     libraryDependencies ++= Dependencies.sjOutputEngineDependencies.value,
     libraryDependencies ++= Dependencies.sjTestDependencies.value,
@@ -175,6 +190,7 @@ lazy val outputStreamingEngine = Project(id = "sj-output-streaming-engine",
 lazy val framework = Project(id = "sj-mesos-framework",
   base = file("./core/sj-mesos-framework"))
   .settings(commonSettings: _*)
+  .settings(publishSettings: _*)
   .settings(
     libraryDependencies ++= Dependencies.sjFrameworkDependencies.value
   )
@@ -183,6 +199,7 @@ lazy val framework = Project(id = "sj-mesos-framework",
 lazy val engineSimulators = Project(id = "sj-engine-simulators",
   base = file("./core/sj-engine-simulators"))
   .settings(commonSettings: _*)
+  .settings(publishSettings: _*)
   .settings(
     libraryDependencies ++= Dependencies.sjEngineSimulatorsDependencies.value
   )
@@ -192,46 +209,55 @@ lazy val engineSimulators = Project(id = "sj-engine-simulators",
 lazy val stubInput = Project(id = "sj-stub-input-streaming",
   base = file("./contrib/stubs/sj-stub-input-streaming"))
   .settings(commonSettings: _*)
+  .settings(publishSettings: _*)
   .dependsOn(engineCore % "provided")
 
 lazy val stubRegular = Project(id = "sj-stub-regular-streaming",
   base = file("./contrib/stubs/sj-stub-regular-streaming"))
   .settings(commonSettings: _*)
+  .settings(publishSettings: _*)
   .dependsOn(engineCore % "provided")
 
 lazy val stubBatch = Project(id = "sj-stub-batch-streaming",
   base = file("./contrib/stubs/sj-stub-batch-streaming"))
   .settings(commonSettings: _*)
+  .settings(publishSettings: _*)
   .dependsOn(engineCore % "provided")
 
 lazy val stubESOutput = Project(id = "sj-stub-es-output-streaming",
   base = file("./contrib/stubs/sj-stub-es-output-streaming"))
   .settings(commonSettings: _*)
+  .settings(publishSettings: _*)
   .dependsOn(engineCore % "provided")
 
 lazy val stubJDBCOutput = Project(id = "sj-stub-jdbc-output-streaming",
   base = file("./contrib/stubs/sj-stub-jdbc-output-streaming"))
   .settings(commonSettings: _*)
+  .settings(publishSettings: _*)
   .dependsOn(engineCore % "provided")
 
 lazy val stubRestOutput = Project(id = "sj-stub-rest-output-streaming",
   base = file("./contrib/stubs/sj-stub-rest-output-streaming"))
   .settings(commonSettings: _*)
+  .settings(publishSettings: _*)
   .dependsOn(engineCore % "provided")
 
 lazy val pmOutput = Project(id = "sj-performance-metrics-output-es",
   base = file("./contrib/sj-platform/sj-performance-metrics-output-es"))
   .settings(commonSettings: _*)
+  .settings(publishSettings: _*)
   .dependsOn(engineCore % "provided")
 
 lazy val sumBatch = Project(id = "sj-batch-sum",
   base = file("./contrib/examples/sj-batch-sum"))
   .settings(commonSettings: _*)
+  .settings(publishSettings: _*)
   .dependsOn(engineCore % "provided")
 
 lazy val csvInput = Project(id = "sj-csv-input",
   base = file("./contrib/sj-platform/sj-csv-input"))
   .settings(commonSettings: _*)
+  .settings(publishSettings: _*)
   .settings(
     libraryDependencies ++= Dependencies.sjTestDependencies.value
   )
@@ -241,6 +267,7 @@ lazy val csvInput = Project(id = "sj-csv-input",
 lazy val regexInput = Project(id = "sj-regex-input",
   base = file("./contrib/sj-platform/sj-regex-input"))
   .settings(commonSettings: _*)
+  .settings(publishSettings: _*)
   .settings(
     libraryDependencies ++= Dependencies.sjTestDependencies.value
   )
@@ -250,16 +277,19 @@ lazy val regexInput = Project(id = "sj-regex-input",
 lazy val regularPerformanceBenchmark = Project(id = "sj-regular-performance-benchmark",
   base = file("./contrib/benchmarks/sj-regular-performance-benchmark"))
   .settings(commonSettings: _*)
+  .settings(disabledPublishSettings: _*)
   .dependsOn(engineCore % "provided")
 
 lazy val batchPerformanceBenchmark = Project(id = "sj-batch-performance-benchmark",
   base = file("./contrib/benchmarks/sj-batch-performance-benchmark"))
   .settings(commonSettings: _*)
+  .settings(disabledPublishSettings: _*)
   .dependsOn(engineCore % "provided")
 
 lazy val flinkBenchmarkTask = Project(id = "flink-benchmark-task",
   base = file("./contrib/benchmarks/flink-benchmark-task"))
   .settings(commonSettings: _*)
+  .settings(disabledPublishSettings: _*)
   .settings(
     scalaVersion := "2.11.8",
     libraryDependencies ++= Dependencies.flinkDependencies.value
@@ -268,6 +298,7 @@ lazy val flinkBenchmarkTask = Project(id = "flink-benchmark-task",
 lazy val flinkBatchBenchmarkTask = Project(id = "flink-batch-benchmark-task",
   base = file("./contrib/benchmarks/flink-batch-benchmark-task"))
   .settings(commonSettings: _*)
+  .settings(disabledPublishSettings: _*)
   .settings(
     scalaVersion := "2.11.8",
     libraryDependencies ++= Dependencies.flinkDependencies.value
@@ -277,33 +308,40 @@ lazy val flinkBatchBenchmarkTask = Project(id = "flink-batch-benchmark-task",
 lazy val testInput = Project(id = "sj-input-test",
   base = file("./tests/pipeline/sj-input-test"))
   .settings(commonSettings: _*)
+  .settings(disabledPublishSettings: _*)
   .dependsOn(engineCore)
 
 lazy val testRegular = Project(id = "sj-regular-test",
   base = file("./tests/pipeline/sj-regular-test"))
   .settings(commonSettings: _*)
+  .settings(disabledPublishSettings: _*)
   .dependsOn(engineCore)
 
 lazy val testBatch = Project(id = "sj-batch-test",
   base = file("./tests/pipeline/sj-batch-test"))
   .settings(commonSettings: _*)
+  .settings(disabledPublishSettings: _*)
   .dependsOn(engineCore)
 
 lazy val testOutputES = Project(id = "sj-output-es-test",
   base = file("./tests/pipeline/sj-output-es-test"))
   .settings(commonSettings: _*)
+  .settings(disabledPublishSettings: _*)
   .dependsOn(engineCore)
 
 lazy val testOutputJDBC = Project(id = "sj-output-jdbc-test",
   base = file("./tests/pipeline/sj-output-jdbc-test"))
   .settings(commonSettings: _*)
+  .settings(disabledPublishSettings: _*)
   .dependsOn(engineCore)
 
 lazy val testOutputRest = Project(id = "sj-output-rest-test",
   base = file("./tests/pipeline/sj-output-rest-test"))
   .settings(commonSettings: _*)
+  .settings(disabledPublishSettings: _*)
   .dependsOn(engineCore)
 
 lazy val pipelineTest = Project(id = "sj-pipeline-test",
   base = file("./tests/pipeline"))
+  .settings(disabledPublishSettings: _*)
   .aggregate(testInput, testRegular, testBatch, testOutputES, testOutputJDBC, testOutputRest)
