@@ -19,6 +19,6 @@
 package com.bwsw.sj.engine.core.testutils
 
 object Constants {
-  val sjVersion: String = "1.0-SNAPSHOT"
+  val sjVersion: String = "1.1.0"
   val ttsLaunchTimeout: Int = 15 * 1000
 }
