@@ -1,7 +1,7 @@
 import sbt.url
 
 name := "sj"
-val sjVersion = "1.0-SNAPSHOT"
+val sjVersion = "1.1.0"
 
 addCommandAlias("rebuild", ";clean; compile; package")
 
