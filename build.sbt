@@ -12,10 +12,12 @@ artifact in(Compile, assembly) := {
 
 addArtifact(artifact in(Compile, assembly), assembly)
 
+organization in ThisBuild := "com.bwsw"
+version in ThisBuild := sjVersion
+scalaVersion in ThisBuild := Dependencies.Versions.scala
+concurrentRestrictions in ThisBuild += Tags.limit(Tags.Test, 1)
+
 val commonSettings = Seq(
-  organization := "com.bwsw",
-  version := sjVersion,
-  scalaVersion in ThisBuild := Dependencies.Versions.scala,
   scalacOptions ++= Seq(
     "-unchecked",
     "-deprecation",
@@ -48,8 +50,7 @@ val commonSettings = Seq(
   fork in run := true,
   fork in Test := true,
 
-  parallelExecution in Test := false,
-  concurrentRestrictions in Global += Tags.limit(Tags.Test, 1)
+  parallelExecution in Test := false
 )
 
 val publishSettings = Seq(
