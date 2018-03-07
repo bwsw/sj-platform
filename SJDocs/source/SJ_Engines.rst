@@ -33,7 +33,7 @@ Here is the engine processing flowchart.
    
    Figure 1.1
    
-Input module waits for new events (messages) from the TCP channel. A wait time period (‘event-wait-time’) is 1000 ms by default. Once a new data portion is received, the “tokenize” method determins the beginning and the end of the Interval (i.e. significant set of bytes in the incoming flow of bytes). 
+Input module waits for new events (messages) from the TCP channel. A wait time period (‘event-wait-time’) is 1000 ms by default. Once a new data portion is received, the “tokenize” method determines the beginning and the end of the Interval (i.e. significant set of bytes in the incoming flow of bytes). 
 
 Once an Interval is set the buffer of incoming data is validated to define whether the Interval contains a message or meaningless data. If the buffer of incoming data is determined as a message it is checked for duplication and a key/id is assigned to it. At this stage the destination where the data will be passed to is attributed to the message (this is T-streams for the input module). The message is processed and passed further into T-streams after a checkpoint is done.
 
